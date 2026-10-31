@@ -1,0 +1,10 @@
+.gradle/
+build/
+.cxx/
+local.properties
+*.iml
+.idea/
+upstream/
+app/src/main/assets/engine/
+signing/
+dist/
