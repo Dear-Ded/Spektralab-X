@@ -226,7 +226,13 @@ data class Edit(
             put("output_cctf_encoding", true)
             put("extended_dynamic_range", false)
             put("product_defaults", true)
+            // The live tier is what a slider drag renders. Upstream's 1600 px is
+            // sized for a desktop GPU; 1024 is 2.4x fewer pixels on a phone, and
+            // the 3400 px preview follows as soon as the finger lifts.
+            put("preview_long_edge", LIVE_EDGE)
         }
+
+        const val LIVE_EDGE = 1024
     }
 }
 

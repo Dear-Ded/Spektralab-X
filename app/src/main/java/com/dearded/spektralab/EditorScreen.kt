@@ -343,7 +343,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         PresetRow(ui, vm, enabled)
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                         SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                        LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV") {
+                        LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
                             vm.update(e.copy(exposureEv = it))
                         }
                         ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
@@ -371,13 +371,13 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         } else {
                             StockPicker("相纸", ui.catalog.papers, e.paper, enabled) { vm.update(e.copy(paper = it)) }
                         }
-                        LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f") {
+                        LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(printExposure = it))
                         }
-                        LabeledSlider("黄滤镜", e.yShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f") {
+                        LabeledSlider("黄滤镜", e.yShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(yShift = it))
                         }
-                        LabeledSlider("品红滤镜", e.mShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f") {
+                        LabeledSlider("品红滤镜", e.mShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(mShift = it))
                         }
                     }
@@ -460,15 +460,15 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                     }
                     else -> {
                         SwitchRow("颗粒", e.grainActive, enabled) { vm.update(e.copy(grainActive = it)) }
-                        LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f") {
+                        LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(grainAmount = it))
                         }
                         SwitchRow("光晕（Halation）", e.halationActive, enabled) { vm.update(e.copy(halationActive = it)) }
-                        LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f") {
+                        LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(halationAmount = it))
                         }
                         SwitchRow("相纸眩光", e.glareActive, enabled) { vm.update(e.copy(glareActive = it)) }
-                        LabeledSlider("眩光强度", e.glareAmount, 0.0, 5.0, 1.0, enabled && e.glareActive, "%.2f") {
+                        LabeledSlider("眩光强度", e.glareAmount, 0.0, 5.0, 1.0, enabled && e.glareActive, "%.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(glareAmount = it))
                         }
                     }
@@ -483,7 +483,7 @@ private val FORMATS = listOf("半格" to 24.0, "135" to 35.0, "645" to 56.0, "6�
 @Composable
 private fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
-    enabled: Boolean, format: String, onChange: (Double) -> Unit,
+    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -493,7 +493,8 @@ private fun LabeledSlider(
         }
         Slider(
             value = value.toFloat().coerceIn(min.toFloat(), max.toFloat()),
-            onValueChange = { onChange(it.toDouble()) },
+            onValueChange = { onDrag(true); onChange(it.toDouble()) },
+            onValueChangeFinished = { onDrag(false) },
             valueRange = min.toFloat()..max.toFloat(),
             enabled = enabled,
         )

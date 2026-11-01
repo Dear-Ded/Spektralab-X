@@ -488,6 +488,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             kotlinx.coroutines.delay(1500)   // let the first preview land first
             val catalog = _ui.value.catalog
             for (film in catalog.films) {
+                // Never ahead of the user's own drag renders on the one engine thread.
+                while (interacting) kotlinx.coroutines.delay(150)
                 // Cards show the film's colour, not the border or date: both cost a larger canvas.
                 val base = withFilm(wanted, catalog, film.id)?.copy(filmEdge = false, dateImprint = false) ?: continue
                 val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
@@ -513,12 +515,38 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         return null
     }
 
+    // True while a finger is on a slider. Set from the UI thread.
+    @Volatile private var interacting = false
+    private val settle = Channel<Unit>(Channel.CONFLATED)
+
+    /**
+     * A slider drag starts or ends. While it lasts only the small live tier
+     * renders and the film cards wait; on release the sharp preview starts at
+     * once instead of after a timeout.
+     */
+    fun setInteracting(on: Boolean) {
+        if (on == interacting) return
+        interacting = on
+        if (on) settle.tryReceive() else settle.trySend(Unit)
+    }
+
     private suspend fun renderLoop() {
         for (request in renders) {
             if (!renderOnce("live")) continue
-            // A full preview once the user has stopped moving a slider.
-            val again = withTimeoutOrNull(600) { renders.receive() }
-            if (again != null) { renders.trySend(Unit); continue }
+            // Dragging: wait for the next value, the release, or a finger held
+            // still. Otherwise (a toggle, a film, a preset) the sharp preview
+            // follows straight away, unless a newer edit is already queued.
+            val newer = if (interacting) {
+                withTimeoutOrNull(1200) {
+                    kotlinx.coroutines.selects.select<Boolean> {
+                        renders.onReceive { true }
+                        settle.onReceive { false }
+                    }
+                }
+            } else {
+                renders.tryReceive().getOrNull()?.let { true }
+            }
+            if (newer == true) { renders.trySend(Unit); continue }
             renderOnce("preview")
         }
     }
@@ -581,6 +609,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (_ui.value.exporting || !_ui.value.hasImage) return
         viewModelScope.launch {
             _ui.update { it.copy(exporting = true, busy = if (size == ExportSize.FULL) "正在渲染全尺寸…" else "正在渲染…") }
+            ExportService.start(app)
             try {
                 val stem = "SpektraLab_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date())
                 when (format) {
@@ -625,6 +654,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 log("export $format ${size.tier} failed: ${e.message ?: e}")
                 _ui.update { it.copy(message = e.message ?: e.toString()) }
             } finally {
+                ExportService.stop(app)
                 _ui.update { it.copy(exporting = false, busy = null) }
             }
         }

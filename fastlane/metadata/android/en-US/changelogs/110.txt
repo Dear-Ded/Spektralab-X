@@ -1,0 +1,1 @@
+Smaller 1024 px drag preview; sharp preview on release; film cards pause while dragging; exports run in a foreground service so HyperOS does not kill them; R8 shrinking. Alpha, not yet tested on a device.
