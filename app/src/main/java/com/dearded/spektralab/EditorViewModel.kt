@@ -513,6 +513,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val pool = Any()
     private val spare = HashMap<String, Bitmap>()
     private val shownByTier = HashMap<String, Bitmap>()
+    // The frame replaced most recently. It may still be in the display list
+    // RenderThread is drawing, so it waits one more render before it can be
+    // written into again (three buffers per tier: shown, cooling, spare).
+    private val coolingByTier = HashMap<String, Bitmap>()
 
     /** Engine thread. */
     private fun renderPooled(tier: String): Bitmap? {
@@ -521,17 +525,24 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // size (crop, rotation, film edge); either way the frame renders once.
         val out = NativeEngine.renderReuse(session, tier, reuse)
         if (out == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
+        // Upload to the GPU here, on the engine thread, instead of on the
+        // RenderThread during the frame that first shows it (a 30-46 MB upload
+        // there is a dropped frame exactly when the sharp preview lands).
+        out?.prepareToDraw()
         return out
     }
 
     private fun retire(tier: String, shown: Bitmap) = synchronized(pool) {
         val previous = shownByTier.put(tier, shown)
-        if (previous != null && previous !== shown) spare[tier] = previous
+        if (previous == null || previous === shown) return@synchronized
+        val cooled = coolingByTier.put(tier, previous)
+        if (cooled != null && cooled !== shown && cooled !== previous) spare[tier] = cooled
     }
 
     private fun clearPool() = synchronized(pool) {
         spare.clear()
         shownByTier.clear()
+        coolingByTier.clear()
     }
 
     // An exception escaping here would end renderLoop for good (and leave the

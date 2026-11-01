@@ -197,7 +197,7 @@ fun EditorScreen(vm: EditorViewModel) {
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail)
-                    Controls(ui, vm, Modifier.fillMaxWidth().heightIn(max = boxHeight * 0.45f))
+                    Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -261,15 +261,23 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
                         )
                     }
                     .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(1f, 8f)
-                            offset = if (scale == 1f) Offset.Zero else offset + pan
+                        detectTransformGestures { centroid, pan, zoom, _ ->
+                            // Keep the point under the fingers fixed, and the image on screen.
+                            val next = (scale * zoom).coerceIn(1f, 8f)
+                            val q = centroid - Offset(size.width / 2f, size.height / 2f)
+                            var o = q + pan - (q - offset) * (next / scale)
+                            val maxX = size.width * (next - 1f) / 2f
+                            val maxY = size.height * (next - 1f) / 2f
+                            o = Offset(o.x.coerceIn(-maxX, maxX), o.y.coerceIn(-maxY, maxY))
+                            scale = next
+                            offset = if (next == 1f) Offset.Zero else o
                         }
                     }
-                    .graphicsLayer(
-                        scaleX = scale, scaleY = scale,
-                        translationX = offset.x, translationY = offset.y,
-                    ),
+                    // Lambda form: read in the draw phase, so a pinch frame does not recompose.
+                    .graphicsLayer {
+                        scaleX = scale; scaleY = scale
+                        translationX = offset.x; translationY = offset.y
+                    },
             )
         } else if (ui.ready && !ui.hasImage) {
             Text(
@@ -279,7 +287,12 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
                 modifier = Modifier.padding(24.dp),
             )
         }
-        if (ui.rendering) {
+        // Shown only after 400 ms, so quick drag renders never flicker a bar.
+        val showProgress by androidx.compose.runtime.produceState(false, ui.rendering) {
+            value = false
+            if (ui.rendering) { kotlinx.coroutines.delay(400); value = true }
+        }
+        if (showProgress) {
             LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
         }
         // Histogram of what is on screen (the print, or the original while held).
@@ -508,7 +521,8 @@ private fun LabeledSlider(
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-            Text(String.format(Locale.ROOT, format, value), style = MaterialTheme.typography.labelMedium)
+            Text(String.format(Locale.ROOT, format, value),
+                style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"))
             TextButton(onClick = { onChange(default) }, enabled = enabled && value != default) { Text("重置") }
         }
         Slider(
@@ -632,7 +646,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                         Image(bitmap, contentDescription = film.label, contentScale = ContentScale.Crop,
                               modifier = Modifier.fillMaxSize())
                     } else {
-                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text("·", color = Color(0xFF55555A), style = MaterialTheme.typography.titleLarge)
                     }
                 }
                 Text(
