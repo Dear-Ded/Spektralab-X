@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.animation.core.VisibilityThreshold
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -90,6 +91,11 @@ object Motion {
     fun <T> slowSpatial() = spring<T>(dampingRatio = 0.9f, stiffness = 300f)
     fun <T> fastEffects() = spring<T>(dampingRatio = 1f, stiffness = 3800f)
     fun <T> defaultEffects() = spring<T>(dampingRatio = 1f, stiffness = 1600f)
+    /** defaultSpatial for slides, settling at one pixel rather than overshooting forever. */
+    fun defaultSpatialOffset() = spring(
+        dampingRatio = 0.9f, stiffness = 700f,
+        visibilityThreshold = androidx.compose.ui.unit.IntOffset.VisibilityThreshold,
+    )
 }
 
 /** One haptic tick: a firmer segment tick on API 34+, a clock tick before. */

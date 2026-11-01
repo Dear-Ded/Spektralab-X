@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.animation.togetherWith
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -376,11 +377,24 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                     Tab(selected = tab == i, onClick = { tab = i }, text = { Text(title) })
                 }
             }
+            // Pages slide in the direction of travel and fade; the panel height is
+            // fixed, so the photo above never moves.
+            androidx.compose.animation.AnimatedContent(
+                targetState = tab,
+                transitionSpec = {
+                    val dir = if (targetState > initialState) 1 else -1
+                    (androidx.compose.animation.slideInHorizontally(Motion.defaultSpatialOffset()) { it / 8 * dir } +
+                        androidx.compose.animation.fadeIn(Motion.defaultEffects())) togetherWith
+                        (androidx.compose.animation.slideOutHorizontally(Motion.defaultSpatialOffset()) { -it / 8 * dir } +
+                            androidx.compose.animation.fadeOut(Motion.fastEffects()))
+                },
+                label = "tab",
+            ) { page ->
             Column(
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                when (tab) {
+                when (page) {
                     0 -> {
                         FilmStrip(ui, enabled) { vm.pickFilm(it) }
                         PresetRow(ui, vm, enabled)
@@ -591,6 +605,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         }
                     }
                 }
+            }
             }
         }
     }
