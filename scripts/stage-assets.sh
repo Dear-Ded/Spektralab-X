@@ -24,6 +24,8 @@ rm -rf "$out"
 mkdir -p "$out/vulkan" "$out/DI" "$out/licenses"
 cp -R "$engine/resources/." "$out/"
 cp -R "$engine/resources_product/profiles/." "$out/profiles/"
+# This repo's own aliases (no profile data of their own, see each file).
+cp -R "$repo/profiles-extra/." "$out/profiles/"
 cp "$engine/resources_product/paper_grades.json" "$out/paper_grades.json"
 cp "$engine/resources_product/neutral_print_filters.json" "$out/product-neutral-print-filters.json"
 # engine.cpp reads only the ProPhoto view LUT.

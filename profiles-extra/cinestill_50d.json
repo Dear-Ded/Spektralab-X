@@ -1,0 +1,13 @@
+{
+  "derived_from": "kodak_vision3_50d",
+  "metadata": {
+    "what": "CineStill 50D: Kodak Vision3 50D (5203/7203) with its rem-jet anti-halation backing removed, sold for still cameras in 135 and 120.",
+    "data": "None of its own. The engine loads kodak_vision3_50d whole and overrides only the info keys below (load_profile, derived_from), so no array of the CC BY-SA profile is copied or derived here. Same construction as upstream's cinestill_800t.",
+    "physics": "The one physical difference is the missing rem-jet: light scattered into the base reflects off its back face and re-exposes the emulsion from behind. antihalation 'no' selects that halation model."
+  },
+  "info": {
+    "name": "CineStill 50D",
+    "use": "still",
+    "antihalation": "no"
+  }
+}
