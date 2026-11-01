@@ -1,0 +1,1 @@
+Review fixes: no native session leaks, safe export service, correct EXIF and crop aspect. Smoother: pinch zooms about the fingers, triple-buffered preview, fixed panel height, no progress-bar flicker.
