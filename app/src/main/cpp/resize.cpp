@@ -33,12 +33,25 @@ std::vector<Taps> area_taps(uint32_t n, uint32_t nn) {
     return out;
 }
 
+// Rows a thread could not be created for run on the caller: unwinding a
+// vector of joinable threads would be std::terminate.
 void parallel_rows(uint32_t rows, const std::function<void(uint32_t, uint32_t)>& body) {
+    if (rows == 0) return;
     const uint32_t workers = std::max(1u, std::min(8u, std::thread::hardware_concurrency()));
     const uint32_t chunk = (rows + workers - 1) / workers;
     std::vector<std::thread> threads;
-    for (uint32_t start = 0; start < rows; start += chunk)
-        threads.emplace_back(body, start, std::min(rows, start + chunk));
+    uint32_t spawned_to = std::min(rows, chunk);
+    try {
+        threads.reserve(workers);
+        for (uint32_t start = chunk; start < rows; start += chunk) {
+            const uint32_t end = std::min(rows, start + chunk);
+            threads.emplace_back(body, start, end);
+            spawned_to = end;
+        }
+    } catch (...) {
+    }
+    body(0, std::min(rows, chunk));
+    if (spawned_to < rows) body(spawned_to, rows);
     for (auto& t : threads) t.join();
 }
 

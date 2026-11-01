@@ -52,6 +52,81 @@ struct Session {
     uint32_t small_w = 0, small_h = 0;
 };
 
+// Owns a Session until it is handed to Kotlin, so an exception between the
+// engine open and the return never leaks the session's GPU buffers.
+struct SessionDeleter {
+    void operator()(Session* s) const {
+        if (!s) return;
+        spk_session_release(s->session);
+        delete s;
+    }
+};
+using SessionPtr = std::unique_ptr<Session, SessionDeleter>;
+
+// A render result freed on every exit (spk_result_free is a no-op once freed).
+struct ResultGuard {
+    spk_result r;
+    ResultGuard() { std::memset(&r, 0, sizeof r); }
+    ~ResultGuard() { spk_result_free(&r); }
+    ResultGuard(const ResultGuard&) = delete;
+    ResultGuard& operator=(const ResultGuard&) = delete;
+};
+
+// Bitmap pixels locked for exactly this scope.
+struct PixelLock {
+    JNIEnv* env;
+    jobject bitmap;
+    void* pixels = nullptr;
+    bool ok = false;
+    PixelLock(JNIEnv* e, jobject b) : env(e), bitmap(b) {
+        ok = b && AndroidBitmap_lockPixels(e, b, &pixels) == ANDROID_BITMAP_RESULT_SUCCESS && pixels;
+    }
+    ~PixelLock() { if (ok) AndroidBitmap_unlockPixels(env, bitmap); }
+    PixelLock(const PixelLock&) = delete;
+    PixelLock& operator=(const PixelLock&) = delete;
+};
+
+// Runs body(y0, y1) over [0, rows) on up to `workers` threads, the caller
+// taking the first slice. If a thread cannot be created (memory or thread
+// limits), the rows it would have taken run on the caller instead: a vector
+// of joinable threads must never be unwound, that is std::terminate.
+template <typename F>
+void run_rows(uint32_t rows, uint32_t workers, F&& body) {
+    if (rows == 0) return;
+    workers = std::max(1u, workers);
+    const uint32_t chunk = (rows + workers - 1) / workers;
+    std::vector<std::thread> threads;
+    uint32_t spawned_to = std::min(rows, chunk);
+    try {
+        threads.reserve(workers);
+        for (uint32_t y = chunk; y < rows; y += chunk) {
+            const uint32_t y1 = std::min(rows, y + chunk);
+            threads.emplace_back(body, y, y1);
+            spawned_to = y1;
+        }
+    } catch (...) {
+        // Fall through: whatever was not spawned runs here.
+    }
+    body(0u, std::min(rows, chunk));
+    if (spawned_to < rows) body(spawned_to, rows);
+    for (auto& t : threads) t.join();
+}
+
+// LibRaw's make/model are raw bytes; NewStringUTF aborts (under CheckJNI) on
+// anything that is not valid modified UTF-8. Keep valid UTF-8, replace the rest.
+std::string utf8_clean(const std::string& s) {
+    std::string out;
+    for (size_t i = 0; i < s.size();) {
+        const unsigned char c = static_cast<unsigned char>(s[i]);
+        size_t n = c < 0x80 ? 1 : (c >> 5) == 0x6 ? 2 : (c >> 4) == 0xE ? 3 : (c >> 3) == 0x1E ? 4 : 0;
+        bool ok = n > 0 && i + n <= s.size() && c != 0;
+        for (size_t k = 1; ok && k < n; ++k) ok = (static_cast<unsigned char>(s[i + k]) >> 6) == 0x2;
+        if (ok) { out.append(s, i, n); i += n; }
+        else { out += '?'; i += 1; }
+    }
+    return out;
+}
+
 std::string str(JNIEnv* env, jstring s) {
     if (!s) return {};
     const char* chars = env->GetStringUTFChars(s, nullptr);
@@ -60,7 +135,7 @@ std::string str(JNIEnv* env, jstring s) {
     return out;
 }
 
-jstring jstr(JNIEnv* env, const std::string& s) { return env->NewStringUTF(s.c_str()); }
+jstring jstr(JNIEnv* env, const std::string& s) { return env->NewStringUTF(utf8_clean(s).c_str()); }
 
 std::string json_escape(const std::string& s) {
     std::string out;
@@ -129,12 +204,7 @@ void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride) {
     };
     const uint64_t px = uint64_t(r.width) * r.height;
     const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
-    if (workers == 1) { rows(0, r.height); return; }
-    std::vector<std::thread> threads;
-    const uint32_t chunk = (r.height + workers - 1) / workers;
-    for (uint32_t y = chunk; y < r.height; y += chunk) threads.emplace_back(rows, y, std::min(r.height, y + chunk));
-    rows(0, std::min(r.height, chunk));
-    for (auto& t : threads) t.join();
+    run_rows(r.height, workers, rows);
 }
 
 // RGBA16 rows (engine-encoded sRGB) into an ARGB_8888 Bitmap, whose memory
@@ -154,27 +224,13 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r) {
         return nullptr;
     }
     AndroidBitmapInfo info{};
-    void* pixels = nullptr;
-    if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
-        AndroidBitmap_lockPixels(env, bitmap, &pixels) != ANDROID_BITMAP_RESULT_SUCCESS || !pixels) {
-        fail("cannot lock bitmap pixels");
+    if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS) {
+        fail("cannot read bitmap info");
         return nullptr;
     }
-    pack_rgba8(r, static_cast<uint8_t*>(pixels), info.stride);
-    AndroidBitmap_unlockPixels(env, bitmap);
-    return bitmap;
-}
-
-jobject new_argb_bitmap(JNIEnv* env, uint32_t w, uint32_t h) {
-    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
-    jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
-    if (!bitmap_class || !config_class) return nullptr;
-    jfieldID argb_field = env->GetStaticFieldID(config_class, "ARGB_8888", "Landroid/graphics/Bitmap$Config;");
-    jobject argb = env->GetStaticObjectField(config_class, argb_field);
-    jmethodID create = env->GetStaticMethodID(bitmap_class, "createBitmap",
-        "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
-    jobject bitmap = env->CallStaticObjectMethod(bitmap_class, create, jint(w), jint(h), argb);
-    if (env->ExceptionCheck()) { env->ExceptionClear(); return nullptr; }
+    PixelLock lock(env, bitmap);
+    if (!lock.ok) { fail("cannot lock bitmap pixels"); return nullptr; }
+    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride);
     return bitmap;
 }
 
@@ -189,7 +245,15 @@ float srgb_encode(float v) {
 constexpr uint32_t kBeforeEdge = 1600;
 constexpr uint32_t kThumbEdge = 384;
 
-void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t h, bool linear_prophoto) {
+float srgb_decode(float v) {
+    v = std::min(1.0f, std::max(0.0f, v));
+    return v <= 0.04045f ? v / 12.92f : std::pow((v + 0.055f) / 1.055f, 2.4f);
+}
+
+// `display_p3`: an encoded Display P3 photo, shown here in sRGB (the before
+// bitmap is sRGB), so press-and-hold does not look desaturated against the print.
+void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t h, bool linear_prophoto,
+                 bool display_p3 = false) {
     uint32_t nw = w, nh = h;
     fit(w, h, kBeforeEdge, 0, nw, nh);
     std::vector<float> small;
@@ -209,6 +273,12 @@ void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t
             const float gg = m[3] * r + m[4] * g + m[5] * b;
             const float bb = m[6] * r + m[7] * g + m[8] * b;
             r = srgb_encode(rr); g = srgb_encode(gg); b = srgb_encode(bb);
+        } else if (display_p3) {
+            // Display P3 (D65) -> sRGB, linear, then the shared sRGB curve.
+            const float lr = srgb_decode(r), lg = srgb_decode(g), lb = srgb_decode(b);
+            r = srgb_encode(1.2249401f * lr - 0.2249404f * lg);
+            g = srgb_encode(-0.0420569f * lr + 1.0420571f * lg);
+            b = srgb_encode(-0.0196376f * lr - 0.0786361f * lg + 1.0982735f * lb);
         }
         s->before[4 * i + 0] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, r)) * 255.0f));
         s->before[4 * i + 1] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, g)) * 255.0f));
@@ -318,14 +388,11 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
     try {
         auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
         const std::string path = str(env, path_j);
-        // Half-size decode only when the sensor is more than 4x what we keep, so
-        // the binned frame still covers the working size before the CPU downscale.
-        // The edge budget assumes 4:3, the widest common sensor shape by area.
-        uint64_t budget = uint64_t(std::max<jlong>(0, max_pixels));
-        if (max_edge > 0) {
-            const uint64_t edge_px = uint64_t(max_edge) * uint64_t(max_edge) * 3 / 4;
-            budget = budget ? std::min(budget, edge_px) : edge_px;
-        }
+        // Half-size decode (2x2 binning) only when the binned frame still covers
+        // the size the frame is fitted to on both edges, whatever the sensor's
+        // shape; decided below from the sensor size the metadata open reads.
+        uint32_t sensor_w = 0, sensor_h = 0;
+        bool sensor_turned = false;
         // White balance is chosen at decode (LibRaw's user_mul), as upstream's
         // desktop host does: the metadata-only open reads the as-shot
         // illuminant and, for a custom one, derives the multipliers.
@@ -336,7 +403,13 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         {
             auto probe = std::make_unique<LibRaw>(LIBRAW_OPTIONS_NO_DATAERR_CALLBACK);
             if (probe->open_file(path.c_str()) == LIBRAW_SUCCESS) {
-                spkhost::as_shot_temperature_tint(*probe, as_shot_k, as_shot_tint);
+                sensor_w = probe->imgdata.sizes.width;
+                sensor_h = probe->imgdata.sizes.height;
+                sensor_turned = (probe->imgdata.sizes.flip & 4) != 0;
+                if (!spkhost::as_shot_temperature_tint(*probe, as_shot_k, as_shot_tint) ||
+                    !std::isfinite(as_shot_k) || !std::isfinite(as_shot_tint)) {
+                    as_shot_k = 0; as_shot_tint = 0;
+                }
                 if (custom_wb && !spkhost::multipliers_for(*probe, temperature_k, tint, mul, error)) {
                     fail("white balance: " + error); return 0;
                 }
@@ -344,7 +417,14 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
                 fail("white balance: cannot read the RAW metadata"); return 0;
             }
         }
-        spk::io::set_raw_half_size_budget(budget);
+        bool binned = false;
+        if (sensor_w && sensor_h) {
+            uint32_t fw = 0, fh = 0;
+            fit(sensor_w, sensor_h, uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)), fw, fh);
+            binned = sensor_w / 2 >= fw && sensor_h / 2 >= fh;
+        }
+        // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
+        spk::io::set_raw_half_size_budget(binned ? 1 : 0);
         spk::io::DecodedRaw decoded;
         const bool ok = spk::io::decode_raw_compatible(path, custom_wb ? &mul : nullptr, decoded, error);
         spk::io::set_raw_half_size_budget(0);
@@ -359,11 +439,17 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         } else {
             rgb.swap(decoded.rgb);
         }
-        Session* session = open_pixels(engine, rgb, w, h, str(env, params_j));
+        SessionPtr session(open_pixels(engine, rgb, w, h, str(env, params_j)));
         if (!session) return 0;
-        make_before(session, rgb, w, h, /*linear_prophoto=*/true);
-        session->source_width = sw;
-        session->source_height = sh;
+        make_before(session.get(), rgb, w, h, /*linear_prophoto=*/true);
+        // The sensor's size, not the binned decode's, in display orientation.
+        if (sensor_w && sensor_h && binned) {
+            session->source_width = sensor_turned ? sensor_h : sensor_w;
+            session->source_height = sensor_turned ? sensor_w : sensor_h;
+        } else {
+            session->source_width = sw;
+            session->source_height = sh;
+        }
         session->make = decoded.metadata.make;
         session->model = decoded.metadata.model;
         session->kind = "raw";
@@ -371,7 +457,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->as_shot_tint = as_shot_tint;
         session->wb_k = custom_wb ? double(temperature_k) : 0;
         session->wb_tint = custom_wb ? double(tint) : 0;
-        return reinterpret_cast<jlong>(session);
+        return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the RAW file; choose a smaller working size");
     } catch (const std::exception& e) {
@@ -386,33 +472,40 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
 JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring params_j) {
     try {
         AndroidBitmapInfo info{};
-        void* pixels = nullptr;
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
             info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
             fail("image must be an ARGB_8888 bitmap"); return 0;
         }
-        if (AndroidBitmap_lockPixels(env, bitmap, &pixels) != ANDROID_BITMAP_RESULT_SUCCESS || !pixels) {
-            fail("cannot lock bitmap pixels"); return 0;
-        }
+        const std::string params = str(env, params_j);
+        // Allocated before the pixels are locked: a bad_alloc here must not
+        // leave the bitmap pinned (Kotlin's recycle could not free it then).
         std::vector<float> rgb(size_t(info.width) * info.height * 3);
-        for (uint32_t y = 0; y < info.height; ++y) {
-            const auto* src = static_cast<const uint8_t*>(pixels) + size_t(y) * info.stride;
-            float* dst = rgb.data() + size_t(y) * info.width * 3;
-            for (uint32_t x = 0; x < info.width; ++x) {
-                dst[3 * x + 0] = src[4 * x + 0] / 255.0f;
-                dst[3 * x + 1] = src[4 * x + 1] / 255.0f;
-                dst[3 * x + 2] = src[4 * x + 2] / 255.0f;
+        {
+            PixelLock lock(env, bitmap);
+            if (!lock.ok) { fail("cannot lock bitmap pixels"); return 0; }
+            for (uint32_t y = 0; y < info.height; ++y) {
+                const auto* src = static_cast<const uint8_t*>(lock.pixels) + size_t(y) * info.stride;
+                float* dst = rgb.data() + size_t(y) * info.width * 3;
+                for (uint32_t x = 0; x < info.width; ++x) {
+                    const uint32_t a = src[4 * x + 3];
+                    // ARGB_8888 is premultiplied: undo it, or semi-transparent
+                    // edges (PNG) print darker than they are.
+                    const float k = (a == 255 || a == 0) ? 1.0f / 255.0f : 1.0f / float(a);
+                    dst[3 * x + 0] = std::min(1.0f, src[4 * x + 0] * k);
+                    dst[3 * x + 1] = std::min(1.0f, src[4 * x + 1] * k);
+                    dst[3 * x + 2] = std::min(1.0f, src[4 * x + 2] * k);
+                }
             }
         }
-        AndroidBitmap_unlockPixels(env, bitmap);
-        Session* session = open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
-                                       info.width, info.height, str(env, params_j));
+        SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
+                                       info.width, info.height, params));
         if (!session) return 0;
-        make_before(session, rgb, info.width, info.height, /*linear_prophoto=*/false);
+        const bool p3 = params.find("\"Display P3\"") != std::string::npos;
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3);
         session->source_width = info.width;
         session->source_height = info.height;
         session->kind = "bitmap";
-        return reinterpret_cast<jlong>(session);
+        return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the image");
     } catch (const std::exception& e) {
@@ -427,27 +520,33 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
 JNI_FN(jobject, beforeBitmap)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s || s->before.empty()) { fail("no original thumbnail"); return nullptr; }
-    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
-    jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
-    if (!bitmap_class || !config_class) { fail("Bitmap classes not found"); return nullptr; }
-    jfieldID argb_field = env->GetStaticFieldID(config_class, "ARGB_8888", "Landroid/graphics/Bitmap$Config;");
-    jobject argb = env->GetStaticObjectField(config_class, argb_field);
-    jmethodID create = env->GetStaticMethodID(bitmap_class, "createBitmap",
-        "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
-    jobject bitmap = env->CallStaticObjectMethod(bitmap_class, create, jint(s->before_w), jint(s->before_h), argb);
-    if (env->ExceptionCheck() || !bitmap) { env->ExceptionClear(); fail("cannot allocate original bitmap"); return nullptr; }
-    AndroidBitmapInfo info{};
-    void* pixels = nullptr;
-    if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
-        AndroidBitmap_lockPixels(env, bitmap, &pixels) != ANDROID_BITMAP_RESULT_SUCCESS || !pixels) {
-        fail("cannot lock bitmap pixels");
-        return nullptr;
+    try {
+        jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
+        jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
+        if (!bitmap_class || !config_class) { env->ExceptionClear(); fail("Bitmap classes not found"); return nullptr; }
+        jfieldID argb_field = env->GetStaticFieldID(config_class, "ARGB_8888", "Landroid/graphics/Bitmap$Config;");
+        jmethodID create = env->GetStaticMethodID(bitmap_class, "createBitmap",
+            "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+        if (!argb_field || !create) { env->ExceptionClear(); fail("Bitmap API not found"); return nullptr; }
+        jobject argb = env->GetStaticObjectField(config_class, argb_field);
+        jobject bitmap = env->CallStaticObjectMethod(bitmap_class, create, jint(s->before_w), jint(s->before_h), argb);
+        if (env->ExceptionCheck() || !bitmap) { env->ExceptionClear(); fail("cannot allocate original bitmap"); return nullptr; }
+        AndroidBitmapInfo info{};
+        if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS) {
+            fail("cannot read bitmap info"); return nullptr;
+        }
+        PixelLock lock(env, bitmap);
+        if (!lock.ok) { fail("cannot lock bitmap pixels"); return nullptr; }
+        for (uint32_t y = 0; y < s->before_h; ++y)
+            std::memcpy(static_cast<uint8_t*>(lock.pixels) + size_t(y) * info.stride,
+                        s->before.data() + size_t(y) * s->before_w * 4, size_t(s->before_w) * 4);
+        return bitmap;
+    } catch (const std::exception& e) {
+        fail(std::string("original: ") + e.what());
+    } catch (...) {
+        fail("original: unknown failure");
     }
-    for (uint32_t y = 0; y < s->before_h; ++y)
-        std::memcpy(static_cast<uint8_t*>(pixels) + size_t(y) * info.stride,
-                    s->before.data() + size_t(y) * s->before_w * 4, size_t(s->before_w) * 4);
-    AndroidBitmap_unlockPixels(env, bitmap);
-    return bitmap;
+    return nullptr;
 }
 
 // A film card: the current photo, 384 px, through `params_j` (complete opening
@@ -459,16 +558,15 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
     try {
         const spk_image input{s->small_rgb.data(), s->small_w, s->small_h, 3};
         const std::string params = str(env, params_j);
-        spk_session* card = spk_open(s->engine, &input, params.c_str(), nullptr);
+        std::unique_ptr<spk_session, decltype(&spk_session_release)> card(
+            spk_open(s->engine, &input, params.c_str(), nullptr), &spk_session_release);
         if (!card) { fail(engine_error("film preview")); return nullptr; }
-        spk_result result;
-        std::memset(&result, 0, sizeof result);
-        jobject bitmap = nullptr;
-        if (spk_render(card, "full", &result) == SPK_OK && result.rgba16) bitmap = to_bitmap(env, result);
-        else fail(engine_error("film preview render"));
-        spk_result_free(&result);
-        spk_session_release(card);
-        return bitmap;
+        ResultGuard result;
+        if (spk_render(card.get(), "full", &result.r) != SPK_OK || !result.r.rgba16) {
+            fail(engine_error("film preview render"));
+            return nullptr;
+        }
+        return to_bitmap(env, result.r);
     } catch (const std::exception& e) {
         fail(std::string("film preview: ") + e.what());
     } catch (...) {
@@ -480,54 +578,64 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
 JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return jstr(env, "{}");
-    std::string out = "{\"width\":" + std::to_string(s->width) + ",\"height\":" + std::to_string(s->height) +
-        ",\"sourceWidth\":" + std::to_string(s->source_width) +
-        ",\"sourceHeight\":" + std::to_string(s->source_height) +
-        ",\"kind\":\"" + s->kind + "\",\"make\":\"" + json_escape(s->make) +
-        "\",\"model\":\"" + json_escape(s->model) + "\"" +
-        ",\"asShotK\":" + std::to_string(s->as_shot_k) + ",\"asShotTint\":" + std::to_string(s->as_shot_tint) +
-        ",\"wbK\":" + std::to_string(s->wb_k) + ",\"wbTint\":" + std::to_string(s->wb_tint) + "}";
-    return jstr(env, out);
+    try {
+        const auto num = [](double v) { return std::to_string(std::isfinite(v) ? v : 0.0); };
+        std::string out = "{\"width\":" + std::to_string(s->width) + ",\"height\":" + std::to_string(s->height) +
+            ",\"sourceWidth\":" + std::to_string(s->source_width) +
+            ",\"sourceHeight\":" + std::to_string(s->source_height) +
+            ",\"kind\":\"" + s->kind + "\",\"make\":\"" + json_escape(utf8_clean(s->make)) +
+            "\",\"model\":\"" + json_escape(utf8_clean(s->model)) + "\"" +
+            ",\"asShotK\":" + num(s->as_shot_k) + ",\"asShotTint\":" + num(s->as_shot_tint) +
+            ",\"wbK\":" + num(s->wb_k) + ",\"wbTint\":" + num(s->wb_tint) + "}";
+        return jstr(env, out);
+    } catch (...) {
+        fail("source info: out of memory");
+        return jstr(env, "{}");
+    }
 }
 
 JNI_FN(jstring, setParams)(JNIEnv* env, jobject, jlong handle, jstring delta_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
-    const std::string delta = str(env, delta_j);
-    char* reply = nullptr;
-    if (spk_set_params(s->session, delta.c_str(), &reply) != SPK_OK) {
-        if (reply) spk_string_free(reply);
-        fail(engine_error("set params"));
-        return nullptr;
+    try {
+        const std::string delta = str(env, delta_j);
+        char* reply = nullptr;
+        const spk_status st = spk_set_params(s->session, delta.c_str(), &reply);
+        std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
+        if (st != SPK_OK) { fail(engine_error("set params")); return nullptr; }
+        return jstr(env, reply ? reply : "{}");
+    } catch (const std::exception& e) {
+        fail(std::string("set params: ") + e.what());
+    } catch (...) {
+        fail("set params: unknown failure");
     }
-    std::string text = reply ? reply : "{}";
-    if (reply) spk_string_free(reply);
-    return jstr(env, text);
+    return nullptr;
 }
 
 JNI_FN(jstring, getParams)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
-    char* reply = nullptr;
-    if (spk_get_params(s->session, &reply) != SPK_OK) {
-        if (reply) spk_string_free(reply);
-        fail(engine_error("get params"));
-        return nullptr;
+    try {
+        char* reply = nullptr;
+        const spk_status st = spk_get_params(s->session, &reply);
+        std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
+        if (st != SPK_OK) { fail(engine_error("get params")); return nullptr; }
+        return jstr(env, reply ? reply : "{}");
+    } catch (const std::exception& e) {
+        fail(std::string("get params: ") + e.what());
+    } catch (...) {
+        fail("get params: unknown failure");
     }
-    std::string text = reply ? reply : "{}";
-    if (reply) spk_string_free(reply);
-    return jstr(env, text);
+    return nullptr;
 }
 
 JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
     try {
-        spk_result result;
-        if (!render(s, str(env, tier_j), result)) return nullptr;
-        jobject bitmap = to_bitmap(env, result);
-        spk_result_free(&result);
-        return bitmap;
+        ResultGuard result;
+        if (!render(s, str(env, tier_j), result.r)) return nullptr;
+        return to_bitmap(env, result.r);
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -544,23 +652,19 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
     try {
-        spk_result result;
-        if (!render(s, str(env, tier_j), result)) return nullptr;
-        jobject out = nullptr;
+        ResultGuard result;
+        if (!render(s, str(env, tier_j), result.r)) return nullptr;
         AndroidBitmapInfo info{};
-        void* pixels = nullptr;
         if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
             info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 &&
-            info.width == result.width && info.height == result.height &&
-            AndroidBitmap_lockPixels(env, reuse, &pixels) == ANDROID_BITMAP_RESULT_SUCCESS && pixels) {
-            pack_rgba8(result, static_cast<uint8_t*>(pixels), info.stride);
-            AndroidBitmap_unlockPixels(env, reuse);
-            out = reuse;
-        } else {
-            out = to_bitmap(env, result);
+            info.width == result.r.width && info.height == result.r.height) {
+            PixelLock lock(env, reuse);
+            if (lock.ok) {
+                pack_rgba8(result.r, static_cast<uint8_t*>(lock.pixels), info.stride);
+                return reuse;
+            }
         }
-        spk_result_free(&result);
-        return out;
+        return to_bitmap(env, result.r);
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -573,21 +677,26 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return JNI_FALSE; }
     try {
+        // A TIFF without its profile would be read as some other space: refuse.
         std::vector<uint8_t> icc;
         const std::string icc_path = str(env, icc_j);
-        if (!icc_path.empty()) {
-            std::ifstream file(icc_path, std::ios::binary);
-            icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-        }
-        spk_result result;
+        std::ifstream file(icc_path, std::ios::binary);
+        if (icc_path.empty() || !file) { fail("TIFF: sRGB profile missing from engine resources"); return JNI_FALSE; }
+        icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+        if (icc.empty()) { fail("TIFF: sRGB profile is empty"); return JNI_FALSE; }
+        const std::string path = str(env, path_j);
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
-        if (!render(s, tier, result)) return JNI_FALSE;
+        ResultGuard result;
+        if (!render(s, tier, result.r)) return JNI_FALSE;
         std::string error;
-        const bool ok = spk::android::write_tiff16(str(env, path_j), result.rgba16, result.width, result.height,
-                                                   result.row_stride_px, icc, error);
-        spk_result_free(&result);
-        if (!ok) { fail("TIFF: " + error); return JNI_FALSE; }
+        if (!spk::android::write_tiff16(path, result.r.rgba16, result.r.width, result.r.height,
+                                        result.r.row_stride_px, icc, error)) {
+            fail("TIFF: " + error);
+            return JNI_FALSE;
+        }
         return JNI_TRUE;
+    } catch (const std::bad_alloc&) {
+        fail("TIFF: out of memory; choose a smaller working size");
     } catch (const std::exception& e) {
         fail(std::string("TIFF: ") + e.what());
     } catch (...) {

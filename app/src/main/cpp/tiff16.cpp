@@ -81,7 +81,7 @@ bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width,
     std::unique_ptr<std::FILE, decltype(&std::fclose)> file(std::fopen(path.c_str(), "wb"), &std::fclose);
     if (!file) { error = "cannot create " + path; return false; }
     if (std::fwrite(head.data(), 1, head.size(), file.get()) != head.size()) {
-        error = "write failed: " + path; return false;
+        file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false;
     }
     std::vector<uint8_t> row(size_t(width) * 6);
     for (uint32_t y = 0; y < height; ++y) {
@@ -94,10 +94,11 @@ bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width,
             }
         }
         if (std::fwrite(row.data(), 1, row.size(), file.get()) != row.size()) {
-            error = "write failed: " + path; return false;
+            file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false;
         }
     }
-    if (std::fflush(file.get()) != 0) { error = "write failed: " + path; return false; }
+    if (std::fflush(file.get()) != 0) { file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false; }
+    if (std::fclose(file.release()) != 0) { std::remove(path.c_str()); error = "close failed: " + path; return false; }
     return true;
 }
 
