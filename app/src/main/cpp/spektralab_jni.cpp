@@ -483,19 +483,26 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         {
             PixelLock lock(env, bitmap);
             if (!lock.ok) { fail("cannot lock bitmap pixels"); return 0; }
-            for (uint32_t y = 0; y < info.height; ++y) {
-                const auto* src = static_cast<const uint8_t*>(lock.pixels) + size_t(y) * info.stride;
-                float* dst = rgb.data() + size_t(y) * info.width * 3;
-                for (uint32_t x = 0; x < info.width; ++x) {
-                    const uint32_t a = src[4 * x + 3];
-                    // ARGB_8888 is premultiplied: undo it, or semi-transparent
-                    // edges (PNG) print darker than they are.
-                    const float k = (a == 255 || a == 0) ? 1.0f / 255.0f : 1.0f / float(a);
-                    dst[3 * x + 0] = std::min(1.0f, src[4 * x + 0] * k);
-                    dst[3 * x + 1] = std::min(1.0f, src[4 * x + 1] * k);
-                    dst[3 * x + 2] = std::min(1.0f, src[4 * x + 2] * k);
+            // Row bands on up to four threads: a 50 MP phone photo is the
+            // slowest thing on the open path after the decode itself.
+            const uint64_t px = uint64_t(info.width) * info.height;
+            const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
+            const auto* base = static_cast<const uint8_t*>(lock.pixels);
+            run_rows(info.height, workers, [&](uint32_t y0, uint32_t y1) {
+                for (uint32_t y = y0; y < y1; ++y) {
+                    const auto* src = base + size_t(y) * info.stride;
+                    float* dst = rgb.data() + size_t(y) * info.width * 3;
+                    for (uint32_t x = 0; x < info.width; ++x) {
+                        const uint32_t a = src[4 * x + 3];
+                        // ARGB_8888 is premultiplied: undo it, or semi-transparent
+                        // edges (PNG) print darker than they are.
+                        const float k = (a == 255 || a == 0) ? 1.0f / 255.0f : 1.0f / float(a);
+                        dst[3 * x + 0] = std::min(1.0f, src[4 * x + 0] * k);
+                        dst[3 * x + 1] = std::min(1.0f, src[4 * x + 1] * k);
+                        dst[3 * x + 2] = std::min(1.0f, src[4 * x + 2] * k);
+                    }
                 }
-            }
+            });
         }
         SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
                                        info.width, info.height, params));
