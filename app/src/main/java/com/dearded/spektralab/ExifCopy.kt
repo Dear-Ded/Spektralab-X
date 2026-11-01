@@ -17,6 +17,9 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
 
     val isEmpty get() = values.isEmpty()
 
+    /** `yyyy:MM:dd HH:mm:ss`, or null. */
+    val dateTimeOriginal: String? get() = values[ExifInterface.TAG_DATETIME_ORIGINAL]
+
     /** Writes the copied tags into [jpeg] in place. Failures leave the file as it was. */
     fun applyTo(jpeg: File, width: Int, height: Int) {
         runCatching {

@@ -376,8 +376,13 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                     }
                     3 -> {
                         val src = ui.source
-                        fun reframe(next: Edit) =
-                            if (src == null) next else Edit.centredCrop(next, src.width, src.height, next.cropAspect)
+                        // With the film edge on, the crop must stay the gate's shape in the new orientation.
+                        fun reframe(next: Edit) = when {
+                            src == null -> next
+                            next.filmEdge -> Edit.withFilmEdge(next.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0),
+                                src.width, src.height, on = true)
+                            else -> Edit.centredCrop(next, src.width, src.height, next.cropAspect)
+                        }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = { vm.update(reframe(e.copy(quarterTurns = (e.quarterTurns + 3) % 4))) },
                                 enabled = enabled) { Text("向左转") }
@@ -395,12 +400,53 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                     selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
                                     onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
                                     label = { Text(label) },
-                                    enabled = enabled,
+                                    enabled = enabled && !e.filmEdge,
                                 )
                             }
                         }
                         Text(
                             "旋转和裁剪在胶片之前完成，颗粒按裁剪后的画面计算。长按看到的原图不带裁剪。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                        SwitchRow("胶片边框", e.filmEdge, enabled && src != null) { on ->
+                            if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on))
+                        }
+                        if (e.filmEdge && src != null) {
+                            Row(
+                                Modifier.horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                for ((id, label, _) in Edit.EDGE_FORMATS) {
+                                    FilterChip(
+                                        selected = e.edgeFormat == id,
+                                        onClick = {
+                                            var next = Edit.withFilmEdge(e, src.width, src.height, true, id)
+                                            if (!Edit.dateBackFits(id)) next = next.copy(dateImprint = false)
+                                            vm.update(next)
+                                        },
+                                        label = { Text(label) },
+                                        enabled = enabled,
+                                    )
+                                }
+                            }
+                            Text(
+                                "边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
+                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank()) {
+                            vm.update(e.copy(dateImprint = it))
+                        }
+                        Text(
+                            when {
+                                e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
+                                !dateOk -> "宽幅画幅没有日期后背。"
+                                else -> "日期：${e.dateText}（取自拍摄时间）"
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

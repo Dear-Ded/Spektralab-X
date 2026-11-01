@@ -78,6 +78,14 @@ data class Edit(
     val cropH: Double = 1.0,
     /** The crop's chosen output aspect; app-side only, never sent (0 = whole frame). */
     val cropAspect: Double = 0.0,
+    // RFC-032 film edge and RFC-031 date back. With the edge on the frame must
+    // already be the gate's shape (the engine refuses anything 5 % off), so
+    // turning it on also crops to the gate; see withFilmEdge.
+    val filmEdge: Boolean = false,
+    val edgeFormat: String = "135",
+    val dateImprint: Boolean = false,
+    /** Already formatted the way a date back writes it, e.g. `'26 11 1`. */
+    val dateText: String = "",
 ) {
     fun toJson(): JSONObject = JSONObject().apply { for ((key, get) in FIELDS) put(key, get(this@Edit)) }
 
@@ -117,6 +125,10 @@ data class Edit(
             "geometry_crop_y" to { e: Edit -> e.cropY },
             "geometry_crop_w" to { e: Edit -> e.cropW },
             "geometry_crop_h" to { e: Edit -> e.cropH },
+            "overscan_active" to { e: Edit -> e.filmEdge },
+            "overscan_format" to { e: Edit -> e.edgeFormat },
+            "date_imprint_active" to { e: Edit -> e.dateImprint },
+            "date_imprint_text" to { e: Edit -> e.dateText },
         )
 
         /** The session's resolved values, as `spk_get_params` reports them. */
@@ -142,7 +154,48 @@ data class Edit(
             cropY = p.optDouble("geometry_crop_y", fallback.cropY),
             cropW = p.optDouble("geometry_crop_w", fallback.cropW),
             cropH = p.optDouble("geometry_crop_h", fallback.cropH),
+            filmEdge = p.optBoolean("overscan_active", fallback.filmEdge),
+            edgeFormat = p.optString("overscan_format", fallback.edgeFormat),
+            dateImprint = p.optBoolean("date_imprint_active", fallback.dateImprint),
+            dateText = p.optString("date_imprint_text", fallback.dateText),
         )
+
+        /** Gate long / short edge, mm, as engine/src/pipeline/overscan.cpp's kFormats. */
+        val EDGE_FORMATS = listOf(
+            Triple("135", "135", 36.25 / 24.3),
+            Triple("135_half", "半格", 24.0 / 18.0),
+            Triple("135_xpan", "XPan", 65.0 / 24.0),
+            Triple("120_645", "645", 56.0 / 41.5),
+            Triple("120_6x6", "6×6", 1.0),
+            Triple("120_6x7", "6×7", 69.5 / 56.0),
+            Triple("120_6x9", "6×9", 84.0 / 56.0),
+            Triple("120_6x12", "6×12", 112.0 / 56.0),
+            Triple("120_6x17", "6×17", 168.0 / 56.0),
+        )
+
+        /** The date back exists on 135 and 120 only (no panoramic formats, RFC-031). */
+        fun dateBackFits(format: String) = format != "135_xpan" && format != "120_6x12" && format != "120_6x17"
+
+        /**
+         * The film edge on [format]: the crop becomes the gate's shape (kept in
+         * the frame's current orientation), because the engine lays the picture
+         * into the gate and refuses a frame more than 5 % off its shape.
+         */
+        fun withFilmEdge(edit: Edit, w: Int, h: Int, on: Boolean, format: String = edit.edgeFormat): Edit {
+            if (!on) return edit.copy(filmEdge = false, edgeFormat = format)
+            val gate = EDGE_FORMATS.firstOrNull { it.first == format }?.third ?: 1.5
+            val outW = if (edit.quarterTurns % 2 == 1) h * edit.cropH else w * edit.cropW
+            val outH = if (edit.quarterTurns % 2 == 1) w * edit.cropW else h * edit.cropH
+            val aspect = if (outW >= outH) gate else 1.0 / gate
+            return centredCrop(edit.copy(filmEdge = true, edgeFormat = format, cropAspect = aspect), w, h, aspect)
+        }
+
+        /** EXIF `yyyy:MM:dd ...` as a date back prints it (year first, no leading zeros). */
+        fun dateBackText(exifDate: String?): String {
+            val m = Regex("""^(\d{4}):(\d{2}):(\d{2})""").find(exifDate ?: "") ?: return ""
+            val (y, mo, d) = m.destructured
+            return "'${y.takeLast(2)} ${mo.toInt()} ${d.toInt()}"
+        }
 
         /**
          * A centred crop of [aspect] (width / height of the *output*, after the

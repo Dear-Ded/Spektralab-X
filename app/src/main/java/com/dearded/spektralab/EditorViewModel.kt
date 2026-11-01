@@ -163,11 +163,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // another port). RAW is scene-linear and wants the meter.
             // Rotation and crop belong to one photo; the look (film, paper, effects) carries over.
             // A white-balance re-decode is the same photo: everything is kept.
+            // The film edge is turned off with the crop (the engine refuses a frame
+            // that is not the gate's shape); the date back follows the new photo's EXIF.
+            if (wb == null) {
+                sourceExif = withContext(Dispatchers.IO) { ExifCopy.read { resolver.openInputStream(uri) } }
+            }
             val look = if (wb != null) wanted else wanted.copy(
                 autoExposure = raw,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
-            )
+                filmEdge = false,
+                dateText = Edit.dateBackText(sourceExif.dateTimeOriginal),
+            ).let { if (it.dateText.isEmpty()) it.copy(dateImprint = false) else it }
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
@@ -175,7 +182,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             cardsJob?.cancel()
             withContext(EngineThread.dispatcher) { releaseSession() }
             _ui.update { it.copy(image = null, before = null, source = null, filmCards = emptyMap()) }
-            sourceExif = withContext(Dispatchers.IO) { ExifCopy.read { resolver.openInputStream(uri) } }
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -326,7 +332,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val redoStack = ArrayDeque<Edit>()
     private var lastStepAt = 0L
 
-    fun update(edit: Edit) = applyEdit(edit, record = true)
+    fun update(edit: Edit) {
+        // The film edge lays the frame on a canvas up to 1.6x its area (the 6x17
+        // strip and the 135 rebate). Past the pixel budget that canvas is what
+        // reset the driver in another port, so say so before it renders.
+        val src = _ui.value.source
+        if (edit.filmEdge && !_ui.value.edit.filmEdge && src != null && _ui.value.maxPixels > 0 &&
+            src.width.toLong() * src.height * 16 / 10 > _ui.value.maxPixels) {
+            _ui.update { it.copy(message = "画面较大，加边框后可能内存不足；可在“设置”里调小工作尺寸") }
+        }
+        applyEdit(edit, record = true)
+    }
 
     private fun applyEdit(edit: Edit, record: Boolean) {
         val current = _ui.value.edit
@@ -405,7 +421,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             kotlinx.coroutines.delay(1500)   // let the first preview land first
             val catalog = _ui.value.catalog
             for (film in catalog.films) {
-                val base = withFilm(wanted, catalog, film.id) ?: continue
+                // Cards show the film's colour, not the border or date: both cost a larger canvas.
+                val base = withFilm(wanted, catalog, film.id)?.copy(filmEdge = false, dateImprint = false) ?: continue
                 val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
                 val card = runCatching {
                     withContext(EngineThread.dispatcher) {
