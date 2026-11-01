@@ -1,8 +1,5 @@
 package com.dearded.spektralab
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -31,26 +28,18 @@ class ExportService : Service() {
             stopSelf(startId)
             return START_NOT_STICKY
         }
-        val nm = getSystemService(NotificationManager::class.java)
-        nm?.createNotificationChannel(
-            NotificationChannel(CHANNEL, "导出", NotificationManager.IMPORTANCE_LOW)
-        )
-        val notification = Notification.Builder(this, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_upload)
-            .setContentTitle("SpektraLab 正在导出")
-            .setContentText("全尺寸渲染中，可以切到其他应用")
-            .setProgress(0, 0, true)
-            .setOngoing(true)
-            .build()
+        // The queue's own notice, under the queue's id: the service only makes it
+        // the foreground one, and the queue keeps updating it in place.
+        val notification = JobNotifier.build(this, (application as SpektraLabApp).host.queue.jobs.value)
         // A failure is left alone: the export's own stop cleans up.
         runCatching {
             when {
                 // Local image processing is what mediaProcessing is for (Android 15).
                 Build.VERSION.SDK_INT >= 35 ->
-                    startForeground(ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
+                    startForeground(JobNotifier.ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
                 Build.VERSION.SDK_INT >= 29 ->
-                    startForeground(ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-                else -> startForeground(ID, notification)
+                    startForeground(JobNotifier.ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+                else -> startForeground(JobNotifier.ID, notification)
             }
         }
         return START_NOT_STICKY
@@ -62,8 +51,6 @@ class ExportService : Service() {
     }
 
     companion object {
-        private const val CHANNEL = "export"
-        private const val ID = 1
         private const val ACTION_STOP = "stop"
         private val active = AtomicInteger()
 

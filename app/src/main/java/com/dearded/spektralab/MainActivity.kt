@@ -14,6 +14,11 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        /** From the processing notification: open the 正在处理 list. */
+        const val ACTION_SHOW_QUEUE = "com.dearded.spektralab.SHOW_QUEUE"
+    }
+
     private val viewModel: EditorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +44,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        if (intent?.action == ACTION_SHOW_QUEUE) { viewModel.showQueue(true); return }
         val uri: Uri? = when (intent?.action) {
             Intent.ACTION_SEND ->
                 if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)

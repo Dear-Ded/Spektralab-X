@@ -47,8 +47,12 @@ class SourceLoader(private val context: Context) {
     fun openDescriptor(uri: Uri): ParcelFileDescriptor? =
         runCatching { context.contentResolver.openFileDescriptor(uri, "r") }.getOrNull()
 
-    fun copyToCache(uri: Uri, name: String): File {
-        val dir = File(context.cacheDir, "open").apply { mkdirs() }
+    /**
+     * Copies [uri] into cache/[folder]. The editor and the processing queue use
+     * different folders: each clears its own, never the other's file mid-decode.
+     */
+    fun copyToCache(uri: Uri, name: String, folder: String = "open"): File {
+        val dir = File(context.cacheDir, folder).apply { mkdirs() }
         dir.listFiles()?.forEach { it.delete() }
         val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80).ifEmpty { "image.raw" }
         val file = File(dir, safe)

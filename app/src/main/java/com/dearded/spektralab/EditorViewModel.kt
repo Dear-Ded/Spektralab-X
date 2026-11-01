@@ -1,12 +1,10 @@
 package com.dearded.spektralab
 
 import android.app.Application
-import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.ColorSpace
 import android.graphics.ImageDecoder
 import android.net.Uri
-import android.provider.MediaStore
 import android.provider.OpenableColumns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,6 +55,8 @@ data class UiState(
     val canUndo: Boolean = false,
     val canRedo: Boolean = false,
     val presets: List<Preset> = emptyList(),
+    /** The 正在处理 sheet is open. */
+    val showQueue: Boolean = false,
     /** The full working-size render for 1:1 viewing; dropped on any edit. */
     val detail: Bitmap? = null,
     val loadingDetail: Boolean = false,
@@ -130,6 +130,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 )
             }
             pendingOpen?.let { pendingOpen = null; open(it) }
+            // Jobs left by a process the system killed pick up where they were.
+            if (host.queue.jobs.value.any { it.active }) host.queue.start()
         } catch (e: Throwable) {
             _ui.update { it.copy(busy = null, error = e.message ?: e.toString()) }
         }
@@ -329,6 +331,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val current = _ui.value.edit
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
+        host.lastInteraction = android.os.SystemClock.uptimeMillis()
         _ui.update {
             it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
                 detail = if (edit == it.edit) it.detail else null)
@@ -479,6 +482,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * once instead of after a timeout.
      */
     fun setInteracting(on: Boolean) {
+        host.lastInteraction = android.os.SystemClock.uptimeMillis()
         if (on == interacting) return
         interacting = on
         if (on) settle.tryReceive() else settle.trySend(Unit)
@@ -601,92 +605,38 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // --- export --------------------------------------------------------------
 
-    private var exportJob: kotlinx.coroutines.Job? = null
+    /** Every export, past and present, newest last. */
+    val jobs: StateFlow<List<ProcessingJob>> get() = host.queue.jobs
 
+    fun showQueue(on: Boolean) = _ui.update { it.copy(showQueue = on) }
+    fun cancelJob(id: Long) = host.queue.cancel(id)
+    fun retryJob(id: Long) = host.queue.retry(id)
+    fun clearFinishedJobs() = host.queue.clearFinished()
+
+    /**
+     * Queues an export of the open photo with its whole edit. The job opens its
+     * own session from the source, so the editor is free at once: keep editing,
+     * open the next photo, or leave the app. Progress and the remaining time are
+     * in 正在处理 and in the notification (on HyperOS, the island).
+     */
     fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL) {
-        if (_ui.value.exporting || !_ui.value.hasImage) return
-        val exif = sourceExif   // taken now: a later open must not relabel this file
-        // EngineHost's scope, not viewModelScope: closing the editor (back, or
-        // HyperOS recreating the activity) must not cancel a running export.
-        // onCleared waits for it before releasing the session it renders.
-        exportJob = host.scope.launch {
-            _ui.update { it.copy(exporting = true, busy = if (size == ExportSize.FULL) "正在渲染全尺寸…" else "正在渲染…") }
-            ExportService.start(app)
-            try {
-                val stem = "SpektraLab_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date())
-                when (format) {
-                    ExportFormat.TIFF -> {
-                        val tmp = File(app.cacheDir, "$stem.tif")
-                        withContext(EngineThread.dispatcher) {
-                            applyWanted()?.let { throw EngineException("参数无效：$it") }
-                            if (!NativeEngine.exportTiff(session, tmp.absolutePath, iccPath, size.tier))
-                                throw EngineException("导出失败：${NativeEngine.lastError()}")
-                        }
-                        withContext(Dispatchers.IO) {
-                            try {
-                                save("$stem.tif", "image/tiff") { out -> tmp.inputStream().use { it.copyTo(out, 1 shl 20) } }
-                            } finally {
-                                tmp.delete()   // 100-300 MB; never left in cache
-                            }
-                        }
-                    }
-                    ExportFormat.JPEG -> {
-                        val bitmap = withContext(EngineThread.dispatcher) {
-                            applyWanted()?.let { throw EngineException("参数无效：$it") }
-                            NativeEngine.renderBitmap(session, size.tier)
-                                ?: throw EngineException("导出失败：${NativeEngine.lastError()}")
-                        }
-                        withContext(Dispatchers.IO) {
-                            // Compressed to a file first: EXIF is written in place, then copied out.
-                            val tmp = File(app.cacheDir, "$stem.jpg")
-                            try {
-                                tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
-                                exif.applyTo(tmp, bitmap.width, bitmap.height)
-                                save("$stem.jpg", "image/jpeg") { out -> tmp.inputStream().use { it.copyTo(out, 1 shl 20) } }
-                            } finally {
-                                tmp.delete()
-                            }
-                        }
-                        bitmap.recycle()
-                    }
-                }
-                log("export $format ${size.tier} ok")
-                _ui.update { it.copy(message = "已保存到 Pictures/SpektraLab") }
-            } catch (e: OutOfMemoryError) {
-                log("export $format ${size.tier} failed: out of memory")
-                _ui.update { it.copy(message = "内存不足，无法导出全尺寸；请调小工作尺寸") }
-            } catch (e: Throwable) {
-                log("export $format ${size.tier} failed: ${e.message ?: e}")
-                _ui.update { it.copy(message = e.message ?: e.toString()) }
-            } finally {
-                ExportService.stop(app)
-                _ui.update { it.copy(exporting = false, busy = null) }
-            }
-        }
-    }
-
-    private fun save(name: String, mime: String, write: (java.io.OutputStream) -> Unit) {
-        val resolver = app.contentResolver
-        val values = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, mime)
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/SpektraLab")
-            put(MediaStore.MediaColumns.IS_PENDING, 1)
-        }
-        // Some builds refuse TIFF in the images collection; Downloads takes any type.
-        val uri = runCatching {
-            resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
-        }.getOrNull() ?: run {
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/SpektraLab")
-            resolver.insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
-        } ?: throw EngineException("无法在相册中创建文件")
-        try {
-            resolver.openOutputStream(uri)?.use(write) ?: throw EngineException("无法写入文件")
-            resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
-        } catch (e: Throwable) {
-            resolver.delete(uri, null, null)
-            throw e
-        }
+        val state = _ui.value
+        val src = state.source ?: return
+        val uri = lastUri ?: return
+        val px = src.width.toLong() * src.height
+        val outPixels = if (size == ExportSize.SHARE) {
+            val long = max(src.width, src.height).toDouble()
+            if (long <= SHARE_EDGE) px else (px * (SHARE_EDGE / long) * (SHARE_EDGE / long)).toLong()
+        } else px
+        val job = ProcessingJob(
+            id = host.queue.nextId(), uri = uri.toString(), name = src.name, raw = src.kind == "raw",
+            editJson = state.edit.toJson().toString(), wbK = src.wbK, wbTint = src.wbTint,
+            format = format, size = size, workingEdge = state.workingEdge, maxPixels = state.maxPixels,
+            outPixels = outPixels,
+        )
+        host.queue.enqueue(job)
+        log("queued ${job.label} ${src.width}x${src.height}")
+        _ui.update { it.copy(message = "已加入“正在处理”，可以继续编辑或切到后台") }
     }
 
     // --- settings ------------------------------------------------------------
@@ -753,11 +703,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // The engine stays warm in EngineHost for the next editor. The session
         // is released only after a running export (which renders it) is done.
         cardsJob?.cancel()
-        val export = exportJob
-        host.scope.launch {
-            export?.join()
-            withContext(EngineThread.dispatcher) { releaseSession() }
-        }
+        host.scope.launch { withContext(EngineThread.dispatcher) { releaseSession() } }
     }
 
     companion object {
@@ -766,6 +712,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         private const val kMaxUndo = 50
         private const val kHotHeadroom = 0.85f
         private const val kMaxDetailPixels = 16_000_000L
+        /** The engine's preview tier, which the share size exports. */
+        private const val SHARE_EDGE = 3400.0
 
         /** [edit] with film [id]; the paper changes only when it cannot print it (colour vs B&W). */
         fun withFilm(edit: Edit, catalog: Catalog, id: String): Edit? {

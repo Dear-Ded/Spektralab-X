@@ -88,6 +88,7 @@ import java.util.Locale
 @Composable
 fun EditorScreen(vm: EditorViewModel) {
     val ui by vm.ui.collectAsState()
+    val jobs by vm.jobs.collectAsState()
     val snackbar = remember { SnackbarHostState() }
     var showSettings by remember { mutableStateOf(false) }
     var openMenu by remember { mutableStateOf(false) }
@@ -177,6 +178,10 @@ fun EditorScreen(vm: EditorViewModel) {
                             })
                         }
                     }
+                    val active = jobs.count { it.active }
+                    TextButton(onClick = { vm.showQueue(true) }) {
+                        Text(if (active > 0) "处理中 $active" else "任务")
+                    }
                     TextButton(onClick = vm::undo, enabled = ui.canUndo && !ui.exporting) { Text("撤销") }
                     TextButton(onClick = vm::redo, enabled = ui.canRedo && !ui.exporting) { Text("重做") }
                     IconButton(onClick = { showSettings = true }) {
@@ -231,6 +236,7 @@ fun EditorScreen(vm: EditorViewModel) {
     }
 
     if (showSettings) SettingsDialog(ui, vm) { showSettings = false }
+    if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
     ui.detail?.let { DetailViewer(it, vm::closeDetail) }
 }
 
