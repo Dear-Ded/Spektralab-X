@@ -296,29 +296,43 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // An exception escaping here would end renderLoop for good (and leave the
+    // progress bar up), so everything but cancellation is turned into a message,
+    // and the busy flag is cleared in finally.
     private suspend fun renderOnce(tier: String): Boolean {
         _ui.update { it.copy(rendering = true) }
         var failure: String? = null
         var reverted: Edit? = null
-        val bitmap = withContext(EngineThread.dispatcher) {
-            if (session == 0L) return@withContext null
-            applyWanted()?.let { error ->
-                failure = "参数无效：$error"
-                wanted = applied
-                reverted = applied
-                return@withContext null
+        var bitmap: Bitmap? = null
+        try {
+            bitmap = withContext(EngineThread.dispatcher) {
+                if (session == 0L) return@withContext null
+                applyWanted()?.let { error ->
+                    failure = "参数无效：$error"
+                    wanted = applied
+                    reverted = applied
+                    return@withContext null
+                }
+                NativeEngine.renderBitmap(session, tier) ?: run {
+                    failure = "渲染失败：${NativeEngine.lastError()}"
+                    null
+                }
             }
-            NativeEngine.renderBitmap(session, tier) ?: run {
-                failure = "渲染失败：${NativeEngine.lastError()}"
-                null
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: OutOfMemoryError) {
+            failure = "内存不足，渲染失败；请在“设置”里调小工作尺寸"
+        } catch (e: Throwable) {
+            failure = "渲染失败：${e.message ?: e}"
+        } finally {
+            val shown = bitmap
+            _ui.update {
+                var next = it.copy(rendering = false)
+                if (shown != null) next = next.copy(image = shown, imageTier = tier)
+                reverted?.let { e -> next = next.copy(edit = e) }
+                failure?.let { f -> next = next.copy(message = f) }
+                next
             }
-        }
-        _ui.update {
-            var next = it.copy(rendering = false)
-            if (bitmap != null) next = next.copy(image = bitmap, imageTier = tier)
-            reverted?.let { e -> next = next.copy(edit = e) }
-            failure?.let { f -> next = next.copy(message = f) }
-            next
         }
         return bitmap != null
     }
