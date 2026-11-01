@@ -1,0 +1,1 @@
+Background processing queue with time estimates; Live Update / HyperOS focus notification; 14 adjustable border presets (off by default); darkroom palette, responsive sliders with haptics, tab and film-change animations. Not yet verified on a device.
