@@ -154,7 +154,8 @@ fun EditorScreen(vm: EditorViewModel) {
         },
     ) { padding ->
         BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
-            val landscape = maxWidth > maxHeight
+            val boxHeight = maxHeight
+            val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight())
@@ -163,7 +164,7 @@ fun EditorScreen(vm: EditorViewModel) {
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth())
-                    Controls(ui, vm, Modifier.fillMaxWidth().heightIn(max = maxHeight * 0.45f))
+                    Controls(ui, vm, Modifier.fillMaxWidth().heightIn(max = boxHeight * 0.45f))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
