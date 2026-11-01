@@ -1,0 +1,82 @@
+diff --git a/engine/src/pipeline/blur.cpp b/engine/src/pipeline/blur.cpp
+index 2dea987..d3623fb 100644
+--- a/engine/src/pipeline/blur.cpp
++++ b/engine/src/pipeline/blur.cpp
+@@ -1,5 +1,6 @@
+ #include "blur.hpp"
+ 
++#include <algorithm>
+ #include <cmath>
+ #include <cstring>
+ 
+@@ -133,25 +134,35 @@ bool Blur::iir(const Image& img, const double sigmas[3], const bool active[3],
+     //
+     // The first pass is plain and the second carries the mixture's multiply-add,
+     // which is also where the fused multiply-add landed in the transposed path.
+-    const uint32_t meta_h[4] = {img.h, img.w, 0u, 1u};
+-    const uint32_t meta_v[4] = {img.h, img.w, acc ? 1u : 0u, 0u};
+-    if (!gpu_->dispatch("spk_iir_df_acc",
+-                        {gpu::Arg::buf(img.buf), gpu::Arg::buf(coef_buf), gpu::Arg::buf(act_buf),
+-                         gpu::Arg::buf(dummy->buf), gpu::Arg::buf(wt_buf),
+-                         gpu::Arg::inline_bytes(meta_h, 4), gpu::Arg::buf(out.buf)},
+-                        size_t(img.h) * 3, error)) return false;
+-    if (!gpu_->dispatch("spk_iir_df_acc",
+-                        {gpu::Arg::buf(out.buf), gpu::Arg::buf(coef_buf), gpu::Arg::buf(act_buf),
+-                         gpu::Arg::buf(dummy->buf), gpu::Arg::buf(wt_buf),
+-                         gpu::Arg::inline_bytes(meta_v, 4), gpu::Arg::buf(out.buf)},
+-                        size_t(img.w) * 3, error)) return false;
++    // Android: each pass is launched in chunks of kIirLinesPerLaunch lines per
++    // channel. One launch over a whole 20 MP plane ran for seconds and mobile
++    // GPU watchdogs (Adreno) answered with VK_ERROR_DEVICE_LOST. Every thread
++    // owns one complete line, so chunking changes no arithmetic.
++    constexpr uint32_t kIirLinesPerLaunch = 512;
++    const auto launch = [&](const gpu::BufferRef& src, uint32_t accumulate, uint32_t axis,
++                            uint32_t lines, std::string& err) {
++        const uint32_t threads = lines * 3u;
++        const uint32_t step = kIirLinesPerLaunch * 3u;
++        for (uint32_t first = 0; first < threads; first += step) {
++            const uint32_t end = std::min(threads, first + step);
++            const uint32_t meta[6] = {img.h, img.w, accumulate, axis, first, end};
++            if (!gpu_->dispatch("spk_iir_df_acc",
++                                {gpu::Arg::buf(src), gpu::Arg::buf(coef_buf), gpu::Arg::buf(act_buf),
++                                 gpu::Arg::buf(dummy->buf), gpu::Arg::buf(wt_buf),
++                                 gpu::Arg::inline_bytes(meta, 6), gpu::Arg::buf(out.buf)},
++                                size_t(end - first), err)) return false;
++            if (sweep_report_) ++sweep_report_->launches;
++        }
++        return true;
++    };
++    if (!launch(img.buf, 0u, 1u, img.h, error)) return false;
++    if (!launch(out.buf, acc ? 1u : 0u, 0u, img.w, error)) return false;
+     // What a `Swept` stage reports: this pass covers the plane once, as one
+     // span, whatever the executor's plan says -- the plan is about bands and
+     // this never makes one. Filled here rather than by the caller, so the
+     // report is what was launched and not what was intended.
+     if (sweep_report_) {
+         sweep_report_->bands.push_back({0, img.h});
+-        sweep_report_->launches += 2;
+     }
+     return true;
+ }
+diff --git a/engine/src/shaders/vulkan/spk_iir_df_acc.comp b/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+index 43cd7d0..bd34e65 100644
+--- a/engine/src/shaders/vulkan/spk_iir_df_acc.comp
++++ b/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+@@ -69,11 +69,15 @@ vec2 df_mul_f(vec2 a, float b) {
+ }
+ 
+ void main() {
+-    uint t = spk_global_index();
++    // Android: blur.cpp launches the lines in chunks so no single submit runs
++    // long enough to trip a mobile GPU watchdog. meta[4] is the chunk's first
++    // thread and meta[5] its end; lines are independent, so the output is the
++    // same as one launch.
++    uint t = spk_global_index() + meta.value[4];
+     uint height = meta.value[0], width = meta.value[1];
+     uint accumulate = meta.value[2], axis = meta.value[3];
+     uint threads = axis == 0u ? width * 3u : height * 3u;
+-    if (t >= threads) return;
++    if (t >= min(threads, meta.value[5])) return;
+     uint channel = t % 3u, line = t / 3u;
+     uint length = axis == 0u ? height : width;
+     uint stride = axis == 0u ? width * 3u : 3u;

@@ -21,7 +21,13 @@ dest="${1:-$here/../upstream}"
 mkdir -p "$dest"
 dest="$(cd "$dest" && pwd)"
 
-if [[ -f "$dest/.spk-commit" && "$(cat "$dest/.spk-commit")" == "$UPSTREAM_COMMIT" ]]; then
+# The tree is upstream at UPSTREAM_COMMIT plus patches/*.patch, applied in
+# name order. The stamp covers both, so editing a patch re-extracts.
+patch_dir="$here/../patches"
+patch_sum="$(cat "$patch_dir"/*.patch 2>/dev/null | sha256sum | cut -c1-16)"
+stamp="$UPSTREAM_COMMIT+$patch_sum"
+
+if [[ -f "$dest/.spk-commit" && "$(cat "$dest/.spk-commit")" == "$stamp" ]]; then
   echo "upstream $UPSTREAM_COMMIT already present in $dest" >&2
 else
   tmp="$(mktemp -d)"
@@ -30,7 +36,12 @@ else
   find "$dest" -mindepth 1 -maxdepth 1 ! -name build -exec rm -rf {} +
   tar -xzf "$tmp/src.tar.gz" --strip-components=1 -C "$dest"
   rm -rf "$tmp"
-  echo "$UPSTREAM_COMMIT" > "$dest/.spk-commit"
+  for p in "$patch_dir"/*.patch; do
+    [[ -f "$p" ]] || continue
+    patch -d "$dest" -p1 --forward --batch < "$p"
+    echo "applied $(basename "$p")" >&2
+  done
+  echo "$stamp" > "$dest/.spk-commit"
   echo "upstream $UPSTREAM_COMMIT extracted to $dest" >&2
 fi
 

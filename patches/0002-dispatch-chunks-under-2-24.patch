@@ -1,0 +1,1111 @@
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index c70152c..71d2214 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -625,12 +625,15 @@ public:
+         // frame -- the groups fold into rows, and every kernel recovers the 1D
+         // index with spk_global_index(). The surplus threads of the last row
+         // fail the same bounds check the last partial workgroup always did.
+-        const size_t groups = (n_threads + spec->workgroup - 1) / spec->workgroup;
++        // Android: no single dispatch above 2^24 threads. Adreno drivers
++        // corrupt larger ones (and upstream's fold into a second group
++        // dimension starts exactly there), so the threads go out in 1D chunks,
++        // each told its first index through a push constant.
+         const size_t max_x = properties_.limits.maxComputeWorkGroupCount[0];
+-        const size_t groups_x = std::min(groups, max_x);
+-        const size_t groups_y = (groups + groups_x - 1) / groups_x;
+-        if (groups_y > properties_.limits.maxComputeWorkGroupCount[1]) {
+-            error = "Vulkan dispatch exceeds maxComputeWorkGroupCount";
++        const size_t wall = (size_t(1) << 24) / spec->workgroup * spec->workgroup;
++        const size_t chunk_threads = std::min(max_x * spec->workgroup, wall);
++        if (n_threads > size_t(UINT32_MAX)) {
++            error = "Vulkan dispatch exceeds 32-bit thread index";
+             return false;
+         }
+         // Inline uploads submit transfers too. Resolve them before taking the
+@@ -696,7 +699,13 @@ public:
+                 vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->pipeline);
+                 vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->layout,
+                                         0, 1, &set, 0, nullptr);
+-                vkCmdDispatch(command, uint32_t(groups_x), uint32_t(groups_y), 1);
++                for (size_t first = 0; first < n_threads; first += chunk_threads) {
++                    const size_t count = std::min(chunk_threads, n_threads - first);
++                    const uint32_t base = uint32_t(first);
++                    vkCmdPushConstants(command, pipeline->layout, VK_SHADER_STAGE_COMPUTE_BIT,
++                                       0, sizeof base, &base);
++                    vkCmdDispatch(command, uint32_t((count + spec->workgroup - 1) / spec->workgroup), 1, 1);
++                }
+             }, "Vulkan compute dispatch", error);
+         vkDestroyDescriptorPool(device_, descriptor_pool, nullptr);
+         return submitted;
+@@ -1206,6 +1215,9 @@ private:
+             layout_create.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+             layout_create.setLayoutCount = 1;
+             layout_create.pSetLayouts = &p.descriptors;
++            const VkPushConstantRange push{VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(uint32_t)};
++            layout_create.pushConstantRangeCount = 1;
++            layout_create.pPushConstantRanges = &push;
+             result = vkCreatePipelineLayout(device_, &layout_create, nullptr, &p.layout);
+         }
+         if (result == VK_SUCCESS) {
+diff --git a/engine/src/shaders/vulkan/spk_affine3.comp b/engine/src/shaders/vulkan/spk_affine3.comp
+index 76b28db..5207c19 100644
+--- a/engine/src/shaders/vulkan/spk_affine3.comp
++++ b/engine/src/shaders/vulkan/spk_affine3.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Per-channel scale and offset; the same buffer order as util.metal.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Scale { float value[]; } scale_data;
+@@ -11,7 +14,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_boost.comp b/engine/src/shaders/vulkan/spk_boost.comp
+index af479ba..5602ce0 100644
+--- a/engine/src/shaders/vulkan/spk_boost.comp
++++ b/engine/src/shaders/vulkan/spk_boost.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Host supplies the highlight threshold and normalisation solved from max(x).
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Parameters { float value[]; } parameters;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_bw_correct.comp b/engine/src/shaders/vulkan/spk_bw_correct.comp
+index d246c08..4597754 100644
+--- a/engine/src/shaders/vulkan/spk_bw_correct.comp
++++ b/engine/src/shaders/vulkan/spk_bw_correct.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Stretch Y, clipping only the corrected Y, then scale XYZ together.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Parameters { float value[]; } parameters;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl b/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+index 0fbcbbd..77b79ac 100644
+--- a/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
++++ b/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+@@ -17,7 +17,7 @@ layout(set = 0, binding = 7, std430) buffer Stats { uint value[]; } stats;
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp b/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+index e3d7ba4..a2444c0 100644
+--- a/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
++++ b/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+@@ -1,3 +1,6 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_cam16ucs_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_cctf_decode.comp b/engine/src/shaders/vulkan/spk_cctf_decode.comp
+index a6d0ce6..ce34bfc 100644
+--- a/engine/src/shaders/vulkan/spk_cctf_decode.comp
++++ b/engine/src/shaders/vulkan/spk_cctf_decode.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Transfer modes and exact breakpoints follow nodes.metal/core/colour.cpp.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Meta { uint value[]; } meta;
+@@ -9,7 +12,7 @@ layout(set = 0, binding = 2, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float signed_power(float value, float exponent) {
+diff --git a/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp b/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+index 5c28d66..bafd9d9 100644
+--- a/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
++++ b/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // The near-identity output matrix is intentionally applied before the OETF.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Matrix { float value[]; } matrix_data;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float signed_power(float value, float exponent) {
+diff --git a/engine/src/shaders/vulkan/spk_couplers_correction.comp b/engine/src/shaders/vulkan/spk_couplers_correction.comp
+index a2b03bf..5dcb343 100644
+--- a/engine/src/shaders/vulkan/spk_couplers_correction.comp
++++ b/engine/src/shaders/vulkan/spk_couplers_correction.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // DIR-coupler correction before the separately scheduled spatial diffusion.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Matrix { float value[]; } matrix_data;
+@@ -13,7 +16,7 @@ layout(set = 0, binding = 6, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_curves.comp b/engine/src/shaders/vulkan/spk_curves.comp
+index 6ece046..29ec1ad 100644
+--- a/engine/src/shaders/vulkan/spk_curves.comp
++++ b/engine/src/shaders/vulkan/spk_curves.comp
+@@ -2,6 +2,9 @@
+ 
+ // Per-channel fast_interp, with the same right-biased binary search as
+ // spk_common.h. The baked x/y tables are interleaved (K,3).
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer XAxis { float value[]; } x_axis;
+@@ -13,7 +16,7 @@ layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float interpolate(uint count, uint channel, float value) {
+diff --git a/engine/src/shaders/vulkan/spk_di_encode.comp b/engine/src/shaders/vulkan/spk_di_encode.comp
+index 7472427..2d05957 100644
+--- a/engine/src/shaders/vulkan/spk_di_encode.comp
++++ b/engine/src/shaders/vulkan/spk_di_encode.comp
+@@ -1,11 +1,14 @@
+ #version 450
+ // Exact parameter layout and order from nodes.metal spk_di_encode.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set=0,binding=0,std430) readonly buffer Input { float value[]; } input_data;
+ layout(set=0,binding=1,std430) readonly buffer Params { float value[]; } params;
+ layout(set=0,binding=2,std430) readonly buffer Meta { uint value[]; } meta;
+ layout(set=0,binding=3,std430) writeonly buffer Output { float value[]; } output_data;
+-uint spk_global_index() { return gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x; }
++uint spk_global_index() { return (gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x + spk_pc.base); }
+ vec3 log10v(vec3 x) { return log(x)/log(10.0); }
+ void main() {
+     uint i = spk_global_index();
+diff --git a/engine/src/shaders/vulkan/spk_di_normalise.comp b/engine/src/shaders/vulkan/spk_di_normalise.comp
+index f81f605..64ae8b1 100644
+--- a/engine/src/shaders/vulkan/spk_di_normalise.comp
++++ b/engine/src/shaders/vulkan/spk_di_normalise.comp
+@@ -2,6 +2,9 @@
+ 
+ // DI and the shipped print LUT share these per-channel density axes.
+ // One thread per scalar, not per pixel, matching util.metal's count contract.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Density { float value[]; } density;
+ layout(set = 0, binding = 1, std430) readonly buffer Lower { float value[]; } lower;
+@@ -12,7 +15,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_edr.comp b/engine/src/shaders/vulkan/spk_edr.comp
+index 761d65d..c034c01 100644
+--- a/engine/src/shaders/vulkan/spk_edr.comp
++++ b/engine/src/shaders/vulkan/spk_edr.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Calibrated EDR log2-Y LUT and exact identity toe/shoulder joins, nodes.metal.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Parameters { float value[]; } parameters;
+@@ -11,7 +14,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_geometry_resample_df.comp b/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+index 7bcd954..3f99ba5 100644
+--- a/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
++++ b/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_split_product.glsl"
+ 
+ // nodes.metal::spk_geometry_resample_df, packed RGB and the same float-pair
+@@ -16,7 +19,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ vec2 two_sum(float a, float b) {
+diff --git a/engine/src/shaders/vulkan/spk_glare_add.comp b/engine/src/shaders/vulkan/spk_glare_add.comp
+index a2b06b0..6141ee6 100644
+--- a/engine/src/shaders/vulkan/spk_glare_add.comp
++++ b/engine/src/shaders/vulkan/spk_glare_add.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Add the field in percent, using the print illuminant's XYZ channel values.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Field { float value[]; } field_data;
+@@ -11,7 +14,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_grain_layer_one.comp b/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+index e9527f3..f7c75d5 100644
+--- a/engine/src/shaders/vulkan/spk_grain_layer_one.comp
++++ b/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_rng.glsl"
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer Cmy { float cmy[]; };
+@@ -14,7 +17,7 @@ layout(std430, binding = 7) writeonly buffer Out { float dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ uint search_right(uint K, uint ch, float v) {
+     uint lo = 0u, hi = K;
+diff --git a/engine/src/shaders/vulkan/spk_grain_layers.comp b/engine/src/shaders/vulkan/spk_grain_layers.comp
+index 32795d4..e10bbba 100644
+--- a/engine/src/shaders/vulkan/spk_grain_layers.comp
++++ b/engine/src/shaders/vulkan/spk_grain_layers.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_rng.glsl"
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer Cmy { float cmy[]; };
+@@ -14,7 +17,7 @@ layout(std430, binding = 7) writeonly buffer Out { float dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ uint search_right(uint K, uint ch, float v) {
+     uint lo = 0u, hi = K;
+diff --git a/engine/src/shaders/vulkan/spk_grain_simple.comp b/engine/src/shaders/vulkan/spk_grain_simple.comp
+index bc7682b..1d9c120 100644
+--- a/engine/src/shaders/vulkan/spk_grain_simple.comp
++++ b/engine/src/shaders/vulkan/spk_grain_simple.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_rng.glsl"
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer Cmy { float cmy[]; };
+@@ -11,7 +14,7 @@ layout(std430, binding = 4) writeonly buffer Out { float dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ void main() {
+     uint i = spk_global_index();
+diff --git a/engine/src/shaders/vulkan/spk_highlight_headroom.comp b/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+index 6ebac9f..1223e07 100644
+--- a/engine/src/shaders/vulkan/spk_highlight_headroom.comp
++++ b/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+@@ -8,6 +8,9 @@
+ // channels alike so the light keeps its colour. Only a film with no
+ // anti-halation layer (CineStill 800T) reaches this kernel.
+ // p = {1/clip, clip_from, clip_inv_span, headroom, 1/mid-grey, floor_from, floor_inv_span}.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Parameters { float value[]; } p;
+@@ -17,7 +20,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float spk_smoothstep01(float t) {
+diff --git a/engine/src/shaders/vulkan/spk_iir_df_acc.comp b/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+index bd34e65..e2bbe49 100644
+--- a/engine/src/shaders/vulkan/spk_iir_df_acc.comp
++++ b/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_split_product.glsl"
+ 
+ // Direct port of blur.metal's Young & van Vliet recurrence. Each invocation
+@@ -19,7 +22,7 @@ layout(set = 0, binding = 6, std430) buffer Output { float value[]; } output_dat
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ // (hi, lo) float pairs, translated from spk_common.h. precise preserves the
+diff --git a/engine/src/shaders/vulkan/spk_lincomb3.comp b/engine/src/shaders/vulkan/spk_lincomb3.comp
+index 774e9ab..d49c089 100644
+--- a/engine/src/shaders/vulkan/spk_lincomb3.comp
++++ b/engine/src/shaders/vulkan/spk_lincomb3.comp
+@@ -2,6 +2,9 @@
+ 
+ // Per-channel linear combination, including the blur-mixture and unsharp
+ // mask paths. Matches blur.metal's scalar operation and binding order.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer X { float value[]; } x_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Y { float value[]; } y_data;
+@@ -13,7 +16,7 @@ layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_log10_guarded.comp b/engine/src/shaders/vulkan/spk_log10_guarded.comp
+index 1a1c55f..a830a0c 100644
+--- a/engine/src/shaders/vulkan/spk_log10_guarded.comp
++++ b/engine/src/shaders/vulkan/spk_log10_guarded.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ 
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Gain { float value[]; } gain_data;
+@@ -9,7 +12,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_lognormal_field.comp b/engine/src/shaders/vulkan/spk_lognormal_field.comp
+index 05e6457..a01ded6 100644
+--- a/engine/src/shaders/vulkan/spk_lognormal_field.comp
++++ b/engine/src/shaders/vulkan/spk_lognormal_field.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_rng.glsl"
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer P { float p[]; };
+@@ -9,7 +12,7 @@ layout(std430, binding = 2) writeonly buffer Out { float dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ void main() {
+     uint i = spk_global_index();
+diff --git a/engine/src/shaders/vulkan/spk_lut2d_cubic.comp b/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+index 8a6a078..08e12c0 100644
+--- a/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
++++ b/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+@@ -2,6 +2,9 @@
+ 
+ // Hanatos spectral upsampling, back half. Mitchell weights and mirrored
+ // indices follow spk_common.h; the LUT is (L, L, 3) row-major.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Coordinates { float value[]; } tc_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Brightness { float value[]; } brightness_data;
+@@ -12,7 +15,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float mitchell(float t) {
+diff --git a/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp b/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+index c11c40d..1f17b45 100644
+--- a/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
++++ b/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+@@ -2,6 +2,9 @@
+ 
+ // Shipped print LUT: tightly packed (S,S,S,3), third density axis fastest.
+ // Binding order and interpolation order match util.metal. One thread/pixel.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Density { float value[]; } density;
+ layout(set = 0, binding = 1, std430) readonly buffer Lut { float value[]; } lut_data;
+@@ -13,7 +16,7 @@ layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ float metal_clamp01(float x) {
+diff --git a/engine/src/shaders/vulkan/spk_math_probe.comp b/engine/src/shaders/vulkan/spk_math_probe.comp
+index 90ddc81..cb14c68 100644
+--- a/engine/src/shaders/vulkan/spk_math_probe.comp
++++ b/engine/src/shaders/vulkan/spk_math_probe.comp
+@@ -4,6 +4,9 @@
+ // checked against an exact binary64 product residual when the engine starts.
+ // Metal dispatches exactly 64 threads for this probe. A one-thread workgroup
+ // preserves that extent without adding an argument to the existing Gpu call.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 1) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) writeonly buffer Output { float value[]; } output_data;
+@@ -11,7 +14,7 @@ layout(set = 0, binding = 1, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_matmul3.comp b/engine/src/shaders/vulkan/spk_matmul3.comp
+index a321ad2..c9797e4 100644
+--- a/engine/src/shaders/vulkan/spk_matmul3.comp
++++ b/engine/src/shaders/vulkan/spk_matmul3.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Row-vector convention matches nodes.metal's spk_matmul3 exactly.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Matrix { float value[]; } matrix_data;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_mul.comp b/engine/src/shaders/vulkan/spk_mul.comp
+index 240ecea..3bf0bb4 100644
+--- a/engine/src/shaders/vulkan/spk_mul.comp
++++ b/engine/src/shaders/vulkan/spk_mul.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Grain micro-structure product; util.metal's buffer order and arithmetic.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Field { float value[]; } field_data;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_overscan_add_mask.comp b/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+index e9adac1..c9744bb 100644
+--- a/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
++++ b/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_OVERSCAN_ADD_MASK
+ #include "spk_overscan_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_overscan_body.glsl b/engine/src/shaders/vulkan/spk_overscan_body.glsl
+index bbef95b..f4baad8 100644
+--- a/engine/src/shaders/vulkan/spk_overscan_body.glsl
++++ b/engine/src/shaders/vulkan/spk_overscan_body.glsl
+@@ -194,7 +194,7 @@ vec3 sample_frame(float fx, float fy, uint fw, uint fh) {
+ // ① + ② + the fog of ③: raw exposure on the film canvas.
+ #if defined(SPK_OVERSCAN_CANVAS)
+ void main() {
+-    const uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    const uint i = (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+     if (i >= count.v[0]) return;
+     const uint cw = uint(params.v[P_CW]);
+     const vec2 st = canvas_to_film(float(i % cw), float(i / cw));
+@@ -256,7 +256,7 @@ void main() {
+ // M = {x0, y0, mw, mh, cw, ch, e_r, e_g, e_b}.
+ #if defined(SPK_OVERSCAN_ADD_MASK)
+ void main() {
+-    const uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    const uint i = (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+     if (i >= count.v[0]) return;
+     const uint mw = uint(params.v[2]);
+     const int x = int(params.v[0]) + int(i % mw), y = int(params.v[1]) + int(i / mw);
+@@ -351,7 +351,7 @@ float film_alpha(vec2 st) {
+ // the enlarger or the scanner sees clear light.
+ #if defined(SPK_OVERSCAN_FILM_PRESENT)
+ void main() {
+-    const uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    const uint i = (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+     if (i >= count.v[0]) return;
+     const uint cw = uint(params.v[P_CW]);
+     const float a = film_alpha(canvas_to_film(float(i % cw), float(i / cw)));
+@@ -375,7 +375,7 @@ void main() {
+ // after the scanner's blur and sharpening (the edge's softness is `film_alpha`'s).
+ #if defined(SPK_OVERSCAN_LIGHT)
+ void main() {
+-    const uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    const uint i = (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+     if (i >= count.v[0]) return;
+     const uint cw = uint(params.v[P_CW]);
+     const vec2 st = canvas_to_film(float(i % cw), float(i / cw));
+diff --git a/engine/src/shaders/vulkan/spk_overscan_canvas.comp b/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+index d2475b9..b334c87 100644
+--- a/engine/src/shaders/vulkan/spk_overscan_canvas.comp
++++ b/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_OVERSCAN_CANVAS
+ #include "spk_overscan_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_overscan_film_present.comp b/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+index 715e3b5..a04c5b4 100644
+--- a/engine/src/shaders/vulkan/spk_overscan_film_present.comp
++++ b/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_OVERSCAN_FILM_PRESENT
+ #include "spk_overscan_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_overscan_light.comp b/engine/src/shaders/vulkan/spk_overscan_light.comp
+index 0def8d8..1f13a51 100644
+--- a/engine/src/shaders/vulkan/spk_overscan_light.comp
++++ b/engine/src/shaders/vulkan/spk_overscan_light.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_OVERSCAN_LIGHT
+ #include "spk_overscan_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_print_exposure.comp b/engine/src/shaders/vulkan/spk_print_exposure.comp
+index 8046d45..479046b 100644
+--- a/engine/src/shaders/vulkan/spk_print_exposure.comp
++++ b/engine/src/shaders/vulkan/spk_print_exposure.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ 
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Gain { float value[]; } gain_data;
+@@ -9,7 +12,7 @@ layout(set = 0, binding = 3, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_reduce_max.comp b/engine/src/shaders/vulkan/spk_reduce_max.comp
+index 5de3c96..b1bf13d 100644
+--- a/engine/src/shaders/vulkan/spk_reduce_max.comp
++++ b/engine/src/shaders/vulkan/spk_reduce_max.comp
+@@ -2,6 +2,9 @@
+ 
+ // One partial per workgroup, exactly as util.metal. Pipeline::device_max
+ // dispatches 256 groups of 256 threads and reduces these 256 partials on host.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Count { uint value[]; } count_data;
+diff --git a/engine/src/shaders/vulkan/spk_rng_probe.comp b/engine/src/shaders/vulkan/spk_rng_probe.comp
+index 10a2407..a7c71e4 100644
+--- a/engine/src/shaders/vulkan/spk_rng_probe.comp
++++ b/engine/src/shaders/vulkan/spk_rng_probe.comp
+@@ -2,6 +2,9 @@
+ // 2: exact Poisson(p[0]); 3: layer_draw(p[0..3]); 4: standard normal.
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_rng.glsl"
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer CounterKey { uint ctrkey[]; };
+@@ -12,7 +15,7 @@ layout(std430, binding = 3) writeonly buffer Out { uint dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ void main() {
+     uint i = spk_global_index();
+diff --git a/engine/src/shaders/vulkan/spk_scene_latitude.comp b/engine/src/shaders/vulkan/spk_scene_latitude.comp
+index ab64c45..c91eab6 100644
+--- a/engine/src/shaders/vulkan/spk_scene_latitude.comp
++++ b/engine/src/shaders/vulkan/spk_scene_latitude.comp
+@@ -2,6 +2,9 @@
+ 
+ // RFC-023, arithmetic and parameters from scene_latitude.metal. Negative
+ // signal components survive: only the scalar norm uses the positive triple.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float v[]; } rgb;
+ layout(set = 0, binding = 1, std430) readonly buffer Parameters { float v[]; } p;
+@@ -19,7 +22,7 @@ float departure(float D, float H, float m) {
+ }
+ 
+ void main() {
+-    uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    uint i = (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+     if (i >= n.v[0]) return;
+     float r = rgb.v[3u * i], g = rgb.v[3u * i + 1u], b = rgb.v[3u * i + 2u];
+     float cr = max(r, 0.0), cg = max(g, 0.0), cb = max(b, 0.0);
+diff --git a/engine/src/shaders/vulkan/spk_sep_fir_acc.comp b/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+index fceff10..d0ead06 100644
+--- a/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
++++ b/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+@@ -2,6 +2,9 @@
+ 
+ // Separable three-channel FIR. Keep the Metal kernel's axis, edge modes, and
+ // optional accumulation so downscale and film blur share one implementation.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } image_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Weights { float value[]; } weights;
+@@ -13,7 +16,7 @@ layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ int reflect_index(int index, int length) {
+diff --git a/engine/src/shaders/vulkan/spk_spectral_epilogue.comp b/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+index 23f9789..8274e7e 100644
+--- a/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
++++ b/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+@@ -2,6 +2,9 @@
+ 
+ // Fused spectral integral and the three-channel epilogue from nodes.metal.
+ // Keeping the wavelength reduction in registers avoids a spectral image plane.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Characteristic { float value[]; } characteristic;
+@@ -14,7 +17,7 @@ layout(set = 0, binding = 6, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_split_probe.comp b/engine/src/shaders/vulkan/spk_split_probe.comp
+index 41bf17f..b7f4889 100644
+--- a/engine/src/shaders/vulkan/spk_split_probe.comp
++++ b/engine/src/shaders/vulkan/spk_split_probe.comp
+@@ -1,5 +1,8 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_split_product.glsl"
+ 
+ // Same split product as the IIR and geometry kernels. The host checks both
+@@ -8,7 +11,7 @@ layout(local_size_x = 1) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) writeonly buffer Output { float value[]; } output_data;
+ void main() {
+-    uint i = gl_GlobalInvocationID.y * gl_NumWorkGroups.x + gl_GlobalInvocationID.x;
++    uint i = (gl_GlobalInvocationID.y * gl_NumWorkGroups.x + gl_GlobalInvocationID.x + spk_pc.base);
+     vec2 product = spk_split_product(input_data.value[2 * i], input_data.value[2 * i + 1]);
+     output_data.value[2 * i] = product.x;
+     output_data.value[2 * i + 1] = product.y;
+diff --git a/engine/src/shaders/vulkan/spk_stride_sample.comp b/engine/src/shaders/vulkan/spk_stride_sample.comp
+index a5557eb..49a74da 100644
+--- a/engine/src/shaders/vulkan/spk_stride_sample.comp
++++ b/engine/src/shaders/vulkan/spk_stride_sample.comp
+@@ -2,6 +2,9 @@
+ 
+ // The exposure meter's sparse RGB gather. Source and output are tightly
+ // packed, top row first, matching util.metal's spk_stride_sample.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Meta { uint value[]; } meta;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 2, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_take_rgb.comp b/engine/src/shaders/vulkan/spk_take_rgb.comp
+index 34ed087..7c1448e 100644
+--- a/engine/src/shaders/vulkan/spk_take_rgb.comp
++++ b/engine/src/shaders/vulkan/spk_take_rgb.comp
+@@ -1,6 +1,9 @@
+ #version 450
+ 
+ // Same indexing and channel convention as util.metal's spk_take_rgb.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Meta { uint value[]; } meta;
+@@ -9,7 +12,7 @@ layout(set = 0, binding = 2, std430) writeonly buffer Output { float value[]; }
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_tc_b.comp b/engine/src/shaders/vulkan/spk_tc_b.comp
+index 9eefcea..494e08d 100644
+--- a/engine/src/shaders/vulkan/spk_tc_b.comp
++++ b/engine/src/shaders/vulkan/spk_tc_b.comp
+@@ -2,6 +2,9 @@
+ 
+ // Hanatos spectral upsampling, front half. The matrix is row-major here,
+ // matching nodes.metal's spk_tc_b (not spk_matmul3's convention).
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } rgb_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Matrix { float value[]; } matrix_data;
+@@ -12,7 +15,7 @@ layout(set = 0, binding = 4, std430) writeonly buffer Brightness { float value[]
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_to_rgba16.comp b/engine/src/shaders/vulkan/spk_to_rgba16.comp
+index 216750f..808948c 100644
+--- a/engine/src/shaders/vulkan/spk_to_rgba16.comp
++++ b/engine/src/shaders/vulkan/spk_to_rgba16.comp
+@@ -2,6 +2,9 @@
+ 
+ // Pack two 16-bit channels per uint. This avoids requiring the optional
+ // Vulkan storageBuffer16BitAccess feature; Windows is little-endian here.
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
+ layout(set = 0, binding = 1, std430) readonly buffer Meta { uint value[]; } meta;
+@@ -10,7 +13,7 @@ layout(set = 0, binding = 2, std430) writeonly buffer Output { uint value[]; } o
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ void main() {
+diff --git a/engine/src/shaders/vulkan/spk_view_cam16.comp b/engine/src/shaders/vulkan/spk_view_cam16.comp
+index b3e1bd5..788936b 100644
+--- a/engine/src/shaders/vulkan/spk_view_cam16.comp
++++ b/engine/src/shaders/vulkan/spk_view_cam16.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_VIEW_STATS
+ #include "spk_cam16ucs_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_view_geometry.comp b/engine/src/shaders/vulkan/spk_view_geometry.comp
+index 194c5da..3518833 100644
+--- a/engine/src/shaders/vulkan/spk_view_geometry.comp
++++ b/engine/src/shaders/vulkan/spk_view_geometry.comp
+@@ -1,10 +1,13 @@
+ #version 450
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x=256) in;
+ layout(binding=0,std430) readonly buffer Input { float v[]; } src;
+ layout(binding=1,std430) readonly buffer Uniforms { float v[]; } u;
+ layout(binding=2,std430) readonly buffer Meta { uint v[]; } m;
+ layout(binding=3,std430) writeonly buffer Output { float v[]; } dst;
+-uint index1D(){return gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x;}
++uint index1D(){return (gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x + spk_pc.base);}
+ vec3 sampleAt(uint x,uint y){uint i=3u*(y*m.v[0]+x); return vec3(src.v[i],src.v[i+1u],src.v[i+2u]);}
+ void main(){
+  uint i=index1D(); if(i>=m.v[2]*m.v[3])return;
+diff --git a/engine/src/shaders/vulkan/spk_view_grade.comp b/engine/src/shaders/vulkan/spk_view_grade.comp
+index de92c4d..8cb763a 100644
+--- a/engine/src/shaders/vulkan/spk_view_grade.comp
++++ b/engine/src/shaders/vulkan/spk_view_grade.comp
+@@ -1,3 +1,6 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #include "spk_view_grade_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_view_grade_body.glsl b/engine/src/shaders/vulkan/spk_view_grade_body.glsl
+index edce173..cdf69b5 100644
+--- a/engine/src/shaders/vulkan/spk_view_grade_body.glsl
++++ b/engine/src/shaders/vulkan/spk_view_grade_body.glsl
+@@ -11,7 +11,7 @@ layout(binding=1,std430) readonly buffer Uniforms { float v[]; } u;
+ layout(binding=2,std430) readonly buffer Curves { float v[]; } curves;
+ layout(binding=3,std430) readonly buffer Meta { uint v[]; } m;
+ layout(binding=4,std430) writeonly buffer Output { float v[]; } dst;
+-uint index1D() { return gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x; }
++uint index1D() { return (gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x + spk_pc.base); }
+ #ifdef SPK_DI_VIEW
+ layout(binding=5,std430) readonly buffer Table { float value[]; } lut;
+ float sample_table(uvec3 p,uint channel) { return lut.value[((p.z*m.v[3]+p.y)*m.v[3]+p.x)*3u+channel]; }
+diff --git a/engine/src/shaders/vulkan/spk_view_grade_di.comp b/engine/src/shaders/vulkan/spk_view_grade_di.comp
+index 4b6c61a..dafc358 100644
+--- a/engine/src/shaders/vulkan/spk_view_grade_di.comp
++++ b/engine/src/shaders/vulkan/spk_view_grade_di.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_DI_VIEW
+ #include "spk_view_grade_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_view_grade_float.comp b/engine/src/shaders/vulkan/spk_view_grade_float.comp
+index a3fbcd0..6bc9e3c 100644
+--- a/engine/src/shaders/vulkan/spk_view_grade_float.comp
++++ b/engine/src/shaders/vulkan/spk_view_grade_float.comp
+@@ -1,4 +1,7 @@
+ #version 450
+ #extension GL_GOOGLE_include_directive : require
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ #define SPK_FLOAT_SOURCE
+ #include "spk_view_grade_body.glsl"
+diff --git a/engine/src/shaders/vulkan/spk_view_pack.comp b/engine/src/shaders/vulkan/spk_view_pack.comp
+index 055280d..0edf351 100644
+--- a/engine/src/shaders/vulkan/spk_view_pack.comp
++++ b/engine/src/shaders/vulkan/spk_view_pack.comp
+@@ -1,10 +1,13 @@
+ #version 450
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x=256) in;
+ layout(binding=0,std430) readonly buffer Input { float v[]; } src;
+ layout(binding=1,std430) readonly buffer Meta { uint v[]; } m;
+ layout(binding=2,std430) writeonly buffer Output { uint v[]; } dst;
+ layout(binding=3,std430) buffer Stats { uint v[]; } stats;
+-uint index1D(){return gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x;}
++uint index1D(){return (gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x + spk_pc.base);}
+ float encode(float x,uint mode){
+  if(mode==0u)return x<=0.0031308?12.92*x:1.055*pow(max(x,0.0),1.0/2.4)-0.055;
+  if(mode==1u)return x<1.0/512.0?16.0*x:pow(max(x,0.0),1.0/1.8);
+diff --git a/engine/src/shaders/vulkan/spk_view_pair.comp b/engine/src/shaders/vulkan/spk_view_pair.comp
+index f8ab7a9..38ed46f 100644
+--- a/engine/src/shaders/vulkan/spk_view_pair.comp
++++ b/engine/src/shaders/vulkan/spk_view_pair.comp
+@@ -1,4 +1,7 @@
+ #version 450
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x=256) in;
+ layout(binding=0,std430) readonly buffer Base { uint v[]; } base;
+ layout(binding=1,std430) readonly buffer First { uint v[]; } first;
+@@ -9,7 +12,7 @@ layout(binding=5,std430) writeonly buffer Output { uint v[]; } dst;
+ vec3 rgb(uint a,uint b){return vec3(a&65535u,a>>16,b&65535u)/65535.0;}
+ float coverage(vec2 p,uint k){float d=min(min(p.x-r.v[k],r.v[k+2u]-p.x),min(p.y-r.v[k+1u],r.v[k+3u]-p.y));return clamp(d/1.5+0.5,0.0,1.0);}
+ void main(){
+- uint i=gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x;
++ uint i=(gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x + spk_pc.base);
+  if(i>=m.v[0])return;
+  vec2 p=vec2(float(i%m.v[1]),float(i/m.v[1]))+0.5;
+  vec3 c=rgb(base.v[2u*i],base.v[2u*i+1u]);
+diff --git a/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp b/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+index 5425a64..d52de44 100644
+--- a/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
++++ b/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+@@ -1,6 +1,9 @@
+ // The resample half of util.metal's tier downscale. The Gaussian prefilter
+ // remains the existing mirror-mode spk_sep_fir_acc pass on the host.
+ #version 450
++// Android: vulkan_gpu.cpp splits a dispatch into chunks under 2^24 threads
++// (Adreno corrupts larger ones); this is the chunk's first thread.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
+ layout(local_size_x = 256) in;
+ layout(std430, binding = 0) readonly buffer Img { float img[]; };
+ layout(std430, binding = 1) readonly buffer Meta { uint meta[]; };
+@@ -9,7 +12,7 @@ layout(std430, binding = 2) writeonly buffer Out { float dst[]; };
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+ uint spk_global_index() {
+-    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
+ }
+ 
+ // Pair layout is {low, high}. Use exact two-word integer arithmetic instead

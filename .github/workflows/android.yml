@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: upstream
-          key: upstream-${{ hashFiles('scripts/fetch-upstream.sh') }}
+          key: upstream-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
 
       - name: Fetch upstream
         run: bash scripts/fetch-upstream.sh upstream
