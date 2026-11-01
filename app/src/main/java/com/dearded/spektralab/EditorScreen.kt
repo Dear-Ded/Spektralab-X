@@ -188,7 +188,10 @@ fun EditorScreen(vm: EditorViewModel) {
             onDismissRequest = vm::dismissError,
             confirmButton = { TextButton(onClick = vm::dismissError) { Text("好") } },
             dismissButton = {
-                TextButton(onClick = { clipboard.setText(AnnotatedString(report)) }) { Text("复制") }
+                // The copy carries the whole diagnostics report, not just the message.
+                TextButton(onClick = { clipboard.setText(AnnotatedString(report + "\n\n" + vm.diagnostics())) }) {
+                    Text("复制")
+                }
             },
             title = { Text("出错了") },
             text = {
@@ -502,6 +505,11 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 Text("设备", style = MaterialTheme.typography.labelLarge)
                 Text(ui.deviceSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
                 Text(ui.engineSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
+                val clipboard = LocalClipboardManager.current
+                var copied by remember { mutableStateOf(false) }
+                TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
+                    Text(if (copied) "已复制诊断信息" else "复制诊断信息")
+                }
                 Spacer(Modifier.height(12.dp))
                 Text("关于", style = MaterialTheme.typography.labelLarge)
                 Text("版本 ${BuildConfig.VERSION_NAME}（${BuildConfig.VERSION_CODE}）", style = MaterialTheme.typography.bodySmall)

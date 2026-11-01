@@ -70,6 +70,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     @Volatile private var wanted = Edit()
 
     private val renders = Channel<Unit>(Channel.CONFLATED)
+    // Diagnostics: the raw probe replies and the last events, for the copyable report.
+    private var deviceJson = ""
+    private var capabilitiesJson = ""
+    private val events = ArrayDeque<String>()
+    private val clock = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
+
+    private fun log(event: String) = synchronized(events) {
+        events.addLast("${clock.format(Date())} $event")
+        while (events.size > 20) events.removeFirst()
+    }
     private var lastUri: Uri? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
@@ -95,6 +105,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 Triple(catalog, device, NativeEngine.capabilities(handle))
             }
             val (catalog, device, caps) = started
+            deviceJson = device
+            capabilitiesJson = caps
+            log("engine ready")
             _ui.update {
                 it.copy(
                     ready = true, busy = null, catalog = catalog,
@@ -184,10 +197,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     ),
                 )
             }
+            log("open ${if (raw) "raw" else "photo"} ${info.optInt("sourceWidth")}x${info.optInt("sourceHeight")} -> ${info.optInt("width")}x${info.optInt("height")}")
             renders.trySend(Unit)
         } catch (e: OutOfMemoryError) {
+            log("open failed: out of memory")
             _ui.update { it.copy(busy = null, error = "内存不足，请在“设置”里把工作尺寸调小后重试") }
         } catch (e: Throwable) {
+            log("open failed: ${e.message ?: e}")
             _ui.update { it.copy(busy = null, error = e.message ?: e.toString()) }
         }
     }
@@ -313,6 +329,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         var reverted: Edit? = null
         var bitmap: Bitmap? = null
         try {
+            val started = android.os.SystemClock.elapsedRealtime()
             bitmap = withContext(EngineThread.dispatcher) {
                 if (session == 0L) return@withContext null
                 applyWanted()?.let { error ->
@@ -326,6 +343,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     null
                 }
             }
+            val ms = android.os.SystemClock.elapsedRealtime() - started
+            bitmap?.let { log("render $tier ${it.width}x${it.height} ${ms} ms") }
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: OutOfMemoryError) {
@@ -333,6 +352,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         } catch (e: Throwable) {
             failure = "渲染失败：${e.message ?: e}"
         } finally {
+            failure?.let { log("render $tier failed: $it") }
             val shown = bitmap
             _ui.update {
                 var next = it.copy(rendering = false)
@@ -386,10 +406,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         bitmap.recycle()
                     }
                 }
+                log("export $format ${size.tier} ok")
                 _ui.update { it.copy(message = "已保存到 Pictures/SpektraLab") }
             } catch (e: OutOfMemoryError) {
+                log("export $format ${size.tier} failed: out of memory")
                 _ui.update { it.copy(message = "内存不足，无法导出全尺寸；请调小工作尺寸") }
             } catch (e: Throwable) {
+                log("export $format ${size.tier} failed: ${e.message ?: e}")
                 _ui.update { it.copy(message = e.message ?: e.toString()) }
             } finally {
                 _ui.update { it.copy(exporting = false, busy = null) }
@@ -422,6 +445,32 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     // --- settings ------------------------------------------------------------
+
+    /** Everything a bug report needs, as plain text. No file names or locations. */
+    fun diagnostics(): String {
+        val ui = _ui.value
+        val am = app.getSystemService(android.app.ActivityManager::class.java)
+        val mem = android.app.ActivityManager.MemoryInfo().also { am?.getMemoryInfo(it) }
+        val rt = Runtime.getRuntime()
+        val src = ui.source
+        return buildString {
+            appendLine("SpektraLab Android ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+            appendLine("${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (${android.os.Build.DEVICE}) · " +
+                "Android ${android.os.Build.VERSION.RELEASE} / API ${android.os.Build.VERSION.SDK_INT}")
+            appendLine("SoC: ${if (android.os.Build.VERSION.SDK_INT >= 31) android.os.Build.SOC_MODEL else "?"}")
+            appendLine("RAM: total ${mem.totalMem shr 20} MB, available ${mem.availMem shr 20} MB, low=${mem.lowMemory}")
+            appendLine("Java heap: max ${rt.maxMemory() shr 20} MB, used ${(rt.totalMemory() - rt.freeMemory()) shr 20} MB")
+            appendLine("Native heap: ${android.os.Debug.getNativeHeapAllocatedSize() shr 20} MB")
+            appendLine("Working edge: ${ui.workingEdge} · pixel cap: ${ui.maxPixels}")
+            appendLine("GPU: ${deviceJson.ifEmpty { "-" }}")
+            appendLine("Engine: ${ui.engineSummary.ifEmpty { "-" }}")
+            if (src != null) appendLine("Image: ${src.kind} ${src.sourceWidth}x${src.sourceHeight} -> ${src.width}x${src.height}" +
+                (if (src.camera.isNotBlank()) " · ${src.camera}" else ""))
+            appendLine("Edit: ${ui.edit.toJson()}")
+            appendLine("Events:")
+            synchronized(events) { events.forEach { appendLine("  $it") } }
+        }
+    }
 
     fun setWorkingEdge(edge: Int) {
         if (edge == _ui.value.workingEdge) return
