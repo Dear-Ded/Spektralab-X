@@ -68,6 +68,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private val renders = Channel<Unit>(Channel.CONFLATED)
     private var lastUri: Uri? = null
+    private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
 
     init {
@@ -129,6 +130,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             withContext(EngineThread.dispatcher) { releaseSession() }
             _ui.update { it.copy(image = null, before = null, source = null) }
+            sourceExif = withContext(Dispatchers.IO) { ExifCopy.read { resolver.openInputStream(uri) } }
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -349,7 +351,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                                 ?: throw EngineException("导出失败：${NativeEngine.lastError()}")
                         }
                         withContext(Dispatchers.IO) {
-                            save("$stem.jpg", "image/jpeg") { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out) }
+                            // Compressed to a file first: EXIF is written in place, then copied out.
+                            val tmp = File(app.cacheDir, "$stem.jpg")
+                            try {
+                                tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+                                sourceExif.applyTo(tmp, bitmap.width, bitmap.height)
+                                save("$stem.jpg", "image/jpeg") { out -> tmp.inputStream().use { it.copyTo(out, 1 shl 20) } }
+                            } finally {
+                                tmp.delete()
+                            }
                         }
                         bitmap.recycle()
                     }
