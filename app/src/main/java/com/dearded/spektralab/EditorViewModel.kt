@@ -87,13 +87,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     // Diagnostics: the raw probe replies and the last events, for the copyable report.
     private var deviceJson = ""
     private var capabilitiesJson = ""
-    private val events = ArrayDeque<String>()
-    private val clock = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
+    // Process-lifetime engine, event log and thermal monitor (EngineHost).
+    private val host = (app as SpektraLabApp).host
+    private val loader = SourceLoader(app)
+    private val history = EditHistory(kSettleMs, kMaxUndo)
 
-    private fun log(event: String) = synchronized(events) {
-        events.addLast("${clock.format(Date())} $event")
-        while (events.size > 20) events.removeFirst()
-    }
+    private fun log(event: String) = host.events.add(event)
     private var lastUri: Uri? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
@@ -109,34 +108,24 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun startEngine() {
         try {
-            val started = withContext(EngineThread.dispatcher) {
-                val dir = EngineAssets.install(app)
-                val device = NativeEngine.deviceInfo()
-                val catalog = Catalog.load(dir)
-                val tmp = File(app.cacheDir, "engine-tmp").apply { mkdirs() }
-                val handle = NativeEngine.create(dir.absolutePath, tmp.absolutePath)
-                if (handle == 0L) {
-                    throw EngineException("引擎启动失败：${NativeEngine.lastError()}\n\nGPU：${summarizeDevice(device)}")
-                }
-                engine = handle
-                iccPath = File(dir, "io/sRGB.icc").absolutePath
-                // Build the default stock pair's tables and every compute
-                // pipeline now, so the first photo's first preview does not pay
-                // for them. A failure here is not fatal: open would do it anyway.
-                val look = wanted
-                if (!NativeEngine.warmUp(handle, look.film, look.paper)) log("warm up failed: ${NativeEngine.lastError()}")
-                Triple(catalog, device, NativeEngine.capabilities(handle))
-            }
-            val (catalog, device, caps) = started
-            deviceJson = device
-            capabilitiesJson = caps
-            log("engine ready")
+            val ready = host.start(wanted.film, wanted.paper)
+            engine = ready.engine
+            iccPath = File(ready.dir, "io/sRGB.icc").absolutePath
+            deviceJson = ready.deviceJson
+            capabilitiesJson = ready.capabilitiesJson
+            val gpu = DeviceProfile.gpu(ready.deviceJson)
+            val maxPixels = DeviceProfile.maxPixels(gpu, DeviceProfile.availableMemory(app))
+            // First run: pick the working edge from the GPU's buffer cap (3072 on
+            // Adreno 7xx, Xiaomi 12-14) instead of a fixed 4096. A user's choice wins.
+            val edge = if (prefs.contains("working_edge")) prefs.getInt("working_edge", 4096)
+                       else DeviceProfile.recommendedEdge(maxPixels)
+            log(if (ready.reused) "engine reused" else "engine ready")
             _ui.update {
                 it.copy(
-                    ready = true, busy = null, catalog = catalog,
-                    deviceSummary = summarizeDevice(device),
-                    engineSummary = summarizeCapabilities(caps),
-                    maxPixels = maxPixelsFor(device, availableMemory()),
+                    ready = true, busy = null, catalog = ready.catalog, workingEdge = edge,
+                    deviceSummary = DeviceProfile.summary(gpu),
+                    engineSummary = DeviceProfile.summarizeCapabilities(ready.capabilitiesJson),
+                    maxPixels = maxPixels,
                 )
             }
             pendingOpen?.let { pendingOpen = null; open(it) }
@@ -167,8 +156,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         _ui.update { it.copy(busy = "正在读取…", error = null) }
         try {
             val resolver = app.contentResolver
-            val name = displayName(uri)
-            val raw = isRaw(name, resolver.getType(uri), uri)
+            val name = loader.displayName(uri)
+            val raw = loader.isRaw(name, resolver.getType(uri), uri)
             val edge = _ui.value.workingEdge
             // The film edge lays the frame on a canvas up to 1.6x its area, and the
             // canvas is one GPU buffer: on Adreno 7xx (Xiaomi 12-14) that buffer is
@@ -203,7 +192,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             clearPool()
             val handle: Long
             if (raw) {
-                val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
+                val file = withContext(Dispatchers.IO) { loader.copyToCache(uri, name) }
                 _ui.update { it.copy(busy = "正在解码 RAW…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
@@ -215,7 +204,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     h
                 }
             } else {
-                val (bitmap, space) = withContext(Dispatchers.IO) { decodePhoto(uri, edge, maxPixels) }
+                val (bitmap, space) = withContext(Dispatchers.IO) { loader.decodePhoto(uri, edge, maxPixels) }
                 _ui.update { it.copy(busy = "正在打开…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
@@ -270,33 +259,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /**
-     * PowerManager's forecast of how close the SoC is to throttling, 10 s
-     * ahead: 1.0 means throttling now. 0 when unknown (API < 30, or the HAL
-     * does not report it, which returns NaN).
-     */
-    // The API answers NaN when asked more than once a second, so the last
-    // real reading is kept for 1.5 s.
-    @Volatile private var headroom = 0f
-    @Volatile private var headroomAt = 0L
-
-    private fun thermalHeadroom(): Float {
-        if (android.os.Build.VERSION.SDK_INT < 30) return 0f
-        val now = android.os.SystemClock.elapsedRealtime()
-        if (headroomAt != 0L && now - headroomAt < 1500) return headroom
-        val pm = app.getSystemService(android.os.PowerManager::class.java) ?: return 0f
-        val h = runCatching { pm.getThermalHeadroom(10) }.getOrDefault(Float.NaN)
-        headroomAt = now
-        if (!h.isNaN()) headroom = h
-        return headroom
-    }
-
-    private fun availableMemory(): Long {
-        val am = app.getSystemService(android.app.ActivityManager::class.java) ?: return 0L
-        val info = android.app.ActivityManager.MemoryInfo()
-        am.getMemoryInfo(info)
-        return info.availMem
-    }
+    private fun thermalHeadroom(): Float = host.thermal.headroom()
 
     private fun releaseSession() = synchronized(cancelLock) {
         if (session != 0L) NativeEngine.release(session)
@@ -313,94 +276,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (inFlightTier == "preview" && session != 0L) NativeEngine.cancel(session)
     }
 
-    private fun displayName(uri: Uri): String {
-        app.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-            if (c.moveToFirst() && !c.isNull(0)) return c.getString(0)
-        }
-        return uri.lastPathSegment?.substringAfterLast('/') ?: "image"
-    }
-
-    private fun isRaw(name: String, mime: String?, uri: Uri? = null): Boolean {
-        val ext = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
-        if (ext in RAW_EXTENSIONS) return true
-        val m = mime?.lowercase(Locale.ROOT)
-        if (m != null && (m.contains("dng") || m.contains("raw") || m.startsWith("image/x-") && m !in DECODABLE_X)) return true
-        // Files and cloud providers often say application/octet-stream (or
-        // nothing) for a DNG: trust the TIFF header instead of the type.
-        if (uri != null && (m == null || m == "application/octet-stream")) {
-            val head = runCatching {
-                app.contentResolver.openInputStream(uri)?.use { s -> ByteArray(4).also { if (s.read(it) != 4) return false } }
-            }.getOrNull() ?: return false
-            val ii = head[0] == 0x49.toByte() && head[1] == 0x49.toByte()
-            val mm = head[0] == 0x4D.toByte() && head[1] == 0x4D.toByte()
-            return ii || mm
-        }
-        return false
-    }
-
-    private fun copyToCache(uri: Uri, name: String): File {
-        val dir = File(app.cacheDir, "open").apply { mkdirs() }
-        dir.listFiles()?.forEach { it.delete() }
-        val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80).ifEmpty { "image.raw" }
-        val file = File(dir, safe)
-        val input = app.contentResolver.openInputStream(uri) ?: throw EngineException("无法读取该文件")
-        input.use { i -> file.outputStream().use { o -> i.copyTo(o, 1 shl 20) } }
-        return file
-    }
-
-    /**
-     * Phone photos (JPEG, HEIC/HEIF, Ultra HDR JPEG, PNG, WebP). ImageDecoder
-     * applies the EXIF rotation. Display P3 sources (what many phones shoot)
-     * stay in P3 so their wide gamut reaches the engine; everything else is
-     * converted to sRGB. Returns the bitmap and the engine's name for its space.
-     */
-    private fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Pair<Bitmap, String> {
-        val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
-        var space = "sRGB"
-        val bitmap = decodeBitmap(uri, edge, maxPixels) { info ->
-            if (info.colorSpace == p3) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
-        }
-        return bitmap to space
-    }
-
-    private fun decodeBitmap(
-        uri: Uri, edge: Int, maxPixels: Long,
-        target: (ImageDecoder.ImageInfo) -> ColorSpace,
-    ): Bitmap {
-        val source = ImageDecoder.createSource(app.contentResolver, uri)
-        val decoded = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-            decoder.setTargetColorSpace(target(info))
-            val w = info.size.width
-            val h = info.size.height
-            var s = 1.0
-            if (edge > 0 && max(w, h) > edge) s = edge.toDouble() / max(w, h)
-            if (maxPixels > 0 && w.toDouble() * h * s * s > maxPixels) s = sqrt(maxPixels.toDouble() / (w.toDouble() * h))
-            if (s < 1.0) decoder.setTargetSize(max(1, (w * s).toInt()), max(1, (h * s).toInt()))
-        }
-        // setTargetSize is a hint some decoders ignore (seen with DNG and very
-        // large HEIC in another port), so the pixel cap is enforced here too.
-        var out = decoded
-        if (maxPixels > 0 && out.width.toLong() * out.height > maxPixels * 21 / 20) {
-            val s = sqrt(maxPixels.toDouble() / (out.width.toDouble() * out.height))
-            val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
-            if (scaled !== out) out.recycle()
-            out = scaled
-        }
-        if (out.config == Bitmap.Config.ARGB_8888) return out
-        val copy = out.copy(Bitmap.Config.ARGB_8888, false)
-        out.recycle()
-        return copy ?: throw EngineException("无法转换图像格式")
-    }
-
     // --- editing and rendering -------------------------------------------------
-
-    // Undo history of whole edits. Changes less than kSettleMs apart join one
-    // step, so a slider drag undoes as a single move. Cleared when another
-    // photo opens; a white-balance re-decode keeps it.
-    private val undoStack = ArrayDeque<Edit>()
-    private val redoStack = ArrayDeque<Edit>()
-    private var lastStepAt = 0L
 
     fun update(edit: Edit) {
         // The film edge lays the frame on a canvas up to 1.6x its area (the 6x17
@@ -421,18 +297,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private fun applyEdit(edit: Edit, record: Boolean, render: Boolean = true) {
         val current = _ui.value.edit
-        if (record && edit != current) {
-            val now = android.os.SystemClock.uptimeMillis()
-            if (undoStack.isEmpty() || now - lastStepAt > kSettleMs) {
-                undoStack.addLast(current)
-                while (undoStack.size > kMaxUndo) undoStack.removeFirst()
-            }
-            lastStepAt = now
-            redoStack.clear()
-        }
+        if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
         _ui.update {
-            it.copy(edit = edit, canUndo = undoStack.isNotEmpty(), canRedo = redoStack.isNotEmpty(),
+            it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
                 detail = if (edit == it.edit) it.detail else null)
         }
         // A sharp preview of the previous edit is now wasted work: stop it so the
@@ -480,23 +348,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun closeDetail() = _ui.update { it.copy(detail = null) }
 
     fun undo() {
-        val previous = undoStack.removeLastOrNull() ?: return
-        redoStack.addLast(_ui.value.edit)
-        lastStepAt = 0L
-        applyEdit(previous, record = false)
+        applyEdit(history.undo(_ui.value.edit) ?: return, record = false)
     }
 
     fun redo() {
-        val next = redoStack.removeLastOrNull() ?: return
-        undoStack.addLast(_ui.value.edit)
-        lastStepAt = 0L
-        applyEdit(next, record = false)
+        applyEdit(history.redo(_ui.value.edit) ?: return, record = false)
     }
 
     private fun clearHistory() {
-        undoStack.clear()
-        redoStack.clear()
-        lastStepAt = 0L
+        history.clear()
         _ui.update { it.copy(canUndo = false, canRedo = false) }
     }
 
@@ -693,9 +553,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // --- export --------------------------------------------------------------
 
+    private var exportJob: kotlinx.coroutines.Job? = null
+
     fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL) {
         if (_ui.value.exporting || !_ui.value.hasImage) return
-        viewModelScope.launch {
+        // EngineHost's scope, not viewModelScope: closing the editor (back, or
+        // HyperOS recreating the activity) must not cancel a running export.
+        // onCleared waits for it before releasing the session it renders.
+        exportJob = host.scope.launch {
             _ui.update { it.copy(exporting = true, busy = if (size == ExportSize.FULL) "正在渲染全尺寸…" else "正在渲染…") }
             ExportService.start(app)
             try {
@@ -797,7 +662,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 (if (src.camera.isNotBlank()) " · ${src.camera}" else ""))
             appendLine("Edit: ${ui.edit.toJson()}")
             appendLine("Events:")
-            synchronized(events) { events.forEach { appendLine("  $it") } }
+            host.events.snapshot().forEach { appendLine("  $it") }
         }
     }
 
@@ -830,14 +695,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun dismissError() = _ui.update { it.copy(error = null) }
 
     override fun onCleared() {
-        val e = engine
-        val s = session
-        EngineThread.dispatcher.executor.execute {
-            if (s != 0L) NativeEngine.release(s)
-            if (e != 0L) NativeEngine.destroy(e)
+        // The engine stays warm in EngineHost for the next editor. The session
+        // is released only after a running export (which renders it) is done.
+        cardsJob?.cancel()
+        val export = exportJob
+        host.scope.launch {
+            export?.join()
+            withContext(EngineThread.dispatcher) { releaseSession() }
         }
-        session = 0L
-        engine = 0L
     }
 
     companion object {
@@ -846,45 +711,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         private const val kMaxUndo = 50
         private const val kHotHeadroom = 0.85f
         private const val kMaxDetailPixels = 16_000_000L
-
-        private val RAW_EXTENSIONS = setOf(
-            "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
-            "srw", "x3f", "3fr", "iiq", "erf", "kdc", "mrw", "rwl", "raw", "mos", "mef", "dcr",
-        )
-        private val DECODABLE_X = setOf("image/x-ms-bmp", "image/x-icon")
-
-        private fun firstDevice(device: String): JSONObject? =
-            runCatching { JSONObject(device).optJSONArray("devices")?.optJSONObject(0) }.getOrNull()
-
-        /**
-         * One storage buffer holds a whole image plane, so the frame is capped by
-         * maxStorageBufferRange. Sized for a four-channel float plane, the widest
-         * the pipeline allocates.
-         */
-        fun maxPixelsFor(device: String, availMem: Long): Long {
-            // An unreadable probe is treated as the Vulkan minimum (128 MiB), not as no limit.
-            val range = firstDevice(device)?.optLong("maxStorageBufferRange")?.takeIf { it > 0 } ?: (128L shl 20)
-            val gpu = range / 16
-            // Measured on other ports: ~70-100 B/px live across the pipeline, plus host
-            // copies. Keep 1.5 GiB for the system so lmkd does not start killing apps.
-            val ram = max(4_000_000L, (availMem - (3L shl 29)) / 100)
-            return minOf(gpu, ram, MAX_CANVAS_PIXELS)
-        }
-
-        /** 42.7 MP rendered and 44.8 MP lost the device on Adreno in another port. */
-        private const val MAX_CANVAS_PIXELS = 42_000_000L
-
-        fun summarizeDevice(device: String): String {
-            val d = firstDevice(device) ?: return "未检测到 Vulkan 设备"
-            val range = d.optLong("maxStorageBufferRange")
-            return "${d.optString("name")} · Vulkan ${d.optString("api")} · 单缓冲上限 ${range shr 20} MB" +
-                " · 约 ${(range / 16 / 1_000_000.0 * 10).roundToInt() / 10.0} MP"
-        }
-
-        fun summarizeCapabilities(caps: String): String = runCatching {
-            val backend = JSONObject(caps).optJSONObject("backend") ?: return@runCatching caps
-            "${backend.optString("render_core")} · ${backend.optString("math_mode")}"
-        }.getOrDefault(caps)
 
         /** [edit] with film [id]; the paper changes only when it cannot print it (colour vs B&W). */
         fun withFilm(edit: Edit, catalog: Catalog, id: String): Edit? {
@@ -895,7 +721,5 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             return edit.copy(film = id, scanFilm = film.positive, paper = paper)
         }
 
-        @Suppress("unused")
-        private fun clamp(v: Double, lo: Double, hi: Double) = min(hi, max(lo, v))
     }
 }

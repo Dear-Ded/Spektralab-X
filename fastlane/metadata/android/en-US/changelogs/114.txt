@@ -1,0 +1,1 @@
+Architecture: the engine stays warm for the whole process; closing the editor no longer cancels an export.
