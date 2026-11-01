@@ -44,7 +44,9 @@ class EngineHost(private val app: Application) {
     /** Starts the engine once per process; later calls return the same one. */
     suspend fun start(film: String, paper: String): Ready = mutex.withLock {
         ready?.let { r -> return@withLock Ready(r.engine, r.dir, r.catalog, r.deviceJson, r.capabilitiesJson, reused = true) }
-        val started = withContext(EngineThread.dispatcher) {
+        // NonCancellable: leaving during the first start must not drop a created
+        // engine (it leaked, and the next editor created a second one).
+        val started = withContext(kotlinx.coroutines.NonCancellable + EngineThread.dispatcher) {
             val dir = EngineAssets.install(app)
             val device = NativeEngine.deviceInfo()
             val catalog = Catalog.load(dir)
@@ -59,9 +61,8 @@ class EngineHost(private val app: Application) {
             // the first photo's first preview does not pay for them. Not fatal:
             // open would do the same work.
             if (!NativeEngine.warmUp(handle, film, paper)) events.add("warm up failed: ${NativeEngine.lastError()}")
-            Ready(handle, dir, catalog, device, NativeEngine.capabilities(handle), reused = false)
+            Ready(handle, dir, catalog, device, NativeEngine.capabilities(handle), reused = false).also { ready = it }
         }
-        ready = started
         started
     }
 }

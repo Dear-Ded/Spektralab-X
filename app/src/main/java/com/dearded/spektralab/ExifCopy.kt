@@ -61,5 +61,17 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
                 ExifCopy(map)
             }
         }.getOrNull() ?: NONE
+
+        fun read(context: android.content.Context, uri: android.net.Uri): ExifCopy {
+            val fromFd = runCatching {
+                context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                    val exif = ExifInterface(pfd.fileDescriptor)
+                    val map = LinkedHashMap<String, String>()
+                    for (tag in TAGS) exif.getAttribute(tag)?.takeIf { it.isNotBlank() }?.let { map[tag] = it }
+                    ExifCopy(map)
+                }
+            }.getOrNull()
+            return fromFd?.takeIf { !it.isEmpty } ?: read { context.contentResolver.openInputStream(uri) }
+        }
     }
 }

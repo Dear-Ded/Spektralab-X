@@ -87,6 +87,12 @@ data class Edit(
     /** Already formatted the way a date back writes it, e.g. `'26 11 1`. */
     val dateText: String = "",
 ) {
+    /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
+    fun turned(by: Int) = copy(
+        quarterTurns = (quarterTurns + by) % 4,
+        cropAspect = if (by % 2 == 1 && cropAspect > 0) 1.0 / cropAspect else cropAspect,
+    )
+
     fun toJson(): JSONObject = JSONObject().apply { for ((key, get) in FIELDS) put(key, get(this@Edit)) }
 
     /**
@@ -154,6 +160,7 @@ data class Edit(
             cropY = p.optDouble("geometry_crop_y", fallback.cropY),
             cropW = p.optDouble("geometry_crop_w", fallback.cropW),
             cropH = p.optDouble("geometry_crop_h", fallback.cropH),
+            cropAspect = fallback.cropAspect,   // app-side only; the engine does not know it
             filmEdge = p.optBoolean("overscan_active", fallback.filmEdge),
             edgeFormat = p.optString("overscan_format", fallback.edgeFormat),
             dateImprint = p.optBoolean("date_imprint_active", fallback.dateImprint),
@@ -194,6 +201,8 @@ data class Edit(
         fun dateBackText(exifDate: String?): String {
             val m = Regex("""^(\d{4}):(\d{2}):(\d{2})""").find(exifDate ?: "") ?: return ""
             val (y, mo, d) = m.destructured
+            // An unset camera clock writes 0000:00:00.
+            if (y == "0000" || mo.toInt() !in 1..12 || d.toInt() !in 1..31) return ""
             return "'${y.takeLast(2)} ${mo.toInt()} ${d.toInt()}"
         }
 

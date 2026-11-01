@@ -93,6 +93,26 @@ fun EditorScreen(vm: EditorViewModel) {
     var openMenu by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
 
+    // Android 13+: the export's progress notification needs POST_NOTIFICATIONS.
+    // Asked when an export starts; a refusal only hides the notification.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var queuedExport by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        queuedExport?.invoke()
+        queuedExport = null
+    }
+    fun exportWithNotice(format: ExportFormat, size: ExportSize) {
+        val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (missing) {
+            queuedExport = { vm.export(format, size) }
+            notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            vm.export(format, size)
+        }
+    }
+
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let(vm::open)
     }
@@ -147,13 +167,13 @@ fun EditorScreen(vm: EditorViewModel) {
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
                             DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
-                                exportMenu = false; vm.export(ExportFormat.JPEG, ExportSize.FULL)
+                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
                             })
                             DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
-                                exportMenu = false; vm.export(ExportFormat.JPEG, ExportSize.SHARE)
+                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
                             })
                             DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
-                                exportMenu = false; vm.export(ExportFormat.TIFF, ExportSize.FULL)
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
                         }
                     }
@@ -216,8 +236,8 @@ fun EditorScreen(vm: EditorViewModel) {
 
 @Composable
 private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) {
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
+    var scale by remember(ui.source) { mutableFloatStateOf(1f) }
+    var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
     Box(modifier.background(Color(0xFF111111)), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
@@ -391,9 +411,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             else -> Edit.centredCrop(next, src.width, src.height, next.cropAspect)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { vm.update(reframe(e.copy(quarterTurns = (e.quarterTurns + 3) % 4))) },
+                            OutlinedButton(onClick = { vm.update(reframe(e.turned(3))) },
                                 enabled = enabled) { Text("向左转") }
-                            OutlinedButton(onClick = { vm.update(reframe(e.copy(quarterTurns = (e.quarterTurns + 1) % 4))) },
+                            OutlinedButton(onClick = { vm.update(reframe(e.turned(1))) },
                                 enabled = enabled) { Text("向右转") }
                         }
                         SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }

@@ -5,6 +5,7 @@
          background processes early). No network permission: nothing leaves the phone. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature android:name="android.hardware.vulkan.version" android:version="0x400000" android:required="true" />
@@ -41,6 +42,6 @@
         <service
             android:name=".ExportService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="dataSync|mediaProcessing" />
     </application>
 </manifest>

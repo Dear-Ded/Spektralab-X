@@ -536,39 +536,37 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     return nullptr;
 }
 
-// Renders [tier] into a caller-owned ARGB_8888 bitmap of the same size, so a
-// preview does not allocate (and later finalize) a 30-46 MB Bitmap per frame.
-// Returns 1 on success, 0 on failure (lastError), -1 when the size differs:
-// the caller then falls back to renderBitmap and keeps the new one.
-JNI_FN(jint, renderInto)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jobject bitmap) {
+// Renders `tier` into `reuse` when it is the same size, so a pooled preview
+// allocates nothing; otherwise into a new Bitmap from the same result, so a
+// size change (first preview, crop, rotation, film edge) renders once, not
+// twice. Null on failure (lastError), and `reuse` is then untouched.
+JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
-    if (!s || !bitmap) { fail("no session"); return 0; }
+    if (!s) { fail("no session"); return nullptr; }
     try {
         spk_result result;
-        if (!render(s, str(env, tier_j), result)) return 0;
+        if (!render(s, str(env, tier_j), result)) return nullptr;
+        jobject out = nullptr;
         AndroidBitmapInfo info{};
         void* pixels = nullptr;
-        int status = -1;
-        if (AndroidBitmap_getInfo(env, bitmap, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
+        if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
             info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 &&
-            info.width == result.width && info.height == result.height) {
-            if (AndroidBitmap_lockPixels(env, bitmap, &pixels) == ANDROID_BITMAP_RESULT_SUCCESS && pixels) {
-                pack_rgba8(result, static_cast<uint8_t*>(pixels), info.stride);
-                AndroidBitmap_unlockPixels(env, bitmap);
-                status = 1;
-            } else {
-                fail("cannot lock bitmap pixels");
-                status = 0;
-            }
+            info.width == result.width && info.height == result.height &&
+            AndroidBitmap_lockPixels(env, reuse, &pixels) == ANDROID_BITMAP_RESULT_SUCCESS && pixels) {
+            pack_rgba8(result, static_cast<uint8_t*>(pixels), info.stride);
+            AndroidBitmap_unlockPixels(env, reuse);
+            out = reuse;
+        } else {
+            out = to_bitmap(env, result);
         }
         spk_result_free(&result);
-        return status;
+        return out;
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
         fail("render: unknown failure");
     }
-    return 0;
+    return nullptr;
 }
 
 JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
