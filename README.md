@@ -120,8 +120,9 @@ LibRaw 0.22.2（RAW 解码）
 ```
 
 - 上游源码在 CI 里按固定提交下载，见 [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh)；本仓库只放安卓相关代码。
-- 对上游引擎的修改全部放在 [`patches/`](patches/)，编译前按顺序打上，说明见 [docs/PATCHES.md](docs/PATCHES.md)。主要是针对 Adreno 驱动的问题：模糊分批提交避免 GPU 看门狗、单次计算不超过 2²⁴ 线程避免图像损坏、RAW 半尺寸解码省内存。
+- 对上游引擎的修改全部放在 [`patches/`](patches/)，编译前按顺序打上，说明见 [docs/PATCHES.md](docs/PATCHES.md)。整体结构、线程模型和内存策略见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。主要是针对 Adreno 驱动的问题：模糊分批提交避免 GPU 看门狗、单次计算不超过 2²⁴ 线程避免图像损坏、RAW 半尺寸解码省内存。
 - 着色器在编译时转成 SPIR-V，和胶片数据一起打包进 APK，首次启动时解到应用私有目录，见 [`scripts/stage-assets.sh`](scripts/stage-assets.sh)。
+- 应用层的模块划分、线程模型、渲染档位和内存预算见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ## 自己编译
 

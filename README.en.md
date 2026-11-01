@@ -66,7 +66,7 @@ Compose UI (Kotlin) ──JSON──▶ JNI (spektralab_jni.cpp) ──spk_engin
                                                                           └─ LibRaw 0.22.2
 ```
 
-Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh). All engine changes live in [`patches/`](patches/) and are described in [docs/PATCHES.md](docs/PATCHES.md).
+Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh). All engine changes live in [`patches/`](patches/) and are described in [docs/PATCHES.md](docs/PATCHES.md). Structure, threading and memory strategy: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Module layout, threading, render tiers and the memory budget are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Building
 
