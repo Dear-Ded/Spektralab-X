@@ -2,6 +2,9 @@ name: android
 
 on:
   push:
+    paths-ignore:
+      - "README.md"
+      - ".github/ISSUE_TEMPLATE/**"
   workflow_dispatch:
 
 permissions:

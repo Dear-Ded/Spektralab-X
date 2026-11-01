@@ -1,0 +1,37 @@
+name: 问题反馈 / Bug report
+description: 闪退、渲染错误、颜色异常等
+labels: [bug]
+body:
+  - type: input
+    id: build
+    attributes:
+      label: 版本
+      description: Releases 里的 Build 编号，或 APK 文件名
+      placeholder: SpektraLab-12
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: 设备与系统
+      placeholder: 小米 13 Ultra · HyperOS 2 · Android 15
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 做了哪些操作、看到了什么、期望是什么。界面上的报错文字请原样贴出。
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 图片来源
+      description: 相机型号与格式（RAF、DNG、JPEG…），以及工作尺寸设置
+  - type: textarea
+    id: log
+    attributes:
+      label: 日志（可选）
+      description: "`adb logcat -s SpektraLabJNI AndroidRuntime` 的输出"
+      render: text
