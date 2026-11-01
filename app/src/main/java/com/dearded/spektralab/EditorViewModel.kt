@@ -56,6 +56,9 @@ data class UiState(
     val canUndo: Boolean = false,
     val canRedo: Boolean = false,
     val presets: List<Preset> = emptyList(),
+    /** The full working-size render for 1:1 viewing; dropped on any edit. */
+    val detail: Bitmap? = null,
+    val loadingDetail: Boolean = false,
 ) {
     val hasImage get() = source != null
 }
@@ -181,7 +184,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             cardsJob?.cancel()
             withContext(EngineThread.dispatcher) { releaseSession() }
-            _ui.update { it.copy(image = null, before = null, source = null, filmCards = emptyMap()) }
+            _ui.update { it.copy(image = null, before = null, source = null, filmCards = emptyMap(), detail = null) }
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -356,9 +359,50 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             redoStack.clear()
         }
         wanted = edit
-        _ui.update { it.copy(edit = edit, canUndo = undoStack.isNotEmpty(), canRedo = redoStack.isNotEmpty()) }
+        _ui.update {
+            it.copy(edit = edit, canUndo = undoStack.isNotEmpty(), canRedo = redoStack.isNotEmpty(),
+                detail = if (edit == it.edit) it.detail else null)
+        }
         renders.trySend(Unit)
     }
+
+    /**
+     * Renders the full working size once for 1:1 viewing. Refused above
+     * kMaxDetailPixels, where the ARGB bitmap alone would pass ~64 MB.
+     */
+    fun loadDetail() {
+        val state = _ui.value
+        val src = state.source ?: return
+        if (state.loadingDetail || state.detail != null || state.exporting) return
+        if (src.width.toLong() * src.height > kMaxDetailPixels) {
+            _ui.update { it.copy(message = "工作尺寸超过 1600 万像素，1:1 查看已关闭；导出不受影响") }
+            return
+        }
+        val edit = state.edit
+        viewModelScope.launch {
+            _ui.update { it.copy(loadingDetail = true) }
+            try {
+                val bitmap = withContext(EngineThread.dispatcher) {
+                    applyWanted()?.let { throw EngineException("参数无效：$it") }
+                    NativeEngine.renderBitmap(session, "full")
+                        ?: throw EngineException("渲染失败：${NativeEngine.lastError()}")
+                }
+                // An edit that landed while this rendered makes it stale.
+                _ui.update { if (it.edit == edit) it.copy(detail = bitmap) else it }
+                log("detail ${bitmap.width}x${bitmap.height}")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: OutOfMemoryError) {
+                _ui.update { it.copy(message = "内存不足，无法 1:1 查看") }
+            } catch (e: Throwable) {
+                _ui.update { it.copy(message = e.message ?: e.toString()) }
+            } finally {
+                _ui.update { it.copy(loadingDetail = false) }
+            }
+        }
+    }
+
+    fun closeDetail() = _ui.update { it.copy(detail = null) }
 
     fun undo() {
         val previous = undoStack.removeLastOrNull() ?: return
@@ -633,6 +677,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         /** Edits closer together than this are one undo step (a slider drag). */
         private const val kSettleMs = 700L
         private const val kMaxUndo = 50
+        private const val kMaxDetailPixels = 16_000_000L
 
         private val RAW_EXTENSIONS = setOf(
             "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",

@@ -81,6 +81,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.first
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,12 +171,12 @@ fun EditorScreen(vm: EditorViewModel) {
             val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxHeight())
+                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail)
                     Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight())
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxWidth())
+                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail)
                     Controls(ui, vm, Modifier.fillMaxWidth().heightIn(max = boxHeight * 0.45f))
                 }
             }
@@ -210,10 +211,11 @@ fun EditorScreen(vm: EditorViewModel) {
     }
 
     if (showSettings) SettingsDialog(ui, vm) { showSettings = false }
+    ui.detail?.let { DetailViewer(it, vm::closeDetail) }
 }
 
 @Composable
-private fun Preview(ui: UiState, modifier: Modifier) {
+private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
@@ -269,8 +271,13 @@ private fun Preview(ui: UiState, modifier: Modifier) {
                 else null
             }
             Column(Modifier.align(Alignment.TopStart).padding(8.dp)) {
-                TextButton(onClick = { showHistogram = !showHistogram }) {
-                    Text(if (showHistogram) "隐藏直方图" else "直方图", color = Color.White.copy(alpha = 0.8f))
+                Row {
+                    TextButton(onClick = { showHistogram = !showHistogram }) {
+                        Text(if (showHistogram) "隐藏直方图" else "直方图", color = Color.White.copy(alpha = 0.8f))
+                    }
+                    TextButton(onClick = onDetail, enabled = !ui.loadingDetail && ui.imageTier.isNotEmpty()) {
+                        Text(if (ui.loadingDetail) "渲染中…" else "1:1", color = Color.White.copy(alpha = 0.8f))
+                    }
                 }
                 histogram?.let { h ->
                     HistogramView(h, Modifier.width(160.dp).height(80.dp).background(Color.Black.copy(alpha = 0.5f)))
@@ -733,5 +740,48 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             title = { Text("删除预设") },
             text = { Text("删除“$target”？") },
         )
+    }
+}
+
+/**
+ * The full render at one image pixel per screen pixel, to judge grain and
+ * halation, which the fitted preview cannot show. Pan with one finger.
+ */
+@Composable
+private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onClose,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val image = remember(bitmap) { bitmap.asImageBitmap() }
+        val h = rememberScrollState()
+        val v = rememberScrollState()
+        // Start in the middle of the frame, where the subject usually is.
+        // maxValue is Int.MAX_VALUE until the first layout, so wait for the real range.
+        LaunchedEffect(bitmap) {
+            androidx.compose.runtime.snapshotFlow { h.maxValue to v.maxValue }
+                .first { (a, b) -> a != Int.MAX_VALUE && b != Int.MAX_VALUE }
+            h.scrollTo(h.maxValue / 2)
+            v.scrollTo(v.maxValue / 2)
+        }
+        Box(Modifier.fillMaxSize().background(Color.Black)) {
+            Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)) {
+                Image(
+                    bitmap = image,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = with(density) { Modifier.width(bitmap.width.toDp()).height(bitmap.height.toDp()) },
+                )
+            }
+            Row(
+                Modifier.align(Alignment.TopEnd).padding(8.dp).background(Color.Black.copy(alpha = 0.5f)),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,
+                    style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 8.dp))
+                TextButton(onClick = onClose) { Text("关闭", color = Color.White) }
+            }
+        }
     }
 }
