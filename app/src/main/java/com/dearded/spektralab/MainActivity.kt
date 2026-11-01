@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) handleIntent(intent)
         setContent {
             // Always dark: judging a print against a white UI skews it.
-            MaterialTheme(colorScheme = darkColorScheme()) { EditorScreen(viewModel) }
+            SpektraTheme { EditorScreen(viewModel) }
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.background
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
@@ -247,7 +248,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
-    Box(modifier.background(Color(0xFF111111)), contentAlignment = Alignment.Center) {
+    Box(modifier.background(Palette.Surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
@@ -602,19 +603,51 @@ private fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
     enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    // The thumb follows the finger from local state; the model hears every
+    // change, but a busy main thread never makes the thumb lag behind.
+    var local by remember(value) { mutableFloatStateOf(value.toFloat()) }
+    val span = (max - min).toFloat()
+    val snap = span * 0.015f
+    val onChangeLatest by androidx.compose.runtime.rememberUpdatedState(onChange)
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().pointerInput(enabled, default) {
+                if (enabled) detectTapGestures(onDoubleTap = { view.tick(strong = true); local = default.toFloat(); onChangeLatest(default) })
+            },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-            Text(String.format(Locale.ROOT, format, value),
-                style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"))
-            TextButton(onClick = { onChange(default) }, enabled = enabled && value != default) { Text("重置") }
+            Text(String.format(Locale.ROOT, format, local.toDouble()), style = Readout,
+                color = if (kotlin.math.abs(local - default.toFloat()) < 1e-6f) MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.primary)
+            TextButton(onClick = { view.tick(strong = true); local = default.toFloat(); onChange(default) },
+                enabled = enabled && kotlin.math.abs(local - default.toFloat()) > 1e-6f) { Text("重置") }
         }
         Slider(
-            value = value.toFloat().coerceIn(min.toFloat(), max.toFloat()),
-            onValueChange = { onDrag(true); onChange(it.toDouble()) },
+            value = local.coerceIn(min.toFloat(), max.toFloat()),
+            onValueChange = { raw ->
+                // Snap onto the default and tick when crossing it or hitting an end.
+                val v = if (kotlin.math.abs(raw - default.toFloat()) < snap) default.toFloat() else raw
+                val before = local
+                val crossed = (before - default.toFloat()) * (v - default.toFloat()) <= 0f && before != v
+                if ((crossed && v == default.toFloat()) || (v == min.toFloat() && before != v) || (v == max.toFloat() && before != v))
+                    view.tick(strong = true)
+                local = v
+                onDrag(true)
+                onChange(v.toDouble())
+            },
             onValueChangeFinished = { onDrag(false) },
             valueRange = min.toFloat()..max.toFloat(),
             enabled = enabled,
+            colors = androidx.compose.material3.SliderDefaults.colors(
+                thumbColor = Palette.OnSurface,
+                activeTrackColor = Palette.Amber,
+                inactiveTrackColor = Palette.PanelHighest,
+                disabledActiveTrackColor = Palette.Outline,
+                disabledInactiveTrackColor = Palette.PanelHigh,
+            ),
+            modifier = Modifier.systemGestureExclusion(),
         )
     }
 }
