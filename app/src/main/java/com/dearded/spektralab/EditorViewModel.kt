@@ -126,18 +126,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(busy = "正在解码 RAW…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    val params = Edit.openingParams(look, raw = true).toString()
+                    val params = Edit.openingParams(look, inputSpace = "ProPhoto RGB", linear = true).toString()
                     val h = NativeEngine.openRaw(engine, file.absolutePath, edge, maxPixels, params)
                     file.delete()
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     h
                 }
             } else {
-                val bitmap = withContext(Dispatchers.IO) { decodeBitmap(uri, edge, maxPixels) }
+                val (bitmap, space) = withContext(Dispatchers.IO) { decodePhoto(uri, edge, maxPixels) }
                 _ui.update { it.copy(busy = "正在打开…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    val params = Edit.openingParams(look, raw = false).toString()
+                    val params = Edit.openingParams(look, inputSpace = space, linear = false).toString()
                     val h = NativeEngine.openBitmap(engine, bitmap, params)
                     bitmap.recycle()
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
@@ -202,11 +202,29 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         return file
     }
 
-    private fun decodeBitmap(uri: Uri, edge: Int, maxPixels: Long): Bitmap {
+    /**
+     * Phone photos (JPEG, HEIC/HEIF, Ultra HDR JPEG, PNG, WebP). ImageDecoder
+     * applies the EXIF rotation. Display P3 sources (what many phones shoot)
+     * stay in P3 so their wide gamut reaches the engine; everything else is
+     * converted to sRGB. Returns the bitmap and the engine's name for its space.
+     */
+    private fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Pair<Bitmap, String> {
+        val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
+        var space = "sRGB"
+        val bitmap = decodeBitmap(uri, edge, maxPixels) { info ->
+            if (info.colorSpace == p3) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
+        }
+        return bitmap to space
+    }
+
+    private fun decodeBitmap(
+        uri: Uri, edge: Int, maxPixels: Long,
+        target: (ImageDecoder.ImageInfo) -> ColorSpace,
+    ): Bitmap {
         val source = ImageDecoder.createSource(app.contentResolver, uri)
         val decoded = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-            decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB))
+            decoder.setTargetColorSpace(target(info))
             val w = info.size.width
             val h = info.size.height
             var s = 1.0

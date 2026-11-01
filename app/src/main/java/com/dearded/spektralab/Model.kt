@@ -122,10 +122,13 @@ data class Edit(
             glareAmount = p.optDouble("glare_amount", fallback.glareAmount),
         )
 
-        fun openingParams(edit: Edit, raw: Boolean): JSONObject = edit.toJson().apply {
-            // LibRaw decodes to linear ProPhoto; gallery images are encoded sRGB.
-            put("input_color_space", if (raw) "ProPhoto RGB" else "sRGB")
-            put("input_cctf_decoding", !raw)
+        /**
+         * LibRaw decodes to linear ProPhoto ("ProPhoto RGB", linear). Gallery
+         * images arrive encoded, in "sRGB" or "Display P3" (the engine's names).
+         */
+        fun openingParams(edit: Edit, inputSpace: String, linear: Boolean): JSONObject = edit.toJson().apply {
+            put("input_color_space", inputSpace)
+            put("input_cctf_decoding", !linear)
             put("output_color_space", "sRGB")
             put("output_cctf_encoding", true)
             put("extended_dynamic_range", false)
