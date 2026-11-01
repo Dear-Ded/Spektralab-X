@@ -270,6 +270,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /**
+     * PowerManager's forecast of how close the SoC is to throttling, 10 s
+     * ahead: 1.0 means throttling now. 0 when unknown (API < 30, or the HAL
+     * does not report it, which returns NaN).
+     */
+    // The API answers NaN when asked more than once a second, so the last
+    // real reading is kept for 1.5 s.
+    @Volatile private var headroom = 0f
+    @Volatile private var headroomAt = 0L
+
+    private fun thermalHeadroom(): Float {
+        if (android.os.Build.VERSION.SDK_INT < 30) return 0f
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (headroomAt != 0L && now - headroomAt < 1500) return headroom
+        val pm = app.getSystemService(android.os.PowerManager::class.java) ?: return 0f
+        val h = runCatching { pm.getThermalHeadroom(10) }.getOrDefault(Float.NaN)
+        headroomAt = now
+        if (!h.isNaN()) headroom = h
+        return headroom
+    }
+
     private fun availableMemory(): Long {
         val am = app.getSystemService(android.app.ActivityManager::class.java) ?: return 0L
         val info = android.app.ActivityManager.MemoryInfo()
@@ -520,7 +541,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val catalog = _ui.value.catalog
             for (film in catalog.films) {
                 // Never ahead of the user's own drag renders on the one engine thread.
-                while (interacting) kotlinx.coroutines.delay(150)
+                // Hold back while a finger is on a slider, and while the phone is hot:
+                // cards are optional, the preview the user is looking at is not.
+                while (interacting || thermalHeadroom() > kHotHeadroom) kotlinx.coroutines.delay(150)
                 // Cards show the film's colour, not the border or date: both cost a larger canvas.
                 val base = withFilm(wanted, catalog, film.id)?.copy(filmEdge = false, dateImprint = false) ?: continue
                 val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
@@ -763,6 +786,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             appendLine("${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (${android.os.Build.DEVICE}) · " +
                 "Android ${android.os.Build.VERSION.RELEASE} / API ${android.os.Build.VERSION.SDK_INT}")
             appendLine("SoC: ${if (android.os.Build.VERSION.SDK_INT >= 31) android.os.Build.SOC_MODEL else "?"}")
+            appendLine("Thermal headroom: ${"%.2f".format(Locale.ROOT, thermalHeadroom())} (1.0 = throttling)")
             appendLine("RAM: total ${mem.totalMem shr 20} MB, available ${mem.availMem shr 20} MB, low=${mem.lowMemory}")
             appendLine("Java heap: max ${rt.maxMemory() shr 20} MB, used ${(rt.totalMemory() - rt.freeMemory()) shr 20} MB")
             appendLine("Native heap: ${android.os.Debug.getNativeHeapAllocatedSize() shr 20} MB")
@@ -820,6 +844,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         /** Edits closer together than this are one undo step (a slider drag). */
         private const val kSettleMs = 700L
         private const val kMaxUndo = 50
+        private const val kHotHeadroom = 0.85f
         private const val kMaxDetailPixels = 16_000_000L
 
         private val RAW_EXTENSIONS = setOf(
