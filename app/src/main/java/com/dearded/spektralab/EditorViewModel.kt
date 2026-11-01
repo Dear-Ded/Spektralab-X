@@ -94,7 +94,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     ready = true, busy = null, catalog = catalog,
                     deviceSummary = summarizeDevice(device),
                     engineSummary = summarizeCapabilities(caps),
-                    maxPixels = maxPixelsFor(device),
+                    maxPixels = maxPixelsFor(device, availableMemory()),
                 )
             }
             pendingOpen?.let { pendingOpen = null; open(it) }
@@ -123,6 +123,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // double-counts (a bright sky in the middle printed ~1.7 stops dark in
             // another port). RAW is scene-linear and wants the meter.
             val look = wanted.copy(autoExposure = raw)
+            // Free the previous frame before decoding the next, so the two never
+            // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
+            withContext(EngineThread.dispatcher) { releaseSession() }
+            _ui.update { it.copy(image = null, source = null) }
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -174,6 +178,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         } catch (e: Throwable) {
             _ui.update { it.copy(busy = null, error = e.message ?: e.toString()) }
         }
+    }
+
+    private fun availableMemory(): Long {
+        val am = app.getSystemService(android.app.ActivityManager::class.java) ?: return 0L
+        val info = android.app.ActivityManager.MemoryInfo()
+        am.getMemoryInfo(info)
+        return info.availMem
     }
 
     private fun releaseSession() {
@@ -414,10 +425,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
          * maxStorageBufferRange. Sized for a four-channel float plane, the widest
          * the pipeline allocates.
          */
-        fun maxPixelsFor(device: String): Long {
-            val range = firstDevice(device)?.optLong("maxStorageBufferRange") ?: 0L
-            return if (range > 0) range / 16 else 0L
+        fun maxPixelsFor(device: String, availMem: Long): Long {
+            // An unreadable probe is treated as the Vulkan minimum (128 MiB), not as no limit.
+            val range = firstDevice(device)?.optLong("maxStorageBufferRange")?.takeIf { it > 0 } ?: (128L shl 20)
+            val gpu = range / 16
+            // Measured on other ports: ~70-100 B/px live across the pipeline, plus host
+            // copies. Keep 1.5 GiB for the system so lmkd does not start killing apps.
+            val ram = max(4_000_000L, (availMem - (3L shl 29)) / 100)
+            return minOf(gpu, ram, MAX_CANVAS_PIXELS)
         }
+
+        /** 42.7 MP rendered and 44.8 MP lost the device on Adreno in another port. */
+        private const val MAX_CANVAS_PIXELS = 42_000_000L
 
         fun summarizeDevice(device: String): String {
             val d = firstDevice(device) ?: return "未检测到 Vulkan 设备"
