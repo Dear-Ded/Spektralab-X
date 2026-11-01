@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -286,7 +287,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
     Surface(modifier, tonalElevation = 2.dp) {
         Column {
             TabRow(selectedTabIndex = tab) {
-                listOf("胶片", "放大冲印", "效果").forEachIndexed { i, title ->
+                listOf("胶片", "放大冲印", "效果", "构图").forEachIndexed { i, title ->
                     Tab(selected = tab == i, onClick = { tab = i }, text = { Text(title) })
                 }
             }
@@ -332,6 +333,37 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         LabeledSlider("品红滤镜", e.mShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f") {
                             vm.update(e.copy(mShift = it))
                         }
+                    }
+                    3 -> {
+                        val src = ui.source
+                        fun reframe(next: Edit) =
+                            if (src == null) next else Edit.centredCrop(next, src.width, src.height, next.cropAspect)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { vm.update(reframe(e.copy(quarterTurns = (e.quarterTurns + 3) % 4))) },
+                                enabled = enabled) { Text("向左转") }
+                            OutlinedButton(onClick = { vm.update(reframe(e.copy(quarterTurns = (e.quarterTurns + 1) % 4))) },
+                                enabled = enabled) { Text("向右转") }
+                        }
+                        SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
+                        Text("裁剪比例（居中）", style = MaterialTheme.typography.labelLarge)
+                        Row(
+                            Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            for ((label, aspect) in ASPECTS) {
+                                FilterChip(
+                                    selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
+                                    onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
+                                    label = { Text(label) },
+                                    enabled = enabled,
+                                )
+                            }
+                        }
+                        Text(
+                            "旋转和裁剪在胶片之前完成，颗粒按裁剪后的画面计算。长按看到的原图不带裁剪。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     else -> {
                         SwitchRow("颗粒", e.grainActive, enabled) { vm.update(e.copy(grainActive = it)) }
@@ -426,6 +458,11 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
         )
     }
 }
+
+private val ASPECTS = listOf(
+    "原始" to 0.0, "3:2" to 1.5, "2:3" to 2.0 / 3.0, "4:3" to 4.0 / 3.0, "3:4" to 0.75,
+    "1:1" to 1.0, "16:9" to 16.0 / 9.0, "XPan 65:24" to 65.0 / 24.0,
+)
 
 private val WORKING_EDGES = listOf(
     2048 to "2048 px（最快）",

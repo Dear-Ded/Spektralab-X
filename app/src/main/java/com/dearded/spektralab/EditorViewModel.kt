@@ -125,7 +125,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // A phone photo was already exposed by the camera; metering it again
             // double-counts (a bright sky in the middle printed ~1.7 stops dark in
             // another port). RAW is scene-linear and wants the meter.
-            val look = wanted.copy(autoExposure = raw)
+            // Rotation and crop belong to one photo; the look (film, paper, effects) carries over.
+            val look = wanted.copy(
+                autoExposure = raw,
+                quarterTurns = 0, flipH = false,
+                cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
+            )
             // Free the previous frame before decoding the next, so the two never
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             withContext(EngineThread.dispatcher) { releaseSession() }

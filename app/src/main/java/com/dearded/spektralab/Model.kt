@@ -68,6 +68,16 @@ data class Edit(
     val halationAmount: Double = 1.0,
     val glareActive: Boolean = true,
     val glareAmount: Double = 1.0,
+    // Geometry, applied by the engine before the film (shoot layer). Crop
+    // fractions are of the source frame before the quarter turns.
+    val quarterTurns: Int = 0,
+    val flipH: Boolean = false,
+    val cropX: Double = 0.0,
+    val cropY: Double = 0.0,
+    val cropW: Double = 1.0,
+    val cropH: Double = 1.0,
+    /** The crop's chosen output aspect; app-side only, never sent (0 = whole frame). */
+    val cropAspect: Double = 0.0,
 ) {
     fun toJson(): JSONObject = JSONObject().apply { for ((key, get) in FIELDS) put(key, get(this@Edit)) }
 
@@ -101,6 +111,12 @@ data class Edit(
             "halation_amount" to { e: Edit -> e.halationAmount },
             "glare_active" to { e: Edit -> e.glareActive },
             "glare_amount" to { e: Edit -> e.glareAmount },
+            "geometry_quarter_turns" to { e: Edit -> e.quarterTurns },
+            "geometry_flip_h" to { e: Edit -> e.flipH },
+            "geometry_crop_x" to { e: Edit -> e.cropX },
+            "geometry_crop_y" to { e: Edit -> e.cropY },
+            "geometry_crop_w" to { e: Edit -> e.cropW },
+            "geometry_crop_h" to { e: Edit -> e.cropH },
         )
 
         /** The session's resolved values, as `spk_get_params` reports them. */
@@ -120,7 +136,31 @@ data class Edit(
             halationAmount = p.optDouble("halation_amount", fallback.halationAmount),
             glareActive = p.optBoolean("glare_active", fallback.glareActive),
             glareAmount = p.optDouble("glare_amount", fallback.glareAmount),
+            quarterTurns = p.optInt("geometry_quarter_turns", fallback.quarterTurns),
+            flipH = p.optBoolean("geometry_flip_h", fallback.flipH),
+            cropX = p.optDouble("geometry_crop_x", fallback.cropX),
+            cropY = p.optDouble("geometry_crop_y", fallback.cropY),
+            cropW = p.optDouble("geometry_crop_w", fallback.cropW),
+            cropH = p.optDouble("geometry_crop_h", fallback.cropH),
         )
+
+        /**
+         * A centred crop of [aspect] (width / height of the *output*, after the
+         * quarter turns) on a w x h source; 0 means the whole frame.
+         */
+        fun centredCrop(edit: Edit, w: Int, h: Int, aspect: Double): Edit {
+            if (aspect <= 0.0 || w <= 0 || h <= 0) return edit.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0)
+            // In source orientation an odd number of turns inverts the target aspect.
+            val a = if (edit.quarterTurns % 2 == 1) 1.0 / aspect else aspect
+            val src = w.toDouble() / h
+            return if (src > a) {
+                val cw = a / src
+                edit.copy(cropX = (1 - cw) / 2, cropY = 0.0, cropW = cw, cropH = 1.0)
+            } else {
+                val ch = src / a
+                edit.copy(cropX = 0.0, cropY = (1 - ch) / 2, cropW = 1.0, cropH = ch)
+            }
+        }
 
         /**
          * LibRaw decodes to linear ProPhoto ("ProPhoto RGB", linear). Gallery
