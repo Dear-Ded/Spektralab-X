@@ -156,6 +156,8 @@ fun EditorScreen(vm: EditorViewModel) {
                             })
                         }
                     }
+                    TextButton(onClick = vm::undo, enabled = ui.canUndo && !ui.exporting) { Text("撤销") }
+                    TextButton(onClick = vm::redo, enabled = ui.canRedo && !ui.exporting) { Text("重做") }
                     IconButton(onClick = { showSettings = true }) {
                         Icon(Icons.Default.Settings, contentDescription = "设置")
                     }

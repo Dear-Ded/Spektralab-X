@@ -53,6 +53,8 @@ data class UiState(
     val engineSummary: String = "",
     val rendering: Boolean = false,
     val exporting: Boolean = false,
+    val canUndo: Boolean = false,
+    val canRedo: Boolean = false,
 ) {
     val hasImage get() = source != null
 }
@@ -165,6 +167,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
             )
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
+            if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             cardsJob?.cancel()
@@ -314,10 +317,50 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // --- editing and rendering -------------------------------------------------
 
-    fun update(edit: Edit) {
+    // Undo history of whole edits. Changes less than kSettleMs apart join one
+    // step, so a slider drag undoes as a single move. Cleared when another
+    // photo opens; a white-balance re-decode keeps it.
+    private val undoStack = ArrayDeque<Edit>()
+    private val redoStack = ArrayDeque<Edit>()
+    private var lastStepAt = 0L
+
+    fun update(edit: Edit) = applyEdit(edit, record = true)
+
+    private fun applyEdit(edit: Edit, record: Boolean) {
+        val current = _ui.value.edit
+        if (record && edit != current) {
+            val now = android.os.SystemClock.uptimeMillis()
+            if (undoStack.isEmpty() || now - lastStepAt > kSettleMs) {
+                undoStack.addLast(current)
+                while (undoStack.size > kMaxUndo) undoStack.removeFirst()
+            }
+            lastStepAt = now
+            redoStack.clear()
+        }
         wanted = edit
-        _ui.update { it.copy(edit = edit) }
+        _ui.update { it.copy(edit = edit, canUndo = undoStack.isNotEmpty(), canRedo = redoStack.isNotEmpty()) }
         renders.trySend(Unit)
+    }
+
+    fun undo() {
+        val previous = undoStack.removeLastOrNull() ?: return
+        redoStack.addLast(_ui.value.edit)
+        lastStepAt = 0L
+        applyEdit(previous, record = false)
+    }
+
+    fun redo() {
+        val next = redoStack.removeLastOrNull() ?: return
+        undoStack.addLast(_ui.value.edit)
+        lastStepAt = 0L
+        applyEdit(next, record = false)
+    }
+
+    private fun clearHistory() {
+        undoStack.clear()
+        redoStack.clear()
+        lastStepAt = 0L
+        _ui.update { it.copy(canUndo = false, canRedo = false) }
     }
 
     fun pickFilm(id: String) {
@@ -545,6 +588,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     companion object {
+        /** Edits closer together than this are one undo step (a slider drag). */
+        private const val kSettleMs = 700L
+        private const val kMaxUndo = 50
+
         private val RAW_EXTENSIONS = setOf(
             "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
             "srw", "x3f", "3fr", "iiq", "erf", "kdc", "mrw", "rwl", "raw", "mos", "mef", "dcr",
