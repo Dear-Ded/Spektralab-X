@@ -67,7 +67,7 @@ class SourceLoader(private val context: Context) {
      * gamut reaches the engine; everything else is converted to sRGB. Returns
      * the bitmap and the engine's name for its space.
      */
-    fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Pair<Bitmap, String> {
+    fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Photo {
         val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
         var space = "sRGB"
         val source = ImageDecoder.createSource(context.contentResolver, uri)
@@ -79,6 +79,9 @@ class SourceLoader(private val context: Context) {
             val s = fitScale(info.size.width, info.size.height, edge, maxPixels)
             if (s < 1.0) decoder.setTargetSize(max(1, (info.size.width * s).toInt()), max(1, (info.size.height * s).toInt()))
         }
+        // Taken before any rescale or copy: the gain map is sampled by
+        // normalised position, so the base's final size does not matter.
+        val gain = if (android.os.Build.VERSION.SDK_INT >= 34) GainmapReader.read(decoded) else null
         // setTargetSize is a hint some decoders ignore (seen with DNG and very
         // large HEIC in another port), so the pixel cap is enforced here too.
         var out = decoded
@@ -88,10 +91,10 @@ class SourceLoader(private val context: Context) {
             if (scaled !== out) out.recycle()
             out = scaled
         }
-        if (out.config == Bitmap.Config.ARGB_8888) return out to space
+        if (out.config == Bitmap.Config.ARGB_8888) return Photo(out, space, gain?.first, gain?.second)
         val copy = out.copy(Bitmap.Config.ARGB_8888, false)
         out.recycle()
-        return (copy ?: throw EngineException("无法转换图像格式")) to space
+        return Photo(copy ?: throw EngineException("无法转换图像格式"), space, gain?.first, gain?.second)
     }
 
     companion object {

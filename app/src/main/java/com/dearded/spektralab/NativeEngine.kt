@@ -31,6 +31,14 @@ object NativeEngine {
     /** Opens a session on an sRGB ARGB_8888 bitmap. */
     external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String): Long
 
+    /**
+     * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888) recovered
+     * with its gain map [gain] (ALPHA_8 or ARGB_8888) to linear light at full
+     * boost. [meta] is ratioMin, ratioMax, gamma, epsilonSdr, epsilonHdr, 3 each.
+     * [paramsJson] must say input_cctf_decoding = false.
+     */
+    external fun openBitmapHdr(engine: Long, bitmap: Bitmap, gain: Bitmap, meta: FloatArray, paramsJson: String): Long
+
     /** A small sRGB thumbnail of the frame before any film was applied. */
     external fun beforeBitmap(session: Long): Bitmap?
 

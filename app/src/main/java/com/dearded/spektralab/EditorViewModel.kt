@@ -244,14 +244,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     h
                 }
             } else {
-                val (bitmap, space) = withContext(Dispatchers.IO) { loader.decodePhoto(uri, edge, maxPixels) }
-                _ui.update { it.copy(busy = "正在打开…") }
+                val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, edge, maxPixels) }
+                _ui.update { it.copy(busy = if (photo.hdr) "正在恢复 HDR 高光…" else "正在打开…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    openSpace = space; openLinear = false
-                    val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
-                    val h = NativeEngine.openBitmap(engine, bitmap, params)
-                    bitmap.recycle()
+                    val opened = openPhotoSession(engine, photo) { space, linear ->
+                        Edit.openingParams(look, inputSpace = space, linear = linear).toString()
+                    }
+                    val h = opened.handle
+                    openSpace = photo.space; openLinear = opened.linear
+                    if (opened.linear) log("ultra hdr gain map applied")
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     synchronized(cancelLock) { session = h }
                     h

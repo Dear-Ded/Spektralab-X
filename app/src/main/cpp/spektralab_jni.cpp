@@ -252,8 +252,9 @@ float srgb_decode(float v) {
 
 // `display_p3`: an encoded Display P3 photo, shown here in sRGB (the before
 // bitmap is sRGB), so press-and-hold does not look desaturated against the print.
+// `linear`: the values are already linear (an Ultra HDR recovery), not encoded.
 void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t h, bool linear_prophoto,
-                 bool display_p3 = false) {
+                 bool display_p3 = false, bool linear = false) {
     uint32_t nw = w, nh = h;
     fit(w, h, kBeforeEdge, 0, nw, nh);
     std::vector<float> small;
@@ -273,12 +274,18 @@ void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t
             const float gg = m[3] * r + m[4] * g + m[5] * b;
             const float bb = m[6] * r + m[7] * g + m[8] * b;
             r = srgb_encode(rr); g = srgb_encode(gg); b = srgb_encode(bb);
-        } else if (display_p3) {
-            // Display P3 (D65) -> sRGB, linear, then the shared sRGB curve.
-            const float lr = srgb_decode(r), lg = srgb_decode(g), lb = srgb_decode(b);
-            r = srgb_encode(1.2249401f * lr - 0.2249404f * lg);
-            g = srgb_encode(-0.0420569f * lr + 1.0420571f * lg);
-            b = srgb_encode(-0.0196376f * lr - 0.0786361f * lg + 1.0982735f * lb);
+        } else if (display_p3 || linear) {
+            const float lr = linear ? r : srgb_decode(r);
+            const float lg = linear ? g : srgb_decode(g);
+            const float lb = linear ? b : srgb_decode(b);
+            if (display_p3) {
+                // Display P3 (D65) -> sRGB, linear, then the shared sRGB curve.
+                r = srgb_encode(1.2249401f * lr - 0.2249404f * lg);
+                g = srgb_encode(-0.0420569f * lr + 1.0420571f * lg);
+                b = srgb_encode(-0.0196376f * lr - 0.0786361f * lg + 1.0982735f * lb);
+            } else {
+                r = srgb_encode(lr); g = srgb_encode(lg); b = srgb_encode(lb);
+            }
         }
         s->before[4 * i + 0] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, r)) * 255.0f));
         s->before[4 * i + 1] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, g)) * 255.0f));
@@ -524,6 +531,116 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
 }
 
 // The frame as it went into the engine, for press-and-hold "original".
+// Ultra HDR / ISO 21496-1: the SDR picture plus its gain map, recovered at
+// full boost (weight 1) into linear light in the base's own primaries, with
+// highlights above SDR white kept, so the film's shoulder and halation see
+// the real highlight range instead of a clipped 1.0. `meta_j` is the Gainmap
+// API's ratioMin[3], ratioMax[3], gamma[3], epsilonSdr[3], epsilonHdr[3]
+// (linear ratios). The gain map is usually a quarter of the size; it is
+// sampled bilinearly in log-boost space. Caller passes linear=true params.
+JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jobject gain,
+                             jfloatArray meta_j, jstring params_j) {
+    try {
+        AndroidBitmapInfo info{}, ginfo{};
+        if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) { fail("image must be an ARGB_8888 bitmap"); return 0; }
+        if (!gain || AndroidBitmap_getInfo(env, gain, &ginfo) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            !ginfo.width || !ginfo.height ||
+            (ginfo.format != ANDROID_BITMAP_FORMAT_A_8 && ginfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888)) {
+            fail("unsupported gain map"); return 0;
+        }
+        if (!meta_j || env->GetArrayLength(meta_j) < 15) { fail("gain map metadata missing"); return 0; }
+        float meta[15];
+        env->GetFloatArrayRegion(meta_j, 0, 15, meta);
+        const std::string params = str(env, params_j);
+
+        // Per channel, a log2-boost table over the 256 gain codes.
+        const uint32_t gc = ginfo.format == ANDROID_BITMAP_FORMAT_A_8 ? 1 : 3;
+        float boost[3][256];
+        float eps_sdr[3], eps_hdr[3];
+        for (int c = 0; c < 3; ++c) {
+            const float lo = std::log2(std::max(1e-6f, meta[c]));
+            const float hi = std::log2(std::max(1e-6f, meta[3 + c]));
+            const float gamma = meta[6 + c] > 0 ? meta[6 + c] : 1.0f;
+            eps_sdr[c] = meta[9 + c];
+            eps_hdr[c] = meta[12 + c];
+            for (int v = 0; v < 256; ++v) {
+                const float gp = std::pow(v / 255.0f, 1.0f / gamma);
+                boost[c][v] = lo * (1 - gp) + hi * gp;
+            }
+        }
+        float decode[256];
+        for (int v = 0; v < 256; ++v) decode[v] = srgb_decode(v / 255.0f);
+
+        const uint32_t gw = ginfo.width, gh = ginfo.height;
+        std::vector<uint8_t> g(size_t(gw) * gh * gc);
+        std::vector<float> rgb(size_t(info.width) * info.height * 3);
+        {
+            PixelLock lock(env, gain);
+            if (!lock.ok) { fail("cannot lock gain map pixels"); return 0; }
+            for (uint32_t y = 0; y < gh; ++y) {
+                const auto* src = static_cast<const uint8_t*>(lock.pixels) + size_t(y) * ginfo.stride;
+                uint8_t* dst = g.data() + size_t(y) * gw * gc;
+                if (gc == 1) std::memcpy(dst, src, gw);
+                else for (uint32_t x = 0; x < gw; ++x) {
+                    dst[3 * x] = src[4 * x]; dst[3 * x + 1] = src[4 * x + 1]; dst[3 * x + 2] = src[4 * x + 2];
+                }
+            }
+        }
+        {
+            PixelLock lock(env, bitmap);
+            if (!lock.ok) { fail("cannot lock bitmap pixels"); return 0; }
+            const uint32_t W = info.width, H = info.height;
+            const float sx = float(gw) / W, sy = float(gh) / H;
+            const auto rows = [&](uint32_t y0, uint32_t y1) {
+                for (uint32_t y = y0; y < y1; ++y) {
+                    const auto* src = static_cast<const uint8_t*>(lock.pixels) + size_t(y) * info.stride;
+                    float* dst = rgb.data() + size_t(y) * W * 3;
+                    const float fy = std::min(float(gh - 1), std::max(0.0f, (y + 0.5f) * sy - 0.5f));
+                    const uint32_t y0g = uint32_t(fy), y1g = std::min(gh - 1, y0g + 1);
+                    const float ty = fy - y0g;
+                    for (uint32_t x = 0; x < W; ++x) {
+                        const float fx = std::min(float(gw - 1), std::max(0.0f, (x + 0.5f) * sx - 0.5f));
+                        const uint32_t x0g = uint32_t(fx), x1g = std::min(gw - 1, x0g + 1);
+                        const float tx = fx - x0g;
+                        const uint32_t a = src[4 * x + 3];
+                        for (int c = 0; c < 3; ++c) {
+                            uint32_t code = src[4 * x + c];
+                            if (a != 255 && a != 0) code = std::min(255u, (code * 255u + a / 2) / a);
+                            const int gch = gc == 1 ? 0 : c;
+                            const auto at = [&](uint32_t gx, uint32_t gy) {
+                                return boost[c][g[(size_t(gy) * gw + gx) * gc + gch]];
+                            };
+                            const float lb = (at(x0g, y0g) * (1 - tx) + at(x1g, y0g) * tx) * (1 - ty) +
+                                             (at(x0g, y1g) * (1 - tx) + at(x1g, y1g) * tx) * ty;
+                            const float v = (decode[code] + eps_sdr[c]) * std::exp2(lb) - eps_hdr[c];
+                            dst[3 * x + c] = std::isfinite(v) ? std::max(0.0f, v) : 0.0f;
+                        }
+                    }
+                }
+            };
+            const uint64_t px = uint64_t(W) * H;
+            run_rows(H, px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency())), rows);
+        }
+        SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
+                                       info.width, info.height, params));
+        if (!session) return 0;
+        const bool p3 = params.find("\"Display P3\"") != std::string::npos;
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3, /*linear=*/true);
+        session->source_width = info.width;
+        session->source_height = info.height;
+        session->kind = "bitmap";
+        return reinterpret_cast<jlong>(session.release());
+    } catch (const std::bad_alloc&) {
+        fail("out of memory while opening the HDR image");
+    } catch (const std::exception& e) {
+        fail(std::string("open HDR image: ") + e.what());
+    } catch (...) {
+        fail("open HDR image: unknown failure");
+    }
+    return 0;
+}
+
 JNI_FN(jobject, beforeBitmap)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s || s->before.empty()) { fail("no original thumbnail"); return nullptr; }

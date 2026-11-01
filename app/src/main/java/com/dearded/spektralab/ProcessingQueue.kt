@@ -262,12 +262,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
         } else {
             step("解码照片", 0.10f)
-            val (bitmap, space) = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
+            val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
             withContext(EngineThread.dispatcher) {
                 NativeEngine.trimMemory(ready.engine)
-                val params = Edit.openingParams(edit, inputSpace = space, linear = false, outputSpace = outSpace).toString()
-                val h = NativeEngine.openBitmap(ready.engine, bitmap, params)
-                bitmap.recycle()
+                val h = openPhotoSession(ready.engine, photo) { space, linear ->
+                    Edit.openingParams(edit, inputSpace = space, linear = linear, outputSpace = outSpace).toString()
+                }.handle
                 if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                 synchronized(handleLock) { runningHandle = h }
                 h
