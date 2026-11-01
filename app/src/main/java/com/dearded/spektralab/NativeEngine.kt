@@ -44,6 +44,9 @@ object NativeEngine {
     /** Tier is "live", "preview" or "full". */
     external fun renderBitmap(session: Long, tier: String): Bitmap?
 
+    /** Renders [tier] into [bitmap]: 1 done, 0 failed (lastError), -1 size differs. */
+    external fun renderInto(session: Long, tier: String, bitmap: Bitmap): Int
+
     /** Renders [tier] ("full" or "preview") and writes an RGB16 TIFF to [path]. */
     external fun exportTiff(session: Long, path: String, iccPath: String, tier: String): Boolean
 

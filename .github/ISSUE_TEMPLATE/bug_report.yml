@@ -20,7 +20,7 @@ body:
     id: device
     attributes:
       label: 机型与系统 / Device and OS
-      placeholder: 小米 13 Ultra · HyperOS 2.0 · Android 15
+      placeholder: 小米 14 · HyperOS 2.0 · Android 15
     validations:
       required: true
   - type: textarea
@@ -43,7 +43,7 @@ body:
     attributes:
       label: 照片来源 / Source image
       description: 相机或手机型号与格式（DNG、RAF、HEIC、JPEG…），像素尺寸
-      placeholder: 小米 13 Ultra 专业模式 DNG，50 MP
+      placeholder: 小米相机专业模式 DNG，50 MP
   - type: textarea
     id: log
     attributes:

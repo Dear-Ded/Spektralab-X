@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="SpektraLab icon">
+
 # SpektraLab for Android
 
 **光谱胶片与相纸模拟，在手机上冲洗你的照片。**
@@ -60,7 +62,7 @@
 | 小米 10 系列 | 骁龙 865 | Adreno 650 | 未测试 |
 | 小米 11 系列 | 骁龙 888 | Adreno 660 | 未测试 |
 | 小米 12 / 12S 系列 | 骁龙 8 Gen 1 / 8+ Gen 1 | Adreno 730 | 未测试 |
-| 小米 13 系列 | 骁龙 8 Gen 2 | Adreno 740 | 未测试（维护者的主力机型 13 Ultra） |
+| 小米 13 系列 | 骁龙 8 Gen 2 | Adreno 740 | 未测试 |
 | 小米 14 系列 | 骁龙 8 Gen 3 | Adreno 750 | 未测试 |
 | 小米 15 系列 | 骁龙 8 至尊版 | Adreno 830 | 未测试 |
 | 小米 17 系列 | 骁龙 8 至尊版 Gen 5 | Adreno 840 | 未测试 |

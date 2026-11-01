@@ -200,6 +200,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             cardsJob?.cancel()
             withContext(EngineThread.dispatcher) { releaseSession() }
             _ui.update { it.copy(image = null, before = null, source = null, filmCards = emptyMap(), detail = null) }
+            clearPool()
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -581,6 +582,38 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // Preview bitmaps are reused: per tier, the frame on screen and one spare
+    // the next render writes into. A 3400 px ARGB frame is 30-46 MB, and a new
+    // one per render meant native-heap spikes and finalizer churn mid-drag.
+    // The spare is never the bitmap on screen: a tier's previous frame becomes
+    // the spare only once its successor has replaced it in the UI.
+    private val pool = Any()
+    private val spare = HashMap<String, Bitmap>()
+    private val shownByTier = HashMap<String, Bitmap>()
+
+    /** Engine thread. */
+    private fun renderPooled(tier: String): Bitmap? {
+        val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
+        if (reuse != null) {
+            when (NativeEngine.renderInto(session, tier, reuse)) {
+                1 -> return reuse
+                0 -> { synchronized(pool) { spare[tier] = reuse }; return null }
+                // -1: the tier changed size (new crop, film edge); drop the spare.
+            }
+        }
+        return NativeEngine.renderBitmap(session, tier)
+    }
+
+    private fun retire(tier: String, shown: Bitmap) = synchronized(pool) {
+        val previous = shownByTier.put(tier, shown)
+        if (previous != null && previous !== shown) spare[tier] = previous
+    }
+
+    private fun clearPool() = synchronized(pool) {
+        spare.clear()
+        shownByTier.clear()
+    }
+
     // An exception escaping here would end renderLoop for good (and leave the
     // progress bar up), so everything but cancellation is turned into a message,
     // and the busy flag is cleared in finally.
@@ -601,7 +634,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
                 inFlightTier = tier
                 try {
-                    NativeEngine.renderBitmap(session, tier) ?: run {
+                    renderPooled(tier) ?: run {
                         // Cancelled for a newer edit: not a failure, and the loop
                         // already has the newer request queued.
                         if (!NativeEngine.lastWasCancelled()) failure = "渲染失败：${NativeEngine.lastError()}"
@@ -622,6 +655,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         } finally {
             failure?.let { log("render $tier failed: $it") }
             val shown = bitmap
+            // Outside update: its lambda may run more than once.
+            if (shown != null) retire(tier, shown)
             _ui.update {
                 var next = it.copy(rendering = false)
                 if (shown != null) next = next.copy(image = shown, imageTier = tier)
@@ -758,6 +793,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (level < android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
             level != android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) return
         _ui.update { it.copy(detail = null) }
+        synchronized(pool) { spare.clear() }
         val e = engine
         if (e == 0L) return
         viewModelScope.launch {

@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "io/raw_decoder.hpp"
@@ -111,6 +112,31 @@ Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, ui
     return session;
 }
 
+// RGBA16 rows (engine-encoded sRGB) to RGBA8, split across up to four
+// threads: at the 3400 px tier it is ~8 M pixels, a visible slice of a drag.
+void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride) {
+    const auto rows = [&](uint32_t y0, uint32_t y1) {
+        for (uint32_t y = y0; y < y1; ++y) {
+            const uint16_t* src = r.rgba16 + size_t(y) * r.row_stride_px * 4;
+            uint8_t* dst = out + size_t(y) * stride;
+            for (uint32_t x = 0; x < r.width; ++x) {
+                dst[4 * x + 0] = uint8_t((uint32_t(src[4 * x + 0]) + 128u) / 257u);
+                dst[4 * x + 1] = uint8_t((uint32_t(src[4 * x + 1]) + 128u) / 257u);
+                dst[4 * x + 2] = uint8_t((uint32_t(src[4 * x + 2]) + 128u) / 257u);
+                dst[4 * x + 3] = 255;
+            }
+        }
+    };
+    const uint64_t px = uint64_t(r.width) * r.height;
+    const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
+    if (workers == 1) { rows(0, r.height); return; }
+    std::vector<std::thread> threads;
+    const uint32_t chunk = (r.height + workers - 1) / workers;
+    for (uint32_t y = chunk; y < r.height; y += chunk) threads.emplace_back(rows, y, std::min(r.height, y + chunk));
+    rows(0, std::min(r.height, chunk));
+    for (auto& t : threads) t.join();
+}
+
 // RGBA16 rows (engine-encoded sRGB) into an ARGB_8888 Bitmap, whose memory
 // order is R, G, B, A.
 jobject to_bitmap(JNIEnv* env, const spk_result& r) {
@@ -134,16 +160,7 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r) {
         fail("cannot lock bitmap pixels");
         return nullptr;
     }
-    for (uint32_t y = 0; y < r.height; ++y) {
-        const uint16_t* src = r.rgba16 + size_t(y) * r.row_stride_px * 4;
-        auto* dst = static_cast<uint8_t*>(pixels) + size_t(y) * info.stride;
-        for (uint32_t x = 0; x < r.width; ++x) {
-            dst[4 * x + 0] = uint8_t((uint32_t(src[4 * x + 0]) + 128u) / 257u);
-            dst[4 * x + 1] = uint8_t((uint32_t(src[4 * x + 1]) + 128u) / 257u);
-            dst[4 * x + 2] = uint8_t((uint32_t(src[4 * x + 2]) + 128u) / 257u);
-            dst[4 * x + 3] = 255;
-        }
-    }
+    pack_rgba8(r, static_cast<uint8_t*>(pixels), info.stride);
     AndroidBitmap_unlockPixels(env, bitmap);
     return bitmap;
 }
@@ -517,6 +534,41 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
         fail("render: unknown failure");
     }
     return nullptr;
+}
+
+// Renders [tier] into a caller-owned ARGB_8888 bitmap of the same size, so a
+// preview does not allocate (and later finalize) a 30-46 MB Bitmap per frame.
+// Returns 1 on success, 0 on failure (lastError), -1 when the size differs:
+// the caller then falls back to renderBitmap and keeps the new one.
+JNI_FN(jint, renderInto)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jobject bitmap) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s || !bitmap) { fail("no session"); return 0; }
+    try {
+        spk_result result;
+        if (!render(s, str(env, tier_j), result)) return 0;
+        AndroidBitmapInfo info{};
+        void* pixels = nullptr;
+        int status = -1;
+        if (AndroidBitmap_getInfo(env, bitmap, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
+            info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 &&
+            info.width == result.width && info.height == result.height) {
+            if (AndroidBitmap_lockPixels(env, bitmap, &pixels) == ANDROID_BITMAP_RESULT_SUCCESS && pixels) {
+                pack_rgba8(result, static_cast<uint8_t*>(pixels), info.stride);
+                AndroidBitmap_unlockPixels(env, bitmap);
+                status = 1;
+            } else {
+                fail("cannot lock bitmap pixels");
+                status = 0;
+            }
+        }
+        spk_result_free(&result);
+        return status;
+    } catch (const std::exception& e) {
+        fail(std::string("render: ") + e.what());
+    } catch (...) {
+        fail("render: unknown failure");
+    }
+    return 0;
 }
 
 JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {

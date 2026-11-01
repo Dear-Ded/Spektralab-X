@@ -1,0 +1,1 @@
+Reuse preview bitmaps to cut memory spikes; new icon and artwork.

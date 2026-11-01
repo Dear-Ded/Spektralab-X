@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="SpektraLab icon">
+
 # SpektraLab for Android
 
 **Spectral film and print simulation: develop your photos on a phone.**

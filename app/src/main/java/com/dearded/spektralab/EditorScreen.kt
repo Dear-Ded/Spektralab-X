@@ -675,7 +675,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 Text("关于", style = MaterialTheme.typography.labelLarge)
                 Text("版本 ${BuildConfig.VERSION_NAME}（${BuildConfig.VERSION_CODE}）", style = MaterialTheme.typography.bodySmall)
                 Text(
-                    "基于 SpektraLab（GPL-3.0）的安卓移植，个人自用。胶片与相纸数据来自 spektrafilm（CC BY-SA 4.0）；" +
+                    "基于 SpektraLab（GPL-3.0）的非官方安卓移植。胶片与相纸数据来自 spektrafilm（CC BY-SA 4.0）；" +
                         "RAW 解码使用 LibRaw（LGPL-2.1）。许可证文本随应用附带。",
                     style = MaterialTheme.typography.bodySmall,
                 )
