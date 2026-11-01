@@ -47,6 +47,8 @@ data class UiState(
     val filmCards: Map<String, Bitmap> = emptyMap(),
     val source: SourceInfo? = null,
     val workingEdge: Int = 4096,
+    /** JPEG exports in Display P3 (on by default: Xiaomi flagships have P3 screens). */
+    val wideGamut: Boolean = true,
     val maxPixels: Long = 0,
     val deviceSummary: String = "",
     val engineSummary: String = "",
@@ -71,7 +73,8 @@ class EngineException(message: String) : Exception(message)
 class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("settings", 0)
     private val presetStore = PresetStore(prefs)
-    private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096)))
+    private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
+        wideGamut = prefs.getBoolean("wide_gamut", true)))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -643,6 +646,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             outPixels = outPixels,
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
             filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
+            wideGamut = state.wideGamut,
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${src.width}x${src.height}")
@@ -676,6 +680,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             appendLine("Events:")
             host.events.snapshot().forEach { appendLine("  $it") }
         }
+    }
+
+    fun setWideGamut(on: Boolean) {
+        prefs.edit().putBoolean("wide_gamut", on).apply()
+        _ui.update { it.copy(wideGamut = on) }
     }
 
     fun setWorkingEdge(edge: Int) {

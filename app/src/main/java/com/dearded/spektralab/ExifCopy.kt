@@ -44,7 +44,7 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
     fun iso(): Int? = values[ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY]?.split(',')?.firstOrNull()?.trim()?.toIntOrNull()
 
     /** Writes the copied tags into [jpeg] in place. Failures leave the file as it was. */
-    fun applyTo(jpeg: File, width: Int, height: Int) {
+    fun applyTo(jpeg: File, width: Int, height: Int, wide: Boolean = false) {
         runCatching {
             val exif = ExifInterface(jpeg)
             for ((tag, value) in values) runCatching { exif.setAttribute(tag, value) }
@@ -52,7 +52,8 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
             exif.setAttribute(ExifInterface.TAG_SOFTWARE, "SpektraLab Android ${BuildConfig.VERSION_NAME}")
             exif.setAttribute(ExifInterface.TAG_PIXEL_X_DIMENSION, width.toString())
             exif.setAttribute(ExifInterface.TAG_PIXEL_Y_DIMENSION, height.toString())
-            exif.setAttribute(ExifInterface.TAG_COLOR_SPACE, "1")  // sRGB, what the export is
+            // 1 = sRGB; 65535 = uncalibrated, i.e. read the embedded profile (P3).
+            exif.setAttribute(ExifInterface.TAG_COLOR_SPACE, if (wide) "65535" else "1")
             exif.saveAttributes()
         }
     }

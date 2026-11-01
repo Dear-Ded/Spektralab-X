@@ -84,7 +84,9 @@ data class FrameSpec(
          */
         fun render(image: Bitmap, spec: FrameSpec, caption: Caption?): Bitmap {
             val l = spec.layout(image.width, image.height)
-            val out = Bitmap.createBitmap(l.width, l.height, Bitmap.Config.ARGB_8888)
+            // The card keeps the print's colour space, so a P3 print stays P3.
+            val out = Bitmap.createBitmap(l.width, l.height, Bitmap.Config.ARGB_8888, true,
+                image.colorSpace ?: android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.SRGB))
             val canvas = Canvas(out)
             canvas.drawColor(spec.paper)
             canvas.drawBitmap(image, l.x.toFloat(), l.y.toFloat(), Paint(Paint.FILTER_BITMAP_FLAG))

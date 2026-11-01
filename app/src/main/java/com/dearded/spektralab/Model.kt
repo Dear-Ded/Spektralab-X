@@ -291,10 +291,12 @@ data class Edit(
          * LibRaw decodes to linear ProPhoto ("ProPhoto RGB", linear). Gallery
          * images arrive encoded, in "sRGB" or "Display P3" (the engine's names).
          */
-        fun openingParams(edit: Edit, inputSpace: String, linear: Boolean): JSONObject = edit.toJson().apply {
+        fun openingParams(edit: Edit, inputSpace: String, linear: Boolean, outputSpace: String = "sRGB"): JSONObject = edit.toJson().apply {
             put("input_color_space", inputSpace)
             put("input_cctf_decoding", !linear)
-            put("output_color_space", "sRGB")
+            // "Display P3" for a wide-gamut export: the film and print dyes reach
+            // past sRGB (slide films and 2383 most of all) and P3 screens show it.
+            put("output_color_space", outputSpace)
             put("output_cctf_encoding", true)
             put("extended_dynamic_range", false)
             put("product_defaults", true)

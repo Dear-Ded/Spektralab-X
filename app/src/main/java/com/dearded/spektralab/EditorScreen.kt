@@ -892,6 +892,13 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     }
                 }
                 Spacer(Modifier.height(12.dp))
+                SwitchRow("广色域导出（Display P3）", ui.wideGamut, true) { vm.setWideGamut(it) }
+                Text(
+                    "JPEG 按 P3 色域冲印并嵌入色彩配置，反转片和电影拷贝的饱和色不会被截掉。TIFF 始终是 sRGB。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
                 Text("设备", style = MaterialTheme.typography.labelLarge)
                 Text(ui.deviceSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
                 Text(ui.engineSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)

@@ -50,6 +50,8 @@ data class ProcessingJob(
     /** The paper frame (FrameSpec JSON, "" = none) and the film's name for its caption. */
     val frameJson: String = "",
     val filmLabel: String = "",
+    /** A JPEG rendered and tagged in Display P3 rather than sRGB. */
+    val wideGamut: Boolean = false,
     val state: JobState = JobState.QUEUED,
     val progress: Float = 0f,
     val phase: String = "",
@@ -72,7 +74,7 @@ data class ProcessingJob(
         .put("id", id).put("uri", uri).put("name", name).put("raw", raw).put("edit", editJson)
         .put("wbK", wbK).put("wbTint", wbTint).put("format", format.name).put("size", size.name)
         .put("edge", workingEdge).put("maxPixels", maxPixels).put("outPixels", outPixels)
-        .put("frame", frameJson).put("filmLabel", filmLabel)
+        .put("frame", frameJson).put("filmLabel", filmLabel).put("wide", wideGamut)
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
 
@@ -85,6 +87,7 @@ data class ProcessingJob(
                 format = ExportFormat.valueOf(o.getString("format")), size = ExportSize.valueOf(o.getString("size")),
                 workingEdge = o.optInt("edge"), maxPixels = o.optLong("maxPixels"), outPixels = o.optLong("outPixels"),
                 frameJson = o.optString("frame"), filmLabel = o.optString("filmLabel"),
+                wideGamut = o.optBoolean("wide"),
                 state = JobState.valueOf(o.optString("state", "QUEUED")), message = o.optString("message"),
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
             )
@@ -238,6 +241,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // The film edge lays the frame on a canvas up to 1.6x its area, and that
         // canvas is one GPU buffer (128 MiB on Adreno 7xx): decode a little smaller.
         val maxPixels = if (edit.filmEdge && job.maxPixels > 0) job.maxPixels * 10 / 16 else job.maxPixels
+        // TIFF carries the bundled sRGB profile, so only a JPEG goes wide.
+        val wide = job.wideGamut && job.format == ExportFormat.JPEG
+        val outSpace = if (wide) "Display P3" else "sRGB"
         yieldToEditor()
         val handle: Long = if (job.raw) {
             val file = withContext(Dispatchers.IO) { loader.copyToCache(uri, job.name, "job") }
@@ -245,7 +251,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             try {
                 withContext(EngineThread.dispatcher) {
                     NativeEngine.trimMemory(ready.engine)
-                    val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
+                    val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true, outputSpace = outSpace).toString()
                     val h = NativeEngine.openRaw(ready.engine, file.absolutePath, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     synchronized(handleLock) { runningHandle = h }
@@ -259,7 +265,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             val (bitmap, space) = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
             withContext(EngineThread.dispatcher) {
                 NativeEngine.trimMemory(ready.engine)
-                val params = Edit.openingParams(edit, inputSpace = space, linear = false).toString()
+                val params = Edit.openingParams(edit, inputSpace = space, linear = false, outputSpace = outSpace).toString()
                 val h = NativeEngine.openBitmap(ready.engine, bitmap, params)
                 bitmap.recycle()
                 if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
@@ -298,6 +304,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             throw EngineException("导出失败：${NativeEngine.lastError()}")
                         }
                     }
+                    // The pixels are P3 already; tag them so compress embeds the profile.
+                    if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
                     step("写入相册", 0.92f)
                     try {
                         withContext(Dispatchers.IO) {
@@ -309,7 +317,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
                                 try {
                                     tmp.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, 95, it) }
-                                    exif.applyTo(tmp, out.width, out.height)
+                                    exif.applyTo(tmp, out.width, out.height, wide = wide)
                                 } finally {
                                     if (out !== bitmap) out.recycle()
                                 }
