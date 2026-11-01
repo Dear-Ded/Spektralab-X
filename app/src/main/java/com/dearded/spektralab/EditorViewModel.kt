@@ -136,7 +136,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { doOpen(uri) }
     }
 
-    private suspend fun doOpen(uri: Uri) {
+    /**
+     * RAW white balance is chosen at decode (LibRaw multipliers), so a change
+     * re-opens the same file keeping the whole edit. [temperatureK] 0 = as shot.
+     */
+    fun setWhiteBalance(temperatureK: Double, tint: Double) {
+        val uri = lastUri ?: return
+        if (_ui.value.source?.kind != "raw" || _ui.value.exporting) return
+        viewModelScope.launch { doOpen(uri, wb = temperatureK to tint) }
+    }
+
+    private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null) {
         _ui.update { it.copy(busy = "正在读取…", error = null) }
         try {
             val resolver = app.contentResolver
@@ -148,11 +158,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // double-counts (a bright sky in the middle printed ~1.7 stops dark in
             // another port). RAW is scene-linear and wants the meter.
             // Rotation and crop belong to one photo; the look (film, paper, effects) carries over.
-            val look = wanted.copy(
+            // A white-balance re-decode is the same photo: everything is kept.
+            val look = if (wb != null) wanted else wanted.copy(
                 autoExposure = raw,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
             )
+            val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             // Free the previous frame before decoding the next, so the two never
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             cardsJob?.cancel()
@@ -167,7 +179,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     releaseSession()
                     openSpace = "ProPhoto RGB"; openLinear = true
                     val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
-                    val h = NativeEngine.openRaw(engine, file.absolutePath, edge, maxPixels, params)
+                    val h = NativeEngine.openRaw(engine, file.absolutePath, edge, maxPixels, params, wbK, wbTint)
                     file.delete()
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     h
@@ -203,6 +215,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         kind = info.optString("kind"),
                         camera = listOf(info.optString("make"), info.optString("model"))
                             .filter { s -> s.isNotBlank() }.joinToString(" "),
+                        asShotK = info.optDouble("asShotK", 0.0), asShotTint = info.optDouble("asShotTint", 0.0),
+                        wbK = info.optDouble("wbK", 0.0), wbTint = info.optDouble("wbTint", 0.0),
                     ),
                 )
             }

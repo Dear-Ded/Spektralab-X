@@ -23,6 +23,11 @@
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
 #include "volk.h"
+#include "white_balance.hpp"
+
+#include <libraw/libraw.h>
+#include <array>
+#include <memory>
 
 namespace {
 
@@ -35,6 +40,8 @@ struct Session {
     uint32_t width = 0, height = 0;
     uint32_t source_width = 0, source_height = 0;
     std::string make, model, kind;
+    // RAW only: the illuminant the camera recorded, and the one decoded with (0 = as shot).
+    double as_shot_k = 0, as_shot_tint = 0, wb_k = 0, wb_tint = 0;
     std::vector<uint8_t> before;   // RGBA8, see make_before
     uint32_t before_w = 0, before_h = 0;
     // The same small frame before encoding, in the session's input space:
@@ -289,7 +296,7 @@ JNI_FN(jstring, capabilities)(JNIEnv* env, jobject, jlong engine) {
 }
 
 JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
-                       jlong max_pixels, jstring params_j) {
+                       jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint) {
     try {
         auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
         const std::string path = str(env, path_j);
@@ -301,10 +308,27 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
             const uint64_t edge_px = uint64_t(max_edge) * uint64_t(max_edge) * 3 / 4;
             budget = budget ? std::min(budget, edge_px) : edge_px;
         }
+        // White balance is chosen at decode (LibRaw's user_mul), as upstream's
+        // desktop host does: the metadata-only open reads the as-shot
+        // illuminant and, for a custom one, derives the multipliers.
+        double as_shot_k = 0, as_shot_tint = 0;
+        std::array<float, 4> mul{};
+        const bool custom_wb = temperature_k > 0;
+        std::string error;
+        {
+            auto probe = std::make_unique<LibRaw>(LIBRAW_OPTIONS_NO_DATAERR_CALLBACK);
+            if (probe->open_file(path.c_str()) == LIBRAW_SUCCESS) {
+                spkhost::as_shot_temperature_tint(*probe, as_shot_k, as_shot_tint);
+                if (custom_wb && !spkhost::multipliers_for(*probe, temperature_k, tint, mul, error)) {
+                    fail("white balance: " + error); return 0;
+                }
+            } else if (custom_wb) {
+                fail("white balance: cannot read the RAW metadata"); return 0;
+            }
+        }
         spk::io::set_raw_half_size_budget(budget);
         spk::io::DecodedRaw decoded;
-        std::string error;
-        const bool ok = spk::io::decode_raw_compatible(path, decoded, error);
+        const bool ok = spk::io::decode_raw_compatible(path, custom_wb ? &mul : nullptr, decoded, error);
         spk::io::set_raw_half_size_budget(0);
         if (!ok) { fail("RAW decode: " + error); return 0; }
         const uint32_t sw = decoded.width, sh = decoded.height;
@@ -325,6 +349,10 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->make = decoded.metadata.make;
         session->model = decoded.metadata.model;
         session->kind = "raw";
+        session->as_shot_k = as_shot_k;
+        session->as_shot_tint = as_shot_tint;
+        session->wb_k = custom_wb ? double(temperature_k) : 0;
+        session->wb_tint = custom_wb ? double(tint) : 0;
         return reinterpret_cast<jlong>(session);
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the RAW file; choose a smaller working size");
@@ -438,7 +466,9 @@ JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {
         ",\"sourceWidth\":" + std::to_string(s->source_width) +
         ",\"sourceHeight\":" + std::to_string(s->source_height) +
         ",\"kind\":\"" + s->kind + "\",\"make\":\"" + json_escape(s->make) +
-        "\",\"model\":\"" + json_escape(s->model) + "\"}";
+        "\",\"model\":\"" + json_escape(s->model) + "\"" +
+        ",\"asShotK\":" + std::to_string(s->as_shot_k) + ",\"asShotTint\":" + std::to_string(s->as_shot_tint) +
+        ",\"wbK\":" + std::to_string(s->wb_k) + ",\"wbTint\":" + std::to_string(s->wb_tint) + "}";
     return jstr(env, out);
 }
 

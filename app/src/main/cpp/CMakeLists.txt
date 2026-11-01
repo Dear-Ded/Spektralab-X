@@ -26,12 +26,16 @@ set(SPEKTRALAB_VULKAN_HEADERS "${spk_deps}/Vulkan-Headers/include" CACHE PATH ""
 
 add_subdirectory("${SPK_UPSTREAM}/engine" engine)
 
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp)
+# white_balance.cpp is upstream's desktop-host Temperature/Tint (Robertson
+# isotherms, LibRaw's camera matrix), compiled here unmodified.
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp
+    "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE
     "${SPK_UPSTREAM}/engine/include"
-    "${SPK_UPSTREAM}/engine/src")
+    "${SPK_UPSTREAM}/engine/src"
+    "${SPK_UPSTREAM}/engine/host")
 target_link_libraries(spektralab_jni PRIVATE
-    spektralab_engine spk_image_io spk_volk android log jnigraphics)
+    spektralab_engine spk_image_io spk_libraw spk_volk android log jnigraphics)
 # 16 KB page alignment, required by newer Android releases for native code.
 target_link_options(spektralab_jni PRIVATE "-Wl,-z,max-page-size=16384")

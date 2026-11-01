@@ -312,6 +312,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV") {
                             vm.update(e.copy(exposureEv = it))
                         }
+                        ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
+                            WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
+                        }
                         Text("画幅", style = MaterialTheme.typography.labelLarge)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             for ((label, mm) in FORMATS) {
@@ -413,6 +416,43 @@ private fun LabeledSlider(
             onValueChange = { onChange(it.toDouble()) },
             valueRange = min.toFloat()..max.toFloat(),
             enabled = enabled,
+        )
+    }
+}
+
+/**
+ * RAW white balance. It is applied at decode, so a change re-opens the file:
+ * the sliders move freely and commit only when released.
+ */
+@Composable
+private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Double) -> Unit) {
+    val currentK = if (s.wbK > 0) s.wbK else s.asShotK
+    val currentTint = if (s.wbK > 0) s.wbTint else s.asShotTint
+    var k by remember(s) { mutableFloatStateOf(currentK.toFloat().coerceIn(2000f, 12000f)) }
+    var tint by remember(s) { mutableFloatStateOf(currentTint.toFloat().coerceIn(-150f, 150f)) }
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("白平衡", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+            Text(
+                String.format(Locale.ROOT, "%.0f K · 色调 %+.0f", k, tint),
+                style = MaterialTheme.typography.labelMedium,
+            )
+            TextButton(onClick = { onCommit(0.0, 0.0) }, enabled = enabled && s.wbK > 0) { Text("原始") }
+        }
+        Slider(
+            value = k, onValueChange = { k = it },
+            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
+            valueRange = 2000f..12000f, enabled = enabled,
+        )
+        Slider(
+            value = tint, onValueChange = { tint = it },
+            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
+            valueRange = -150f..150f, enabled = enabled,
+        )
+        Text(
+            "在解码时应用，松手后重新解码 RAW，需要几秒。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

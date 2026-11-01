@@ -19,8 +19,14 @@ object NativeEngine {
     external fun destroy(engine: Long)
     external fun capabilities(engine: Long): String
 
-    /** Decodes a RAW file and opens a session on it, downscaled to fit both limits (0 = none). */
-    external fun openRaw(engine: Long, path: String, maxEdge: Int, maxPixels: Long, paramsJson: String): Long
+    /**
+     * Decodes a RAW file and opens a session on it, downscaled to fit both limits (0 = none).
+     * [temperatureK] 0 decodes with the camera's as-shot white balance.
+     */
+    external fun openRaw(
+        engine: Long, path: String, maxEdge: Int, maxPixels: Long, paramsJson: String,
+        temperatureK: Double, tint: Double,
+    ): Long
 
     /** Opens a session on an sRGB ARGB_8888 bitmap. */
     external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String): Long

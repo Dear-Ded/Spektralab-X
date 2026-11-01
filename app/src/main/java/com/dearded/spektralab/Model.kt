@@ -185,4 +185,9 @@ data class SourceInfo(
     val sourceHeight: Int,
     val kind: String,
     val camera: String,
+    /** RAW only: the camera's as-shot illuminant, and the chosen one (0 = as shot). */
+    val asShotK: Double = 0.0,
+    val asShotTint: Double = 0.0,
+    val wbK: Double = 0.0,
+    val wbTint: Double = 0.0,
 )
