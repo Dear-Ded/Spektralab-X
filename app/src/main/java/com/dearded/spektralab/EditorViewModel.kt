@@ -221,6 +221,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 )
             }
             log("open ${if (raw) "raw" else "photo"} ${info.optInt("sourceWidth")}x${info.optInt("sourceHeight")} -> ${info.optInt("width")}x${info.optInt("height")}")
+            // Say so when the frame was scaled down, so a smaller export is not a surprise.
+            val sw = info.optInt("sourceWidth"); val sh = info.optInt("sourceHeight")
+            val ww = info.optInt("width"); val wh = info.optInt("height")
+            if (wb == null && sw > 0 && (ww < sw || wh < sh)) {
+                _ui.update {
+                    it.copy(message = "原图 ${sw}×${sh}，按工作尺寸缩到 ${ww}×${wh} 处理；可在“设置”里调大")
+                }
+            }
             renders.trySend(Unit)
             startFilmCards(handle)
         } catch (e: OutOfMemoryError) {
