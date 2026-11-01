@@ -119,7 +119,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val raw = isRaw(name, resolver.getType(uri))
             val edge = _ui.value.workingEdge
             val maxPixels = _ui.value.maxPixels
-            val look = wanted
+            // A phone photo was already exposed by the camera; metering it again
+            // double-counts (a bright sky in the middle printed ~1.7 stops dark in
+            // another port). RAW is scene-linear and wants the meter.
+            val look = wanted.copy(autoExposure = raw)
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }

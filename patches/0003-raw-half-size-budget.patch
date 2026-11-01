@@ -1,0 +1,47 @@
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 3814081..c5b9805 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -24,6 +24,12 @@ namespace spk::io {
+ #error "RAW OpenMP requested but LibRaw parallel processing is disabled"
+ #endif
+ 
++namespace {
++thread_local std::uint64_t t_half_size_budget = 0;
++}
++
++void set_raw_half_size_budget(std::uint64_t pixels) noexcept { t_half_size_budget = pixels; }
++
+ bool raw_openmp_enabled() noexcept {
+ #if SPEKTRALAB_RAW_OPENMP
+     return true;
+@@ -328,6 +334,12 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         decoded.timings.open_ms = elapsed_ms(start);
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
++        {
++            const auto& s = raw->imgdata.sizes;
++            if (t_half_size_budget && raw->imgdata.idata.filters > 1000 &&
++                std::uint64_t(s.width) * s.height > 4 * t_half_size_budget)
++                raw->imgdata.params.half_size = 1;
++        }
+ 
+         start = Clock::now();
+         const int unpack_status = raw->unpack();
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index af0a382..139b48b 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -102,6 +102,12 @@ struct DecodedRaw {
+ // default RAW orientation. scale_colors() remains enabled for WB and scaling.
+ // No user black/white overrides, exposure adjustment, ICC profile or resize.
+ // On failure, out is unchanged and error describes the failed stage.
++// Android: when a Bayer sensor has more than four times this many pixels, the
++// compatible policy decodes at LibRaw half size (2x2 binning, no demosaic)
++// instead of building a full-size float frame only to throw most of it away.
++// 0 (the default) keeps full size. Per thread, like the decode itself.
++void set_raw_half_size_budget(std::uint64_t pixels) noexcept;
++
+ bool decode_raw_compatible(const std::filesystem::path& source,
+                            DecodedRaw& out, std::string& error);
+ 

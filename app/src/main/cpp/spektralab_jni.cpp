@@ -225,9 +225,20 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
     try {
         auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
         const std::string path = str(env, path_j);
+        // Half-size decode only when the sensor is more than 4x what we keep, so
+        // the binned frame still covers the working size before the CPU downscale.
+        // The edge budget assumes 4:3, the widest common sensor shape by area.
+        uint64_t budget = uint64_t(std::max<jlong>(0, max_pixels));
+        if (max_edge > 0) {
+            const uint64_t edge_px = uint64_t(max_edge) * uint64_t(max_edge) * 3 / 4;
+            budget = budget ? std::min(budget, edge_px) : edge_px;
+        }
+        spk::io::set_raw_half_size_budget(budget);
         spk::io::DecodedRaw decoded;
         std::string error;
-        if (!spk::io::decode_raw_compatible(path, decoded, error)) { fail("RAW decode: " + error); return 0; }
+        const bool ok = spk::io::decode_raw_compatible(path, decoded, error);
+        spk::io::set_raw_half_size_budget(0);
+        if (!ok) { fail("RAW decode: " + error); return 0; }
         const uint32_t sw = decoded.width, sh = decoded.height;
         uint32_t w = sw, h = sh;
         fit(sw, sh, uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)), w, h);
