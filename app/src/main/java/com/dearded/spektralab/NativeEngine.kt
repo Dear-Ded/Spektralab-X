@@ -25,6 +25,9 @@ object NativeEngine {
     /** Opens a session on an sRGB ARGB_8888 bitmap. */
     external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String): Long
 
+    /** A small sRGB thumbnail of the frame before any film was applied. */
+    external fun beforeBitmap(session: Long): Bitmap?
+
     external fun sourceInfo(session: Long): String
     external fun setParams(session: Long, deltaJson: String): String?
     external fun getParams(session: Long): String?

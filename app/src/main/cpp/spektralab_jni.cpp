@@ -35,6 +35,8 @@ struct Session {
     uint32_t width = 0, height = 0;
     uint32_t source_width = 0, source_height = 0;
     std::string make, model, kind;
+    std::vector<uint8_t> before;   // RGBA8, see make_before
+    uint32_t before_w = 0, before_h = 0;
 };
 
 std::string str(JNIEnv* env, jstring s) {
@@ -132,6 +134,58 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r) {
     }
     AndroidBitmap_unlockPixels(env, bitmap);
     return bitmap;
+}
+
+jobject new_argb_bitmap(JNIEnv* env, uint32_t w, uint32_t h) {
+    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
+    jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
+    if (!bitmap_class || !config_class) return nullptr;
+    jfieldID argb_field = env->GetStaticFieldID(config_class, "ARGB_8888", "Landroid/graphics/Bitmap$Config;");
+    jobject argb = env->GetStaticObjectField(config_class, argb_field);
+    jmethodID create = env->GetStaticMethodID(bitmap_class, "createBitmap",
+        "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+    jobject bitmap = env->CallStaticObjectMethod(bitmap_class, create, jint(w), jint(h), argb);
+    if (env->ExceptionCheck()) { env->ExceptionClear(); return nullptr; }
+    return bitmap;
+}
+
+float srgb_encode(float v) {
+    v = std::min(1.0f, std::max(0.0f, v));
+    return v <= 0.0031308f ? 12.92f * v : 1.055f * std::pow(v, 1.0f / 2.4f) - 0.055f;
+}
+
+// The "before" view: a small RGBA8 thumbnail of the frame as it went into the
+// engine. RAW arrives as linear ProPhoto (D50) and is converted to encoded sRGB
+// (Bradford to D65); a gallery photo is already encoded and is only scaled.
+constexpr uint32_t kBeforeEdge = 1600;
+
+void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t h, bool linear_prophoto) {
+    uint32_t nw = w, nh = h;
+    fit(w, h, kBeforeEdge, 0, nw, nh);
+    std::vector<float> small;
+    const std::vector<float>* src = &rgb;
+    if (nw != w || nh != h) { spk::android::resize_area_rgb(rgb, w, h, nw, nh, small); src = &small; }
+    static constexpr float m[9] = {
+        2.0341926f, -0.7274198f, -0.3067728f,
+        -0.2288151f, 1.2317584f, -0.0029433f,
+        -0.0085497f, -0.1532550f, 1.1618047f,
+    };
+    s->before.assign(size_t(nw) * nh * 4, 255);
+    for (size_t i = 0, n = size_t(nw) * nh; i < n; ++i) {
+        const float* p = src->data() + 3 * i;
+        float r = p[0], g = p[1], b = p[2];
+        if (linear_prophoto) {
+            const float rr = m[0] * r + m[1] * g + m[2] * b;
+            const float gg = m[3] * r + m[4] * g + m[5] * b;
+            const float bb = m[6] * r + m[7] * g + m[8] * b;
+            r = srgb_encode(rr); g = srgb_encode(gg); b = srgb_encode(bb);
+        }
+        s->before[4 * i + 0] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, r)) * 255.0f));
+        s->before[4 * i + 1] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, g)) * 255.0f));
+        s->before[4 * i + 2] = uint8_t(std::lround(std::min(1.0f, std::max(0.0f, b)) * 255.0f));
+    }
+    s->before_w = nw;
+    s->before_h = nh;
 }
 
 bool render(Session* s, const std::string& tier, spk_result& out) {
@@ -251,6 +305,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         }
         Session* session = open_pixels(engine, rgb, w, h, str(env, params_j));
         if (!session) return 0;
+        make_before(session, rgb, w, h, /*linear_prophoto=*/true);
         session->source_width = sw;
         session->source_height = sh;
         session->make = decoded.metadata.make;
@@ -293,6 +348,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         Session* session = open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
                                        info.width, info.height, str(env, params_j));
         if (!session) return 0;
+        make_before(session, rgb, info.width, info.height, /*linear_prophoto=*/false);
         session->source_width = info.width;
         session->source_height = info.height;
         session->kind = "bitmap";
@@ -305,6 +361,33 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         fail("open image: unknown failure");
     }
     return 0;
+}
+
+// The frame as it went into the engine, for press-and-hold "original".
+JNI_FN(jobject, beforeBitmap)(JNIEnv* env, jobject, jlong handle) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s || s->before.empty()) { fail("no original thumbnail"); return nullptr; }
+    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
+    jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
+    if (!bitmap_class || !config_class) { fail("Bitmap classes not found"); return nullptr; }
+    jfieldID argb_field = env->GetStaticFieldID(config_class, "ARGB_8888", "Landroid/graphics/Bitmap$Config;");
+    jobject argb = env->GetStaticObjectField(config_class, argb_field);
+    jmethodID create = env->GetStaticMethodID(bitmap_class, "createBitmap",
+        "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+    jobject bitmap = env->CallStaticObjectMethod(bitmap_class, create, jint(s->before_w), jint(s->before_h), argb);
+    if (env->ExceptionCheck() || !bitmap) { env->ExceptionClear(); fail("cannot allocate original bitmap"); return nullptr; }
+    AndroidBitmapInfo info{};
+    void* pixels = nullptr;
+    if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+        AndroidBitmap_lockPixels(env, bitmap, &pixels) != ANDROID_BITMAP_RESULT_SUCCESS || !pixels) {
+        fail("cannot lock bitmap pixels");
+        return nullptr;
+    }
+    for (uint32_t y = 0; y < s->before_h; ++y)
+        std::memcpy(static_cast<uint8_t*>(pixels) + size_t(y) * info.stride,
+                    s->before.data() + size_t(y) * s->before_w * 4, size_t(s->before_w) * 4);
+    AndroidBitmap_unlockPixels(env, bitmap);
+    return bitmap;
 }
 
 JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {

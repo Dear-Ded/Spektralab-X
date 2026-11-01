@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -172,11 +175,25 @@ fun EditorScreen(vm: EditorViewModel) {
     }
 
     ui.error?.let { error ->
+        val clipboard = LocalClipboardManager.current
+        val report = remember(error, ui.deviceSummary, ui.engineSummary) {
+            "$error\n\n${BuildConfig.VERSION_NAME} · ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} · " +
+                "Android ${android.os.Build.VERSION.RELEASE}\n${ui.deviceSummary}\n${ui.engineSummary}"
+        }
         AlertDialog(
             onDismissRequest = vm::dismissError,
             confirmButton = { TextButton(onClick = vm::dismissError) { Text("好") } },
+            dismissButton = {
+                TextButton(onClick = { clipboard.setText(AnnotatedString(report)) }) { Text("复制") }
+            },
             title = { Text("出错了") },
-            text = { Text(error) },
+            text = {
+                // Scrollable and selectable: an engine error is often long and is
+                // what a bug report needs verbatim.
+                SelectionContainer {
+                    Text(report, Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()))
+                }
+            },
         )
     }
 
@@ -187,8 +204,10 @@ fun EditorScreen(vm: EditorViewModel) {
 private fun Preview(ui: UiState, modifier: Modifier) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var holding by remember { mutableStateOf(false) }
     Box(modifier.background(Color(0xFF111111)), contentAlignment = Alignment.Center) {
-        val image = ui.image
+        // Held down: the frame as it went into the engine, before any film.
+        val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
             val bitmap = remember(image) { image.asImageBitmap() }
             Image(
@@ -198,7 +217,14 @@ private fun Preview(ui: UiState, modifier: Modifier) {
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
-                        detectTapGestures(onDoubleTap = { scale = 1f; offset = Offset.Zero })
+                        detectTapGestures(
+                            onDoubleTap = { scale = 1f; offset = Offset.Zero },
+                            onLongPress = { holding = true },
+                            onPress = {
+                                tryAwaitRelease()
+                                holding = false
+                            },
+                        )
                     }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
@@ -224,7 +250,11 @@ private fun Preview(ui: UiState, modifier: Modifier) {
         }
         if (ui.image != null && ui.imageTier.isNotEmpty()) {
             Text(
-                if (ui.imageTier == "live") "快速预览" else "预览",
+                when {
+                    holding && ui.before != null -> "原图"
+                    ui.imageTier == "live" -> "快速预览 · 长按看原图"
+                    else -> "预览 · 长按看原图"
+                },
                 color = Color.White.copy(alpha = 0.6f),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),

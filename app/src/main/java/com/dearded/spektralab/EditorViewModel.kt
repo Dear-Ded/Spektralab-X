@@ -39,6 +39,8 @@ data class UiState(
     val edit: Edit = Edit(),
     val image: Bitmap? = null,
     val imageTier: String = "",
+    /** The frame before any film, shown while the preview is held down. */
+    val before: Bitmap? = null,
     val source: SourceInfo? = null,
     val workingEdge: Int = 4096,
     val maxPixels: Long = 0,
@@ -126,7 +128,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // Free the previous frame before decoding the next, so the two never
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
             withContext(EngineThread.dispatcher) { releaseSession() }
-            _ui.update { it.copy(image = null, source = null) }
+            _ui.update { it.copy(image = null, before = null, source = null) }
             val handle: Long
             if (raw) {
                 val file = withContext(Dispatchers.IO) { copyToCache(uri, name) }
@@ -151,17 +153,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     h
                 }
             }
-            val (edit, info) = withContext(EngineThread.dispatcher) {
+            val (edit, info, before) = withContext(EngineThread.dispatcher) {
                 session = handle
                 val params = NativeEngine.getParams(handle)?.let(::JSONObject) ?: JSONObject()
                 val edit = Edit.fromParams(params, look)
                 applied = edit
                 wanted = edit
-                edit to JSONObject(NativeEngine.sourceInfo(handle))
+                Triple(edit, JSONObject(NativeEngine.sourceInfo(handle)), NativeEngine.beforeBitmap(handle))
             }
             _ui.update {
                 it.copy(
-                    busy = null, edit = edit, image = null, imageTier = "",
+                    busy = null, edit = edit, image = null, imageTier = "", before = before,
                     source = SourceInfo(
                         name = name,
                         width = info.optInt("width"), height = info.optInt("height"),
