@@ -1,0 +1,1 @@
+Xiaomi 12-14 (Adreno 7xx, 128 MiB GPU buffers): the film edge re-opens the photo smaller instead of failing. Decoders that ignore the target size are capped after decode. DNGs typed application/octet-stream are recognised by their header.

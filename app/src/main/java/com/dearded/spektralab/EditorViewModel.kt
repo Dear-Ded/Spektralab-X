@@ -168,9 +168,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         try {
             val resolver = app.contentResolver
             val name = displayName(uri)
-            val raw = isRaw(name, resolver.getType(uri))
+            val raw = isRaw(name, resolver.getType(uri), uri)
             val edge = _ui.value.workingEdge
-            val maxPixels = _ui.value.maxPixels
+            // The film edge lays the frame on a canvas up to 1.6x its area, and the
+            // canvas is one GPU buffer: on Adreno 7xx (Xiaomi 12-14) that buffer is
+            // capped at 128 MiB. A re-decode with the edge on keeps the canvas inside.
+            val maxPixels = _ui.value.maxPixels.let {
+                if (wb != null && wanted.filmEdge && it > 0) it * 10 / 16 else it
+            }
             // A phone photo was already exposed by the camera; metering it again
             // double-counts (a bright sky in the middle printed ~1.7 stops dark in
             // another port). RAW is scene-linear and wants the meter.
@@ -293,11 +298,22 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         return uri.lastPathSegment?.substringAfterLast('/') ?: "image"
     }
 
-    private fun isRaw(name: String, mime: String?): Boolean {
+    private fun isRaw(name: String, mime: String?, uri: Uri? = null): Boolean {
         val ext = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
         if (ext in RAW_EXTENSIONS) return true
-        val m = mime?.lowercase(Locale.ROOT) ?: return false
-        return m.contains("dng") || m.contains("raw") || m.startsWith("image/x-") && m !in DECODABLE_X
+        val m = mime?.lowercase(Locale.ROOT)
+        if (m != null && (m.contains("dng") || m.contains("raw") || m.startsWith("image/x-") && m !in DECODABLE_X)) return true
+        // Files and cloud providers often say application/octet-stream (or
+        // nothing) for a DNG: trust the TIFF header instead of the type.
+        if (uri != null && (m == null || m == "application/octet-stream")) {
+            val head = runCatching {
+                app.contentResolver.openInputStream(uri)?.use { s -> ByteArray(4).also { if (s.read(it) != 4) return false } }
+            }.getOrNull() ?: return false
+            val ii = head[0] == 0x49.toByte() && head[1] == 0x49.toByte()
+            val mm = head[0] == 0x4D.toByte() && head[1] == 0x4D.toByte()
+            return ii || mm
+        }
+        return false
     }
 
     private fun copyToCache(uri: Uri, name: String): File {
@@ -340,9 +356,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             if (maxPixels > 0 && w.toDouble() * h * s * s > maxPixels) s = sqrt(maxPixels.toDouble() / (w.toDouble() * h))
             if (s < 1.0) decoder.setTargetSize(max(1, (w * s).toInt()), max(1, (h * s).toInt()))
         }
-        if (decoded.config == Bitmap.Config.ARGB_8888) return decoded
-        val copy = decoded.copy(Bitmap.Config.ARGB_8888, false)
-        decoded.recycle()
+        // setTargetSize is a hint some decoders ignore (seen with DNG and very
+        // large HEIC in another port), so the pixel cap is enforced here too.
+        var out = decoded
+        if (maxPixels > 0 && out.width.toLong() * out.height > maxPixels * 21 / 20) {
+            val s = sqrt(maxPixels.toDouble() / (out.width.toDouble() * out.height))
+            val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
+            if (scaled !== out) out.recycle()
+            out = scaled
+        }
+        if (out.config == Bitmap.Config.ARGB_8888) return out
+        val copy = out.copy(Bitmap.Config.ARGB_8888, false)
+        out.recycle()
         return copy ?: throw EngineException("无法转换图像格式")
     }
 
@@ -357,17 +382,22 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun update(edit: Edit) {
         // The film edge lays the frame on a canvas up to 1.6x its area (the 6x17
-        // strip and the 135 rebate). Past the pixel budget that canvas is what
-        // reset the driver in another port, so say so before it renders.
+        // strip and the 135 rebate). Past the GPU buffer cap that canvas cannot be
+        // rendered at all (and reset the driver in another port), so the photo is
+        // re-decoded smaller first, with the whole edit kept.
         val src = _ui.value.source
-        if (edit.filmEdge && !_ui.value.edit.filmEdge && src != null && _ui.value.maxPixels > 0 &&
-            src.width.toLong() * src.height * 16 / 10 > _ui.value.maxPixels) {
-            _ui.update { it.copy(message = "画面较大，加边框后可能内存不足；可在“设置”里调小工作尺寸") }
+        val uri = lastUri
+        if (edit.filmEdge && !_ui.value.edit.filmEdge && src != null && uri != null &&
+            _ui.value.maxPixels > 0 && src.width.toLong() * src.height * 16 / 10 > _ui.value.maxPixels) {
+            applyEdit(edit, record = true, render = false)
+            _ui.update { it.copy(message = "加边框后画布超出 GPU 单缓冲上限，已按更小尺寸重新打开") }
+            viewModelScope.launch { doOpen(uri, wb = src.wbK to src.wbTint) }
+            return
         }
         applyEdit(edit, record = true)
     }
 
-    private fun applyEdit(edit: Edit, record: Boolean) {
+    private fun applyEdit(edit: Edit, record: Boolean, render: Boolean = true) {
         val current = _ui.value.edit
         if (record && edit != current) {
             val now = android.os.SystemClock.uptimeMillis()
@@ -386,7 +416,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
         cancelStalePreview()
-        renders.trySend(Unit)
+        if (render) renders.trySend(Unit)
     }
 
     /**
