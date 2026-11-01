@@ -1,0 +1,1 @@
+Display P3 JPEG export (on by default); Ultra HDR gain maps recovered on Android 14+ for real highlight headroom; snapping film strip with haptics; Settings as a bottom sheet, predictive back in the 1:1 viewer. Not yet verified on a device.
