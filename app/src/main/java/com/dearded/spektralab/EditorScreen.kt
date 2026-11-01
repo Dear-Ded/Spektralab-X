@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -75,6 +76,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -784,16 +786,45 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
 @Composable
 private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        items(ui.catalog.films, key = { it.id }) { film ->
+    val films = ui.catalog.films
+    val view = androidx.compose.ui.platform.LocalView.current
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    // The current film is brought into view when the strip appears or the film
+    // changes from elsewhere (a preset, undo), with the motion spring.
+    val selectedIndex = films.indexOfFirst { it.id == ui.edit.film }
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex < 0) return@LaunchedEffect
+        val visible = state.layoutInfo.visibleItemsInfo
+        val shown = visible.any { it.index == selectedIndex && it.offset >= 0 &&
+            it.offset + it.size <= state.layoutInfo.viewportEndOffset }
+        if (!shown) state.animateScrollToItem(maxOf(0, selectedIndex - 1))
+    }
+    LazyRow(
+        state = state,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 4.dp),
+        // Flings settle on a card edge rather than halfway through one.
+        flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        items(films, key = { it.id }) { film ->
             val selected = film.id == ui.edit.film
+            val scale by androidx.compose.animation.core.animateFloatAsState(
+                if (selected) 1f else 0.94f, Motion.fastSpatial(), label = "card")
+            val ring by androidx.compose.animation.animateColorAsState(
+                if (selected) Palette.Amber else Color.Transparent, Motion.defaultEffects(), label = "ring")
+            val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
             Column(
-                Modifier.width(96.dp).clickable(enabled = enabled) { onPick(film.id) },
+                Modifier.width(92.dp)
+                    .graphicsLayer { scaleX = scale; scaleY = scale }
+                    .clickable(enabled = enabled) { if (!selected) { view.tick(); onPick(film.id) } },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    Modifier.size(96.dp).background(Color(0xFF222222))
-                        .then(if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
+                    Modifier.size(92.dp)
+                        .clip(shape)
+                        .background(Palette.PanelHigh)
+                        .border(2.dp, ring, shape),
                     contentAlignment = Alignment.Center,
                 ) {
                     val card = ui.filmCards[film.id]
@@ -802,14 +833,18 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                         Image(bitmap, contentDescription = film.label, contentScale = ContentScale.Crop,
                               modifier = Modifier.fillMaxSize())
                     } else {
-                        Text("·", color = Color(0xFF55555A), style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            if (film.bw) "B&W" else if (film.positive) "E-6" else "C-41",
+                            color = Palette.OnSurfaceSoft, style = MaterialTheme.typography.labelSmall,
+                        )
                     }
                 }
+                Spacer(Modifier.height(4.dp))
                 Text(
                     film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    color = if (selected) Palette.Amber else MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -829,14 +864,18 @@ private val WORKING_EDGES = listOf(
     0 to "原始尺寸（受 GPU 上限约束）",
 )
 
+// A sheet, not a dialog: the photo stays in view, it follows the finger down,
+// and Material3's sheet already answers predictive back.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("完成") } },
-        title = { Text("设置") },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.Panel) {
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp)
+            ) {
+                Text("设置", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(12.dp))
                 Text("工作尺寸（长边）", style = MaterialTheme.typography.labelLarge)
                 Text(
                     "打开照片时先缩到这个尺寸再处理，导出也是这个尺寸。越大越慢、越占内存。",
@@ -870,8 +909,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-        },
-    )
+    }
 }
 
 @Composable
@@ -944,6 +982,16 @@ private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
         onDismissRequest = onClose,
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
     ) {
+        var back by remember { mutableFloatStateOf(0f) }
+        androidx.activity.compose.PredictiveBackHandler { events ->
+            try {
+                events.collect { back = it.progress }
+                onClose()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                back = 0f
+                throw e
+            }
+        }
         val density = androidx.compose.ui.platform.LocalDensity.current
         val image = remember(bitmap) { bitmap.asImageBitmap() }
         val h = rememberScrollState()
@@ -956,7 +1004,9 @@ private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
             h.scrollTo(h.maxValue / 2)
             v.scrollTo(v.maxValue / 2)
         }
-        Box(Modifier.fillMaxSize().background(Color.Black)) {
+        Box(Modifier.fillMaxSize().graphicsLayer {
+            val k = 1f - 0.1f * back; scaleX = k; scaleY = k; alpha = 1f - 0.3f * back
+        }.background(Color.Black)) {
             Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)) {
                 Image(
                     bitmap = image,
