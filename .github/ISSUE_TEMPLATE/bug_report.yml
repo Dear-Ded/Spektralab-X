@@ -1,37 +1,52 @@
 name: 问题反馈 / Bug report
-description: 闪退、渲染错误、颜色异常等
-labels: [bug]
+description: 闪退、渲染错误、颜色异常、卡顿 / Crashes, wrong renders, colour problems, slowness
+labels: [bug, needs triage]
 body:
-  - type: input
-    id: build
+  - type: markdown
     attributes:
-      label: 版本
-      description: Releases 里的 Build 编号，或 APK 文件名
-      placeholder: SpektraLab-12
-    validations:
-      required: true
+      value: |
+        请先在应用的 **设置 → 复制诊断信息** 里复制一份诊断信息，粘贴到下面。它包含版本、机型、SoC、内存、GPU 和最近的事件，不含文件名和位置。
+        Copy **Settings → Copy diagnostics** in the app and paste it below.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认 / Checklist
+      options:
+        - label: 我用的是最新的 pre-release / I am on the latest pre-release
+          required: true
+        - label: 我搜索过已有的 issue / I searched existing issues
+          required: true
   - type: input
     id: device
     attributes:
-      label: 设备与系统
-      placeholder: 小米 13 Ultra · HyperOS 2 · Android 15
+      label: 机型与系统 / Device and OS
+      placeholder: 小米 13 Ultra · HyperOS 2.0 · Android 15
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 诊断信息 / Diagnostics
+      description: 设置 → 复制诊断信息 / Settings → Copy diagnostics
+      render: text
     validations:
       required: true
   - type: textarea
     id: what
     attributes:
-      label: 发生了什么
-      description: 做了哪些操作、看到了什么、期望是什么。界面上的报错文字请原样贴出。
+      label: 发生了什么 / What happened
+      description: 操作步骤、看到的结果、期望的结果。报错文字请原样贴出。
     validations:
       required: true
   - type: input
     id: source
     attributes:
-      label: 图片来源
-      description: 相机型号与格式（RAF、DNG、JPEG…），以及工作尺寸设置
+      label: 照片来源 / Source image
+      description: 相机或手机型号与格式（DNG、RAF、HEIC、JPEG…），像素尺寸
+      placeholder: 小米 13 Ultra 专业模式 DNG，50 MP
   - type: textarea
     id: log
     attributes:
-      label: 日志（可选）
+      label: 日志（可选）/ Log (optional)
       description: "`adb logcat -s SpektraLabJNI AndroidRuntime` 的输出"
       render: text

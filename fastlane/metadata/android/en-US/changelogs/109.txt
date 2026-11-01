@@ -1,0 +1,1 @@
+Smoother editing and lower memory use: stale previews are cancelled while a slider moves, the engine warms up its tables and GPU pipelines at start, and idle GPU memory is returned when the system runs low. Still alpha, not yet verified on a device.

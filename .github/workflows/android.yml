@@ -3,12 +3,29 @@ name: android
 on:
   push:
     paths-ignore:
-      - "README.md"
+      - "**.md"
+      - "docs/**"
+      - "fastlane/**"
       - ".github/ISSUE_TEMPLATE/**"
+      - ".github/*.md"
+      - ".github/dependabot.yml"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "fastlane/**"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write      # create the release
+  id-token: write      # build provenance attestation
+  attestations: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   apk:
@@ -68,22 +85,31 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Rename APK
+      - name: Rename APK and checksum
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/SpektraLab-$APP_VERSION.apk"
+          apk="SpektraLab-$APP_VERSION-arm64-v8a.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/$apk"
+          (cd dist && sha256sum "$apk" > SHA256SUMS && cat SHA256SUMS)
 
       - uses: actions/upload-artifact@v4
         with:
           name: SpektraLab-${{ env.APP_VERSION }}-run${{ github.run_number }}
-          path: dist/*.apk
+          path: dist/*
 
       # A release is published only when VERSION names a version not yet
       # released; other pushes leave an artifact on the run and nothing else.
+      - name: Build provenance
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.PUBLISH == '1'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/*.apk
+
       - name: Release
-        if: github.ref == 'refs/heads/main' && env.PUBLISH == '1'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.PUBLISH == '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          notes="$(awk -v v="$APP_VERSION" '$0 ~ "^## "v"( |$)" {f=1; next} /^## / {f=0} f' CHANGELOG.md)"
-          gh release create "v$APP_VERSION" dist/*.apk             --title "SpektraLab Android $APP_VERSION"             --notes "${notes:-Commit ${{ github.sha }}}" --prerelease
+          bash scripts/release-notes.sh "$APP_VERSION" dist "${{ github.repository }}" "${{ github.sha }}" > notes.md
+          gh release create "v$APP_VERSION" dist/*.apk dist/SHA256SUMS \
+            --title "SpektraLab Android $APP_VERSION" --notes-file notes.md --prerelease

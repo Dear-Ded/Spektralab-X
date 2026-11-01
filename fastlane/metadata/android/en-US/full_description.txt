@@ -1,0 +1,15 @@
+Unofficial Android port of the SpektraLab spectral film and print simulator, tuned for Xiaomi number-series phones (Snapdragon / Adreno).
+
+It is not a filter: the photo is exposed spectrally onto a physical film model, developed into a negative and printed onto paper, all computed on the phone's GPU with Vulkan.
+
+<b>Features</b>
+<ul>
+<li>Camera RAW (DNG, CR3, NEF, ARW, RAF and more, via LibRaw) and phone photos (JPEG, HEIC, PNG, WebP, keeping Display P3)</li>
+<li>30+ colour negative, slide and black-and-white films and papers, with a live preview strip</li>
+<li>Exposure, RAW white balance, print exposure, Y/M filtration, grain, halation, glare</li>
+<li>Crop, rotate, flip, film edge (135, half frame, XPan, 120 formats) and date back</li>
+<li>Presets, undo/redo, histogram, hold to compare, 1:1 grain view</li>
+<li>Export JPEG (shooting EXIF kept, no location) or 16-bit TIFF</li>
+</ul>
+
+No network access, no data collection. Alpha: not yet widely tested on real devices.

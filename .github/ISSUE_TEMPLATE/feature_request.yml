@@ -1,0 +1,26 @@
+name: 功能建议 / Feature request
+description: 提一个新功能或改进 / Suggest an idea
+labels: [enhancement, needs triage]
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认 / Checklist
+      options:
+        - label: 我搜索过已有的 issue（包括已关闭的）/ I searched existing open and closed issues
+          required: true
+        - label: 一个 issue 只提一个功能 / One feature per issue
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 想要什么 / What
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么需要 / Why
+      description: 什么场景下用到，现在怎么绕过
+    validations:
+      required: true
