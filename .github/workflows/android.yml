@@ -20,8 +20,6 @@ permissions:
   contents: write      # create the release
   id-token: write      # build provenance attestation
   attestations: write
-  id-token: write
-  attestations: write
 
 concurrency:
   group: android-${{ github.ref }}
