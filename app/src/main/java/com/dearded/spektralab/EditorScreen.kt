@@ -5,6 +5,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -303,6 +306,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
             ) {
                 when (tab) {
                     0 -> {
+                        FilmStrip(ui, enabled) { vm.pickFilm(it) }
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                         SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
                         LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV") {
@@ -462,6 +466,42 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
                 }
             },
         )
+    }
+}
+
+/** The film cards: each film on the open photo. Films whose card has not rendered yet show their name only. */
+@Composable
+private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
+    if (!ui.hasImage || ui.catalog.films.isEmpty()) return
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        items(ui.catalog.films, key = { it.id }) { film ->
+            val selected = film.id == ui.edit.film
+            Column(
+                Modifier.width(96.dp).clickable(enabled = enabled) { onPick(film.id) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier.size(96.dp).background(Color(0xFF222222))
+                        .then(if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val card = ui.filmCards[film.id]
+                    if (card != null) {
+                        val bitmap = remember(card) { card.asImageBitmap() }
+                        Image(bitmap, contentDescription = film.label, contentScale = ContentScale.Crop,
+                              modifier = Modifier.fillMaxSize())
+                    } else {
+                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    }
+                }
+                Text(
+                    film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
     }
 }
 

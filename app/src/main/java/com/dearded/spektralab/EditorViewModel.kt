@@ -44,6 +44,8 @@ data class UiState(
     val imageTier: String = "",
     /** The frame before any film, shown while the preview is held down. */
     val before: Bitmap? = null,
+    /** Film id -> a 384 px preview of the open photo through that film. Filled in the background. */
+    val filmCards: Map<String, Bitmap> = emptyMap(),
     val source: SourceInfo? = null,
     val workingEdge: Int = 4096,
     val maxPixels: Long = 0,
@@ -83,6 +85,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var lastUri: Uri? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
+    // The open photo's input space, so a film card opens on it the same way.
+    private var openSpace = "sRGB"
+    private var openLinear = false
+    private var cardsJob: kotlinx.coroutines.Job? = null
 
     init {
         viewModelScope.launch { startEngine() }
@@ -149,8 +155,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             )
             // Free the previous frame before decoding the next, so the two never
             // coexist in memory (a 20 MP open ran out of memory that way elsewhere).
+            cardsJob?.cancel()
             withContext(EngineThread.dispatcher) { releaseSession() }
-            _ui.update { it.copy(image = null, before = null, source = null) }
+            _ui.update { it.copy(image = null, before = null, source = null, filmCards = emptyMap()) }
             sourceExif = withContext(Dispatchers.IO) { ExifCopy.read { resolver.openInputStream(uri) } }
             val handle: Long
             if (raw) {
@@ -158,7 +165,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(busy = "正在解码 RAW…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    val params = Edit.openingParams(look, inputSpace = "ProPhoto RGB", linear = true).toString()
+                    openSpace = "ProPhoto RGB"; openLinear = true
+                    val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
                     val h = NativeEngine.openRaw(engine, file.absolutePath, edge, maxPixels, params)
                     file.delete()
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
@@ -169,7 +177,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(busy = "正在打开…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    val params = Edit.openingParams(look, inputSpace = space, linear = false).toString()
+                    openSpace = space; openLinear = false
+                    val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
                     val h = NativeEngine.openBitmap(engine, bitmap, params)
                     bitmap.recycle()
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
@@ -199,6 +208,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             log("open ${if (raw) "raw" else "photo"} ${info.optInt("sourceWidth")}x${info.optInt("sourceHeight")} -> ${info.optInt("width")}x${info.optInt("height")}")
             renders.trySend(Unit)
+            startFilmCards(handle)
         } catch (e: OutOfMemoryError) {
             log("open failed: out of memory")
             _ui.update { it.copy(busy = null, error = "内存不足，请在“设置”里把工作尺寸调小后重试") }
@@ -290,13 +300,32 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun pickFilm(id: String) {
         val state = _ui.value
-        val film = state.catalog.film(id) ?: return
-        val current = state.edit
-        var paper = current.paper
-        // Keep the user's paper unless it cannot print this film (colour vs black and white).
-        val paperBw = state.catalog.paper(paper)?.bw ?: false
-        if (film.targetPrint != null && paperBw != film.bw) paper = film.targetPrint
-        update(current.copy(film = id, scanFilm = film.positive, paper = paper))
+        update(withFilm(state.edit, state.catalog, id) ?: return)
+    }
+
+    /**
+     * One card per film, rendered after the photo opens: the open photo's small
+     * copy through that film, with the user's current paper and effects. One
+     * card per engine-thread hop, so the user's own renders get in between.
+     * Cancelled by the next open; a card that fails is simply left out.
+     */
+    private fun startFilmCards(handle: Long) {
+        cardsJob?.cancel()
+        cardsJob = viewModelScope.launch {
+            kotlinx.coroutines.delay(1500)   // let the first preview land first
+            val catalog = _ui.value.catalog
+            for (film in catalog.films) {
+                val base = withFilm(wanted, catalog, film.id) ?: continue
+                val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
+                val card = runCatching {
+                    withContext(EngineThread.dispatcher) {
+                        if (session != handle) null else NativeEngine.filmPreview(handle, params)
+                    }
+                }.getOrNull() ?: continue
+                _ui.update { it.copy(filmCards = it.filmCards + (film.id to card)) }
+            }
+            log("film cards ${_ui.value.filmCards.size}/${catalog.films.size}")
+        }
     }
 
     /** Sends whatever the user changed since the last call. Engine thread only. */
@@ -532,6 +561,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val backend = JSONObject(caps).optJSONObject("backend") ?: return@runCatching caps
             "${backend.optString("render_core")} · ${backend.optString("math_mode")}"
         }.getOrDefault(caps)
+
+        /** [edit] with film [id]; the paper changes only when it cannot print it (colour vs B&W). */
+        fun withFilm(edit: Edit, catalog: Catalog, id: String): Edit? {
+            val film = catalog.film(id) ?: return null
+            var paper = edit.paper
+            val paperBw = catalog.paper(paper)?.bw ?: false
+            if (film.targetPrint != null && paperBw != film.bw) paper = film.targetPrint
+            return edit.copy(film = id, scanFilm = film.positive, paper = paper)
+        }
 
         @Suppress("unused")
         private fun clamp(v: Double, lo: Double, hi: Double) = min(hi, max(lo, v))

@@ -37,6 +37,10 @@ struct Session {
     std::string make, model, kind;
     std::vector<uint8_t> before;   // RGBA8, see make_before
     uint32_t before_w = 0, before_h = 0;
+    // The same small frame before encoding, in the session's input space:
+    // what the film preview cards render from (see thumbnail()).
+    std::vector<float> small_rgb;
+    uint32_t small_w = 0, small_h = 0;
 };
 
 std::string str(JNIEnv* env, jstring s) {
@@ -158,6 +162,7 @@ float srgb_encode(float v) {
 // engine. RAW arrives as linear ProPhoto (D50) and is converted to encoded sRGB
 // (Bradford to D65); a gallery photo is already encoded and is only scaled.
 constexpr uint32_t kBeforeEdge = 1600;
+constexpr uint32_t kThumbEdge = 384;
 
 void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t h, bool linear_prophoto) {
     uint32_t nw = w, nh = h;
@@ -186,6 +191,15 @@ void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t
     }
     s->before_w = nw;
     s->before_h = nh;
+
+    // Film cards: a still smaller copy, unencoded, so each card opens a
+    // throwaway session on it in the same input space as the real one.
+    uint32_t tw = nw, th = nh;
+    fit(nw, nh, kThumbEdge, 0, tw, th);
+    if (tw != nw || th != nh) spk::android::resize_area_rgb(*src, nw, nh, tw, th, s->small_rgb);
+    else s->small_rgb = *src;
+    s->small_w = tw;
+    s->small_h = th;
 }
 
 bool render(Session* s, const std::string& tier, spk_result& out) {
@@ -388,6 +402,33 @@ JNI_FN(jobject, beforeBitmap)(JNIEnv* env, jobject, jlong handle) {
                     s->before.data() + size_t(y) * s->before_w * 4, size_t(s->before_w) * 4);
     AndroidBitmap_unlockPixels(env, bitmap);
     return bitmap;
+}
+
+// A film card: the current photo, 384 px, through `params_j` (complete opening
+// params, the card's film and paper). A throwaway session on the small copy
+// kept at open, so the user's session and its cached negative are untouched.
+JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s || s->small_rgb.empty()) { fail("no preview source"); return nullptr; }
+    try {
+        const spk_image input{s->small_rgb.data(), s->small_w, s->small_h, 3};
+        const std::string params = str(env, params_j);
+        spk_session* card = spk_open(s->engine, &input, params.c_str(), nullptr);
+        if (!card) { fail(engine_error("film preview")); return nullptr; }
+        spk_result result;
+        std::memset(&result, 0, sizeof result);
+        jobject bitmap = nullptr;
+        if (spk_render(card, "full", &result) == SPK_OK && result.rgba16) bitmap = to_bitmap(env, result);
+        else fail(engine_error("film preview render"));
+        spk_result_free(&result);
+        spk_session_release(card);
+        return bitmap;
+    } catch (const std::exception& e) {
+        fail(std::string("film preview: ") + e.what());
+    } catch (...) {
+        fail("film preview: unknown failure");
+    }
+    return nullptr;
 }
 
 JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {

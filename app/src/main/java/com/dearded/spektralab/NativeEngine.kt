@@ -28,6 +28,9 @@ object NativeEngine {
     /** A small sRGB thumbnail of the frame before any film was applied. */
     external fun beforeBitmap(session: Long): Bitmap?
 
+    /** The photo at 384 px through [paramsJson] (complete opening params), in a throwaway session. */
+    external fun filmPreview(session: Long, paramsJson: String): Bitmap?
+
     external fun sourceInfo(session: Long): String
     external fun setParams(session: Long, deltaJson: String): String?
     external fun getParams(session: Long): String?
