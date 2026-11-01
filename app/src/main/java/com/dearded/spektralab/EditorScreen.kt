@@ -77,6 +77,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -250,11 +252,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
         val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
             val bitmap = remember(image) { image.asImageBitmap() }
-            Image(
-                bitmap = bitmap,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
+            val gestures = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -283,8 +281,13 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
                     .graphicsLayer {
                         scaleX = scale; scaleY = scale
                         translationX = offset.x; translationY = offset.y
-                    },
-            )
+                    }
+            // The original is shown bare; the print gets its paper frame.
+            val frame = if (holding && ui.before != null) FrameSpec() else ui.edit.frame
+            val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
+                Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
+            }
+            FramedImage(bitmap, frame, caption, gestures)
         } else if (ui.ready && !ui.hasImage) {
             Text(
                 "点右上角 + 打开照片\n支持 JPEG / PNG / HEIC 和相机 RAW（DNG、CR3、NEF、ARW、RAF…）",
@@ -456,8 +459,83 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                        Text("边框样式", style = MaterialTheme.typography.labelLarge)
+                        Row(
+                            Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            for (p in Borders.PRESETS) {
+                                FilterChip(
+                                    selected = e.borderId == p.id,
+                                    onClick = { if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height)) },
+                                    label = { Text(p.label) },
+                                    enabled = enabled && src != null,
+                                )
+                            }
+                        }
+                        Borders.byId(e.borderId)?.let { p ->
+                            Text(p.hint, style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        if (e.filmEdge) {
+                            Text("片边", style = MaterialTheme.typography.labelLarge)
+                            Row(
+                                Modifier.horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                for ((v, label) in listOf("strip" to "整条底片", "filed" to "锉边")) {
+                                    FilterChip(selected = e.edgeMode == v, onClick = { vm.update(e.copy(edgeMode = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                                for ((v, label) in listOf("white" to "扫描 · 白孔", "black" to "相纸 · 黑孔")) {
+                                    FilterChip(selected = e.edgeHoles == v, onClick = { vm.update(e.copy(edgeHoles = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            LabeledSlider("边缘雾化", e.edgeFog, 0.0, 3.0, 1.0, enabled, "%.1f", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(edgeFog = it))
+                            }
+                            LabeledSlider("片轴漏光", e.edgeLeaks, 0.0, 3.0, 0.0, enabled, "%.1f", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(edgeLeaks = it))
+                            }
+                        }
+                        if (!e.frame.isNone) {
+                            Text("相纸", style = MaterialTheme.typography.labelLarge)
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+                                for (c in FrameSpec.PAPERS) {
+                                    val on = e.frame.paper == c
+                                    Box(
+                                        Modifier.size(30.dp)
+                                            .background(Color(c), androidx.compose.foundation.shape.CircleShape)
+                                            .border(if (on) 2.dp else 1.dp,
+                                                if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                                androidx.compose.foundation.shape.CircleShape)
+                                            .clickable(enabled = enabled) { vm.update(e.copy(frame = e.frame.copy(paper = c))) },
+                                    )
+                                }
+                            }
+                            // A data bar has only a bottom band; every other card scales as a whole.
+                            val bar = e.frame.side == 0f && e.frame.top == 0f
+                            val cur = if (bar) e.frame.bottom else maxOf(e.frame.side, e.frame.top)
+                            val presetFrame = Borders.byId(e.borderId)?.frame
+                            val def = presetFrame?.let { if (bar) it.bottom else maxOf(it.side, it.top) } ?: cur
+                            LabeledSlider("边宽", cur.toDouble(), 0.01, 0.3, def.toDouble(), enabled, "%.2f") { v ->
+                                val f = e.frame
+                                val next = if (bar) f.copy(bottom = v.toFloat()) else {
+                                    val r = (v / cur.coerceAtLeast(0.001f)).toFloat()
+                                    f.copy(side = f.side * r, top = f.top * r, bottom = f.bottom * r)
+                                }
+                                vm.update(e.copy(frame = next))
+                            }
+                            SwitchRow("参数文字", e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
+                            Text("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                         SwitchRow("胶片边框", e.filmEdge, enabled && src != null) { on ->
-                            if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on))
+                            if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on).let {
+                                if (!on && Borders.byId(e.borderId)?.edge != null && e.frame.isNone) it.copy(borderId = "none") else it
+                            })
                         }
                         if (e.filmEdge && src != null) {
                             Row(
@@ -823,6 +901,45 @@ private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
                     style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 8.dp))
                 TextButton(onClick = onClose) { Text("关闭", color = Color.White) }
             }
+        }
+    }
+}
+
+/**
+ * The print on its paper frame, scaled to fit. With no frame it is a plain
+ * fitted image. Drawn rather than composed, so the frame costs no bitmap.
+ */
+@Composable
+private fun FramedImage(
+    bitmap: androidx.compose.ui.graphics.ImageBitmap,
+    frame: FrameSpec,
+    caption: Caption,
+    modifier: Modifier,
+) {
+    if (frame.isNone) {
+        Image(bitmap = bitmap, contentDescription = null, contentScale = ContentScale.Fit, modifier = modifier)
+        return
+    }
+    androidx.compose.foundation.Canvas(modifier) {
+        val l = frame.layout(bitmap.width, bitmap.height)
+        val k = minOf(size.width / l.width, size.height / l.height)
+        val ox = (size.width - l.width * k) / 2f
+        val oy = (size.height - l.height * k) / 2f
+        drawRect(Color(frame.paper), topLeft = Offset(ox, oy),
+            size = androidx.compose.ui.geometry.Size(l.width * k, l.height * k))
+        drawImage(
+            bitmap,
+            dstOffset = androidx.compose.ui.unit.IntOffset(Math.round(ox + l.x * k), Math.round(oy + l.y * k)),
+            dstSize = androidx.compose.ui.unit.IntSize(Math.round(bitmap.width * k), Math.round(bitmap.height * k)),
+            filterQuality = androidx.compose.ui.graphics.FilterQuality.Medium,
+        )
+        if (frame.caption) drawIntoCanvas { c ->
+            val n = c.nativeCanvas
+            n.save()
+            n.translate(ox, oy)
+            n.scale(k, k)
+            FrameSpec.drawCaption(n, frame, l, bitmap.width, bitmap.height, caption)
+            n.restore()
         }
     }
 }

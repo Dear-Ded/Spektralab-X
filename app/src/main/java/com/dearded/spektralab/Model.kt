@@ -86,6 +86,24 @@ data class Edit(
     val dateImprint: Boolean = false,
     /** Already formatted the way a date back writes it, e.g. `'26 11 1`. */
     val dateText: String = "",
+    // The rest of the film edge (engine wire names in FIELDS).
+    val edgeMode: String = "strip",
+    val edgeHoles: String = "white",
+    val edgeGate: String = "auto",
+    val edgeCarrier: String = "none",
+    val edgeFog: Double = 1.0,
+    val edgeLeaks: Double = 0.0,
+    /** "The camera" and "this frame": gate centring, weave, leak positions. A die roll re-draws them. */
+    val edgeCameraSeed: Int = 1,
+    val edgeFrameSeed: Int = 1,
+    /** EXIF aperture; sets the gate's penumbra (0 = f/5.6 assumed). */
+    val edgeFNumber: Double = 0.0,
+    val dateStyle: String = "lcd",
+    val dateCorner: String = "br",
+    /** The paper around the print. App-side only: drawn after the engine, never sent. */
+    val frame: FrameSpec = FrameSpec(),
+    /** The border preset the user picked, for the chip row. App-side only. */
+    val borderId: String = "none",
 ) {
     /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
     fun turned(by: Int) = copy(
@@ -135,6 +153,17 @@ data class Edit(
             "overscan_format" to { e: Edit -> e.edgeFormat },
             "date_imprint_active" to { e: Edit -> e.dateImprint },
             "date_imprint_text" to { e: Edit -> e.dateText },
+            "overscan_mode" to { e: Edit -> e.edgeMode },
+            "overscan_holes" to { e: Edit -> e.edgeHoles },
+            "overscan_gate" to { e: Edit -> e.edgeGate },
+            "overscan_carrier" to { e: Edit -> e.edgeCarrier },
+            "overscan_fog" to { e: Edit -> e.edgeFog },
+            "overscan_leaks" to { e: Edit -> e.edgeLeaks },
+            "overscan_camera_seed" to { e: Edit -> e.edgeCameraSeed },
+            "overscan_frame_seed" to { e: Edit -> e.edgeFrameSeed },
+            "overscan_f_number" to { e: Edit -> e.edgeFNumber },
+            "date_imprint_style" to { e: Edit -> e.dateStyle },
+            "date_imprint_corner" to { e: Edit -> e.dateCorner },
         )
 
         /** The session's resolved values, as `spk_get_params` reports them. */
@@ -165,7 +194,40 @@ data class Edit(
             edgeFormat = p.optString("overscan_format", fallback.edgeFormat),
             dateImprint = p.optBoolean("date_imprint_active", fallback.dateImprint),
             dateText = p.optString("date_imprint_text", fallback.dateText),
+            edgeMode = p.optString("overscan_mode", fallback.edgeMode),
+            edgeHoles = p.optString("overscan_holes", fallback.edgeHoles),
+            edgeGate = p.optString("overscan_gate", fallback.edgeGate),
+            edgeCarrier = p.optString("overscan_carrier", fallback.edgeCarrier),
+            edgeFog = p.optDouble("overscan_fog", fallback.edgeFog),
+            edgeLeaks = p.optDouble("overscan_leaks", fallback.edgeLeaks),
+            edgeCameraSeed = p.optInt("overscan_camera_seed", fallback.edgeCameraSeed),
+            edgeFrameSeed = p.optInt("overscan_frame_seed", fallback.edgeFrameSeed),
+            edgeFNumber = p.optDouble("overscan_f_number", fallback.edgeFNumber),
+            dateStyle = p.optString("date_imprint_style", fallback.dateStyle),
+            dateCorner = p.optString("date_imprint_corner", fallback.dateCorner),
+            frame = fallback.frame,          // app-side only
+            borderId = fallback.borderId,    // app-side only
         )
+
+        /**
+         * [preset] applied to [edit] on a [w] x [h] source: the film edge (with
+         * its gate crop) or, without one, the preset's own centred crop.
+         */
+        fun withBorder(edit: Edit, preset: BorderPreset, w: Int, h: Int): Edit {
+            val edge = preset.edge
+            var next = edit.copy(frame = preset.frame, borderId = preset.id)
+            return if (edge != null) {
+                next = next.copy(edgeMode = edge.mode, edgeHoles = edge.holes, edgeGate = edge.gate,
+                    edgeCarrier = edge.carrier, edgeFog = edge.fog, edgeLeaks = edge.leaks)
+                val e = withFilmEdge(next.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0), w, h, true, edge.format)
+                if (!dateBackFits(edge.format)) e.copy(dateImprint = false) else e
+            } else {
+                next = next.copy(filmEdge = false)
+                if (preset.crop > 0) centredCrop(next.copy(cropAspect = preset.crop), w, h, preset.crop)
+                else if (edit.filmEdge) centredCrop(next.copy(cropAspect = 0.0), w, h, 0.0)
+                else next
+            }
+        }
 
         /** Gate long / short edge, mm, as engine/src/pipeline/overscan.cpp's kFormats. */
         val EDGE_FORMATS = listOf(
@@ -175,6 +237,7 @@ data class Edit(
             Triple("120_645", "645", 56.0 / 41.5),
             Triple("120_6x6", "6×6", 1.0),
             Triple("120_6x7", "6×7", 69.5 / 56.0),
+            Triple("120_6x8", "6×8", 76.0 / 56.0),
             Triple("120_6x9", "6×9", 84.0 / 56.0),
             Triple("120_6x12", "6×12", 112.0 / 56.0),
             Triple("120_6x17", "6×17", 168.0 / 56.0),

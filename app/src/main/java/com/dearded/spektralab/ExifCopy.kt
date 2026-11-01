@@ -20,6 +20,29 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
     /** `yyyy:MM:dd HH:mm:ss`, or null. */
     val dateTimeOriginal: String? get() = values[ExifInterface.TAG_DATETIME_ORIGINAL]
 
+    // For the shooting-data caption. Each is null (or blank) when the photo does not say.
+    val make: String get() = values[ExifInterface.TAG_MAKE]?.trim().orEmpty()
+    val model: String get() = values[ExifInterface.TAG_MODEL]?.trim().orEmpty()
+
+    private fun rational(tag: String): Double? = values[tag]?.let { v ->
+        val parts = v.split('/')
+        if (parts.size == 2) parts[0].toDoubleOrNull()?.let { n -> parts[1].toDoubleOrNull()?.takeIf { it != 0.0 }?.let { n / it } }
+        else v.toDoubleOrNull()
+    }?.takeIf { it.isFinite() && it > 0 }
+
+    fun focal35(): Int? = values[ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM]?.toIntOrNull()?.takeIf { it > 0 }
+        ?: rational(ExifInterface.TAG_FOCAL_LENGTH)?.let { kotlin.math.round(it).toInt() }
+
+    fun fNumber(): Double? = rational(ExifInterface.TAG_F_NUMBER)
+
+    fun aperture(): String? = fNumber()?.let { if (it >= 10) "%.0f".format(it) else "%.1f".format(it).removeSuffix(".0") }
+
+    fun shutter(): String? = rational(ExifInterface.TAG_EXPOSURE_TIME)?.let { t ->
+        if (t >= 1) "${"%.1f".format(t).removeSuffix(".0")}s" else "1/${kotlin.math.round(1 / t).toInt()}s"
+    }
+
+    fun iso(): Int? = values[ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY]?.split(',')?.firstOrNull()?.trim()?.toIntOrNull()
+
     /** Writes the copied tags into [jpeg] in place. Failures leave the file as it was. */
     fun applyTo(jpeg: File, width: Int, height: Int) {
         runCatching {

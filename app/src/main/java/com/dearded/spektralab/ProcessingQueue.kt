@@ -47,6 +47,9 @@ data class ProcessingJob(
     val maxPixels: Long,
     /** The output's pixel count, for the time estimate. */
     val outPixels: Long,
+    /** The paper frame (FrameSpec JSON, "" = none) and the film's name for its caption. */
+    val frameJson: String = "",
+    val filmLabel: String = "",
     val state: JobState = JobState.QUEUED,
     val progress: Float = 0f,
     val phase: String = "",
@@ -69,6 +72,7 @@ data class ProcessingJob(
         .put("id", id).put("uri", uri).put("name", name).put("raw", raw).put("edit", editJson)
         .put("wbK", wbK).put("wbTint", wbTint).put("format", format.name).put("size", size.name)
         .put("edge", workingEdge).put("maxPixels", maxPixels).put("outPixels", outPixels)
+        .put("frame", frameJson).put("filmLabel", filmLabel)
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
 
@@ -80,6 +84,7 @@ data class ProcessingJob(
                 wbK = o.optDouble("wbK", 0.0), wbTint = o.optDouble("wbTint", 0.0),
                 format = ExportFormat.valueOf(o.getString("format")), size = ExportSize.valueOf(o.getString("size")),
                 workingEdge = o.optInt("edge"), maxPixels = o.optLong("maxPixels"), outPixels = o.optLong("outPixels"),
+                frameJson = o.optString("frame"), filmLabel = o.optString("filmLabel"),
                 state = JobState.valueOf(o.optString("state", "QUEUED")), message = o.optString("message"),
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
             )
@@ -299,8 +304,15 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             // Compressed to a file first: EXIF is written in place, then copied out.
                             val tmp = File(app.cacheDir, "$stem.jpg")
                             try {
-                                tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
-                                exif.applyTo(tmp, bitmap.width, bitmap.height)
+                                // The paper frame is drawn around the print here, after the engine.
+                                val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
+                                val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
+                                try {
+                                    tmp.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+                                    exif.applyTo(tmp, out.width, out.height)
+                                } finally {
+                                    if (out !== bitmap) out.recycle()
+                                }
                                 MediaSaver.save(app, "$stem.jpg", "image/jpeg") { out -> tmp.inputStream().use { it.copyTo(out, 1 shl 20) } }
                             } finally {
                                 tmp.delete()

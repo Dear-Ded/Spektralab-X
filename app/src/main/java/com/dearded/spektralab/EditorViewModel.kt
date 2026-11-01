@@ -57,6 +57,8 @@ data class UiState(
     val presets: List<Preset> = emptyList(),
     /** The 正在处理 sheet is open. */
     val showQueue: Boolean = false,
+    /** The open photo's shooting data, for the paper frame's caption. */
+    val exif: ExifCopy = ExifCopy.NONE,
     /** The full working-size render for 1:1 viewing; dropped on any edit. */
     val detail: Bitmap? = null,
     val loadingDetail: Boolean = false,
@@ -208,6 +210,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 filmEdge = false,
                 dateText = Edit.dateBackText(sourceExif.dateTimeOriginal),
             ).let { if (it.dateText.isEmpty()) it.copy(dateImprint = false) else it }
+                // A border that crops or sets a film edge belongs to the last photo's
+                // geometry; a pure paper frame (data bar, mat) carries over as a look.
+                .let {
+                    val p = Borders.byId(it.borderId)
+                    if (wb == null && p != null && (p.edge != null || p.crop > 0)) it.copy(frame = FrameSpec(), borderId = "none") else it
+                }
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
@@ -256,7 +264,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             _ui.update {
                 it.copy(
-                    busy = null, edit = edit, image = null, imageTier = "", before = before,
+                    busy = null, edit = edit, image = null, imageTier = "", before = before, exif = sourceExif,
                     source = SourceInfo(
                         name = name,
                         width = info.optInt("width"), height = info.optInt("height"),
@@ -633,6 +641,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             editJson = state.edit.toJson().toString(), wbK = src.wbK, wbTint = src.wbTint,
             format = format, size = size, workingEdge = state.workingEdge, maxPixels = state.maxPixels,
             outPixels = outPixels,
+            frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
+            filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${src.width}x${src.height}")
