@@ -1,0 +1,1 @@
+Film preview cards pause while the phone is hot; thermal headroom in diagnostics.
