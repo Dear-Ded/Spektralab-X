@@ -60,21 +60,30 @@ jobs:
           SPK_UPSTREAM: ${{ github.workspace }}/upstream
         run: gradle --no-daemon --stacktrace :app:assembleRelease
 
+      - name: Version
+        run: |
+          v="$(tr -d '[:space:]' < VERSION)"
+          echo "APP_VERSION=$v" >> "$GITHUB_ENV"
+          if gh release view "v$v" >/dev/null 2>&1; then echo "PUBLISH=0" >> "$GITHUB_ENV"; else echo "PUBLISH=1" >> "$GITHUB_ENV"; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Rename APK
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/SpektraLab-${{ github.run_number }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/SpektraLab-$APP_VERSION.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SpektraLab-${{ github.run_number }}
+          name: SpektraLab-${{ env.APP_VERSION }}-run${{ github.run_number }}
           path: dist/*.apk
 
+      # A release is published only when VERSION names a version not yet
+      # released; other pushes leave an artifact on the run and nothing else.
       - name: Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && env.PUBLISH == '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "build-${{ github.run_number }}" dist/*.apk \
-            --title "Build ${{ github.run_number }}" \
-            --notes "Commit ${{ github.sha }}" --latest
+          notes="$(awk -v v="$APP_VERSION" '$0 ~ "^## "v"( |$)" {f=1; next} /^## / {f=0} f' CHANGELOG.md)"
+          gh release create "v$APP_VERSION" dist/*.apk             --title "SpektraLab Android $APP_VERSION"             --notes "${notes:-Commit ${{ github.sha }}}" --prerelease

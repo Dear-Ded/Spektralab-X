@@ -6,7 +6,12 @@ plugins {
 
 // Upstream SpektraLab checkout made by scripts/fetch-upstream.sh.
 val upstream: String = System.getenv("SPK_UPSTREAM") ?: rootProject.file("upstream").absolutePath
-val runNumber: Int = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+// VERSION holds "major.minor.patch[-label]" (0.1.3-alpha). Bump the patch for
+// every release; the versionCode is derived from it so updates always install.
+val appVersion: String = rootProject.file("VERSION").readText().trim()
+val appVersionCode: Int = Regex("""^(\d+)\.(\d+)\.(\d+)""").find(appVersion)
+    ?.destructured?.let { (a, b, c) -> a.toInt() * 10000 + b.toInt() * 100 + c.toInt() }
+    ?: error("VERSION '$appVersion' is not major.minor.patch")
 val keystorePath: String? = System.getenv("SPK_KEYSTORE")?.takeIf { file(it).isFile }
 
 android {
@@ -18,8 +23,8 @@ android {
         applicationId = "com.dearded.spektralab"
         minSdk = 29
         targetSdk = 35
-        versionCode = runNumber
-        versionName = "0.1.$runNumber"
+        versionCode = appVersionCode
+        versionName = appVersion
         ndk { abiFilters += "arm64-v8a" }
         externalNativeBuild {
             cmake {
