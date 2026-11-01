@@ -142,11 +142,14 @@ fun EditorScreen(vm: EditorViewModel) {
                             Icon(Icons.Default.Share, contentDescription = "导出")
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text("导出 JPEG") }, onClick = {
-                                exportMenu = false; vm.export(ExportFormat.JPEG)
+                            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
+                                exportMenu = false; vm.export(ExportFormat.JPEG, ExportSize.FULL)
                             })
-                            DropdownMenuItem(text = { Text("导出 16 位 TIFF") }, onClick = {
-                                exportMenu = false; vm.export(ExportFormat.TIFF)
+                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
+                                exportMenu = false; vm.export(ExportFormat.JPEG, ExportSize.SHARE)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
+                                exportMenu = false; vm.export(ExportFormat.TIFF, ExportSize.FULL)
                             })
                         }
                     }

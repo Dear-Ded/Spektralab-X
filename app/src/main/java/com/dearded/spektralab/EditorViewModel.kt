@@ -30,6 +30,9 @@ import kotlin.math.sqrt
 
 enum class ExportFormat { JPEG, TIFF }
 
+/** "full" is the working size; "preview" is the engine's 3400 px tier, for sharing. */
+enum class ExportSize(val tier: String) { FULL("full"), SHARE("preview") }
+
 data class UiState(
     val ready: Boolean = false,
     val busy: String? = "正在准备引擎…",
@@ -344,10 +347,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // --- export --------------------------------------------------------------
 
-    fun export(format: ExportFormat) {
+    fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL) {
         if (_ui.value.exporting || !_ui.value.hasImage) return
         viewModelScope.launch {
-            _ui.update { it.copy(exporting = true, busy = "正在渲染全尺寸…") }
+            _ui.update { it.copy(exporting = true, busy = if (size == ExportSize.FULL) "正在渲染全尺寸…" else "正在渲染…") }
             try {
                 val stem = "SpektraLab_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date())
                 when (format) {
@@ -355,7 +358,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         val tmp = File(app.cacheDir, "$stem.tif")
                         withContext(EngineThread.dispatcher) {
                             applyWanted()?.let { throw EngineException("参数无效：$it") }
-                            if (!NativeEngine.exportTiff(session, tmp.absolutePath, iccPath))
+                            if (!NativeEngine.exportTiff(session, tmp.absolutePath, iccPath, size.tier))
                                 throw EngineException("导出失败：${NativeEngine.lastError()}")
                         }
                         withContext(Dispatchers.IO) {
@@ -366,7 +369,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     ExportFormat.JPEG -> {
                         val bitmap = withContext(EngineThread.dispatcher) {
                             applyWanted()?.let { throw EngineException("参数无效：$it") }
-                            NativeEngine.renderBitmap(session, "full")
+                            NativeEngine.renderBitmap(session, size.tier)
                                 ?: throw EngineException("导出失败：${NativeEngine.lastError()}")
                         }
                         withContext(Dispatchers.IO) {

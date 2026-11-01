@@ -447,7 +447,7 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     return nullptr;
 }
 
-JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j) {
+JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return JNI_FALSE; }
     try {
@@ -458,7 +458,8 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
             icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
         }
         spk_result result;
-        if (!render(s, "full", result)) return JNI_FALSE;
+        const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
+        if (!render(s, tier, result)) return JNI_FALSE;
         std::string error;
         const bool ok = spk::android::write_tiff16(str(env, path_j), result.rgba16, result.width, result.height,
                                                    result.row_stride_px, icc, error);
