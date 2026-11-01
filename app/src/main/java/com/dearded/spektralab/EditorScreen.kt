@@ -289,7 +289,31 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
-            FramedImage(bitmap, frame, caption, gestures)
+            // A film change crosses over from the old print (defaultEffects, no
+            // overshoot); drag renders, tier upgrades and the held original swap
+            // instantly, so live feedback is never delayed by an animation.
+            val film = ui.edit.film
+            var shownFilm by remember { mutableStateOf(film) }
+            var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+            var front by remember { mutableStateOf(bitmap) }
+            val fade = remember { androidx.compose.animation.core.Animatable(1f) }
+            LaunchedEffect(bitmap) {
+                if (bitmap === front) return@LaunchedEffect
+                val cross = film != shownFilm && !holding && back == null
+                shownFilm = film
+                if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
+                back = front; front = bitmap; fade.snapTo(0f)
+                try { fade.animateTo(1f, Motion.defaultEffects()) } finally { back = null }
+            }
+            Box(gestures) {
+                val under = back
+                if (under != null) {
+                    FramedImage(under, frame, caption, Modifier.fillMaxSize())
+                    FramedImage(front, frame, caption, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
+                } else {
+                    FramedImage(bitmap, frame, caption, Modifier.fillMaxSize())
+                }
+            }
         } else if (ui.ready && !ui.hasImage) {
             Text(
                 "点右上角 + 打开照片\n支持 JPEG / PNG / HEIC 和相机 RAW（DNG、CR3、NEF、ARW、RAF…）",
