@@ -8,3 +8,7 @@ upstream/
 app/src/main/assets/engine/
 signing/
 dist/
+.kotlin/
+*.jks
+*.keystore
+*.p12

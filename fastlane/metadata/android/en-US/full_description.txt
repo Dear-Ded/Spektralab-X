@@ -13,3 +13,5 @@ It is not a filter: the photo is exposed spectrally onto a physical film model, 
 </ul>
 
 No network access, no data collection. Alpha: not yet widely tested on real devices.
+
+<i>The interface is Simplified Chinese only for now.</i>

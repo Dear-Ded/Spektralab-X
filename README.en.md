@@ -33,6 +33,9 @@ This repository builds SpektraLab's C++ engine for Android with the NDK, runs it
 - **Framing:** rotate, flip, centred crop; film edge for 135, half frame, XPan, 645, 6×6, 6×7, 6×9, 6×12, 6×17; date back from the EXIF capture time.
 - **Viewing and export:** fast preview while dragging, sharp preview on release, stale renders cancelled; hold to compare with the original; histogram with clipping; 1:1 grain view; 50-step undo/redo; presets; JPEG with EXIF (no GPS) or 16-bit TIFF with an sRGB profile, at full working size or 3400 px.
 
+> [!NOTE]
+> The app's interface is Simplified Chinese only for now.
+
 ## Devices
 
 Tuned for **Xiaomi 10 – 18** (there is no Xiaomi 16): Snapdragon 865, 888, 8 Gen 1 / 8+ Gen 1, 8 Gen 2, 8 Gen 3, 8 Elite, 8 Elite Gen 5 and Gen 6, all with Adreno GPUs. None is verified yet. Memory, recommended working sizes and known risks per generation are in [docs/DEVICES.md](docs/DEVICES.md). Other arm64 phones on Android 10+ with Vulkan should run it but are not a target.
@@ -51,12 +54,12 @@ Each release carries `SHA256SUMS` and a GitHub build-provenance attestation:
 
 ```bash
 sha256sum -c SHA256SUMS
-gh attestation verify SpektraLab-0.1.9-alpha-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify SpektraLab-<version>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
 ## Reporting problems
 
-Open **Settings → Copy diagnostics** in the app (version, device, SoC, memory, GPU probe, current parameters, last 20 events; no file names or locations) and paste it into a [bug report](https://github.com/Dear-Ded/spektralab-android/issues/new/choose). Questions go to [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions). If a render differs from the macOS app, report it here, not upstream.
+Open **Settings → Copy diagnostics** in the app (version, device, SoC, memory, GPU probe, current parameters, last 40 events; no file names or locations) and paste it into a [bug report](https://github.com/Dear-Ded/spektralab-android/issues/new/choose). Questions go to [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions). If a render differs from the macOS app, report it here, not upstream.
 
 ## How it works
 
@@ -66,7 +69,7 @@ Compose UI (Kotlin) ──JSON──▶ JNI (spektralab_jni.cpp) ──spk_engin
                                                                           └─ LibRaw 0.22.2
 ```
 
-Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh). All engine changes live in [`patches/`](patches/) and are described in [docs/PATCHES.md](docs/PATCHES.md). Structure, threading and memory strategy: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Module layout, threading, render tiers and the memory budget are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh). All engine changes live in [`patches/`](patches/) and are described in [docs/PATCHES.md](docs/PATCHES.md). Module layout, threading, render tiers and the memory budget are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Building
 
@@ -75,7 +78,7 @@ JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator`:
 ```bash
 bash scripts/fetch-upstream.sh upstream
 bash scripts/stage-assets.sh upstream
-SPK_UPSTREAM=$PWD/upstream gradle :app:assembleRelease
+SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -21,7 +21,7 @@ docs/DEVICES.md          设备适配说明
 ```bash
 bash scripts/fetch-upstream.sh upstream
 bash scripts/stage-assets.sh upstream
-SPK_UPSTREAM=$PWD/upstream gradle :app:assembleRelease
+SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ```
 
 不想装工具链也可以只推送到自己的 fork，GitHub Actions 会编译并把 APK 放在运行记录的 Artifacts 里。
@@ -31,7 +31,7 @@ SPK_UPSTREAM=$PWD/upstream gradle :app:assembleRelease
 不要直接改 `upstream/` 里的文件，改动会在下次拉取时丢掉。改引擎的流程：
 
 1. 在 `upstream/` 里做修改并编译通过。
-2. 用 `git diff` 生成补丁，放进 `patches/`，文件名按序号排列（`0004-简短说明.patch`）。
+2. `upstream/` 是解压的源码包，不是 git 仓库：先在里面 `git init && git add -A && git commit -m base`，改完再用 `git diff` 生成补丁（详见 [docs/PATCHES.md](docs/PATCHES.md)），放进 `patches/`，文件名按序号排列（`0004-简短说明.patch`）。
 3. 补丁开头的注释写清楚改了什么、为什么，以及是否影响数值结果。引擎对数值精度要求很严，改动尽量保持结果不变。
 
 ## 提交规范

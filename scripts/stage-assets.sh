@@ -37,8 +37,8 @@ cp "$engine/resources_product/fonts/DejaVu-LICENSE" "$out/licenses/Imprint-mono-
 cp "$engine/third_party/stb/LICENSE" "$out/licenses/stb-LICENSE.txt"
 cp "$engine/third_party/volk/LICENSE.md" "$out/licenses/volk-LICENSE.md"
 libraw="$up/build/deps/LibRaw-0.22.2"
-[[ -f "$libraw/LICENSE.LGPL" ]] && cp "$libraw/LICENSE.LGPL" "$out/licenses/LibRaw-LICENSE.LGPL"
-[[ -f "$libraw/COPYRIGHT" ]] && cp "$libraw/COPYRIGHT" "$out/licenses/LibRaw-COPYRIGHT.txt"
+cp "$libraw/LICENSE.LGPL" "$out/licenses/LibRaw-LICENSE.LGPL"
+cp "$libraw/COPYRIGHT" "$out/licenses/LibRaw-COPYRIGHT.txt"
 
 kernels="$(sed -n '/set(SPEKTRALAB_VULKAN_KERNELS/,/CACHE INTERNAL/p' "$engine/CMakeLists.txt" |
            grep -o 'spk_[a-z0-9_]*' | grep -v '^spk_$' | sort -u)"
@@ -54,5 +54,7 @@ if [[ $count -lt 40 ]]; then
 fi
 
 # aapt2 skips dotfiles, so the stamp is a plain name.
-{ cat "$up/.spk-commit" 2>/dev/null || echo unknown; date -u +%Y%m%dT%H%M%SZ; } | tr '\n' ' ' > "$out/stamp.txt"
+# A hash of the staged tree, not the build time: identical inputs give an
+# identical APK, and any change to the assets still re-installs them.
+( cd "$out" && find . -type f ! -name stamp.txt -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-32 ) > "$out/stamp.txt"
 echo "staged $count kernels and resources in $out ($(du -sh "$out" | cut -f1))" >&2

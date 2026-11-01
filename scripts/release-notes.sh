@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 # release-notes.sh VERSION DIST_DIR REPO SHA -- the release body: the version's
 # CHANGELOG section, the checksums, the signing certificate and how to verify.
+# Fails rather than publish a release without notes or checksums.
 set -euo pipefail
 version="$1"; dist="$2"; repo="$3"; sha="$4"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-notes="$(awk -v v="$version" '$0 ~ "^## "v"( |$)" {f=1; next} /^## / {f=0} f' "$here/../CHANGELOG.md")"
-cert="CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3"
+# Literal match on the heading (index(), not a regex: '.' in the version is not a wildcard).
+notes="$(awk -v h="## $version" 'index($0, h) == 1 && (length($0) == length(h) || substr($0, length(h) + 1, 1) == " ") {f=1; next} /^## / {f=0} f' "$here/../CHANGELOG.md")"
+[[ -n "${notes//[[:space:]]/}" ]] || { echo "release-notes: no CHANGELOG section for $version" >&2; exit 1; }
+[[ -s "$dist/SHA256SUMS" ]] || { echo "release-notes: $dist/SHA256SUMS is missing" >&2; exit 1; }
+sums="$(cat "$dist/SHA256SUMS")"
+cert="$(tr -d '[:space:]' < "$here/signing-cert.sha256")"
 cat <<EOF
-${notes:-Commit $sha}
+$notes
 
 ### 校验 / Verify
 
 \`\`\`
-$(cat "$dist/SHA256SUMS")
+$sums
 \`\`\`
 
 签名证书 SHA-256 / Signing certificate: \`$cert\`
 
-\`gh attestation verify <apk> -R $repo\`
+\`gh attestation verify <apk> -R $repo\` · commit \`$sha\`
 EOF

@@ -1,6 +1,6 @@
 # The Android native library: the upstream engine (portable pipeline + Vulkan
 # backend + LibRaw), built by upstream's own engine/CMakeLists.txt, plus a thin
-# JNI layer. SPK_UPSTREAM is an unmodified SpektraLab checkout at the commit
+# JNI layer. SPK_UPSTREAM is a SpektraLab checkout plus patches/*.patch at the commit
 # scripts/fetch-upstream.sh pins, with its build/deps already fetched.
 cmake_minimum_required(VERSION 3.22.1)
 project(spektralab_android LANGUAGES C CXX)

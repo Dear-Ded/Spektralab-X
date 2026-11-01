@@ -6,3 +6,6 @@
 -keep class com.dearded.spektralab.NativeEngine { *; }
 -keepclasseswithmembernames,includedescriptorclasses class * { native <methods>; }
 
+
+# Keep line numbers so stack traces in the diagnostics report point at real lines.
+-keepattributes SourceFile,LineNumberTable

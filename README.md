@@ -90,18 +90,18 @@ CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51
 
 ```bash
 sha256sum -c SHA256SUMS
-gh attestation verify SpektraLab-0.1.9-alpha-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify SpektraLab-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
 ## 使用提示
 
-- **工作尺寸**（设置里调整）决定处理和导出的分辨率。默认长边 4096 px，同时受手机可用内存、GPU 单缓冲上限和 4200 万像素的总上限约束。8 GB 内存的机型（如部分小米 10 / 11）建议 3072。
+- **工作尺寸**（设置里调整）决定处理和导出的分辨率。首次启动时按 GPU 自动选择（最高 4096 px；小米 12–14 为 3072），同时受手机可用内存、GPU 单缓冲上限和 4200 万像素的总上限约束。
 - 手机直出照片已经由相机曝光和调色过，默认关闭自动曝光。想要最接近真实胶片的效果，请在小米相机专业模式里打开 RAW 拍摄。
 - 小米“超级 HDR”照片的增益图目前不会用到，只读取普通的那一层画面。
 
 ## 反馈问题
 
-1. 打开应用的 **设置 → 复制诊断信息**。里面有版本、机型、芯片、内存、GPU 探测结果、当前参数和最近 20 条事件，不含文件名和位置。
+1. 打开应用的 **设置 → 复制诊断信息**。里面有版本、机型、芯片、内存、GPU 探测结果、当前参数和最近 40 条事件，不含文件名和位置。
 2. 用 [问题反馈模板](https://github.com/Dear-Ded/spektralab-android/issues/new/choose) 提交，把诊断信息贴进去。
 
 使用上的问题请到 [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions)。胶片效果和 macOS 版不一样时，多半是这个移植的问题，请在这里报告，不要去上游。
@@ -120,7 +120,7 @@ LibRaw 0.22.2（RAW 解码）
 ```
 
 - 上游源码在 CI 里按固定提交下载，见 [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh)；本仓库只放安卓相关代码。
-- 对上游引擎的修改全部放在 [`patches/`](patches/)，编译前按顺序打上，说明见 [docs/PATCHES.md](docs/PATCHES.md)。整体结构、线程模型和内存策略见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。主要是针对 Adreno 驱动的问题：模糊分批提交避免 GPU 看门狗、单次计算不超过 2²⁴ 线程避免图像损坏、RAW 半尺寸解码省内存。
+- 对上游引擎的修改全部放在 [`patches/`](patches/)，编译前按顺序打上，说明见 [docs/PATCHES.md](docs/PATCHES.md)。主要是针对 Adreno 驱动的问题：模糊分批提交避免 GPU 看门狗、单次计算不超过 2²⁴ 线程避免图像损坏、RAW 半尺寸解码省内存。
 - 着色器在编译时转成 SPIR-V，和胶片数据一起打包进 APK，首次启动时解到应用私有目录，见 [`scripts/stage-assets.sh`](scripts/stage-assets.sh)。
 - 应用层的模块划分、线程模型、渲染档位和内存预算见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
@@ -131,7 +131,7 @@ LibRaw 0.22.2（RAW 解码）
 ```bash
 bash scripts/fetch-upstream.sh upstream
 bash scripts/stage-assets.sh upstream
-SPK_UPSTREAM=$PWD/upstream gradle :app:assembleRelease
+SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ```
 
 没有设置 `SPK_KEYSTORE` 时用调试密钥签名，装不上正式版的位置。完整流程见 [`.github/workflows/android.yml`](.github/workflows/android.yml)，贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)。

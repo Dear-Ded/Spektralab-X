@@ -2,6 +2,7 @@ name: android
 
 on:
   push:
+    branches: [main]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -14,12 +15,14 @@ on:
       - "**.md"
       - "docs/**"
       - "fastlane/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/*.md"
+      - ".github/dependabot.yml"
   workflow_dispatch:
 
+# Read-only by default; only the release job below can write.
 permissions:
-  contents: write      # create the release
-  id-token: write      # build provenance attestation
-  attestations: write
+  contents: read
 
 concurrency:
   group: android-${{ github.ref }}
@@ -29,6 +32,9 @@ jobs:
   apk:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
 
@@ -54,6 +60,30 @@ jobs:
       - name: Stage engine assets
         run: bash scripts/stage-assets.sh upstream
 
+      # A release is made only from a push to main whose VERSION has not been
+      # released yet, and it must be strictly newer than every earlier tag.
+      - name: Version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="$(tr -d '[:space:]' < VERSION)"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          publish=0
+          if [[ "${{ github.event_name }}" == push && "${{ github.ref }}" == refs/heads/main ]]; then
+            if ! gh release view "v$v" -R "${{ github.repository }}" >/dev/null 2>&1; then
+              publish=1
+              latest="$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}.git" 'v*' \
+                        | sed 's#.*refs/tags/v##' | sort -V | tail -n1)"
+              if [[ -n "$latest" && "$(printf '%s\n%s\n' "$latest" "$v" | sort -V | tail -n1)" != "$v" ]]; then
+                echo "::error::VERSION $v is not newer than the latest release v$latest"
+                exit 1
+              fi
+            fi
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$v publish=$publish"
+
       - name: Signing key
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
@@ -61,53 +91,72 @@ jobs:
           if [ -n "$KEYSTORE_B64" ]; then
             echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.p12"
             echo "SPK_KEYSTORE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+          elif [ "${{ steps.version.outputs.publish }}" = 1 ]; then
+            echo "::error::KEYSTORE_B64 is not set; refusing to publish a debug-signed release"
+            exit 1
           else
-            echo "::warning::KEYSTORE_B64 is not set; the APK is signed with a throwaway debug key"
+            echo "::warning::KEYSTORE_B64 is not set; this build is signed with a throwaway debug key"
           fi
 
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.11.1"
 
       - name: Build
         env:
           SPK_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           SPK_UPSTREAM: ${{ github.workspace }}/upstream
-        run: gradle --no-daemon --stacktrace :app:assembleRelease
-
-      - name: Version
-        run: |
-          v="$(tr -d '[:space:]' < VERSION)"
-          echo "APP_VERSION=$v" >> "$GITHUB_ENV"
-          if gh release view "v$v" >/dev/null 2>&1; then echo "PUBLISH=0" >> "$GITHUB_ENV"; else echo "PUBLISH=1" >> "$GITHUB_ENV"; fi
-        env:
-          GH_TOKEN: ${{ github.token }}
+        run: ./gradlew --no-daemon --stacktrace :app:assembleRelease
 
       - name: Rename APK and checksum
         run: |
           mkdir -p dist
-          apk="SpektraLab-$APP_VERSION-arm64-v8a.apk"
+          apk="SpektraLab-${{ steps.version.outputs.version }}-arm64-v8a.apk"
           cp app/build/outputs/apk/release/app-release.apk "dist/$apk"
+          cp app/build/outputs/mapping/release/mapping.txt dist/mapping.txt 2>/dev/null || true
           (cd dist && sha256sum "$apk" > SHA256SUMS && cat SHA256SUMS)
+
+      # The APK that would be released must carry the published certificate.
+      - name: Verify signature
+        if: steps.version.outputs.publish == '1'
+        run: |
+          signer="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n1)apksigner"
+          got="$("$signer" verify --print-certs dist/*.apk | sed -n 's/.*certificate SHA-256 digest: //p' | head -n1 | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')"
+          want="$(tr -d '[:space:]' < scripts/signing-cert.sha256)"
+          echo "signed with $got"
+          [ "$got" = "$want" ] || { echo "::error::APK certificate $got is not the published $want"; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SpektraLab-${{ env.APP_VERSION }}-run${{ github.run_number }}
+          name: SpektraLab-${{ steps.version.outputs.version }}-run${{ github.run_number }}
           path: dist/*
 
-      # A release is published only when VERSION names a version not yet
-      # released; other pushes leave an artifact on the run and nothing else.
+  release:
+    needs: apk
+    if: needs.apk.outputs.publish == '1'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write      # create the release and its tag
+      id-token: write      # build provenance attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: SpektraLab-${{ needs.apk.outputs.version }}-run${{ github.run_number }}
+          path: dist
+
       - name: Build provenance
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.PUBLISH == '1'
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: dist/*.apk
 
       - name: Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.PUBLISH == '1'
         env:
           GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ needs.apk.outputs.version }}
         run: |
           bash scripts/release-notes.sh "$APP_VERSION" dist "${{ github.repository }}" "${{ github.sha }}" > notes.md
+          # --target: tag the commit that was built, not whatever main is now.
           gh release create "v$APP_VERSION" dist/*.apk dist/SHA256SUMS \
+            --target "${{ github.sha }}" \
             --title "SpektraLab Android $APP_VERSION" --notes-file notes.md --prerelease
