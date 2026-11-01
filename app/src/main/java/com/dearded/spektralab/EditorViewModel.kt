@@ -55,6 +55,7 @@ data class UiState(
     val exporting: Boolean = false,
     val canUndo: Boolean = false,
     val canRedo: Boolean = false,
+    val presets: List<Preset> = emptyList(),
 ) {
     val hasImage get() = source != null
 }
@@ -63,6 +64,7 @@ class EngineException(message: String) : Exception(message)
 
 class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("settings", 0)
+    private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096)))
     val ui: StateFlow<UiState> = _ui
 
@@ -362,6 +364,29 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         lastStepAt = 0L
         _ui.update { it.copy(canUndo = false, canRedo = false) }
     }
+
+    // --- presets: film, paper and print/effects only, never per-photo settings ---
+
+    fun loadPresets() = _ui.update { it.copy(presets = presetStore.load()) }
+
+    fun savePreset(name: String) {
+        val clean = name.trim().take(40)
+        if (clean.isEmpty()) return
+        val list = presetStore.save(Preset.of(clean, _ui.value.edit))
+        _ui.update { it.copy(presets = list, message = "已保存预设“$clean”") }
+    }
+
+    fun applyPreset(preset: Preset) {
+        val catalog = _ui.value.catalog
+        // A preset saved on another build may name a stock this one does not ship.
+        if (catalog.films.isNotEmpty() && catalog.film(preset.film) == null) {
+            _ui.update { it.copy(message = "预设里的胶片不存在：${preset.film}") }
+            return
+        }
+        update(preset.applyTo(_ui.value.edit))
+    }
+
+    fun deletePreset(name: String) = _ui.update { it.copy(presets = presetStore.delete(name)) }
 
     fun pickFilm(id: String) {
         val state = _ui.value

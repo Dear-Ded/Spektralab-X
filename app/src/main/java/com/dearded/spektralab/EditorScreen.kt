@@ -260,6 +260,30 @@ private fun Preview(ui: UiState, modifier: Modifier) {
         if (ui.rendering) {
             LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
         }
+        // Histogram of what is on screen (the print, or the original while held).
+        if (image != null) {
+            var showHistogram by remember { mutableStateOf(false) }
+            val histogram by androidx.compose.runtime.produceState<Histogram?>(null, image, showHistogram) {
+                value = if (showHistogram)
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(image) }
+                else null
+            }
+            Column(Modifier.align(Alignment.TopStart).padding(8.dp)) {
+                TextButton(onClick = { showHistogram = !showHistogram }) {
+                    Text(if (showHistogram) "隐藏直方图" else "直方图", color = Color.White.copy(alpha = 0.8f))
+                }
+                histogram?.let { h ->
+                    HistogramView(h, Modifier.width(160.dp).height(80.dp).background(Color.Black.copy(alpha = 0.5f)))
+                    if (h.clippedLow > 0.005f || h.clippedHigh > 0.005f) {
+                        Text(
+                            String.format(Locale.ROOT, "暗部溢出 %.1f%% · 高光溢出 %.1f%%", h.clippedLow * 100, h.clippedHigh * 100),
+                            color = Color.White.copy(alpha = 0.8f),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+        }
         if (ui.image != null && ui.imageTier.isNotEmpty()) {
             Text(
                 when {
@@ -309,6 +333,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                 when (tab) {
                     0 -> {
                         FilmStrip(ui, enabled) { vm.pickFilm(it) }
+                        PresetRow(ui, vm, enabled)
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                         SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
                         LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV") {
@@ -603,4 +628,64 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
             }
         },
     )
+}
+
+@Composable
+private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
+    var menu by remember { mutableStateOf(false) }
+    var naming by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { vm.loadPresets() }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box {
+            OutlinedButton(onClick = { menu = true }, enabled = enabled && ui.presets.isNotEmpty()) {
+                Text(if (ui.presets.isEmpty()) "还没有预设" else "套用预设（${ui.presets.size}）")
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                for (p in ui.presets) {
+                    DropdownMenuItem(
+                        text = { Text(p.name) },
+                        onClick = { menu = false; vm.applyPreset(p) },
+                        trailingIcon = {
+                            TextButton(onClick = { menu = false; deleting = p.name }) { Text("删除") }
+                        },
+                    )
+                }
+            }
+        }
+        TextButton(onClick = { naming = true }, enabled = enabled) { Text("存为预设") }
+    }
+    if (naming) {
+        var name by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { naming = false },
+            confirmButton = {
+                TextButton(onClick = { naming = false; vm.savePreset(name) }, enabled = name.isNotBlank()) { Text("保存") }
+            },
+            dismissButton = { TextButton(onClick = { naming = false }) { Text("取消") } },
+            title = { Text("存为预设") },
+            text = {
+                Column {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = name, onValueChange = { name = it.take(40) }, singleLine = true,
+                        label = { Text("名称") },
+                    )
+                    Text(
+                        "保存胶片、相纸、放大和效果参数；曝光、裁剪和白平衡属于单张照片，不保存。同名会覆盖。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+        )
+    }
+    deleting?.let { target ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            confirmButton = { TextButton(onClick = { deleting = null; vm.deletePreset(target) }) { Text("删除") } },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text("取消") } },
+            title = { Text("删除预设") },
+            text = { Text("删除“$target”？") },
+        )
+    }
 }
