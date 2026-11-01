@@ -73,7 +73,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // Touched only on EngineThread, except where marked volatile.
     private var engine = 0L
-    private var session = 0L
+    // Written on EngineThread; read from the main thread only to cancel, under
+    // cancelLock, which release also takes, so a cancel never meets a freed session.
+    @Volatile private var session = 0L
+    private val cancelLock = Any()
+    /** The tier the engine thread is rendering right now, or null. */
+    @Volatile private var inFlightTier: String? = null
     private var applied = Edit()
     private var iccPath = ""
     @Volatile private var wanted = Edit()
@@ -115,6 +120,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
                 engine = handle
                 iccPath = File(dir, "io/sRGB.icc").absolutePath
+                // Build the default stock pair's tables and every compute
+                // pipeline now, so the first photo's first preview does not pay
+                // for them. A failure here is not fatal: open would do it anyway.
+                val look = wanted
+                if (!NativeEngine.warmUp(handle, look.film, look.paper)) log("warm up failed: ${NativeEngine.lastError()}")
                 Triple(catalog, device, NativeEngine.capabilities(handle))
             }
             val (catalog, device, caps) = started
@@ -261,9 +271,19 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         return info.availMem
     }
 
-    private fun releaseSession() {
+    private fun releaseSession() = synchronized(cancelLock) {
         if (session != 0L) NativeEngine.release(session)
         session = 0L
+    }
+
+    /**
+     * A new edit makes the slow preview render in flight stale: stop it at its
+     * next node so the live render for the new edit starts at once, instead of
+     * after a whole full-resolution pass. Live renders are left to finish, or
+     * a slider drag would never show anything.
+     */
+    private fun cancelStalePreview() = synchronized(cancelLock) {
+        if (inFlightTier == "preview" && session != 0L) NativeEngine.cancel(session)
     }
 
     private fun displayName(uri: Uri): String {
@@ -363,6 +383,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             it.copy(edit = edit, canUndo = undoStack.isNotEmpty(), canRedo = redoStack.isNotEmpty(),
                 detail = if (edit == it.edit) it.detail else null)
         }
+        // A sharp preview of the previous edit is now wasted work: stop it so the
+        // live render of this one starts at once.
+        cancelStalePreview()
         renders.trySend(Unit)
     }
 
@@ -518,9 +541,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     reverted = applied
                     return@withContext null
                 }
-                NativeEngine.renderBitmap(session, tier) ?: run {
-                    failure = "渲染失败：${NativeEngine.lastError()}"
-                    null
+                inFlightTier = tier
+                try {
+                    NativeEngine.renderBitmap(session, tier) ?: run {
+                        // Cancelled for a newer edit: not a failure, and the loop
+                        // already has the newer request queued.
+                        if (!NativeEngine.lastWasCancelled()) failure = "渲染失败：${NativeEngine.lastError()}"
+                        null
+                    }
+                } finally {
+                    inFlightTier = null
                 }
             }
             val ms = android.os.SystemClock.elapsedRealtime() - started
@@ -657,6 +687,23 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         prefs.edit().putInt("working_edge", edge).apply()
         _ui.update { it.copy(workingEdge = edge) }
         lastUri?.let { open(it) }
+    }
+
+    /**
+     * The system is short of memory (onTrimMemory): give back the GPU buffer
+     * pool's idle planes and the detail view. The session and its cached
+     * negative stay, so the photo does not have to be re-opened.
+     */
+    fun trimMemory(level: Int) {
+        if (level < android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
+            level != android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) return
+        _ui.update { it.copy(detail = null) }
+        val e = engine
+        if (e == 0L) return
+        viewModelScope.launch {
+            val freed = withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(e) }
+            log("trim memory level $level: ${freed shr 20} MB freed")
+        }
     }
 
     fun consumeMessage() = _ui.update { it.copy(message = null) }

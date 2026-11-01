@@ -26,6 +26,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // MIUI/HyperOS kills background apps hard; giving the GPU pool back when
+    // asked keeps this process off the low-memory killer's list.
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        viewModel.trimMemory(level)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)

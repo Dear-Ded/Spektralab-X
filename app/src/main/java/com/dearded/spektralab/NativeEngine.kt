@@ -48,4 +48,10 @@ object NativeEngine {
     external fun exportTiff(session: Long, path: String, iccPath: String, tier: String): Boolean
 
     external fun release(session: Long)
+
+    /** Any thread: stops the session's in-flight render at the next node. */
+    external fun cancel(session: Long)
+    external fun warmUp(engine: Long, film: String, paper: String): Boolean
+    external fun trimMemory(engine: Long): Long
+    external fun lastWasCancelled(): Boolean
 }

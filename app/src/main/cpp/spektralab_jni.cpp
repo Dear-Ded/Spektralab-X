@@ -22,6 +22,7 @@
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
+#include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
 
@@ -543,6 +544,35 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
         fail("TIFF: unknown failure");
     }
     return JNI_FALSE;
+}
+
+// Safe from another thread while a render is in flight on the engine thread:
+// the render unwinds at its next node and returns SPK_ERR_CANCELLED. The caller
+// guarantees the session outlives this call (EditorViewModel.cancelLock).
+JNI_FN(void, cancel)(JNIEnv*, jobject, jlong handle) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (s && s->session) spk_cancel(s->session, nullptr);
+}
+
+// The fixed per-stock setup (tc_lut, C_max table, compute pipelines) paid
+// before the first photo, so the first preview does not carry it.
+JNI_FN(jboolean, warmUp)(JNIEnv* env, jobject, jlong engine, jstring film_j, jstring paper_j) {
+    char* reply = nullptr;
+    const std::string film = str(env, film_j), paper = str(env, paper_j);
+    const spk_status st = spk_warm_up(reinterpret_cast<spk_engine*>(engine), film.c_str(), paper.c_str(), &reply);
+    if (reply) spk_string_free(reply);
+    if (st != SPK_OK) { fail(engine_error("warm up")); return JNI_FALSE; }
+    return JNI_TRUE;
+}
+
+// Returns the bytes the GPU buffer pool gave back (onTrimMemory).
+JNI_FN(jlong, trimMemory)(JNIEnv*, jobject, jlong engine) {
+    return jlong(spk::view::trim_idle_memory(reinterpret_cast<spk_engine*>(engine)));
+}
+
+// True when the last failure on this thread was a cancellation.
+JNI_FN(jboolean, lastWasCancelled)(JNIEnv*, jobject) {
+    return t_error.find("render cancelled") != std::string::npos ? JNI_TRUE : JNI_FALSE;
 }
 
 JNI_FN(void, release)(JNIEnv*, jobject, jlong handle) {
