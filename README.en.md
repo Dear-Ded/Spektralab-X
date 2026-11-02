@@ -20,11 +20,36 @@ Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / A
 > [!WARNING]
 > **Alpha.** Every release so far has only been built by CI; **none has been run on a real phone yet**. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
 
+<p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
+
 ## What it is
 
 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) is a macOS film simulator. It is not a filter: it simulates the whole chain spectrally — scene light, camera and film, development, enlarger and paper, paper development, scan — from measured characteristic curves and spectral sensitivities.
 
 This repository builds SpektraLab's C++ engine for Android with the NDK, runs it on its own Vulkan compute backend, and adds a Jetpack Compose editor. The look comes entirely from upstream; this project handles Android integration, mobile-GPU fixes and the UI.
+
+## Samples
+
+Every image below was rendered by the same engine this app ships, with the app's opening parameters and default settings, and no retouching. Left: the neutral decode (RAW as linear ProPhoto, converted to sRGB, metered to middle grey). Right: the film print.
+
+<table>
+<tr><td><img src="docs/images/samples/compare_lake.jpg" alt="Leica Q, Kodak Ektar 100"></td></tr>
+<tr><td align="center"><sub>Leica Q (Typ 116) · Kodak Ektar 100: back-lit leaves roll into the shoulder, greens warm up, the boat's blue holds</sub></td></tr>
+<tr><td><img src="docs/images/samples/compare_fruit.jpg" alt="Canon EOS R5, Fujifilm Velvia 100"></td></tr>
+<tr><td align="center"><sub>Canon EOS R5 · Fujifilm Velvia 100: slide-film contrast and saturation without clipping the tomatoes or the lemon</sub></td></tr>
+<tr><td><img src="docs/images/samples/compare_skyline.jpg" alt="Google Pixel 2 XL, Kodak Ektar 100"></td></tr>
+<tr><td align="center"><sub>Google Pixel 2 XL · Kodak Ektar 100: phone DNGs go through the same spectral chain</sub></td></tr>
+</table>
+
+**One frame, six stocks** (Ricoh GR III):
+
+<p align="center"><img src="docs/images/samples/films_dunes.jpg" width="100%" alt="One frame through six film stocks"></p>
+
+**Halation is simulated, not painted.** CineStill 800T has no anti-halation layer, so bright light reflects off the back of the base and re-exposes the emulsion from behind: red halos around the sky. Portra 400, with its backing, shows none:
+
+<p align="center"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="Halation detail: neutral, Portra 400, CineStill 800T"></p>
+
+<sub>Sample RAWs from [raw.pixls.us](https://raw.pixls.us/), released under CC0. Tooling and parameters: [`docs/SAMPLES.md`](docs/SAMPLES.md).</sub>
 
 ## Features
 
@@ -85,6 +110,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License and credits
 
-GPL-3.0, like upstream. Bundled third-party content and its licences: the SpektraLab engine and shaders (GPL-3.0, after andreavolpato/spektrafilm), spektrafilm film and paper profiles (CC BY-SA 4.0), LibRaw (LGPL-2.1), volk and stb (MIT), Liberation Sans and DejaVu Sans Mono (OFL 1.1 / Bitstream Vera). Licence texts ship in the APK under `assets/engine/licenses/`.
+GPL-3.0, like upstream. Bundled third-party content and its licences: the SpektraLab engine and shaders (GPL-3.0, after andreavolpato/spektrafilm), spektrafilm film and paper profiles (CC BY-SA 4.0), LibRaw (LGPL-2.1), volk and stb (MIT), Liberation Sans and DejaVu Sans Mono (OFL 1.1 / Bitstream Vera). README sample RAWs come from raw.pixls.us (CC0 1.0). Licence texts ship in the APK under `assets/engine/licenses/`.
 
 Not affiliated with the SpektraLab project or with Xiaomi. Xiaomi, Snapdragon and Adreno are trademarks of their owners.

@@ -21,11 +21,36 @@
 > [!WARNING]
 > **Alpha 版本。** 所有版本都只通过了 CI 编译，**还没有在真机上验证过**。可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
 
+<p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
+
 ## 这是什么
 
 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 是一个 macOS 胶片模拟软件。它不套滤镜，而是按光谱模拟整条冲印链路：场景光 → 相机与胶片 → 负片显影 → 放大机与相纸 → 相纸显影 → 扫描。胶片和相纸数据来自实测的特性曲线和光谱灵敏度。
 
 这个仓库把上游的 C++ 渲染引擎用 NDK 编译到安卓上，走它自带的 Vulkan 计算后端，再配一个 Jetpack Compose 编辑界面。胶片效果全部来自上游；本仓库负责安卓集成、手机 GPU 适配和界面。
+
+## 样片
+
+下面每张图都由本仓库使用的同一个引擎渲染：同样的打开参数、默认设置，没有任何后期调整。左边是中性解码（RAW 按 ProPhoto 线性光解出，转 sRGB，按中灰测光），右边是胶片冲印结果。
+
+<table>
+<tr><td><img src="docs/images/samples/compare_lake.jpg" alt="Leica Q，Kodak Ektar 100"></td></tr>
+<tr><td align="center"><sub>Leica Q (Typ 116) · Kodak Ektar 100：逆光树叶的高光压进肩部，绿色转暖，船身的蓝保持不变</sub></td></tr>
+<tr><td><img src="docs/images/samples/compare_fruit.jpg" alt="Canon EOS R5，Fujifilm Velvia 100"></td></tr>
+<tr><td align="center"><sub>Canon EOS R5 · Fujifilm Velvia 100：反转片的高反差和饱和度，番茄和柠檬不溢色</sub></td></tr>
+<tr><td><img src="docs/images/samples/compare_skyline.jpg" alt="Google Pixel 2 XL，Kodak Ektar 100"></td></tr>
+<tr><td align="center"><sub>Google Pixel 2 XL · Kodak Ektar 100：手机 DNG 同样走完整条光谱链路</sub></td></tr>
+</table>
+
+**同一张底片，六种胶片**（Ricoh GR III）：
+
+<p align="center"><img src="docs/images/samples/films_dunes.jpg" width="100%" alt="同一画面六种胶片"></p>
+
+**光晕是物理模拟出来的。** CineStill 800T 去掉了防光晕层，强光在片基背面反射后从背后再次曝光乳剂，于是亮天空边缘出现红色光晕；带防光晕层的 Portra 400 没有：
+
+<p align="center"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="光晕细节：中性、Portra 400、CineStill 800T"></p>
+
+<sub>样片 RAW 来自 [raw.pixls.us](https://raw.pixls.us/)，以 CC0 发布。渲染工具和参数见 [`docs/SAMPLES.md`](docs/SAMPLES.md)。</sub>
 
 ## 功能
 
@@ -152,6 +177,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 | RAW 解码 | [LibRaw](https://www.libraw.org/) 0.22.2 | LGPL-2.1 |
 | Vulkan 加载器 | [volk](https://github.com/zeux/volk) | MIT |
 | 图像和字体工具 | [stb](https://github.com/nothings/stb) | MIT |
+| README 样片原图 | [raw.pixls.us](https://raw.pixls.us/) | CC0 1.0 |
 | 日期戳和边缘字样字体 | Liberation Sans、DejaVu Sans Mono | SIL OFL 1.1 / Bitstream Vera |
 
 设计上参考了另外两个安卓移植踩过的坑：[SAINTTaiYi/SpektraLab-Android](https://github.com/SAINTTaiYi/SpektraLab-Android) 和 [thetechgeekko/Spektrafilm-android](https://github.com/thetechgeekko/Spektrafilm-android)。
