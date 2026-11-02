@@ -40,7 +40,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -169,8 +168,14 @@ fun EditorScreen(vm: EditorViewModel) {
                         }
                     }
                     Box {
-                        IconButton(onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting) {
-                            Icon(Icons.Default.Share, contentDescription = "导出")
+                        androidx.compose.material3.Button(
+                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
+                            modifier = Modifier.height(36.dp),
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("保存")
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
                             DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
@@ -202,12 +207,12 @@ fun EditorScreen(vm: EditorViewModel) {
             val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail)
+                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true })
                     Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight())
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail)
+                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true })
                     Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f))
                 }
             }
@@ -247,7 +252,7 @@ fun EditorScreen(vm: EditorViewModel) {
 }
 
 @Composable
-private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) {
+private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {}) {
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
@@ -317,12 +322,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}) 
                 }
             }
         } else if (ui.ready && !ui.hasImage) {
-            Text(
-                "点右上角 + 打开照片\n支持 JPEG / PNG / HEIC 和相机 RAW（DNG、CR3、NEF、ARW、RAF…）",
-                color = Color.LightGray,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(24.dp),
-            )
+            EmptyState(onPick = onOpen)
         }
         // Shown only after 400 ms, so quick drag renders never flicker a bar.
         val showProgress by androidx.compose.runtime.produceState(false, ui.rendering) {
@@ -399,7 +399,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
     Surface(modifier, tonalElevation = 2.dp) {
         Column {
             TabRow(selectedTabIndex = tab) {
-                listOf("胶片", "放大冲印", "效果", "构图").forEachIndexed { i, title ->
+                listOf("胶片", "调整", "冲印", "效果", "构图").forEachIndexed { i, title ->
                     Tab(selected = tab == i, onClick = { tab = i }, text = { Text(title) })
                 }
             }
@@ -444,7 +444,8 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             }
                         }
                     }
-                    1 -> {
+                    1 -> AdjustPage(ui, vm, enabled)
+                    2 -> {
                         if (e.scanFilm) {
                             Text(
                                 "反转片直接扫描，不经过相纸。",
@@ -464,7 +465,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             vm.update(e.copy(mShift = it))
                         }
                     }
-                    3 -> {
+                    4 -> {
                         val src = ui.source
                         // With the film edge on, the crop must stay the gate's shape in the new orientation.
                         fun reframe(next: Edit) = when {
@@ -640,7 +641,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
 private val FORMATS = listOf("半格" to 24.0, "135" to 36.0, "645" to 56.0, "6×7" to 70.0, "4×5" to 127.0)
 
 @Composable
-private fun LabeledSlider(
+internal fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
     enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
 ) {
