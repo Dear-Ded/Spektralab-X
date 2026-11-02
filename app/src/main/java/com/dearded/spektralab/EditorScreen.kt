@@ -422,6 +422,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
             ) {
                 when (page) {
                     0 -> {
+                        StyleStrip(ui, enabled) { vm.applyStyle(it) }
                         FilmStrip(ui, enabled) { vm.pickFilm(it) }
                         PresetRow(ui, vm, enabled)
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }

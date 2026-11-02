@@ -440,6 +440,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         update(preset.applyTo(_ui.value.edit))
     }
 
+    /** A one-tap style (Styles.kt): film, paper, print, effects and its finish together. */
+    fun applyStyle(style: Style) {
+        val next = style.applyTo(_ui.value.edit, _ui.value.catalog) ?: run {
+            _ui.update { it.copy(message = "这个风格用的胶片不在当前版本里") }
+            return
+        }
+        update(next)
+    }
+
     fun deletePreset(name: String) = _ui.update { it.copy(presets = presetStore.delete(name)) }
 
     fun pickFilm(id: String) {
