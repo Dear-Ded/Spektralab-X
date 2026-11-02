@@ -117,6 +117,8 @@ data class Edit(
     val borderId: String = "none",
     /** Black-and-white film on black-and-white paper; set from the catalog by the view model. */
     val monoPrint: Boolean = false,
+    /** Layer 2, the adjustments to the finished print (Look.kt). App-side: re-packed, never developed. */
+    val look: Look = Look.NEUTRAL,
 ) {
     /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
     fun turned(by: Int) = copy(
@@ -239,6 +241,7 @@ data class Edit(
             frame = fallback.frame,          // app-side only
             borderId = fallback.borderId,    // app-side only
             monoPrint = fallback.monoPrint,  // app-side only
+            look = fallback.look,            // app-side only
         )
 
         /**

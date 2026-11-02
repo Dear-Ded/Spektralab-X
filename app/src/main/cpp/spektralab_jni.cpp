@@ -15,6 +15,7 @@
 #include <exception>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -23,6 +24,7 @@
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
+#include "layer2.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -50,6 +52,20 @@ struct Session {
     // what the film preview cards render from (see thumbnail()).
     std::vector<float> small_rgb;
     uint32_t small_w = 0, small_h = 0;
+    // Layer 2, the adjustments to the finished print (layer2.hpp). Applied while
+    // a display or export render is packed; film cards show the film alone.
+    std::unique_ptr<spk::android::Layer2> look;
+    const spk::android::Layer2* active_look() const { return look && !look->identity() ? look.get() : nullptr; }
+    // The last display render, kept so an adjustment re-packs it (repack)
+    // instead of re-running the engine. One tier only: at the preview tier it
+    // is ~70 MB, and the next render or release frees it.
+    spk_result last{};
+    void keep(spk_result& r) {
+        spk_result_free(&last);
+        last = r;
+        std::memset(&r, 0, sizeof r);
+    }
+    ~Session() { spk_result_free(&last); }
 };
 
 // Owns a Session until it is handed to Kotlin, so an exception between the
@@ -57,6 +73,7 @@ struct Session {
 struct SessionDeleter {
     void operator()(Session* s) const {
         if (!s) return;
+        spk_result_free(&s->last);   // before its session
         spk_session_release(s->session);
         delete s;
     }
@@ -189,7 +206,8 @@ Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, ui
 
 // RGBA16 rows (engine-encoded sRGB) to RGBA8, split across up to four
 // threads: at the 3400 px tier it is ~8 M pixels, a visible slice of a drag.
-void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride) {
+void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::android::Layer2* look = nullptr) {
+    if (look) { spk::android::pack_rgba8_look(*look, r.rgba16, r.row_stride_px, r.width, r.height, out, stride); return; }
     const auto rows = [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
             const uint16_t* src = r.rgba16 + size_t(y) * r.row_stride_px * 4;
@@ -209,7 +227,7 @@ void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride) {
 
 // RGBA16 rows (engine-encoded sRGB) into an ARGB_8888 Bitmap, whose memory
 // order is R, G, B, A.
-jobject to_bitmap(JNIEnv* env, const spk_result& r) {
+jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* look = nullptr) {
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
     if (!bitmap_class || !config_class) { fail("Bitmap classes not found"); return nullptr; }
@@ -230,7 +248,7 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r) {
     }
     PixelLock lock(env, bitmap);
     if (!lock.ok) { fail("cannot lock bitmap pixels"); return nullptr; }
-    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride);
+    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look);
     return bitmap;
 }
 
@@ -795,13 +813,27 @@ JNI_FN(jstring, getParams)(JNIEnv* env, jobject, jlong handle) {
     return nullptr;
 }
 
+// `r` into `reuse` when it is the same size, else into a new Bitmap.
+jobject pack_into(JNIEnv* env, const spk_result& r, jobject reuse, const spk::android::Layer2* look) {
+    AndroidBitmapInfo info{};
+    if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
+        info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 && info.width == r.width && info.height == r.height) {
+        PixelLock lock(env, reuse);
+        if (lock.ok) {
+            pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look);
+            return reuse;
+        }
+    }
+    return to_bitmap(env, r, look);
+}
+
 JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
     try {
         ResultGuard result;
         if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        return to_bitmap(env, result.r);
+        return to_bitmap(env, result.r, s->active_look());
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -820,17 +852,9 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
     try {
         ResultGuard result;
         if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        AndroidBitmapInfo info{};
-        if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
-            info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 &&
-            info.width == result.r.width && info.height == result.r.height) {
-            PixelLock lock(env, reuse);
-            if (lock.ok) {
-                pack_rgba8(result.r, static_cast<uint8_t*>(lock.pixels), info.stride);
-                return reuse;
-            }
-        }
-        return to_bitmap(env, result.r);
+        jobject out = pack_into(env, result.r, reuse, s->active_look());
+        if (out) s->keep(result.r);
+        return out;
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -855,7 +879,16 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
         ResultGuard result;
         if (!render(s, tier, result.r)) return JNI_FALSE;
         std::string error;
-        if (!spk::android::write_tiff16(path, result.r.rgba16, result.r.width, result.r.height,
+        // The engine's pixels are its own; Layer 2 goes on a copy.
+        const uint16_t* pixels = result.r.rgba16;
+        std::vector<uint16_t> adjusted;
+        if (const auto* look = s->active_look()) {
+            adjusted.assign(result.r.rgba16, result.r.rgba16 + size_t(result.r.row_stride_px) * result.r.height * 4);
+            spk::android::apply_rgba16_in_place(*look, adjusted.data(), result.r.row_stride_px,
+                                                result.r.width, result.r.height);
+            pixels = adjusted.data();
+        }
+        if (!spk::android::write_tiff16(path, pixels, result.r.width, result.r.height,
                                         result.r.row_stride_px, icc, error)) {
             fail("TIFF: " + error);
             return JNI_FALSE;
@@ -900,9 +933,42 @@ JNI_FN(jboolean, lastWasCancelled)(JNIEnv*, jobject) {
     return t_error.find("render cancelled") != std::string::npos ? JNI_TRUE : JNI_FALSE;
 }
 
+// Layer 2 for this session's display and export renders (Look.kt's array;
+// null or all-neutral clears it). Cheap: no render, the next pack uses it.
+JNI_FN(void, setLook)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) return;
+    try {
+        if (!values_j) { s->look.reset(); return; }
+        std::vector<float> v(size_t(env->GetArrayLength(values_j)));
+        if (!v.empty()) env->GetFloatArrayRegion(values_j, 0, jsize(v.size()), v.data());
+        auto look = std::make_unique<spk::android::Layer2>(v);
+        if (look->identity()) s->look.reset(); else s->look = std::move(look);
+    } catch (...) {
+        s->look.reset();
+    }
+}
+
+// The last display render again, through the current look: what an
+// adjustment slider shows, in milliseconds, without the engine. Null when
+// there is nothing kept (lastError), and the caller renders instead.
+JNI_FN(jobject, repack)(JNIEnv* env, jobject, jlong handle, jobject reuse) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s || !s->last.rgba16) { fail("nothing to repack"); return nullptr; }
+    try {
+        return pack_into(env, s->last, reuse, s->active_look());
+    } catch (const std::exception& e) {
+        fail(std::string("repack: ") + e.what());
+    } catch (...) {
+        fail("repack: unknown failure");
+    }
+    return nullptr;
+}
+
 JNI_FN(void, release)(JNIEnv*, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return;
+    spk_result_free(&s->last);   // before its session
     spk_session_release(s->session);
     delete s;
 }

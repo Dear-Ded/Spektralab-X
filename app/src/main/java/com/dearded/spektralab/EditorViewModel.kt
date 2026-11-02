@@ -93,6 +93,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     @Volatile private var wanted = Edit()
 
     private val renders = Channel<Unit>(Channel.CONFLATED)
+    // A Layer 2 change: the last render re-packed through the new look, no engine pass.
+    private val repacks = Channel<Unit>(Channel.CONFLATED)
+    /** The look the native session holds (engine thread). */
+    private var appliedLook = Look.NEUTRAL
     // Diagnostics: the raw probe replies and the last events, for the copyable report.
     private var deviceJson = ""
     private var capabilitiesJson = ""
@@ -113,6 +117,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch { startEngine() }
         viewModelScope.launch { renderLoop() }
+        viewModelScope.launch { repackLoop() }
     }
 
     private suspend fun startEngine() {
@@ -266,6 +271,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 val params = NativeEngine.getParams(handle)?.let(::JSONObject) ?: JSONObject()
                 val edit = Edit.fromParams(params, look)
                 applied = edit
+                appliedLook = Look.NEUTRAL
                 wanted = edit
                 Triple(edit, JSONObject(NativeEngine.sourceInfo(handle)), NativeEngine.beforeBitmap(handle))
             }
@@ -354,6 +360,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
+        // Only the look moved: the print is the same, so re-pack it (a few ms)
+        // instead of developing again. Anything else renders, look included.
+        val lookOnly = edit.copy(look = current.look) == current && edit.look != current.look
+        if (lookOnly && _ui.value.image != null) { if (render) repacks.trySend(Unit); return }
         cancelStalePreview()
         if (render) renders.trySend(Unit)
     }
@@ -477,6 +487,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private fun applyWanted(): String? {
         val target = wanted
+        applyLook(target.look)
         if (target == applied) return null
         val delta = target.delta(applied)
         if (delta.length() == 0) { applied = target; return null }
@@ -502,6 +513,38 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (on == interacting) return
         interacting = on
         if (on) settle.tryReceive() else settle.trySend(Unit)
+    }
+
+    /** Engine thread. */
+    private fun applyLook(look: Look) {
+        if (look == appliedLook || session == 0L) return
+        NativeEngine.setLook(session, if (look.neutral) null else look.values())
+        appliedLook = look
+    }
+
+    private suspend fun repackLoop() {
+        for (request in repacks) {
+            val tier = _ui.value.imageTier.ifEmpty { continue }
+            val out = try {
+                withContext(EngineThread.dispatcher) {
+                    if (session == 0L) return@withContext null
+                    applyLook(wanted.look)
+                    val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
+                    val bitmap = NativeEngine.repack(session, reuse)
+                    if (bitmap == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
+                    bitmap?.prepareToDraw()
+                    bitmap
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                null
+            }
+            // Nothing kept to re-pack (a fresh session): develop instead.
+            if (out == null) { renders.trySend(Unit); continue }
+            retire(tier, out)
+            _ui.update { it.copy(image = out, imageTier = tier) }
+        }
     }
 
     private suspend fun renderLoop() {
@@ -647,6 +690,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val job = ProcessingJob(
             id = host.queue.nextId(), uri = uri.toString(), name = src.name, raw = src.kind == "raw",
             editJson = state.edit.toJson().toString(), wbK = src.wbK, wbTint = src.wbTint,
+            lookJson = if (state.edit.look.neutral) "" else state.edit.look.toJson().toString(),
             format = format, size = size, workingEdge = state.workingEdge, maxPixels = state.maxPixels,
             outPixels = outPixels,
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),

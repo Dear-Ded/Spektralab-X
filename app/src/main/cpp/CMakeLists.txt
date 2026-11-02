@@ -28,7 +28,7 @@ add_subdirectory("${SPK_UPSTREAM}/engine" engine)
 
 # white_balance.cpp is upstream's desktop-host Temperature/Tint (Robertson
 # isotherms, LibRaw's camera matrix), compiled here unmodified.
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp layer2.cpp
     "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE

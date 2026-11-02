@@ -64,6 +64,12 @@ object NativeEngine {
 
     external fun release(session: Long)
 
+    /** Layer 2 for the session's display and export packs (Look.values()); null clears it. */
+    external fun setLook(session: Long, values: FloatArray?)
+
+    /** The last display render again, through the current look, into [reuse] if it fits. */
+    external fun repack(session: Long, reuse: Bitmap?): Bitmap?
+
     /** Any thread: stops the session's in-flight render at the next node. */
     external fun cancel(session: Long)
     external fun warmUp(engine: Long, film: String, paper: String): Boolean
