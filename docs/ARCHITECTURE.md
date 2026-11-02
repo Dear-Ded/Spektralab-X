@@ -67,6 +67,7 @@ SpektraLab for Android 分三层：Compose 界面、Kotlin 编辑器状态、C++
 | `0001-iir-chunked-launches` | 模糊计算每 512 行提交一次，避免触发高通驱动 2 秒的 GPU 超时 |
 | `0002-dispatch-chunks-under-2-24` | 单次计算不超过 2²⁴ 个线程，Adreno 在这个数以上会写坏图像 |
 | `0003-raw-half-size-budget` | 传感器远大于工作尺寸时，按半尺寸解码 |
+| `0004-dng-dual-illuminant-matrix` | DNG 按拍摄白平衡在两组色彩矩阵之间插值 |
 
 补丁在 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh) 下载上游源码后按文件名顺序应用。补丁内容一变，CI 缓存键也跟着变。
 
