@@ -28,8 +28,12 @@ object NativeEngine {
         temperatureK: Double, tint: Double,
     ): Long
 
-    /** Opens a session on an sRGB ARGB_8888 bitmap. */
-    external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String): Long
+    /**
+     * Opens a session on an sRGB or Display P3 ARGB_8888 bitmap. [headroomStops]
+     * > 0 undoes the phone's highlight shoulder so encoded white lands that many
+     * stops above 1.0; [paramsJson] must then say input_cctf_decoding = false.
+     */
+    external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String, headroomStops: Float): Long
 
     /**
      * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888) recovered

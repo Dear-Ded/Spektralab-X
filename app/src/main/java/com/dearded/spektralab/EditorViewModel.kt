@@ -49,6 +49,8 @@ data class UiState(
     val workingEdge: Int = 4096,
     /** JPEG exports in Display P3 (on by default: Xiaomi flagships have P3 screens). */
     val wideGamut: Boolean = true,
+    /** Highlight recovery for phone photos without a gain map, in stops (0 = off). */
+    val highlightStops: Float = 1f,
     val maxPixels: Long = 0,
     val deviceSummary: String = "",
     val engineSummary: String = "",
@@ -74,7 +76,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("settings", 0)
     private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
-        wideGamut = prefs.getBoolean("wide_gamut", true)))
+        wideGamut = prefs.getBoolean("wide_gamut", true),
+        highlightStops = prefs.getFloat("highlight_stops", 1f)))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -248,7 +251,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(busy = if (photo.hdr) "正在恢复 HDR 高光…" else "正在打开…") }
                 handle = withContext(EngineThread.dispatcher) {
                     releaseSession()
-                    val opened = openPhotoSession(engine, photo) { space, linear ->
+                    val opened = openPhotoSession(engine, photo, _ui.value.highlightStops) { space, linear ->
                         Edit.openingParams(look, inputSpace = space, linear = linear).toString()
                     }
                     val h = opened.handle
@@ -649,6 +652,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
             filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
             wideGamut = state.wideGamut,
+            highlightStops = state.highlightStops,
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${src.width}x${src.height}")
@@ -687,6 +691,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun setWideGamut(on: Boolean) {
         prefs.edit().putBoolean("wide_gamut", on).apply()
         _ui.update { it.copy(wideGamut = on) }
+    }
+
+    /** A phone photo is re-opened with the new recovery; the edit is kept. */
+    fun setHighlightStops(stops: Float) {
+        if (stops == _ui.value.highlightStops || _ui.value.exporting) return
+        prefs.edit().putFloat("highlight_stops", stops).apply()
+        _ui.update { it.copy(highlightStops = stops) }
+        val uri = lastUri ?: return
+        val src = _ui.value.source ?: return
+        if (src.kind == "raw") return
+        launchOpen(uri, wb = src.wbK to src.wbTint)
     }
 
     fun setWorkingEdge(edge: Int) {

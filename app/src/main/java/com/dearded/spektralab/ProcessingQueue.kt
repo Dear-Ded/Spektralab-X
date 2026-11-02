@@ -52,6 +52,8 @@ data class ProcessingJob(
     val filmLabel: String = "",
     /** A JPEG rendered and tagged in Display P3 rather than sRGB. */
     val wideGamut: Boolean = false,
+    /** Highlight recovery the editor opened the phone photo with. */
+    val highlightStops: Float = 0f,
     val state: JobState = JobState.QUEUED,
     val progress: Float = 0f,
     val phase: String = "",
@@ -74,7 +76,7 @@ data class ProcessingJob(
         .put("id", id).put("uri", uri).put("name", name).put("raw", raw).put("edit", editJson)
         .put("wbK", wbK).put("wbTint", wbTint).put("format", format.name).put("size", size.name)
         .put("edge", workingEdge).put("maxPixels", maxPixels).put("outPixels", outPixels)
-        .put("frame", frameJson).put("filmLabel", filmLabel).put("wide", wideGamut)
+        .put("frame", frameJson).put("filmLabel", filmLabel).put("wide", wideGamut).put("hl", highlightStops.toDouble())
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
 
@@ -88,6 +90,7 @@ data class ProcessingJob(
                 workingEdge = o.optInt("edge"), maxPixels = o.optLong("maxPixels"), outPixels = o.optLong("outPixels"),
                 frameJson = o.optString("frame"), filmLabel = o.optString("filmLabel"),
                 wideGamut = o.optBoolean("wide"),
+                highlightStops = o.optDouble("hl", 0.0).toFloat(),
                 state = JobState.valueOf(o.optString("state", "QUEUED")), message = o.optString("message"),
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
             )
@@ -265,7 +268,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
             withContext(EngineThread.dispatcher) {
                 NativeEngine.trimMemory(ready.engine)
-                val h = openPhotoSession(ready.engine, photo) { space, linear ->
+                val h = openPhotoSession(ready.engine, photo, job.highlightStops) { space, linear ->
                     Edit.openingParams(edit, inputSpace = space, linear = linear, outputSpace = outSpace).toString()
                 }.handle
                 if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")

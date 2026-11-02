@@ -21,16 +21,18 @@ data class OpenedPhoto(val handle: Long, val linear: Boolean)
 /**
  * Opens [photo] on [engine] and recycles its bitmaps. An HDR photo is opened
  * linear with its gain map applied; if that fails it falls back to the plain
- * SDR open, so a malformed gain map never costs the photo. Engine thread only.
- * [params] builds the opening JSON for (input space, linear).
+ * SDR open, so a malformed gain map never costs the photo. A photo without a
+ * gain map gets [highlightStops] of highlight recovery (0 = as encoded).
+ * Engine thread only. [params] builds the opening JSON for (input space, linear).
  */
-fun openPhotoSession(engine: Long, photo: Photo, params: (String, Boolean) -> String): OpenedPhoto {
+fun openPhotoSession(engine: Long, photo: Photo, highlightStops: Float, params: (String, Boolean) -> String): OpenedPhoto {
     try {
         if (photo.hdr) {
             val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, params(photo.space, true))
             if (h != 0L) return OpenedPhoto(h, true)
         }
-        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, params(photo.space, false)), false)
+        val linear = highlightStops > 0f
+        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, params(photo.space, linear), highlightStops), linear)
     } finally {
         photo.recycle()
     }

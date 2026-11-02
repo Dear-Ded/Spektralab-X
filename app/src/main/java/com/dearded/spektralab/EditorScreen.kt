@@ -856,6 +856,12 @@ private val ASPECTS = listOf(
     "1:1" to 1.0, "16:9" to 16.0 / 9.0, "XPan 65:24" to 65.0 / 24.0,
 )
 
+private val HIGHLIGHT_STOPS = listOf(
+    0f to "关（按原样）",
+    1f to "1 档（推荐）",
+    2f to "2 档",
+)
+
 private val WORKING_EDGES = listOf(
     2048 to "2048 px（最快）",
     3072 to "3072 px",
@@ -898,6 +904,22 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Spacer(Modifier.height(12.dp))
+                Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    "手机直出的 JPEG/HEIC 把高光压进了一条软肩。恢复会把中灰以上的部分展开，让胶片自己的肩部和光晕处理高光；中间调曝光不变。带增益图的 Ultra HDR 照片按增益图恢复，不受这里影响。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                for ((stops, label) in HIGHLIGHT_STOPS) {
+                    Row(
+                        Modifier.fillMaxWidth().clickable { vm.setHighlightStops(stops) },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = ui.highlightStops == stops, onClick = { vm.setHighlightStops(stops) })
+                        Text(label)
+                    }
+                }
                 Spacer(Modifier.height(12.dp))
                 Text("设备", style = MaterialTheme.typography.labelLarge)
                 Text(ui.deviceSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)

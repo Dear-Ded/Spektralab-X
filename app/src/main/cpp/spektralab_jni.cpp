@@ -475,8 +475,35 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
     return 0;
 }
 
-// `bitmap` is ARGB_8888 in sRGB, already scaled by the caller.
-JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring params_j) {
+// Undoes the highlight shoulder of a phone's tone curve, for a JPEG that has no
+// gain map: linear values up to the knee (middle grey) pass unchanged, above it
+// they are expanded so encoded white lands `stops` above 1.0. It is the exact
+// inverse of y = k + u / (1 + u / w), whose slope is 1 at the knee, so the
+// midtones keep their exposure and only the compressed highlights get their
+// range back for the film's own shoulder. Applied to the largest channel and
+// scaled through all three, so hues do not shift.
+struct HighlightExpand {
+    float knee = 0.18f, w = 0.0f;
+    explicit HighlightExpand(float stops) {
+        const float d = std::exp2(stops) - knee, r = 1.0f - knee;
+        w = d > r ? d * r / (d - r) : 0.0f;
+    }
+    bool active() const { return w > 0.0f; }
+    void apply(float& r, float& g, float& b) const {
+        const float m = std::max(r, std::max(g, b));
+        if (m <= knee) return;
+        const float u = std::min(m - knee, (1.0f - knee));
+        const float denom = std::max(1e-4f, 1.0f - u / w);
+        const float k = (knee + u / denom) / m;
+        r *= k; g *= k; b *= k;
+    }
+};
+
+// `bitmap` is ARGB_8888 in sRGB (or Display P3), already scaled by the caller.
+// `headroom_stops` > 0: decode the transfer curve here and expand the
+// highlights (HighlightExpand); [params_j] must then say input_cctf_decoding = false.
+JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring params_j,
+                          jfloat headroom_stops) {
     try {
         AndroidBitmapInfo info{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
@@ -484,6 +511,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
             fail("image must be an ARGB_8888 bitmap"); return 0;
         }
         const std::string params = str(env, params_j);
+        const HighlightExpand expand(std::isfinite(headroom_stops) ? std::clamp(float(headroom_stops), 0.0f, 3.0f) : 0.0f);
         // Allocated before the pixels are locked: a bad_alloc here must not
         // leave the bitmap pinned (Kotlin's recycle could not free it then).
         std::vector<float> rgb(size_t(info.width) * info.height * 3);
@@ -495,6 +523,9 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
             const uint64_t px = uint64_t(info.width) * info.height;
             const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
             const auto* base = static_cast<const uint8_t*>(lock.pixels);
+            // The sRGB and Display P3 transfer curves are the same: a table of 256.
+            float decode[256];
+            for (int v = 0; v < 256; ++v) decode[v] = srgb_decode(v / 255.0f);
             run_rows(info.height, workers, [&](uint32_t y0, uint32_t y1) {
                 for (uint32_t y = y0; y < y1; ++y) {
                     const auto* src = base + size_t(y) * info.stride;
@@ -504,9 +535,20 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
                         // ARGB_8888 is premultiplied: undo it, or semi-transparent
                         // edges (PNG) print darker than they are.
                         const float k = (a == 255 || a == 0) ? 1.0f / 255.0f : 1.0f / float(a);
-                        dst[3 * x + 0] = std::min(1.0f, src[4 * x + 0] * k);
-                        dst[3 * x + 1] = std::min(1.0f, src[4 * x + 1] * k);
-                        dst[3 * x + 2] = std::min(1.0f, src[4 * x + 2] * k);
+                        float r = std::min(1.0f, src[4 * x + 0] * k);
+                        float g = std::min(1.0f, src[4 * x + 1] * k);
+                        float b = std::min(1.0f, src[4 * x + 2] * k);
+                        if (expand.active()) {
+                            if (a == 255 || a == 0) {
+                                r = decode[src[4 * x + 0]]; g = decode[src[4 * x + 1]]; b = decode[src[4 * x + 2]];
+                            } else {
+                                r = srgb_decode(r); g = srgb_decode(g); b = srgb_decode(b);
+                            }
+                            expand.apply(r, g, b);
+                        }
+                        dst[3 * x + 0] = r;
+                        dst[3 * x + 1] = g;
+                        dst[3 * x + 2] = b;
                     }
                 }
             });
@@ -515,7 +557,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
                                        info.width, info.height, params));
         if (!session) return 0;
         const bool p3 = params.find("\"Display P3\"") != std::string::npos;
-        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3);
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3, expand.active());
         session->source_width = info.width;
         session->source_height = info.height;
         session->kind = "bitmap";
