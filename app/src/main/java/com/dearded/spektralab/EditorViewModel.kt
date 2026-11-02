@@ -524,7 +524,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun repackLoop() {
         for (request in repacks) {
-            val tier = _ui.value.imageTier.ifEmpty { continue }
+            val tier = _ui.value.imageTier
+            if (tier.isEmpty()) continue
             val out = try {
                 withContext(EngineThread.dispatcher) {
                     if (session == 0L) return@withContext null
