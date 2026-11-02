@@ -1,0 +1,1 @@
+DNG ColorMatrix1/2 interpolated at the shot's white balance for truer colour under warm light; highlight recovery for phone photos without a gain map (1 stop by default); new CineStill 50D. Not yet verified on a device.
