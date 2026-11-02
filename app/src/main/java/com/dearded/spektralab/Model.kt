@@ -16,6 +16,12 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
     fun film(id: String) = films.firstOrNull { it.id == id }
     fun paper(id: String) = papers.firstOrNull { it.id == id }
 
+    /** [e] with the app-side facts the wire needs that only the catalog knows. */
+    fun normalize(e: Edit): Edit {
+        val mono = film(e.film)?.bw == true && paper(e.paper)?.bw == true
+        return if (mono == e.monoPrint) e else e.copy(monoPrint = mono)
+    }
+
     companion object {
         val EMPTY = Catalog(emptyList(), emptyList())
 
@@ -54,11 +60,16 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
 /** The user-facing subset of the engine's parameters (names as on the wire). */
 data class Edit(
     val film: String = "kodak_portra_400",
-    val paper: String = "kodak_portra_endura",
+    // SpektraLab's own default pair for a new frame (Params.swift, params.ts):
+    // Supra Endura, not the reference's Portra Endura.
+    val paper: String = "kodak_supra_endura",
     val scanFilm: Boolean = false,
     val autoExposure: Boolean = true,
+    /** The meter's intent. Upstream sends "balanced" (a log average) for every new frame;
+     *  left unsent the engine meters "center_weighted", an arithmetic mean a bright sky drags up. */
+    val aeMethod: String = "balanced",
     val exposureEv: Double = 0.0,
-    val filmFormatMm: Double = 35.0,
+    val filmFormatMm: Double = 36.0,
     val printExposure: Double = 1.0,
     val yShift: Double = 0.0,
     val mShift: Double = 0.0,
@@ -104,6 +115,8 @@ data class Edit(
     val frame: FrameSpec = FrameSpec(),
     /** The border preset the user picked, for the chip row. App-side only. */
     val borderId: String = "none",
+    /** Black-and-white film on black-and-white paper; set from the catalog by the view model. */
+    val monoPrint: Boolean = false,
 ) {
     /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
     fun turned(by: Int) = copy(
@@ -111,7 +124,10 @@ data class Edit(
         cropAspect = if (by % 2 == 1 && cropAspect > 0) 1.0 / cropAspect else cropAspect,
     )
 
-    fun toJson(): JSONObject = JSONObject().apply { for ((key, get) in FIELDS) put(key, get(this@Edit)) }
+    fun toJson(): JSONObject = JSONObject().apply {
+        for ((key, get) in FIELDS) put(key, get(this@Edit))
+        if (monoPrint) putMonoPack(this)
+    }
 
     /**
      * Only changed fields: an unchanged shoot-side field would invalidate the
@@ -124,19 +140,33 @@ data class Edit(
             if (value != get(previous)) put(key, value)
         }
         if (film != previous.film) put("scan_film", scanFilm)
+        // The engine's neutral-filter table has no row for a silver paper, so a
+        // session coming from a colour pair keeps that pair's pack (~55/65 CC).
+        // Going back to colour, the engine takes the colour row again by itself.
+        if (monoPrint && (!previous.monoPrint || film != previous.film || paper != previous.paper)) putMonoPack(this)
     }
 
     companion object {
+        /** Multigrade filter 2 as the enlarger's C/M/Y (paper_grades.json grade "2"), as upstream sends it. */
+        private fun putMonoPack(o: JSONObject) {
+            o.put("c_filter_neutral", 0.0).put("m_filter_neutral", 0.0).put("y_filter_neutral", 68.0)
+        }
+
+        /** What the Y/M sliders' ends are, in CC. Unsent, the engine's 1 makes the whole slider one CC. */
+        const val FILTER_SHIFT_CC = 40.0
+
         private val FIELDS: List<Pair<String, (Edit) -> Any>> = listOf(
             "film_stock" to { e: Edit -> e.film },
             "print_stock" to { e: Edit -> e.paper },
             "scan_film" to { e: Edit -> e.scanFilm },
             "auto_exposure" to { e: Edit -> e.autoExposure },
+            "auto_exposure_method" to { e: Edit -> e.aeMethod },
             "exposure_compensation_ev" to { e: Edit -> e.exposureEv },
             "film_format_mm" to { e: Edit -> e.filmFormatMm },
             "print_exposure" to { e: Edit -> e.printExposure },
             "y_filter_shift" to { e: Edit -> e.yShift },
             "m_filter_shift" to { e: Edit -> e.mShift },
+            "filter_shift_scale" to { _: Edit -> FILTER_SHIFT_CC },
             "grain_active" to { e: Edit -> e.grainActive },
             "grain_amount" to { e: Edit -> e.grainAmount },
             "halation_active" to { e: Edit -> e.halationActive },
@@ -172,6 +202,7 @@ data class Edit(
             paper = p.optString("print_stock", fallback.paper),
             scanFilm = p.optBoolean("scan_film", fallback.scanFilm),
             autoExposure = p.optBoolean("auto_exposure", fallback.autoExposure),
+            aeMethod = p.optString("auto_exposure_method", fallback.aeMethod),
             exposureEv = p.optDouble("exposure_compensation_ev", fallback.exposureEv),
             filmFormatMm = p.optDouble("film_format_mm", fallback.filmFormatMm),
             printExposure = p.optDouble("print_exposure", fallback.printExposure),
@@ -207,6 +238,7 @@ data class Edit(
             dateCorner = p.optString("date_imprint_corner", fallback.dateCorner),
             frame = fallback.frame,          // app-side only
             borderId = fallback.borderId,    // app-side only
+            monoPrint = fallback.monoPrint,  // app-side only
         )
 
         /**

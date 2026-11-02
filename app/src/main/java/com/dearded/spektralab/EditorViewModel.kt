@@ -50,7 +50,7 @@ data class UiState(
     /** JPEG exports in Display P3 (on by default: Xiaomi flagships have P3 screens). */
     val wideGamut: Boolean = true,
     /** Highlight recovery for phone photos without a gain map, in stops (0 = off). */
-    val highlightStops: Float = 1f,
+    val highlightStops: Float = 0f,
     val maxPixels: Long = 0,
     val deviceSummary: String = "",
     val engineSummary: String = "",
@@ -77,7 +77,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
         wideGamut = prefs.getBoolean("wide_gamut", true),
-        highlightStops = prefs.getFloat("highlight_stops", 1f)))
+        highlightStops = prefs.getFloat("highlight_stops_v2", 0f)))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -199,9 +199,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val maxPixels = _ui.value.maxPixels.let {
                 if (wb != null && wanted.filmEdge && it > 0) it * 10 / 16 else it
             }
-            // A phone photo was already exposed by the camera; metering it again
-            // double-counts (a bright sky in the middle printed ~1.7 stops dark in
-            // another port). RAW is scene-linear and wants the meter.
             // Rotation and crop belong to one photo; the look (film, paper, effects) carries over.
             // A white-balance re-decode is the same photo: everything is kept.
             // The film edge is turned off with the crop (the engine refuses a frame
@@ -209,8 +206,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             if (wb == null) {
                 sourceExif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
             }
-            val look = if (wb != null) wanted else wanted.copy(
-                autoExposure = raw,
+            // Every new frame is metered, a phone photo too: upstream meters JPEG
+            // and RAW alike ("balanced", a log average that a bright sky barely moves).
+            val look = _ui.value.catalog.normalize(if (wb != null) wanted else wanted.copy(
+                autoExposure = true,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
                 filmEdge = false,
@@ -221,7 +220,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 .let {
                     val p = Borders.byId(it.borderId)
                     if (wb == null && p != null && (p.edge != null || p.crop > 0)) it.copy(frame = FrameSpec(), borderId = "none") else it
-                }
+                })
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
@@ -343,7 +342,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         applyEdit(edit, record = true)
     }
 
-    private fun applyEdit(edit: Edit, record: Boolean, render: Boolean = true) {
+    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
+        val edit = _ui.value.catalog.normalize(raw)
         val current = _ui.value.edit
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
@@ -696,7 +696,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     /** A phone photo is re-opened with the new recovery; the edit is kept. */
     fun setHighlightStops(stops: Float) {
         if (stops == _ui.value.highlightStops || _ui.value.exporting) return
-        prefs.edit().putFloat("highlight_stops", stops).apply()
+        prefs.edit().putFloat("highlight_stops_v2", stops).apply()
         _ui.update { it.copy(highlightStops = stops) }
         val uri = lastUri ?: return
         val src = _ui.value.source ?: return
@@ -757,7 +757,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             var paper = edit.paper
             val paperBw = catalog.paper(paper)?.bw ?: false
             if (film.targetPrint != null && paperBw != film.bw) paper = film.targetPrint
-            return edit.copy(film = id, scanFilm = film.positive, paper = paper)
+            return catalog.normalize(edit.copy(film = id, scanFilm = film.positive, paper = paper))
         }
 
     }

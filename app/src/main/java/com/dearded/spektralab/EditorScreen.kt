@@ -457,10 +457,10 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(printExposure = it))
                         }
-                        LabeledSlider("黄滤镜", e.yShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                        LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(yShift = it))
                         }
-                        LabeledSlider("品红滤镜", e.mShift, -0.5, 0.5, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                        LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
                             vm.update(e.copy(mShift = it))
                         }
                     }
@@ -637,7 +637,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
     }
 }
 
-private val FORMATS = listOf("半格" to 24.0, "135" to 35.0, "645" to 56.0, "6×7" to 70.0, "4×5" to 127.0)
+private val FORMATS = listOf("半格" to 24.0, "135" to 36.0, "645" to 56.0, "6×7" to 70.0, "4×5" to 127.0)
 
 @Composable
 private fun LabeledSlider(
@@ -857,8 +857,8 @@ private val ASPECTS = listOf(
 )
 
 private val HIGHLIGHT_STOPS = listOf(
-    0f to "关（按原样）",
-    1f to "1 档（推荐）",
+    0f to "关（与桌面版一致，推荐）",
+    1f to "1 档",
     2f to "2 档",
 )
 
@@ -907,7 +907,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 Spacer(Modifier.height(12.dp))
                 Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
                 Text(
-                    "手机直出的 JPEG/HEIC 把高光压进了一条软肩。恢复会把中灰以上的部分展开，让胶片自己的肩部和光晕处理高光；中间调曝光不变。带增益图的 Ultra HDR 照片按增益图恢复，不受这里影响。",
+                    "默认关闭：照片按原样交给引擎，和桌面版 SpektraLab 一致。开启后，中灰以上的高光会被展开（Ultra HDR 照片改用增益图），让胶片自己的肩部处理高光；高光会更亮、更浓，可能偏离原版色彩。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

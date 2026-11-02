@@ -236,8 +236,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     }
 
     private suspend fun process(job: ProcessingJob, step: (String, Float) -> Unit): String {
-        val edit = Edit.fromParams(JSONObject(job.editJson), Edit())
-        val ready = host.start(edit.film, edit.paper)
+        val parsed = Edit.fromParams(JSONObject(job.editJson), Edit())
+        val ready = host.start(parsed.film, parsed.paper)
+        val edit = ready.catalog.normalize(parsed)
         val uri = Uri.parse(job.uri)
         step("读取照片", 0.05f)
         val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
