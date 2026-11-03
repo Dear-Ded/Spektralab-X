@@ -317,6 +317,8 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 本项目与 SpektraLab 上游、小米公司均无关联。“SpektraLab”名称由上游项目管理；“小米”“骁龙”“Adreno”是各自所有者的商标。
 
+边框水印里的相机、手机和胶片品牌 logo 是各自权利人的商标，不属于本项目的 GPL-3.0 授权范围，只用于标识拍摄器材，与各品牌无隶属或背书关系。来源逐个记录在 [docs/LOGOS.md](docs/LOGOS.md)。权利人如有异议，请提 issue，我们会及时移除。
+
 <div align="center">
 
 **觉得有意思？点个 ⭐ Star，让更多人看到。**
