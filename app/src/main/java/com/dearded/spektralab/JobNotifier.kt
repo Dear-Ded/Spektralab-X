@@ -30,6 +30,8 @@ import org.json.JSONObject
 object JobNotifier {
     const val ID = 1
     const val DONE_ID = 2
+    /** The queue is held: the foreground-service limit, or a start the system refused. */
+    const val PAUSED_ID = 3
     private const val CHANNEL = "processing"
     private const val CHANNEL_DONE = "processing_done"
     private const val ACCENT = 0xFFE8A24A.toInt()
@@ -48,6 +50,10 @@ object JobNotifier {
 
     fun post(context: Context, id: Int, notification: Notification) {
         runCatching { context.getSystemService(NotificationManager::class.java)?.notify(id, notification) }
+    }
+
+    fun cancel(context: Context, id: Int) {
+        runCatching { context.getSystemService(NotificationManager::class.java)?.cancel(id) }
     }
 
     private fun openApp(context: Context): PendingIntent {
@@ -104,6 +110,24 @@ object JobNotifier {
         }
         b.addExtras(focusExtras(context, title, text, pct, shortText))
         return b.build()
+    }
+
+    /**
+     * The queue stopped because the system ended or refused its foreground
+     * service (Android 15+ time limit, background start). Opening the app
+     * continues it; nothing is lost, the jobs are still in line.
+     */
+    fun paused(context: Context, waiting: Int): Notification {
+        ensureChannels(context)
+        return NotificationCompat.Builder(context, CHANNEL_DONE)
+            .setSmallIcon(R.drawable.ic_stat_film)
+            .setContentTitle("后台处理已暂停 · $waiting 张待处理")
+            .setContentText("系统限制了后台运行时间；打开应用即可继续")
+            .setColor(ACCENT)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(openApp(context))
+            .build()
     }
 
     fun finished(context: Context, done: Int, failed: Int): Notification {

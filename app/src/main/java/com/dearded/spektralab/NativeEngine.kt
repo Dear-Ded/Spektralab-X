@@ -64,6 +64,9 @@ object NativeEngine {
     /** Renders [tier] ("full" or "preview") and writes an RGB16 TIFF to [path]. */
     external fun exportTiff(session: Long, path: String, iccPath: String, tier: String): Boolean
 
+    /** [exportTiff] into an open writable descriptor (a pending MediaStore entry); the caller closes it. */
+    external fun exportTiffFd(session: Long, fd: Int, iccPath: String, tier: String): Boolean
+
     external fun release(session: Long)
 
     /** Layer 2 for the session's display and export packs (Look.values()); null clears it. */
@@ -84,4 +87,7 @@ object NativeEngine {
     external fun warmUp(engine: Long, film: String, paper: String): Boolean
     external fun trimMemory(engine: Long): Long
     external fun lastWasCancelled(): Boolean
+
+    /** True when the last failure lost the GPU device (VkResult -4): only a new engine helps (EngineHost.recover). */
+    external fun lastWasDeviceLost(): Boolean
 }

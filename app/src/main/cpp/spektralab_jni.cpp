@@ -5,6 +5,7 @@
 #include <android/bitmap.h>
 #include <android/log.h>
 #include <jni.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <cmath>
@@ -16,8 +17,11 @@
 #include <fstream>
 #include <iterator>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "io/raw_decoder.hpp"
@@ -91,14 +95,55 @@ bool renders_prophoto(const std::string& params) {
            params.find("\"output_color_space\":\"ProPhoto RGB\"") != std::string::npos;
 }
 
+// Every engine and the sessions open on it. spk_engine_destroy deletes the
+// sessions it still holds, so an engine the GPU lost cannot be destroyed while
+// an editor has a photo open on it: `destroy` retires it instead, and the last
+// session's release frees it (EngineHost.recover). A handle to an engine that
+// is gone is refused rather than dereferenced.
+std::mutex g_engines_lock;
+std::unordered_map<spk_engine*, int> g_sessions;   // live engine -> open sessions
+std::unordered_set<spk_engine*> g_retired;         // destroy asked, sessions still open
+
+bool engine_known(spk_engine* e) {
+    std::lock_guard<std::mutex> guard(g_engines_lock);
+    return e && g_sessions.count(e) != 0;
+}
+
+// Known and not retired: what a new session or a warm-up may use.
+bool engine_usable(spk_engine* e) {
+    std::lock_guard<std::mutex> guard(g_engines_lock);
+    return e && g_sessions.count(e) != 0 && g_retired.count(e) == 0;
+}
+
+void session_opened(spk_engine* e) {
+    std::lock_guard<std::mutex> guard(g_engines_lock);
+    ++g_sessions[e];
+}
+
+void session_closed(spk_engine* e) {
+    bool destroy = false;
+    {
+        std::lock_guard<std::mutex> guard(g_engines_lock);
+        auto it = g_sessions.find(e);
+        if (it == g_sessions.end()) return;
+        if (--it->second <= 0 && g_retired.erase(e)) {
+            g_sessions.erase(it);
+            destroy = true;
+        }
+    }
+    if (destroy) spk_engine_destroy(e);
+}
+
 // Owns a Session until it is handed to Kotlin, so an exception between the
 // engine open and the return never leaks the session's GPU buffers.
 struct SessionDeleter {
     void operator()(Session* s) const {
         if (!s) return;
+        spk_engine* engine = s->engine;
         spk_result_free(&s->last);   // before its session
         spk_session_release(s->session);
         delete s;
+        session_closed(engine);
     }
 };
 using SessionPtr = std::unique_ptr<Session, SessionDeleter>;
@@ -197,6 +242,14 @@ std::string engine_error(const char* what) {
     return std::string(what) + ": " + (e && *e ? e : "unknown engine error");
 }
 
+// VK_ERROR_DEVICE_LOST (VkResult -4): the GPU was reset, usually by the
+// kernel driver's watchdog. Nothing on that VkDevice works again; the engine
+// has to be replaced. The Vulkan backend reports it as "... (VkResult -4)".
+bool device_lost(const std::string& e) {
+    return e.find("(VkResult -4)") != std::string::npos ||
+           e.find("VK_ERROR_DEVICE_LOST") != std::string::npos;
+}
+
 // Fits (w, h) inside max_edge on its long side and inside max_pixels in area;
 // 0 means no limit. The pixel cap comes from the GPU's maxStorageBufferRange:
 // one storage buffer holds a whole plane, so a frame larger than the range
@@ -214,12 +267,14 @@ void fit(uint32_t w, uint32_t h, uint32_t max_edge, uint64_t max_pixels, uint32_
 
 Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, uint32_t h,
                      const std::string& params) {
+    if (!engine_usable(engine)) { fail("open image: the engine was replaced after a GPU fault"); return nullptr; }
     const spk_image input{rgb.data(), w, h, 3};
     char* reply = nullptr;
     spk_session* s = spk_open(engine, &input, params.c_str(), &reply);
     if (reply) spk_string_free(reply);
     if (!s) { fail(engine_error("open image")); return nullptr; }
     auto* session = new Session();
+    session_opened(engine);
     session->engine = engine;
     session->session = s;
     session->width = w;
@@ -417,6 +472,10 @@ JNI_FN(jlong, create)(JNIEnv* env, jobject, jstring resources, jstring tmp_dir) 
         const std::string dir = str(env, resources);
         spk_engine* engine = spk_engine_create(dir.c_str(), nullptr);
         if (!engine) { fail(engine_error("engine")); return 0; }
+        {
+            std::lock_guard<std::mutex> guard(g_engines_lock);
+            g_sessions[engine] = 0;
+        }
         return reinterpret_cast<jlong>(engine);
     } catch (const std::exception& e) {
         fail(std::string("engine: ") + e.what());
@@ -426,11 +485,23 @@ JNI_FN(jlong, create)(JNIEnv* env, jobject, jstring resources, jstring tmp_dir) 
     return 0;
 }
 
-JNI_FN(void, destroy)(JNIEnv*, jobject, jlong engine) {
-    spk_engine_destroy(reinterpret_cast<spk_engine*>(engine));
+// Destroys the engine now or, while sessions are still open on it, retires
+// it: no new session opens on it and the last release frees it.
+JNI_FN(void, destroy)(JNIEnv*, jobject, jlong engine_handle) {
+    auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
+    {
+        std::lock_guard<std::mutex> guard(g_engines_lock);
+        auto it = g_sessions.find(engine);
+        if (it == g_sessions.end()) return;   // unknown, or already gone
+        if (it->second > 0) { g_retired.insert(engine); return; }
+        g_sessions.erase(it);
+        g_retired.erase(engine);
+    }
+    spk_engine_destroy(engine);
 }
 
 JNI_FN(jstring, capabilities)(JNIEnv* env, jobject, jlong engine) {
+    if (!engine_known(reinterpret_cast<spk_engine*>(engine))) return jstr(env, "{}");
     const char* caps = spk_capabilities(reinterpret_cast<spk_engine*>(engine));
     return jstr(env, caps ? caps : "{}");
 }
@@ -888,8 +959,9 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
     return nullptr;
 }
 
-JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
-    auto* s = reinterpret_cast<Session*>(handle);
+// Renders `tier` and writes the RGB16 TIFF to `path`, or, when `fd` >= 0, to
+// that descriptor (a pending MediaStore entry, so nothing is copied twice).
+static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring tier_j) {
     if (!s) { fail("no session"); return JNI_FALSE; }
     try {
         // A TIFF without its profile would be read as some other space: refuse.
@@ -899,7 +971,6 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
         if (icc_path.empty() || !file) { fail("TIFF: sRGB profile missing from engine resources"); return JNI_FALSE; }
         icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
         if (icc.empty()) { fail("TIFF: sRGB profile is empty"); return JNI_FALSE; }
-        const std::string path = str(env, path_j);
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
         ResultGuard result;
         if (!render(s, tier, result.r)) return JNI_FALSE;
@@ -921,6 +992,20 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
                                                 result.r.width, result.r.height);
             pixels = adjusted.data();
         }
+        if (fd >= 0) {
+            // A dup, so fclose leaves the caller's ParcelFileDescriptor to close its own.
+            const int own = dup(fd);
+            std::FILE* file = own >= 0 ? fdopen(own, "wb") : nullptr;
+            if (!file) {
+                if (own >= 0) close(own);
+                fail("TIFF: cannot open the gallery entry for writing");
+                return JNI_FALSE;
+            }
+            const bool ok = spk::android::write_tiff16(file, pixels, result.r.width, result.r.height, stride, icc, error);
+            if (std::fclose(file) != 0 && ok) { fail("TIFF: close failed"); return JNI_FALSE; }
+            if (!ok) { fail("TIFF: " + error); return JNI_FALSE; }
+            return JNI_TRUE;
+        }
         if (!spk::android::write_tiff16(path, pixels, result.r.width, result.r.height,
                                         stride, icc, error)) {
             fail("TIFF: " + error);
@@ -937,6 +1022,16 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
     return JNI_FALSE;
 }
 
+JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
+    return export_tiff(env, reinterpret_cast<Session*>(handle), str(env, path_j), -1, icc_j, tier_j);
+}
+
+// exportTiff into an open, writable descriptor; the caller keeps and closes it.
+JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring tier_j) {
+    if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, tier_j);
+}
+
 // Safe from another thread while a render is in flight on the engine thread:
 // the render unwinds at its next node and returns SPK_ERR_CANCELLED. The caller
 // guarantees the session outlives this call (EditorViewModel.cancelLock).
@@ -948,6 +1043,7 @@ JNI_FN(void, cancel)(JNIEnv*, jobject, jlong handle) {
 // The fixed per-stock setup (tc_lut, C_max table, compute pipelines) paid
 // before the first photo, so the first preview does not carry it.
 JNI_FN(jboolean, warmUp)(JNIEnv* env, jobject, jlong engine, jstring film_j, jstring paper_j) {
+    if (!engine_usable(reinterpret_cast<spk_engine*>(engine))) { fail("warm up: the engine was replaced"); return JNI_FALSE; }
     char* reply = nullptr;
     const std::string film = str(env, film_j), paper = str(env, paper_j);
     const spk_status st = spk_warm_up(reinterpret_cast<spk_engine*>(engine), film.c_str(), paper.c_str(), &reply);
@@ -958,12 +1054,19 @@ JNI_FN(jboolean, warmUp)(JNIEnv* env, jobject, jlong engine, jstring film_j, jst
 
 // Returns the bytes the GPU buffer pool gave back (onTrimMemory).
 JNI_FN(jlong, trimMemory)(JNIEnv*, jobject, jlong engine) {
+    if (!engine_known(reinterpret_cast<spk_engine*>(engine))) return 0;
     return jlong(spk::view::trim_idle_memory(reinterpret_cast<spk_engine*>(engine)));
 }
 
 // True when the last failure on this thread was a cancellation.
 JNI_FN(jboolean, lastWasCancelled)(JNIEnv*, jobject) {
     return t_error.find("render cancelled") != std::string::npos ? JNI_TRUE : JNI_FALSE;
+}
+
+// True when the last failure on this thread means the GPU device is lost:
+// retrying on the same engine cannot succeed (EngineHost.recover).
+JNI_FN(jboolean, lastWasDeviceLost)(JNIEnv*, jobject) {
+    return device_lost(t_error) ? JNI_TRUE : JNI_FALSE;
 }
 
 // Layer 2 for this session's display and export renders (Look.kt's array;
@@ -1022,7 +1125,9 @@ JNI_FN(jboolean, setOutput)(JNIEnv* env, jobject, jlong handle, jstring target_j
 JNI_FN(void, release)(JNIEnv*, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return;
+    spk_engine* engine = s->engine;
     spk_result_free(&s->last);   // before its session
     spk_session_release(s->session);
     delete s;
+    session_closed(engine);
 }
