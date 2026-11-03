@@ -30,6 +30,9 @@ import kotlin.math.roundToInt
 
 enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 
+/** The pre-save check found a frame no photo produces ([what]: 全黑, 全白, 纯色); nothing was saved. */
+class BlankFrameException(val what: String) : Exception("导出画面异常（$what），未保存")
+
 /**
  * One export: a snapshot of the photo and its whole edit, so the editor is
  * free to move on (another photo, more edits) while this one is developed.
@@ -343,10 +346,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private suspend fun runRecovering(job: ProcessingJob, step: (String, Float) -> Unit): String {
         try {
             return process(job, step)
-        } catch (e: DeviceLostException) {
+        } catch (e: Exception) {
+            if (e !is DeviceLostException && e !is BlankFrameException) throw e
             host.events.add("job ${job.id}: ${e.message}")
-            step("GPU 被重置，正在重试", 0.05f)
-            host.recover(e.engine)
+            if (e is DeviceLostException) {
+                step("GPU 被重置，正在重试", 0.05f)
+                host.recover(e.engine)
+            } else {
+                // A blank frame is a render that went wrong without saying so;
+                // the same smaller retry, on the same engine.
+                step("画面异常，正在重试", 0.05f)
+            }
             val smaller = smaller(job)
             set(job.id) { it.copy(workingEdge = smaller.workingEdge, maxPixels = smaller.maxPixels) }
             persist()
@@ -357,6 +367,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 host.events.add("job ${job.id}: device lost again: ${again.message}")
                 host.recover(again.engine)   // the editor still needs a working engine
                 throw EngineException("GPU 连续两次被系统重置；请调小工作尺寸后重试")
+            } catch (again: BlankFrameException) {
+                host.events.add("job ${job.id}: blank again: ${again.message}")
+                throw EngineException("导出画面两次异常（${again.what}），未保存；请调小工作尺寸后重试")
             }
         }
     }
@@ -379,8 +392,15 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         if (NativeEngine.lastWasDeviceLost()) throw DeviceLostException(engine, NativeEngine.lastError())
         val error = NativeEngine.lastError()
         // The pre-save check (blank_frame): nothing was written to the gallery.
-        if (error.startsWith("export check:")) throw EngineException("导出画面异常（全黑或全白），未保存；请重试或调小工作尺寸")
+        if (error.startsWith("export check:")) throw BlankFrameException(blankReason(error))
         throw EngineException("$what：$error")
+    }
+
+    private fun blankReason(error: String): String = when {
+        "black" in error -> "全黑"
+        "white" in error -> "全白"
+        "solid colour" in error -> "纯色"
+        else -> "无像素"
     }
 
     /** Records the pending gallery entry before a byte is written. Any thread. */
