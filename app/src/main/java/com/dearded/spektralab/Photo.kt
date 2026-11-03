@@ -15,29 +15,35 @@ class Photo(val bitmap: Bitmap, val space: String, val gain: Bitmap? = null, val
     }
 }
 
-/** The handle and whether the session was opened on linear (HDR) values. */
+/** The handle and whether highlights were recovered (gain map or highlight stops). */
 data class OpenedPhoto(val handle: Long, val linear: Boolean)
 
 /**
- * Opens [photo] on [engine] and recycles its bitmaps. An HDR photo is opened
- * linear with its gain map applied; if that fails it falls back to the plain
- * SDR open, so a malformed gain map never costs the photo. A photo without a
- * gain map gets [highlightStops] of highlight recovery. 0 opens the picture as
- * encoded, gain map ignored: what the desktop app hands the engine.
- * Engine thread only. [params] builds the opening JSON for (input space, linear).
+ * Opens [photo] on [engine] and recycles its bitmaps. The pixels leave the
+ * photo's space natively and the engine opens on linear ProPhoto, as upstream's
+ * desktop host does for every file (input_transform.hpp), so [params] is always
+ * asked for ("ProPhoto RGB", linear), and so is anything that reopens the
+ * session's source later (film cards). An HDR photo gets its gain map applied;
+ * if that fails it falls back to the plain SDR open, so a malformed gain map
+ * never costs the photo. A photo without a gain map gets [highlightStops] of
+ * highlight recovery; 0 is the picture as encoded, what the desktop app hands
+ * the engine. Engine thread only.
  */
 fun openPhotoSession(engine: Long, photo: Photo, highlightStops: Float, params: (String, Boolean) -> String): OpenedPhoto {
     try {
+        val opening = params(INPUT_SPACE, true)
         if (photo.hdr && highlightStops > 0f) {
-            val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, params(photo.space, true))
+            val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, photo.space, opening)
             if (h != 0L) return OpenedPhoto(h, true)
         }
-        val linear = highlightStops > 0f
-        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, params(photo.space, linear), highlightStops), linear)
+        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, photo.space, opening, highlightStops), highlightStops > 0f)
     } finally {
         photo.recycle()
     }
 }
+
+/** The engine's input space for every opened photo: linear ProPhoto, as for a RAW. */
+const val INPUT_SPACE = "ProPhoto RGB"
 
 /** Android 14's Gainmap API, kept in its own class so older devices never load it. */
 @androidx.annotation.RequiresApi(34)

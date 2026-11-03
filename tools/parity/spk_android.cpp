@@ -25,6 +25,7 @@
 #include "spektrafilm/spk_engine.h"
 #include "io/raw_decoder.hpp"
 #include "layer2.hpp"
+#include "input_transform.hpp"
 #include "output_transform.hpp"
 #include "resize.hpp"
 
@@ -121,7 +122,23 @@ int main(int argc, char** argv) {
         }
         input = R"("input_color_space":"ProPhoto RGB","input_cctf_decoding":false)";
     } else if (kind == "srgb" || kind == "p3") {
-        // openBitmap with no highlight recovery: the codes / 255, the engine decodes.
+        // openBitmap with no highlight recovery: the app's InputTransform takes
+        // the curve and primaries off, the engine opens on linear ProPhoto.
+        int iw, ih, n;
+        unsigned char* p = stbi_load(in.c_str(), &iw, &ih, &n, 3);
+        if (!p) { std::fprintf(stderr, "decode failed: %s\n", in.c_str()); return 1; }
+        w = uint32_t(iw); h = uint32_t(ih);
+        const spk::android::InputTransform xf(kind == "p3" ? "Display P3" : "sRGB");
+        rgb.resize(size_t(w) * h * 3);
+        for (size_t px = 0; px < size_t(w) * h; ++px) {
+            float* c = rgb.data() + 3 * px;
+            for (int i = 0; i < 3; ++i) c[i] = xf.decode(p[3 * px + i], i);
+            xf.to_prophoto(c);
+        }
+        stbi_image_free(p);
+        input = R"("input_color_space":"ProPhoto RGB","input_cctf_decoding":false)";
+    } else if (kind == "srgb_old" || kind == "p3_old") {
+        // The app before input_transform: the codes / 255, the engine decodes.
         int iw, ih, n;
         unsigned char* p = stbi_load(in.c_str(), &iw, &ih, &n, 3);
         if (!p) { std::fprintf(stderr, "decode failed: %s\n", in.c_str()); return 1; }
@@ -129,8 +146,8 @@ int main(int argc, char** argv) {
         rgb.resize(size_t(w) * h * 3);
         for (size_t i = 0; i < rgb.size(); ++i) rgb[i] = p[i] * (1.0f / 255.0f);
         stbi_image_free(p);
-        input = kind == "p3" ? R"("input_color_space":"Display P3","input_cctf_decoding":true)"
-                             : R"("input_color_space":"sRGB","input_cctf_decoding":true)";
+        input = kind == "p3_old" ? R"("input_color_space":"Display P3","input_cctf_decoding":true)"
+                                 : R"("input_color_space":"sRGB","input_cctf_decoding":true)";
     } else if (kind == "srgb_icc" || kind == "p3_icc") {
         // Diagnosis: the host's own JPEG path (image_io.cpp encoded_to_linear_prophoto):
         // the sRGB curve, then the profile's D50 colorants into linear ProPhoto.

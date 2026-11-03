@@ -29,19 +29,21 @@ object NativeEngine {
     ): Long
 
     /**
-     * Opens a session on an sRGB or Display P3 ARGB_8888 bitmap. [headroomStops]
-     * > 0 undoes the phone's highlight shoulder so encoded white lands that many
-     * stops above 1.0; [paramsJson] must then say input_cctf_decoding = false.
+     * Opens a session on an ARGB_8888 bitmap in [space] ("sRGB" or "Display P3").
+     * The pixels are converted to linear ProPhoto natively, as upstream's host
+     * does, so [paramsJson] must say input_color_space "ProPhoto RGB" and
+     * input_cctf_decoding false. [headroomStops] > 0 undoes the phone's
+     * highlight shoulder so encoded white lands that many stops above 1.0.
      */
-    external fun openBitmap(engine: Long, bitmap: Bitmap, paramsJson: String, headroomStops: Float): Long
+    external fun openBitmap(engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float): Long
 
     /**
-     * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888) recovered
-     * with its gain map [gain] (ALPHA_8 or ARGB_8888) to linear light at full
-     * boost. [meta] is ratioMin, ratioMax, gamma, epsilonSdr, epsilonHdr, 3 each.
-     * [paramsJson] must say input_cctf_decoding = false.
+     * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888, in [space])
+     * recovered with its gain map [gain] (ALPHA_8 or ARGB_8888) to linear light
+     * at full boost, then converted to linear ProPhoto. [meta] is ratioMin,
+     * ratioMax, gamma, epsilonSdr, epsilonHdr, 3 each. [paramsJson] as for openBitmap.
      */
-    external fun openBitmapHdr(engine: Long, bitmap: Bitmap, gain: Bitmap, meta: FloatArray, paramsJson: String): Long
+    external fun openBitmapHdr(engine: Long, bitmap: Bitmap, gain: Bitmap, meta: FloatArray, space: String, paramsJson: String): Long
 
     /** A small sRGB thumbnail of the frame before any film was applied. */
     external fun beforeBitmap(session: Long): Bitmap?

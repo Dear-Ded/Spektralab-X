@@ -26,6 +26,7 @@
 #include "tiff16.hpp"
 #include "layer2.hpp"
 #include "output_transform.hpp"
+#include "input_transform.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -543,11 +544,13 @@ struct HighlightExpand {
     }
 };
 
-// `bitmap` is ARGB_8888 in sRGB (or Display P3), already scaled by the caller.
-// `headroom_stops` > 0: decode the transfer curve here and expand the
-// highlights (HighlightExpand); [params_j] must then say input_cctf_decoding = false.
-JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring params_j,
-                          jfloat headroom_stops) {
+// `bitmap` is ARGB_8888 in `space_j` ("sRGB" or "Display P3"), already scaled
+// by the caller. Its curve and primaries are taken off here, as upstream's host
+// does (input_transform.hpp), so the engine opens on linear ProPhoto and
+// [params_j] must say so. `headroom_stops` > 0 also expands the highlights
+// (HighlightExpand) in the photo's own primaries first.
+JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring space_j,
+                          jstring params_j, jfloat headroom_stops) {
     try {
         AndroidBitmapInfo info{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
@@ -555,6 +558,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
             fail("image must be an ARGB_8888 bitmap"); return 0;
         }
         const std::string params = str(env, params_j);
+        const spk::android::InputTransform xf(str(env, space_j));
         const HighlightExpand expand(std::isfinite(headroom_stops) ? std::clamp(float(headroom_stops), 0.0f, 3.0f) : 0.0f);
         // Allocated before the pixels are locked: a bad_alloc here must not
         // leave the bitmap pinned (Kotlin's recycle could not free it then).
@@ -567,32 +571,25 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
             const uint64_t px = uint64_t(info.width) * info.height;
             const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
             const auto* base = static_cast<const uint8_t*>(lock.pixels);
-            // The sRGB and Display P3 transfer curves are the same: a table of 256.
-            float decode[256];
-            for (int v = 0; v < 256; ++v) decode[v] = srgb_decode(v / 255.0f);
             run_rows(info.height, workers, [&](uint32_t y0, uint32_t y1) {
                 for (uint32_t y = y0; y < y1; ++y) {
                     const auto* src = base + size_t(y) * info.stride;
                     float* dst = rgb.data() + size_t(y) * info.width * 3;
                     for (uint32_t x = 0; x < info.width; ++x) {
                         const uint32_t a = src[4 * x + 3];
-                        // ARGB_8888 is premultiplied: undo it, or semi-transparent
-                        // edges (PNG) print darker than they are.
-                        const float k = (a == 255 || a == 0) ? 1.0f / 255.0f : 1.0f / float(a);
-                        float r = std::min(1.0f, src[4 * x + 0] * k);
-                        float g = std::min(1.0f, src[4 * x + 1] * k);
-                        float b = std::min(1.0f, src[4 * x + 2] * k);
-                        if (expand.active()) {
-                            if (a == 255 || a == 0) {
-                                r = decode[src[4 * x + 0]]; g = decode[src[4 * x + 1]]; b = decode[src[4 * x + 2]];
-                            } else {
-                                r = srgb_decode(r); g = srgb_decode(g); b = srgb_decode(b);
-                            }
-                            expand.apply(r, g, b);
+                        float c[3];
+                        if (a == 255 || a == 0) {
+                            for (int i = 0; i < 3; ++i) c[i] = xf.decode(src[4 * x + i], i);
+                        } else {
+                            // ARGB_8888 is premultiplied: undo it, or semi-transparent
+                            // edges (PNG) print darker than they are.
+                            for (int i = 0; i < 3; ++i) c[i] = xf.decode(std::min(1.0f, src[4 * x + i] / float(a)), i);
                         }
-                        dst[3 * x + 0] = r;
-                        dst[3 * x + 1] = g;
-                        dst[3 * x + 2] = b;
+                        if (expand.active()) expand.apply(c[0], c[1], c[2]);
+                        xf.to_prophoto(c);
+                        dst[3 * x + 0] = c[0];
+                        dst[3 * x + 1] = c[1];
+                        dst[3 * x + 2] = c[2];
                     }
                 }
             });
@@ -600,8 +597,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
                                        info.width, info.height, params));
         if (!session) return 0;
-        const bool p3 = params.find("\"Display P3\"") != std::string::npos;
-        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3, expand.active());
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
         session->source_width = info.width;
         session->source_height = info.height;
         session->kind = "bitmap";
@@ -623,9 +619,11 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
 // the real highlight range instead of a clipped 1.0. `meta_j` is the Gainmap
 // API's ratioMin[3], ratioMax[3], gamma[3], epsilonSdr[3], epsilonHdr[3]
 // (linear ratios). The gain map is usually a quarter of the size; it is
-// sampled bilinearly in log-boost space. Caller passes linear=true params.
+// sampled bilinearly in log-boost space. The recovered light then leaves the
+// base's primaries for linear ProPhoto (input_transform.hpp), as openBitmap's
+// pixels do; [params_j] must say linear ProPhoto.
 JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jobject gain,
-                             jfloatArray meta_j, jstring params_j) {
+                             jfloatArray meta_j, jstring space_j, jstring params_j) {
     try {
         AndroidBitmapInfo info{}, ginfo{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
@@ -655,8 +653,7 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
                 boost[c][v] = lo * (1 - gp) + hi * gp;
             }
         }
-        float decode[256];
-        for (int v = 0; v < 256; ++v) decode[v] = srgb_decode(v / 255.0f);
+        const spk::android::InputTransform xf(str(env, space_j));
 
         const uint32_t gw = ginfo.width, gh = ginfo.height;
         std::vector<uint8_t> g(size_t(gw) * gh * gc);
@@ -699,9 +696,10 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
                             };
                             const float lb = (at(x0g, y0g) * (1 - tx) + at(x1g, y0g) * tx) * (1 - ty) +
                                              (at(x0g, y1g) * (1 - tx) + at(x1g, y1g) * tx) * ty;
-                            const float v = (decode[code] + eps_sdr[c]) * std::exp2(lb) - eps_hdr[c];
+                            const float v = (xf.decode(uint8_t(code), c) + eps_sdr[c]) * std::exp2(lb) - eps_hdr[c];
                             dst[3 * x + c] = std::isfinite(v) ? std::max(0.0f, v) : 0.0f;
                         }
+                        xf.to_prophoto(dst + 3 * x);
                     }
                 }
             };
@@ -711,8 +709,7 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
         SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
                                        info.width, info.height, params));
         if (!session) return 0;
-        const bool p3 = params.find("\"Display P3\"") != std::string::npos;
-        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/false, p3, /*linear=*/true);
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
         session->source_width = info.width;
         session->source_height = info.height;
         session->kind = "bitmap";

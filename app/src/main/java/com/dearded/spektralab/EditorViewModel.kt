@@ -259,7 +259,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         Edit.openingParams(look, inputSpace = space, linear = linear).toString()
                     }
                     val h = opened.handle
-                    openSpace = photo.space; openLinear = opened.linear
+                    openSpace = INPUT_SPACE; openLinear = true
                     if (opened.linear) log("ultra hdr gain map applied")
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     synchronized(cancelLock) { session = h }
