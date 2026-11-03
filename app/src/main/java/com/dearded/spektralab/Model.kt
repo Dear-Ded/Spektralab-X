@@ -250,7 +250,7 @@ data class Edit(
          */
         fun withBorder(edit: Edit, preset: BorderPreset, w: Int, h: Int): Edit {
             val edge = preset.edge
-            var next = edit.copy(frame = preset.frame, borderId = preset.id)
+            var next = edit.copy(frame = preset.frame.copy(perf = if (preset.edge != null) null else edit.frame.perf), borderId = preset.id)
             return if (edge != null) {
                 next = next.copy(edgeMode = edge.mode, edgeHoles = edge.holes, edgeGate = edge.gate,
                     edgeCarrier = edge.carrier, edgeFog = edge.fog, edgeLeaks = edge.leaks)

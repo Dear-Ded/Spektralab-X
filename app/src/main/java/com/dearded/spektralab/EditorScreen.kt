@@ -577,6 +577,43 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             Text(p.hint, style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
+                        // Sprocket strips only: any photo, any film, no crop, nothing re-developed.
+                        val perf = e.frame.perf
+                        SwitchRow("只加齿孔", perf != null, enabled && !e.filmEdge) { on ->
+                            vm.update(e.copy(frame = e.frame.copy(perf = if (on) Perforation() else null)))
+                        }
+                        if (perf != null) {
+                            fun setPerf(p: Perforation) = vm.update(e.copy(frame = e.frame.copy(perf = p)))
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("both" to "上下", "top" to "只上", "bottom" to "只下")) {
+                                    FilterChip(selected = perf.where == v, onClick = { setPerf(perf.copy(where = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                                for ((v, label) in listOf("ks" to "方孔 KS", "bh" to "圆孔 BH")) {
+                                    FilterChip(selected = perf.shape == v, onClick = { setPerf(perf.copy(shape = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((c, label) in Perforation.BASES) {
+                                    FilterChip(selected = perf.base == c,
+                                        onClick = { setPerf(perf.copy(base = c, holes = Perforation.holesFor(c))) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            SwitchRow("片基字", perf.edgeText, enabled) { setPerf(perf.copy(edgeText = it)) }
+                            if (perf.edgeText) {
+                                androidx.compose.material3.OutlinedTextField(
+                                    value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
+                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("片基文字（留空用胶片名）") },
+                                )
+                                SwitchRow("帧号", perf.numbers, enabled) { setPerf(perf.copy(numbers = it)) }
+                            }
+                            Text("画在照片外侧，不裁剪、不改任何冲印参数；导出 JPEG 时加上。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                         if (e.filmEdge) {
                             Text("片边", style = MaterialTheme.typography.labelLarge)
                             Row(
@@ -1140,6 +1177,12 @@ private fun FramedImage(
         val oy = (size.height - l.height * k) / 2f
         drawRect(Color(frame.paper), topLeft = Offset(ox, oy),
             size = androidx.compose.ui.geometry.Size(l.width * k, l.height * k))
+        frame.perf?.let { p -> drawIntoCanvas { c ->
+            val n = c.nativeCanvas
+            n.save(); n.translate(ox, oy); n.scale(k, k)
+            p.draw(n, l.x.toFloat(), l.y.toFloat(), bitmap.width.toFloat(), bitmap.height.toFloat(), l.short, caption.film)
+            n.restore()
+        } }
         drawImage(
             bitmap,
             dstOffset = androidx.compose.ui.unit.IntOffset(Math.round(ox + l.x * k), Math.round(oy + l.y * k)),

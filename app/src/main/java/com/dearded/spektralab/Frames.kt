@@ -28,16 +28,20 @@ data class FrameSpec(
     val paper: Int = PAPER_WHITE,
     /** Shooting data on the bottom band. */
     val caption: Boolean = false,
+    /** 135 sprocket strips beside the print, drawn here, not by the engine (Perforations.kt). */
+    val perf: Perforation? = null,
 ) {
-    val isNone get() = top == 0f && bottom == 0f && side == 0f && canvasAspect == 0f && !caption
+    val isNone get() = top == 0f && bottom == 0f && side == 0f && canvasAspect == 0f && !caption && perf == null
 
     /** Where the image sits on the card, in pixels, for a [w] x [h] image. */
     fun layout(w: Int, h: Int): FrameLayout {
         val s = minOf(w, h).toFloat()
-        var outW = w + 2 * side * s
-        var outH = h + (top + bottom) * s
-        var x = side * s
-        var y = top * s
+        // The sprocket strips sit against the print; the paper margins go round both.
+        val p = perf?.margins(w, h, s) ?: Perforation.Margins(0f, 0f, 0f, 0f, 0f)
+        var outW = w + p.left + p.right + 2 * side * s
+        var outH = h + p.top + p.bottom + (top + bottom) * s
+        var x = side * s + p.left
+        var y = top * s + p.top
         if (canvasAspect > 0f) {
             if (outW / outH < canvasAspect) {
                 val nw = outH * canvasAspect; x += (nw - outW) / 2; outW = nw
@@ -45,7 +49,7 @@ data class FrameSpec(
                 val nh = outW / canvasAspect; y += (nh - outH) / 2; outH = nh
             }
         }
-        return FrameLayout(outW.roundToInt(), outH.roundToInt(), x.roundToInt(), y.roundToInt(), s)
+        return FrameLayout(outW.roundToInt(), outH.roundToInt(), x.roundToInt(), y.roundToInt(), s, p.left, p.right, p.belowPrint)
     }
 
     /** Text on paper this light is dark, and the other way round. */
@@ -54,6 +58,7 @@ data class FrameSpec(
 
     fun toJson(): JSONObject = JSONObject().put("id", id).put("top", top.toDouble()).put("bottom", bottom.toDouble())
         .put("side", side.toDouble()).put("aspect", canvasAspect.toDouble()).put("paper", paper).put("caption", caption)
+        .apply { perf?.let { put("perf", it.toJson()) } }
 
     companion object {
         const val PAPER_WHITE = 0xFFFFFFFF.toInt()
@@ -69,6 +74,7 @@ data class FrameSpec(
                 id = o.optString("id", "custom"), top = o.optDouble("top").toFloat(), bottom = o.optDouble("bottom").toFloat(),
                 side = o.optDouble("side").toFloat(), canvasAspect = o.optDouble("aspect").toFloat(),
                 paper = o.optInt("paper", PAPER_WHITE), caption = o.optBoolean("caption"),
+                perf = Perforation.fromJson(o.optJSONObject("perf")),
             )
         }.getOrDefault(FrameSpec())
 
@@ -89,6 +95,8 @@ data class FrameSpec(
                 image.colorSpace ?: android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.SRGB))
             val canvas = Canvas(out)
             canvas.drawColor(spec.paper)
+            spec.perf?.draw(canvas, l.x.toFloat(), l.y.toFloat(), image.width.toFloat(), image.height.toFloat(), l.short,
+                caption?.film ?: "")
             canvas.drawBitmap(image, l.x.toFloat(), l.y.toFloat(), Paint(Paint.FILTER_BITMAP_FLAG))
             if (spec.caption && caption != null) drawCaption(canvas, spec, l, image.width, image.height, caption)
             return out
@@ -97,7 +105,7 @@ data class FrameSpec(
         fun drawCaption(canvas: Canvas, spec: FrameSpec, l: FrameLayout, w: Int, h: Int, c: Caption) {
             val band = spec.bottom * l.short
             if (band < 4f) return
-            val bandTop = l.y + h.toFloat()
+            val bandTop = l.y + h.toFloat() + l.perfBelow
             val mid = bandTop + band / 2
             val margin = max(spec.side * l.short, l.short * 0.04f)
             val big = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -106,10 +114,10 @@ data class FrameSpec(
             }
             val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = spec.inkSoft; textSize = l.short * 0.017f }
             val gap = l.short * 0.008f
-            val leftX = l.x + margin - spec.side * l.short
+            val leftX = l.x - l.perfLeft + margin - spec.side * l.short
             canvas.drawText(c.camera, leftX, mid - gap, big)
             canvas.drawText(c.film, leftX, mid + gap + small.textSize, small)
-            val right = l.x + w - margin + spec.side * l.short
+            val right = l.x + w + l.perfRight - margin + spec.side * l.short
             big.textAlign = Paint.Align.RIGHT
             small.textAlign = Paint.Align.RIGHT
             canvas.drawText(c.settings, right, mid - gap, big)
@@ -118,7 +126,10 @@ data class FrameSpec(
     }
 }
 
-data class FrameLayout(val width: Int, val height: Int, val x: Int, val y: Int, val short: Float)
+data class FrameLayout(
+    val width: Int, val height: Int, val x: Int, val y: Int, val short: Float,
+    val perfLeft: Float = 0f, val perfRight: Float = 0f, val perfBelow: Float = 0f,
+)
 
 /** The four caption lines: camera, film (left); exposure, date (right). */
 data class Caption(val camera: String, val film: String, val settings: String, val date: String) {
