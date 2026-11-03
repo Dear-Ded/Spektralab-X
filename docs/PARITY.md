@@ -146,6 +146,42 @@ JPEG 导出平均 ≤ 0.016，p99.9 ≤ 0.072，最大 ≤ 0.24。
 修前的路径保留为 `spk_android` 的 `srgb_old` / `p3_old` 输入，可用来复现修前数字。
 高光恢复（`headroom_stops` > 0）与 Ultra HDR 增益图路径只做了代码上的同样处理，宿主没有对应功能，未做像素对照。
 
+### 4.4 fma 探测：GPU 的 fma 不精确时，引擎会怎样（不需要补丁）
+
+问题：有报告说 Adreno / Mali 会把 GLSL 的 `fma()` 拆成普通的乘法加加法，引擎的启动探测因此报告 “unfused”。
+要确认这会不会让引擎拒绝启动，或者悄悄降低精度。
+
+机制（上游 `engine/src/gpu/vulkan_gpu.cpp` 第 313–410 行）：`spk_math_probe` 把 GPU 上 `fma(a, b, -a*b)` 的残差
+和 binary64 的精确残差逐个比较，不留容差。不一致时，再测 Dekker 拆分乘积（`spk_split_probe`，高低两个字都要精确），
+通过就设 `fused_fma_ = 0` 并正常启动。这个值通过特化常量 `SPK_FUSED_FMA` 传给仅有的两个用到 `two_prod` 的
+着色器：`spk_iir_df_acc`（光晕模糊）和 `spk_geometry_resample_df`（旋转、重采样），两者都改用 `spk_split_product`。
+只有拆分乘积也不精确、拆分探测文件缺失或设置了 `SPEKTRAFILM_VULKAN_STRICT_FMA=1` 时才拒绝启动。
+
+验证（`tools/parity/fma_check.sh`，云主机 lavapipe，2026-11-03）：
+
+1. **启动探测**：用上游自己的故障注入测试（`engine/tests/gpu_vulkan_math_gate.cpp` 与 `math_gate_fault.comp`，
+   即上游 `spk_math_gate_*` 测试的同一套夹具）链接打过本仓库补丁的引擎，7 种情况全部符合预期：
+   原样、残差全 0、残差混杂三种都以拆分乘积启动；拆分乘积错误、拆分探测缺失、STRICT 三种都拒绝启动，且第二次调用仍然拒绝。
+   **意外发现**：原样的 lavapipe（LLVM 19.1.7）本身就报告 fma 不精确（第 0 个残差得 0，应为 7.45e-11），
+   走的是拆分乘积。也就是说，本页第 3 节和此前全部对照数字，走的本来就是 Adreno 将会走的那条路。
+2. **画面**：4 个场景（合成图 Portra、水果 CineStill 800T + 2383、湖景 Velvia 旋转 7.5°、沙丘 Tri-X），打开光晕，
+   关闭颗粒和眩光。原样与换入“残差全 0”探测各渲染一次，印片和导出、屏幕全部逐位相同（16 位码值最大差 0）。
+3. **探测防住了什么**：换入一个“说谎”的探测（返回精确残差，让引擎以为 fma 精确），两个着色器就在不精确的
+   `fma()` 上做 `two_prod`，丢掉低位字。与拆分乘积路径相比：
+
+| 场景 | 印片 16 位码值最大差 / 平均差 | 导出 sRGB ΔE00 平均 / p99.9 / 最大 | 屏幕 sRGB ΔE00 最大 |
+|---|---|---|---|
+| synth_portra | 1 / 0.022 | 0.0003 / 0.010 / 0.025 | 1.04 |
+| fruit_cine800t | 5 / 0.060 | 0.0006 / 0.010 / 0.023 | 1.22 |
+| lake_velvia_rot | 7 / 0.099 | 0.0007 / 0.010 / 0.019 | 1.50 |
+| dunes_trix | 1 / 0.023 | 0.0003 / 0.011 / 0.024 | 1.67 |
+
+   即便探测失效，代价也只有导出最大 ΔE00 约 0.025，屏幕偶尔差 1 个 8 位码值，远低于可察觉的 1。
+   探测是对的，而且它保护的精度在这几个场景里本来就很小。
+
+结论：不需要引擎补丁。fma 不精确的 GPU 上，引擎会正常启动，并走 lavapipe 上已逐像素验证过的拆分乘积路径。
+还没做的：真机上从设备信息页读 `math_mode`，确认 Adreno 报告 “exact Dekker split product”（或 “fused fma”）。
+
 ## 5. 复现
 
 云主机上（目录可改）：
@@ -176,3 +212,10 @@ python3 src/host_parity.py grade run1 --where synth_portra/host_view_srgb   # �
 
 磁盘有限时可按 `--only` 分批渲染、评分后删除用例目录（一次完整渲染约 4 GB）。
 `build.sh` 从上游 `image_io.*` 自己生成 `upstream_input_math.inc`，并编译 `input_transform.cpp`。
+
+fma 探测检查（第 4.4 节，约 2 分钟）：
+
+```bash
+cd $P && UP=$U B=$P/build-host A=src/spk_android R=build-host/engine/resources IN=run1 OUT=fma \
+    LP_NUM_THREADS=2 bash src/fma_check.sh
+```
