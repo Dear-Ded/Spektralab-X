@@ -1,0 +1,18 @@
+LibRaw 0.22.2: wavelet_denoise() under OpenMP allocates with an uninitialised
+`size` (the OpenMP branch lost `size = iheight * iwidth;`).
+
+LibRaw issue #842, fixed upstream in a6268d4. Same one-line fix as
+thetechgeekko/Spektrafilm-android lib/libraw/patches/0001 (GPL-3.0).
+Spektralab-X opens RAWs with threshold = 0, so this path is not taken today;
+it is fixed because the OpenMP build compiles it.
+
+--- a/src/postprocessing/postprocessing_aux.cpp
++++ b/src/postprocessing/postprocessing_aux.cpp
+@@ -147,6 +147,7 @@
+   maximum <<= --scale;
+   black <<= scale;
+   FORC4 cblack[c] <<= scale;
++  size = iheight * iwidth;
+   fimg = (float *)malloc((size * 3 + iheight + iwidth) * sizeof *fimg);
+   temp = fimg + size * 3;
+   if ((nc = colors) == 3 && filters)
