@@ -92,7 +92,8 @@ Layer2::Layer2(const std::vector<float>& v) {
     for (int z = 0; z < 4; ++z) {
         const float hue = at(kCbMaster + 3 * z), sat = at(kCbMaster + 3 * z + 1) / 100;
         wheel(hue, sat, cb_[z]);
-        cb_lum_[z] = at(kCbMaster + 3 * z + 2) / 100 * 0.3f;
+        // x 0.25, as upstream's grade (view_process.cpp u[28..31], Adjustments.swift cbLum).
+        cb_lum_[z] = at(kCbMaster + 3 * z + 2) / 100 * 0.25f;
         if (sat != 0 || cb_lum_[z] != 0) cb_active_ = true;
     }
     for (int b = 0; b < 8; ++b)

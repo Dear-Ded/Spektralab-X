@@ -101,7 +101,7 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
 }
 
 // Tables for the display, where the result is 8 bits; the exact curves for a
-// file, and for anything outside 0..1 (out-of-gamut and Layer 2 overshoot).
+// file, and for anything outside 0..1.
 float OutputTransform::decode(float v) const {
     if (cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_decode_mode(v, src_mode_);
     return lerp_lut(decode_lut_, kDecodeN, v);
@@ -144,7 +144,12 @@ void convert(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
                 if (look) {
                     c[0] = s[4 * x] / 65535.0f; c[1] = s[4 * x + 1] / 65535.0f; c[2] = s[4 * x + 2] / 65535.0f;
                     look->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v);
-                    xf.apply(c);
+                    // Upstream's grade ends at the UNORM16 boundary before any
+                    // output conversion (spk_view_grade_body.glsl): clamp to
+                    // 0..1 and round to 16 bits, so CAM16 never sees overshoot.
+                    uint16_t q[3];
+                    for (int k = 0; k < 3; ++k) q[k] = uint16_t(std::floor(saturate(c[k]) * 65535.0f + 0.5f));
+                    xf.apply16(q, c);
                 } else {
                     xf.apply16(s + 4 * x, c);
                 }
