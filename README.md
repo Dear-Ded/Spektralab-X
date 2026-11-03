@@ -14,12 +14,15 @@
 [![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
 [![CI](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml)
 [![License](https://img.shields.io/github/license/Dear-Ded/spektralab-android)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
-[![Stars](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
 [![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/spektralab-android)](https://github.com/Dear-Ded/spektralab-android/commits/main)
 ![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white)
 ![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-informational)
 [![官方版永久免费](https://img.shields.io/badge/%E5%AE%98%E6%96%B9%E7%89%88-%E6%B0%B8%E4%B9%85%E5%85%8D%E8%B4%B9-E8A24A)](#下载与校验)
+
+[![总下载](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?label=%E6%80%BB%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![最新版下载](https://img.shields.io/github/downloads-pre/Dear-Ded/spektralab-android/latest/total?label=%E6%9C%80%E6%96%B0%E7%89%88%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![Star](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
+[![访问](https://hits.sh/github.com/Dear-Ded/spektralab-android.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/spektralab-android/)
 
 [下载](#下载与校验) · [样片](#样片) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
 
@@ -212,6 +215,17 @@ gh attestation verify SpektraLab-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-a
 - **近期（0.1.x-alpha）：** 真机反馈修复、色彩还原与风格体系、界面与交互重构、导出稳定性、小米深度适配（超级岛、后台保活、小米 DNG）。
 - **正式版：** 远程处理，把照片交给自己的电脑或服务器做后处理再传回手机（规范草案见 [docs/REMOTE.md](docs/REMOTE.md)）。
 - **之后的计划：** 小米优化版稳定到可以日常使用后，另开项目做**通用安卓版**、**Windows 版**和 **iOS 版**。这些是计划，没有承诺时间。
+
+## Star 趋势
+
+<a href="https://star-history.com/#Dear-Ded/spektralab-android&Date">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date&theme=dark">
+  <img src="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date" width="600" alt="Star 趋势图">
+</picture>
+</a>
+
+<sub>下载数来自 GitHub Releases，包含所有预发布版本的安装包。访问计数和 Star 趋势图由第三方服务 [hits.sh](https://hits.sh/) 和 [star-history.com](https://star-history.com/) 提供；在 GitHub 上浏览时图片经 GitHub 的图片代理加载，在其他网站或镜像里浏览时这些服务会收到你的 IP 地址。</sub>
 
 ## 反馈问题
 

@@ -14,12 +14,15 @@ Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / A
 [![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
 [![CI](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml)
 [![License](https://img.shields.io/github/license/Dear-Ded/spektralab-android)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
-[![Stars](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
 [![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/spektralab-android)](https://github.com/Dear-Ded/spektralab-android/commits/main)
 ![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white)
 ![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-informational)
 [![Official build: free forever](https://img.shields.io/badge/Official%20build-free%20forever-E8A24A)](#download-and-verify)
+
+[![downloads](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?label=downloads&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![latest pre-release](https://img.shields.io/github/downloads-pre/Dear-Ded/spektralab-android/latest/total?label=latest%20pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![stars](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?label=stars&style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
+[![visits](https://hits.sh/github.com/Dear-Ded/spektralab-android.svg?view=today-total&label=visits)](https://hits.sh/github.com/Dear-Ded/spektralab-android/)
 
 [Download](#download-and-verify) · [Samples](#samples) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
 
@@ -212,6 +215,17 @@ Work proceeds by milestone; the full list, acceptance criteria and research note
 - **Near term (0.1.x-alpha):** fixes from on-device feedback, colour fidelity and the style system, a redesigned UI, export stability, deeper Xiaomi integration (Super Island, background keep-alive, Xiaomi DNG).
 - **First stable release:** remote processing, sending photos to your own computer or server for post-processing and back to the phone (draft spec: [docs/REMOTE.md](docs/REMOTE.md)).
 - **Later plans:** once the Xiaomi-tuned version is stable for daily use, separate projects for a **general Android version**, **Windows** and **iOS**. These are plans, not promises with dates.
+
+## Star history
+
+<a href="https://star-history.com/#Dear-Ded/spektralab-android&Date">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date&theme=dark">
+  <img src="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date" width="600" alt="Star history chart">
+</picture>
+</a>
+
+<sub>Download counts come from GitHub Releases and include every pre-release APK. The visit counter and the star chart are third-party services, [hits.sh](https://hits.sh/) and [star-history.com](https://star-history.com/). On GitHub the images load through GitHub's image proxy; when this page is viewed on another site or mirror, those services receive your IP address.</sub>
 
 ## Reporting problems
 
