@@ -1,0 +1,1 @@
+Renamed Spektralab-X, new icon; colour path now matches upstream (pixel parity on a cloud host); wide-gamut P3 preview; new Adjust tab and 30 one-tap styles; Save button, tap the photo for full screen. Not yet verified on a device.

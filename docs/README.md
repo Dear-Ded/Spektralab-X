@@ -3,6 +3,12 @@
 Spektralab-X 的所有文档。大部分文档用中文写，标注了 EN 的有英文。
 Most documents are in Chinese; those marked EN have English.
 
+## 从这里开始 / Start here
+
+| 文档 | 内容 |
+|---|---|
+| **[PROJECT.md](PROJECT.md)** | **新读者先看这页。** 项目总览：现状、需求、路线、参考项目、分工和文档索引 · New readers start here (Chinese) |
+
 ## 使用 / Using the app
 
 | 文档 | 内容 |
@@ -19,6 +25,7 @@ Most documents are in Chinese; those marked EN have English.
 | [ROADMAP.md](ROADMAP.md) | 里程碑、验收标准、调研结论 |
 | [UI.md](UI.md) | 界面规范（M3 界面重构的依据） |
 | [REMOTE.md](REMOTE.md) | 远程处理接口规范草案 v1（正式版提供） |
+| [PARITY.md](PARITY.md) | 色彩对照：与上游 Linux 宿主逐像素比较的方法、合格线和结果 |
 
 ## 开发 / Development
 
@@ -28,7 +35,7 @@ Most documents are in Chinese; those marked EN have English.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 模块划分、线程模型、渲染档位、内存预算、生命周期 |
 | [PATCHES.md](PATCHES.md) | 对上游引擎的补丁和写新补丁的流程 · EN |
 | [SAMPLES.md](SAMPLES.md) | README 样片的来源、参数和复现方法 · EN |
-| [WORKSTREAMS.md](WORKSTREAMS.md) | 并行开发时各条线负责的文件 |
+| [WORKSTREAMS.md](WORKSTREAMS.md) | 并行开发分工：每条线的分支、负责文件、当前任务和会话管理 |
 
 ## 许可与署名 / Licence and attribution
 

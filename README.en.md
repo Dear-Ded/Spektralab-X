@@ -52,7 +52,7 @@ This repository builds SpektraLab's C++ engine for Android with the NDK, runs it
 
 ## Samples
 
-Every image below was rendered by the same engine this app ships, with the app's opening parameters and default settings, and no retouching. Left: the neutral decode (RAW as linear ProPhoto, converted to sRGB, metered to middle grey). Right: the film print.
+Every image below was rendered by the same engine this app ships, at default settings, with no retouching. They date from 0.1.18 and print colour negatives on Kodak Portra Endura; the app now defaults to Kodak Supra Endura, as the desktop app does, so results look slightly different. The samples will be re-rendered for the next release. Left: the neutral decode (RAW as linear ProPhoto, converted to sRGB, metered to middle grey). Right: the film print.
 
 <table>
 <tr><td><img src="docs/images/samples/compare_lake.jpg" alt="Leica Q, Kodak Ektar 100"></td></tr>
@@ -77,17 +77,17 @@ Every image below was rendered by the same engine this app ships, with the app's
 
 **Input**
 - Camera RAW through LibRaw 0.22.2: DNG, CR3, NEF, ARW, RAF, RW2, ORF and more; DNGs interpolate between the dual-illuminant matrices at the shot's white balance
-- Phone photos: JPEG, HEIC/HEIF, PNG, WebP. Display P3 photos go to the engine as P3; Ultra HDR photos recover highlights from the gain map (Android 14+)
+- Phone photos: JPEG, HEIC/HEIF, PNG, WebP. Display P3 photos go to the engine as P3; the Ultra HDR gain map and highlight recovery can be turned on in Settings (off by default, as on the desktop)
 - Open from the gallery or a file manager, or straight from another app with Share / Open with
 
 **Printing**
 - Colour negative, slide, black-and-white and motion-picture films with matching papers; slides are scanned directly, without paper
 - Film strip: a live thumbnail of the current photo on every stock, tap to switch
-- One-tap styles: lab scans, maker looks and photographer-inspired finishes, each naming what inspired it (done on `main`, ships in the next release)
+- One-tap styles: 30 styles in six groups (lab scans, negative, slide, cinema, black-and-white, masters), each setting film, paper, print, effects and adjustments together
 - Exposure compensation, auto exposure, film format (sets the physical scale of grain and halation), print exposure, yellow / magenta filtration
 - Grain, halation and paper glare, each with its own switch and strength
 - RAW white balance: temperature / tint applied at decode, with upstream's desktop algorithm
-- Post-print adjustments: exposure, highlights, shadows, colour, fade, vignette and more (done on `main`, ships in the next release)
+- Post-print adjustments (Adjust tab): white balance, exposure, contrast, highlights, shadows, black/white point, saturation, eight HSL bands, four colour wheels, fade, vignette, previewed live while dragging
 
 **Framing and borders**
 - Rotate, flip, centred crop (original, 3:2, 4:3, 1:1, 16:9, 65:24 and more)
@@ -96,10 +96,10 @@ Every image below was rendered by the same engine this app ships, with the app's
 
 **Viewing and export**
 - A fast preview while dragging, the sharp render on release; new edits cancel stale renders
-- Hold to compare with the original, histogram with clipping, 1:1 grain view
+- Hold to compare with the original, tap the photo to hide the interface, histogram with clipping, 1:1 grain view
 - Undo / redo up to 50 steps; presets save film, paper and effect combinations
 - Background export queue: the editor frees up at once, jobs resume after the process is killed, progress notifications support Live Update
-- Export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF
+- Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF
 
 > [!NOTE]
 > The app's interface is Simplified Chinese only for now.
@@ -157,8 +157,8 @@ On the phone, [AppVerifier](https://github.com/soupslurpr/AppVerifier) checks th
 ## Tips
 
 - **Working size** (in Settings) sets the processing and export resolution. On first launch it is picked from the GPU (up to 4096 px; 3072 on Xiaomi 12–14), and it is also capped by free memory, the GPU's single-buffer limit and a 42 MP ceiling.
-- Phone photos were already exposed and graded by the camera, so auto exposure is off for them by default. For the most film-like result, shoot RAW in the Xiaomi camera's Pro mode.
-- The gain map in Xiaomi "Super HDR" photos is not used yet; only the base image is read.
+- Phone photos are auto-exposed with the "balanced" meter, like RAW and like the desktop app. They were already graded by the camera, so for the most film-like result shoot RAW in the Xiaomi camera's Pro mode.
+- Ultra HDR and Xiaomi "Super HDR" photos open from their base image by default; with "highlight recovery for phone photos" on in Settings, Ultra HDR photos use the gain map.
 
 ## FAQ
 
@@ -183,7 +183,7 @@ Vulkan drivers differ a lot between phone GPUs: the same compute work can render
 <details>
 <summary><b>Do the colours match SpektraLab on macOS?</b></summary>
 
-That is the goal. The opening parameters match the desktop app, and export now uses upstream's own colour conversion code. In parity tests on a cloud machine the mean colour difference is below 0.1 ΔE00, with the deviation concentrated in a small share of the most saturated pixels. On-device comparisons are still to come; progress is in the [roadmap](docs/ROADMAP.md). If colours differ from the desktop app, report it here, not upstream.
+On a cloud machine, yes. The engine prints in ProPhoto and the screen and export use upstream's own conversion code; compared pixel by pixel with upstream's Linux host in 43 cases, RAW exports differ by a mean ΔE00 of 0.000 (max 0.015). Phone JPEGs still differ by 0.20–0.36; the cause is known and being fixed. Method and numbers: [docs/PARITY.md](docs/PARITY.md). On-device comparisons are still to come. If colours differ from the desktop app, report it here, not upstream.
 </details>
 
 <details>
