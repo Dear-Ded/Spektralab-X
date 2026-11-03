@@ -8,6 +8,21 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/spektralab-android/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 0.1.19-alpha · 未发布（草稿）
+
+改名 Spektralab-X，新图标，色彩路径改为与上游一致，新增调整层和一键风格。仍未在真机上验证。
+
+- 改名：应用、发布包和相册文件夹改为 Spektralab-X（导出到 `Pictures/Spektralab-X`）。包名不变，可以直接覆盖安装 0.1.18。
+- 新图标：深色底上的光谱胶片条，支持主题图标。
+- 色彩：引擎在 ProPhoto 里冲印，离开时只转换一次，做法与上游相同。屏幕按矩阵加裁切显示，导出用上游自己的 CAM16 色域压缩代码。在云主机上与上游 Linux 版 `spektralab-host` 逐像素对照 43 组：RAW 和浮点输入导出平均 ΔE00 0.000、最大 0.015，屏幕平均 0.000；手机 JPEG 平均差 0.20–0.36，原因已查明、正在修（见 [docs/PARITY.md](docs/PARITY.md)）。
+- 打开参数与桌面版对齐：默认相纸 Kodak Supra Endura、均衡测光、40 CC 滤镜刻度、黑白胶片配 Multigrade 2 号滤镜。手机照片也自动测光；手机照片高光恢复和 Ultra HDR 增益图改为默认关闭，照片按原样交给引擎，与桌面版一致（设置里可以打开）。
+- 广色域预览：P3 屏幕上窗口开启广色域，超出 sRGB 的染料颜色能看到了。
+- 新增“调整”页（冲印后调整）：白平衡、曝光、对比、亮度、高光、阴影、黑白点、饱和、自然饱和、八色 HSL、四个色轮、褪色、暗角，拖动时只重新打包、不重跑引擎。算法移植自上游 Layer 2，与上游对照一致。导出和预设都带上调整。
+- 新增一键风格：冲扫店、负片、反转片、电影、黑白、大师六组共 30 款，每款同时设定胶片、相纸、放大参数、效果和调整。
+- 编辑器：顶栏加“保存”按钮；空白页居中显示“打开照片”；轻点照片隐藏所有按钮和系统栏，再点恢复。
+- 修复：浅色模式下状态栏图标看不清。
+- README、NOTICE、贡献指南和安全策略改版，新增安装包校验说明（[docs/VERIFY.md](docs/VERIFY.md)）。
+
 ## 0.1.18-alpha · 2026-11-02
 
 色彩准确度和高光改进，新增 CineStill 50D。仍未在真机上验证。

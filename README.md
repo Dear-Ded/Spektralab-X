@@ -24,7 +24,7 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 [![Star](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
 [![访问](https://hits.sh/github.com/Dear-Ded/spektralab-android.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/spektralab-android/)
 
-[下载](#下载与校验) · [样片](#样片) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
+[写在前面](#写在前面) · [下载](#下载与校验) · [样片](#样片) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
 
 </div>
 
@@ -37,6 +37,16 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 > **尚未在真机上验证。** 目前所有版本都只通过了 CI 编译，可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
+
+## 写在前面
+
+Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 与 Andrea Volpato 的 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 开发。没有这些开源项目和背后多年的研究，就不会有它。
+
+我不是职业程序员，只是一个热爱胶片影像、想把暗房的质感带进手机的摄影爱好者。这个项目从构思、开发到一遍遍调教，都是在 AI 助手的协助下一点点完成的；开发过程中的 token、云服务器等费用，全部由我个人承担。它没有商业目的，也永远不会收费。
+
+正因为如此，它一定还有许多不完美：可能有 bug，可能在你的手机上不够流畅，色彩也未必合每个人的口味。如果你发现了问题，或者有好的想法，非常欢迎提交 [Issue](https://github.com/Dear-Ded/spektralab-android/issues) 或 Pull Request，每一条反馈我都会认真看。
+
+如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
 
 ## 这是什么
 
@@ -52,7 +62,7 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 
 ## 样片
 
-下面每张图都由本仓库使用的同一个引擎渲染：同样的打开参数、默认设置，没有任何后期调整。左边是中性解码（RAW 按 ProPhoto 线性光解出，转 sRGB，按中灰测光），右边是胶片冲印结果。
+下面每张图都由本仓库使用的同一个引擎渲染，默认设置，没有任何后期调整。样片渲染于 0.1.18 时期，彩色负片配 Kodak Portra Endura 相纸；应用现在默认使用 Kodak Supra Endura，与桌面版一致，所以实际效果会略有不同，样片会在下一版重新渲染。左边是中性解码（RAW 按 ProPhoto 线性光解出，转 sRGB，按中灰测光），右边是胶片冲印结果。
 
 <table>
 <tr><td><img src="docs/images/samples/compare_lake.jpg" alt="Leica Q，Kodak Ektar 100"></td></tr>
@@ -77,17 +87,17 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 
 **输入**
 - 相机 RAW：DNG、CR3、NEF、ARW、RAF、RW2、ORF 等，由 LibRaw 0.22.2 解码；DNG 按拍摄白平衡在双光源矩阵之间插值
-- 手机直出照片：JPEG、HEIC/HEIF、PNG、WebP。Display P3 照片按 P3 交给引擎；Ultra HDR 照片用增益图恢复高光（Android 14+）
+- 手机直出照片：JPEG、HEIC/HEIF、PNG、WebP。Display P3 照片按 P3 交给引擎；Ultra HDR 增益图和高光恢复可在设置里打开（默认关闭，与桌面版一致）
 - 可以从相册、文件管理器选择，也可以在其他应用里“分享”或“打开方式”直接打开
 
 **冲印**
 - 彩色负片、反转片、黑白负片、电影负片，配对应的相纸；反转片直接扫描，不经过相纸
 - 胶片预览条：每种胶片在当前照片上实时渲染一张小样，点一下切换
-- 一键风格：冲扫店、厂商色彩、摄影师风格等多组预设，每款注明灵感来源（已在 main 分支完成，随下一版发布）
+- 一键风格：冲扫店、负片、反转片、电影、黑白、大师六组共 30 款，每款同时设定胶片、相纸、放大参数、效果和调整
 - 曝光补偿、自动曝光、画幅（影响颗粒和光晕的物理尺度）、放大曝光、黄 / 品红滤镜
 - 颗粒、光晕（Halation）、相纸眩光，可分别开关和调强度
 - RAW 白平衡：色温 / 色调在解码时生效，算法与上游桌面版一致
-- 冲印后调整：曝光、高光、阴影、色彩、褪色、暗角等（已在 main 分支完成，随下一版发布）
+- 冲印后调整（“调整”页）：白平衡、曝光、对比、高光、阴影、黑白点、饱和、八色 HSL、四个色轮、褪色、暗角，拖动时实时预览
 
 **构图与边框**
 - 旋转、水平翻转、居中裁剪（原始、3:2、4:3、1:1、16:9、65:24 等）
@@ -96,10 +106,10 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 
 **查看与导出**
 - 拖动滑块时先出快速预览，松手后自动渲染清晰版；新的改动会取消还没完成的旧渲染
-- 长按预览看原图，直方图带溢出提示，1:1 查看颗粒细节
+- 长按预览看原图，轻点照片隐藏界面全屏查看，直方图带溢出提示，1:1 查看颗粒细节
 - 撤销 / 重做，最多 50 步；预设保存胶片、相纸和效果组合
 - 后台导出队列：编辑器立刻空出来，进程被杀后下次启动接着做，进度通知支持 Live Update
-- 导出 JPEG（Display P3 或 sRGB，保留相机、镜头、曝光、时间等 EXIF，不含 GPS）或 16 位 TIFF
+- P3 屏幕上按广色域预览；导出 JPEG（Display P3 或 sRGB，保留相机、镜头、曝光、时间等 EXIF，不含 GPS）或 16 位 TIFF
 
 > [!NOTE]
 > 应用界面目前只有简体中文。
@@ -157,8 +167,8 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab
 ## 使用提示
 
 - **工作尺寸**（设置里调整）决定处理和导出的分辨率。首次启动时按 GPU 自动选择（最高 4096 px；小米 12–14 为 3072），同时受手机可用内存、GPU 单缓冲上限和 4200 万像素的总上限约束。
-- 手机直出照片已经由相机曝光和调色过，默认关闭自动曝光。想要最接近真实胶片的效果，请在小米相机专业模式里打开 RAW 拍摄。
-- 小米“超级 HDR”照片的增益图目前不会用到，只读取普通的那一层画面。
+- 手机直出照片和 RAW 一样按“均衡”方式自动测光，与桌面版一致。手机照片已经由相机调过色，想要最接近真实胶片的效果，请在小米相机专业模式里打开 RAW 拍摄。
+- Ultra HDR 和小米“超级 HDR”照片默认只读取普通的那一层画面；在设置里打开“手机照片高光恢复”后，Ultra HDR 照片会用增益图恢复高光。
 
 ## 常见问题
 
@@ -183,7 +193,7 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab
 <details>
 <summary><b>颜色和 macOS 版 SpektraLab 一致吗？</b></summary>
 
-目标是一致。打开参数已与桌面版对齐，导出改用上游自己的色彩转换代码；在云主机上的对照测试里，平均色差 ΔE00 低于 0.1，偏差集中在最饱和的少量像素。真机上的对照还在做，进度见[路线图](docs/ROADMAP.md)。颜色与桌面版不一致时，请在本仓库报告，不要去上游。
+在云主机上已经一致。引擎在 ProPhoto 里冲印，屏幕和导出用上游自己的转换代码；与上游 Linux 版逐像素对照 43 组，RAW 输入导出平均色差 ΔE00 0.000、最大 0.015。手机 JPEG 还差 0.20–0.36，原因已查明、正在修。方法和全部数字见 [docs/PARITY.md](docs/PARITY.md)，真机对照还没做。颜色与桌面版不一致时，请在本仓库报告，不要去上游。
 </details>
 
 <details>
