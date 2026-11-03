@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launcher background: the neutral darkroom grey with a faint safelight glow
-     from below, so the icon reads as "lit" without a coloured plate. -->
+<!-- Launcher background: the flat dark ground. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M0,0h108v108h-108z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="radial"
-                android:centerX="54"
-                android:centerY="96"
-                android:gradientRadius="84">
-                <item android:offset="0" android:color="#FF2A1D12" />
-                <item android:offset="0.55" android:color="#FF161412" />
-                <item android:offset="1" android:color="#FF0E0D0C" />
-            </gradient>
-        </aapt:attr>
-    </path>
+    <path android:fillColor="#FF121216" android:pathData="M0,0h108v108h-108z" />
 </vector>
