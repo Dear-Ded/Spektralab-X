@@ -1,0 +1,26 @@
+LibRaw 0.22.2: run xtrans_interpolate()'s tile loop serially even in the
+OpenMP build. The 512-pixel tiles overlap by 16 and each tile reads pixels a
+neighbouring tile may already have written back into image[], so the parallel
+loop's output depends on thread scheduling (LibRaw issue #845). Upstream's fix
+(7a9777a, corrected by 4e20414) writes to a temporary image instead; it is not
+taken here. Fuji X-Trans decodes stay single-threaded in this step only, and
+come out exactly as the serial build's.
+
+Spektralab-X patch.
+
+--- a/src/demosaic/xtrans_demosaic.cpp
++++ b/src/demosaic/xtrans_demosaic.cpp
+@@ -174,9 +174,10 @@
+   size_t buffer_size = LIBRAW_AHD_TILE * LIBRAW_AHD_TILE * (ndir * 11 + 6);
+   char** buffers = malloc_omp_buffers(buffer_count, buffer_size);
+ 
+-#if defined(LIBRAW_USE_OPENMP)
+-# pragma omp parallel for schedule(dynamic) default(none) firstprivate(buffers, allhex, passes, sgrow, sgcol, ndir) shared(dir) 
+-#endif
++  // Serial on purpose: the tiles overlap, and a tile reads pixels a
++  // neighbouring tile may already have written back, so the parallel loop's
++  // output depends on scheduling (LibRaw issue #845). Serial output is what
++  // the single-threaded build always produced.
+     for (int top = 3; top < height - 19; top += LIBRAW_AHD_TILE - 16)
+     {
+ #if defined(LIBRAW_USE_OPENMP)

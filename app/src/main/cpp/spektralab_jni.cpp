@@ -36,6 +36,10 @@
 #include "white_balance.hpp"
 
 #include <libraw/libraw.h>
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+#include <mutex>
 #include <array>
 #include <memory>
 
@@ -447,6 +451,40 @@ std::string blank_frame(const uint16_t* rgba, uint32_t width, uint32_t height, s
     return {};
 }
 
+// LibRaw's OpenMP workers: the performance cores only. A core counts when its
+// top clock is at least 70% of the fastest core's, which drops the efficiency
+// cluster on every Snapdragon from the 865 (Mi 10) to the 8 Elite (all-Oryon,
+// kept whole). Upstream's RawDecodeThreadScope reads the count from
+// SPEKTRALAB_RAW_THREADS on each decode. KMP_BLOCKTIME=0 is read when libomp
+// starts (the first decode); kmp_set_blocktime covers the calling thread's
+// teams too. Workers then sleep as soon as a parallel loop ends instead of
+// spinning for 200 ms on cores the GPU render and the UI need.
+void configure_raw_threads() {
+    static std::once_flag once;
+    std::call_once(once, [] {
+        std::vector<long> khz;
+        for (unsigned cpu = 0; cpu < 64; ++cpu) {
+            std::ifstream f("/sys/devices/system/cpu/cpu" + std::to_string(cpu) + "/cpufreq/cpuinfo_max_freq");
+            long v = 0;
+            if (!(f >> v)) break;
+            khz.push_back(v);
+        }
+        const unsigned all = std::max(1u, std::thread::hardware_concurrency());
+        unsigned big = 0;
+        if (!khz.empty() && khz.size() == all) {
+            const long top = *std::max_element(khz.begin(), khz.end());
+            for (long v : khz) big += v * 10 >= top * 7;
+        }
+        if (big == 0) big = std::max(1u, all / 2);
+        setenv("SPEKTRALAB_RAW_THREADS", std::to_string(std::min(big, 8u)).c_str(), 1);
+        setenv("KMP_BLOCKTIME", "0", 0);
+        __android_log_print(ANDROID_LOG_INFO, kTag, "raw decode: %u OpenMP workers of %u cores", std::min(big, 8u), all);
+    });
+#if defined(_OPENMP)
+    kmp_set_blocktime(0);
+#endif
+}
+
 }  // namespace
 
 #define JNI_FN(ret, name) extern "C" JNIEXPORT ret JNICALL Java_com_dearded_spektralab_NativeEngine_##name
@@ -577,6 +615,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         }
         // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
         spk::io::set_raw_half_size_budget(binned ? 1 : 0);
+        configure_raw_threads();
         spk::io::DecodedRaw decoded;
         const bool ok = spk::io::decode_raw_compatible(path, custom_wb ? &mul : nullptr, decoded, error);
         spk::io::set_raw_half_size_budget(0);

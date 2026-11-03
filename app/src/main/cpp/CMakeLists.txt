@@ -15,13 +15,59 @@ set(SPEKTRALAB_BUILD_HOST OFF CACHE BOOL "" FORCE)
 set(SPEKTRALAB_BUILD_DESKTOP OFF CACHE BOOL "" FORCE)
 set(SPEKTRALAB_BUILD_TEST_DLL OFF CACHE BOOL "" FORCE)
 set(SPEKTRALAB_REQUIRE_VULKAN ON CACHE BOOL "" FORCE)
-# OpenMP on Android would mean shipping libomp.so; LibRaw runs serially instead.
-set(SPEKTRALAB_LIBRAW_OPENMP OFF CACHE BOOL "" FORCE)
+# LibRaw's demosaic and decoders run on OpenMP. libomp is linked into this .so
+# (-static-openmp below), so no libomp.so ships; thread count and spin policy
+# are set per decode in openRaw.
+set(SPEKTRALAB_LIBRAW_OPENMP ON CACHE BOOL "" FORCE)
+# FindOpenMP (in upstream's LibRaw.cmake) would name the toolchain's libomp.so
+# by full path; point it at libomp.a beside it so nothing links the shared one.
+execute_process(COMMAND "${CMAKE_CXX_COMPILER}" --target=${CMAKE_CXX_COMPILER_TARGET} -print-file-name=libomp.a
+    OUTPUT_VARIABLE spk_libomp OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT IS_ABSOLUTE "${spk_libomp}" OR NOT EXISTS "${spk_libomp}")
+    file(GLOB spk_libomp "${ANDROID_TOOLCHAIN_ROOT}/lib/clang/*/lib/linux/aarch64/libomp.a")
+endif()
+if(NOT spk_libomp OR NOT EXISTS "${spk_libomp}")
+    message(FATAL_ERROR "LibRaw OpenMP needs the NDK's static libomp.a")
+endif()
+set(OpenMP_omp_LIBRARY "${spk_libomp}" CACHE FILEPATH "Static libomp from the NDK" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 set(spk_deps "${SPK_UPSTREAM}/build/deps")
 set(SPEKTRALAB_DEPS_DIR "${spk_deps}" CACHE PATH "" FORCE)
-set(SPEKTRALAB_LIBRAW_SOURCE "${spk_deps}/LibRaw-0.22.2" CACHE PATH "" FORCE)
+
+# LibRaw is built from a copy of the pinned 0.22.2 tree with patches/libraw/*.patch
+# applied, in name order. The stamp covers the patches, so editing one re-copies.
+set(spk_libraw_pristine "${spk_deps}/LibRaw-0.22.2")
+set(spk_libraw "${CMAKE_BINARY_DIR}/LibRaw-0.22.2-spk")
+file(GLOB spk_libraw_patches "${CMAKE_CURRENT_LIST_DIR}/../../../../patches/libraw/*.patch")
+list(SORT spk_libraw_patches)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${spk_libraw_patches})
+set(spk_libraw_stamp "")
+foreach(p IN LISTS spk_libraw_patches)
+    file(SHA256 "${p}" h)
+    string(APPEND spk_libraw_stamp "${h}\n")
+endforeach()
+if(EXISTS "${spk_libraw}/.spk-patches")
+    file(READ "${spk_libraw}/.spk-patches" spk_libraw_have)
+else()
+    set(spk_libraw_have "-")
+endif()
+if(NOT spk_libraw_have STREQUAL spk_libraw_stamp)
+    find_program(SPK_PATCH patch REQUIRED)
+    file(REMOVE_RECURSE "${spk_libraw}")
+    file(MAKE_DIRECTORY "${spk_libraw}")
+    file(COPY "${spk_libraw_pristine}/src" "${spk_libraw_pristine}/libraw" "${spk_libraw_pristine}/internal"
+         "${spk_libraw_pristine}/LICENSE.LGPL" "${spk_libraw_pristine}/COPYRIGHT" DESTINATION "${spk_libraw}")
+    foreach(p IN LISTS spk_libraw_patches)
+        execute_process(COMMAND "${SPK_PATCH}" -p1 --forward --batch -i "${p}"
+            WORKING_DIRECTORY "${spk_libraw}" RESULT_VARIABLE rc OUTPUT_VARIABLE out ERROR_VARIABLE out)
+        if(NOT rc EQUAL 0)
+            message(FATAL_ERROR "LibRaw patch ${p} does not apply:\n${out}")
+        endif()
+    endforeach()
+    file(WRITE "${spk_libraw}/.spk-patches" "${spk_libraw_stamp}")
+endif()
+set(SPEKTRALAB_LIBRAW_SOURCE "${spk_libraw}" CACHE PATH "" FORCE)
 set(SPEKTRALAB_VULKAN_HEADERS "${spk_deps}/Vulkan-Headers/include" CACHE PATH "" FORCE)
 
 add_subdirectory("${SPK_UPSTREAM}/engine" engine)
@@ -74,3 +120,5 @@ target_link_libraries(spektralab_jni PRIVATE
     spektralab_engine spk_image_io spk_libraw spk_volk android log jnigraphics z)
 # 16 KB page alignment, required by newer Android releases for native code.
 target_link_options(spektralab_jni PRIVATE "-Wl,-z,max-page-size=16384")
+# The NDK links libomp.so by default; this links libomp.a into the library.
+target_link_options(spektralab_jni PRIVATE -fopenmp -static-openmp)
