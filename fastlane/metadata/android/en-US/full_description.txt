@@ -1,4 +1,4 @@
-Unofficial Android port of the SpektraLab spectral film and print simulator, tuned for Xiaomi number-series phones (Snapdragon / Adreno).
+Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm: spectral film and print simulation, tuned for Xiaomi number-series phones (Snapdragon / Adreno). Unofficial; not affiliated with upstream.
 
 It is not a filter: the photo is exposed spectrally onto a physical film model, developed into a negative and printed onto paper, all computed on the phone's GPU with Vulkan.
 

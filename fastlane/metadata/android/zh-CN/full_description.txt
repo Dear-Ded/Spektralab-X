@@ -1,4 +1,4 @@
-SpektraLab 光谱胶片与相纸模拟器的非官方安卓移植，针对小米数字系列（骁龙 / Adreno GPU）优化。
+Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目：光谱胶片与相纸模拟，针对小米数字系列（骁龙 / Adreno GPU）优化。非官方版本，与上游无关联。
 
 它不是滤镜：照片先按光谱曝光到胶片的物理模型上，冲出负片，再放大到相纸，整个过程在手机 GPU 上用 Vulkan 计算完成。
 

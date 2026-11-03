@@ -99,9 +99,9 @@ def banner(W, H, dirs, path):
     img.paste(icon, (x, pad + int(24 * s)), icon)
 
     y = pad + int(140 * s)
-    d.text((x, y), "SpektraLab", font=font("bold", int(70 * s), dirs), fill=FG)
+    d.text((x, y), "Spektralab-X", font=font("bold", int(70 * s), dirs), fill=FG)
     y += int(84 * s)
-    d.text((x, y), "for Android", font=font("sans", int(36 * s), dirs), fill=DIM)
+    d.text((x, y), "based on SpektraLab", font=font("sans", int(30 * s), dirs), fill=DIM)
     y += int(66 * s)
     d.text((x, y), "光谱胶片与相纸模拟", font=font("cjk", int(32 * s), dirs), fill=FG)
     y += int(46 * s)

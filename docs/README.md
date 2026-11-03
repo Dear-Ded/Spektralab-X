@@ -1,6 +1,6 @@
 # 文档 / Documentation
 
-SpektraLab for Android 的所有文档。大部分文档用中文写，标注了 EN 的有英文。
+Spektralab-X 的所有文档。大部分文档用中文写，标注了 EN 的有英文。
 Most documents are in Chinese; those marked EN have English.
 
 ## 使用 / Using the app

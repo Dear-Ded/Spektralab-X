@@ -1,8 +1,8 @@
 # 校验安装包 / Verify a build
 
-官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。如果你在其他地方拿到或付费买到“SpektraLab”，可以用下面任一方法确认它是不是官方版本。
+官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。如果你在其他地方拿到或付费买到“Spektralab-X”，可以用下面任一方法确认它是不是官方版本。
 
-The official APKs are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) and are free. If you got (or paid for) a "SpektraLab" APK anywhere else, any of the checks below tells you whether it is an official build.
+The official APKs are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) and are free. If you got (or paid for) a "Spektralab-X" APK anywhere else, any of the checks below tells you whether it is an official build.
 
 ## 签名证书 / Signing certificate
 
@@ -17,11 +17,11 @@ CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51
 ### 在手机上 / On the phone
 
 1. 安装 [AppVerifier](https://github.com/soupslurpr/AppVerifier)（开源）。
-2. 在 AppVerifier 里选中已安装的 SpektraLab，或者把 APK 分享给它。
+2. 在 AppVerifier 里选中已安装的 Spektralab-X，或者把 APK 分享给它。
 3. 把显示的 SHA-256 与上面的值对比，全部一致才是官方版本。
 
 1. Install [AppVerifier](https://github.com/soupslurpr/AppVerifier) (open source).
-2. Pick the installed SpektraLab in AppVerifier, or share the APK to it.
+2. Pick the installed Spektralab-X in AppVerifier, or share the APK to it.
 3. Compare the SHA-256 it shows with the value above; every byte must match.
 
 ### 在电脑上 / On a computer
@@ -29,7 +29,7 @@ CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51
 Android SDK 的 `apksigner`：
 
 ```bash
-apksigner verify --print-certs SpektraLab-<版本>-arm64-v8a.apk
+apksigner verify --print-certs Spektralab-X-<版本>-arm64-v8a.apk
 ```
 
 输出里 `Signer #1 certificate SHA-256 digest` 一行（不带冒号的小写十六进制）应与上面的值一致。
@@ -53,14 +53,14 @@ sha256sum -c SHA256SUMS
 Every official APK is built by GitHub Actions from this repository's public source and carries a build-provenance [artifact attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations), which records the commit and workflow that produced the file. Check it with the [GitHub CLI](https://cli.github.com/):
 
 ```bash
-gh attestation verify SpektraLab-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
 ## 导出的照片 / Exported photos
 
-官方版导出的 JPEG 会在 EXIF 的 `Software` 字段写入 `SpektraLab Android <版本>`。这只能说明照片是用这个应用（或它的修改版）导出的，不能代替签名校验。
+官方版导出的 JPEG 会在 EXIF 的 `Software` 字段写入 `Spektralab-X <版本>`。这只能说明照片是用这个应用（或它的修改版）导出的，不能代替签名校验。
 
-JPEGs exported by the official build carry `SpektraLab Android <version>` in the EXIF `Software` field. That shows which app exported a photo; it does not replace the signature check.
+JPEGs exported by the official build carry `Spektralab-X <version>` in the EXIF `Software` field. That shows which app exported a photo; it does not replace the signature check.
 
 ## 校验不通过 / If a check fails
 

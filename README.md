@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="SpektraLab 图标">
+<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="Spektralab-X 图标">
 
-# SpektraLab for Android
+# Spektralab-X
 
 **光谱胶片与相纸模拟，在手机上冲洗你的照片。**
 
 按真实胶片的特性曲线和光谱灵敏度，把 RAW 和手机照片“曝光”到胶片上、显影、放大到相纸。<br>
-非官方安卓移植 · 针对小米数字系列（骁龙 / Adreno）优化 · 开源免费
+SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Adreno）优化 · 开源免费
 
 简体中文 | [English](README.en.md)
 
@@ -39,6 +39,8 @@
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
 
 ## 这是什么
+
+Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)（JamesQiu2005/SpektraLab）与 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 的安卓衍生项目。
 
 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 是一个 macOS 胶片模拟软件，引擎来自 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。它不套滤镜，而是按光谱模拟整条冲印链路：场景光 → 相机与胶片 → 负片显影 → 放大机与相纸 → 相纸显影 → 扫描。胶片和相纸数据来自实测的特性曲线和光谱灵敏度。
 
@@ -127,9 +129,9 @@
 </p>
 
 > [!CAUTION]
-> **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“SpektraLab”，那不是官方版本，请申请退款，并按下面的方法核对签名。
+> **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“Spektralab-X”，那不是官方版本，请申请退款，并按下面的方法核对签名。
 
-1. 打开 [Releases](https://github.com/Dear-Ded/spektralab-android/releases)，下载最新 `v…-alpha` 版本里的 `SpektraLab-<版本>-arm64-v8a.apk`。
+1. 打开 [Releases](https://github.com/Dear-Ded/spektralab-android/releases)，下载最新 `v…-alpha` 版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
 2. 在手机上安装。小米 / HyperOS 第一次安装未知来源应用时，会要求在“安全”里允许。
 3. 以后的版本可以直接覆盖安装，编辑预设会保留。
 
@@ -147,7 +149,7 @@ CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51
 
 ```bash
 sha256sum -c SHA256SUMS
-gh attestation verify SpektraLab-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
 在手机上可以用 [AppVerifier](https://github.com/soupslurpr/AppVerifier) 核对证书，在电脑上可以用 `apksigner verify --print-certs`。完整步骤见 [docs/VERIFY.md](docs/VERIFY.md)。
@@ -273,12 +275,12 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 **欢迎转载、改版和二次开发。** 本项目以 GPL-3.0 发布，你可以自由使用、研究、修改和分发，也可以收费分发，这是 GPL 赋予的权利，本项目不加限制。我们只请你做到下面几件事，前三条是 GPL-3.0 本身的要求或第 7 条允许的附加条款，完整条款见 [NOTICE](NOTICE)：
 
-1. **保留署名**（GPL-3.0 第 7(b) 条）：在衍生版本的“关于”页和文档里保留原项目名称“SpektraLab for Android”、本仓库地址 `https://github.com/Dear-Ded/spektralab-android` 和“SpektraLab for Android 贡献者”署名，同时注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。
-2. **改名换图标**（第 7(c)、7(e) 条）：本项目不授予“SpektraLab for Android”名称和图标的商标使用权。公开发布的改版请换一个名字、图标和包名，标明“基于 SpektraLab for Android 修改”，不要冒充官方版本。
+1. **保留署名**（GPL-3.0 第 7(b) 条）：在衍生版本的“关于”页和文档里保留原项目名称“Spektralab-X”、本仓库地址 `https://github.com/Dear-Ded/spektralab-android` 和“Spektralab-X 贡献者”署名，同时注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。
+2. **改名换图标**（第 7(c)、7(e) 条）：本项目不授予“Spektralab-X”名称和图标的商标使用权。公开发布的改版请换一个名字、图标和包名，标明“基于 Spektralab-X 修改”，不要冒充官方版本。
 3. **提供源码**（GPL-3.0 第 4–6 条）：分发安装包时，必须同时提供完整对应源码，保留许可证和署名，并以 GPL-3.0 发布你的修改。
 4. **胶片数据**：胶片和相纸数据以 CC BY-SA 4.0 发布，转载需署名 spektrafilm（Andrea Volpato）并以相同许可共享。
 
-转载文章或视频时，注明“来源：SpektraLab for Android（github.com/Dear-Ded/spektralab-android）”即可；二次开发的项目请同时写上你自己作为二创开发者的署名。
+转载文章或视频时，注明“来源：Spektralab-X（github.com/Dear-Ded/spektralab-android）”即可；二次开发的项目请同时写上你自己作为二创开发者的署名。
 
 ## 许可与致谢
 

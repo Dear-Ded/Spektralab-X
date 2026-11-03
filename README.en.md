@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="SpektraLab icon">
+<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="Spektralab-X icon">
 
-# SpektraLab for Android
+# Spektralab-X
 
 **Spectral film and print simulation: develop your photos on a phone.**
 
 Your RAW and phone photos are "exposed" onto film from measured characteristic curves and spectral sensitivities, developed, and printed onto paper.<br>
-Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source
+Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source
 
 [简体中文](README.md) | English
 
@@ -39,6 +39,8 @@ Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / A
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
 
 ## What it is
+
+Spektralab-X is an Android derivative of [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) (JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm).
 
 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) is a macOS film simulator built on the [spektrafilm](https://github.com/andreavolpato/spektrafilm) engine. It is not a filter: it simulates the whole chain spectrally (scene light → camera and film → negative development → enlarger and paper → paper development → scan) from measured characteristic curves and spectral sensitivities.
 
@@ -127,9 +129,9 @@ There is no Xiaomi 16. Memory, recommended working sizes and known risks per gen
 </p>
 
 > [!CAUTION]
-> **Official builds are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases), and they are free forever.** If you paid for "SpektraLab" in an app store, a file-sharing site or a second-hand marketplace, it is not an official build: ask for a refund and check the signature as shown below.
+> **Official builds are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases), and they are free forever.** If you paid for "Spektralab-X" in an app store, a file-sharing site or a second-hand marketplace, it is not an official build: ask for a refund and check the signature as shown below.
 
-1. Open [Releases](https://github.com/Dear-Ded/spektralab-android/releases) and download `SpektraLab-<version>-arm64-v8a.apk` from the latest `v…-alpha` release.
+1. Open [Releases](https://github.com/Dear-Ded/spektralab-android/releases) and download `Spektralab-X-<version>-arm64-v8a.apk` from the latest `v…-alpha` release.
 2. Install it on the phone. Xiaomi / HyperOS asks you to allow unknown sources under "Security" the first time.
 3. Later versions install over earlier ones; your presets are kept.
 
@@ -147,7 +149,7 @@ Each release carries `SHA256SUMS` and a GitHub Actions build-provenance attestat
 
 ```bash
 sha256sum -c SHA256SUMS
-gh attestation verify SpektraLab-<version>-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify Spektralab-X-<version>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
 On the phone, [AppVerifier](https://github.com/soupslurpr/AppVerifier) checks the certificate; on a computer, use `apksigner verify --print-certs`. Step by step: [docs/VERIFY.md](docs/VERIFY.md).
@@ -273,12 +275,12 @@ The version lives in [`VERSION`](VERSION) as `major.minor.patch-alpha`; until th
 
 **Reposts, modified versions and derivative projects are welcome.** This project is released under GPL-3.0: you may use, study, modify and redistribute it, including for a fee. Those are rights GPL grants, and this project does not restrict them. We only ask for the following; the first three are GPL-3.0's own requirements or additional terms permitted by its section 7, and the full terms are in [NOTICE](NOTICE):
 
-1. **Keep the attribution** (GPL-3.0 section 7(b)): in the About screen and the documentation of a derivative version, keep the original project name "SpektraLab for Android", this repository's address `https://github.com/Dear-Ded/spektralab-android` and the credit "SpektraLab for Android contributors", and credit the upstream [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm).
-2. **Use your own name and icon** (sections 7(c) and 7(e)): this project grants no trademark rights to the name "SpektraLab for Android" or its icon. A modified version you publish should have its own name, icon and package name, say "modified from SpektraLab for Android", and not present itself as the official build.
+1. **Keep the attribution** (GPL-3.0 section 7(b)): in the About screen and the documentation of a derivative version, keep the original project name "Spektralab-X", this repository's address `https://github.com/Dear-Ded/spektralab-android` and the credit "Spektralab-X contributors", and credit the upstream [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm).
+2. **Use your own name and icon** (sections 7(c) and 7(e)): this project grants no trademark rights to the name "Spektralab-X" or its icon. A modified version you publish should have its own name, icon and package name, say "modified from Spektralab-X", and not present itself as the official build.
 3. **Provide the source** (GPL-3.0 sections 4–6): whoever distributes an APK must also provide the complete corresponding source, keep the licence and the attributions, and release their changes under GPL-3.0.
 4. **Film data:** the film and paper profiles are CC BY-SA 4.0; redistributing them requires crediting spektrafilm (Andrea Volpato) and sharing under the same licence.
 
-When reposting in an article or video, a line such as "Source: SpektraLab for Android (github.com/Dear-Ded/spektralab-android)" is enough; a derivative project should also carry your own credit as its developer.
+When reposting in an article or video, a line such as "Source: Spektralab-X (github.com/Dear-Ded/spektralab-android)" is enough; a derivative project should also carry your own credit as its developer.
 
 ## License and credits
 

@@ -1,6 +1,6 @@
 # 架构
 
-SpektraLab for Android 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。引擎来自上游，不在本仓库里改动源码，只通过 [`patches/`](../patches/) 打补丁。
+Spektralab-X 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。引擎来自上游，不在本仓库里改动源码，只通过 [`patches/`](../patches/) 打补丁。
 
 ```
 ┌─ 进程 ──────────────────────────────────────────────────────────────┐

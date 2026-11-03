@@ -11,12 +11,12 @@
 
 ## 简体中文
 
-**SpektraLab for Android**
+**Spektralab-X**
 版本 {version}（{code}）
 
 **关于本项目**
-光谱胶片与相纸模拟。本应用是 SpektraLab 的非官方安卓移植，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。
-作者：SpektraLab for Android 贡献者
+光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。
+作者：Spektralab-X 贡献者
 源码：https://github.com/Dear-Ded/spektralab-android
 
 **本应用永久免费**
@@ -26,7 +26,7 @@
 [复制] · 校验方法：github.com/Dear-Ded/spektralab-android/blob/main/docs/VERIFY.md
 
 **许可与署名**
-本应用以 GPL-3.0 发布，你可以自由使用、修改和分发。分发修改版时，请同时提供完整源码，在“关于”页保留原项目名称“SpektraLab for Android”、源码地址和“SpektraLab for Android 贡献者”署名，并换用自己的名称和图标（GPL-3.0 第 7 条附加条款，见 NOTICE）。
+本应用以 GPL-3.0 发布，你可以自由使用、修改和分发。分发修改版时，请同时提供完整源码，在“关于”页保留原项目名称“Spektralab-X”、源码地址和“Spektralab-X 贡献者”署名，并换用自己的名称和图标（GPL-3.0 第 7 条附加条款，见 NOTICE）。
 
 **致谢**
 渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab
@@ -36,12 +36,12 @@ RAW 解码：LibRaw（LGPL-2.1）；volk、stb（MIT）；Liberation Sans（OFL 
 
 ## English
 
-**SpektraLab for Android**
+**Spektralab-X**
 Version {version} ({code})
 
 **About**
-Spectral film and print simulation. This app is an unofficial Android port of SpektraLab, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly.
-Author: SpektraLab for Android contributors
+Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly.
+Author: Spektralab-X contributors
 Source: https://github.com/Dear-Ded/spektralab-android
 
 **This app is free, forever**
@@ -51,7 +51,7 @@ Official signing certificate SHA-256:
 [Copy] · How to verify: github.com/Dear-Ded/spektralab-android/blob/main/docs/VERIFY.md
 
 **Licence and attribution**
-This app is released under GPL-3.0: you may use, modify and redistribute it. If you distribute a modified version, provide its complete source, keep the original project name "SpektraLab for Android", the source address and the credit "SpektraLab for Android contributors" on its About screen, and use your own name and icon (additional terms under GPL-3.0 section 7, see NOTICE).
+This app is released under GPL-3.0: you may use, modify and redistribute it. If you distribute a modified version, provide its complete source, keep the original project name "Spektralab-X", the source address and the credit "Spektralab-X contributors" on its About screen, and use your own name and icon (additional terms under GPL-3.0 section 7, see NOTICE).
 
 **Credits**
 Rendering engine: SpektraLab (GPL-3.0) · github.com/JamesQiu2005/SpektraLab
@@ -65,10 +65,10 @@ Not affiliated with the SpektraLab project or with Xiaomi.
 
 | 键 | 内容 |
 |---|---|
-| `about_title` | SpektraLab for Android |
+| `about_title` | Spektralab-X |
 | `about_version` | 版本 %1$s（%2$d） |
 | `about_project` | “关于本项目”正文 |
-| `about_author` | 作者：SpektraLab for Android 贡献者 |
+| `about_author` | 作者：Spektralab-X 贡献者 |
 | `about_source_url` | https://github.com/Dear-Ded/spektralab-android |
 | `about_free` | “本应用永久免费”正文 |
 | `about_cert_sha256` | 证书指纹（不翻译，`translatable="false"`） |
@@ -81,8 +81,8 @@ Not affiliated with the SpektraLab project or with Xiaomi.
 建议所有本项目自己的 Kotlin 和 C++ 文件加上同样的文件头（由各文件的负责线在下次改动时加，不单独发一个全仓库的改动）：
 
 ```
-// SpektraLab for Android — https://github.com/Dear-Ded/spektralab-android
-// Copyright (C) 2026 SpektraLab for Android contributors
+// Spektralab-X — https://github.com/Dear-Ded/spektralab-android
+// Copyright (C) 2026 Spektralab-X contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Additional terms under GPL-3.0 section 7 apply; see NOTICE.
 ```
