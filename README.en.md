@@ -147,6 +147,8 @@ There is no Xiaomi 16. Memory, recommended working sizes and known risks per gen
 
 **Automatic updates with Obtainium:** add `https://github.com/Dear-Ded/spektralab-android` and enable **Include prereleases** (every release is a pre-release for now, so nothing shows up without it).
 
+**Feel free to share it:** pass the downloaded APK on to communities, groups and forums. No permission needed; just include this repository's address. See [Reposting and derivative works](#reposting-and-derivative-works).
+
 ### Verify the APK
 
 Every official release is signed with the same key. Signing certificate SHA-256 (also in [`scripts/signing-cert.sha256`](scripts/signing-cert.sha256)):
@@ -282,6 +284,10 @@ Without `SPK_KEYSTORE` the build is debug-signed and will not install over an of
 The version lives in [`VERSION`](VERSION) as `major.minor.patch-alpha`; until the app is ready for daily use, each release bumps only the patch number. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Reposting and derivative works
+
+> **Please share it.** You are welcome to pass the downloaded APK on to any community, group chat or forum. No permission is needed; just include this repository's address: https://github.com/Dear-Ded/spektralab-android
+>
+> For the unmodified official APK, the address is all you need: the complete source of every release can be obtained from this repository (tag `v<version>`; the upstream engine is fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh)), which also meets GPL-3.0 section 6(d)'s requirement to say where the source can be found. The points below apply only to modified versions and derivative projects.
 
 **Reposts, modified versions and derivative projects are welcome.** This project is released under GPL-3.0: you may use, study, modify and redistribute it, including for a fee. Those are rights GPL grants, and this project does not restrict them. We only ask for the following; the first three are GPL-3.0's own requirements or additional terms permitted by its section 7, and the full terms are in [NOTICE](NOTICE):
 
