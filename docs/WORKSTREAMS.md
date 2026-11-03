@@ -20,6 +20,7 @@
 | 导出稳定性 | export-stability | `stability-m5` / `wt-stability` | `ProcessingQueue.kt`、`ExportService.kt`、`MediaSaver.kt`、`EngineHost.kt`、`tiff16.cpp`、JNI 中导出与恢复相关函数 | GPU 故障恢复、事务式保存、导出前画面检查、峰值内存计量（VmHWM）、16 位 TIFF 改 Deflate、启动读取被杀原因 |
 | RAW 解码 | raw-decode | `raw-decode` / `wt-raw` | `SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`、`patches/`（解码相关）、`cpp/CMakeLists.txt` 的 LibRaw 部分、JNI 的 `openRaw`；本轮另允许 `EditorViewModel.kt`、`ProcessingQueue.kt` 各一处 RAW 打开调用 | 描述符直读、多线程解码、LibRaw 加固、小米 DNG |
 | 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、ROADMAP、UI、WORKSTREAMS、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、署名与“关于”文案 | 第一轮已合并；待命，接后续文档与商店素材 |
+| 风格库扩充 | `styles` | [风格库扩充](#local_a6a3987e-bc82-484d-81f3-19b86262ca67) `local_a6a3987e-bc82-484d-81f3-19b86262ca67` | `Styles.kt`、`app/src/main/assets/styles/`、`docs/STYLES.md` | 调研器材厂商、热门胶卷、手机厂商风格，扩到 60 款以上，每款注明来源 |
 
 `EditorViewModel.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。
 
