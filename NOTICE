@@ -73,11 +73,25 @@ redistribute this program, including for a fee.
 必须同时提供完整对应源码（或按第 6 条提供获取方式），保留许可证、版权声明和上面
 的署名，并以 GPL-3.0 发布修改部分。只给 APK、不给源码，不符合 GPL-3.0。
 
+转发未修改的官方安装包（社区、社群、论坛等）无需事先授权，只需在安装包旁注明
+本仓库地址 https://github.com/Dear-Ded/spektralab-android。每个版本的完整对应源码都能从该仓库
+获取（标签 v<版本号>；上游引擎由 scripts/fetch-upstream.sh 按固定提交下载），注明地址即满足 GPL-3.0 第 6(d) 条“在目标代码旁清楚说明
+源码获取位置”的要求。修改过的版本仍须遵守上面第一节的署名、标明修改和改名规定。
+
 This section adds nothing; it restates what GPL-3.0 itself requires (sections
 4–6). Whoever distributes an APK must also provide the complete corresponding
 source (or offer it as section 6 allows), keep the licence, the copyright
 notices and the attribution above, and release their changes under GPL-3.0.
 Shipping an APK without its source does not comply with GPL-3.0.
+
+Sharing the unmodified official APK (in communities, group chats, forums and
+so on) needs no permission; just put this repository's address,
+https://github.com/Dear-Ded/spektralab-android, next to the APK. The complete
+corresponding source of every release can be obtained from that
+repository (tag v<version>; scripts/fetch-upstream.sh fetches the upstream
+engine at a pinned commit), so the address is the clear direction to the source that
+GPL-3.0 section 6(d) asks for. Modified versions still follow the
+attribution, marking and naming terms in part one above.
 
 
 三、官方渠道 / Official builds

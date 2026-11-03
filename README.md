@@ -147,6 +147,8 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 
 **用 Obtainium 自动更新：** 添加仓库地址 `https://github.com/Dear-Ded/spektralab-android`，并打开 **Include prereleases**（目前所有版本都是预发布，不打开就找不到）。
 
+**欢迎转发分享：** 下载好的安装包可以直接转发到社区、社群、论坛，无需授权，注明本仓库地址即可，见[转载与二次开发](#转载与二次开发)。
+
 ### 校验安装包
 
 所有官方版本都用同一个密钥签名。签名证书 SHA-256（也记录在 [`scripts/signing-cert.sha256`](scripts/signing-cert.sha256)）：
@@ -282,6 +284,10 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 版本号写在 [`VERSION`](VERSION)，格式为 `主版本.次版本.修订号-alpha`，能日常使用之前每次发布只加修订号。更新内容见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 转载与二次开发
+
+> **欢迎转发分享。** 欢迎把下载好的安装包转发到社区、社群、论坛等任何地方，无需事先授权，只需注明本仓库地址：https://github.com/Dear-Ded/spektralab-android
+>
+> 转发的是未修改的官方安装包时，注明仓库地址就够了：每个版本的完整源码都能从这个仓库获取（标签 `v<版本号>`，上游引擎由 [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh) 按固定提交下载），这也满足了 GPL-3.0 第 6(d) 条“注明源码获取位置”的要求。下面几条只针对修改过的版本和二次开发。
 
 **欢迎转载、改版和二次开发。** 本项目以 GPL-3.0 发布，你可以自由使用、研究、修改和分发，也可以收费分发，这是 GPL 赋予的权利，本项目不加限制。我们只请你做到下面几件事，前三条是 GPL-3.0 本身的要求或第 7 条允许的附加条款，完整条款见 [NOTICE](NOTICE)：
 

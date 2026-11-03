@@ -24,7 +24,7 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
 
 **本应用永久免费**
-官方安装包只在 GitHub Releases 发布，不收取任何费用。如果你是付费买到的，那不是官方版本，请申请退款，并到上面的地址下载官方版。
+官方安装包只在 GitHub Releases 发布，不收取任何费用。欢迎把安装包转发到社区、社群、论坛，无需授权，注明源码地址即可。如果你是付费买到的，那不是官方版本，请申请退款，并到上面的地址下载官方版。
 官方签名证书 SHA-256：
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [复制] · 校验方法：github.com/Dear-Ded/spektralab-android/blob/main/docs/VERIFY.md
@@ -53,7 +53,7 @@ Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's Sp
 If it helps you develop a photo you love, a star is the best encouragement you could give.
 
 **This app is free, forever**
-Official APKs are published only on GitHub Releases and cost nothing. If you paid for this copy, it is not the official build: ask for a refund and download the official one from the address above.
+Official APKs are published only on GitHub Releases and cost nothing. You are welcome to share the APK in communities, groups and forums; no permission is needed, just include the source address. If you paid for this copy, it is not the official build: ask for a refund and download the official one from the address above.
 Official signing certificate SHA-256:
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [Copy] · How to verify: github.com/Dear-Ded/spektralab-android/blob/main/docs/VERIFY.md
