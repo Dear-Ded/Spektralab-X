@@ -236,19 +236,22 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             clearPool()
             val handle: Long
             if (raw) {
-                val file = withContext(Dispatchers.IO) { loader.copyToCache(uri, name) }
-                _ui.update { it.copy(busy = "正在解码 RAW…") }
-                handle = withContext(EngineThread.dispatcher) {
-                    releaseSession()
-                    openSpace = "ProPhoto RGB"; openLinear = true
-                    val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
-                    val h = NativeEngine.openRaw(engine, file.absolutePath, edge, maxPixels, params, wbK, wbTint)
-                    file.delete()
-                    if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
-                    // Owned now, in this same engine-thread hop: if the open is
-                    // cancelled (back, a newer open) the next release frees it.
-                    synchronized(cancelLock) { session = h }
-                    h
+                val input = withContext(Dispatchers.IO) { loader.rawInput(uri, name) }
+                handle = try {
+                    _ui.update { it.copy(busy = "正在解码 RAW…") }
+                    withContext(EngineThread.dispatcher) {
+                        releaseSession()
+                        openSpace = "ProPhoto RGB"; openLinear = true
+                        val params = Edit.openingParams(look, inputSpace = openSpace, linear = openLinear).toString()
+                        val h = NativeEngine.openRaw(engine, input.path, edge, maxPixels, params, wbK, wbTint)
+                        if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
+                        // Owned now, in this same engine-thread hop: if the open is
+                        // cancelled (back, a newer open) the next release frees it.
+                        synchronized(cancelLock) { session = h }
+                        h
+                    }
+                } finally {
+                    input.close()
                 }
             } else {
                 val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, edge, maxPixels) }
