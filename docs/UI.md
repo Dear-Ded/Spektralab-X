@@ -240,3 +240,28 @@
 - [NN/g：新手教程与情境帮助](https://www.nngroup.com/articles/onboarding-tutorials/)
 - [Android 震动原则](https://developer.android.com/develop/ui/views/haptics/haptics-principles)、[JankStats](https://developer.android.com/topic/performance/jankstats)、[Macrobenchmark](https://developer.android.com/topic/performance/benchmarking/macrobenchmark-overview)
 - [Telephoto](https://github.com/saket/telephoto)、[Haze](https://github.com/chrisbanes/haze)、[colorpicker-compose](https://github.com/skydoves/colorpicker-compose)、[reveal](https://github.com/svenjacobs/reveal)、[Coil](https://coil-kt.github.io/coil/)
+
+## 附录 A：可复用的开源组件（2026-11-03 调研）
+
+总原则：**参照改写，不加依赖**。原因两条：
+1. 仍在维护的候选库大多已用 Kotlin 2.3–2.4、Compose BOM 2026.09 编译，本项目是 Kotlin 2.0.21，直接依赖很可能编译失败。要依赖须先升级 Kotlin（单列一项，评估后再定）。
+2. 现成的裁剪、对比库大多直接产出裁好的 Bitmap；本项目是非破坏式编辑，界面只产出参数，处理交给引擎。
+
+| 组件 | 做法 | 参照 | 许可 |
+|---|---|---|---|
+| 修图滑杆（双向填充、数值气泡、纵向精调、点两侧步进） | 自己写 | ImageToolbox `HyperOSSlider.kt`、Compose-Colorful-Sliders | Apache-2.0 |
+| 色调曲线 + 直方图 | 自己写 Compose 版 | ImageToolbox `ImageCurvesEditor.kt`；Telegram `PhotoFilterCurvesControl.java` | GPL-2.0+（ImageToolbox 该文件实为 Telegram 移植，署名两家） |
+| 三向色轮 | 参照改写 | ImageToolbox `ColorWheelsEditor.kt` | Apache-2.0 |
+| 二维调色盘 | 自己写 | 无成熟开源实现 | — |
+| 拉直刻度拨盘 | 自己写 | Telegram `CropRotationWheel.java`、uCrop `HorizontalProgressWheelView` | GPL-2.0+ / Apache-2.0 |
+| 裁剪层（只输出裁剪框和角度） | 参照改写 | ImageToolbox `lib/cropper`、Cropify、Krop | MIT / Apache-2.0 |
+| 前后对比分割 | 自己写（约 100 行） | ImageToolbox `BeforeAfterLayoutImpl.kt` | Apache-2.0 |
+| 底部工具栏、胶片条吸附 | 自己写 | Compose `AnimatedContent`、`rememberSnapFlingBehavior` | — |
+| 观片台网格（捏合改列数、拖动多选） | 参照改写 | IacobIonut01/Gallery `GridPinchZoomState.kt`、`MultiSelectExt.kt` | Apache-2.0 |
+| 首次引导提示 | 自己写（遮罩 + 挖孔 + 文字） | svenjacobs/reveal（需新版 Kotlin） | MIT |
+| 新版本提示 | 直接搬代码并署名 | JunkFood02/Seal `UpdateUtil.kt`（含 alpha/rc 版本比较） | GPL-3.0 |
+
+注意事项：
+- 曲线插值算法必须和引擎查表一致，否则所见不等于所得；Catmull-Rom 会过冲，需截断或改用单调三次插值。
+- 更新检查：GitHub `releases/latest` 不返回预发布版本，alpha 期间要请求 `/releases` 自行筛选；未登录每 IP 每小时 60 次，带 ETag 缓存；不做应用内安装，直接跳 Release 页面。
+- 所有参照来源在 NOTICE 和关于页保留原版权声明。
