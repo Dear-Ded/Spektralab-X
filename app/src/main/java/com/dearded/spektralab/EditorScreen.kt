@@ -434,13 +434,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
     val enabled = ui.hasImage && !ui.exporting
     Surface(modifier, tonalElevation = 2.dp) {
         Column {
-            TabRow(selectedTabIndex = tab) {
-                listOf("胶片", "调整", "冲印", "效果", "构图").forEachIndexed { i, title ->
-                    Tab(selected = tab == i, onClick = { tab = i }, text = { Text(title) })
-                }
-            }
             // Pages slide in the direction of travel and fade; the panel height is
             // fixed, so the photo above never moves.
+            Box(Modifier.weight(1f)) {
             androidx.compose.animation.AnimatedContent(
                 targetState = tab,
                 transitionSpec = {
@@ -671,6 +667,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                 }
             }
             }
+            }
+            // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
+            CategoryBar(selected = tab, enabled = true) { tab = it }
         }
     }
 }
