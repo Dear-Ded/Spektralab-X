@@ -23,7 +23,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // The UI is always dark: without this, a phone in light mode draws dark
+        // status-bar icons on the dark top bar, where they vanish.
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+        )
         DisplayColor.attach(this)
         if (savedInstanceState == null) handleIntent(intent)
         setContent {

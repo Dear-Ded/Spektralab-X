@@ -89,7 +89,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun EditorScreen(vm: EditorViewModel) {
     val ui by vm.ui.collectAsState()
@@ -127,6 +127,27 @@ fun EditorScreen(vm: EditorViewModel) {
         uri?.let(vm::open)
     }
 
+    // Tap the photo to hide every control and the system bars (docs/UI.md,
+    // 沉浸式). Anything that needs the user -- an error, the queue, the 1:1
+    // viewer, no photo at all -- brings the chrome back by itself.
+    var chrome by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
+    val canHide = immersiveAllowed()
+    val showChrome = chrome || !canHide || !ui.hasImage || ui.error != null || ui.showQueue ||
+        ui.detail != null || ui.busy != null
+    LaunchedEffect(ui.source) { chrome = true }
+    SystemBarsHidden(!showChrome)
+    androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
+    val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
+    val toggleChrome: () -> Unit = {
+        if (canHide && ui.hasImage) {
+            chrome = !chrome
+            if (!chrome && !hintPrefs.getBoolean("hint_immersive", false)) {
+                hintPrefs.edit().putBoolean("hint_immersive", true).apply()
+                vm.showMessage("轻点照片或按返回，恢复界面")
+            }
+        }
+    }
+
     LaunchedEffect(ui.message) {
         ui.message?.let {
             snackbar.showSnackbar(it)
@@ -136,8 +157,13 @@ fun EditorScreen(vm: EditorViewModel) {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
             TopAppBar(
+                modifier = Modifier.chrome(showChrome),
+                windowInsets = androidx.compose.foundation.layout.WindowInsets.systemBarsIgnoringVisibility.only(
+                    androidx.compose.foundation.layout.WindowInsetsSides.Horizontal +
+                        androidx.compose.foundation.layout.WindowInsetsSides.Top),
                 title = {
                     Column {
                         Text("Spektralab-X", style = MaterialTheme.typography.titleMedium)
@@ -207,13 +233,15 @@ fun EditorScreen(vm: EditorViewModel) {
             val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true })
-                    Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight())
+                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                        chrome = showChrome, onToggleChrome = toggleChrome)
+                    Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true })
-                    Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f))
+                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                        chrome = showChrome, onToggleChrome = toggleChrome)
+                    Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -252,7 +280,11 @@ fun EditorScreen(vm: EditorViewModel) {
 }
 
 @Composable
-private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {}) {
+private fun Preview(
+    ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
+    chrome: Boolean = true, onToggleChrome: () -> Unit = {},
+) {
+    val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
@@ -265,6 +297,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, 
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
+                            onTap = { toggle() },
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
                             onLongPress = { holding = true },
                             onPress = {
@@ -340,7 +373,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, 
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(image) }
                 else null
             }
-            Column(Modifier.align(Alignment.TopStart).padding(8.dp)) {
+            Column(Modifier.align(Alignment.TopStart).padding(8.dp).chrome(chrome)) {
                 Row {
                     TextButton(onClick = { showHistogram = !showHistogram }) {
                         Text(if (showHistogram) "隐藏直方图" else "直方图", color = Color.White.copy(alpha = 0.8f))
@@ -370,7 +403,7 @@ private fun Preview(ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, 
                 },
                 color = Color.White.copy(alpha = 0.6f),
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome),
             )
         }
     }

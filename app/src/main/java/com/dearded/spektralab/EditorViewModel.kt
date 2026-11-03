@@ -789,6 +789,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun consumeMessage() = _ui.update { it.copy(message = null) }
+    fun showMessage(text: String) = _ui.update { it.copy(message = text) }
     fun dismissError() = _ui.update { it.copy(error = null) }
 
     override fun onCleared() {
