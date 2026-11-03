@@ -34,6 +34,8 @@ public:
     bool ready() const { return ready_; }
     const std::string& target() const { return dst_; }
     bool exporting() const { return cam16_; }
+    // Exact transfer curves everywhere, not the display tables (parity tests).
+    void set_exact(bool on) { exact_ = on; }
 
     // Encoded ProPhoto in, encoded target out (unclamped), in place.
     void apply(float c[3]) const;
@@ -45,7 +47,7 @@ private:
     float encode(float v) const;
     void finish(const float v[3], float c[3]) const;
 
-    bool ready_ = false, cam16_ = false, lightness_ = false;
+    bool ready_ = false, cam16_ = false, lightness_ = false, exact_ = false;
     std::string dst_;
     uint32_t src_mode_ = 1, dst_mode_ = 0;
     std::array<float, 9> matrix_{}, m2x_{}, m2r_{};

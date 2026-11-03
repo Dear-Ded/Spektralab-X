@@ -103,12 +103,12 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
 // Tables for the display, where the result is 8 bits; the exact curves for a
 // file, and for anything outside 0..1 (out-of-gamut and Layer 2 overshoot).
 float OutputTransform::decode(float v) const {
-    if (cam16_ || v < 0.0f || v > 1.0f) return upstream::cctf_decode_mode(v, src_mode_);
+    if (cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_decode_mode(v, src_mode_);
     return lerp_lut(decode_lut_, kDecodeN, v);
 }
 
 float OutputTransform::encode(float v) const {
-    if (cam16_ || v < 0.0f || v > 1.0f) return upstream::cctf_encode_mode(v, dst_mode_);
+    if (cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_encode_mode(v, dst_mode_);
     return lerp_lut(encode_lut_, kEncodeN, v);
 }
 
