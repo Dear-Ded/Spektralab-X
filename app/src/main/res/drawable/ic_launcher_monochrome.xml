@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon layer (Android 13+, HyperOS themed icons): the same strip as
+     one silhouette, holes and the frame window cut out. The launcher tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M18,31h72v46h-72z
+            M27,34.5h6v5h-6z M39,34.5h6v5h-6z M51,34.5h6v5h-6z M63,34.5h6v5h-6z M75,34.5h6v5h-6z
+            M27,68.5h6v5h-6z M39,68.5h6v5h-6z M51,68.5h6v5h-6z M63,68.5h6v5h-6z M75,68.5h6v5h-6z
+            M37,43h34v22h-34z" />
+    <!-- A small lit spot inside the window, so the themed icon still reads as light through film. -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M54,49a5,5 0,1 1,-0.01 0z" />
+</vector>
