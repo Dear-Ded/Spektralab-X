@@ -7,6 +7,8 @@ body:
       value: |
         请先在应用的 **设置 → 复制诊断信息** 里复制一份诊断信息，粘贴到下面。它包含版本、机型、SoC、内存、GPU 和最近的事件，不含文件名和位置。
         Copy **Settings → Copy diagnostics** in the app and paste it below.
+
+        中文、英文都可以。请不要贴出手机号、邮箱、照片位置等个人信息。/ Chinese or English are both fine. Please leave out personal information such as phone numbers, email addresses or photo locations.
   - type: checkboxes
     id: checklist
     attributes:
@@ -16,6 +18,18 @@ body:
           required: true
         - label: 我搜索过已有的 issue / I searched existing issues
           required: true
+  - type: dropdown
+    id: install_source
+    attributes:
+      label: 安装来源 / Where you got the APK
+      description: 只处理官方版的问题，见 docs/VERIFY.md / Only official builds are supported; see docs/VERIFY.md
+      options:
+        - GitHub Releases
+        - Obtainium（GitHub Releases）
+        - 自己编译 / Built from source
+        - 其他渠道 / Somewhere else
+    validations:
+      required: true
   - type: input
     id: device
     attributes:

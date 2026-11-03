@@ -15,12 +15,17 @@ body:
     id: description
     attributes:
       label: 想要什么 / What
+      description: 尽量具体，可以附截图或其他应用的例子 / Be specific; screenshots or examples from other apps help
     validations:
       required: true
   - type: textarea
     id: why
     attributes:
       label: 为什么需要 / Why
-      description: 什么场景下用到，现在怎么绕过
+      description: 什么场景下用到，现在怎么绕过 / When you would use it, and how you work around it today
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        已经计划的功能见 [路线图](https://github.com/Dear-Ded/spektralab-android/blob/main/docs/ROADMAP.md)。/ Planned features are in the roadmap.

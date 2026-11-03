@@ -6,3 +6,9 @@ contact_links:
   - name: 桌面版 SpektraLab / Desktop SpektraLab
     url: https://github.com/JamesQiu2005/SpektraLab
     about: 这是非官方移植，安卓版的问题请不要去上游报告 / This is an unofficial port; do not report Android issues upstream
+  - name: 安全问题 / Security vulnerability
+    url: https://github.com/Dear-Ded/spektralab-android/security/advisories/new
+    about: 请私下报告，不要公开提 issue / Report privately, not in a public issue
+  - name: 核对安装包是不是官方版 / Is my APK official?
+    url: https://github.com/Dear-Ded/spektralab-android/blob/main/docs/VERIFY.md
+    about: 官方版只在 GitHub Releases 免费发布 / Official builds are free and only on GitHub Releases

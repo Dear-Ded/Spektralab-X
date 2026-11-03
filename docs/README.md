@@ -1,0 +1,46 @@
+# 文档 / Documentation
+
+SpektraLab for Android 的所有文档。大部分文档用中文写，标注了 EN 的有英文。
+Most documents are in Chinese; those marked EN have English.
+
+## 使用 / Using the app
+
+| 文档 | 内容 |
+|---|---|
+| [项目首页](../README.md) · [README (EN)](../README.en.md) | 介绍、样片、功能、下载、常见问题 |
+| [VERIFY.md](VERIFY.md) | 校验安装包：签名证书、SHA256SUMS、构建溯源证明 · EN |
+| [DEVICES.md](DEVICES.md) | 小米数字系列 10–18 的芯片、内存、建议工作尺寸、已知风险和 GPU 限制 |
+| [更新记录 / CHANGELOG](../CHANGELOG.md) | 每个版本的改动 |
+
+## 计划 / Plans
+
+| 文档 | 内容 |
+|---|---|
+| [ROADMAP.md](ROADMAP.md) | 里程碑、验收标准、调研结论 |
+| [UI.md](UI.md) | 界面规范（M3 界面重构的依据） |
+| [REMOTE.md](REMOTE.md) | 远程处理接口规范草案 v1（正式版提供） |
+
+## 开发 / Development
+
+| 文档 | 内容 |
+|---|---|
+| [贡献指南 / CONTRIBUTING](../CONTRIBUTING.md) | 编译、改引擎、提交规范、转载与二次开发 · EN |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 模块划分、线程模型、渲染档位、内存预算、生命周期 |
+| [PATCHES.md](PATCHES.md) | 对上游引擎的补丁和写新补丁的流程 · EN |
+| [SAMPLES.md](SAMPLES.md) | README 样片的来源、参数和复现方法 · EN |
+| [WORKSTREAMS.md](WORKSTREAMS.md) | 并行开发时各条线负责的文件 |
+
+## 许可与署名 / Licence and attribution
+
+| 文档 | 内容 |
+|---|---|
+| [LICENSE](../LICENSE) | GPL-3.0 全文 · EN |
+| [NOTICE](../NOTICE) | 版权声明、GPL-3.0 第 7 条附加条款（署名、名称与图标）、官方渠道、第三方许可 · EN |
+| [ABOUT_TEXT.md](ABOUT_TEXT.md) | 应用“关于”页的文案（署名、源码地址、官方渠道） · EN |
+| [安全策略 / SECURITY](../SECURITY.md) | 如何私下报告安全问题 · EN |
+
+## 图片 / Images
+
+- [`images/samples/`](images/samples/)：README 样片，由引擎实际渲染，原图来自 raw.pixls.us（CC0）。
+- [`images/social-preview.png`](images/social-preview.png)：GitHub 社交预览图（1280 × 640）。
+- [`images/make-banners.py`](images/make-banners.py)：从样片生成社交预览图和 fastlane 宣传图（需要 Pillow）。

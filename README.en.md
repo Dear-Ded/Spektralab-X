@@ -5,28 +5,45 @@
 # SpektraLab for Android
 
 **Spectral film and print simulation: develop your photos on a phone.**
-Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · **Alpha**
+
+Your RAW and phone photos are "exposed" onto film from measured characteristic curves and spectral sensitivities, developed, and printed onto paper.<br>
+Unofficial Android port · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source
 
 [简体中文](README.md) | English
 
-[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
 [![CI](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml)
 [![License](https://img.shields.io/github/license/Dear-Ded/spektralab-android)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![Stars](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
+[![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/spektralab-android)](https://github.com/Dear-Ded/spektralab-android/commits/main)
 ![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white)
 ![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-informational)
+[![Official build: free forever](https://img.shields.io/badge/Official%20build-free%20forever-E8A24A)](#download-and-verify)
+
+[Download](#download-and-verify) · [Samples](#samples) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
 
 </div>
 
+> [!IMPORTANT]
+> **Under rapid development (alpha).** Updates land almost daily, and more features are on the way: a redesigned editor, more one-tap styles, a light table, colour-look import and more; see the [roadmap](docs/ROADMAP.md). **Star** the repository, or use **Watch → Custom → Releases** to hear about new versions.
+>
+> Built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek).
+
 > [!WARNING]
-> **Alpha.** Every release so far has only been built by CI; **none has been run on a real phone yet**. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
+> **Not yet verified on a real phone.** Every release so far has only been built by CI. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
 
 ## What it is
 
-[SpektraLab](https://github.com/JamesQiu2005/SpektraLab) is a macOS film simulator. It is not a filter: it simulates the whole chain spectrally — scene light, camera and film, development, enlarger and paper, paper development, scan — from measured characteristic curves and spectral sensitivities.
+[SpektraLab](https://github.com/JamesQiu2005/SpektraLab) is a macOS film simulator built on the [spektrafilm](https://github.com/andreavolpato/spektrafilm) engine. It is not a filter: it simulates the whole chain spectrally (scene light → camera and film → negative development → enlarger and paper → paper development → scan) from measured characteristic curves and spectral sensitivities.
 
 This repository builds SpektraLab's C++ engine for Android with the NDK, runs it on its own Vulkan compute backend, and adds a Jetpack Compose editor. The look comes entirely from upstream; this project handles Android integration, mobile-GPU fixes and the UI.
+
+- **A physical model, not a LUT.** Grain, halation and paper glare are computed from the physical parameters of each film and paper.
+- **The full chain on the phone.** Vulkan compute shaders run on the Adreno GPU, with submissions split and memory capped per device.
+- **Offline.** The app requests no network permission and collects no data; exported photos carry no location.
 
 ## Samples
 
@@ -53,52 +70,180 @@ Every image below was rendered by the same engine this app ships, with the app's
 
 ## Features
 
-- **Input:** camera RAW through LibRaw 0.22.2 (DNG, CR3, NEF, ARW, RAF, RW2, ORF…); phone photos (JPEG, HEIC/HEIF, PNG, WebP), with Display P3 photos kept in P3; open from the gallery, files, or Share / Open with.
-- **Printing:** colour negative, slide and black-and-white films with matching papers; a strip of live per-film previews of the current photo; exposure, auto exposure, film format; print exposure and Y/M filtration; grain, halation and paper glare; RAW white balance (temperature/tint at decode, upstream's algorithm).
-- **Framing:** rotate, flip, centred crop; film edge for 135, half frame, XPan, 645, 6×6, 6×7, 6×9, 6×12, 6×17; date back from the EXIF capture time.
-- **Viewing and export:** fast preview while dragging, sharp preview on release, stale renders cancelled; hold to compare with the original; histogram with clipping; 1:1 grain view; 50-step undo/redo; presets; JPEG with EXIF (no GPS) or 16-bit TIFF with an sRGB profile, at full working size or 3400 px.
+**Input**
+- Camera RAW through LibRaw 0.22.2: DNG, CR3, NEF, ARW, RAF, RW2, ORF and more; DNGs interpolate between the dual-illuminant matrices at the shot's white balance
+- Phone photos: JPEG, HEIC/HEIF, PNG, WebP. Display P3 photos go to the engine as P3; Ultra HDR photos recover highlights from the gain map (Android 14+)
+- Open from the gallery or a file manager, or straight from another app with Share / Open with
+
+**Printing**
+- Colour negative, slide, black-and-white and motion-picture films with matching papers; slides are scanned directly, without paper
+- Film strip: a live thumbnail of the current photo on every stock, tap to switch
+- One-tap styles: lab scans, maker looks and photographer-inspired finishes, each naming what inspired it (done on `main`, ships in the next release)
+- Exposure compensation, auto exposure, film format (sets the physical scale of grain and halation), print exposure, yellow / magenta filtration
+- Grain, halation and paper glare, each with its own switch and strength
+- RAW white balance: temperature / tint applied at decode, with upstream's desktop algorithm
+- Post-print adjustments: exposure, highlights, shadows, colour, fade, vignette and more (done on `main`, ships in the next release)
+
+**Framing and borders**
+- Rotate, flip, centred crop (original, 3:2, 4:3, 1:1, 16:9, 65:24 and more)
+- Film edges: 135, half frame, XPan, 645, 6×6, 6×7, 6×9 and more, with edge print and sprocket holes; plus paper borders such as Polaroid, Instax Mini, a parameter strip and gallery white
+- Date back: the EXIF capture time imprinted in a date-back style
+
+**Viewing and export**
+- A fast preview while dragging, the sharp render on release; new edits cancel stale renders
+- Hold to compare with the original, histogram with clipping, 1:1 grain view
+- Undo / redo up to 50 steps; presets save film, paper and effect combinations
+- Background export queue: the editor frees up at once, jobs resume after the process is killed, progress notifications support Live Update
+- Export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF
 
 > [!NOTE]
 > The app's interface is Simplified Chinese only for now.
 
 ## Devices
 
-Tuned for **Xiaomi 10 – 18** (there is no Xiaomi 16): Snapdragon 865, 888, 8 Gen 1 / 8+ Gen 1, 8 Gen 2, 8 Gen 3, 8 Elite, 8 Elite Gen 5 and Gen 6, all with Adreno GPUs. None is verified yet. Memory, recommended working sizes and known risks per generation are in [docs/DEVICES.md](docs/DEVICES.md). Other arm64 phones on Android 10+ with Vulkan should run it but are not a target.
+Tuned for **Xiaomi 10 – 18**. Every one of these generations uses a Snapdragon flagship chip with an Adreno GPU, which is what this project adapts the driver handling for.
 
-## Install
+| Phone | Chip | GPU | Status |
+|---|---|---|---|
+| Xiaomi 10 series | Snapdragon 865 | Adreno 650 | Untested |
+| Xiaomi 11 series | Snapdragon 888 | Adreno 660 | Untested |
+| Xiaomi 12 / 12S series | Snapdragon 8 Gen 1 / 8+ Gen 1 | Adreno 730 | Untested |
+| Xiaomi 13 series | Snapdragon 8 Gen 2 | Adreno 740 | Untested |
+| Xiaomi 14 series | Snapdragon 8 Gen 3 | Adreno 750 | Untested |
+| Xiaomi 15 series | Snapdragon 8 Elite | Adreno 830 | Untested |
+| Xiaomi 17 series | Snapdragon 8 Elite Gen 5 | Adreno 840 | Untested |
+| Xiaomi 18 series | Snapdragon 8 Elite Gen 6 | Adreno | Untested |
 
-Download `SpektraLab-<version>-arm64-v8a.apk` from the latest `v…-alpha` [release](https://github.com/Dear-Ded/spektralab-android/releases). Later versions install over earlier ones. With **Obtainium**, add this repository and enable **Include prereleases**.
+There is no Xiaomi 16. Memory, recommended working sizes and known risks per generation are in [docs/DEVICES.md](docs/DEVICES.md) (Chinese). Other arm64 phones on Android 10+ with Vulkan should run it but are not a target.
 
-Signing certificate SHA-256 (the same for every release):
+## Download and verify
+
+<p>
+<a href="https://github.com/Dear-Ded/spektralab-android/releases"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" height="60" alt="Get it on GitHub"></a>
+<a href="https://github.com/ImranR98/Obtainium"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" height="60" alt="Get it on Obtainium"></a>
+</p>
+
+> [!CAUTION]
+> **Official builds are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases), and they are free forever.** If you paid for "SpektraLab" in an app store, a file-sharing site or a second-hand marketplace, it is not an official build: ask for a refund and check the signature as shown below.
+
+1. Open [Releases](https://github.com/Dear-Ded/spektralab-android/releases) and download `SpektraLab-<version>-arm64-v8a.apk` from the latest `v…-alpha` release.
+2. Install it on the phone. Xiaomi / HyperOS asks you to allow unknown sources under "Security" the first time.
+3. Later versions install over earlier ones; your presets are kept.
+
+**Automatic updates with Obtainium:** add `https://github.com/Dear-Ded/spektralab-android` and enable **Include prereleases** (every release is a pre-release for now, so nothing shows up without it).
+
+### Verify the APK
+
+Every official release is signed with the same key. Signing certificate SHA-256 (also in [`scripts/signing-cert.sha256`](scripts/signing-cert.sha256)):
 
 ```
 CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3
 ```
 
-Each release carries `SHA256SUMS` and a GitHub build-provenance attestation:
+Each release carries `SHA256SUMS` and a GitHub Actions build-provenance attestation, which proves the APK was built from this repository's public source:
 
 ```bash
 sha256sum -c SHA256SUMS
 gh attestation verify SpektraLab-<version>-arm64-v8a.apk -R Dear-Ded/spektralab-android
 ```
 
+On the phone, [AppVerifier](https://github.com/soupslurpr/AppVerifier) checks the certificate; on a computer, use `apksigner verify --print-certs`. Step by step: [docs/VERIFY.md](docs/VERIFY.md).
+
+## Tips
+
+- **Working size** (in Settings) sets the processing and export resolution. On first launch it is picked from the GPU (up to 4096 px; 3072 on Xiaomi 12–14), and it is also capped by free memory, the GPU's single-buffer limit and a 42 MP ceiling.
+- Phone photos were already exposed and graded by the camera, so auto exposure is off for them by default. For the most film-like result, shoot RAW in the Xiaomi camera's Pro mode.
+- The gain map in Xiaomi "Super HDR" photos is not used yet; only the base image is read.
+
+## FAQ
+
+<details>
+<summary><b>How is this different from a film filter or a LUT?</b></summary>
+
+A filter or LUT maps one colour to another. This engine simulates how the emulsion responds to each wavelength, the dye densities after development, and the print made through an enlarger onto paper. Exposure, the colour of the light and the film format all change the result naturally, and grain and halation change with them.
+</details>
+
+<details>
+<summary><b>Does it cost anything? Where do I get it?</b></summary>
+
+The official build is free forever and published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases). Anything you paid for elsewhere is not an official build; check the signing certificate as described in [Verify the APK](#verify-the-apk).
+</details>
+
+<details>
+<summary><b>Why only Xiaomi's numbered phones? Will it run on mine?</b></summary>
+
+Vulkan drivers differ a lot between phone GPUs: the same compute work can render, corrupt the image or reset the GPU depending on the driver. Xiaomi 10–18 are all Snapdragon with Adreno, so the driver issues are concentrated and can be handled together. Other arm64 phones on Android 10+ with Vulkan will probably run it, just without specific tuning. Reports are welcome.
+</details>
+
+<details>
+<summary><b>Do the colours match SpektraLab on macOS?</b></summary>
+
+That is the goal. The opening parameters match the desktop app, and export now uses upstream's own colour conversion code. In parity tests on a cloud machine the mean colour difference is below 0.1 ΔE00, with the deviation concentrated in a small share of the most saturated pixels. On-device comparisons are still to come; progress is in the [roadmap](docs/ROADMAP.md). If colours differ from the desktop app, report it here, not upstream.
+</details>
+
+<details>
+<summary><b>Does it need the internet? Are my photos uploaded?</b></summary>
+
+No. The app requests no network permission, everything is computed on the phone, and no data is collected. Exported JPEGs keep the camera, lens and exposure details but no GPS location.
+</details>
+
+<details>
+<summary><b>Why is export slow, and why does the phone get warm?</b></summary>
+
+The full spectral chain is a lot of computation; a full-size export can take tens of seconds on older phones. Long exports make the phone throttle, most visibly on the Xiaomi 11 (Snapdragon 888). Lower the working size in Settings, or export at the 3400 px sharing size.
+</details>
+
+<details>
+<summary><b>Will there be versions for other platforms?</b></summary>
+
+It is planned. Once the Xiaomi-tuned version is stable enough for daily use, separate projects will start for a general Android version, Windows and iOS. These are plans without dates; see the [roadmap](#roadmap) below.
+</details>
+
+<details>
+<summary><b>Can I repost it, modify it or build on it?</b></summary>
+
+Yes. Publish your full source under GPL-3.0, credit this project, the upstream projects and yourself as the derivative developer, and give your version its own name and icon. Details: [Reposting and derivative works](#reposting-and-derivative-works).
+</details>
+
+## Roadmap
+
+Work proceeds by milestone; the full list, acceptance criteria and research notes are in [docs/ROADMAP.md](docs/ROADMAP.md) (Chinese).
+
+- **Near term (0.1.x-alpha):** fixes from on-device feedback, colour fidelity and the style system, a redesigned UI, export stability, deeper Xiaomi integration (Super Island, background keep-alive, Xiaomi DNG).
+- **First stable release:** remote processing, sending photos to your own computer or server for post-processing and back to the phone (draft spec: [docs/REMOTE.md](docs/REMOTE.md)).
+- **Later plans:** once the Xiaomi-tuned version is stable for daily use, separate projects for a **general Android version**, **Windows** and **iOS**. These are plans, not promises with dates.
+
 ## Reporting problems
 
-Open **Settings → Copy diagnostics** in the app (version, device, SoC, memory, GPU probe, current parameters, last 40 events; no file names or locations) and paste it into a [bug report](https://github.com/Dear-Ded/spektralab-android/issues/new/choose). Questions go to [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions). If a render differs from the macOS app, report it here, not upstream.
+1. Open **Settings → Copy diagnostics** in the app. It holds the version, device, SoC, memory, GPU probe, current parameters and the last 40 events; no file names or locations.
+2. Paste it into a [bug report](https://github.com/Dear-Ded/spektralab-android/issues/new/choose). Chinese or English are both fine.
 
-## How it works
+Usage questions go to [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions). Report security issues privately as described in [SECURITY.md](SECURITY.md).
+
+## Contributing
+
+On-device reports are the most valuable contribution right now, even if all you can say is "it opens and exports". Code, docs and sample images are welcome too; see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### How it works
 
 ```
-Compose UI (Kotlin) ──JSON──▶ JNI (spektralab_jni.cpp) ──spk_engine.h──▶ SpektraLab engine (C++20)
-                                                                          ├─ Vulkan compute (SPIR-V) ─▶ Adreno
-                                                                          └─ LibRaw 0.22.2
+Compose UI (Kotlin)
+   │  JSON parameters, a dedicated engine thread
+   ▼
+JNI bridge            app/src/main/cpp/spektralab_jni.cpp
+   │  spk_engine.h (upstream's C API)
+   ▼
+SpektraLab engine (C++20) ── Vulkan compute shaders (SPIR-V) ── Adreno GPU
+LibRaw 0.22.2 (RAW decoding)
 ```
 
-Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh). All engine changes live in [`patches/`](patches/) and are described in [docs/PATCHES.md](docs/PATCHES.md). Module layout, threading, render tiers and the memory budget are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- Upstream sources are fetched at a pinned commit by [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh); this repository holds only the Android code.
+- Every change to the upstream engine lives in [`patches/`](patches/), applied in order before the build, and is described in [docs/PATCHES.md](docs/PATCHES.md).
+- Module layout, threading, render tiers and the memory budget are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (Chinese).
 
-## Building
+### Building
 
-JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator`:
+JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator` (`glslang-tools` on Ubuntu):
 
 ```bash
 bash scripts/fetch-upstream.sh upstream
@@ -106,10 +251,42 @@ bash scripts/stage-assets.sh upstream
 SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Without `SPK_KEYSTORE` the build is debug-signed and will not install over an official release. The full pipeline is in [`.github/workflows/android.yml`](.github/workflows/android.yml).
+
+The version lives in [`VERSION`](VERSION) as `major.minor.patch-alpha`; until the app is ready for daily use, each release bumps only the patch number. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+
+## Reposting and derivative works
+
+**Reposts, modified versions and derivative projects are welcome.** This project is released under GPL-3.0: you may use, study, modify and redistribute it, including for a fee. Those are rights GPL grants, and this project does not restrict them. We only ask for the following; the first three are GPL-3.0's own requirements or additional terms permitted by its section 7, and the full terms are in [NOTICE](NOTICE):
+
+1. **Keep the attribution** (GPL-3.0 section 7(b)): in the About screen and the documentation of a derivative version, keep the original project name "SpektraLab for Android", this repository's address `https://github.com/Dear-Ded/spektralab-android` and the credit "SpektraLab for Android contributors", and credit the upstream [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm).
+2. **Use your own name and icon** (sections 7(c) and 7(e)): this project grants no trademark rights to the name "SpektraLab for Android" or its icon. A modified version you publish should have its own name, icon and package name, say "modified from SpektraLab for Android", and not present itself as the official build.
+3. **Provide the source** (GPL-3.0 sections 4–6): whoever distributes an APK must also provide the complete corresponding source, keep the licence and the attributions, and release their changes under GPL-3.0.
+4. **Film data:** the film and paper profiles are CC BY-SA 4.0; redistributing them requires crediting spektrafilm (Andrea Volpato) and sharing under the same licence.
+
+When reposting in an article or video, a line such as "Source: SpektraLab for Android (github.com/Dear-Ded/spektralab-android)" is enough; a derivative project should also carry your own credit as its developer.
 
 ## License and credits
 
-GPL-3.0, like upstream. Bundled third-party content and its licences: the SpektraLab engine and shaders (GPL-3.0, after andreavolpato/spektrafilm), spektrafilm film and paper profiles (CC BY-SA 4.0), LibRaw (LGPL-2.1), volk and stb (MIT), Liberation Sans and DejaVu Sans Mono (OFL 1.1 / Bitstream Vera). README sample RAWs come from raw.pixls.us (CC0 1.0). Licence texts ship in the APK under `assets/engine/licenses/`.
+The code in this repository is released under [GPL-3.0](LICENSE), like upstream, with the additional terms in [NOTICE](NOTICE). The APK also contains the following third-party content; the licence texts ship in the app under `assets/engine/licenses/`:
 
-Not affiliated with the SpektraLab project or with Xiaomi. Xiaomi, Snapdragon and Adreno are trademarks of their owners.
+| Content | Source | Licence |
+|---|---|---|
+| Rendering engine and shaders | [JamesQiu2005/SpektraLab](https://github.com/JamesQiu2005/SpektraLab), based on [andreavolpato/spektrafilm](https://github.com/andreavolpato/spektrafilm) | GPL-3.0 |
+| Film and paper profiles | Andrea Volpato, spektrafilm | CC BY-SA 4.0 |
+| Black-and-white film and paper profiles | SpektraLab product data | see `Product-profiles-NOTICE.md` |
+| RAW decoding | [LibRaw](https://www.libraw.org/) 0.22.2 | LGPL-2.1 |
+| Vulkan loader | [volk](https://github.com/zeux/volk) | MIT |
+| Image and font utilities | [stb](https://github.com/nothings/stb) | MIT |
+| README sample RAWs | [raw.pixls.us](https://raw.pixls.us/) | CC0 1.0 |
+| Date-back and edge-print fonts | Liberation Sans, DejaVu Sans Mono | SIL OFL 1.1 / Bitstream Vera |
+
+The design draws on lessons from two other Android ports: [SAINTTaiYi/SpektraLab-Android](https://github.com/SAINTTaiYi/SpektraLab-Android) and [thetechgeekko/Spektrafilm-android](https://github.com/thetechgeekko/Spektrafilm-android).
+
+Not affiliated with the SpektraLab project or with Xiaomi. The name "SpektraLab" is managed by the upstream project; Xiaomi, Snapdragon and Adreno are trademarks of their owners.
+
+<div align="center">
+
+**Find it interesting? Give it a ⭐ Star so more people can find it.**
+
+</div>
