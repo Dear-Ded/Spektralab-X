@@ -11,9 +11,9 @@
 //   -> HSL (8 bands) -> fade -> vignette
 //
 // Vibrance, the HSL bands and fade are this port's additions; everything else
-// follows upstream's arithmetic. Upstream pivots on mid-grey in its ProPhoto
-// working space; these values are encoded sRGB or Display P3 (the same curve),
-// so the pivot is sRGB's encoded 0.18, upstream's own `srgbMidGrey`.
+// follows upstream's arithmetic. Like upstream, it runs on the engine's
+// encoded ProPhoto output, before the output transform, and pivots on
+// ProPhoto's encoded mid-grey (0.3857, upstream's `proPhotoMidGrey`).
 #pragma once
 
 #include <cstddef>

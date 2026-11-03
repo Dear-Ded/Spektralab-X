@@ -7,7 +7,9 @@
 namespace spk::android {
 namespace {
 
-constexpr float kMidGrey = 0.4614f;   // 1.055 * 0.18^(1/2.4) - 0.055
+// Mid-grey (linear 0.18) encoded in the space the values are in: ProPhoto
+// RGB, gamma 1.8 -- upstream's `proPhotoMidGrey`, RFC-018 D1.
+constexpr float kMidGrey = 0.3857f;   // 0.18^(1/1.8)
 constexpr float kPi = 3.14159265358979f;
 constexpr float kBandHue[8] = {0, 30, 60, 120, 180, 240, 270, 300};   // red ... magenta
 

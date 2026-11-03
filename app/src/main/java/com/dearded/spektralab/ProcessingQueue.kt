@@ -258,7 +258,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             try {
                 withContext(EngineThread.dispatcher) {
                     NativeEngine.trimMemory(ready.engine)
-                    val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true, outputSpace = outSpace).toString()
+                    val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
                     val h = NativeEngine.openRaw(ready.engine, file.absolutePath, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     synchronized(handleLock) { runningHandle = h }
@@ -273,12 +273,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             withContext(EngineThread.dispatcher) {
                 NativeEngine.trimMemory(ready.engine)
                 val h = openPhotoSession(ready.engine, photo, job.highlightStops) { space, linear ->
-                    Edit.openingParams(edit, inputSpace = space, linear = linear, outputSpace = outSpace).toString()
+                    Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
                 }.handle
                 if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                 synchronized(handleLock) { runningHandle = h }
                 h
             }
+        }
+        // The file's own space, through the CAM16 export path (upstream's export
+        // transform, lightness shoulder off). TIFF carries the sRGB profile.
+        withContext(EngineThread.dispatcher) {
+            if (!NativeEngine.setOutput(handle, outSpace, true)) throw EngineException("导出失败：${NativeEngine.lastError()}")
         }
         // Layer 2 rides on the job's own session: every pack below goes through it.
         Look.fromJson(job.lookJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) }).let { look ->

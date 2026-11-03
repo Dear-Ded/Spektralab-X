@@ -70,6 +70,13 @@ object NativeEngine {
     /** The last display render again, through the current look, into [reuse] if it fits. */
     external fun repack(session: Long, reuse: Bitmap?): Bitmap?
 
+    /**
+     * Where the session's pixels go: [target] "sRGB" or "Display P3", for the
+     * screen (matrix and clip) or, [exporting], a file (CAM16 chroma
+     * compression into the space). Engine thread.
+     */
+    external fun setOutput(session: Long, target: String, exporting: Boolean): Boolean
+
     /** Any thread: stops the session's in-flight render at the next node. */
     external fun cancel(session: Long)
     external fun warmUp(engine: Long, film: String, paper: String): Boolean

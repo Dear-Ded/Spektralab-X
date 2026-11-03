@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        DisplayColor.attach(this)
         if (savedInstanceState == null) handleIntent(intent)
         setContent {
             // Always dark: judging a print against a white UI skews it.

@@ -25,6 +25,7 @@
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
 #include "layer2.hpp"
+#include "output_transform.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -65,8 +66,29 @@ struct Session {
         last = r;
         std::memset(&r, 0, sizeof r);
     }
+    // The engine renders encoded ProPhoto RGB (spk_open's convention), and
+    // the pixels leave it once, per destination, as upstream's hosts do
+    // (output_transform.hpp). `out` is set by setOutput; a session that was
+    // never told gets the sRGB display path, never ProPhoto codes in an sRGB
+    // bitmap. `prophoto` is false only for a session opened in another space.
+    bool prophoto = true;
+    spk::android::OutputTransform out;
+    const spk::android::OutputTransform* transform() {
+        if (!out.ready()) {
+            std::string e;
+            if (!out.fetch(engine, "sRGB", false, e)) return nullptr;
+        }
+        return &out;
+    }
+    const spk::android::OutputTransform* xf() { return prophoto ? transform() : nullptr; }
     ~Session() { spk_result_free(&last); }
 };
+
+// True when `params` (an open's JSON) leaves the engine in its ProPhoto output.
+bool renders_prophoto(const std::string& params) {
+    return params.find("\"output_color_space\"") == std::string::npos ||
+           params.find("\"output_color_space\":\"ProPhoto RGB\"") != std::string::npos;
+}
 
 // Owns a Session until it is handed to Kotlin, so an exception between the
 // engine open and the return never leaks the session's GPU buffers.
@@ -201,12 +223,15 @@ Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, ui
     session->session = s;
     session->width = w;
     session->height = h;
+    session->prophoto = renders_prophoto(params);
     return session;
 }
 
 // RGBA16 rows (engine-encoded sRGB) to RGBA8, split across up to four
 // threads: at the 3400 px tier it is ~8 M pixels, a visible slice of a drag.
-void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::android::Layer2* look = nullptr) {
+void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::android::Layer2* look = nullptr,
+                const spk::android::OutputTransform* xf = nullptr) {
+    if (xf) { spk::android::pack_rgba8(r.rgba16, r.row_stride_px, r.width, r.height, out, stride, look, *xf); return; }
     if (look) { spk::android::pack_rgba8_look(*look, r.rgba16, r.row_stride_px, r.width, r.height, out, stride); return; }
     const auto rows = [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
@@ -227,7 +252,8 @@ void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::and
 
 // RGBA16 rows (engine-encoded sRGB) into an ARGB_8888 Bitmap, whose memory
 // order is R, G, B, A.
-jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* look = nullptr) {
+jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* look = nullptr,
+                  const spk::android::OutputTransform* xf = nullptr) {
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
     if (!bitmap_class || !config_class) { fail("Bitmap classes not found"); return nullptr; }
@@ -248,7 +274,7 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* 
     }
     PixelLock lock(env, bitmap);
     if (!lock.ok) { fail("cannot lock bitmap pixels"); return nullptr; }
-    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look);
+    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf);
     return bitmap;
 }
 
@@ -750,7 +776,8 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
             fail(engine_error("film preview render"));
             return nullptr;
         }
-        return to_bitmap(env, result.r);
+        // The card is shown beside the print, so it leaves ProPhoto the same way.
+        return to_bitmap(env, result.r, nullptr, renders_prophoto(params) ? s->transform() : nullptr);
     } catch (const std::exception& e) {
         fail(std::string("film preview: ") + e.what());
     } catch (...) {
@@ -814,17 +841,18 @@ JNI_FN(jstring, getParams)(JNIEnv* env, jobject, jlong handle) {
 }
 
 // `r` into `reuse` when it is the same size, else into a new Bitmap.
-jobject pack_into(JNIEnv* env, const spk_result& r, jobject reuse, const spk::android::Layer2* look) {
+jobject pack_into(JNIEnv* env, const spk_result& r, jobject reuse, const spk::android::Layer2* look,
+                  const spk::android::OutputTransform* xf) {
     AndroidBitmapInfo info{};
     if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
         info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 && info.width == r.width && info.height == r.height) {
         PixelLock lock(env, reuse);
         if (lock.ok) {
-            pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look);
+            pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf);
             return reuse;
         }
     }
-    return to_bitmap(env, r, look);
+    return to_bitmap(env, r, look, xf);
 }
 
 JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
@@ -833,7 +861,7 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     try {
         ResultGuard result;
         if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        return to_bitmap(env, result.r, s->active_look());
+        return to_bitmap(env, result.r, s->active_look(), s->xf());
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -852,7 +880,7 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
     try {
         ResultGuard result;
         if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        jobject out = pack_into(env, result.r, reuse, s->active_look());
+        jobject out = pack_into(env, result.r, reuse, s->active_look(), s->xf());
         if (out) s->keep(result.r);
         return out;
     } catch (const std::exception& e) {
@@ -879,17 +907,25 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
         ResultGuard result;
         if (!render(s, tier, result.r)) return JNI_FALSE;
         std::string error;
-        // The engine's pixels are its own; Layer 2 goes on a copy.
+        // The engine's pixels are its own; the conversion and Layer 2 go on a copy.
         const uint16_t* pixels = result.r.rgba16;
+        size_t stride = result.r.row_stride_px;
         std::vector<uint16_t> adjusted;
-        if (const auto* look = s->active_look()) {
+        if (const auto* xf = s->xf()) {
+            // The file carries the sRGB profile, so the pixels must be sRGB.
+            if (xf->target() != "sRGB") { fail("TIFF: the session's output is not sRGB"); return JNI_FALSE; }
+            spk::android::pack_rgba16(result.r.rgba16, stride, result.r.width, result.r.height, adjusted,
+                                      s->active_look(), *xf);
+            pixels = adjusted.data();
+            stride = result.r.width;
+        } else if (const auto* look = s->active_look()) {
             adjusted.assign(result.r.rgba16, result.r.rgba16 + size_t(result.r.row_stride_px) * result.r.height * 4);
             spk::android::apply_rgba16_in_place(*look, adjusted.data(), result.r.row_stride_px,
                                                 result.r.width, result.r.height);
             pixels = adjusted.data();
         }
         if (!spk::android::write_tiff16(path, pixels, result.r.width, result.r.height,
-                                        result.r.row_stride_px, icc, error)) {
+                                        stride, icc, error)) {
             fail("TIFF: " + error);
             return JNI_FALSE;
         }
@@ -956,13 +992,34 @@ JNI_FN(jobject, repack)(JNIEnv* env, jobject, jlong handle, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s || !s->last.rgba16) { fail("nothing to repack"); return nullptr; }
     try {
-        return pack_into(env, s->last, reuse, s->active_look());
+        return pack_into(env, s->last, reuse, s->active_look(), s->xf());
     } catch (const std::exception& e) {
         fail(std::string("repack: ") + e.what());
     } catch (...) {
         fail("repack: unknown failure");
     }
     return nullptr;
+}
+
+// Where this session's pixels go: `target` "sRGB" or "Display P3", for the
+// display (matrix and clip) or, `exporting`, a file (CAM16 chroma compression
+// into the space, the lightness shoulder off). Engine thread.
+JNI_FN(jboolean, setOutput)(JNIEnv* env, jobject, jlong handle, jstring target_j, jboolean exporting) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("no session"); return JNI_FALSE; }
+    try {
+        std::string error;
+        if (!s->out.fetch(s->engine, str(env, target_j), exporting == JNI_TRUE, error)) {
+            fail("output transform: " + error);
+            return JNI_FALSE;
+        }
+        return JNI_TRUE;
+    } catch (const std::exception& e) {
+        fail(std::string("output transform: ") + e.what());
+    } catch (...) {
+        fail("output transform: unknown failure");
+    }
+    return JNI_FALSE;
 }
 
 JNI_FN(void, release)(JNIEnv*, jobject, jlong handle) {

@@ -268,6 +268,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             val (edit, info, before) = withContext(EngineThread.dispatcher) {
                 session = handle
+                // The screen's space: Display P3 when the window is wide-gamut.
+                if (!NativeEngine.setOutput(handle, DisplayColor.space, false)) log("display transform: ${NativeEngine.lastError()}")
                 val params = NativeEngine.getParams(handle)?.let(::JSONObject) ?: JSONObject()
                 val edit = Edit.fromParams(params, look)
                 applied = edit
@@ -386,7 +388,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             try {
                 val bitmap = withContext(EngineThread.dispatcher) {
                     applyWanted()?.let { throw EngineException("参数无效：$it") }
-                    NativeEngine.renderBitmap(session, "full")
+                    NativeEngine.renderBitmap(session, "full")?.also(DisplayColor::tag)
                         ?: throw EngineException("渲染失败：${NativeEngine.lastError()}")
                 }
                 // An edit that landed while this rendered makes it stale.
@@ -477,7 +479,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
                 val card = try {
                     withContext(EngineThread.dispatcher) {
-                        if (session != handle) null else NativeEngine.filmPreview(handle, params)
+                        if (session != handle) null else NativeEngine.filmPreview(handle, params)?.also(DisplayColor::tag)
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
@@ -540,7 +542,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     if (session == 0L) return@withContext null
                     applyLook(wanted.look)
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
-                    val bitmap = NativeEngine.repack(session, reuse)
+                    val bitmap = NativeEngine.repack(session, reuse)?.also(DisplayColor::tag)
                     if (bitmap == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
                     bitmap?.prepareToDraw()
                     bitmap
@@ -596,7 +598,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
         // The same render fills the spare, or a new bitmap when the tier changed
         // size (crop, rotation, film edge); either way the frame renders once.
-        val out = NativeEngine.renderReuse(session, tier, reuse)
+        val out = NativeEngine.renderReuse(session, tier, reuse)?.also(DisplayColor::tag)
         if (out == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
         // Upload to the GPU here, on the engine thread, instead of on the
         // RenderThread during the frame that first shows it (a 30-46 MB upload
