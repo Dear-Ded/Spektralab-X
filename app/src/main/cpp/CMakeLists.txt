@@ -71,6 +71,6 @@ target_include_directories(spektralab_jni PRIVATE
     "${SPK_UPSTREAM}/engine/host"
     "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(spektralab_jni PRIVATE
-    spektralab_engine spk_image_io spk_libraw spk_volk android log jnigraphics)
+    spektralab_engine spk_image_io spk_libraw spk_volk android log jnigraphics z)
 # 16 KB page alignment, required by newer Android releases for native code.
 target_link_options(spektralab_jni PRIVATE "-Wl,-z,max-page-size=16384")

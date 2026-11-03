@@ -171,35 +171,91 @@ object MediaSaver {
     }
 
     /**
-     * The TIFF tiff16.cpp writes: the header parses, it is RGB16 at some size,
-     * and the entry holds every byte of the strip the header points to.
+     * The TIFF tiff16.cpp writes, read back from the entry: the header points
+     * to a directory (patched last, so a cut-off file has none), it is RGB16,
+     * the strips cover the frame, and every strip inflates to exactly its rows.
+     * Uncompressed strips (older builds) are checked for size only.
      */
     fun checkTiff(context: Context, uri: Uri) {
-        context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-            val head = ByteArray(512)
-            val n = FileInputStream(pfd.fileDescriptor).use { s -> s.read(head) }
-            val b = ByteBuffer.wrap(head, 0, maxOf(0, n)).order(ByteOrder.LITTLE_ENDIAN)
-            fun bad(why: String): Nothing = throw EngineException("TIFF 校验失败：$why")
-            if (n < 16 || head[0] != 'I'.code.toByte() || head[1] != 'I'.code.toByte() || b.getShort(2).toInt() != 42) bad("文件头")
-            val ifd = b.getInt(4)
-            if (ifd < 8 || ifd + 2 > n) bad("目录位置")
-            val entries = b.getShort(ifd).toInt() and 0xFFFF
-            if (ifd + 2 + entries * 12 > n) bad("目录不完整")
-            var width = 0L; var height = 0L; var offset = 0L; var count = 0L
+        fun bad(why: String): Nothing = throw EngineException("TIFF 校验失败：$why")
+        val pfd = context.contentResolver.openFileDescriptor(uri, "r") ?: bad("无法读取")
+        pfd.use {
+            // Not closed itself: the descriptor belongs to pfd.
+            val channel = FileInputStream(pfd.fileDescriptor).channel
+            val size = channel.size()
+            fun read(at: Long, n: Int): ByteBuffer {
+                if (at < 0 || n < 0 || at + n > size) bad("文件不完整（$size 字节）")
+                val buf = ByteBuffer.allocate(n).order(ByteOrder.LITTLE_ENDIAN)
+                while (buf.hasRemaining()) if (channel.read(buf, at + buf.position()) < 0) bad("读取中断")
+                buf.flip()
+                return buf
+            }
+            val head = read(0, 8)
+            if (head.get(0) != 'I'.code.toByte() || head.get(1) != 'I'.code.toByte() || head.getShort(2).toInt() != 42) bad("文件头")
+            val ifd = head.getInt(4).toLong() and 0xFFFFFFFFL
+            if (ifd < 8) bad("目录缺失，文件未写完")
+            val entries = read(ifd, 2).getShort(0).toInt() and 0xFFFF
+            val dir = read(ifd + 2, entries * 12)
+            val tags = HashMap<Int, LongArray>()
             for (i in 0 until entries) {
-                val at = ifd + 2 + i * 12
-                val tag = b.getShort(at).toInt() and 0xFFFF
-                val type = b.getShort(at + 2).toInt()
-                val value = if (type == 3) (b.getShort(at + 8).toLong() and 0xFFFF) else (b.getInt(at + 8).toLong() and 0xFFFFFFFFL)
-                when (tag) {
-                    256 -> width = value
-                    257 -> height = value
-                    273 -> offset = value
-                    279 -> count = value
+                val at = i * 12
+                val tag = dir.getShort(at).toInt() and 0xFFFF
+                val type = dir.getShort(at + 2).toInt()
+                if (type != 3 && type != 4) continue
+                val count = dir.getInt(at + 4).toLong() and 0xFFFFFFFFL
+                if (count > 1_000_000) bad("目录项 $tag 过大")
+                val unit = if (type == 3) 2 else 4
+                val bytes = (count * unit).toInt()
+                val data = if (bytes <= 4) {
+                    ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).also { b -> for (k in 0 until 4) b.put(k, dir.get(at + 8 + k)) }
+                } else {
+                    read(dir.getInt(at + 8).toLong() and 0xFFFFFFFFL, bytes)
+                }
+                tags[tag] = LongArray(count.toInt()) { k ->
+                    if (type == 3) data.getShort(k * 2).toLong() and 0xFFFF else data.getInt(k * 4).toLong() and 0xFFFFFFFFL
                 }
             }
-            if (width <= 0 || height <= 0 || count != width * height * 6) bad("尺寸 ${width}×$height，数据 $count 字节")
-            if (pfd.statSize < offset + count) bad("文件不完整（${pfd.statSize} / ${offset + count} 字节）")
-        } ?: throw EngineException("TIFF 校验失败：无法读取")
+            fun one(tag: Int): Long = tags[tag]?.singleOrNull() ?: bad("缺少标签 $tag")
+            val width = one(256)
+            val height = one(257)
+            if (width <= 0 || height <= 0) bad("尺寸 ${width}×$height")
+            if (tags[258]?.toList() != listOf(16L, 16L, 16L) || one(277) != 3L) bad("不是 16 位 RGB")
+            val compression = one(259)
+            val rows = tags[278]?.singleOrNull() ?: height
+            val offsets = tags[273] ?: bad("缺少数据位置")
+            val counts = tags[279] ?: bad("缺少数据长度")
+            if (rows <= 0 || offsets.size.toLong() != (height + rows - 1) / rows || counts.size != offsets.size) bad("分条信息不一致")
+            val rowBytes = width * 6
+            val stripBytes = rowBytes * minOf(rows, height)
+            if (stripBytes >= Int.MAX_VALUE) bad("分条过大")
+            // One byte spare, so a strip that inflates to more than its rows is caught.
+            val out = ByteArray(stripBytes.toInt() + 1)
+            val inflater = java.util.zip.Inflater()
+            try {
+                for (s in offsets.indices) {
+                    val expect = rowBytes * minOf(rows, height - s * rows)
+                    when (compression) {
+                        1L -> if (counts[s] != expect || offsets[s] + counts[s] > size) bad("第 ${s + 1} 条不完整")
+                        8L, 32946L -> {
+                            val input = read(offsets[s], counts[s].toInt())
+                            inflater.reset()
+                            inflater.setInput(input.array(), 0, input.limit())
+                            var got = 0
+                            while (!inflater.finished() && got < out.size) {
+                                val k = inflater.inflate(out, got, out.size - got)
+                                if (k == 0 && (inflater.needsInput() || inflater.needsDictionary())) break
+                                got += k
+                            }
+                            if (!inflater.finished() || got.toLong() != expect) bad("第 ${s + 1} 条数据损坏")
+                        }
+                        else -> bad("压缩方式 $compression")
+                    }
+                }
+            } catch (e: java.util.zip.DataFormatException) {
+                bad("数据损坏")
+            } finally {
+                inflater.end()
+            }
+        }
     }
 }
