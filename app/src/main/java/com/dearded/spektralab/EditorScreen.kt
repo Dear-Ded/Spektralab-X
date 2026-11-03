@@ -667,6 +667,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 vm.update(e.copy(frame = next))
                             }
                             SwitchRow("参数文字", e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
+                            BrandPanel(ui, vm, enabled)
                             Text("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
