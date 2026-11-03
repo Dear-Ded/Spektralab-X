@@ -21,6 +21,7 @@
 | RAW 解码 | raw-decode | `raw-decode` / `wt-raw` | `SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`、`patches/`（解码相关）、`cpp/CMakeLists.txt` 的 LibRaw 部分、JNI 的 `openRaw`；本轮另允许 `EditorViewModel.kt`、`ProcessingQueue.kt` 各一处 RAW 打开调用 | 描述符直读、多线程解码、LibRaw 加固、小米 DNG |
 | 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、ROADMAP、UI、WORKSTREAMS、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、署名与“关于”文案 | 第一轮已合并；待命，接后续文档与商店素材 |
 | 风格库扩充 | styles-library | `styles` / `wt-styles` | `Styles.kt`、`app/src/main/assets/styles/`、`docs/STYLES.md` | 调研器材厂商、热门胶卷、手机厂商风格，扩到 60 款以上，每款注明来源 |
+| 品牌 logo 边框 | brand-logos | `brand-logos` / `wt-logos` | `app/src/main/assets/logos/`、`Frames.kt` 中品牌匹配与 logo 绘制、新增 logo 相关文件、`NOTICE` 中商标声明段 | 内置器材与胶片厂商 logo（单色/彩色），EXIF 自动匹配，手动改选，导入 logo 包 |
 
 `EditorViewModel.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。
 
