@@ -43,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -219,13 +220,37 @@ fun EditorScreen(vm: EditorViewModel) {
                         }
                     }
                     val active = jobs.count { it.active }
-                    TextButton(onClick = { vm.showQueue(true) }) {
-                        Text(if (active > 0) "处理中 $active" else "任务")
+                    // Undo / redo as icons; tasks and settings behind ⋯ (docs/UI.md 2.2).
+                    // A running export stays visible: its count rides on the ⋯ button.
+                    val canUndo = ui.canUndo && !ui.exporting
+                    val canRedo = ui.canRedo && !ui.exporting
+                    IconButton(onClick = vm::undo, enabled = canUndo) {
+                        HistoryIcon(redo = false, tint = if (canUndo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
                     }
-                    TextButton(onClick = vm::undo, enabled = ui.canUndo && !ui.exporting) { Text("撤销") }
-                    TextButton(onClick = vm::redo, enabled = ui.canRedo && !ui.exporting) { Text("重做") }
-                    IconButton(onClick = { showSettings = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = "设置")
+                    IconButton(onClick = vm::redo, enabled = canRedo) {
+                        HistoryIcon(redo = true, tint = if (canRedo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
+                    }
+                    Box {
+                        var moreMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { moreMenu = true }) {
+                            androidx.compose.material3.BadgedBox(badge = {
+                                if (active > 0) androidx.compose.material3.Badge(containerColor = Palette.Amber,
+                                    contentColor = Palette.OnAmber) { Text("$active") }
+                            }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "更多")
+                            }
+                        }
+                        DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
+                                onClick = { moreMenu = false; vm.showQueue(true) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("设置") },
+                                leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                                onClick = { moreMenu = false; showSettings = true },
+                            )
+                        }
                     }
                 },
             )
