@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -118,6 +119,25 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { startEngine() }
         viewModelScope.launch { renderLoop() }
         viewModelScope.launch { repackLoop() }
+        // A lost GPU device (here or in an export) makes EngineHost build a new
+        // engine and bump generation; the open photo is reopened on it with the
+        // whole edit kept, the way a white-balance re-decode keeps it.
+        viewModelScope.launch {
+            host.generation.drop(1).collect { onEngineReplaced() }
+        }
+    }
+
+    private suspend fun onEngineReplaced() {
+        val ready = try { host.start(wanted.film, wanted.paper) } catch (e: Throwable) { return }
+        if (ready.engine == engine) return
+        withContext(EngineThread.dispatcher) { releaseSession() }
+        engine = ready.engine
+        log("engine replaced after a lost GPU device; reopening")
+        clearPool()
+        val uri = lastUri ?: return
+        val src = _ui.value.source
+        _ui.update { it.copy(message = "GPU 重置了一下，已自动重新打开照片，编辑都还在") }
+        launchOpen(uri, wb = (src?.wbK ?: 0.0) to (src?.wbTint ?: 0.0))
     }
 
     private suspend fun startEngine() {
@@ -646,7 +666,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     renderPooled(tier) ?: run {
                         // Cancelled for a newer edit: not a failure, and the loop
                         // already has the newer request queued.
-                        if (!NativeEngine.lastWasCancelled()) failure = "渲染失败：${NativeEngine.lastError()}"
+                        if (NativeEngine.lastWasDeviceLost()) {
+                            failure = "GPU 重置了，正在恢复…"
+                            val lost = engine
+                            viewModelScope.launch { runCatching { host.recover(lost) } }
+                        } else if (!NativeEngine.lastWasCancelled()) failure = "渲染失败：${NativeEngine.lastError()}"
                         null
                     }
                 } finally {
