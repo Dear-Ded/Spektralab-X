@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -80,6 +82,12 @@ data class Style(
     }
 
     fun matches(edit: Edit, catalog: Catalog) = applyTo(edit, catalog) == edit
+
+    /**
+     * This style with its finish at [k] of full strength (0..1), linearly from
+     * neutral. Film, paper, print and effects stay as they are; at 1 it is this style.
+     */
+    fun atStrength(k: Double): Style = if (k >= 1.0) this else copy(look = look.scaled(k.coerceIn(0.0, 1.0)))
 
     companion object {
         // Lab scanner signatures, as the labs describe them (Carmencita, theFINDlab,
@@ -201,14 +209,36 @@ data class Style(
     }
 }
 
+/** Every field of the finish times [k], except vignetteMid (a shape) and the wheels' hues (a direction). */
+private fun Look.scaled(k: Double): Look {
+    fun zone(z: Zone) = z.copy(sat = z.sat * k, lum = z.lum * k)
+    return copy(
+        temperature = temperature * k, tint = tint * k, exposure = exposure * k, contrast = contrast * k,
+        brightness = brightness * k, saturation = saturation * k, vibrance = vibrance * k,
+        highlights = highlights * k, shadows = shadows * k, blackPoint = blackPoint * k, whitePoint = whitePoint * k,
+        fade = fade * k, vignette = vignette * k,
+        master = zone(master), shadowZone = zone(shadowZone), midZone = zone(midZone), highlightZone = zone(highlightZone),
+        hsl = hsl.map { Band(it.hue * k, it.sat * k, it.lum * k) },
+    )
+}
+
 /**
- * The 风格 row: a category chip row over cards, each showing the open photo
+ * The 风格 row: the eight group chips over cards, each showing the open photo
  * through the style's film (the film card already rendered) with its name and
- * stock as a subtitle. One tap applies the whole style.
+ * what it is inspired by. One tap applies the style at the strength last used
+ * for it; tapping the applied style again opens its strength slider, which
+ * scales only the finish. Strengths are kept per style across photos and launches.
  */
 @Composable
 internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) {
-    var group by remember { mutableStateOf(Style.GROUPS.first()) }
+    val context = LocalContext.current
+    val prefs = remember(context) { context.getSharedPreferences("style_strength", 0) }
+    val strengths = remember { mutableStateMapOf<String, Double>() }
+    fun strengthOf(id: String) = strengths[id] ?: prefs.getFloat(id, 1f).toDouble().coerceIn(0.0, 1.0)
+    fun applied(s: Style) = s.atStrength(strengthOf(s.id)).matches(ui.edit, ui.catalog)
+
+    var group by remember { mutableStateOf(Style.ALL.firstOrNull { applied(it) }?.group ?: Style.GROUPS.first()) }
+    var open by remember { mutableStateOf<String?>(null) }
     Text("一键风格", style = MaterialTheme.typography.labelLarge)
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         for (g in Style.GROUPS) FilterChip(selected = group == g, onClick = { group = g }, label = { Text(g) })
@@ -216,12 +246,15 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val styles = Style.ALL.filter { it.group == group && ui.catalog.film(it.film) != null }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
         items(styles, key = { it.id }) { s ->
-            val on = s.matches(ui.edit, ui.catalog)
+            val on = applied(s)
             val ring by animateColorAsState(if (on) Palette.Amber else Palette.OutlineSoft, Motion.defaultEffects(), label = "ring")
             Column(
                 Modifier.width(92.dp).clip(RoundedCornerShape(10.dp))
                     .border(if (on) 2.dp else 1.dp, ring, RoundedCornerShape(10.dp))
-                    .clickable(enabled = enabled) { onPick(s) }
+                    .clickable(enabled = enabled) {
+                        if (on) open = if (open == s.id) null else s.id
+                        else { open = null; onPick(s.atStrength(strengthOf(s.id))) }
+                    }
                     .padding(bottom = 6.dp),
             ) {
                 Box(Modifier.height(64.dp).width(92.dp).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
@@ -235,10 +268,20 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                 }
                 Text(s.name, style = MaterialTheme.typography.labelMedium, maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp))
-                Text(ui.catalog.film(s.film)?.label ?: s.film, style = MaterialTheme.typography.labelSmall,
+                Text(s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film }, style = MaterialTheme.typography.labelSmall,
                     color = Palette.OnSurfaceSoft, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = 6.dp))
             }
+        }
+    }
+    // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
+    val current = Style.ALL.firstOrNull { it.id == open }?.takeIf { applied(it) }
+    if (current != null) {
+        LabeledSlider("强度 · ${current.name}", strengthOf(current.id) * 100, 0.0, 100.0, 100.0, enabled, "%.0f%%") { v ->
+            val k = (v / 100).coerceIn(0.0, 1.0)
+            strengths[current.id] = k
+            prefs.edit().putFloat(current.id, k.toFloat()).apply()
+            onPick(current.atStrength(k))
         }
     }
 }
