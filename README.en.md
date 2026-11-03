@@ -24,7 +24,7 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 [![stars](https://img.shields.io/github/stars/Dear-Ded/Spektralab-X?label=stars&style=flat&logo=github)](https://github.com/Dear-Ded/Spektralab-X)
 [![visits](https://hits.sh/github.com/Dear-Ded/Spektralab-X.svg?view=today-total&label=visits)](https://hits.sh/github.com/Dear-Ded/Spektralab-X/)
 
-[Note](#a-note-from-the-developer) · [Download](#download-and-verify) · [Samples](#samples) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
+[Note](#a-note-from-the-developer) · [Download](#download-and-verify) · [Samples](#samples) · [Desktop differences](#differences-from-desktop) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
 
 </div>
 
@@ -82,6 +82,21 @@ Every image below was rendered by the same engine this app ships, at default set
 <p align="center"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="Halation detail: neutral, Portra 400, CineStill 800T"></p>
 
 <sub>Sample RAWs from [raw.pixls.us](https://raw.pixls.us/), released under CC0. Tooling and parameters: [`docs/SAMPLES.md`](docs/SAMPLES.md).</sub>
+
+## Differences from desktop
+
+**Bottom line: you will not see a colour difference.** The Android colour path was compared pixel by pixel with upstream's Linux host (`spektralab-host`) on 43 cases: RAW exports differ by a mean ΔE00 of 0.000 (max ≤ 0.015), phone JPEG / P3 by a mean of ≤ 0.016. The eye starts to notice at about ΔE00 1, two orders of magnitude more. These numbers come from a software GPU (lavapipe) on a cloud machine; **they have not been verified on an Adreno phone yet**, and the macOS app has not been compared directly.
+
+| Area | macOS / Windows desktop | Android (Spektralab-X) | Why |
+|---|---|---|---|
+| RAW decoding | macOS uses Apple's `CIRAWFilter`; Windows / Linux use LibRaw | LibRaw 0.22.2, the same function as Windows / Linux; no lens correction | Apple's camera matrices, demosaicing and highlight handling are its own, so the same RAW reaches the engine differently on macOS. Upstream's Windows / Linux builds differ the same way. **Not measured** (no Mac) |
+| GPU and precision | Metal / desktop Vulkan, fp32 | Vulkan 1.0 on Adreno, fp32, the same code as Windows / Linux | If fma is inexact the engine falls back to split products, which affects only the halation blur and the rotate/resample shaders. That is a reading of the code; **still to be checked on Adreno** |
+| Resolution limits | Bounded by the computer's GPU memory (inferred) | Xiaomi 12–14 (Adreno 730 / 740 / 750) have a 128 MiB single buffer, about 8 MP, so the working size tops out at 3072; Adreno 650 has 512 MiB, about 33 MP; 42 MP overall ceiling. Preview is 1024 while dragging, 3400 on release | One image plane must fit in one GPU buffer or it cannot render, so large photos are scaled down first. A full-resolution "extreme render" mode is planned |
+| Screen colour | macOS converts through ColorSync with the display profile | A wide-gamut window on P3 screens; matrix and clip into Display P3 or sRGB | The same display path as upstream's `render_view`. HyperOS "Vivid" mode oversaturates (inferred); switch to "Original colour" to judge colour. This affects the screen only, not exported files |
+| Phone JPEGs | Printed as encoded | Printed as encoded; highlight recovery and the Ultra HDR gain map are optional and off by default | A phone JPEG already carries the camera's tone curve, so printing it stacks two curves. Upstream does the same by design; shoot RAW for accurate colour |
+| Not ported yet | All present (masks, tone masks and enlarger controls are off by default on macOS) | Missing: Layer 2 curves; masks, tone masks, enlarger controls; DI / Cineon export and print LUTs (`.cube`); half-frame pairs; lens correction; scene-latitude fit and neutral picker; export soft proof; PNG, 8-bit TIFF and P3 / ProPhoto TIFF (TIFF is 16-bit sRGB only) | The most-used parts came first; the rest is scheduled in the [roadmap](docs/ROADMAP.md). In return, Android adds vibrance, 8-band HSL, fade, one-tap styles, borders, the Ultra HDR gain map and a background processing queue |
+
+Full numbers, the cause of each difference and what is still unverified: [docs/PLATFORMS.md](docs/PLATFORMS.md) (Chinese). Method: [docs/PARITY.md](docs/PARITY.md).
 
 ## Features
 

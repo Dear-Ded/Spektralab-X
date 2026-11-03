@@ -24,7 +24,7 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 [![Star](https://img.shields.io/github/stars/Dear-Ded/Spektralab-X?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/Spektralab-X)
 [![访问](https://hits.sh/github.com/Dear-Ded/Spektralab-X.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/Spektralab-X/)
 
-[写在前面](#写在前面) · [下载](#下载与校验) · [样片](#样片) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
+[写在前面](#写在前面) · [下载](#下载与校验) · [样片](#样片) · [和桌面版的差别](#和桌面版的差别) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
 
 </div>
 
@@ -82,6 +82,21 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 <p align="center"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="光晕细节：中性、Portra 400、CineStill 800T"></p>
 
 <sub>样片 RAW 来自 [raw.pixls.us](https://raw.pixls.us/)，以 CC0 发布。渲染工具和参数见 [`docs/SAMPLES.md`](docs/SAMPLES.md)。</sub>
+
+## 和桌面版的差别
+
+**结论：颜色看不出差别。** 安卓版的色彩链和上游 Linux 版（`spektralab-host`）逐像素对照了 43 组：RAW 导出平均 ΔE00 0.000、最大 ≤ 0.015，手机 JPEG / P3 平均 ≤ 0.016。人眼大约在 ΔE00 1 才能分辨，这些差别小两个数量级。数字来自云主机上的软件 GPU（lavapipe），**还没在 Adreno 真机上验证**，也还没和 macOS 版直接比过。
+
+| 方面 | macOS / Windows 桌面版 | 安卓（Spektralab-X） | 原因 |
+|---|---|---|---|
+| RAW 解码 | macOS 用苹果的 `CIRAWFilter`；Windows / Linux 用 LibRaw | LibRaw 0.22.2，和 Windows / Linux 同一个函数；没有镜头校正 | 苹果的相机矩阵、去马赛克和高光处理都是自己的，所以同一个 RAW 在 macOS 上进入引擎前就不一样，上游 Windows / Linux 版也一样。**未实测**（没有 Mac） |
+| GPU 与精度 | Metal / 桌面 Vulkan，fp32 | Vulkan 1.0，Adreno，fp32，代码与 Windows / Linux 相同 | fma 不精确时会改用拆分乘积，只影响光晕模糊和旋转重采样两个着色器。这是读代码的结论，**Adreno 上待验** |
+| 分辨率上限 | 受电脑显存限制〔推断〕 | 小米 12–14（Adreno 730 / 740 / 750）单块缓冲 128 MiB，约 8 MP，工作尺寸最高 3072；Adreno 650 为 512 MiB，约 33 MP；总上限 4200 万像素。拖动时预览 1024，松手后 3400 | 一个图像平面必须放进一块 GPU 缓冲，超了就无法渲染，所以大图会先缩小再处理。全分辨率的“极致渲染模式”在计划中 |
+| 屏幕色彩 | macOS 由 ColorSync 按显示器配置文件转换 | P3 屏幕上开广色域窗口，矩阵加裁切到 Display P3 或 sRGB | 和上游 `render_view` 的显示路径相同。HyperOS 的“鲜艳”模式会把颜色拉得更饱和〔推断〕，对色请切到“原色”。只影响屏幕，不影响导出文件 |
+| 手机 JPEG | 照原样冲印 | 照原样冲印；高光恢复和 Ultra HDR 增益图可选，默认关闭 | 手机 JPEG 已带相机的色调曲线，再冲印等于叠两条曲线。上游也是这样设计的，需要准确颜色请拍 RAW |
+| 尚未移植的功能 | 都有（蒙版、色调蒙版、放大机控制在 macOS 默认关闭） | 还没有：Layer 2 曲线；蒙版、色调蒙版、放大机控制；DI / Cineon 导出、打印 LUT（`.cube`）；半格双拼；镜头校正；场景宽容度拟合、中性点吸管；导出软打样；PNG、8 位 TIFF、P3 / ProPhoto 的 TIFF（TIFF 只有 16 位 sRGB） | 先做手机上最常用的部分，其余按[路线图](docs/ROADMAP.md)排期。反过来，安卓新增了自然饱和度、8 段 HSL、褪色、一键风格、边框、Ultra HDR 增益图和后台处理队列 |
+
+完整的对照数据、每项差别的原因和尚未验证的清单见 [docs/PLATFORMS.md](docs/PLATFORMS.md)，对照方法见 [docs/PARITY.md](docs/PARITY.md)。
 
 ## 功能
 
