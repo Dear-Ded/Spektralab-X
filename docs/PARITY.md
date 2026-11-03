@@ -9,6 +9,8 @@ JPEG 导出平均 ≤ 0.016，p99.9 ≤ 0.072，最大 ≤ 0.24。
 
 测量日期 2026-11-03，云主机 Debian 13、lavapipe（CPU Vulkan），上游固定提交加本仓库 `patches/`。
 
+本页只比较安卓版与上游 Linux 宿主。安卓版与 macOS 版、Windows / Linux 版在各个环节上的差别和原因，见 [PLATFORMS.md](PLATFORMS.md)。
+
 ## 1. 方法
 
 - **参考**：上游 `engine/host` 原样编译出的 `spektralab-host`（与桌面版同一个进程），
