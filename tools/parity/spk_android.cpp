@@ -32,6 +32,7 @@
 #include "stb_image.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -130,6 +131,41 @@ int main(int argc, char** argv) {
         stbi_image_free(p);
         input = kind == "p3" ? R"("input_color_space":"Display P3","input_cctf_decoding":true)"
                              : R"("input_color_space":"sRGB","input_cctf_decoding":true)";
+    } else if (kind == "srgb_icc" || kind == "p3_icc") {
+        // Diagnosis: the host's own JPEG path (image_io.cpp encoded_to_linear_prophoto):
+        // the sRGB curve, then the profile's D50 colorants into linear ProPhoto.
+        int iw, ih, n;
+        unsigned char* p = stbi_load(in.c_str(), &iw, &ih, &n, 3);
+        if (!p) { std::fprintf(stderr, "decode failed: %s\n", in.c_str()); return 1; }
+        w = uint32_t(iw); h = uint32_t(ih);
+        const double srgb[9] = {0.4360747, 0.3850649, 0.1430804, 0.2225045, 0.7168786, 0.0606169,
+                                0.0139322, 0.0971045, 0.7141733};
+        const double p3[9] = {0.5151215, 0.2919769, 0.1571045, 0.2411957, 0.6922455, 0.0665588,
+                              -0.0010529, 0.0418854, 0.7840729};
+        // inverse of the ProPhoto colorants (linear_prophoto_space)
+        const double a = 0.7976749, b = 0.1351917, c = 0.0313534, d = 0.2880402, e = 0.7118741, f = 0.0000857,
+                     g = 0.0, hh = 0.0, k = 0.8252100;
+        const double det = a * (e * k - f * hh) - b * (d * k - f * g) + c * (d * hh - e * g);
+        const double inv[9] = {(e * k - f * hh) / det, (c * hh - b * k) / det, (b * f - c * e) / det,
+                               (f * g - d * k) / det, (a * k - c * g) / det, (c * d - a * f) / det,
+                               (d * hh - e * g) / det, (b * g - a * hh) / det, (a * e - b * d) / det};
+        const double* s = kind == "p3_icc" ? p3 : srgb;
+        double m[9] = {};
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                for (int q = 0; q < 3; ++q) m[i * 3 + j] += inv[i * 3 + q] * s[q * 3 + j];
+        float lut[256];
+        for (int v = 0; v < 256; ++v) {
+            const double x = v / 255.0;
+            lut[v] = float(x < 0.04045 ? x / 12.92 : std::pow((x + 0.055) / 1.055, 2.4));
+        }
+        rgb.resize(size_t(w) * h * 3);
+        for (size_t px = 0; px < size_t(w) * h; ++px) {
+            const double l[3] = {lut[p[px * 3]], lut[p[px * 3 + 1]], lut[p[px * 3 + 2]]};
+            for (int r = 0; r < 3; ++r) rgb[px * 3 + r] = float(m[r * 3] * l[0] + m[r * 3 + 1] * l[1] + m[r * 3 + 2] * l[2]);
+        }
+        stbi_image_free(p);
+        input = R"("input_color_space":"ProPhoto RGB","input_cctf_decoding":false)";
     } else {
         std::fprintf(stderr, "unknown kind %s\n", kind.c_str());
         return 2;

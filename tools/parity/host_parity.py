@@ -452,6 +452,17 @@ def cmd_grade(a):
             print(f"{d.name:<34} {label:<26} mean {g['mean']:.3f}  p95 {g['p95']:.3f}  p99.9 {g['p999']:.3f}  "
                   f"max {g['max']:.3f}  |d| max {g['code_max']:.2f} mean {g['code_mean']:.4f} code", flush=True)
     (a.dir / "grade.json").write_text(json.dumps(rows, indent=1))
+    if a.table:
+        by = {}
+        for r in rows:
+            by.setdefault(r["case"], {})[r["pair"]] = r
+        cols = ["export sRGB", "export P3", "view sRGB", "view P3", "host view vs host export"]
+        lines = ["| case | " + " | ".join(cols) + " |", "|---" * (len(cols) + 1) + "|"]
+        for case in sorted(by):
+            cells = [f"{g['mean']:.3f} / {g['p95']:.3f} / {g['p999']:.3f} / {g['max']:.2f}"
+                     for g in (by[case][c] for c in cols)]
+            lines.append(f"| {case} | " + " | ".join(cells) + " |")
+        Path(a.table).write_text("\n".join(lines) + "\n")
     return 0
 
 
@@ -488,6 +499,7 @@ def main():
     g = sub.add_parser("grade")
     g.add_argument("dir", type=Path)
     g.add_argument("--where")
+    g.add_argument("--table", help="also write a markdown table (mean / p95 / p99.9 / max) here")
     a = ap.parse_args()
     return cmd_render(a) if a.cmd == "render" else cmd_grade(a)
 
