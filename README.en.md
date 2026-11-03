@@ -24,7 +24,7 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 [![stars](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?label=stars&style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
 [![visits](https://hits.sh/github.com/Dear-Ded/spektralab-android.svg?view=today-total&label=visits)](https://hits.sh/github.com/Dear-Ded/spektralab-android/)
 
-[Download](#download-and-verify) · [Samples](#samples) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
+[Note](#a-note-from-the-developer) · [Download](#download-and-verify) · [Samples](#samples) · [Features](#features) · [FAQ](#faq) · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Docs](docs/README.md)
 
 </div>
 
@@ -37,6 +37,16 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 > **Not yet verified on a real phone.** Every release so far has only been built by CI. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
+
+## A note from the developer
+
+Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and Andrea Volpato's [spektrafilm](https://github.com/andreavolpato/spektrafilm). Without those projects and the years of research behind them, it would not exist.
+
+I'm not a professional programmer, just someone who loves film and wanted to develop good photos on a phone. Everything here, from the first idea through development and endless tuning, was done step by step with the help of AI assistants, and every cost along the way, from tokens to cloud servers, comes out of my own pocket. It has no commercial purpose and will always be free.
+
+That also means it is far from perfect. There will be bugs, it may not run smoothly on your phone, and the colours won't suit everyone's taste. If you find a problem or have a good idea, please open an [issue](https://github.com/Dear-Ded/spektralab-android/issues) or a pull request. I read every one.
+
+If it helps you develop a photo you love, a star is the best encouragement you could give.
 
 ## What it is
 

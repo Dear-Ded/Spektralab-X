@@ -7,7 +7,7 @@
 
 ## 布局
 
-自上而下五块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（应用没有网络权限，打开外部链接不需要）。证书指纹用等宽字体，旁边放“复制”按钮。
+自上而下六块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（应用没有网络权限，打开外部链接不需要）。证书指纹用等宽字体，旁边放“复制”按钮。
 
 ## 简体中文
 
@@ -18,6 +18,10 @@
 光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。
 作者：Spektralab-X 贡献者
 源码：https://github.com/Dear-Ded/spektralab-android
+
+**写在前面**
+Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab 与 Andrea Volpato 的 spektrafilm 开发。没有这些开源项目和背后多年的研究，就不会有它。
+如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
 
 **本应用永久免费**
 官方安装包只在 GitHub Releases 发布，不收取任何费用。如果你是付费买到的，那不是官方版本，请申请退款，并到上面的地址下载官方版。
@@ -44,6 +48,10 @@ Spectral film and print simulation. Spektralab-X is an Android derivative of Spe
 Author: Spektralab-X contributors
 Source: https://github.com/Dear-Ded/spektralab-android
 
+**A note from the developer**
+Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's SpektraLab and Andrea Volpato's spektrafilm. Without those projects and the years of research behind them, it would not exist.
+If it helps you develop a photo you love, a star is the best encouragement you could give.
+
 **This app is free, forever**
 Official APKs are published only on GitHub Releases and cost nothing. If you paid for this copy, it is not the official build: ask for a refund and download the official one from the address above.
 Official signing certificate SHA-256:
@@ -69,6 +77,7 @@ Not affiliated with the SpektraLab project or with Xiaomi.
 | `about_version` | 版本 %1$s（%2$d） |
 | `about_project` | “关于本项目”正文 |
 | `about_author` | 作者：Spektralab-X 贡献者 |
+| `about_note` | “写在前面”正文（两句） |
 | `about_source_url` | https://github.com/Dear-Ded/spektralab-android |
 | `about_free` | “本应用永久免费”正文 |
 | `about_cert_sha256` | 证书指纹（不翻译，`translatable="false"`） |
