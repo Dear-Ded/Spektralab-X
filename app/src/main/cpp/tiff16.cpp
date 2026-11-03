@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <limits>
-#include <memory>
 
 namespace spk::android {
 namespace {
@@ -20,8 +19,9 @@ void put32(std::vector<uint8_t>& out, uint32_t v) {
 
 }  // namespace
 
-bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width, uint32_t height,
+bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_t height,
                   uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+    if (!file) { error = "no file to write the TIFF to"; return false; }
     if (!rgba || !width || !height || row_stride_px < width) {
         error = "invalid image for TIFF export"; return false;
     }
@@ -78,11 +78,7 @@ bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width,
     head.insert(head.end(), icc.begin(), icc.end());
     while (head.size() < data_offset) head.push_back(0);
 
-    std::unique_ptr<std::FILE, decltype(&std::fclose)> file(std::fopen(path.c_str(), "wb"), &std::fclose);
-    if (!file) { error = "cannot create " + path; return false; }
-    if (std::fwrite(head.data(), 1, head.size(), file.get()) != head.size()) {
-        file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false;
-    }
+    if (std::fwrite(head.data(), 1, head.size(), file) != head.size()) { error = "write failed"; return false; }
     std::vector<uint8_t> row(size_t(width) * 6);
     for (uint32_t y = 0; y < height; ++y) {
         const uint16_t* src = rgba + size_t(y) * row_stride_px * 4;
@@ -93,12 +89,20 @@ bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width,
                 *dst++ = uint8_t(v); *dst++ = uint8_t(v >> 8);
             }
         }
-        if (std::fwrite(row.data(), 1, row.size(), file.get()) != row.size()) {
-            file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false;
-        }
+        if (std::fwrite(row.data(), 1, row.size(), file) != row.size()) { error = "write failed"; return false; }
     }
-    if (std::fflush(file.get()) != 0) { file.reset(); std::remove(path.c_str()); error = "write failed: " + path; return false; }
-    if (std::fclose(file.release()) != 0) { std::remove(path.c_str()); error = "close failed: " + path; return false; }
+    if (std::fflush(file) != 0) { error = "write failed"; return false; }
+    return true;
+}
+
+bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width, uint32_t height,
+                  uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+    std::FILE* file = std::fopen(path.c_str(), "wb");
+    if (!file) { error = "cannot create " + path; return false; }
+    if (!write_tiff16(file, rgba, width, height, row_stride_px, icc, error)) {
+        std::fclose(file); std::remove(path.c_str()); error += ": " + path; return false;
+    }
+    if (std::fclose(file) != 0) { std::remove(path.c_str()); error = "close failed: " + path; return false; }
     return true;
 }
 
