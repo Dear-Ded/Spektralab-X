@@ -33,25 +33,36 @@ add_subdirectory("${SPK_UPSTREAM}/engine" engine)
 # tree at configure time so the phone converts exactly as the desktop does.
 # Markers, not line numbers: a reshuffled upstream file fails here, loudly.
 file(READ "${SPK_UPSTREAM}/engine/host/output.cpp" spk_output_src)
-function(spk_slice out from to)
-    string(FIND "${spk_output_src}" "${from}" a)
-    string(FIND "${spk_output_src}" "${to}" b)
+function(spk_slice out src from to)
+    string(FIND "${${src}}" "${from}" a)
+    string(FIND "${${src}}" "${to}" b)
     if(a EQUAL -1 OR b EQUAL -1 OR NOT b GREATER a)
-        message(FATAL_ERROR "upstream output.cpp changed: cannot find '${from}' .. '${to}'")
+        message(FATAL_ERROR "upstream ${src} changed: cannot find '${from}' .. '${to}'")
     endif()
     math(EXPR n "${b} - ${a}")
-    string(SUBSTRING "${spk_output_src}" ${a} ${n} s)
+    string(SUBSTRING "${${src}}" ${a} ${n} s)
     set(${out} "${s}" PARENT_SCOPE)
 endfunction()
-spk_slice(spk_cctf "static inline float spow" "bool OutputTransform::fetch")
-spk_slice(spk_cam16 "static inline void cam16ucs_into" "template <typename F>")
+spk_slice(spk_cctf spk_output_src "static inline float spow" "bool OutputTransform::fetch")
+spk_slice(spk_cam16 spk_output_src "static inline void cam16ucs_into" "template <typename F>")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generated/upstream_output_math.inc"
     "// Generated from ${SPK_UPSTREAM}/engine/host/output.cpp. Do not edit.
 ${spk_cctf}
 ${spk_cam16}
 ")
+# The host's input side (engine/host/image_io.*): the colour spaces and curves
+# a display-encoded photo is decoded with before the engine sees it.
+file(READ "${SPK_UPSTREAM}/engine/host/image_io.hpp" spk_io_hpp)
+file(READ "${SPK_UPSTREAM}/engine/host/image_io.cpp" spk_io_cpp)
+spk_slice(spk_rgb_space spk_io_hpp "struct Trc {" "bool parse_icc(")
+spk_slice(spk_spaces spk_io_cpp "double Trc::decode" "static uint32_t be32")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generated/upstream_input_math.inc"
+    "// Generated from ${SPK_UPSTREAM}/engine/host/image_io.{hpp,cpp}. Do not edit.
+${spk_rgb_space}
+${spk_spaces}
+")
 
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp layer2.cpp output_transform.cpp
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
     "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE

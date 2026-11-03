@@ -323,8 +323,9 @@ data class Edit(
         }
 
         /**
-         * LibRaw decodes to linear ProPhoto ("ProPhoto RGB", linear). Gallery
-         * images arrive encoded, in "sRGB" or "Display P3" (the engine's names).
+         * LibRaw decodes to linear ProPhoto ("ProPhoto RGB", linear), and gallery
+         * photos are converted to it natively before the engine (openBitmap), as
+         * upstream's host does: every session opens with ("ProPhoto RGB", true).
          */
         fun openingParams(edit: Edit, inputSpace: String, linear: Boolean): JSONObject = edit.toJson().apply {
             put("input_color_space", inputSpace)

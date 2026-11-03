@@ -7,16 +7,30 @@
 # configure that builds spektralab-host, see docs/PARITY.md). SRC holds this
 # directory's spk_android.cpp plus the app's output_transform.*, layer2.* and
 # resize.* (app/src/main/cpp) and upstream_output_math.inc, generated the way
-# app/src/main/cpp/CMakeLists.txt generates it.
+# app/src/main/cpp/CMakeLists.txt generates it. upstream_input_math.inc is
+# generated here from upstream's image_io.{hpp,cpp}, with the same markers.
 set -euo pipefail
 UP="${UP:?upstream tree}"; B="${B:?upstream build dir}"; SRC="${SRC:-$(dirname "$0")}"
 E="$B/engine"
+slice() {  # file from to: the text from the first marker up to the second
+    python3 - "$1" "$2" "$3" <<'PY'
+import sys
+t = open(sys.argv[1], encoding="utf-8").read()
+a, b = t.find(sys.argv[2]), t.find(sys.argv[3])
+assert a >= 0 and b > a, f"{sys.argv[1]} changed: cannot find markers"
+sys.stdout.write(t[a:b])
+PY
+}
+{ echo "// Generated from $UP/engine/host/image_io.{hpp,cpp}. Do not edit."
+  slice "$UP/engine/host/image_io.hpp" "struct Trc {" "bool parse_icc("
+  slice "$UP/engine/host/image_io.cpp" "double Trc::decode" "static uint32_t be32"
+} > "$SRC/upstream_input_math.inc"
 openmp=""
 grep -q 'SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON' "$B/CMakeCache.txt" && openmp="-fopenmp"
 c++ -std=c++20 -O2 $openmp \
     -I"$SRC" -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/host" \
     -I"$UP/engine/third_party/stb" -I"$UP/build/deps/LibRaw-0.22.2" \
-    "$SRC/spk_android.cpp" "$SRC/output_transform.cpp" "$SRC/layer2.cpp" "$SRC/resize.cpp" \
+    "$SRC/spk_android.cpp" "$SRC/output_transform.cpp" "$SRC/input_transform.cpp" "$SRC/layer2.cpp" "$SRC/resize.cpp" \
     -Wl,--start-group "$E/libspektralab_engine.a" "$E/libspektralab_core.a" "$E/libspk_image_io.a" \
     "$E/libspk_libraw.a" "$E/libspk_volk.a" -Wl,--end-group \
     -lpthread -ldl -o "$SRC/spk_android"
