@@ -253,19 +253,19 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val outSpace = if (wide) "Display P3" else "sRGB"
         yieldToEditor()
         val handle: Long = if (job.raw) {
-            val file = withContext(Dispatchers.IO) { loader.copyToCache(uri, job.name, "job") }
+            val input = withContext(Dispatchers.IO) { loader.rawInput(uri, job.name, "job") }
             step("解码 RAW", 0.12f)
             try {
                 withContext(EngineThread.dispatcher) {
                     NativeEngine.trimMemory(ready.engine)
                     val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
-                    val h = NativeEngine.openRaw(ready.engine, file.absolutePath, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
+                    val h = NativeEngine.openRaw(ready.engine, input.path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
                     if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
                     synchronized(handleLock) { runningHandle = h }
                     h
                 }
             } finally {
-                file.delete()
+                input.close()
             }
         } else {
             step("解码照片", 0.10f)
