@@ -140,7 +140,7 @@ fun EditorScreen(vm: EditorViewModel) {
             TopAppBar(
                 title = {
                     Column {
-                        Text("SpektraLab", style = MaterialTheme.typography.titleMedium)
+                        Text("Spektralab-X", style = MaterialTheme.typography.titleMedium)
                         ui.source?.let { s ->
                             Text(
                                 listOf(s.name, s.camera, "${s.width}×${s.height}").filter { it.isNotBlank() }

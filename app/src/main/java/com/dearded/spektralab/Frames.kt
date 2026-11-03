@@ -126,7 +126,7 @@ data class Caption(val camera: String, val film: String, val settings: String, v
         fun of(exif: ExifCopy, filmLabel: String): Caption {
             val camera = listOf(exif.make, exif.model).filter { it.isNotBlank() }
                 .let { parts -> if (parts.size == 2 && parts[1].startsWith(parts[0], ignoreCase = true)) listOf(parts[1]) else parts }
-                .joinToString(" ").ifBlank { "SpektraLab" }
+                .joinToString(" ").ifBlank { "Spektralab-X" }
             val settings = listOfNotNull(
                 exif.focal35()?.let { "${it}mm" },
                 exif.aperture()?.let { "f/$it" },

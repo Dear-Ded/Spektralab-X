@@ -290,7 +290,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             if (!look.neutral) withContext(EngineThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
         }
         try {
-            val stem = "SpektraLab_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
+            val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor()
             step("冲洗", 0.25f)
             val icc = File(ready.dir, "io/sRGB.icc").absolutePath

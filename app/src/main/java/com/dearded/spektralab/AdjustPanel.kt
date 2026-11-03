@@ -134,7 +134,7 @@ internal fun PageColumn(content: @Composable () -> Unit) = Column { content() }
 @Composable
 internal fun EmptyState(onPick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-        Text("SpektraLab", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
+        Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
         Spacer(Modifier.height(6.dp))
         Text("光谱胶片冲印", style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft)
         Spacer(Modifier.height(28.dp))

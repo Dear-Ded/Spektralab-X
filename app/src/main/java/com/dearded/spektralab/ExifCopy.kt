@@ -49,7 +49,7 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
             val exif = ExifInterface(jpeg)
             for ((tag, value) in values) runCatching { exif.setAttribute(tag, value) }
             exif.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL.toString())
-            exif.setAttribute(ExifInterface.TAG_SOFTWARE, "SpektraLab Android ${BuildConfig.VERSION_NAME}")
+            exif.setAttribute(ExifInterface.TAG_SOFTWARE, "Spektralab-X ${BuildConfig.VERSION_NAME}")
             exif.setAttribute(ExifInterface.TAG_PIXEL_X_DIMENSION, width.toString())
             exif.setAttribute(ExifInterface.TAG_PIXEL_Y_DIMENSION, height.toString())
             // 1 = sRGB; 65535 = uncalibrated, i.e. read the embedded profile (P3).
