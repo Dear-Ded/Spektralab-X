@@ -7,6 +7,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
+import android.system.Os
+import android.system.OsConstants
 import java.io.File
 import java.util.Locale
 import kotlin.math.max
@@ -46,6 +48,45 @@ class SourceLoader(private val context: Context) {
      */
     fun openDescriptor(uri: Uri): ParcelFileDescriptor? =
         runCatching { context.contentResolver.openFileDescriptor(uri, "r") }.getOrNull()
+
+    /**
+     * Where LibRaw reads [uri] from: `/proc/self/fd/<fd>` when the provider
+     * gives a regular file that path can reopen (LibRaw stats and fopens it,
+     * a new open file with its own offset), else a copy in cache/[folder] as
+     * before. Close it once the decode is done, on every path.
+     */
+    fun rawInput(uri: Uri, name: String, folder: String = "open"): RawInput {
+        openDescriptor(uri)?.let { pfd ->
+            val path = "/proc/self/fd/${pfd.fd}"
+            if (reopens(pfd, path)) return RawInput(path, pfd, null)
+            runCatching { pfd.close() }
+        }
+        val file = copyToCache(uri, name, folder)
+        return RawInput(file.absolutePath, null, file)
+    }
+
+    // A pipe, a socket or a file this app may not open by path (another
+    // app's private file handed over as a descriptor) fails here, not in
+    // LibRaw: the first bytes read through the path must match the descriptor's.
+    private fun reopens(pfd: ParcelFileDescriptor, path: String): Boolean = runCatching {
+        val st = Os.fstat(pfd.fileDescriptor)
+        if (!OsConstants.S_ISREG(st.st_mode) || st.st_size < 16) return false
+        val want = ByteArray(16)
+        if (Os.pread(pfd.fileDescriptor, want, 0, want.size, 0L) != want.size) return false
+        val got = ByteArray(16)
+        java.io.FileInputStream(path).use { s -> if (s.readNBytesCompat(got) != got.size) return false }
+        want.contentEquals(got)
+    }.getOrDefault(false)
+
+    private fun java.io.InputStream.readNBytesCompat(buf: ByteArray): Int {
+        var n = 0
+        while (n < buf.size) {
+            val r = read(buf, n, buf.size - n)
+            if (r < 0) break
+            n += r
+        }
+        return n
+    }
 
     /**
      * Copies [uri] into cache/[folder]. The editor and the processing queue use
@@ -127,5 +168,17 @@ class SourceLoader(private val context: Context) {
             if (maxPixels > 0 && w.toDouble() * h * s * s > maxPixels) s = sqrt(maxPixels.toDouble() / (w.toDouble() * h))
             return s
         }
+    }
+}
+
+/**
+ * A RAW as LibRaw opens it: [path] is either `/proc/self/fd/<fd>` of the held
+ * descriptor or a cache copy. [close] releases whichever it is, once.
+ */
+class RawInput(val path: String, private val pfd: ParcelFileDescriptor?, private val copy: File?) : java.io.Closeable {
+    val direct: Boolean get() = pfd != null
+    override fun close() {
+        runCatching { pfd?.close() }
+        copy?.delete()
     }
 }
