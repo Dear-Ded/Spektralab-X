@@ -1,0 +1,131 @@
+SpektraLab for Android
+https://github.com/Dear-Ded/spektralab-android
+
+Copyright (C) 2026 SpektraLab for Android contributors
+
+本程序是自由软件，以 GNU 通用公共许可证第 3 版（GPL-3.0）发布，完整文本见 LICENSE。
+本程序不提供任何担保。下面的附加条款按 GPL-3.0 第 7 条添加，只适用于本项目
+自己添加的内容（安卓端代码、文档、图标与界面文案），不适用于上游代码和第三方内容。
+附加条款不限制 GPL-3.0 赋予你的任何权利：你仍然可以自由使用、研究、修改和分发，
+包括收费分发。
+
+This program is free software, released under the GNU General Public License
+version 3 (GPL-3.0); the full text is in LICENSE. It comes with no warranty.
+The additional terms below are added under section 7 of GPL-3.0. They apply
+only to material this project added (the Android code, documentation, icon and
+interface text), not to upstream code or third-party content. They do not
+restrict any right GPL-3.0 grants you: you may still use, study, modify and
+redistribute this program, including for a fee.
+
+
+一、附加条款 / Additional terms
+================================
+
+1. 保留署名（GPL-3.0 第 7(b) 条）
+   分发本程序或其修改版本时，请在“关于”页（或同等的法律声明界面）和随附文档中
+   保留以下内容：
+   - 原项目名称“SpektraLab for Android”；
+   - 本仓库地址 https://github.com/Dear-Ded/spektralab-android；
+   - 署名“SpektraLab for Android 贡献者”；
+   - 上游项目 SpektraLab（https://github.com/JamesQiu2005/SpektraLab）和
+     spektrafilm（https://github.com/andreavolpato/spektrafilm）。
+   建议写法：“基于 SpektraLab for Android（github.com/Dear-Ded/spektralab-android）
+   修改，原作者为 SpektraLab for Android 贡献者。”
+
+   Preservation of attribution (GPL-3.0 section 7(b))
+   When you convey this program or a modified version, keep the following in
+   its About screen (or equivalent Appropriate Legal Notices) and in its
+   accompanying documentation: the original project name "SpektraLab for
+   Android"; this repository's address
+   https://github.com/Dear-Ded/spektralab-android; the credit "SpektraLab for
+   Android contributors"; and the upstream projects SpektraLab
+   (https://github.com/JamesQiu2005/SpektraLab) and spektrafilm
+   (https://github.com/andreavolpato/spektrafilm).
+   Suggested wording: "Modified from SpektraLab for Android
+   (github.com/Dear-Ded/spektralab-android) by the SpektraLab for Android
+   contributors."
+
+2. 标明修改（GPL-3.0 第 7(c) 条）
+   修改版本须以合理方式标明与原版不同，不得把修改版本说成官方版本，也不得暗示得到
+   本项目的认可。
+
+   Marking of modified versions (GPL-3.0 section 7(c))
+   Modified versions must be marked in reasonable ways as different from the
+   original, and must not be presented as the official build or as endorsed by
+   this project.
+
+3. 名称与图标（GPL-3.0 第 7(e) 条）
+   本许可不授予“SpektraLab for Android”名称和本项目图标的商标权利。公开发布的修改
+   版本请使用自己的名称、图标和应用包名（applicationId）。可以说明“基于
+   SpektraLab for Android”。“SpektraLab”名称由上游项目管理。
+
+   Names and icon (GPL-3.0 section 7(e))
+   This licence grants no trademark rights to the name "SpektraLab for Android"
+   or to this project's icon. A modified version you publish should use its
+   own name, icon and package name (applicationId). Saying it is "based on
+   SpektraLab for Android" is fine. The name "SpektraLab" is managed by the
+   upstream project.
+
+
+二、分发者的源码义务 / Source obligations of distributors
+=========================================================
+
+这一节不是附加条款，只是提醒 GPL-3.0 本身的要求（第 4–6 条）：分发安装包的人，
+必须同时提供完整对应源码（或按第 6 条提供获取方式），保留许可证、版权声明和上面
+的署名，并以 GPL-3.0 发布修改部分。只给 APK、不给源码，不符合 GPL-3.0。
+
+This section adds nothing; it restates what GPL-3.0 itself requires (sections
+4–6). Whoever distributes an APK must also provide the complete corresponding
+source (or offer it as section 6 allows), keep the licence, the copyright
+notices and the attribution above, and release their changes under GPL-3.0.
+Shipping an APK without its source does not comply with GPL-3.0.
+
+
+三、官方渠道 / Official builds
+==============================
+
+官方安装包只在 https://github.com/Dear-Ded/spektralab-android/releases 发布，
+永久免费。所有官方版本使用同一个签名证书，SHA-256 为：
+
+The official APKs are published only at
+https://github.com/Dear-Ded/spektralab-android/releases and are free. Every
+official build is signed with the same certificate, SHA-256:
+
+  CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3
+
+每个版本附带 SHA256SUMS 和 GitHub 构建溯源证明（build provenance）。校验方法见
+docs/VERIFY.md。在其他渠道付费买到的不是官方版本。官方版导出的 JPEG 在 EXIF 的
+Software 字段写入“SpektraLab Android <版本>”。
+
+Each release carries SHA256SUMS and a GitHub build-provenance attestation; see
+docs/VERIFY.md. A copy you paid for elsewhere is not an official build.
+JPEGs exported by the official build carry "SpektraLab Android <version>" in
+the EXIF Software field.
+
+
+四、第三方内容 / Third-party content
+====================================
+
+- SpektraLab 渲染引擎与着色器 / rendering engine and shaders
+  https://github.com/JamesQiu2005/SpektraLab — GPL-3.0-or-later
+- spektrafilm 胶片过程模型 / film process model
+  https://github.com/andreavolpato/spektrafilm — GPL-3.0
+- 胶片与相纸数据、冲印 LUT / film and paper profiles, print LUTs
+  Andrea Volpato, spektrafilm — CC BY-SA 4.0
+  转载或修改这些数据须署名并以 CC BY-SA 4.0 共享。
+  Redistributing or adapting this data requires attribution and sharing under
+  CC BY-SA 4.0.
+- 黑白胶片与相纸配置 / black-and-white profiles
+  SpektraLab — see Product-profiles-NOTICE.md in the engine assets
+- LibRaw 0.22.2 — LGPL-2.1 (https://www.libraw.org/)
+- volk — MIT (https://github.com/zeux/volk)
+- stb — MIT (https://github.com/nothings/stb)
+- Liberation Sans — SIL OFL 1.1; DejaVu Sans Mono — Bitstream Vera licence
+- README 样片原图 / README sample RAWs: raw.pixls.us — CC0 1.0
+
+许可文本随应用打包在 assets/engine/licenses/。
+Licence texts ship in the app under assets/engine/licenses/.
+
+本项目与 SpektraLab 上游、小米公司均无关联。“小米”“骁龙”“Adreno”是各自所有者的商标。
+Not affiliated with the SpektraLab project or with Xiaomi. Xiaomi, Snapdragon
+and Adreno are trademarks of their owners.
