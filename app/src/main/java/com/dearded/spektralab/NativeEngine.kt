@@ -58,6 +58,12 @@ object NativeEngine {
     /** Tier is "live", "preview" or "full". */
     external fun renderBitmap(session: Long, tier: String): Bitmap?
 
+    /**
+     * [renderBitmap] for an export: null (lastError "export check: ...") when
+     * the frame is flat black or white, which only a failed render produces.
+     */
+    external fun exportBitmap(session: Long, tier: String): Bitmap?
+
     /** Renders [tier] into [reuse] when it is the same size, else into a new bitmap; null on failure. */
     external fun renderReuse(session: Long, tier: String, reuse: Bitmap?): Bitmap?
 

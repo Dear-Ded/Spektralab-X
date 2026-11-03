@@ -418,6 +418,29 @@ bool render(Session* s, const std::string& tier, spk_result& out) {
     return true;
 }
 
+// The pre-save check on a finished RGBA16 frame: a frame that is flat black
+// or flat white came from a failed render (the pack maps NaN to 0, so a NaN
+// frame is black; a corrupt GPU submit leaves zeros), not from a photo.
+// Samples a grid of at most ~64 k pixels. Empty when the frame is fine.
+std::string blank_frame(const uint16_t* rgba, uint32_t width, uint32_t height, size_t stride_px) {
+    if (!rgba || !width || !height) return "no pixels";
+    const uint32_t step_x = std::max<uint32_t>(1, width / 256), step_y = std::max<uint32_t>(1, height / 256);
+    uint16_t lo = 65535, hi = 0;
+    for (uint32_t y = 0; y < height; y += step_y) {
+        const uint16_t* row = rgba + size_t(y) * stride_px * 4;
+        for (uint32_t x = 0; x < width; x += step_x)
+            for (int c = 0; c < 3; ++c) {
+                const uint16_t v = row[4 * x + c];
+                lo = std::min(lo, v);
+                hi = std::max(hi, v);
+            }
+    }
+    // 16 of 65535 is below one 8-bit step: only an exactly flat frame fails.
+    if (hi <= 16) return "the frame is completely black";
+    if (lo >= 65535 - 16) return "the frame is completely white";
+    return {};
+}
+
 }  // namespace
 
 #define JNI_FN(ret, name) extern "C" JNIEXPORT ret JNICALL Java_com_dearded_spektralab_NativeEngine_##name
@@ -938,6 +961,25 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     return nullptr;
 }
 
+// renderBitmap for an export: the engine's frame is checked (blank_frame)
+// before it is packed, so a failed render never reaches the gallery.
+JNI_FN(jobject, exportBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("no session"); return nullptr; }
+    try {
+        ResultGuard result;
+        if (!render(s, str(env, tier_j), result.r)) return nullptr;
+        const std::string blank = blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px);
+        if (!blank.empty()) { fail("export check: " + blank); return nullptr; }
+        return to_bitmap(env, result.r, s->active_look(), s->xf());
+    } catch (const std::exception& e) {
+        fail(std::string("render: ") + e.what());
+    } catch (...) {
+        fail("render: unknown failure");
+    }
+    return nullptr;
+}
+
 // Renders `tier` into `reuse` when it is the same size, so a pooled preview
 // allocates nothing; otherwise into a new Bitmap from the same result, so a
 // size change (first preview, crop, rotation, film edge) renders once, not
@@ -974,7 +1016,8 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
         ResultGuard result;
         if (!render(s, tier, result.r)) return JNI_FALSE;
-        std::string error;
+        std::string error = blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px);
+        if (!error.empty()) { fail("export check: " + error); return JNI_FALSE; }
         // The engine's pixels are its own; the conversion and Layer 2 go on a copy.
         const uint16_t* pixels = result.r.rgba16;
         size_t stride = result.r.row_stride_px;

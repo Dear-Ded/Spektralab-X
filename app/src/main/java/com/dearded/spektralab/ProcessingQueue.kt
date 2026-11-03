@@ -377,7 +377,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private fun engineFailure(engine: Long, what: String): Nothing {
         if (NativeEngine.lastWasCancelled()) throw CancellationException("cancelled")
         if (NativeEngine.lastWasDeviceLost()) throw DeviceLostException(engine, NativeEngine.lastError())
-        throw EngineException("$what：${NativeEngine.lastError()}")
+        val error = NativeEngine.lastError()
+        // The pre-save check (blank_frame): nothing was written to the gallery.
+        if (error.startsWith("export check:")) throw EngineException("导出画面异常（全黑或全白），未保存；请重试或调小工作尺寸")
+        throw EngineException("$what：$error")
     }
 
     /** Records the pending gallery entry before a byte is written. Any thread. */
@@ -477,7 +480,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 }
                 ExportFormat.JPEG -> {
                     val bitmap: Bitmap = withContext(EngineThread.dispatcher) {
-                        NativeEngine.renderBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                        NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
