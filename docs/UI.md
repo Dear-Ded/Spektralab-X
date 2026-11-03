@@ -365,3 +365,11 @@
 9. 字体：拉丁与数字可内置 Noto（OFL），中文用系统字体。
 
 **E.4 可参考的开源实现**：semi-utils（Apache-2.0，布局模板；不取其 logo 与字体）、auto-shotframe / frame-tool / photoborder / exifmark / EasyWatermark（MIT）。framestamp、magick-frames 无许可证，只看思路不复制。
+
+
+### E.4 品牌 logo 边框（2026-11-03 调研，待用户拍板）
+
+- 同类 app（边框水印大师、MetaCam、semi-utils）都按 EXIF Make 自动匹配品牌 logo，并允许手动改选；版式以底部白条加 logo 为主。
+- 风险：GPL 管不到商标。佳能明确要求签约才能用 logo，Simple Icons 因此拒收佳能，并曾整批下架 Adobe、Microsoft 图标。开源仓库内置 logo 等于向所有人分发商标图形。
+- 推荐方案：仓库和 APK 不内置任何 logo。内置的是用开源字体排印的品牌字标、EXIF 自动识别（含小米等手机内部型号到市售名的对照表）和胶片厂牌文字；另提供“导入 logo 包”入口（SVG/PNG + manifest.json），用户自备的 logo 按 EXIF 自动套用，单色版随纸色着色。
+- 采用后，E.3 第 8 条改为“app 不内置 logo，用户自备的可以渲染”。
