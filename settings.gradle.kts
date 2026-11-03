@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SpektraLabAndroid"
+rootProject.name = "Spektralab-X"
 include(":app")

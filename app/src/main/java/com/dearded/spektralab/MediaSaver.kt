@@ -11,14 +11,14 @@ object MediaSaver {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, mime)
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/SpektraLab")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/Spektralab-X")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         // Some builds refuse TIFF in the images collection; Downloads takes any type.
         val uri = runCatching {
             resolver.insert(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
         }.getOrNull() ?: run {
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/SpektraLab")
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/Spektralab-X")
             resolver.insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
         } ?: throw EngineException("无法在相册中创建文件")
         try {

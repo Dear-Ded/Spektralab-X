@@ -62,5 +62,5 @@ body:
     id: log
     attributes:
       label: 日志（可选）/ Log (optional)
-      description: "`adb logcat -s SpektraLabJNI AndroidRuntime` 的输出"
+      description: "`adb logcat -s SpektralabX AndroidRuntime` 的输出"
       render: text

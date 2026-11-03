@@ -36,7 +36,7 @@
 
 namespace {
 
-constexpr const char* kTag = "SpektraLabJNI";
+constexpr const char* kTag = "SpektralabX";
 thread_local std::string t_error;
 
 struct Session {

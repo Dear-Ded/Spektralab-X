@@ -116,7 +116,7 @@ object JobNotifier {
         return NotificationCompat.Builder(context, CHANNEL_DONE)
             .setSmallIcon(R.drawable.ic_stat_film)
             .setContentTitle(title)
-            .setContentText(if (failed == 0) "已保存到 相册 · Pictures/SpektraLab" else "打开“正在处理”查看原因")
+            .setContentText(if (failed == 0) "已保存到 相册 · Pictures/Spektralab-X" else "打开“正在处理”查看原因")
             .setColor(ACCENT)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))

@@ -53,7 +53,7 @@
 ## 4. 接口 v1
 
 - 基础地址 `https://<host>:8765/v1`。除 `/info`、`/pair` 外都要 `Authorization: Bearer <token>`。
-- 每个响应带 `SpektraLab-API: 1`。只做向后兼容的新增；不兼容的改动换 `/v2`。
+- 每个响应带 `Spektralab-X-API: 1`。只做向后兼容的新增；不兼容的改动换 `/v2`。
 - 错误用 RFC 9457 `application/problem+json`：`{type, title, status, code, detail}`。`code` 沿用上游 host 的错误名（`bad_request`、`not_found`、`decode_failed`、`engine_error`、`unsupported`、`cancelled`、`io_error`、`internal`），另加 `unauthorized`、`too_large`、`busy`、`version_mismatch`、`hook_failed`。
 
 | 方法与路径 | 作用 |
