@@ -18,7 +18,7 @@
 |---|---|---|
 | 引擎 | 上游 C++20 引擎，Vulkan 计算后端，固定上游提交 `a46627d`，另加 4 个补丁 | [ARCHITECTURE.md](ARCHITECTURE.md)、[PATCHES.md](PATCHES.md) |
 | 解码 | LibRaw 0.22.2；手机照片走 ImageDecoder；Ultra HDR 增益图；DNG 双光源矩阵插值 | — |
-| 色彩路径 | 按上游做法：ProPhoto 冲印，屏幕矩阵加裁切，导出 CAM16 压缩；P3 广色域窗口 | [PARITY.md](PARITY.md) |
+| 色彩路径 | 按上游做法：ProPhoto 冲印，屏幕矩阵加裁切，导出 CAM16 压缩；P3 广色域窗口 | [PARITY.md](PARITY.md)、[PLATFORMS.md](PLATFORMS.md) |
 | 色彩对照 | RAW 与合成图和上游 Linux 宿主逐像素一致（43 组，导出均值 ΔE00 0.000）；手机 JPEG 还差 ≤0.36，正在修 | [PARITY.md](PARITY.md) |
 | 编辑 | 胶片 / 调整 / 冲印 / 效果 / 构图五页；调整层（Layer 2）实时重打包；一键风格；预设；边框 15 款 | [UI.md](UI.md) |
 | 后台 | “正在处理”队列，按本机耗时估算剩余时间，被杀后续做；实时通知 / 超级岛 | — |
