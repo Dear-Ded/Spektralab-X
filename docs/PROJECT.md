@@ -93,3 +93,4 @@
 | [VERIFY.md](VERIFY.md) | 官方安装包校验 |
 | [SAMPLES.md](SAMPLES.md) | 样片的渲染方法 |
 | [ABOUT_TEXT.md](ABOUT_TEXT.md) | 应用“关于”页文案 |
+- [USER_VOICES.md](USER_VOICES.md)：同类项目的用户口碑、吐槽与愿望
