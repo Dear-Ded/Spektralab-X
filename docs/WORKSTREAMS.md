@@ -15,13 +15,16 @@
 
 | 线 | 会话 | 分支 / 工作区 | 负责的文件 | 当前任务 |
 |---|---|---|---|---|
-| 主会话：界面与新功能 | 主会话 | `main` / `wt-main` | `EditorScreen.kt`、`AdjustPanel.kt`、`Theme.kt`、`QueueSheet.kt`、`Immersive.kt`、新增界面文件、`docs/PROJECT.md`、`ROADMAP.md`、`UI.md`、`WORKSTREAMS.md` | 底部图标工具栏、二级面板、滑杆改版、首次引导、1:1 沉浸；之后调色盘、观片台、边框扩充 |
+| 主会话：界面与新功能 | 主会话 | `main` / `wt-main` | `EditorScreen.kt`（边框区除外）、`AdjustPanel.kt`、`Theme.kt`、`QueueSheet.kt`、`Immersive.kt`、`CategoryBar.kt`、`TopBarIcons.kt`、引导与更新检测新文件、`docs/PROJECT.md`、`ROADMAP.md`、`UI.md`、`WORKSTREAMS.md` | 引擎重建后重开照片、滑杆改版、首次引导、1:1 沉浸、检查更新入口、发布 |
 | 色彩对照 | colour-parity | `parity-upstream-host` / `spektralab-android` | `tools/parity/`、`docs/PARITY.md`、`output_transform.*`、`patches/`（色彩相关）、本轮另允许 JNI 的 `openBitmap` / `openBitmapHdr` 输入解码 | 手机 JPEG 输入按上游 ICC 方式换算，JPEG/P3 均值 ΔE00 ≤ 0.05，RAW 不退步；之后查 Adreno FMA 探测 |
-| 导出稳定性 | export-stability | `stability-m5` / `wt-stability` | `ProcessingQueue.kt`、`ExportService.kt`、`MediaSaver.kt`、`EngineHost.kt`、`tiff16.cpp`、JNI 中导出与恢复相关函数 | GPU 故障恢复、事务式保存、导出前画面检查、峰值内存计量（VmHWM）、16 位 TIFF 改 Deflate、启动读取被杀原因 |
+| 导出稳定性 | export-stability | `stability-m5` / `wt-stability` | `ProcessingQueue.kt`、`ExportService.kt`、`MediaSaver.kt`、`EngineHost.kt`、`tiff16.cpp`、JNI 中导出与恢复相关函数 | 导出前画面检查 → 极致渲染模式（striped 原分辨率后台渲染）→ TIFF Deflate → 导出时让出引擎线程 |
 | RAW 解码 | raw-decode-2（`local_5a8e66c8-5ae9-4993-a795-1bca201b28ad`，2026-11-03 接替 raw-decode：多轮无提交） | `raw-decode` / `wt-raw` | `SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`、`patches/`（解码相关）、`cpp/CMakeLists.txt` 的 LibRaw 部分、JNI 的 `openRaw`；本轮另允许 `EditorViewModel.kt`、`ProcessingQueue.kt` 各一处 RAW 打开调用 | 描述符直读、多线程解码、LibRaw 加固、小米 DNG |
 | 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、ROADMAP、UI、WORKSTREAMS、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、署名与“关于”文案 | 第一轮已合并；待命，接后续文档与商店素材 |
-| 风格库扩充 | styles-library | `styles` / `wt-styles` | `Styles.kt`、`app/src/main/assets/styles/`、`docs/STYLES.md` | 调研器材厂商、热门胶卷、手机厂商风格，扩到 60 款以上，每款注明来源 |
-| 品牌 logo 边框 | brand-logos | `brand-logos` / `wt-logos` | `app/src/main/assets/logos/`、`Frames.kt` 中品牌匹配与 logo 绘制、新增 logo 相关文件、`NOTICE` 中商标声明段 | 内置器材与胶片厂商 logo（单色/彩色），EXIF 自动匹配，手动改选，导入 logo 包 |
+| 风格库扩充 | styles-library | `styles` / `wt-styles` | `Styles.kt`、`app/src/main/assets/styles/`、`docs/STYLES.md`、新增导入与 `.spklook` 文件、manifest 的导入 intent（单独提交） | 87 款已合并；`.spklook` 格式、导入 .cube/HaldCLUT/XMP/spektrafilm 预设/富士配方、自定义胶片方案、导出分享 |
+| 品牌 logo 与边框 | brand-logos | `brand-logos` / `wt-logos` | `assets/logos/`、`Frames.kt`、`Perforations.kt`、`Model.kt` 的边框与片边字段、`EditorScreen.kt` 构图页边框区、`NOTICE` 商标声明段 | 内置品牌 logo → 上游片边缺口（片名边码、帧号、日期后背、光圈）→ 30 款新边框 → 兼容规则 |
+
+| 调整工具 | adjust-tools | 见会话 | `layer2.*`、`Look.kt`、`AdjustPanel.kt` 调整页内容、新增调色盘与曲线文件 | 调色盘（仿 iPhone 摄影风格）、曲线、颗粒尺寸与锐化、HSL 补全、给 LUT 留钩子 |
+| 观片台 | light-table | 见会话 | 新增观片台文件、Room 索引、侧边文件 | 网格挑片、星级与标记、批量套用与导出、逐卷查看（参照 ObscuraFilm） |
 
 `EditorViewModel.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。
 
