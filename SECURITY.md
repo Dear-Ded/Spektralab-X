@@ -7,9 +7,9 @@ Only the latest pre-release is supported; fixes are not backported.
 
 ## 报告漏洞 / Reporting a vulnerability
 
-发现安全问题请**不要**公开提 issue，在本仓库的 **[Security → Report a vulnerability](https://github.com/Dear-Ded/spektralab-android/security/advisories/new)** 里私下报告。请写明版本、机型、复现步骤和影响。项目由一位独立开发者维护，一般两周内回复；确认后会在修复版本的更新记录里致谢（你愿意的话）。
+发现安全问题请**不要**公开提 issue，在本仓库的 **[Security → Report a vulnerability](https://github.com/Dear-Ded/Spektralab-X/security/advisories/new)** 里私下报告。请写明版本、机型、复现步骤和影响。项目由一位独立开发者维护，一般两周内回复；确认后会在修复版本的更新记录里致谢（你愿意的话）。
 
-Please do **not** open a public issue. Report privately via **[Security → Report a vulnerability](https://github.com/Dear-Ded/spektralab-android/security/advisories/new)** with the version, device, steps to reproduce and impact. A single maintainer handles reports; expect a reply within about two weeks. With your permission, you will be credited in the changelog of the fixing release.
+Please do **not** open a public issue. Report privately via **[Security → Report a vulnerability](https://github.com/Dear-Ded/Spektralab-X/security/advisories/new)** with the version, device, steps to reproduce and impact. A single maintainer handles reports; expect a reply within about two weeks. With your permission, you will be credited in the changelog of the fixing release.
 
 ## 范围 / Scope
 
@@ -27,9 +27,9 @@ The app requests no network permission and collects or uploads nothing. Exported
 
 ## 冒充的安装包 / Impersonating builds
 
-官方安装包只在 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费，签名证书 SHA-256 为：
+官方安装包只在 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费，签名证书 SHA-256 为：
 
-Official APKs are published only on [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases), free, signed with the certificate whose SHA-256 is:
+Official APKs are published only on [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases), free, signed with the certificate whose SHA-256 is:
 
 ```
 CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3

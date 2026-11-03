@@ -8,11 +8,11 @@
 
 目前所有版本都只通过了 CI 编译，还没有在真机上验证过。哪怕只有“能打开、能导出”也很有用：
 
-1. 安装最新的 [pre-release](https://github.com/Dear-Ded/spektralab-android/releases)，打开一张照片并导出。
+1. 安装最新的 [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases)，打开一张照片并导出。
 2. 在应用的 **设置 → 复制诊断信息** 里复制诊断信息（版本、机型、芯片、内存、GPU 探测结果、最近 40 条事件，不含文件名和位置）。
-3. 用 [问题反馈模板](https://github.com/Dear-Ded/spektralab-android/issues/new/choose) 提交。适配情况汇总在 [docs/DEVICES.md](docs/DEVICES.md)。
+3. 用 [问题反馈模板](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose) 提交。适配情况汇总在 [docs/DEVICES.md](docs/DEVICES.md)。
 
-使用上的问题请到 [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions)，安全问题按 [SECURITY.md](SECURITY.md) 私下报告。
+使用上的问题请到 [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions)，安全问题按 [SECURITY.md](SECURITY.md) 私下报告。
 
 ## 项目结构
 
@@ -62,12 +62,12 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 欢迎转载和二次开发。本项目以 GPL-3.0 发布，你可以自由使用、修改和分发，也可以收费分发，本项目不限制这些权利。我们请你做到下面几件事，完整条款见 [NOTICE](NOTICE)：
 
-1. **保留署名**（GPL-3.0 第 7(b) 条）：在“关于”页和文档里保留“Spektralab-X”、本仓库地址 `https://github.com/Dear-Ded/spektralab-android` 和“Spektralab-X 贡献者”署名，并注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。也请写上你自己作为二创开发者的署名。
+1. **保留署名**（GPL-3.0 第 7(b) 条）：在“关于”页和文档里保留“Spektralab-X”、本仓库地址 `https://github.com/Dear-Ded/Spektralab-X` 和“Spektralab-X 贡献者”署名，并注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。也请写上你自己作为二创开发者的署名。
 2. **改名换图标**（第 7(c)、7(e) 条）：公开发布的改版请换名字、图标和包名（`applicationId`，现在是 `com.dearded.spektralab`），标明是修改版，不要冒充官方版本。换包名也能避免和官方版签名冲突。
 3. **提供源码**（GPL-3.0 第 4–6 条）：分发安装包时同时提供完整对应源码，保留许可证和署名。
 4. **胶片数据**：spektrafilm 的胶片和相纸数据以 CC BY-SA 4.0 发布，需署名 Andrea Volpato 并以相同许可共享。
 
-官方版只在本仓库 [Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费，签名证书和校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。
+官方版只在本仓库 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费，签名证书和校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。
 
 ---
 
@@ -75,7 +75,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 Issues and pull requests are welcome. One independent developer maintains the project, so replies may be slow. Chinese or English are both fine.
 
-**The most useful contribution right now is an on-device report.** No release has been run on a real phone yet. Install the latest [pre-release](https://github.com/Dear-Ded/spektralab-android/releases), open and export a photo, copy **Settings → Copy diagnostics** (no file names or locations) and file a [bug report](https://github.com/Dear-Ded/spektralab-android/issues/new/choose). Even "it opens and exports" helps. Usage questions go to [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions); security issues follow [SECURITY.md](SECURITY.md).
+**The most useful contribution right now is an on-device report.** No release has been run on a real phone yet. Install the latest [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases), open and export a photo, copy **Settings → Copy diagnostics** (no file names or locations) and file a [bug report](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose). Even "it opens and exports" helps. Usage questions go to [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions); security issues follow [SECURITY.md](SECURITY.md).
 
 **Building.** JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator`, then the three commands above. Pushing to your own fork also works: GitHub Actions builds the APK and attaches it to the run's Artifacts.
 
@@ -83,4 +83,4 @@ Issues and pull requests are welcome. One independent developer maintains the pr
 
 **Rules.** One change per PR. User-visible changes go into `CHANGELOG.md`. The maintainer handles releases (bump the patch number in `VERSION` and add a `CHANGELOG.md` section; CI publishes). Follow the style of the file you are editing. Add the file header from [docs/ABOUT_TEXT.md](docs/ABOUT_TEXT.md#源码文件头--source-file-header) to new files. Keep personal information (real names, email addresses, phone numbers, local paths) out of code, docs, commit messages and screenshots. By contributing you agree to release your work under GPL-3.0, with the additional terms in [NOTICE](NOTICE) applying to what you add.
 
-**Reposting and derivative works.** Welcome, including paid redistribution, which GPL-3.0 allows and this project does not restrict. Please (1) keep the attribution under GPL-3.0 section 7(b): "Spektralab-X", this repository's address and the credit "Spektralab-X contributors" on the About screen and in the docs, plus upstream [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm), and add your own credit as the derivative developer; (2) under sections 7(c) and 7(e), give a published modified version its own name, icon and `applicationId` (currently `com.dearded.spektralab`) and do not present it as official; (3) provide the complete corresponding source with every APK, as GPL-3.0 sections 4–6 require; (4) credit Andrea Volpato and share alike for the spektrafilm film and paper data (CC BY-SA 4.0). Full terms: [NOTICE](NOTICE). Official builds are published only on this repository's [Releases](https://github.com/Dear-Ded/spektralab-android/releases), free; see [docs/VERIFY.md](docs/VERIFY.md).
+**Reposting and derivative works.** Welcome, including paid redistribution, which GPL-3.0 allows and this project does not restrict. Please (1) keep the attribution under GPL-3.0 section 7(b): "Spektralab-X", this repository's address and the credit "Spektralab-X contributors" on the About screen and in the docs, plus upstream [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and [spektrafilm](https://github.com/andreavolpato/spektrafilm), and add your own credit as the derivative developer; (2) under sections 7(c) and 7(e), give a published modified version its own name, icon and `applicationId` (currently `com.dearded.spektralab`) and do not present it as official; (3) provide the complete corresponding source with every APK, as GPL-3.0 sections 4–6 require; (4) credit Andrea Volpato and share alike for the spektrafilm film and paper data (CC BY-SA 4.0). Full terms: [NOTICE](NOTICE). Official builds are published only on this repository's [Releases](https://github.com/Dear-Ded/Spektralab-X/releases), free; see [docs/VERIFY.md](docs/VERIFY.md).

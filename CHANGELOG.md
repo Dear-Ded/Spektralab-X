@@ -1,12 +1,12 @@
 # 更新记录 / Changelog
 
-[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
+[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/Spektralab-X?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
 
-所有用户能看到的改动都记在这里，最新的在最上面。每个版本对应 [Releases](https://github.com/Dear-Ded/spektralab-android/releases) 页面的一个预发布版本，标签为 `v<版本号>`，安装包的校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。接下来要做的见[路线图](docs/ROADMAP.md)。
+所有用户能看到的改动都记在这里，最新的在最上面。每个版本对应 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 页面的一个预发布版本，标签为 `v<版本号>`，安装包的校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。接下来要做的见[路线图](docs/ROADMAP.md)。
 
 版本号格式为 `主版本.次版本.修订号-alpha`。能日常使用之前都是 alpha 版，每次发布只加修订号。日期为发布日（UTC+8）。
 
-Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/spektralab-android/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
+Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
 ## 0.1.19-alpha · 未发布（草稿）
 

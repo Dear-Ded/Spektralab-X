@@ -11,18 +11,18 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 
 简体中文 | [English](README.en.md)
 
-[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/spektralab-android?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
-[![CI](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/spektralab-android/actions/workflows/android.yml)
-[![License](https://img.shields.io/github/license/Dear-Ded/spektralab-android)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/spektralab-android)](https://github.com/Dear-Ded/spektralab-android/commits/main)
+[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/Spektralab-X?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
+[![CI](https://github.com/Dear-Ded/Spektralab-X/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/Spektralab-X/actions/workflows/android.yml)
+[![License](https://img.shields.io/github/license/Dear-Ded/Spektralab-X)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/Spektralab-X)](https://github.com/Dear-Ded/Spektralab-X/commits/main)
 ![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white)
 ![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-informational)
 [![官方版永久免费](https://img.shields.io/badge/%E5%AE%98%E6%96%B9%E7%89%88-%E6%B0%B8%E4%B9%85%E5%85%8D%E8%B4%B9-E8A24A)](#下载与校验)
 
-[![总下载](https://img.shields.io/github/downloads/Dear-Ded/spektralab-android/total?label=%E6%80%BB%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
-[![最新版下载](https://img.shields.io/github/downloads-pre/Dear-Ded/spektralab-android/latest/total?label=%E6%9C%80%E6%96%B0%E7%89%88%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/spektralab-android/releases)
-[![Star](https://img.shields.io/github/stars/Dear-Ded/spektralab-android?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/spektralab-android)
-[![访问](https://hits.sh/github.com/Dear-Ded/spektralab-android.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/spektralab-android/)
+[![总下载](https://img.shields.io/github/downloads/Dear-Ded/Spektralab-X/total?label=%E6%80%BB%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
+[![最新版下载](https://img.shields.io/github/downloads-pre/Dear-Ded/Spektralab-X/latest/total?label=%E6%9C%80%E6%96%B0%E7%89%88%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
+[![Star](https://img.shields.io/github/stars/Dear-Ded/Spektralab-X?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/Spektralab-X)
+[![访问](https://hits.sh/github.com/Dear-Ded/Spektralab-X.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/Spektralab-X/)
 
 [写在前面](#写在前面) · [下载](#下载与校验) · [样片](#样片) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
 
@@ -44,7 +44,7 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 [SpektraLab](
 
 我不是职业程序员，只是一个热爱胶片影像、想把暗房的质感带进手机的摄影爱好者。这个项目从构思、开发到一遍遍调教，都是在 AI 助手的协助下一点点完成的；开发过程中的 token、云服务器等费用，全部由我个人承担。它没有商业目的，也永远不会收费。
 
-正因为如此，它一定还有许多不完美：可能有 bug，可能在你的手机上不够流畅，色彩也未必合每个人的口味。如果你发现了问题，或者有好的想法，非常欢迎提交 [Issue](https://github.com/Dear-Ded/spektralab-android/issues) 或 Pull Request，每一条反馈我都会认真看。
+正因为如此，它一定还有许多不完美：可能有 bug，可能在你的手机上不够流畅，色彩也未必合每个人的口味。如果你发现了问题，或者有好的想法，非常欢迎提交 [Issue](https://github.com/Dear-Ded/Spektralab-X/issues) 或 Pull Request，每一条反馈我都会认真看。
 
 如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
 
@@ -134,18 +134,18 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 ## 下载与校验
 
 <p>
-<a href="https://github.com/Dear-Ded/spektralab-android/releases"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" height="60" alt="从 GitHub 下载"></a>
+<a href="https://github.com/Dear-Ded/Spektralab-X/releases"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" height="60" alt="从 GitHub 下载"></a>
 <a href="https://github.com/ImranR98/Obtainium"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" height="60" alt="用 Obtainium 获取"></a>
 </p>
 
 > [!CAUTION]
-> **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“Spektralab-X”，那不是官方版本，请申请退款，并按下面的方法核对签名。
+> **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“Spektralab-X”，那不是官方版本，请申请退款，并按下面的方法核对签名。
 
-1. 打开 [Releases](https://github.com/Dear-Ded/spektralab-android/releases)，下载最新 `v…-alpha` 版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
+1. 打开 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases)，下载最新 `v…-alpha` 版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
 2. 在手机上安装。小米 / HyperOS 第一次安装未知来源应用时，会要求在“安全”里允许。
 3. 以后的版本可以直接覆盖安装，编辑预设会保留。
 
-**用 Obtainium 自动更新：** 添加仓库地址 `https://github.com/Dear-Ded/spektralab-android`，并打开 **Include prereleases**（目前所有版本都是预发布，不打开就找不到）。
+**用 Obtainium 自动更新：** 添加仓库地址 `https://github.com/Dear-Ded/Spektralab-X`，并打开 **Include prereleases**（目前所有版本都是预发布，不打开就找不到）。
 
 **欢迎转发分享：** 下载好的安装包可以直接转发到社区、社群、论坛，无需授权，注明本仓库地址即可，见[转载与二次开发](#转载与二次开发)。
 
@@ -161,7 +161,7 @@ CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51
 
 ```bash
 sha256sum -c SHA256SUMS
-gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/Spektralab-X
 ```
 
 在手机上可以用 [AppVerifier](https://github.com/soupslurpr/AppVerifier) 核对证书，在电脑上可以用 `apksigner verify --print-certs`。完整步骤见 [docs/VERIFY.md](docs/VERIFY.md)。
@@ -183,7 +183,7 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab
 <details>
 <summary><b>收费吗？哪里能下载？</b></summary>
 
-官方版永久免费，只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布。在其他地方付费买到的都不是官方版本，请按[校验安装包](#校验安装包)核对签名证书。
+官方版永久免费，只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布。在其他地方付费买到的都不是官方版本，请按[校验安装包](#校验安装包)核对签名证书。
 </details>
 
 <details>
@@ -232,10 +232,10 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab
 
 ## Star 趋势
 
-<a href="https://star-history.com/#Dear-Ded/spektralab-android&Date">
+<a href="https://star-history.com/#Dear-Ded/Spektralab-X&Date">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date&theme=dark">
-  <img src="https://api.star-history.com/svg?repos=dear-ded%2Fspektralab-android&type=Date" width="600" alt="Star 趋势图">
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dear-ded%2FSpektralab-X&type=Date&theme=dark">
+  <img src="https://api.star-history.com/svg?repos=dear-ded%2FSpektralab-X&type=Date" width="600" alt="Star 趋势图">
 </picture>
 </a>
 
@@ -244,9 +244,9 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab
 ## 反馈问题
 
 1. 打开应用的 **设置 → 复制诊断信息**。里面有版本、机型、芯片、内存、GPU 探测结果、当前参数和最近 40 条事件，不含文件名和位置。
-2. 用 [问题反馈模板](https://github.com/Dear-Ded/spektralab-android/issues/new/choose) 提交，把诊断信息贴进去。中文、英文都可以。
+2. 用 [问题反馈模板](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose) 提交，把诊断信息贴进去。中文、英文都可以。
 
-使用上的问题请到 [Discussions](https://github.com/Dear-Ded/spektralab-android/discussions)。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
+使用上的问题请到 [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions)。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
 
 ## 参与贡献
 
@@ -285,18 +285,18 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 ## 转载与二次开发
 
-> **欢迎转发分享。** 欢迎把下载好的安装包转发到社区、社群、论坛等任何地方，无需事先授权，只需注明本仓库地址：https://github.com/Dear-Ded/spektralab-android
+> **欢迎转发分享。** 欢迎把下载好的安装包转发到社区、社群、论坛等任何地方，无需事先授权，只需注明本仓库地址：https://github.com/Dear-Ded/Spektralab-X
 >
 > 转发的是未修改的官方安装包时，注明仓库地址就够了：每个版本的完整源码都能从这个仓库获取（标签 `v<版本号>`，上游引擎由 [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh) 按固定提交下载），这也满足了 GPL-3.0 第 6(d) 条“注明源码获取位置”的要求。下面几条只针对修改过的版本和二次开发。
 
 **欢迎转载、改版和二次开发。** 本项目以 GPL-3.0 发布，你可以自由使用、研究、修改和分发，也可以收费分发，这是 GPL 赋予的权利，本项目不加限制。我们只请你做到下面几件事，前三条是 GPL-3.0 本身的要求或第 7 条允许的附加条款，完整条款见 [NOTICE](NOTICE)：
 
-1. **保留署名**（GPL-3.0 第 7(b) 条）：在衍生版本的“关于”页和文档里保留原项目名称“Spektralab-X”、本仓库地址 `https://github.com/Dear-Ded/spektralab-android` 和“Spektralab-X 贡献者”署名，同时注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。
+1. **保留署名**（GPL-3.0 第 7(b) 条）：在衍生版本的“关于”页和文档里保留原项目名称“Spektralab-X”、本仓库地址 `https://github.com/Dear-Ded/Spektralab-X` 和“Spektralab-X 贡献者”署名，同时注明上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。
 2. **改名换图标**（第 7(c)、7(e) 条）：本项目不授予“Spektralab-X”名称和图标的商标使用权。公开发布的改版请换一个名字、图标和包名，标明“基于 Spektralab-X 修改”，不要冒充官方版本。
 3. **提供源码**（GPL-3.0 第 4–6 条）：分发安装包时，必须同时提供完整对应源码，保留许可证和署名，并以 GPL-3.0 发布你的修改。
 4. **胶片数据**：胶片和相纸数据以 CC BY-SA 4.0 发布，转载需署名 spektrafilm（Andrea Volpato）并以相同许可共享。
 
-转载文章或视频时，注明“来源：Spektralab-X（github.com/Dear-Ded/spektralab-android）”即可；二次开发的项目请同时写上你自己作为二创开发者的署名。
+转载文章或视频时，注明“来源：Spektralab-X（github.com/Dear-Ded/Spektralab-X）”即可；二次开发的项目请同时写上你自己作为二创开发者的署名。
 
 ## 许可与致谢
 

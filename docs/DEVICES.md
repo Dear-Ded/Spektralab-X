@@ -38,7 +38,7 @@
 
 ## 帮忙补全这张表
 
-装上后在 **设置 → 复制诊断信息**，用 [问题反馈模板](https://github.com/Dear-Ded/spektralab-android/issues/new/choose) 提交。哪怕只有“能打开、能导出”也很有用，里面的 GPU 探测数据（`maxStorageBufferRange`、驱动版本）就是这张表要填的东西。
+装上后在 **设置 → 复制诊断信息**，用 [问题反馈模板](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose) 提交。哪怕只有“能打开、能导出”也很有用，里面的 GPU 探测数据（`maxStorageBufferRange`、驱动版本）就是这张表要填的东西。
 
 ## GPU 限制（来自 vulkan.gpuinfo.org 的实测报告）
 

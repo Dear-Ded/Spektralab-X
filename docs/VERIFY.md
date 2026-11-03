@@ -1,8 +1,8 @@
 # 校验安装包 / Verify a build
 
-官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) 发布，永久免费。如果你在其他地方拿到或付费买到“Spektralab-X”，可以用下面任一方法确认它是不是官方版本。
+官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费。如果你在其他地方拿到或付费买到“Spektralab-X”，可以用下面任一方法确认它是不是官方版本。
 
-The official APKs are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/spektralab-android/releases) and are free. If you got (or paid for) a "Spektralab-X" APK anywhere else, any of the checks below tells you whether it is an official build.
+The official APKs are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) and are free. If you got (or paid for) a "Spektralab-X" APK anywhere else, any of the checks below tells you whether it is an official build.
 
 ## 签名证书 / Signing certificate
 
@@ -53,7 +53,7 @@ sha256sum -c SHA256SUMS
 Every official APK is built by GitHub Actions from this repository's public source and carries a build-provenance [artifact attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations), which records the commit and workflow that produced the file. Check it with the [GitHub CLI](https://cli.github.com/):
 
 ```bash
-gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/spektralab-android
+gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/Spektralab-X
 ```
 
 ## 导出的照片 / Exported photos

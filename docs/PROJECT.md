@@ -10,7 +10,7 @@
 - **定位**：针对小米数字系列 10–18（骁龙 / Adreno）优化的光谱胶片冲印应用。开源、永久免费，只在 GitHub Releases 发布。
 - **核心目标**：原汁原味输出上游的色彩。新手一键出大师风格；资深用户调整不设上限。
 - **开发方式**：独立开发者借助 AI 助手（Claude、GPT、Grok、DeepSeek）开发。小米版稳定后，再立项安卓通用版、Windows 版、iOS 版。
-- **仓库**：`Dear-Ded/spektralab-android`。包名 `com.dearded.spektralab` 不改（改了无法覆盖升级）。
+- **仓库**：`Dear-Ded/Spektralab-X`。包名 `com.dearded.spektralab` 不改（改了无法覆盖升级）。
 
 ## 2. 技术现状
 

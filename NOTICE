@@ -1,5 +1,5 @@
 Spektralab-X
-https://github.com/Dear-Ded/spektralab-android
+https://github.com/Dear-Ded/Spektralab-X
 
 Copyright (C) 2026 Spektralab-X contributors
 
@@ -25,23 +25,23 @@ redistribute this program, including for a fee.
    分发本程序或其修改版本时，请在“关于”页（或同等的法律声明界面）和随附文档中
    保留以下内容：
    - 原项目名称“Spektralab-X”；
-   - 本仓库地址 https://github.com/Dear-Ded/spektralab-android；
+   - 本仓库地址 https://github.com/Dear-Ded/Spektralab-X；
    - 署名“Spektralab-X 贡献者”；
    - 上游项目 SpektraLab（https://github.com/JamesQiu2005/SpektraLab）和
      spektrafilm（https://github.com/andreavolpato/spektrafilm）。
-   建议写法：“基于 Spektralab-X（github.com/Dear-Ded/spektralab-android）
+   建议写法：“基于 Spektralab-X（github.com/Dear-Ded/Spektralab-X）
    修改，原作者为 Spektralab-X 贡献者。”
 
    Preservation of attribution (GPL-3.0 section 7(b))
    When you convey this program or a modified version, keep the following in
    its About screen (or equivalent Appropriate Legal Notices) and in its
    accompanying documentation: the original project name "Spektralab-X";
-   this repository's address https://github.com/Dear-Ded/spektralab-android;
+   this repository's address https://github.com/Dear-Ded/Spektralab-X;
    the credit "Spektralab-X contributors"; and the upstream projects SpektraLab
    (https://github.com/JamesQiu2005/SpektraLab) and spektrafilm
    (https://github.com/andreavolpato/spektrafilm).
    Suggested wording: "Modified from Spektralab-X
-   (github.com/Dear-Ded/spektralab-android) by the Spektralab-X
+   (github.com/Dear-Ded/Spektralab-X) by the Spektralab-X
    contributors."
 
 2. 标明修改（GPL-3.0 第 7(c) 条）
@@ -74,7 +74,7 @@ redistribute this program, including for a fee.
 的署名，并以 GPL-3.0 发布修改部分。只给 APK、不给源码，不符合 GPL-3.0。
 
 转发未修改的官方安装包（社区、社群、论坛等）无需事先授权，只需在安装包旁注明
-本仓库地址 https://github.com/Dear-Ded/spektralab-android。每个版本的完整对应源码都能从该仓库
+本仓库地址 https://github.com/Dear-Ded/Spektralab-X。每个版本的完整对应源码都能从该仓库
 获取（标签 v<版本号>；上游引擎由 scripts/fetch-upstream.sh 按固定提交下载），注明地址即满足 GPL-3.0 第 6(d) 条“在目标代码旁清楚说明
 源码获取位置”的要求。修改过的版本仍须遵守上面第一节的署名、标明修改和改名规定。
 
@@ -86,7 +86,7 @@ Shipping an APK without its source does not comply with GPL-3.0.
 
 Sharing the unmodified official APK (in communities, group chats, forums and
 so on) needs no permission; just put this repository's address,
-https://github.com/Dear-Ded/spektralab-android, next to the APK. The complete
+https://github.com/Dear-Ded/Spektralab-X, next to the APK. The complete
 corresponding source of every release can be obtained from that
 repository (tag v<version>; scripts/fetch-upstream.sh fetches the upstream
 engine at a pinned commit), so the address is the clear direction to the source that
@@ -97,11 +97,11 @@ attribution, marking and naming terms in part one above.
 三、官方渠道 / Official builds
 ==============================
 
-官方安装包只在 https://github.com/Dear-Ded/spektralab-android/releases 发布，
+官方安装包只在 https://github.com/Dear-Ded/Spektralab-X/releases 发布，
 永久免费。所有官方版本使用同一个签名证书，SHA-256 为：
 
 The official APKs are published only at
-https://github.com/Dear-Ded/spektralab-android/releases and are free. Every
+https://github.com/Dear-Ded/Spektralab-X/releases and are free. Every
 official build is signed with the same certificate, SHA-256:
 
   CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3
