@@ -42,7 +42,7 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 
 Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and Andrea Volpato's [spektrafilm](https://github.com/andreavolpato/spektrafilm). Without those projects and the years of research behind them, it would not exist.
 
-I'm not a professional programmer, just someone who loves film and wanted to develop good photos on a phone. Everything here, from the first idea through development and endless tuning, was done step by step with the help of AI assistants, and every cost along the way, from tokens to cloud servers, comes out of my own pocket. It has no commercial purpose and will always be free.
+I'm not a professional programmer, just a photographer who loves film and wanted to bring the feel of the darkroom to a phone. Everything here, from the first idea through development and endless tuning, was done step by step with the help of AI assistants, and every cost along the way, from tokens to cloud servers, comes out of my own pocket. It has no commercial purpose and will always be free.
 
 That also means it is far from perfect. There will be bugs, it may not run smoothly on your phone, and the colours won't suit everyone's taste. If you find a problem or have a good idea, please open an [issue](https://github.com/Dear-Ded/spektralab-android/issues) or a pull request. I read every one.
 
