@@ -286,13 +286,13 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        chrome = showChrome, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = showChrome, onToggleChrome = toggleChrome)
                     Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        chrome = showChrome, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = showChrome, onToggleChrome = toggleChrome)
                     Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
                 }
             }
@@ -335,7 +335,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
 @Composable
 private fun Preview(
     ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
-    chrome: Boolean = true, onToggleChrome: () -> Unit = {},
+    onLightTable: () -> Unit = {}, chrome: Boolean = true, onToggleChrome: () -> Unit = {},
 ) {
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
@@ -413,7 +413,7 @@ private fun Preview(
             }
         } else if (ui.ready && !ui.hasImage) {
             Aura(Modifier.matchParentSize(), strength = 0.8f)
-            EmptyState(onPick = onOpen)
+            EmptyState(onPick = onOpen, onLightTable = onLightTable)
         }
         // Shown only after 400 ms, so quick drag renders never flicker a bar.
         val showProgress by androidx.compose.runtime.produceState(false, ui.rendering) {

@@ -1,6 +1,10 @@
 package com.dearded.spektralab
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -138,16 +142,29 @@ internal fun PageColumn(content: @Composable () -> Unit) = Column { content() }
 
 /** No photo yet: one obvious action in the middle, not directions to a corner. */
 @Composable
-internal fun EmptyState(onPick: () -> Unit) {
+internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
+    // UI.md 2.1: one amber action in the middle, the light table as the quiet second.
+    val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "open")
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
         Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
         Spacer(Modifier.height(6.dp))
         Text("光谱胶片冲印", style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft)
-        Spacer(Modifier.height(28.dp))
-        androidx.compose.material3.Button(onClick = onPick, modifier = Modifier.height(52.dp)) {
+        Spacer(Modifier.height(32.dp))
+        androidx.compose.material3.Button(
+            onClick = onPick, interactionSource = press,
+            modifier = Modifier.height(52.dp).widthIn(min = 200.dp)
+                .graphicsLayer { scaleX = scale; scaleY = scale },
+        ) {
             Text("打开照片", style = MaterialTheme.typography.titleMedium)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
+        TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text("去观片台挑一张", color = Palette.OnSurface.copy(alpha = 0.85f))
+        }
+        Spacer(Modifier.height(20.dp))
         Text(
             "JPEG · HEIC · PNG · 相机 RAW（DNG、CR3、NEF、ARW、RAF…）",
             style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
