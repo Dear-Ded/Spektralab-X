@@ -63,8 +63,20 @@ data class Look(
 
     fun withBand(i: Int, band: Band) = copy(hsl = hsl.toMutableList().also { it[i] = band })
 
+    /**
+     * By field name, so a field added later (or reordered in [values]) never
+     * shifts the others. Untouched wheels and bands are left out; [fromJson]
+     * reads a missing key as its default.
+     */
     fun toJson(): JSONObject = JSONObject().apply {
-        put("v", JSONArray().also { a -> values().forEach { a.put(it.toDouble()) } })
+        put("format", FORMAT)
+        for ((key, get) in SCALARS) put(key, get(this@Look))
+        for ((key, get) in ZONES) get(this@Look).takeIf { it != Zone() }?.let { z ->
+            put(key, JSONObject().put("hue", z.hue).put("sat", z.sat).put("lum", z.lum))
+        }
+        if (hsl.any { !it.neutral }) put("hsl", JSONArray().also { a ->
+            for (b in 0 until 8) hsl.getOrElse(b) { Band() }.let { a.put(JSONArray().put(it.hue).put(it.sat).put(it.lum)) }
+        })
     }
 
     companion object {
@@ -74,8 +86,49 @@ data class Look(
         val BANDS = listOf("红" to 0xFFE0524A, "橙" to 0xFFE8913A, "黄" to 0xFFE8D24A, "绿" to 0xFF5EB65A,
             "青" to 0xFF4AC0C8, "蓝" to 0xFF4A74E0, "紫" to 0xFF8A5AD8, "品红" to 0xFFD25AB0)
 
+        /** Version of [toJson]'s layout; 1 was the positional "v" array. */
+        private const val FORMAT = 2
+
+        private val SCALARS: List<Pair<String, (Look) -> Double>> = listOf(
+            "temperature" to { l: Look -> l.temperature }, "tint" to { l: Look -> l.tint },
+            "exposure" to { l: Look -> l.exposure }, "contrast" to { l: Look -> l.contrast },
+            "brightness" to { l: Look -> l.brightness }, "saturation" to { l: Look -> l.saturation },
+            "vibrance" to { l: Look -> l.vibrance }, "highlights" to { l: Look -> l.highlights },
+            "shadows" to { l: Look -> l.shadows }, "blackPoint" to { l: Look -> l.blackPoint },
+            "whitePoint" to { l: Look -> l.whitePoint }, "fade" to { l: Look -> l.fade },
+            "vignette" to { l: Look -> l.vignette }, "vignetteMid" to { l: Look -> l.vignetteMid },
+        )
+        private val ZONES: List<Pair<String, (Look) -> Zone>> = listOf(
+            "master" to { l: Look -> l.master }, "shadowZone" to { l: Look -> l.shadowZone },
+            "midZone" to { l: Look -> l.midZone }, "highlightZone" to { l: Look -> l.highlightZone },
+        )
+
+        /** Either layout: named keys (format 2) or the old positional "v" array. */
         fun fromJson(o: JSONObject?): Look {
-            val a = o?.optJSONArray("v") ?: return NEUTRAL
+            if (o == null) return NEUTRAL
+            o.optJSONArray("v")?.let { if (!o.has("format")) return fromArray(it) }
+            fun num(key: String, default: Double) = o.optDouble(key, default).takeIf { it.isFinite() } ?: default
+            fun zone(key: String) = o.optJSONObject(key)?.let {
+                Zone(it.optDouble("hue", 0.0), it.optDouble("sat", 0.0), it.optDouble("lum", 0.0))
+            } ?: Zone()
+            val bands = o.optJSONArray("hsl")
+            return Look(
+                temperature = num("temperature", 0.0), tint = num("tint", 0.0), exposure = num("exposure", 0.0),
+                contrast = num("contrast", 0.0), brightness = num("brightness", 0.0),
+                saturation = num("saturation", 0.0), vibrance = num("vibrance", 0.0),
+                highlights = num("highlights", 0.0), shadows = num("shadows", 0.0),
+                blackPoint = num("blackPoint", 0.0), whitePoint = num("whitePoint", 0.0), fade = num("fade", 0.0),
+                vignette = num("vignette", 0.0), vignetteMid = num("vignetteMid", 50.0),
+                master = zone("master"), shadowZone = zone("shadowZone"), midZone = zone("midZone"),
+                highlightZone = zone("highlightZone"),
+                hsl = List(8) { b ->
+                    bands?.optJSONArray(b)?.let { Band(it.optDouble(0, 0.0), it.optDouble(1, 0.0), it.optDouble(2, 0.0)) } ?: Band()
+                },
+            )
+        }
+
+        /** Format 1 (0.1.18 and before): [values]' 50 floats in LookIndex order. */
+        private fun fromArray(a: JSONArray): Look {
             val v = DoubleArray(50) { if (it < a.length()) a.optDouble(it, 0.0) else if (it == 13) 50.0 else 0.0 }
             fun zone(z: Int) = Zone(v[14 + 3 * z], v[15 + 3 * z], v[16 + 3 * z])
             return Look(
