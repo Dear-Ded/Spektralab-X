@@ -243,6 +243,12 @@ data class Style(
 /** SharedPreferences file of each style's strength (0..1), built-in and imported alike. */
 internal const val STYLE_STRENGTH_PREFS = "style_strength"
 // In the same file; style ids never start with "_", so these keys cannot be a strength.
+private const val HOT_GROUP = "热门"
+/** 热门: one each of the looks people ask for by name (富士味, 日系, CCD, 徕卡味, 电影感, 黑白). */
+private val HOT = listOf(
+    "lab_daily", "cam_classic_neg", "cam_chrome", "lab_airy", "ph_ccd", "cine_night",
+    "cam_teal_orange", "slide_velvia", "neg_expired", "ph_authentic", "bw_silver", "cam_instant",
+)
 private const val LAST_STYLE = "_last_style"
 private const val LAST_GROUP = "_last_group"
 
@@ -266,7 +272,8 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val library = remember(context) { UserLibrary.get(context) }
     val imported by library.styles.all.collectAsState()
     val all = Style.ALL + imported.map { it.look.toStyle(it.id, ui.edit, it.lutId) }
-    val groups = (Style.GROUPS + imported.map { it.category }).distinct()
+    // 热门 first (UI2.md 2.2): the picks a newcomer is most likely after, by folk name.
+    val groups = (listOf(HOT_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
 
     // The group opens on the applied style, else on the last style picked, else the last
     // group browsed: an edit tweaked after a style no longer matches it, but the row stays put.
@@ -297,8 +304,9 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     }
     val styles = all.filter { s ->
         ui.catalog.film(s.film) != null &&
-            (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty()) else s.group == group)
-    }
+            (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty())
+             else if (group == HOT_GROUP) s.id in HOT else s.group == group)
+    }.let { list -> if (!searching && group == HOT_GROUP) list.sortedBy { HOT.indexOf(it.id) } else list }
     if (searching && styles.isEmpty()) {
         Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
