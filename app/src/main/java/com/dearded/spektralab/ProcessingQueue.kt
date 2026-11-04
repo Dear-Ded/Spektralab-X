@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -164,6 +165,25 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     private val sourcesDir = File(app.filesDir, "job-sources")
     private val exportDir = File(app.cacheDir, "export")
+
+    /**
+     * The export's full-size render runs here, not on EngineThread, so a
+     * slider drag waits for at most one GPU submit instead of the whole
+     * render (seconds at 50 MP). The engine allows it: every render holds only
+     * its own session's lock, the Vulkan backend serialises submits on its
+     * dispatch mutex, the setup cache and the session list are locked, and the
+     * JNI error string is per thread. The paths that touch the engine's
+     * unlocked LUT map (spk_preview_stock_lut, spk_export_di, the desktop
+     * view) are never called by this app. Opening, setOutput, setLook and
+     * release stay on EngineThread. Background priority, so the CPU-side
+     * pack yields to the editor's.
+     */
+    private val renderThread = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+        Thread(null, {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
+            r.run()
+        }, "spektralab-export", 64L * 1024 * 1024)
+    }.asCoroutineDispatcher()
 
     /** Starts (or wakes) the worker. */
     fun start() {
@@ -484,7 +504,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                         withContext(Dispatchers.IO) {
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
-                                withContext(EngineThread.dispatcher) {
+                                // engineFailure reads this thread's error, so it stays inside.
+                                withContext(renderThread) {
                                     if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
                                 }
                             }
@@ -501,7 +522,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     return name
                 }
                 ExportFormat.JPEG -> {
-                    val bitmap: Bitmap = withContext(EngineThread.dispatcher) {
+                    val bitmap: Bitmap = withContext(renderThread) {
                         NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
