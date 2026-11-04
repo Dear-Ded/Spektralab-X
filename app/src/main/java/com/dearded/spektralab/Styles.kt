@@ -243,6 +243,9 @@ data class Style(
 
 /** SharedPreferences file of each style's strength (0..1), built-in and imported alike. */
 internal const val STYLE_STRENGTH_PREFS = "style_strength"
+// In the same file; style ids never start with "_", so these keys cannot be a strength.
+private const val LAST_STYLE = "_last_style"
+private const val LAST_GROUP = "_last_group"
 
 /**
  * The 风格 row: the eight group chips over cards, each showing the open photo
@@ -266,7 +269,18 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val all = Style.ALL + imported.map { it.look.toStyle(it.id, ui.edit, it.lutId) }
     val groups = (Style.GROUPS + imported.map { it.category }).distinct()
 
-    var group by remember { mutableStateOf(all.firstOrNull { applied(it) }?.group ?: groups.first()) }
+    // The group opens on the applied style, else on the last style picked, else the last
+    // group browsed: an edit tweaked after a style no longer matches it, but the row stays put.
+    var group by remember {
+        val last = prefs.getString(LAST_STYLE, null)?.let { id -> all.firstOrNull { it.id == id }?.group }
+        val browsed = prefs.getString(LAST_GROUP, null)?.takeIf { it in groups }
+        mutableStateOf(all.firstOrNull { applied(it) }?.group ?: last ?: browsed ?: groups.first())
+    }
+    fun browse(g: String) { group = g; prefs.edit().putString(LAST_GROUP, g).apply() }
+    fun pick(s: Style, k: Double) {
+        prefs.edit().putString(LAST_STYLE, s.id).putString(LAST_GROUP, s.group).putFloat(s.id, k.toFloat()).apply()
+        onPick(s.atStrength(k))
+    }
     var open by remember { mutableStateOf<String?>(null) }
     // Search across every group by name, inspiration, film and folk name (StyleTags.kt).
     var searching by remember { mutableStateOf(false) }
@@ -276,7 +290,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         FilterChip(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
             label = { Text("搜索") })
         for (g in groups) FilterChip(selected = !searching && group == g,
-            onClick = { searching = false; query = ""; group = g }, label = { Text(g) })
+            onClick = { searching = false; query = ""; browse(g) }, label = { Text(g) })
     }
     if (searching) {
         OutlinedTextField(value = query, onValueChange = { query = it.take(30) }, singleLine = true,
@@ -301,7 +315,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                         else {
                             open = null
                             view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                            onPick(s.atStrength(strengthOf(s.id)))
+                            pick(s, strengthOf(s.id))
                         }
                     }
                     .padding(bottom = 6.dp),
@@ -329,8 +343,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         LabeledSlider("强度 · ${current.name}", strengthOf(current.id) * 100, 0.0, 100.0, 100.0, enabled, "%.0f%%") { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
             strengths[current.id] = k
-            prefs.edit().putFloat(current.id, k.toFloat()).apply()
-            onPick(current.atStrength(k))
+            pick(current, k)
         }
     }
 }
