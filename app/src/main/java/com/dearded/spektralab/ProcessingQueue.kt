@@ -33,6 +33,9 @@ enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 /** The pre-save check found a frame no photo produces ([what]: 全黑, 全白, 纯色); nothing was saved. */
 class BlankFrameException(val what: String) : Exception("导出画面异常（$what），未保存")
 
+/** The engine could not allocate (native heap or GPU memory); retried a size down like a Java OutOfMemoryError. */
+class OutOfMemoryException(detail: String) : Exception("内存不足：$detail")
+
 /**
  * One export: a snapshot of the photo and its whole edit, so the editor is
  * free to move on (another photo, more edits) while this one is developed.
@@ -318,6 +321,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             runner = deferred
             val saved = deferred.await()
             learn(queued, (SystemClock.elapsedRealtime() - started) / 1000.0)
+            // The job as it ran: fitToMemory or a retry may have shrunk its cap.
+            learnPeak(_jobs.value.firstOrNull { it.id == id } ?: queued, rssBefore, peakReset)
             set(id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0, finishedAt = now(), message = saved, pendingUri = "") }
             host.events.add("job $id done in ${(SystemClock.elapsedRealtime() - started) / 1000}s, ${peakText(rssBefore, peakReset)}")
         } catch (e: CancellationException) {
@@ -360,19 +365,25 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
      * engine is replaced and the job tried once more a size down (the GPU
      * watchdog fires on the longest submits, which a smaller frame shortens).
      */
-    private suspend fun runRecovering(job: ProcessingJob, step: (String, Float) -> Unit): String {
+    private suspend fun runRecovering(queued: ProcessingJob, step: (String, Float) -> Unit): String {
+        val job = fitToMemory(queued)
         try {
             return process(job, step)
-        } catch (e: Exception) {
-            if (e !is DeviceLostException && e !is BlankFrameException) throw e
-            host.events.add("job ${job.id}: ${e.message}")
-            if (e is DeviceLostException) {
-                step("GPU 被重置，正在重试", 0.05f)
-                host.recover(e.engine)
-            } else {
+        } catch (e: Throwable) {
+            if (!recoverable(e)) throw e
+            host.events.add("job ${job.id}: ${e.message ?: e}")
+            when (e) {
+                is DeviceLostException -> {
+                    step("GPU 被重置，正在重试", 0.05f)
+                    host.recover(e.engine)
+                }
                 // A blank frame is a render that went wrong without saying so;
                 // the same smaller retry, on the same engine.
-                step("画面异常，正在重试", 0.05f)
+                is BlankFrameException -> step("画面异常，正在重试", 0.05f)
+                // Java heap or native allocation: what the failed attempt held is
+                // released by now (process's finally), and the retry trims the
+                // GPU pool before it opens.
+                else -> step("内存不足，降档重试", 0.05f)
             }
             val smaller = smaller(job)
             set(job.id) { it.copy(workingEdge = smaller.workingEdge, maxPixels = smaller.maxPixels) }
@@ -387,8 +398,86 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             } catch (again: BlankFrameException) {
                 host.events.add("job ${job.id}: blank again: ${again.message}")
                 throw EngineException("导出画面两次异常（${again.what}），未保存；请调小工作尺寸后重试")
+            } catch (again: Throwable) {
+                if (!isOutOfMemory(again)) throw again
+                host.events.add("job ${job.id}: out of memory again: ${again.message ?: again}")
+                throw EngineException("内存不足，降档后仍失败；请调小工作尺寸后重试")
             }
         }
+    }
+
+    private fun recoverable(e: Throwable) = e is DeviceLostException || e is BlankFrameException || isOutOfMemory(e)
+
+    private fun isOutOfMemory(e: Throwable) = e is OutOfMemoryError || e is OutOfMemoryException
+
+    // --- memory tiers -----------------------------------------------------------
+
+    /**
+     * What one app may hold on this phone: a share of the RAM by tier (the
+     * Android 17 memory limiter and lmkd act well before all of it is used,
+     * and a phone with less RAM has less to spare), and never more than what
+     * is in use now plus what is free above the low-memory threshold, minus a
+     * reserve for the editor and the system.
+     */
+    private fun memoryBudgetBytes(rssNowBytes: Long): Long {
+        val am = app.getSystemService(android.app.ActivityManager::class.java) ?: return Long.MAX_VALUE
+        val info = android.app.ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
+        val gib = 1L shl 30
+        val share = when {
+            info.totalMem <= 6 * gib -> 0.35
+            info.totalMem <= 8 * gib -> 0.40
+            info.totalMem <= 12 * gib -> 0.45
+            else -> 0.50
+        }
+        val byTier = (info.totalMem * share).toLong()
+        val byFree = rssNowBytes + info.availMem - info.threshold - MEMORY_RESERVE
+        return minOf(byTier, byFree)
+    }
+
+    /** Learned from VmHWM ([learnPeak]): bytes of peak RSS per pixel rendered, above the RSS before. */
+    private fun peakBytesPerPixel(): Double = prefs.getFloat("peak_bpp", DEFAULT_PEAK_BPP).toDouble()
+
+    /**
+     * Shrinks [job]'s pixel cap when its predicted peak (RSS now plus pixels
+     * times the learned bytes per pixel) would not fit [memoryBudgetBytes].
+     * Never below [MIN_TIER_PIXELS]: a job that small runs, and fails
+     * honestly if it must.
+     */
+    private fun fitToMemory(job: ProcessingJob): ProcessingJob {
+        val rssKb = ProcMemory.statusKb("VmRSS")
+        if (rssKb < 0) return job
+        val rss = rssKb * 1024
+        val pixels = renderedPixels(job)
+        val bpp = peakBytesPerPixel()
+        val budget = memoryBudgetBytes(rss)
+        if (rss + pixels * bpp <= budget) return job
+        val fit = max(MIN_TIER_PIXELS, ((budget - rss) / bpp).toLong())
+        if (fit >= pixels) return job
+        host.events.add("job ${job.id}: memory tier ${budget shr 20} MB, ${pixels / 1_000_000} MP -> ${fit / 1_000_000} MP " +
+            "(${"%.0f".format(Locale.ROOT, bpp)} B/px)")
+        val smaller = job.copy(maxPixels = fit, outPixels = min(job.outPixels, fit))
+        set(job.id) { it.copy(maxPixels = smaller.maxPixels, outPixels = smaller.outPixels) }
+        persist()
+        return smaller
+    }
+
+    /** The pixels a job renders: its output size, or its pixel cap when that is smaller. */
+    private fun renderedPixels(job: ProcessingJob): Long =
+        if (job.maxPixels > 0) min(job.outPixels, job.maxPixels) else job.outPixels
+
+    /**
+     * After a job that finished: its peak RSS above the RSS it started at, per
+     * pixel, folded into the next [fitToMemory]. Only when VmHWM was reset for
+     * the job; otherwise it is the process's peak, which says nothing about it.
+     */
+    private fun learnPeak(job: ProcessingJob, rssBeforeKb: Long, reset: Boolean) {
+        if (!reset || rssBeforeKb < 0) return
+        val peakKb = ProcMemory.statusKb("VmHWM")
+        val pixels = renderedPixels(job)
+        if (peakKb <= rssBeforeKb || pixels < 1_000_000) return
+        val measured = ((peakKb - rssBeforeKb) * 1024.0 / pixels).coerceIn(20.0, 400.0)
+        val next = 0.6 * peakBytesPerPixel() + 0.4 * measured
+        prefs.edit().putFloat("peak_bpp", next.toFloat()).apply()
     }
 
     /** One working size down, and 60 % of the pixel cap. */
@@ -417,8 +506,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val error = NativeEngine.lastError()
         // The pre-save check (blank_frame): nothing was written to the gallery.
         if (error.startsWith("export check:")) throw BlankFrameException(blankReason(error))
+        if (nativeOutOfMemory(error)) throw OutOfMemoryException(error)
         throw EngineException("$what：$error")
     }
+
+    // A native bad_alloc (the JNI layer's "out of memory"), a bitmap the Java
+    // heap could not give, or Vulkan's out-of-host/device-memory (VkResult -1, -2).
+    private fun nativeOutOfMemory(error: String) = "out of memory" in error ||
+        error.startsWith("cannot allocate a ") || "(VkResult -1)" in error || "(VkResult -2)" in error
 
     private fun blankReason(error: String): String = when {
         "black" in error -> "全黑"
@@ -799,6 +894,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // most two minutes of waiting for it: a phone that never cools still exports.
         private const val HOT_HEADROOM = 0.85f
         private const val THERMAL_WAIT_MS = 120_000L
+        /** Kept free for the editor's own session and the system UI. */
+        private const val MEMORY_RESERVE = 768L shl 20
+        /** Peak RSS per rendered pixel before this phone has measured its own (DeviceProfile's 100 B/px). */
+        private const val DEFAULT_PEAK_BPP = 100f
+        /** The smallest frame a memory tier shrinks a job to. */
+        private const val MIN_TIER_PIXELS = 4_000_000L
 
         /** Seconds until every active job is done: the running one's own estimate plus each queued one's. */
         fun remainingSeconds(jobs: List<ProcessingJob>, perMpJpeg: Double = 1.2): Int {
