@@ -29,7 +29,7 @@ index 2dea987..d3623fb 100644
 +    // channel. One launch over a whole 20 MP plane ran for seconds and mobile
 +    // GPU watchdogs (Adreno) answered with VK_ERROR_DEVICE_LOST. Every thread
 +    // owns one complete line, so chunking changes no arithmetic.
-+    constexpr uint32_t kIirLinesPerLaunch = 512;
++    constexpr uint32_t kIirLinesPerLaunch = 256;
 +    const auto launch = [&](const gpu::BufferRef& src, uint32_t accumulate, uint32_t axis,
 +                            uint32_t lines, std::string& err) {
 +        const uint32_t threads = lines * 3u;

@@ -236,6 +236,32 @@ JPEG 用例的逐像素差（导出平均 0.065，p99.9 2.6）比颗粒关闭时
 与第 3、4.5 节的数字逐组相同：默认值下补丁 0005 和曲线阶段都不改变像素（曲线全为恒等时 `curve_table` 返回空表，
 这一阶段被跳过）。fma 探测检查（第 4.4 节）7 种情况也与之前相同。
 
+### 4.7 DNG 增益图、LUT 接口与补丁 0001 改为 256 行（main `063a03f`，2026-11-04）
+
+`main` 又加入了 Layer 2 的 LUT 接口（`ColourTable` / `set_lut`，`Look.lut`）、引擎补丁 0006（DNG OpcodeList2 增益图）
+和 0007（颗粒大小与扫描锐化上线）。在 `063a03f` 上用 `scripts/parity.sh` 完整运行：52 个用例，0 个不合格。
+
+- **增益图 DNG**：样片里只有 Pixel 2 XL 的 DNG 带 OpcodeList2 GainMap（4 个 opcode 9；Leica Q、Leica M10、Ricoh GR III
+  的 OpcodeList2 为空）。新增 `rawfull_pixel_portra`，原文件全尺寸，两边各自用 LibRaw 解码，所以两边都走 0006：
+  导出 sRGB 平均 0.0001 / p99.9 0.004 / 最大 0.0075，16 位码值最大差 0.004；屏幕最大 1.21（1 个 8 位码值）。
+  宿主一侧确实打了 0006：补丁标记从 `+393763879b61225c` 变为 `+1a7707473ac1c2f2`，`engine/src/io/dng_gain_map.hpp`
+  存在，`spektralab-host` 的构建时间晚于该文件。
+- **LUT 关闭时 Layer 2 不变**：`spk_android` 不调用 `set_lut`，`lut_` 为空，`apply()` 走原来的路径。
+  3 个 `layer2_*` 与 2 个 `layer2curve_*` 用例的数字与第 4.6 节逐项相同（导出最大 0.015 / 0.016）。
+- 其余各组也与第 4.6 节相同。
+
+**补丁 0001 从每批 512 行改为 256 行。** 衍生项目 SAINTTaiYi/SpektraLab-Android 的 fa199b6 改成 256 后，44.7 MP 从设备丢失
+变成能跑完。验证方法：同一份代码各跑一次 512 和 256，每个用例的每个输出记下 SHA-256（`hashes.json`），
+用 `host_parity.py same` 比较。第一次比较 468 个输出中 432 个相同，不同的 36 个全部属于 4 个 `temple_*` 用例
+（Fujifilm X100F，X-Trans）。原因在输入：两次运行各自重新解码了 `temple.f32`，两份在 4 723 200 个值中有 465 个不同，
+最大差 0.00099。用同一份 `temple.f32` 以 512 行重跑这 4 个用例，结果与 256 行逐字节相同。
+所以 52 个用例的 468 个输出在 512 与 256 之间全部逐字节相同，补丁已改为 256。
+
+**附带发现**：云主机构建（LibRaw 打开 OpenMP、未打 `patches/libraw/`）解码同一个 X-Trans RAF 两次，结果不完全相同
+〔推断：X-Trans 去马赛克的多线程分块；安卓一侧打了 `patches/libraw/0003-xtrans-serial-tiles`，未在真机上验证是否确定〕。
+差值最大 0.00099（线性），远低于 16 位一个码值的可见量级，但它会让逐字节比较在 X-Trans 用例上误报，
+比较这类用例时要固定同一份输入。
+
 ## 5. 复现
 
 **一键脚本**：`scripts/parity.sh [工作目录]`（默认 `build/parity`）。发版前在云主机手动跑一次，不进常规 CI（约 40–60 分钟、1.5 GB）。
