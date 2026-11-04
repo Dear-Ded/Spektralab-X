@@ -38,6 +38,10 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
 
+> What makes film fascinating was never only the colour or the image quality. It is the act of shooting: the uncertainty when you press the shutter, the anticipation while the roll is developed, the regret of a missed frame, and the surprise when the prints come back.
+>
+> We hope Spektralab-X brings you back to the process of taking pictures, and makes you fall in love again with every press of the shutter.
+
 ## A note from the developer
 
 Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) and Andrea Volpato's [spektrafilm](https://github.com/andreavolpato/spektrafilm). Without those projects and the years of research behind them, it would not exist.

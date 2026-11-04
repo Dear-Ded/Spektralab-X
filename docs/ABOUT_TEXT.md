@@ -7,7 +7,7 @@
 
 ## 布局
 
-自上而下六块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（应用没有网络权限，打开外部链接不需要）。证书指纹用等宽字体，旁边放“复制”按钮。
+自上而下七块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（应用没有网络权限，打开外部链接不需要）。证书指纹用等宽字体，旁边放“复制”按钮。
 
 ## 简体中文
 
@@ -18,6 +18,10 @@
 光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。
 作者：Spektralab-X 贡献者
 源码：https://github.com/Dear-Ded/Spektralab-X
+
+**项目初心**
+胶片真正迷人的，从来不只是色彩和画质，而是拍摄本身：按下快门时的不确定，等待冲洗时的期待，失手时的遗憾，还有出片那一刻的惊喜。
+希望 Spektralab-X 能把你带回拍摄的过程里，让你重新爱上每一次按下快门的瞬间。
 
 **写在前面**
 Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab 与 Andrea Volpato 的 spektrafilm 开发。没有这些开源项目和背后多年的研究，就不会有它。
@@ -47,6 +51,10 @@ Version {version} ({code})
 Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly.
 Author: Spektralab-X contributors
 Source: https://github.com/Dear-Ded/Spektralab-X
+
+**Why we made it**
+What makes film fascinating was never only the colour or the image quality. It is the act of shooting: the uncertainty when you press the shutter, the anticipation while the roll is developed, the regret of a missed frame, and the surprise when the prints come back.
+We hope Spektralab-X brings you back to the process of taking pictures, and makes you fall in love again with every press of the shutter.
 
 **A note from the developer**
 Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's SpektraLab and Andrea Volpato's spektrafilm. Without those projects and the years of research behind them, it would not exist.
@@ -79,6 +87,7 @@ Not affiliated with the SpektraLab project or with Xiaomi.
 | `about_author` | 作者：Spektralab-X 贡献者 |
 | `about_note` | “写在前面”正文（两句） |
 | `about_source_url` | https://github.com/Dear-Ded/Spektralab-X |
+| `about_intent` | “项目初心”正文 |
 | `about_free` | “本应用永久免费”正文 |
 | `about_cert_sha256` | 证书指纹（不翻译，`translatable="false"`） |
 | `about_verify_url` | https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md |

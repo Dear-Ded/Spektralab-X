@@ -38,6 +38,10 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
 
+> 胶片真正迷人的，从来不只是色彩和画质，而是拍摄本身：按下快门时的不确定，等待冲洗时的期待，失手时的遗憾，还有出片那一刻的惊喜。
+>
+> 希望 Spektralab-X 能把你带回拍摄的过程里，让你重新爱上每一次按下快门的瞬间。
+
 ## 写在前面
 
 Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 与 Andrea Volpato 的 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 开发。没有这些开源项目和背后多年的研究，就不会有它。
