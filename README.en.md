@@ -110,7 +110,7 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 ## Features
 
 **Input**
-- Camera RAW through LibRaw 0.22.2: DNG, CR3, NEF, ARW, RAF, RW2, ORF and more; DNGs interpolate between the dual-illuminant matrices at the shot's white balance; Xiaomi and Pixel DNGs get their built-in GainMap lens-shading correction
+- Camera RAW through LibRaw 0.22.2: DNG, CR3, NEF, ARW, RAF, RW2, ORF and more; DNGs interpolate between the dual-illuminant matrices at the shot's white balance; Xiaomi and Pixel DNGs get their built-in GainMap lens-shading correction; Sony A7 V ARW 6 compressed RAWs supported
 - Phone photos: JPEG, HEIC/HEIF, PNG, WebP. Display P3 photos go to the engine as P3; the Ultra HDR gain map and highlight recovery can be turned on in Settings (off by default, as on the desktop)
 - Open from the gallery or a file manager, or straight from another app with Share / Open with; the file picker opens in the folder you last picked from
 - Film and paper for new photos: remember the last used pair (default) or always use a fixed one
@@ -118,17 +118,18 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 **Printing**
 - Colour negative, slide, black-and-white and motion-picture films with matching papers; slides are scanned directly, without paper
 - Film strip: a live thumbnail of the current photo on every stock, tap to switch
-- One-tap styles: 87 styles in eight groups (lab, negative, slide, cinema, black-and-white, photographers, cameras, phones), each setting film, paper, print, effects and adjustments together and naming what inspired it ([docs/STYLES.md](docs/STYLES.md)); tap the applied style again for a 0–100% strength slider
+- One-tap styles: 87 styles in eight groups (lab, negative, slide, cinema, black-and-white, photographers, cameras, phones), each setting film, paper, print, effects and adjustments together and naming what inspired it ([docs/STYLES.md](docs/STYLES.md)); tap the applied style again for a 0–100% strength slider; search across groups by name, inspiration, film or folk names such as "Fuji look" and "CCD"; the last style used is remembered
 - Style import: `.spklook`, `.cube`, HaldCLUT images, Lightroom presets (`.xmp` / `.dng`), spektrafilm presets and film data (`.json`) and Fuji recipes (`.txt`), previewed with a strength slider before keeping, with a list of anything that could not be converted; the current style can be shared as a `.spklook`
 - Exposure compensation, auto exposure, film format (sets the physical scale of grain and halation), print exposure, yellow / magenta filtration
 - Grain, halation and paper glare, each with its own switch and strength; plus grain size, layered grain, emulsion scatter, colour separation (DIR couplers) and scan sharpening (amount, radius)
 - RAW white balance: temperature / tint applied at decode, with upstream's desktop algorithm
 - Post-print adjustments (Adjust tab): white balance, exposure, contrast, highlights, shadows, black/white point, saturation, eight HSL bands, four colour wheels, fade, vignette and RGB / red / green / blue curves, previewed live while dragging
-- Palette: a tone × colour pad with an overall strength slider (after the iPhone's Photographic Styles); double-tap returns to the style's own point
+- Palette: a tone × colour pad with an overall strength slider (after the iPhone's Photographic Styles); double-tap returns to the style's own point; each style has its own home point
 
 **Framing and borders**
 - Rotate, flip, centred crop (original, 3:2, 4:3, 1:1, 16:9, 65:24 and more)
 - Film edges: 135, half frame, XPan, 645, 6×6, 6×7, 6×9 and more, with edge print and sprocket holes; plus paper borders such as Polaroid, Instax Mini, a parameter strip and gallery white
+- 50 border presets in all: film edges and date backs, instant cards (600 / i-Type, Instax Square / Wide / Mini, Go), mats and padding, data bars with or without brand logos (lens model printed; real focal length when there is no 35 mm equivalent)
 - Sprocket strips only: on any film, drawn outside the photo with no crop and no change to the print; position, base colour, hole shape, edge text and frame numbers are adjustable
 - Brand-logo captions: the camera or phone brand is detected from EXIF (or picked by hand, or replaced by your own text), five caption layouts with logos, optional film-maker logo; 33 brands, sources in [docs/LOGOS.md](docs/LOGOS.md)
 - Film-edge details: gate shape, carrier, the real stock name, frame number, and a re-roll button
@@ -139,9 +140,9 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 - Hold to compare with the original, tap the photo to hide the interface, histogram with clipping, full-screen 1:1 grain view
 - Sliders show their value while dragging; double-tap to reset, tap beside the thumb to nudge one step, move your finger off the track for a slow, fine drag
 - Undo / redo up to 50 steps; presets save film, paper and effect combinations
-- Light table: import a whole roll, pinch the grid, filter, drag-select; a loupe where swipe up picks, swipe down rejects, plus star ratings; a film-thumbnail view; copy one frame's edit, paste it by group onto the rest, export in a batch
+- Light table: import a whole roll, pinch the grid, filter, drag-select; a loupe where swipe up picks, swipe down rejects, plus star ratings; a film-thumbnail view; copy one frame's edit, paste it by group onto the rest, export in a batch; automatic rolls by film and day (or packed by hand), a 35 mm strip with sprocket holes and frame numbers, a 6-column contact view, style compare, and a whole roll exported as one contact-sheet JPEG
 - If the system kills the app, reopening it brings back the same photo with the whole edit
-- Extreme render: a JPEG at the photo's original resolution (quality 98) in the background, stepping down a size if memory runs short
+- Extreme render: a 4:4:4 JPEG at the photo's original resolution (quality 98, libjpeg-turbo) in the background, stepping down a size if memory runs short
 - Background export queue: exports render on their own thread so editing is not blocked, jobs resume after the process is killed, progress notifications support Live Update
 - Safe saving: the gallery entry stays hidden until the file is written and checked, so no half-written photos; an all-black, all-white or single-colour frame is refused and retried once a size down; a lost GPU is replaced and the job retried
 - Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF; location only if you turn it on in Settings) or 16-bit TIFF (lossless Deflate)
