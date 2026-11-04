@@ -1,0 +1,23 @@
+// storage_probe.comp -- the canary kernel behind storage_probe.cpp.
+//
+// Thirty-two invocations, one per canary, spread from the buffer's last word
+// down to its start. Mode 0 writes a marker at each spot through the storage
+// binding; mode 1 reads the same spots back into `res`. A driver that accepts
+// a binding past what it really addresses drops the far writes, and mode 1
+// then reads the zeros the buffer was cleared to.
+//
+// Compiled into storage_probe_spv.inc:
+//   glslangValidator -V --target-env vulkan1.0 --vn spk_storage_probe_spv
+//       -o storage_probe_spv.inc storage_probe.comp
+#version 450
+layout(local_size_x = 32) in;
+layout(std430, binding = 0) buffer Big { uint v[]; } big;
+layout(std430, binding = 1) buffer Res { uint v[]; } res;
+layout(push_constant) uniform P { uint words; uint mode; uint salt; } p;
+
+void main() {
+    uint k = gl_LocalInvocationID.x;
+    uint idx = p.words - 1u - k * (p.words / 32u);
+    if (p.mode == 0u) big.v[idx] = (k * 2654435761u) ^ p.salt;
+    else res.v[k] = big.v[idx];
+}

@@ -29,6 +29,7 @@
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
+#include "storage_probe.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
 #include "output_transform.hpp"
@@ -502,6 +503,22 @@ void configure_raw_threads() {
 #define JNI_FN(ret, name) extern "C" JNIEXPORT ret JNICALL Java_com_dearded_spektralab_NativeEngine_##name
 
 JNI_FN(jstring, lastError)(JNIEnv* env, jobject) { return jstr(env, t_error); }
+
+// The storage-buffer size this GPU was measured to address, up to `ceiling`
+// bytes (storage_probe.cpp); 0 when even 128 MiB failed. Its own VkInstance
+// and VkDevice, so call it before create, once per driver. lastError has the log.
+JNI_FN(jlong, probeStorageRange)(JNIEnv*, jobject, jlong ceiling) {
+    try {
+        std::string log;
+        const uint64_t bytes = spk::android::probe_storage_range(uint64_t(std::max<jlong>(0, ceiling)), log);
+        t_error = log;
+        __android_log_print(ANDROID_LOG_INFO, kTag, "storage probe: %s", log.c_str());
+        return jlong(bytes);
+    } catch (...) {
+        fail("storage probe: unknown failure");
+        return 0;
+    }
+}
 
 JNI_FN(jstring, deviceInfo)(JNIEnv* env, jobject) {
     // Queried through vkGetInstanceProcAddr directly, so volk's global table

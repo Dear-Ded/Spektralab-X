@@ -116,7 +116,7 @@ ${spk_rgb_space}
 ${spk_spaces}
 ")
 
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp storage_probe.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
     "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE
