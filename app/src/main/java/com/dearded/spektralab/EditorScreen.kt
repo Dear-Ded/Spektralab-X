@@ -639,6 +639,38 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             LabeledSlider("片轴漏光", e.edgeLeaks, 0.0, 3.0, 0.0, enabled, "%.1f", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(edgeLeaks = it))
                             }
+                            // Upstream's gate families and carriers (overscan.cpp accepts exactly these).
+                            Text("片门", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("auto" to "随机", "square" to "直角", "rounded" to "圆角", "eared" to "耳朵",
+                                    "shouldered" to "肩形", "kicked" to "斜角")) {
+                                    FilterChip(selected = e.edgeGate == v, onClick = { vm.update(e.copy(edgeGate = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            Text("片夹", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("none" to "无", "black" to "黑色片夹", "open" to "开口片夹")) {
+                                    FilterChip(selected = e.edgeCarrier == v, onClick = { vm.update(e.copy(edgeCarrier = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            SwitchRow("使用真实片名", e.edgeRealName, enabled) { vm.update(e.copy(edgeRealName = it)) }
+                            if (e.edgeRealName && e.edgeText.isNotBlank()) {
+                                Text("片边印字：${e.edgeText}", style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            LabeledSlider("画幅编号", e.edgeFrameNumber.toDouble(), 0.0, 99.0, 0.0, enabled, "%.0f") {
+                                vm.update(e.copy(edgeFrameNumber = Math.round(it).toInt().coerceIn(0, 99)))
+                            }
+                            Text("0 为随机编号。", style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            OutlinedButton(onClick = {
+                                // New "camera" and "this frame": gate centring, weave and leak positions re-drawn.
+                                val r = java.util.Random()
+                                vm.update(e.copy(edgeCameraSeed = 1 + r.nextInt(Int.MAX_VALUE - 1),
+                                    edgeFrameSeed = 1 + r.nextInt(Int.MAX_VALUE - 1)))
+                            }, enabled = enabled) { Text("重新抽取") }
                         }
                         if (!e.frame.isNone) {
                             Text("相纸", style = MaterialTheme.typography.labelLarge)
@@ -716,6 +748,62 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        if (e.dateImprint && dateOk) {
+                            // Upstream's limits (FilmEdge.swift): the data face and between-frames
+                            // placement need a film edge; 120 backs print in the margin.
+                            Text("日期后背", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("lcd" to "橙色 LCD", "dots" to "点阵", "data" to "数据后背")) {
+                                    FilterChip(selected = e.dateStyle == v, onClick = { vm.update(e.copy(dateStyle = v)) },
+                                        label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
+                                }
+                            }
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("japan" to "年 月 日", "us" to "月 日 年")) {
+                                    FilterChip(selected = e.dateOrder == v,
+                                        onClick = { vm.update(e.copy(dateOrder = v, dateText = Edit.dateInOrder(e.dateText, v))) },
+                                        label = { Text(label) }, enabled = enabled && e.dateStyle != "data")
+                                }
+                            }
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")) {
+                                    FilterChip(selected = e.dateCorner == v, onClick = { vm.update(e.copy(dateCorner = v)) },
+                                        label = { Text(label) }, enabled = enabled && e.datePlacement == "frame")
+                                }
+                                for ((v, label) in listOf("frame" to "印在画面", "rebate" to "印在帧间")) {
+                                    FilterChip(selected = e.datePlacement == v, onClick = { vm.update(e.copy(datePlacement = v)) },
+                                        label = { Text(label) }, enabled = enabled && (v == "frame" || e.rebateDateFits))
+                                }
+                            }
+                            LabeledSlider("字号", e.dateSize, 0.4, 3.0, 1.0, enabled, "%.1f", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(dateSize = it))
+                            }
+                            LabeledSlider("亮度", e.dateEv, -2.0, 8.0, 3.5, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(dateEv = it))
+                            }
+                            if (e.datePlacement == "frame") {
+                                LabeledSlider("横向边距", e.dateInsetX, 0.0, 30.0, 3.0, enabled, "%.1f mm", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(dateInsetX = it))
+                                }
+                                LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled, "%.1f mm", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(dateInsetY = it))
+                                }
+                            }
+                            if (e.dateStyle != "data") {
+                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank()) {
+                                    vm.update(e.copy(dateWithData = it))
+                                }
+                            }
+                            Text(
+                                when {
+                                    e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息，数据后背无内容。"
+                                    !e.filmEdge -> "数据后背和帧间日期需要打开胶片边框。"
+                                    else -> "拍摄参数：${e.dateDataText}"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                     else -> {
                         SwitchRow("颗粒", e.grainActive, enabled) { vm.update(e.copy(grainActive = it)) }

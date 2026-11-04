@@ -238,8 +238,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
                 filmEdge = false,
-                dateText = Edit.dateBackText(sourceExif.dateTimeOriginal),
-            ).let { if (it.dateText.isEmpty()) it.copy(dateImprint = false) else it }
+            ).let { Edit.withShooting(it, sourceExif) }.let { if (it.dateText.isEmpty()) it.copy(dateImprint = false) else it }
                 // A border that crops or sets a film edge belongs to the last photo's
                 // geometry; a pure paper frame (data bar, mat) carries over as a look.
                 .let {
