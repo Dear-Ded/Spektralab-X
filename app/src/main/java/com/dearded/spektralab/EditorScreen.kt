@@ -926,6 +926,7 @@ private fun Controls(
                         }
                         }
                         else -> {
+                            PanelHint("先定方向，再选比例；裁剪在冲洗之前完成，颗粒按裁剪后的画面计算。")
                         val src = ui.source
                         // With the film edge on, the crop must stay the gate's shape in the new orientation.
                         fun reframe(next: Edit) = when {
