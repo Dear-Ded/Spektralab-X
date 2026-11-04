@@ -19,7 +19,9 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
     /** [e] with the app-side facts the wire needs that only the catalog knows. */
     fun normalize(e: Edit): Edit {
         val mono = film(e.film)?.bw == true && paper(e.paper)?.bw == true
-        return if (mono == e.monoPrint) e else e.copy(monoPrint = mono)
+        // The edge prints the film's own name for its gauge (UI.md E.1).
+        val edge = Edit.edgeTextFor(film(e.film), e.edgeFormat)
+        return if (mono == e.monoPrint && edge == e.edgeText) e else e.copy(monoPrint = mono, edgeText = edge)
     }
 
     companion object {
@@ -111,6 +113,24 @@ data class Edit(
     val edgeFNumber: Double = 0.0,
     val dateStyle: String = "lcd",
     val dateCorner: String = "br",
+    /** The stock's edge print ("KODAK GB 200-7"); resolved by Catalog.normalize from the film and gauge. */
+    val edgeText: String = "",
+    /** Print the film's real name on the edge (UI.md E.1); off leaves the edge print blank. App-side. */
+    val edgeRealName: Boolean = true,
+    /** The frame's number on the edge, 1..99; 0 is the frame seed's draw. */
+    val edgeFrameNumber: Int = 0,
+    /** frame (in the picture) or rebate (between frames, 135 with a film edge only). */
+    val datePlacement: String = "frame",
+    /** The shooting data printed beside the date ("1/250 F5.6 24mm"), already resolved; "" = none. */
+    val dateDataText: String = "",
+    val dateSize: Double = 1.0,
+    val dateEv: Double = 3.5,
+    val dateInsetX: Double = 3.0,
+    val dateInsetY: Double = 2.4,
+    /** japan ('26 11 4) or us (11 4 '26). App-side: the text is formatted here (withShooting). */
+    val dateOrder: String = "japan",
+    /** Print the shooting data as well as the date. App-side; resolved into [dateDataText]. */
+    val dateWithData: Boolean = false,
     /** The paper around the print. App-side only: drawn after the engine, never sent. */
     val frame: FrameSpec = FrameSpec(),
     /** The border preset the user picked, for the chip row. App-side only. */
@@ -120,6 +140,9 @@ data class Edit(
     /** Layer 2, the adjustments to the finished print (Look.kt). App-side: re-packed, never developed. */
     val look: Look = Look.NEUTRAL,
 ) {
+    /** A date between frames needs a 135 film edge to print on (upstream's `between`, the wire's `rebate`). */
+    val rebateDateFits: Boolean get() = filmEdge && (edgeFormat == "135" || edgeFormat == "135_half")
+
     /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
     fun turned(by: Int) = copy(
         quarterTurns = (quarterTurns + by) % 4,
@@ -184,7 +207,8 @@ data class Edit(
             "overscan_active" to { e: Edit -> e.filmEdge },
             "overscan_format" to { e: Edit -> e.edgeFormat },
             "date_imprint_active" to { e: Edit -> e.dateImprint },
-            "date_imprint_text" to { e: Edit -> e.dateText },
+            // The data face prints the shooting data in place of the date.
+            "date_imprint_text" to { e: Edit -> if (e.dateStyle == "data" && e.filmEdge) e.dateDataText else e.dateText },
             "overscan_mode" to { e: Edit -> e.edgeMode },
             "overscan_holes" to { e: Edit -> e.edgeHoles },
             "overscan_gate" to { e: Edit -> e.edgeGate },
@@ -194,8 +218,18 @@ data class Edit(
             "overscan_camera_seed" to { e: Edit -> e.edgeCameraSeed },
             "overscan_frame_seed" to { e: Edit -> e.edgeFrameSeed },
             "overscan_f_number" to { e: Edit -> e.edgeFNumber },
-            "date_imprint_style" to { e: Edit -> e.dateStyle },
+            // The data face goes between frames or in the margin: without a film edge it has nowhere to print.
+            "date_imprint_style" to { e: Edit -> if (e.dateStyle == "data" && !e.filmEdge) "lcd" else e.dateStyle },
             "date_imprint_corner" to { e: Edit -> e.dateCorner },
+            // Clamped to params.cpp's ranges: one value out of range and the engine refuses the whole delta.
+            "overscan_edge_text" to { e: Edit -> if (e.edgeRealName) e.edgeText else "" },
+            "overscan_frame_number" to { e: Edit -> e.edgeFrameNumber.coerceIn(0, 99) },
+            "date_imprint_placement" to { e: Edit -> if (e.rebateDateFits) e.datePlacement else "frame" },
+            "date_imprint_data_text" to { e: Edit -> if (e.filmEdge && e.dateWithData && e.dateStyle != "data") e.dateDataText else "" },
+            "date_imprint_size" to { e: Edit -> e.dateSize.coerceIn(0.4, if (e.dateStyle == "data" && e.edgeFormat == "135_half") 1.0 else 3.0) },
+            "date_imprint_ev" to { e: Edit -> e.dateEv.coerceIn(-2.0, 8.0) },
+            "date_imprint_inset_x" to { e: Edit -> e.dateInsetX.coerceIn(0.0, 30.0) },
+            "date_imprint_inset_y" to { e: Edit -> e.dateInsetY.coerceIn(0.0, 30.0) },
         )
 
         /** The session's resolved values, as `spk_get_params` reports them. */
@@ -238,6 +272,17 @@ data class Edit(
             edgeFNumber = p.optDouble("overscan_f_number", fallback.edgeFNumber),
             dateStyle = p.optString("date_imprint_style", fallback.dateStyle),
             dateCorner = p.optString("date_imprint_corner", fallback.dateCorner),
+            edgeText = p.optString("overscan_edge_text", fallback.edgeText),
+            edgeRealName = fallback.edgeRealName,   // app-side only
+            edgeFrameNumber = p.optInt("overscan_frame_number", fallback.edgeFrameNumber),
+            datePlacement = p.optString("date_imprint_placement", fallback.datePlacement),
+            dateDataText = p.optString("date_imprint_data_text", fallback.dateDataText),
+            dateSize = p.optDouble("date_imprint_size", fallback.dateSize),
+            dateEv = p.optDouble("date_imprint_ev", fallback.dateEv),
+            dateInsetX = p.optDouble("date_imprint_inset_x", fallback.dateInsetX),
+            dateInsetY = p.optDouble("date_imprint_inset_y", fallback.dateInsetY),
+            dateOrder = fallback.dateOrder,         // app-side only
+            dateWithData = fallback.dateWithData,   // app-side only
             frame = fallback.frame,          // app-side only
             borderId = fallback.borderId,    // app-side only
             monoPrint = fallback.monoPrint,  // app-side only
@@ -294,6 +339,83 @@ data class Edit(
             val aspect = if (outW >= outH) gate else 1.0 / gate
             return centredCrop(edit.copy(filmEdge = true, edgeFormat = format, cropAspect = aspect), w, h, aspect)
         }
+
+        /**
+         * The stock's edge print, as upstream's Session.edgeText: the film's own
+         * words where its strips print something other than its name (read off
+         * real strips upstream), else the name in capitals without "(...)".
+         */
+        fun edgeTextFor(stock: Stock?, format: String): String {
+            stock ?: return ""
+            EDGE_TEXT[stock.id]?.let { (on135, on120) -> return if (gauge(format) == "120") on120 else on135 }
+            return stock.label.substringBefore('(').trim().uppercase()
+        }
+
+        /** The film a format runs on: 135 (with half frame and XPan) or 120. */
+        fun gauge(format: String) = if (format.startsWith("135")) "135" else "120"
+
+        // (135, 120), from upstream Session+FilmEdge.swift at a46627d.
+        private val EDGE_TEXT = mapOf(
+            "kodak_gold_200" to ("KODAK GB 200-7" to "KODAK 200"),
+            "kodak_portra_800" to ("KODAK PORTRA 800-3" to "KODAK PORTRA 800"),
+            "kodak_portra_800_push1" to ("KODAK PORTRA 800-3" to "KODAK PORTRA 800"),
+            "kodak_portra_800_push2" to ("KODAK PORTRA 800-3" to "KODAK PORTRA 800"),
+            "kodak_ultramax_400" to ("KODAK GC 400" to "KODAK GC 400"),
+            "kodak_ektachrome_100" to ("KODAK E100" to "KODAK E100"),
+            "fujifilm_c200" to ("FUJI 200" to "FUJI 200"),
+            "fujifilm_xtra_400" to ("S-400" to "FUJI S-400"),
+            "fujifilm_pro_400h" to ("PRO400H" to "FUJI PRO400H"),
+            "fujifilm_provia_100f" to ("FUJI RDPIII" to "FUJI RDPIII"),
+            "fujifilm_velvia_100" to ("RVP100" to "FUJI RVP100"),
+            "kodak_vision3_50d" to ("EASTMAN 5203" to "EASTMAN 5203"),
+            "kodak_vision3_250d" to ("EASTMAN 5207" to "EASTMAN 5207"),
+            "kodak_vision3_200t" to ("EASTMAN 5213" to "EASTMAN 5213"),
+            "kodak_vision3_500t" to ("EASTMAN 5219" to "EASTMAN 5219"),
+            "cinestill_800t" to ("CINESTILL 800T" to "CINESTILL 800T"),
+            "kodak_tri_x_400" to ("KODAK 400TX" to "KODAK 400TX"),
+            "kodak_tmax_100" to ("KODAK 100TMX" to "KODAK 100TMX"),
+            "fujifilm_neopan_acros_100_ii" to ("FUJI 100 ACROS II" to "FUJI 100 ACROS II"),
+            "ilford_hp5_plus_400" to ("ILFORD HP5 PLUS" to "ILFORD HP5 PLUS"),
+        )
+
+        /**
+         * [edit] with what the photo's EXIF decides on the film: the date in
+         * the chosen order, the shooting-data line and the aperture that sets
+         * the gate's penumbra. A field the file does not carry is left out.
+         */
+        fun withShooting(edit: Edit, exif: ExifCopy): Edit = edit.copy(
+            dateText = dateBackText(exif.dateTimeOriginal, edit.dateOrder),
+            dateDataText = dataLine(exif),
+            edgeFNumber = exif.fNumber()?.coerceIn(0.0, 64.0) ?: 0.0,
+        )
+
+        /**
+         * The data face's line, after upstream's ShootingData.dataText:
+         * shutter, aperture, 135-equivalent focal length ("1/250 F5.6 24mm"),
+         * fields dropped from the right until it is 22 characters or fewer.
+         * Only characters the 5x7 face draws.
+         */
+        fun dataLine(exif: ExifCopy): String {
+            val fields = listOfNotNull(
+                exif.shutter()?.let { if (it.startsWith("1/")) it.removeSuffix("s") else it },
+                exif.fNumber()?.let { "F" + "%.1f".format(java.util.Locale.ROOT, it).removeSuffix(".0") },
+                exif.focal35()?.let { "${it}mm" },
+            ).toMutableList()
+            while (fields.isNotEmpty() && fields.joinToString(" ").length > 22) fields.removeAt(fields.size - 1)
+            return fields.joinToString(" ")
+        }
+
+        /** [text] (a date back's date in either order) written in [order]; anything else unchanged. */
+        fun dateInOrder(text: String, order: String): String {
+            val t = text.trim().split(' ')
+            if (t.size != 3) return text
+            val y = t.indexOfFirst { it.startsWith("'") }
+            val (mo, d) = when (y) { 0 -> t[1] to t[2]; 2 -> t[0] to t[1]; else -> return text }
+            return if (order == "us") "$mo $d ${t[y]}" else "${t[y]} $mo $d"
+        }
+
+        /** EXIF `yyyy:MM:dd ...` as a date back prints it: japan '26 11 4, us 11 4 '26, no leading zeros. */
+        fun dateBackText(exifDate: String?, order: String): String = dateInOrder(dateBackText(exifDate), order)
 
         /** EXIF `yyyy:MM:dd ...` as a date back prints it (year first, no leading zeros). */
         fun dateBackText(exifDate: String?): String {

@@ -1,7 +1,8 @@
-// JNI surface for the Android app. Every call is made from one Kotlin worker
-// thread (EngineThread), because the engine's last-error string is
-// thread-local. Nothing here throws into the JVM: failures return 0/null/false
-// and leave a message for lastError().
+// JNI surface for the Android app. A session is used on one thread only: the
+// editor's on EngineThread, an export's on ExportThread; engine-level calls
+// stay on EngineThread. The error string is thread-local, so lastError() is
+// read on the thread that failed. Nothing here throws into the JVM: failures
+// return 0/null/false and leave a message for lastError().
 #include <android/bitmap.h>
 #include <android/log.h>
 #include <jni.h>

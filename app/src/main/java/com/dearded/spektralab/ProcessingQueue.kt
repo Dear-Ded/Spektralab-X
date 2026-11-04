@@ -77,6 +77,8 @@ data class ProcessingJob(
     val secured: Boolean = true,
     /** The pending gallery entry being written, so a kill mid-save is cleaned up or found saved. */
     val pendingUri: String = "",
+    /** The source's GPS tags ([ExifLocation.encode]), read at enqueue when 导出保留拍摄位置 is on; "" = none. */
+    val location: String = "",
 ) {
     val active get() = state == JobState.QUEUED || state == JobState.RUNNING
 
@@ -94,6 +96,7 @@ data class ProcessingJob(
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
+        .put("location", location)
 
     companion object {
         fun fromJson(o: JSONObject): ProcessingJob? = runCatching {
@@ -111,6 +114,7 @@ data class ProcessingJob(
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
                 sourcePath = o.optString("src"), persisted = o.optBoolean("persisted"),
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
+                location = o.optString("location"),
             )
         }.getOrNull()
     }
@@ -175,8 +179,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         _jobs.update { it + job.copy(secured = false) }
         persist()
         host.scope.launch {
-            val secured = withContext(Dispatchers.IO) { secure(job) }
-            set(job.id) { it.copy(sourcePath = secured.sourcePath, persisted = secured.persisted, secured = true) }
+            val secured = withContext(Dispatchers.IO) {
+                // From the URI as the user picked it, while its grant is fresh: a
+                // copy in app storage would carry the GPS tags MediaStore redacted.
+                val location = if (LocationSetting.enabled(app)) ExifLocation.encode(ExifCopy.readLocation(app, Uri.parse(job.uri))) else ""
+                secure(job).copy(location = location)
+            }
+            set(job.id) { it.copy(sourcePath = secured.sourcePath, persisted = secured.persisted, location = secured.location, secured = true) }
             persist()
             start()
         }
@@ -418,7 +427,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val local = job.sourcePath.takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }
         val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
         step("读取照片", 0.05f)
-        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
+        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }.withLocation(ExifLocation.decode(job.location))
         // The film edge lays the frame on a canvas up to 1.6x its area, and that
         // canvas is one GPU buffer (128 MiB on Adreno 7xx): decode a little smaller.
         val maxPixels = if (edit.filmEdge && job.maxPixels > 0) job.maxPixels * 10 / 16 else job.maxPixels
@@ -435,8 +444,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
                 val path = local?.absolutePath ?: input!!.path
                 step("解码 RAW", 0.12f)
-                withContext(EngineThread.dispatcher) {
-                    NativeEngine.trimMemory(engine)
+                // trimMemory is engine-wide (EngineThread); the session is the export's own.
+                withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+                withContext(ExportThread.dispatcher) {
                     val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
                     val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
                     if (h == 0L) engineFailure(engine, "打开失败")
@@ -449,8 +459,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         } else {
             step("解码照片", 0.10f)
             val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
-            withContext(EngineThread.dispatcher) {
-                NativeEngine.trimMemory(engine)
+            withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+            withContext(ExportThread.dispatcher) {
                 val h = openPhotoSession(engine, photo, job.highlightStops) { space, linear ->
                     Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
                 }.handle
@@ -462,12 +472,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         try {
             // The file's own space, through the CAM16 export path (upstream's export
             // transform, lightness shoulder off). TIFF carries the sRGB profile.
-            withContext(EngineThread.dispatcher) {
+            withContext(ExportThread.dispatcher) {
                 if (!NativeEngine.setOutput(handle, outSpace, true)) engineFailure(engine, "导出失败")
             }
             // Layer 2 rides on the job's own session: every pack below goes through it.
             Look.fromJson(job.lookJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) }).let { look ->
-                if (!look.neutral) withContext(EngineThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
+                if (!look.neutral) withContext(ExportThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor()
@@ -484,7 +494,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                         withContext(Dispatchers.IO) {
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
-                                withContext(EngineThread.dispatcher) {
+                                // engineFailure reads this thread's error, so it stays inside.
+                                withContext(ExportThread.dispatcher) {
                                     if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
                                 }
                             }
@@ -501,7 +512,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     return name
                 }
                 ExportFormat.JPEG -> {
-                    val bitmap: Bitmap = withContext(EngineThread.dispatcher) {
+                    val bitmap: Bitmap = withContext(ExportThread.dispatcher) {
                         NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
@@ -547,7 +558,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 }
             }
         } finally {
-            withContext(NonCancellable + EngineThread.dispatcher) {
+            withContext(NonCancellable + ExportThread.dispatcher) {
                 synchronized(handleLock) {
                     NativeEngine.release(handle)
                     runningHandle = 0L

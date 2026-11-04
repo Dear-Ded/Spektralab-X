@@ -4,7 +4,7 @@ import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
-/** The one thread every [NativeEngine] call runs on. */
+/** The editor's engine thread, and the only one for engine-level calls; exports use [ExportThread]. */
 object EngineThread {
     val dispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { r ->
         // RAW decode and the engine's host-side setup want a large stack.

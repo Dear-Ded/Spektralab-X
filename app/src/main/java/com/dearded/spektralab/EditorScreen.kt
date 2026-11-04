@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,7 +53,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -143,6 +141,11 @@ fun EditorScreen(vm: EditorViewModel) {
         ui.detail != null || ui.busy != null
     LaunchedEffect(ui.source) { chrome = true }
     SystemBarsHidden(!showChrome)
+    // The first-run guide waits until there is a photo and nothing over it.
+    val coach = LocalCoach.current
+    val coachAllowed = ui.hasImage && showChrome && ui.busy == null && ui.error == null &&
+        !ui.showQueue && ui.detail == null && !showSettings && !ui.exporting
+    androidx.compose.runtime.SideEffect { coach?.allowed = coachAllowed }
     androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
     val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
     val toggleChrome: () -> Unit = {
@@ -204,7 +207,7 @@ fun EditorScreen(vm: EditorViewModel) {
                         androidx.compose.material3.Button(
                             onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(36.dp),
+                            modifier = Modifier.height(36.dp).coachAnchor(CoachStep.SAVE),
                         ) {
                             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
@@ -376,7 +379,7 @@ private fun Preview(
                 back = front; front = bitmap; fade.snapTo(0f)
                 try { fade.animateTo(1f, Motion.defaultEffects()) } finally { back = null }
             }
-            Box(gestures) {
+            Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, Modifier.fillMaxSize())
@@ -386,6 +389,7 @@ private fun Preview(
                 }
             }
         } else if (ui.ready && !ui.hasImage) {
+            Aura(Modifier.matchParentSize(), strength = 0.8f)
             EmptyState(onPick = onOpen)
         }
         // Shown only after 400 ms, so quick drag renders never flicker a bar.
@@ -394,7 +398,7 @@ private fun Preview(
             if (ui.rendering) { kotlinx.coroutines.delay(400); value = true }
         }
         if (showProgress) {
-            LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
+            AuraBar(Modifier.align(Alignment.TopCenter))
         }
         // Histogram of what is on screen (the print, or the original while held).
         if (image != null) {
@@ -442,15 +446,17 @@ private fun Preview(
 
 @Composable
 private fun BusyOverlay(text: String) {
+    // The Gemini-style glow (Aura.kt) over a dark scrim: engine start, opening
+    // and decoding all wait on this, with nothing to judge colour against yet.
     Box(
-        Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f))
-            .pointerInput(Unit) { detectTapGestures { } },
+        Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { } },
         contentAlignment = Alignment.Center,
     ) {
+        Aura(Modifier.matchParentSize(), strength = 0.9f, ground = Palette.Background.copy(alpha = 0.92f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
-            Spacer(Modifier.height(12.dp))
-            Text(text, color = Color.White)
+            Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
+            Spacer(Modifier.height(10.dp))
+            Text(text, color = Palette.OnSurface.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -487,8 +493,10 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         PresetRow(ui, vm, enabled)
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                         SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                        LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(exposureEv = it))
+                        Box(Modifier.coachAnchor(CoachStep.RESET)) {
+                            LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(exposureEv = it))
+                            }
                         }
                         ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
                             WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
@@ -638,6 +646,38 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             LabeledSlider("片轴漏光", e.edgeLeaks, 0.0, 3.0, 0.0, enabled, "%.1f", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(edgeLeaks = it))
                             }
+                            // Upstream's gate families and carriers (overscan.cpp accepts exactly these).
+                            Text("片门", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("auto" to "随机", "square" to "直角", "rounded" to "圆角", "eared" to "耳朵",
+                                    "shouldered" to "肩形", "kicked" to "斜角")) {
+                                    FilterChip(selected = e.edgeGate == v, onClick = { vm.update(e.copy(edgeGate = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            Text("片夹", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("none" to "无", "black" to "黑色片夹", "open" to "开口片夹")) {
+                                    FilterChip(selected = e.edgeCarrier == v, onClick = { vm.update(e.copy(edgeCarrier = v)) },
+                                        label = { Text(label) }, enabled = enabled)
+                                }
+                            }
+                            SwitchRow("使用真实片名", e.edgeRealName, enabled) { vm.update(e.copy(edgeRealName = it)) }
+                            if (e.edgeRealName && e.edgeText.isNotBlank()) {
+                                Text("片边印字：${e.edgeText}", style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            LabeledSlider("画幅编号", e.edgeFrameNumber.toDouble(), 0.0, 99.0, 0.0, enabled, "%.0f") {
+                                vm.update(e.copy(edgeFrameNumber = Math.round(it).toInt().coerceIn(0, 99)))
+                            }
+                            Text("0 为随机编号。", style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            OutlinedButton(onClick = {
+                                // New "camera" and "this frame": gate centring, weave and leak positions re-drawn.
+                                val r = java.util.Random()
+                                vm.update(e.copy(edgeCameraSeed = 1 + r.nextInt(Int.MAX_VALUE - 1),
+                                    edgeFrameSeed = 1 + r.nextInt(Int.MAX_VALUE - 1)))
+                            }, enabled = enabled) { Text("重新抽取") }
                         }
                         if (!e.frame.isNone) {
                             Text("相纸", style = MaterialTheme.typography.labelLarge)
@@ -668,6 +708,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 vm.update(e.copy(frame = next))
                             }
                             SwitchRow("参数文字", e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
+                            BrandPanel(ui, vm, enabled)
                             Text("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -714,6 +755,62 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        if (e.dateImprint && dateOk) {
+                            // Upstream's limits (FilmEdge.swift): the data face and between-frames
+                            // placement need a film edge; 120 backs print in the margin.
+                            Text("日期后背", style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("lcd" to "橙色 LCD", "dots" to "点阵", "data" to "数据后背")) {
+                                    FilterChip(selected = e.dateStyle == v, onClick = { vm.update(e.copy(dateStyle = v)) },
+                                        label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
+                                }
+                            }
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("japan" to "年 月 日", "us" to "月 日 年")) {
+                                    FilterChip(selected = e.dateOrder == v,
+                                        onClick = { vm.update(e.copy(dateOrder = v, dateText = Edit.dateInOrder(e.dateText, v))) },
+                                        label = { Text(label) }, enabled = enabled && e.dateStyle != "data")
+                                }
+                            }
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for ((v, label) in listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")) {
+                                    FilterChip(selected = e.dateCorner == v, onClick = { vm.update(e.copy(dateCorner = v)) },
+                                        label = { Text(label) }, enabled = enabled && e.datePlacement == "frame")
+                                }
+                                for ((v, label) in listOf("frame" to "印在画面", "rebate" to "印在帧间")) {
+                                    FilterChip(selected = e.datePlacement == v, onClick = { vm.update(e.copy(datePlacement = v)) },
+                                        label = { Text(label) }, enabled = enabled && (v == "frame" || e.rebateDateFits))
+                                }
+                            }
+                            LabeledSlider("字号", e.dateSize, 0.4, 3.0, 1.0, enabled, "%.1f", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(dateSize = it))
+                            }
+                            LabeledSlider("亮度", e.dateEv, -2.0, 8.0, 3.5, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(dateEv = it))
+                            }
+                            if (e.datePlacement == "frame") {
+                                LabeledSlider("横向边距", e.dateInsetX, 0.0, 30.0, 3.0, enabled, "%.1f mm", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(dateInsetX = it))
+                                }
+                                LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled, "%.1f mm", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(dateInsetY = it))
+                                }
+                            }
+                            if (e.dateStyle != "data") {
+                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank()) {
+                                    vm.update(e.copy(dateWithData = it))
+                                }
+                            }
+                            Text(
+                                when {
+                                    e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息，数据后背无内容。"
+                                    !e.filmEdge -> "数据后背和帧间日期需要打开胶片边框。"
+                                    else -> "拍摄参数：${e.dateDataText}"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                     else -> {
                         SwitchRow("颗粒", e.grainActive, enabled) { vm.update(e.copy(grainActive = it)) }
@@ -740,60 +837,6 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
 }
 
 private val FORMATS = listOf("半格" to 24.0, "135" to 36.0, "645" to 56.0, "6×7" to 70.0, "4×5" to 127.0)
-
-@Composable
-internal fun LabeledSlider(
-    label: String, value: Double, min: Double, max: Double, default: Double,
-    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
-) {
-    val view = androidx.compose.ui.platform.LocalView.current
-    // The thumb follows the finger from local state; the model hears every
-    // change, but a busy main thread never makes the thumb lag behind.
-    var local by remember(value) { mutableFloatStateOf(value.toFloat()) }
-    val span = (max - min).toFloat()
-    val snap = span * 0.015f
-    val onChangeLatest by androidx.compose.runtime.rememberUpdatedState(onChange)
-    Column {
-        Row(
-            Modifier.fillMaxWidth().pointerInput(enabled, default) {
-                if (enabled) detectTapGestures(onDoubleTap = { view.tick(strong = true); local = default.toFloat(); onChangeLatest(default) })
-            },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-            Text(String.format(Locale.ROOT, format, local.toDouble()), style = Readout,
-                color = if (kotlin.math.abs(local - default.toFloat()) < 1e-6f) MaterialTheme.colorScheme.onSurfaceVariant
-                        else MaterialTheme.colorScheme.primary)
-            TextButton(onClick = { view.tick(strong = true); local = default.toFloat(); onChange(default) },
-                enabled = enabled && kotlin.math.abs(local - default.toFloat()) > 1e-6f) { Text("重置") }
-        }
-        Slider(
-            value = local.coerceIn(min.toFloat(), max.toFloat()),
-            onValueChange = { raw ->
-                // Snap onto the default and tick when crossing it or hitting an end.
-                val v = if (kotlin.math.abs(raw - default.toFloat()) < snap) default.toFloat() else raw
-                val before = local
-                val crossed = (before - default.toFloat()) * (v - default.toFloat()) <= 0f && before != v
-                if ((crossed && v == default.toFloat()) || (v == min.toFloat() && before != v) || (v == max.toFloat() && before != v))
-                    view.tick(strong = true)
-                local = v
-                onDrag(true)
-                onChange(v.toDouble())
-            },
-            onValueChangeFinished = { onDrag(false) },
-            valueRange = min.toFloat()..max.toFloat(),
-            enabled = enabled,
-            colors = androidx.compose.material3.SliderDefaults.colors(
-                thumbColor = Palette.OnSurface,
-                activeTrackColor = Palette.Amber,
-                inactiveTrackColor = Palette.PanelHighest,
-                disabledActiveTrackColor = Palette.Outline,
-                disabledInactiveTrackColor = Palette.PanelHigh,
-            ),
-            modifier = Modifier.systemGestureExclusion(),
-        )
-    }
-}
 
 /**
  * RAW white balance. It is applied at decode, so a change re-opens the file:
@@ -1006,6 +1049,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                run { val c = androidx.compose.ui.platform.LocalContext.current; var on by remember { mutableStateOf(LocationSetting.enabled(c)) }; SwitchRow("导出保留拍摄位置", on, true) { on = it; LocationSetting.set(c, it) } }
                 Spacer(Modifier.height(12.dp))
                 Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
                 Text(
@@ -1030,6 +1074,9 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 var copied by remember { mutableStateOf(false) }
                 TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
                     Text(if (copied) "已复制诊断信息" else "复制诊断信息")
+                }
+                LocalCoach.current?.let { c ->
+                    TextButton(onClick = { c.replay(); onDismiss() }) { Text("重新查看引导") }
                 }
                 Spacer(Modifier.height(12.dp))
                 Text("关于", style = MaterialTheme.typography.labelLarge)

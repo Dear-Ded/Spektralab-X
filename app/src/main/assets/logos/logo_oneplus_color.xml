@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- OnePlus - Simple Icons 16.36.0 icons/oneplus.svg (CC0 1.0). Trademark of its owner; see assets/logos/LICENSE-LOGOS.md -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="25dp" android:height="25dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#FFF5010C" android:fillType="nonZero"
+        android:pathData="M0 15.58L48.22 15.59L48.22 24.98L9.39 24.98L9.39 90.6L75.02 90.6L75.02 51.78L84.42 51.78L84.42 100L0 100ZM75.02 0L84.34 0L84.34 15.58L100 15.58L100 24.98L84.41 24.98L84.41 40.64L75.02 40.64L75.02 24.98L59.36 24.98L59.36 15.58L75.02 15.58ZM48.14 36.93L48.14 78.08L38.82 78.08L38.82 51.78L29.93 51.78L29.93 45.01L30.95 45.01C33.65 45.01 35.91 44.43 37.44 43.19C38.89 41.88 39.84 39.77 39.84 36.93L48.14 36.93Z" />
+</vector>
