@@ -104,7 +104,7 @@ jobs:
         env:
           SPK_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           SPK_UPSTREAM: ${{ github.workspace }}/upstream
-        run: ./gradlew --no-daemon --stacktrace :app:assembleRelease
+        run: ./gradlew --no-daemon --stacktrace :app:assembleRelease :app:testReleaseUnitTest
 
       - name: Rename APK and checksum
         run: |
