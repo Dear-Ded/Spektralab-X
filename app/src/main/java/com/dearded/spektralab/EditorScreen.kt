@@ -826,18 +826,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         }
                     }
                     else -> {
-                        SwitchRow("颗粒", e.grainActive, enabled) { vm.update(e.copy(grainActive = it)) }
-                        LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(grainAmount = it))
-                        }
-                        SwitchRow("光晕（Halation）", e.halationActive, enabled) { vm.update(e.copy(halationActive = it)) }
-                        LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(halationAmount = it))
-                        }
-                        SwitchRow("相纸眩光", e.glareActive, enabled) { vm.update(e.copy(glareActive = it)) }
-                        LabeledSlider("眩光强度", e.glareAmount, 0.0, 5.0, 1.0, enabled && e.glareActive, "%.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(glareAmount = it))
-                        }
+                        EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
                     }
                 }
             }
