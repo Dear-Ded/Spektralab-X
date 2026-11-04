@@ -498,6 +498,18 @@ data class BorderPreset(
     val edge: EdgeSpec?,
     val frame: FrameSpec,
     val crop: Double = 0.0,
+    /** A date back the preset turns on (null leaves the date switch as it was). */
+    val date: DateBack? = null,
+)
+
+/** The date back a preset sets: the face, the corner and how bright the LEDs burn in. */
+data class DateBack(
+    /** lcd, dots or data; data needs the film edge (it prints between frames). */
+    val style: String = "lcd",
+    val corner: String = "br",
+    val ev: Double = 3.5,
+    /** The shooting data as well as the date (between frames, film edge only). */
+    val withData: Boolean = false,
 )
 
 /** The engine's overscan knobs a preset sets (wire names in Model.kt). */
@@ -509,6 +521,10 @@ data class EdgeSpec(
     val carrier: String = "none",
     val fog: Double = 1.0,
     val leaks: Double = 0.0,
+    /** The film's real name on the edge print (overscan_edge_text). */
+    val realName: Boolean = true,
+    /** 1..99 prints this frame number; null leaves the edit's own (0 = the seed's draw). */
+    val frameNumber: Int? = null,
 )
 
 object Borders {
@@ -571,6 +587,21 @@ object Borders {
         BorderPreset("blur_card", "模糊背景卡", "照片本身虚化成底，补成 4:5，圆角", null,
             FrameSpec("blur_card", 0.08f, 0.08f, 0.08f, canvasAspect = 0.8f, paper = FrameSpec.PAPER_SMOKE,
                 radius = 0.025f, blur = true)),
+        // Engine film edges (UI.md E.2). The crop follows the gate's shape; see Edit.withBorder.
+        BorderPreset("edge135_name", "135 带片名", "整条 135，片边印胶片真实名称与编号", EdgeSpec(holes = "black", fog = 0.6), FrameSpec()),
+        BorderPreset("edge135_black", "135 黑框扫描", "黑色片夹压住片边，扫描仪的样子", EdgeSpec(carrier = "black", fog = 0.8), FrameSpec()),
+        BorderPreset("edge135_num", "135 带编号", "片边帧号固定为 12", EdgeSpec(frameNumber = 12), FrameSpec()),
+        BorderPreset("edge_6x7", "6×7", "120 中画幅，圆角片门", EdgeSpec(format = "120_6x7", gate = "rounded", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x8", "6×8 肩形片门", "120，片门带肩", EdgeSpec(format = "120_6x8", gate = "shouldered", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x9", "6×9", "120 长画幅", EdgeSpec(format = "120_6x9", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x17", "6×17 宽幅", "120 全景，黑色片夹", EdgeSpec(format = "120_6x17", carrier = "black", holes = "black"), FrameSpec()),
+        BorderPreset("edge_half", "半格", "135 半格，竖拍一帧", EdgeSpec(format = "135_half"), FrameSpec()),
+        BorderPreset("enlarger", "暗房放大相纸", "锉开的片夹放在放大机下，白色相纸留边", EdgeSpec(mode = "filed", holes = "black", carrier = "black", fog = 0.4),
+            FrameSpec("enlarger", 0.07f, 0.10f, 0.07f, paper = FrameSpec.PAPER_WHITE)),
+        // Date backs (UI.md E.2): the engine burns the date into the film, upstream's faces.
+        BorderPreset("date_lcd", "橙色 LCD", "相机日期后背：右下角橙色日期", null, FrameSpec(), date = DateBack("lcd")),
+        BorderPreset("date_data", "数据后背", "片间印快门、光圈、焦距，画面内印日期", EdgeSpec(),
+            FrameSpec(), date = DateBack("lcd", withData = true)),
     )
 
     fun byId(id: String) = PRESETS.firstOrNull { it.id == id }
