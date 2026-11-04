@@ -79,10 +79,18 @@ data class ProcessingJob(
     val pendingUri: String = "",
     /** The source's GPS tags ([ExifLocation.encode]), read at enqueue when 导出保留拍摄位置 is on; "" = none. */
     val location: String = "",
+    /**
+     * 极致渲染: the source's own resolution (workingEdge 0, only the device's
+     * pixel cap applies), the whole-frame full tier, JPEG at quality 98, and
+     * pauses while the phone is near throttling. Device loss and the frame
+     * check step it down as any job.
+     */
+    val extreme: Boolean = false,
 ) {
     val active get() = state == JobState.QUEUED || state == JobState.RUNNING
 
     val label get() = when {
+        extreme -> "极致渲染 · 全分辨率"
         format == ExportFormat.TIFF -> "16 位 TIFF"
         size == ExportSize.SHARE -> "JPEG · 分享尺寸"
         else -> "JPEG · 全尺寸"
@@ -96,7 +104,7 @@ data class ProcessingJob(
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
-        .put("location", location)
+        .put("location", location).put("extreme", extreme)
 
     companion object {
         fun fromJson(o: JSONObject): ProcessingJob? = runCatching {
@@ -114,7 +122,7 @@ data class ProcessingJob(
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
                 sourcePath = o.optString("src"), persisted = o.optBoolean("persisted"),
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
-                location = o.optString("location"),
+                location = o.optString("location"), extreme = o.optBoolean("extreme"),
             )
         }.getOrNull()
     }
@@ -390,9 +398,16 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         return job.copy(workingEdge = edge, maxPixels = if (job.maxPixels > 0) job.maxPixels * 6 / 10 else 0L)
     }
 
-    /** The editor's live renders go first; nothing here starts while a finger is moving. */
-    private suspend fun yieldToEditor() {
+    /**
+     * The editor's live renders go first; nothing here starts while a finger is
+     * moving. [cool]: 极致渲染 also waits, up to [THERMAL_WAIT_MS], while the
+     * phone is near throttling, so its long renders do not start hot.
+     */
+    private suspend fun yieldToEditor(cool: Boolean = false) {
         while (SystemClock.uptimeMillis() - host.lastInteraction < EDITOR_GRACE_MS) delay(150)
+        if (!cool) return
+        val until = SystemClock.uptimeMillis() + THERMAL_WAIT_MS
+        while (host.thermal.headroom() > HOT_HEADROOM && SystemClock.uptimeMillis() < until) delay(1000)
     }
 
     /** Engine thread, straight after a failed call: what the failure means for the job. */
@@ -480,8 +495,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 if (!look.neutral) withContext(ExportThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
-            yieldToEditor()
-            step("冲洗", 0.25f)
+            yieldToEditor(cool = job.extreme)
+            step(if (job.extreme) "极致冲洗（全分辨率）" else "冲洗", 0.25f)
             val icc = File(ready.dir, "io/sRGB.icc").absolutePath
             when (job.format) {
                 ExportFormat.TIFF -> {
@@ -530,7 +545,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
                                 val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
                                 try {
-                                    val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+                                    val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
                                     if (!encoded) throw EngineException("JPEG 编码失败")
                                     exif.applyTo(part, out.width, out.height, wide = wide)
                                     MediaSaver.checkJpeg(part, out.width, out.height)
@@ -701,17 +716,24 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     private fun estimateSeconds(job: ProcessingJob): Int {
         val mp = max(0.5, job.outPixels / 1e6)
-        return (BASE_SECONDS + secondsPerMp(job.format) * mp).roundToInt()
+        return (BASE_SECONDS + secondsPerMp(job) * mp).roundToInt()
     }
 
-    private fun secondsPerMp(format: ExportFormat): Double =
-        prefs.getFloat("spmp_${format.name}", if (format == ExportFormat.TIFF) 1.6f else 1.2f).toDouble()
+    // Learned per format, and separately for 极致渲染: the whole-frame full
+    // tier at the source's size runs slower per megapixel than a working-size
+    // export (larger blurs, more pool traffic), and would skew the others.
+    private fun rateKey(job: ProcessingJob) = "spmp_${job.format.name}" + if (job.extreme) "_extreme" else ""
+
+    private fun secondsPerMp(job: ProcessingJob): Double {
+        val base = if (job.format == ExportFormat.TIFF) 1.6f else 1.2f
+        return prefs.getFloat(rateKey(job), if (job.extreme) base * 1.5f else base).toDouble()
+    }
 
     private fun learn(job: ProcessingJob, seconds: Double) {
         val mp = max(0.5, job.outPixels / 1e6)
         val measured = max(0.05, (seconds - BASE_SECONDS) / mp)
-        val next = 0.6 * secondsPerMp(job.format) + 0.4 * measured
-        prefs.edit().putFloat("spmp_${job.format.name}", next.toFloat()).apply()
+        val next = 0.6 * secondsPerMp(job) + 0.4 * measured
+        prefs.edit().putFloat(rateKey(job), next.toFloat()).apply()
     }
 
     private fun refreshNotification(force: Boolean = false) {
@@ -773,13 +795,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     companion object {
         private const val BASE_SECONDS = 2.0
         private const val EDITOR_GRACE_MS = 1200L
+        // The editor's own "hot" line (EditorViewModel.kHotHeadroom), and at
+        // most two minutes of waiting for it: a phone that never cools still exports.
+        private const val HOT_HEADROOM = 0.85f
+        private const val THERMAL_WAIT_MS = 120_000L
 
         /** Seconds until every active job is done: the running one's own estimate plus each queued one's. */
         fun remainingSeconds(jobs: List<ProcessingJob>, perMpJpeg: Double = 1.2): Int {
             var total = 0
             for (j in jobs) when (j.state) {
                 JobState.RUNNING -> total += max(0, j.etaSeconds)
-                JobState.QUEUED -> total += (BASE_SECONDS + perMpJpeg * max(0.5, j.outPixels / 1e6)).roundToInt()
+                JobState.QUEUED -> total += (BASE_SECONDS + perMpJpeg * (if (j.extreme) 1.5 else 1.0) * max(0.5, j.outPixels / 1e6)).roundToInt()
                 else -> Unit
             }
             return total
