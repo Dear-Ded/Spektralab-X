@@ -784,10 +784,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uris = needed.filter { it.persisted || !it.secured }.map { it.uri }.toSet()
         val held = prefs.getStringSet("grants", emptySet()).orEmpty().toSet()
         val keep = held.filter { it in uris }.toSet()
-        // The editor's last photo (LastSession) keeps its own grant on the same URI.
-        val editor = app.getSharedPreferences("settings", 0).getString("last_session_grant", null)
         for (u in held - keep) {
-            if (u == editor) continue
             runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         }
         if (keep.size != held.size) prefs.edit().putStringSet("grants", keep).apply()

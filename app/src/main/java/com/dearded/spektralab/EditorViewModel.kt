@@ -10,10 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -117,20 +114,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var openSpace = "sRGB"
     private var openLinear = false
     private var cardsJob: kotlinx.coroutines.Job? = null
-    private val lastSession = LastSession(app)
 
     init {
         viewModelScope.launch { startEngine() }
-        // The open photo and its edit, written a moment after each change, so a
-        // process the system killed (or a relaunch) comes back where it was.
-        viewModelScope.launch {
-            _ui.map { it.edit to it.source }.distinctUntilChanged().collectLatest { (edit, src) ->
-                if (src == null) return@collectLatest
-                kotlinx.coroutines.delay(800)
-                val uri = lastUri
-                withContext(Dispatchers.IO) { lastSession.save(uri, edit, src.wbK, src.wbTint) }
-            }
-        }
         viewModelScope.launch { renderLoop() }
         viewModelScope.launch { repackLoop() }
         // A lost GPU device (here or in an export) makes EngineHost build a new
@@ -182,28 +168,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     maxPixels = maxPixels,
                 )
             }
-            val pending = pendingOpen
-            if (pending != null) { pendingOpen = null; open(pending) } else restoreLastSession()
+            pendingOpen?.let { pendingOpen = null; open(it) }
             // Jobs left by a process the system killed pick up where they were.
             if (host.queue.jobs.value.any { it.active }) host.queue.start()
         } catch (e: Throwable) {
             _ui.update { it.copy(busy = null, error = e.message ?: e.toString()) }
-        }
-    }
-
-    /**
-     * Launch with nothing to open: the photo left open last time, with its
-     * whole edit, if it can still be read; otherwise only its film, paper
-     * and look, for the next photo opened.
-     */
-    private suspend fun restoreLastSession() {
-        val saved = withContext(Dispatchers.IO) { lastSession.load() } ?: return
-        val uri = saved.uri
-        if (uri != null && withContext(Dispatchers.IO) { lastSession.readable(uri) }) {
-            openSaved(uri, saved.edit, saved.wbK, saved.wbTint)
-            log("restored last session")
-        } else {
-            wanted = _ui.value.catalog.normalize(saved.edit)
         }
     }
 
@@ -216,7 +185,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             return
         }
         lastUri = uri
-        viewModelScope.launch(Dispatchers.IO) { lastSession.hold(uri) }
         launchOpen(uri, wb = null)
     }
 
@@ -231,7 +199,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun openSaved(uri: Uri, edit: Edit, wbK: Double, wbTint: Double) {
         if (!_ui.value.ready || _ui.value.exporting) { open(uri); return }
         lastUri = uri
-        viewModelScope.launch(Dispatchers.IO) { lastSession.hold(uri) }
         val previous = openJob
         openJob = viewModelScope.launch {
             previous?.cancelAndJoin()
