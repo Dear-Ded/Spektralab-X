@@ -741,6 +741,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         SwitchRow("胶片边框", e.filmEdge, enabled && src != null) { on ->
                             if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on).let {
                                 if (!on && Borders.byId(e.borderId)?.edge != null && e.frame.isNone) it.copy(borderId = "none") else it
+                            }.let {
+                                // An instant card crops to its own shape, which the gate would cut (UI.md E.3.1).
+                                if (on && (Borders.byId(e.borderId)?.crop ?: 0.0) > 0.0) it.copy(frame = FrameSpec(), borderId = "none") else it
                             })
                         }
                         if (e.filmEdge && src != null) {
