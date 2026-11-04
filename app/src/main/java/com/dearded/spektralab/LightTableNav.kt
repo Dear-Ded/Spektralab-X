@@ -83,7 +83,8 @@ fun AppScreens(editor: EditorViewModel) {
             val frames by table.frames.collectAsState()
             val catalog by remember(editor) { editor.ui.map { it.catalog }.distinctUntilChanged() }
                 .collectAsState(editor.ui.value.catalog)
-            val rolls = remember(frames, catalog) { rollsOf(frames, catalog) }
+            val manual by table.manualRolls.rolls.collectAsState()
+            val rolls = remember(frames, catalog, manual) { rollsOf(frames, catalog, manual) }
             val exportRoll = rememberNotifiedExport { list -> table.export(list, ExportFormat.JPEG, ExportSize.FULL, editor.ui.value) }
             val open = loupe
             val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }
@@ -103,7 +104,7 @@ fun AppScreens(editor: EditorViewModel) {
                     table = table,
                     onBack = { fromTable = false; screen = Screen.EDITOR },
                     onOpen = table::openLoupe,
-                    selectionActions = { chosen -> BatchActions(table, editor, chosen) },
+                    selectionActions = { chosen -> BatchActions(table, editor, chosen); RollSelectionActions(table, chosen) },
                     topActions = { TextButton(onClick = { table.showRolls(true) }) { Text("按卷") } },
                 )
             }

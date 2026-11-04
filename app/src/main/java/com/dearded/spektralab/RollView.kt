@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -129,6 +130,30 @@ fun RollView(
                             Text(roll.title, style = MaterialTheme.typography.titleMedium)
                         }
                         Text(roll.edgeLine, style = EdgeType, color = Palette.OnSurfaceSoft)
+                    }
+                },
+                actions = {
+                    // A roll the user packed can be renamed or taken apart; an automatic one is the table's.
+                    val id = roll.manualId
+                    if (id != null) {
+                        var menu by remember { mutableStateOf(false) }
+                        var naming by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { menu = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "卷操作")
+                            }
+                            androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                                androidx.compose.material3.DropdownMenuItem(text = { Text("改卷名") },
+                                    onClick = { menu = false; naming = true })
+                                androidx.compose.material3.DropdownMenuItem(text = { Text("拆卷（照片回到自动分卷）") },
+                                    onClick = { menu = false; table.dissolveRoll(id) })
+                            }
+                        }
+                        if (naming) RollNameDialog(
+                            title = "改卷名", hint = "最多 40 个字", initial = roll.name, confirm = "改名",
+                            onDismiss = { naming = false },
+                            onDone = { name -> naming = false; table.renameRoll(id, name) },
+                        )
                     }
                 },
             )
