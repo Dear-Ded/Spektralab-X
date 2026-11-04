@@ -547,6 +547,72 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         }
     }
 
+    /**
+     * IO. 极致渲染's JPEG into [part]: 4:4:4, quality 98, optimised Huffman
+     * (NativeEngine.writeJpeg444), with the file's profile embedded. False,
+     * logged and with nothing left in [part], when it cannot: the caller then
+     * uses Bitmap.compress and the job goes on.
+     */
+    private fun encode444(id: Long, out: Bitmap, part: File, wide: Boolean, dir: File): Boolean {
+        val icc = if (wide) displayP3Icc() else runCatching { File(dir, "io/sRGB.icc").readBytes() }.getOrNull()
+        if (icc == null || icc.isEmpty()) {
+            host.events.add("job $id: no ${if (wide) "Display P3" else "sRGB"} profile for 4:4:4, using Bitmap.compress")
+            return false
+        }
+        val bitmap = if (out.config == Bitmap.Config.ARGB_8888) out else out.copy(Bitmap.Config.ARGB_8888, false)
+        try {
+            if (bitmap != null && NativeEngine.writeJpeg444(bitmap, part.absolutePath, 98, icc)) return true
+        } finally {
+            if (bitmap != null && bitmap !== out) bitmap.recycle()
+        }
+        part.delete()
+        host.events.add("job $id: 4:4:4 JPEG failed (${NativeEngine.lastError()}), using Bitmap.compress 4:2:0")
+        return false
+    }
+
+    /**
+     * The Display P3 profile Bitmap.compress embeds (Skia's), so a 4:4:4 JPEG
+     * carries the same bytes a 4:2:0 one does: a 1x1 P3 JPEG is encoded once
+     * and its APP2 ICC_PROFILE segments joined. Null when there are none.
+     */
+    private val p3Icc: ByteArray? by lazy {
+        runCatching {
+            val p3 = android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)
+            val tiny = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, false, p3)
+            val jpeg = java.io.ByteArrayOutputStream().also { tiny.compress(Bitmap.CompressFormat.JPEG, 90, it) }.toByteArray()
+            tiny.recycle()
+            Icc.iccFromJpeg(jpeg)
+        }.getOrNull()
+    }
+
+    private fun displayP3Icc(): ByteArray? = p3Icc
+
+    object Icc {
+        /** The APP2 ICC_PROFILE chunks of [jpeg], in sequence order and joined; null when it has none. */
+        fun iccFromJpeg(jpeg: ByteArray): ByteArray? {
+            val tag = "ICC_PROFILE\u0000".toByteArray(Charsets.US_ASCII)
+            val chunks = java.util.TreeMap<Int, ByteArray>()
+            var i = 2
+            while (i + 4 <= jpeg.size && (jpeg[i].toInt() and 0xFF) == 0xFF) {
+                val marker = jpeg[i + 1].toInt() and 0xFF
+                if (marker == 0xDA || marker == 0xD9) break   // scan data: no more headers
+                val len = ((jpeg[i + 2].toInt() and 0xFF) shl 8) or (jpeg[i + 3].toInt() and 0xFF)
+                if (len < 2 || i + 2 + len > jpeg.size) break
+                val body = i + 4
+                if (marker == 0xE2 && len >= 2 + tag.size + 2 &&
+                    (tag.indices).all { jpeg[body + it] == tag[it] }) {
+                    val seq = jpeg[body + tag.size].toInt() and 0xFF
+                    chunks[seq] = jpeg.copyOfRange(body + tag.size + 2, i + 2 + len)
+                }
+                i += 2 + len
+            }
+            if (chunks.isEmpty()) return null
+            val out = java.io.ByteArrayOutputStream()
+            for (c in chunks.values) out.write(c)
+            return out.toByteArray()
+        }
+    }
+
     /** Records the pending gallery entry before a byte is written. Any thread. */
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
@@ -672,8 +738,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
                                 val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
                                 try {
-                                    val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
-                                    if (!encoded) throw EngineException("JPEG 编码失败")
+                                    // 极致渲染: 4:4:4 through libjpeg-turbo; anything else, or a
+                                    // failure there, Bitmap.compress (4:2:0).
+                                    val full = job.extreme && encode444(job.id, out, part, wide, ready.dir)
+                                    if (!full) {
+                                        val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
+                                        if (!encoded) throw EngineException("JPEG 编码失败")
+                                    }
                                     exif.applyTo(part, out.width, out.height, wide = wide)
                                     MediaSaver.checkJpeg(part, out.width, out.height)
                                 } finally {

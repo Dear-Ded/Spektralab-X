@@ -30,6 +30,7 @@
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
 #include "storage_probe.hpp"
+#include "jpeg444.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
 #include "output_transform.hpp"
@@ -1274,4 +1275,40 @@ JNI_FN(void, release)(JNIEnv*, jobject, jlong handle) {
     spk_session_release(s->session);
     delete s;
     session_closed(engine);
+}
+
+// 极致渲染's JPEG: [bitmap] (ARGB_8888, the finished and framed print) as a
+// 4:4:4 baseline JPEG at [quality] with optimised Huffman tables, [icc]
+// embedded when not null (jpeg444.cpp). Any thread; false with lastError, and
+// no file left behind, on failure (the caller then falls back to
+// Bitmap.compress).
+JNI_FN(jboolean, writeJpeg444)(JNIEnv* env, jobject, jobject bitmap, jstring path_j, jint quality, jbyteArray icc_j) {
+    try {
+        AndroidBitmapInfo info{};
+        if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+            fail("JPEG 4:4:4: the bitmap is not ARGB_8888");
+            return JNI_FALSE;
+        }
+        std::vector<uint8_t> icc;
+        if (icc_j) {
+            icc.resize(size_t(env->GetArrayLength(icc_j)));
+            if (!icc.empty()) env->GetByteArrayRegion(icc_j, 0, jsize(icc.size()), reinterpret_cast<jbyte*>(icc.data()));
+        }
+        const std::string path = str(env, path_j);
+        PixelLock lock(env, bitmap);
+        if (!lock.ok) { fail("JPEG 4:4:4: cannot lock bitmap pixels"); return JNI_FALSE; }
+        std::string error;
+        if (!spk::android::write_jpeg444(path, static_cast<const uint8_t*>(lock.pixels), info.width, info.height,
+                                         info.stride, std::clamp(int(quality), 1, 100), icc, error)) {
+            fail("JPEG 4:4:4: " + error);
+            return JNI_FALSE;
+        }
+        return JNI_TRUE;
+    } catch (const std::exception& e) {
+        fail(std::string("JPEG 4:4:4: ") + e.what());
+    } catch (...) {
+        fail("JPEG 4:4:4: unknown failure");
+    }
+    return JNI_FALSE;
 }

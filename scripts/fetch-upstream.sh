@@ -15,6 +15,10 @@ LIBRAW_VERSION=0.22.2
 LIBRAW_SHA256=02275a04cf0d1477ab9fd7ee231ddea59e7b14497458da6e3ba957517d6655c7
 VK_TAG=vulkan-sdk-1.4.341.0
 VK_COMMIT=b5c8f996196ba4aa6d8f97e52b5d3b6e70f7e4e2
+# The 4:4:4 JPEG encoder for 极致渲染 (app/src/main/cpp/jpeg444.cpp). The same
+# release and SHA-256 upstream's engine/setup-codecs.sh pins for its exports.
+JPEGTURBO_VERSION=3.2.0
+JPEGTURBO_SHA256=6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dest="${1:-$here/../upstream}"
@@ -58,6 +62,19 @@ if [[ ! -f "$deps/LibRaw-$LIBRAW_VERSION/libraw/libraw.h" ]]; then
   fi
   (cd "$deps" && unzip -q "$zip")
   echo "LibRaw $LIBRAW_VERSION verified and extracted" >&2
+fi
+
+if [[ ! -f "$deps/libjpeg-turbo-$JPEGTURBO_VERSION/CMakeLists.txt" ]]; then
+  tgz="$deps/libjpeg-turbo-$JPEGTURBO_VERSION.tar.gz"
+  curl -fsSL --retry 3 -o "$tgz" \
+    "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$JPEGTURBO_VERSION/libjpeg-turbo-$JPEGTURBO_VERSION.tar.gz"
+  actual="$(sha256sum "$tgz" | cut -d' ' -f1)"
+  if [[ "$actual" != "$JPEGTURBO_SHA256" ]]; then
+    echo "libjpeg-turbo archive checksum mismatch ($actual)" >&2
+    exit 1
+  fi
+  tar -xzf "$tgz" -C "$deps"
+  echo "libjpeg-turbo $JPEGTURBO_VERSION verified and extracted" >&2
 fi
 
 if [[ ! -f "$deps/Vulkan-Headers/include/vulkan/vulkan_core.h" ]]; then
