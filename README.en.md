@@ -90,7 +90,7 @@ Every image below was rendered by the same engine this app ships, at default set
 | Area | macOS / Windows desktop | Android (Spektralab-X) | Why |
 |---|---|---|---|
 | RAW decoding | macOS uses Apple's `CIRAWFilter`; Windows / Linux use LibRaw | LibRaw 0.22.2, the same function as Windows / Linux; no lens correction | Apple's camera matrices, demosaicing and highlight handling are its own, so the same RAW reaches the engine differently on macOS. Upstream's Windows / Linux builds differ the same way. **Not measured** (no Mac) |
-| GPU and precision | Metal / desktop Vulkan, fp32 | Vulkan 1.0 on Adreno, fp32, the same code as Windows / Linux | If fma is inexact the engine falls back to split products, which affects only the halation blur and the rotate/resample shaders. That is a reading of the code; **still to be checked on Adreno** |
+| GPU and precision | Metal / desktop Vulkan, fp32 | Vulkan 1.0 on Adreno, fp32, the same code as Windows / Linux | If fma is inexact the engine falls back to Dekker split products, which affects only the halation blur and the rotate/resample shaders. The cloud machine's lavapipe has inexact fma itself, so every parity number already took that path; Adreno is reported to take it too (inferred), **still to be checked on a phone** |
 | Resolution limits | Bounded by the computer's GPU memory (inferred) | Xiaomi 12–14 (Adreno 730 / 740 / 750) have a 128 MiB single buffer, about 8 MP, so the working size tops out at 3072; Adreno 650 has 512 MiB, about 33 MP; 42 MP overall ceiling. Preview is 1024 while dragging, 3400 on release | One image plane must fit in one GPU buffer or it cannot render, so large photos are scaled down first. A full-resolution "extreme render" mode is planned |
 | Screen colour | macOS converts through ColorSync with the display profile | A wide-gamut window on P3 screens; matrix and clip into Display P3 or sRGB | The same display path as upstream's `render_view`. HyperOS "Vivid" mode oversaturates (inferred); switch to "Original colour" to judge colour. This affects the screen only, not exported files |
 | Phone JPEGs | Printed as encoded | Printed as encoded; highlight recovery and the Ultra HDR gain map are optional and off by default | A phone JPEG already carries the camera's tone curve, so printing it stacks two curves. Upstream does the same by design; shoot RAW for accurate colour |
@@ -108,7 +108,7 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 **Printing**
 - Colour negative, slide, black-and-white and motion-picture films with matching papers; slides are scanned directly, without paper
 - Film strip: a live thumbnail of the current photo on every stock, tap to switch
-- One-tap styles: 30 styles in six groups (lab scans, negative, slide, cinema, black-and-white, masters), each setting film, paper, print, effects and adjustments together
+- One-tap styles: 87 styles in eight groups (lab, negative, slide, cinema, black-and-white, photographers, cameras, phones), each setting film, paper, print, effects and adjustments together and naming what inspired it ([docs/STYLES.md](docs/STYLES.md)); tap the applied style again for a 0–100% strength slider
 - Exposure compensation, auto exposure, film format (sets the physical scale of grain and halation), print exposure, yellow / magenta filtration
 - Grain, halation and paper glare, each with its own switch and strength
 - RAW white balance: temperature / tint applied at decode, with upstream's desktop algorithm
@@ -117,14 +117,17 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 **Framing and borders**
 - Rotate, flip, centred crop (original, 3:2, 4:3, 1:1, 16:9, 65:24 and more)
 - Film edges: 135, half frame, XPan, 645, 6×6, 6×7, 6×9 and more, with edge print and sprocket holes; plus paper borders such as Polaroid, Instax Mini, a parameter strip and gallery white
+- Sprocket strips only: on any film, drawn outside the photo with no crop and no change to the print; position, base colour, hole shape, edge text and frame numbers are adjustable
+- Brand-logo captions: the camera or phone brand is detected from EXIF (or picked by hand, or replaced by your own text), five caption layouts with logos, optional film-maker logo; 33 brands, sources in [docs/LOGOS.md](docs/LOGOS.md)
 - Date back: the EXIF capture time imprinted in a date-back style
 
 **Viewing and export**
 - A fast preview while dragging, the sharp render on release; new edits cancel stale renders
-- Hold to compare with the original, tap the photo to hide the interface, histogram with clipping, 1:1 grain view
+- Hold to compare with the original, tap the photo to hide the interface, histogram with clipping, full-screen 1:1 grain view
 - Undo / redo up to 50 steps; presets save film, paper and effect combinations
-- Background export queue: the editor frees up at once, jobs resume after the process is killed, progress notifications support Live Update
-- Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF
+- Background export queue: exports render on their own thread so editing is not blocked, jobs resume after the process is killed, progress notifications support Live Update
+- Safe saving: the gallery entry stays hidden until the file is written and checked, so no half-written photos; an all-black, all-white or single-colour frame is refused and retried once a size down; a lost GPU is replaced and the job retried
+- Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF (lossless Deflate)
 
 > [!NOTE]
 > The app's interface is Simplified Chinese only for now.
