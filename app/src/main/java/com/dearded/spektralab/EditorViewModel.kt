@@ -67,6 +67,9 @@ data class UiState(
     /** The full working-size render for 1:1 viewing; dropped on any edit. */
     val detail: Bitmap? = null,
     val loadingDetail: Boolean = false,
+    /** The film and paper a new photo starts on; "" = the last photo's (remembered). */
+    val defaultFilm: String = "",
+    val defaultPaper: String = "",
 ) {
     val hasImage get() = source != null
 }
@@ -78,7 +81,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
         wideGamut = prefs.getBoolean("wide_gamut", true),
-        highlightStops = prefs.getFloat("highlight_stops_v2", 0f)))
+        highlightStops = prefs.getFloat("highlight_stops_v2", 0f),
+        defaultFilm = prefs.getString("default_film", "").orEmpty(),
+        defaultPaper = prefs.getString("default_paper", "").orEmpty()))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -275,7 +280,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             // Every new frame is metered, a phone photo too: upstream meters JPEG
             // and RAW alike ("balanced", a log average that a bright sky barely moves).
-            val look = _ui.value.catalog.normalize(if (wb != null) wanted else wanted.copy(
+            val carried = _ui.value.catalog.normalize(if (wb != null) wanted else wanted.copy(
                 autoExposure = true,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
@@ -287,6 +292,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     val p = Borders.byId(it.borderId)
                     if (wb == null && p != null && (p.edge != null || p.crop > 0)) it.copy(frame = FrameSpec(), borderId = "none") else it
                 })
+            // Upstream PR #53: the chosen pair only for a photo with no saved edit.
+            val look = if (wb == null) withNewPhotoStocks(carried) else carried
+            if (wb == null) lastOpenedAny = true
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
@@ -421,6 +429,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
         val edit = _ui.value.catalog.normalize(raw)
         val current = _ui.value.edit
+        // "记住上次用的" across a restart: a new process starts on Edit()'s pair otherwise.
+        if (edit.film != current.film || edit.paper != current.paper)
+            prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper).apply()
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
@@ -859,6 +870,37 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val src = _ui.value.source ?: return
         if (src.kind == "raw") return
         launchOpen(uri, wb = src.wbK to src.wbTint)
+    }
+
+    /** A photo has been opened in this process, so [wanted] already holds the last pair. */
+    private var lastOpenedAny = false
+
+    /**
+     * The film and paper a new photo starts on (upstream PR #53); empty film =
+     * the last photo's, which is what the editor has always carried over.
+     */
+    fun setNewPhotoStocks(film: String, paper: String) {
+        prefs.edit().putString("default_film", film).putString("default_paper", paper).apply()
+        _ui.update { it.copy(defaultFilm = film, defaultPaper = paper) }
+    }
+
+    /**
+     * [e] on the chosen pair. A film no longer in the catalog leaves [e] as it
+     * is; a paper that cannot print the film (colour vs B&W) gives way to the
+     * film's own target print, as picking the film by hand does.
+     */
+    private fun withNewPhotoStocks(e: Edit): Edit {
+        val catalog = _ui.value.catalog
+        // Remembering: in this process the last photo's pair is already carried; the
+        // first photo after a restart takes the pair recorded by applyEdit.
+        val remember = _ui.value.defaultFilm.isEmpty()
+        if (remember && lastOpenedAny) return e
+        val wantFilm = if (remember) prefs.getString("last_film", "").orEmpty() else _ui.value.defaultFilm
+        val wantPaper = if (remember) prefs.getString("last_paper", "").orEmpty() else _ui.value.defaultPaper
+        val film = catalog.film(wantFilm) ?: return e
+        val next = withFilm(e, catalog, film.id) ?: return e
+        val paper = catalog.paper(wantPaper)
+        return if (paper != null && paper.bw == film.bw) catalog.normalize(next.copy(paper = paper.id)) else next
     }
 
     fun setWorkingEdge(edge: Int) {
