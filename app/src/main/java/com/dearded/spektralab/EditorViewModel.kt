@@ -745,6 +745,35 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         _ui.update { it.copy(message = "已加入“正在处理”，可以继续编辑或切到后台") }
     }
 
+    /**
+     * 极致渲染: a JPEG at the source's own resolution (working edge 0; only the
+     * device's pixel cap applies), the whole-frame full tier, in the background
+     * queue. The queue steps it down on a lost GPU or a blank frame.
+     */
+    fun exportExtreme() {
+        val state = _ui.value
+        val src = state.source ?: return
+        val uri = lastUri ?: return
+        val sw = src.sourceWidth.takeIf { it > 0 } ?: src.width
+        val sh = src.sourceHeight.takeIf { it > 0 } ?: src.height
+        val px = sw.toLong() * sh
+        val job = ProcessingJob(
+            id = host.queue.nextId(), uri = uri.toString(), name = src.name, raw = src.kind == "raw",
+            editJson = state.edit.toJson().toString(), wbK = src.wbK, wbTint = src.wbTint,
+            lookJson = if (state.edit.look.neutral) "" else state.edit.look.toJson().toString(),
+            format = ExportFormat.JPEG, size = ExportSize.FULL, workingEdge = 0, maxPixels = state.maxPixels,
+            outPixels = if (state.maxPixels > 0) minOf(px, state.maxPixels) else px,
+            frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
+            filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
+            wideGamut = state.wideGamut,
+            highlightStops = state.highlightStops,
+            extreme = true,
+        )
+        host.queue.enqueue(job)
+        log("queued ${job.label} ${sw}x$sh")
+        _ui.update { it.copy(message = "已加入“正在处理”：极致渲染较慢，可以继续编辑或切到后台") }
+    }
+
     // --- settings ------------------------------------------------------------
 
     /** Everything a bug report needs, as plain text. No file names or locations. */
