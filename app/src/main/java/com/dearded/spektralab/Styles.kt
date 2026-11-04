@@ -78,7 +78,9 @@ data class Style(
             grainActive = grain > 0, grainAmount = grain.coerceAtLeast(0.0),
             halationActive = halation > 0, halationAmount = halation.coerceAtLeast(0.0),
             glareActive = glare > 0, glareAmount = glare.coerceAtLeast(0.0),
-            look = look,
+            look = (PAD_HOMES[id] ?: (0.0 to 0.0)).let { (tH, cH) ->
+                look.copy(tone = tH, colour = cH, toneHome = tH, colourHome = cH)
+            },
         ))
     }
 
@@ -216,6 +218,24 @@ data class Style(
         )
 
         val GROUPS = ALL.map { it.group }.distinct()
+
+        /**
+         * Each style's place on the palette pad (docs/UI.md 2.8): where its finish
+         * already sits on the pad's own axes, read back through Look's PAD_* reach.
+         * The dot starts there and a double tap returns there; the pad moves only
+         * the offset from it, so a style at home renders exactly as before.
+         */
+        val PAD_HOMES: Map<String, Pair<Double, Double>> = ALL.associate { it.id to padHome(it.look) }
+
+        private fun padHome(l: Look): Pair<Double, Double> {
+            val up = maxOf(0.0, l.shadows) / Look.PAD_SHADOWS + maxOf(0.0, -l.highlights) / Look.PAD_HIGHLIGHTS +
+                maxOf(0.0, -l.contrast) / Look.PAD_FLATTEN
+            val down = maxOf(0.0, -l.shadows) / Look.PAD_SHADOWS + maxOf(0.0, l.contrast) / Look.PAD_DEEPEN +
+                l.blackPoint / Look.PAD_BLACK
+            val tone = ((up - down) / 3).coerceIn(-1.0, 1.0)
+            val colour = ((l.saturation / Look.PAD_SATURATION + l.vibrance / Look.PAD_VIBRANCE) / 2).coerceIn(-1.0, 1.0)
+            return Math.round(tone * 100).toDouble() to Math.round(colour * 100).toDouble()
+        }
     }
 }
 

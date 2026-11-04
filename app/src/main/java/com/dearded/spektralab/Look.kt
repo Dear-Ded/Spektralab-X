@@ -77,8 +77,10 @@ data class Look(
             it.copy(tone = 0.0, colour = 0.0, toneHome = 0.0, colourHome = 0.0, palette = 100.0,
                     lutStrength = if (lut.isEmpty()) 1.0 else it.lutStrength)
         }
-        val t = (tone / 100).coerceIn(-1.0, 1.0)
-        val c = (colour / 100).coerceIn(-1.0, 1.0)
+        // Relative to the home point: a style's home is where its finish already
+        // sits, so at home it renders exactly as designed (Styles.kt PAD_HOMES).
+        val t = ((tone - toneHome) / 100).coerceIn(-1.0, 1.0)
+        val c = ((colour - colourHome) / 100).coerceIn(-1.0, 1.0)
         if (t == 0.0 && c == 0.0) return base
         val up = maxOf(t, 0.0)
         val down = maxOf(-t, 0.0)
