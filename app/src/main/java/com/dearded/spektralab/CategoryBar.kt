@@ -82,7 +82,7 @@ fun CategoryBar(selected: Int, enabled: Boolean, trailing: @Composable () -> Uni
                         .selectable(
                             selected = on, role = Role.Tab,
                             interactionSource = remember { MutableInteractionSource() }, indication = null,
-                        ) { if (!on) { view.tick(); onSelect(i) } },
+                        ) { view.tick(); onSelect(i) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {

@@ -81,6 +81,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -149,6 +150,9 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     // UI2.md 3.1: chrome recedes while a slider is dragged (the panel itself stays).
     var dragging by remember { mutableStateOf(false) }
     val barsShown = showChrome && !dragging
+    // UI2.md 2.1: tapping the open entry again folds the panel down to the toolbar,
+    // so the photo gets the screen; any entry opens it again.
+    var panelOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
     val recede by androidx.compose.animation.core.animateFloatAsState(
         if (dragging) 0.15f else 1f, Motion.defaultEffects(), label = "recede")
     // The first-run guide waits until there is a photo and nothing over it.
@@ -310,13 +314,16 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    Controls(ui, vm, saveButton, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
+                    Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    Controls(ui, vm, saveButton, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
+                    val panelH by androidx.compose.animation.core.animateDpAsState(
+                        if (panelOpen) boxHeight * 0.42f else 80.dp, Motion.defaultSpatial(), label = "panel")
+                    Controls(ui, vm, saveButton, panelOpen, { panelOpen = it },
+                        Modifier.fillMaxWidth().height(panelH).chrome(showChrome))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -538,7 +545,10 @@ private fun BusyOverlay(text: String) {
 }
 
 @Composable
-private fun Controls(ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit, modifier: Modifier) {
+private fun Controls(
+    ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit,
+    open: Boolean, onOpen: (Boolean) -> Unit, modifier: Modifier,
+) {
     var tab by remember { mutableIntStateOf(0) }
     var step by remember { mutableIntStateOf(0) }
     val e = ui.edit
@@ -547,7 +557,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, save: @Composable () -> U
         Column {
             // Pages slide in the direction of travel and fade; the panel height is
             // fixed, so the photo above never moves.
-            Box(Modifier.weight(1f)) {
+            Box(Modifier.weight(1f).clipToBounds()) {
             androidx.compose.animation.AnimatedContent(
                 targetState = tab,
                 transitionSpec = {
@@ -940,7 +950,9 @@ private fun Controls(ui: UiState, vm: EditorViewModel, save: @Composable () -> U
             }
             }
             // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
-            CategoryBar(selected = tab, enabled = true, trailing = save) { tab = it }
+            CategoryBar(selected = tab, enabled = true, trailing = save) { i ->
+                if (i == tab) onOpen(!open) else { tab = i; onOpen(true) }
+            }
         }
     }
 }
