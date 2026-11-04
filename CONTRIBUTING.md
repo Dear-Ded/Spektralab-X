@@ -6,7 +6,7 @@
 
 ## 最有价值的贡献：真机反馈
 
-目前只在一台手机上试过一次早期版本，之后的版本只经过 CI 编译和云主机测试，还没有在真机上充分验证。哪怕只有“能打开、能导出”也很有用：
+目前未大规模真机验证，需要社区反馈：除了开发者自己的手机，各版本只经过 CI 编译和云主机测试。哪怕只有“能打开、能导出”也很有用：
 
 1. 安装最新的 [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases)，打开一张照片并导出。
 2. 在应用的 **设置 → 复制诊断信息** 里复制诊断信息（版本、机型、芯片、内存、GPU 探测结果、最近 40 条事件，不含文件名和位置）。
@@ -75,7 +75,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 Issues and pull requests are welcome. One independent developer maintains the project, so replies may be slow. Chinese or English are both fine.
 
-**The most useful contribution right now is an on-device report.** Only one early build has been tried on a real phone so far; nothing has been tested thoroughly on devices. Install the latest [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases), open and export a photo, copy **Settings → Copy diagnostics** (no file names or locations) and file a [bug report](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose). Even "it opens and exports" helps. Usage questions go to [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions); security issues follow [SECURITY.md](SECURITY.md).
+**The most useful contribution right now is an on-device report.** The app has not been tested on real phones at scale yet, so community feedback is needed. Install the latest [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases), open and export a photo, copy **Settings → Copy diagnostics** (no file names or locations) and file a [bug report](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose). Even "it opens and exports" helps. Usage questions go to [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions); security issues follow [SECURITY.md](SECURITY.md).
 
 **Building.** JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator`, then the three commands above. Pushing to your own fork also works: GitHub Actions builds the APK and attaches it to the run's Artifacts.
 

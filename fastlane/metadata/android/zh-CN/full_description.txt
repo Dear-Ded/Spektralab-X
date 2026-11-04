@@ -15,4 +15,4 @@ Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm �
 免费、无广告、无内购；除了检查更新不联网，不收集任何数据，照片不离开手机。开源（GPL-3.0），官方版永久免费，只在 GitHub Releases 发布。
 
 <b>开发状态</b>
-Alpha 版本，正在快速迭代，尚未在真机上充分验证。本项目由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发。小米优化版稳定到可以日常使用后，计划另开项目做通用安卓版、Windows 版和 iOS 版。
+Alpha 版本，正在快速迭代，未大规模真机验证，需要社区反馈。本项目由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发。小米优化版稳定到可以日常使用后，计划另开项目做通用安卓版、Windows 版和 iOS 版。
