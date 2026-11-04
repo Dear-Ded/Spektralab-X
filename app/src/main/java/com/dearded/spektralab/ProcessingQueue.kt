@@ -537,7 +537,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val local = job.sourcePath.takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }
         val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
         step("读取照片", 0.05f)
-        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }.withLocation(ExifLocation.decode(job.location))
+        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri, fillKey = Uri.parse(job.uri)) }.withLocation(ExifLocation.decode(job.location))
         // The film edge lays the frame on a canvas up to 1.6x its area, and that
         // canvas is one GPU buffer (128 MiB on Adreno 7xx): decode a little smaller.
         val maxPixels = if (edit.filmEdge && job.maxPixels > 0) job.maxPixels * 10 / 16 else job.maxPixels
