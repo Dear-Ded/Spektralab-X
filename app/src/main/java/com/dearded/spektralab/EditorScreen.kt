@@ -1057,7 +1057,25 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
 @Composable
 private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
-    val films = ui.catalog.films
+    // UI2.md 2.3 ①: four kinds of film, the current one's kind open first.
+    val kinds = listOf("彩色负片", "反转片", "电影卷", "黑白")
+    fun kindOf(s: Stock) = when {
+        s.bw -> 3
+        s.positive -> 1
+        s.id.contains("vision3") || s.id.startsWith("cinestill") -> 2
+        else -> 0
+    }
+    var kind by androidx.compose.runtime.saveable.rememberSaveable {
+        mutableStateOf(ui.catalog.film(ui.edit.film)?.let(::kindOf) ?: 0)
+    }
+    Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        kinds.forEachIndexed { i, name ->
+            val n = ui.catalog.films.count { kindOf(it) == i }
+            if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
+        }
+    }
+    val films = ui.catalog.films.filter { kindOf(it) == kind }
     val view = androidx.compose.ui.platform.LocalView.current
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
     // The current film is brought into view when the strip appears or the film
