@@ -150,7 +150,7 @@ data class SpkLook(
             )
         }
 
-        private fun readEngine(e: JSONObject, r: Fields): SpkEngine {
+        internal fun readEngine(e: JSONObject, r: Fields): SpkEngine {
             r.unknown(e, "engine", ENGINE)
             fun stock(key: String): String? {
                 if (!e.has(key) || e.isNull(key)) return null
@@ -209,7 +209,7 @@ data class SpkLook(
             )
         }
 
-        private fun engineJson(e: SpkEngine) = JSONObject().apply {
+        internal fun engineJson(e: SpkEngine) = JSONObject().apply {
             e.film?.let { put("film", it) }
             e.paper?.let { put("paper", it) }
             e.exposureEv?.let { put("exposure_ev", it) }
