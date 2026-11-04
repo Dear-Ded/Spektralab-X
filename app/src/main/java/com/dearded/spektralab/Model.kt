@@ -87,6 +87,11 @@ data class Edit(
     val couplersAmount: Double = 1.0,
     /** Grain drawn per sub-layer (fine + coarse) rather than as one layer. */
     val grainLayered: Boolean = true,
+    /** Grain particle area, um^2 (patch 0007 grain_particle_area_um2): larger is coarser grain. */
+    val grainArea: Double = 0.2,
+    /** The scanner's unsharp mask (patch 0007): radius in full-size pixels, and gain. */
+    val unsharpSigma: Double = 0.7,
+    val unsharpAmount: Double = 0.7,
     // Geometry, applied by the engine before the film (shoot layer). Crop
     // fractions are of the source frame before the quarter turns.
     val quarterTurns: Int = 0,
@@ -207,6 +212,9 @@ data class Edit(
             "halation_scatter_amount" to { e: Edit -> e.scatterAmount },
             "dir_couplers_amount" to { e: Edit -> e.couplersAmount },
             "grain_sublayers_active" to { e: Edit -> e.grainLayered },
+            "grain_particle_area_um2" to { e: Edit -> e.grainArea },
+            "scanner_unsharp_sigma" to { e: Edit -> e.unsharpSigma },
+            "scanner_unsharp_amount" to { e: Edit -> e.unsharpAmount },
             "geometry_quarter_turns" to { e: Edit -> e.quarterTurns },
             "geometry_flip_h" to { e: Edit -> e.flipH },
             "geometry_crop_x" to { e: Edit -> e.cropX },
@@ -262,6 +270,9 @@ data class Edit(
             scatterAmount = p.optDouble("halation_scatter_amount", fallback.scatterAmount),
             couplersAmount = p.optDouble("dir_couplers_amount", fallback.couplersAmount),
             grainLayered = p.optBoolean("grain_sublayers_active", fallback.grainLayered),
+            grainArea = p.optDouble("grain_particle_area_um2", fallback.grainArea),
+            unsharpSigma = p.optDouble("scanner_unsharp_sigma", fallback.unsharpSigma),
+            unsharpAmount = p.optDouble("scanner_unsharp_amount", fallback.unsharpAmount),
             quarterTurns = p.optInt("geometry_quarter_turns", fallback.quarterTurns),
             flipH = p.optBoolean("geometry_flip_h", fallback.flipH),
             cropX = p.optDouble("geometry_crop_x", fallback.cropX),
