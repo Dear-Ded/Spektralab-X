@@ -42,12 +42,16 @@ data class Look(
     val midZone: Zone = Zone(),
     val highlightZone: Zone = Zone(),
     val hsl: List<Band> = List(8) { Band() },
+    /** Upstream's tone curves (rgb, luma, red, green, blue), applied after the colour balance as upstream does. */
+    val curves: CurveSet = CurveSet.IDENTITY,
 ) {
     val neutral get() = copy(vignetteMid = 50.0) == NEUTRAL
 
-    /** The array LookIndex in layer2.hpp reads, in that order. */
+    /** The array LookIndex in layer2.hpp reads, in that order; the curves follow as the kCurves tail. */
     fun values(): FloatArray {
-        val v = FloatArray(50)
+        val tail = curves.tail()
+        val v = FloatArray(50 + tail.size)
+        tail.copyInto(v, 50)
         val scalars = doubleArrayOf(temperature, tint, exposure, contrast, brightness, saturation, vibrance,
             highlights, shadows, blackPoint, whitePoint, fade, vignette, vignetteMid)
         for (i in scalars.indices) v[i] = scalars[i].toFloat()
@@ -77,6 +81,7 @@ data class Look(
         if (hsl.any { !it.neutral }) put("hsl", JSONArray().also { a ->
             for (b in 0 until 8) hsl.getOrElse(b) { Band() }.let { a.put(JSONArray().put(it.hue).put(it.sat).put(it.lum)) }
         })
+        if (!curves.isIdentity) put("curves", curves.toJson())
     }
 
     companion object {
@@ -124,6 +129,7 @@ data class Look(
                 hsl = List(8) { b ->
                     bands?.optJSONArray(b)?.let { Band(it.optDouble(0, 0.0), it.optDouble(1, 0.0), it.optDouble(2, 0.0)) } ?: Band()
                 },
+                curves = CurveSet.fromJson(o.optJSONObject("curves")),
             )
         }
 

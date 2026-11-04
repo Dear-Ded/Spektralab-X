@@ -8,7 +8,7 @@
 //
 //   white balance -> exposure/contrast/brightness -> highlights/shadows
 //   -> black/white point -> saturation (+ vibrance) -> colour balance
-//   -> HSL (8 bands) -> fade -> vignette
+//   -> tone curves -> HSL (8 bands) -> fade -> vignette
 //
 // Vibrance, the HSL bands and fade are this port's additions; everything else
 // follows upstream's arithmetic. Like upstream, it runs on the engine's
@@ -29,6 +29,10 @@ enum LookIndex : int {
     kCbMaster = 14,          // hue, saturation, luminance; then shadows, midtones, highlights
     kHsl = 26,               // 8 bands x (hue, saturation, luminance)
     kLookSize = 50,
+    // Optional tail: the five tone curves in upstream's row order (rgb, luma,
+    // red, green, blue), each a point count n (2..256) then n (x, y) pairs.
+    // Missing rows are identity; a malformed tail drops all five.
+    kCurves = 50,
 };
 
 class Layer2 {
@@ -51,6 +55,7 @@ private:
     bool cb_active_ = false;
     float hsl_[8][3] = {};
     bool hsl_active_ = false;
+    std::vector<float> curves_;       // 5 x 256 (upstream's table); empty when every curve is identity
     std::vector<float> bright_lut_;   // c^(1/(1+0.8 b)) over [0, 2]
 };
 

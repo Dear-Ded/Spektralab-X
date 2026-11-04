@@ -107,6 +107,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     Adj("强度", z.sat, 0.0, 100.0, enabled) { setZone(z.copy(sat = it)) }
     Adj("明亮度", z.lum, -100.0, 100.0, enabled) { setZone(z.copy(lum = it)) }
 
+    Group("曲线")
+    CurveEditor(l.curves, ui.image, enabled, onDrag = vm::setInteracting) { set(l.copy(curves = it)) }
+
     Group("质感")
     Adj("褪色", l.fade, 0.0, 100.0, enabled) { set(l.copy(fade = it)) }
     Adj("暗角", l.vignette, -100.0, 100.0, enabled) { set(l.copy(vignette = it)) }

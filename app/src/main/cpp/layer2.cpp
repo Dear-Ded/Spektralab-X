@@ -1,6 +1,7 @@
 #include "layer2.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <thread>
 
@@ -43,6 +44,69 @@ float hue_to_rgb(float p, float q, float t) {
     return p;
 }
 
+// Fritsch-Carlson monotone cubic, upstream's view_process.cpp `curve()`
+// line for line (shared there with CurveMath.swift), so a curve samples to
+// the same table as upstream's grade.
+double curve(const std::vector<std::array<double, 2>>& p, double x) {
+    const size_t n = p.size();
+    if (x <= p.front()[0]) return p.front()[1];
+    if (x >= p.back()[0]) return p.back()[1];
+    std::vector<double> d(n - 1), m(n);
+    for (size_t i = 0; i + 1 < n; ++i) d[i] = (p[i + 1][1] - p[i][1]) / std::max(p[i + 1][0] - p[i][0], 1e-6);
+    m[0] = d[0]; m[n - 1] = d[n - 2];
+    for (size_t i = 1; i + 1 < n; ++i) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+    for (size_t i = 0; i + 1 < n; ++i)
+        if (d[i] != 0) {
+            const double a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+            if (s > 9) { const double t = 3 / std::sqrt(s); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
+        }
+    size_t i = 0;
+    while (i < n - 2 && x > p[i + 1][0]) ++i;
+    const double h = std::max(p[i + 1][0] - p[i][0], 1e-6), t = (x - p[i][0]) / h, t2 = t * t, t3 = t2 * t;
+    return std::clamp((2 * t3 - 3 * t2 + 1) * p[i][1] + (t3 - 2 * t2 + t) * h * m[i] +
+                      (-2 * t3 + 3 * t2) * p[i + 1][1] + (t3 - t2) * h * m[i + 1], 0.0, 1.0);
+}
+
+// The kCurves tail as upstream's table: five rows of 256, row-major. Empty
+// when the tail is missing or malformed, or all five curves are identity
+// (upstream's `curvesActive`). The points arrive as floats, not upstream's
+// JSON doubles; the difference is under 1e-7, far below a 16-bit count.
+std::vector<float> curve_table(const std::vector<float>& v) {
+    std::vector<float> table(5 * 256);
+    std::vector<std::array<double, 2>> p;
+    size_t at = kCurves;
+    bool active = false;
+    for (int row = 0; row < 5; ++row) {
+        p.clear();
+        if (at < v.size()) {
+            const float n = v[at++];
+            if (!(n >= 2 && n <= 256) || n != std::floor(n) || at + 2 * size_t(n) > v.size()) return {};
+            for (int i = 0; i < int(n); ++i, at += 2) {
+                const double x = v[at], y = v[at + 1];
+                if (!std::isfinite(x) || !std::isfinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+                    (!p.empty() && x <= p.back()[0]))
+                    return {};
+                p.push_back({x, y});
+            }
+        } else {
+            p = {{0, 0}, {1, 1}};
+        }
+        if (p.size() != 2 || p[0] != std::array<double, 2>{0, 0} || p[1] != std::array<double, 2>{1, 1}) active = true;
+        for (int x = 0; x < 256; ++x) table[row * 256 + x] = float(curve(p, double(x) / 255));
+    }
+    if (!active) return {};
+    return table;
+}
+
+// One row of the table at v, as upstream's shader samples it: clamped to
+// 0..1, 255 intervals, linear between entries (GLSL mix).
+inline float lookup(const float* row, float v) {
+    const float x = saturate(v) * 255.0f;
+    const int i = int(std::floor(x));
+    const float f = x - float(i);
+    return row[i] * (1 - f) + row[std::min(i + 1, 255)] * f;
+}
+
 template <typename F>
 void rows(uint32_t h, uint64_t px, F&& body) {
     const unsigned workers = px < 500'000 ? 1u : std::min(8u, std::max(1u, std::thread::hardware_concurrency()));
@@ -67,7 +131,8 @@ void rows(uint32_t h, uint64_t px, F&& body) {
 
 Layer2::Layer2(const std::vector<float>& v) {
     if (v.size() < size_t(kLookSize)) return;
-    bool any = false;
+    curves_ = curve_table(v);
+    bool any = !curves_.empty();
     for (int i = 0; i < kLookSize; ++i)
         if (i != kVignetteMid && std::isfinite(v[i]) && v[i] != 0.0f) any = true;
     if (!any) return;
@@ -147,6 +212,15 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
         const float k = 1 + cb_lum_[0] + cb_lum_[1] * wS + cb_lum_[2] * wM + cb_lum_[3] * wH;
         for (int i = 0; i < 3; ++i)
             c[i] = (c[i] + cb_[0][i] + cb_[1][i] * wS + cb_[2][i] * wM + cb_[3][i] * wH) * k;
+    }
+    if (!curves_.empty()) {
+        // Upstream's grade: luma curve as a gain, then RGB on every channel, then each channel's own.
+        const float* t = curves_.data();
+        for (float& x : c) x = saturate(x);
+        const float ly = luma(c[0], c[1], c[2]), ly2 = lookup(t + 256, ly);
+        const float k = ly > 1e-4f ? ly2 / ly : 1.0f;
+        for (float& x : c) x = lookup(t, saturate(x * k));
+        for (int i = 0; i < 3; ++i) c[i] = lookup(t + 256 * (2 + i), c[i]);
     }
     if (hsl_active_) {
         for (float& x : c) x = saturate(x);   // HSL is defined on 0..1
