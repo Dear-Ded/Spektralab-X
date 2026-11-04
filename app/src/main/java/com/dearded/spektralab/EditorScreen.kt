@@ -1269,8 +1269,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     .padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp)
             ) {
                 Text("设置", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(12.dp))
-                Text("工作尺寸（长边）", style = MaterialTheme.typography.labelLarge)
+                SettingsSection("工作尺寸（长边）")
                 Text(
                     "打开照片时先缩到这个尺寸再处理，导出也是这个尺寸。越大越慢、越占内存。",
                     style = MaterialTheme.typography.bodySmall,
@@ -1293,8 +1292,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 run { val c = androidx.compose.ui.platform.LocalContext.current; var on by remember { mutableStateOf(LocationSetting.enabled(c)) }; SwitchRow("导出保留拍摄位置", on, true) { on = it; LocationSetting.set(c, it) } }
-                Spacer(Modifier.height(12.dp))
-                Text("新照片的胶片和相纸", style = MaterialTheme.typography.labelLarge)
+                SettingsSection("新照片的胶片和相纸")
                 Text(
                     "只用于没有保存过编辑的照片；已经编辑过的照片按它自己的设置打开。",
                     style = MaterialTheme.typography.bodySmall,
@@ -1320,8 +1318,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     StockPicker("胶片", ui.catalog.films, ui.defaultFilm, true) { vm.setNewPhotoStocks(it, ui.defaultPaper) }
                     StockPicker("相纸", ui.catalog.papers, ui.defaultPaper, true) { vm.setNewPhotoStocks(ui.defaultFilm, it) }
                 }
-                Spacer(Modifier.height(12.dp))
-                Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
+                SettingsSection("手机照片高光恢复")
                 Text(
                     "默认关闭：照片按原样交给引擎，和桌面版 SpektraLab 一致。开启后，中灰以上的高光会被展开（Ultra HDR 照片改用增益图），让胶片自己的肩部处理高光；高光会更亮、更浓，可能偏离原版色彩。",
                     style = MaterialTheme.typography.bodySmall,
@@ -1336,8 +1333,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                         Text(label)
                     }
                 }
-                Spacer(Modifier.height(12.dp))
-                Text("设备", style = MaterialTheme.typography.labelLarge)
+                SettingsSection("设备")
                 Text(ui.deviceSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
                 Text(ui.engineSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
                 val clipboard = LocalClipboardManager.current
@@ -1345,8 +1341,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
                     Text(if (copied) "已复制诊断信息" else "复制诊断信息")
                 }
-                Spacer(Modifier.height(12.dp))
-                Text("更新", style = MaterialTheme.typography.labelLarge)
+                SettingsSection("更新")
                 Text(
                     "只连 GitHub 上本项目的发布页，不上传任何内容。安装包核对校验和与签名后才安装。",
                     style = MaterialTheme.typography.bodySmall,
@@ -1366,6 +1361,17 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 Spacer(Modifier.height(12.dp))
                 AboutSection()
             }
+    }
+}
+
+@Composable
+/** A settings group's title (UI2.md 1.3): a hairline above, the title quiet, room to breathe. */
+@Composable
+private fun SettingsSection(title: String) {
+    Column(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)) {
+        HorizontalDivider(color = Palette.OutlineSoft)
+        Spacer(Modifier.height(12.dp))
+        Text(title, style = MaterialTheme.typography.titleSmall, color = Palette.OnSurface)
     }
 }
 
