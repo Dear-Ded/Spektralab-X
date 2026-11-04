@@ -7,7 +7,8 @@
 **Spectral film and print simulation: develop your photos on a phone.**
 
 Your RAW and phone photos are "exposed" onto film from measured characteristic curves and spectral sensitivities, developed, and printed onto paper.<br>
-Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source
+Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source<br>
+**Free, no ads, no in-app purchases; online only to check for updates, and your photos never leave the phone.**
 
 [简体中文](README.md) | English
 
@@ -62,7 +63,7 @@ This repository builds SpektraLab's C++ engine for Android with the NDK, runs it
 
 - **A physical model, not a LUT.** Grain, halation and paper glare are computed from the physical parameters of each film and paper.
 - **The full chain on the phone.** Vulkan compute shaders run on the Adreno GPU, with submissions split and memory capped per device.
-- **Offline.** The app requests no network permission and collects no data; exported photos carry no location unless you turn that on in Settings.
+- **Online only for updates.** The only network traffic is checking this repository's GitHub Releases and downloading a new APK; no analytics, no ads, and photos never leave the phone. Exported photos carry no location unless you turn that on in Settings.
 
 ## Samples
 
@@ -169,6 +170,17 @@ There is no Xiaomi 16. Memory, recommended working sizes and known risks per gen
 2. Install it on the phone. Xiaomi / HyperOS asks you to allow unknown sources under "Security" the first time.
 3. Later versions install over earlier ones; your presets are kept.
 
+### In-app updates
+
+From 0.1.19 the app can check for and install new versions itself:
+
+- **When it goes online:** at launch, at most once every 6 hours, it fetches this repository's GitHub Releases list. When a new version is out, it downloads the APK and `SHA256SUMS` when you tap Download and install, or automatically on unmetered Wi-Fi. Nothing is sent beyond the request itself; no analytics.
+- **Never interrupts an edit:** with a photo open, an automatic check shows no dialog, only "New version · View" in the ⋯ menu; you are told when the editor is empty or when you open it yourself.
+- **Switches:** Settings has Check for updates automatically (on by default), Download new versions on Wi-Fi (on by default) and Check now; the ⋯ menu has Check for updates.
+- **Safety:** the APK's SHA-256 must match the release's `SHA256SUMS` and its signing certificate must match the installed app, and Android checks the signature again. The first self-update shows Android's install confirmation (and asks you to allow installing unknown apps); later ones can be silent on Android 12 and up.
+- **Permissions:** `INTERNET`, `ACCESS_NETWORK_STATE`, `REQUEST_INSTALL_PACKAGES`, `UPDATE_PACKAGES_WITHOUT_USER_ACTION`.
+- **Builds you compile yourself** are signed differently, so the updater refuses them and points you to the Releases page.
+
 **Automatic updates with Obtainium:** add `https://github.com/Dear-Ded/Spektralab-X` and enable **Include prereleases** (every release is a pre-release for now, so nothing shows up without it).
 
 **Feel free to share it:** pass the downloaded APK on to communities, groups and forums. No permission needed; just include this repository's address. See [Reposting and derivative works](#reposting-and-derivative-works).
@@ -225,7 +237,7 @@ On a cloud machine, yes. The engine prints in ProPhoto and the screen and export
 <details>
 <summary><b>Does it need the internet? Are my photos uploaded?</b></summary>
 
-No. The app requests no network permission, everything is computed on the phone, and no data is collected. Exported JPEGs keep the camera, lens and exposure details; GPS location is left out unless you turn on "Keep location in exports" in Settings.
+Your photos are never uploaded: everything is computed on the phone, and no data is collected. The app goes online for one thing only, checking for and downloading updates; see [In-app updates](#in-app-updates). Exported JPEGs keep the camera, lens and exposure details; GPS location is left out unless you turn on "Keep location in exports" in Settings.
 </details>
 
 <details>

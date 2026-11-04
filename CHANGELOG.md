@@ -10,7 +10,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 
 ## 0.1.19-alpha · 未发布（草稿）
 
-**省流：** 颜色和桌面版对上了（RAW 和手机照片都是），换了底部图标栏和新滑杆，一键风格扩到 87 款，多了调整页、曲线、品牌 logo 水印、只加齿孔的边框和整套片边 / 日期后背选项，导出不再卡编辑、也不会存出坏图，保存按钮回来了。还没在真机上充分验证，慎冲。
+**省流：** 颜色和桌面版对上了（RAW 和手机照片都是），换了底部图标栏和新滑杆，一键风格扩到 87 款，多了调整页、曲线、品牌 logo 水印、只加齿孔的边框和整套片边 / 日期后背选项，导出不再卡编辑、也不会存出坏图，保存按钮回来了，还能在应用里直接更新。还没在真机上充分验证，慎冲。
 
 > 第一次真机试用之后，我收到了一份热乎的吐槽清单：颜色不对味，保存按钮离家出走，界面素得像没冲洗的底片。说实话，有点破防。你的反馈我都看到了，这一版就干一件事：**挨个认错，挨个改掉。**
 
@@ -44,6 +44,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - **只加齿孔**：新边框，任何胶片都能加。只在照片外侧画一圈 135 齿孔，不裁剪、不改任何冲印参数。可以选上下 / 只上 / 只下、片基颜色（黑、橙、透明、灰）、方孔或圆孔，片边字和帧号也能开关、能改字。
 - **品牌 logo 水印**：参数条终于能带 logo 了。读照片 EXIF 自动认出是哪家相机或手机（小米的型号代码也能翻译成市售名），也可以手动选、写自定义文字。五种版式，还能加胶片厂牌 logo。一共 33 个品牌，每个 logo 的来源都记在 [docs/LOGOS.md](docs/LOGOS.md)。
 - **轻点照片，世界清静**：按钮和状态栏一起退场，只剩照片和你。再点一下或按返回，它们回来上班。
+- **应用里直接更新**：终于不用每次手动去 GitHub 翻 Releases 了。启动时最多每 6 小时看一眼本仓库有没有新版本，Wi-Fi 下顺手把安装包下好，流量下只提醒不下载。正在修图时它憋着不打扰你，等你从 ⋯ 菜单点“有新版本 · 查看”，或者回到空白页再说。设置里有“自动检查更新”“Wi-Fi 下自动下载新版本”两个开关（默认都开）和“立即检查更新”。安装包的 SHA-256 要和发布页的 SHA256SUMS 对上、签名证书要和你装着的这个一致，才会交给系统安装，系统还会再验一遍签名。第一次自更新会弹系统的安装确认（可能还要你允许“安装未知应用”），之后在 Android 12+ 上可以静默装好。
 - **导出可以保留拍摄位置**：设置里新开关“导出保留拍摄位置”，默认关。打开时会问一次照片位置权限，不给就照旧不写。被系统抹掉位置的副本读出来是 0° N 0° E，这种直接丢掉，不会把你的照片“送去”几内亚湾。
 
 ### 顺手了 / 修好了
@@ -65,6 +66,8 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 
 ### 还没冲洗完的
 
+- 坦白一下：为了更新，应用这一版第一次申请了网络权限。它只做一件事：向本仓库的 GitHub Releases 要版本列表，需要时下载安装包和 SHA256SUMS。没有统计、没有广告，除了请求本身什么都不发，照片永远不离开手机。不想要的话，把“自动检查更新”关掉就一点网都不走。
+- 自己编译的版本签名和官方版不一样，自更新会拒绝安装，并引导你去 Releases 页面。
 - 这一版**还没在真机上充分验证**，所有结论都来自编译和云主机测试。闪退、卡顿、颜色跑偏都有可能，撞上了请一定告诉我。
 - 首次使用引导还在暗房里显影。
 - 导入 `.cube` / HaldCLUT、`.spklook`、Lightroom XMP、spektrafilm 预设、富士配方，以及自定义胶片方案和观片台的存档层，代码都已经进了 main，但**界面入口还没接上**，这一版你还点不到。别急，下一步就接。
@@ -95,6 +98,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 拍摄位置：入队时从用户选的 URI 读取 GPS（有 `ACCESS_MEDIA_LOCATION` 时经 `MediaStore.setRequireOriginal`），经纬度为 0 时整组丢弃，随任务保存，写入 JPEG EXIF；TIFF 不带 EXIF，不受影响。
 - Look 格式 2：按字段名保存，没有 `format` 字段的旧位置数组仍按旧顺序读取，传给引擎的数组不变。
 - 已合并但尚无界面入口：`.spklook` v1 读写、`.cube`（1D / 3D、shaper）与 HaldCLUT 解析并四面体重采样到 65³、Lightroom XMP / spektrafilm GUI JSON / 富士配方转换（`PresetImport.kt`）、胶片方案与完整胶片数据校验（`FilmRecipe.kt`）、观片台存档（`FrameStore.kt`，每张照片一个侧边文件）。格式说明见 [docs/STYLES.md](docs/STYLES.md)。
+- 更新（`Updater.kt`、`UpdateDialog.kt`）：启动时检查本仓库 GitHub Releases 列表，间隔至少 6 小时；不计流量的 Wi-Fi 下自动下载，计流量网络只提示；下载可续传，可跳过某个版本。安装前校验 APK 的 SHA-256 与发布附带的 `SHA256SUMS` 一致、签名证书与当前安装的应用一致，再交给 `PackageInstaller`。新增权限 `INTERNET`、`ACCESS_NETWORK_STATE`、`REQUEST_INSTALL_PACKAGES`、`UPDATE_PACKAGES_WITHOUT_USER_ACTION`。编辑器里打开着照片时，自动检查只在 ⋯ 菜单显示“有新版本”，不弹窗。
 - 底部分类栏（`CategoryBar.kt`）替换原来的文字标签页；顶栏撤销 / 重做改为图标，任务和设置移入 ⋯ 菜单。
 - README、NOTICE、贡献指南和安全策略改版，新增安装包校验说明（[docs/VERIFY.md](docs/VERIFY.md)）。
 

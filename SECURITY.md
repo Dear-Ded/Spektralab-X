@@ -19,11 +19,12 @@ In scope: the app (`app/`), the engine patches (`patches/`) and the build and re
 
 ## 应用的隐私设计 / Privacy by design
 
-- 应用不申请网络权限，不收集、不上传任何数据。
+- 应用只为更新联网：最多每 6 小时请求一次本仓库的 GitHub Releases 列表，下载新版安装包和 `SHA256SUMS`。不收集、不上传任何数据，照片不离开手机。
+- 自动更新只安装 SHA-256 与 `SHA256SUMS` 一致、签名证书与已安装应用一致的安装包；安卓系统还会再校验一次签名。
 - 导出的 JPEG 保留拍摄参数；GPS 位置默认不写入，只有在设置里打开“导出保留拍摄位置”才会写。
 - 诊断信息只在你点“复制”时生成，不含文件名和位置。
 
-The app requests no network permission and collects or uploads nothing. Exported JPEGs keep shooting parameters; GPS location is written only if you turn on "Keep location in exports" in Settings (off by default). Diagnostics are produced only when you tap Copy and contain no file names or locations.
+The app goes online only for updates: at most once every 6 hours it fetches this repository's GitHub Releases list, and downloads a new APK and `SHA256SUMS`. It collects and uploads nothing, and photos never leave the phone. The updater installs an APK only if its SHA-256 matches `SHA256SUMS` and its signing certificate matches the installed app; Android checks the signature again. Exported JPEGs keep shooting parameters; GPS location is written only if you turn on "Keep location in exports" in Settings (off by default). Diagnostics are produced only when you tap Copy and contain no file names or locations.
 
 ## 冒充的安装包 / Impersonating builds
 
