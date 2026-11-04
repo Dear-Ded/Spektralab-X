@@ -51,6 +51,21 @@ class Lut3(val size: Int, val data: FloatArray) {
         return Lut3(side, out)
     }
 
+    /** This table as a .cube file (0..1 domain), so a HaldCLUT or a resampled table can go into a .spklook. */
+    fun toCube(title: String = ""): ByteArray {
+        val sb = StringBuilder(size * size * size * 24 + 64)
+        if (title.isNotEmpty()) sb.append("TITLE \"").append(title.replace('"', '\'').take(120)).append("\"\n")
+        sb.append("LUT_3D_SIZE ").append(size).append('\n')
+        for (i in 0 until size * size * size) {
+            for (k in 0 until 3) {
+                if (k > 0) sb.append(' ')
+                sb.append(String.format(java.util.Locale.ROOT, "%.6f", data[i * 3 + k]))
+            }
+            sb.append('\n')
+        }
+        return sb.toString().toByteArray(Charsets.US_ASCII)
+    }
+
     private data class Tet(val c1: Int, val c2: Int, val w0: Float, val w1: Float, val w2: Float, val w3: Float)
 
     companion object {
@@ -230,17 +245,34 @@ object HaldClut {
         val l = level(width, height) ?: throw ImportException("图片 ${width}×$height 不是 HaldCLUT（边长须为 8、27、64…4096）")
         val n = l * l
         require(pixels.size == width * height)
-        val out = FloatArray(n * n * n * 3)
-        for (i in 0 until n * n * n) {
-            val p = pixels[i]
-            out[i * 3] = ((p shr 16) and 0xFF) / 255f
-            out[i * 3 + 1] = ((p shr 8) and 0xFF) / 255f
-            out[i * 3 + 2] = (p and 0xFF) / 255f
+        fun channel(p: Int, k: Int) = ((p shr (16 - 8 * k)) and 0xFF) / 255f
+        if (n <= Lut3.NATIVE_SIDE) {
+            val out = FloatArray(n * n * n * 3)
+            for (i in 0 until n * n * n) for (k in 0 until 3) out[i * 3 + k] = channel(pixels[i], k)
+            return Lut3(n, out)
         }
-        val lut = Lut3(n, out)
-        if (n <= Lut3.NATIVE_SIDE) return lut
+        // Level 9 and up (81..256 a side): sampled straight from the pixels onto
+        // 65^3 (trilinear), so a 256^3 float table is never built.
         report.approximated("HaldCLUT", "${l} 级（${n}³）重采样到 ${Lut3.NATIVE_SIDE}³")
-        return lut.resampled(Lut3.NATIVE_SIDE)
+        val side = Lut3.NATIVE_SIDE
+        val out = FloatArray(side * side * side * 3)
+        val n1 = n - 1
+        fun at(r: Int, g: Int, b: Int) = pixels[(b * n + g) * n + r]
+        var o = 0
+        for (b in 0 until side) for (g in 0 until side) for (r in 0 until side) {
+            val fr = r * n1.toFloat() / (side - 1); val fg = g * n1.toFloat() / (side - 1); val fb = b * n1.toFloat() / (side - 1)
+            val r0 = min(fr.toInt(), n1 - 1); val g0 = min(fg.toInt(), n1 - 1); val b0 = min(fb.toInt(), n1 - 1)
+            val dr = fr - r0; val dg = fg - g0; val db = fb - b0
+            for (k in 0 until 3) {
+                fun c(ri: Int, gi: Int, bi: Int) = channel(at(r0 + ri, g0 + gi, b0 + bi), k)
+                val x00 = c(0, 0, 0) * (1 - dr) + c(1, 0, 0) * dr
+                val x10 = c(0, 1, 0) * (1 - dr) + c(1, 1, 0) * dr
+                val x01 = c(0, 0, 1) * (1 - dr) + c(1, 0, 1) * dr
+                val x11 = c(0, 1, 1) * (1 - dr) + c(1, 1, 1) * dr
+                out[o++] = (x00 * (1 - dg) + x10 * dg) * (1 - db) + (x01 * (1 - dg) + x11 * dg) * db
+            }
+        }
+        return Lut3(side, out)
     }
 }
 
@@ -295,3 +327,21 @@ object LutBake {
 }
 
 private fun clamp01(x: Float) = max(0f, min(1f, if (x.isNaN()) 0f else x))
+
+/** [this] as .cube text (Adobe/Resolve 3D, 0..1 domain, six decimals), what a .spklook carries as lut.cube. */
+fun Lut3.toCube(title: String = ""): ByteArray {
+    val sb = StringBuilder(size * size * size * 27 + 80)
+    if (title.isNotEmpty()) sb.append("TITLE \"").append(title.replace('"', '\'').take(120)).append("\"\n")
+    sb.append("LUT_3D_SIZE ").append(size).append('\n')
+    fun put(x: Float) {
+        val v = (clamp01(x) * 1_000_000f + 0.5f).toInt()
+        sb.append(v / 1_000_000).append('.')
+        val frac = (v % 1_000_000).toString()
+        for (i in frac.length until 6) sb.append('0')
+        sb.append(frac)
+    }
+    for (i in data.indices step 3) {
+        put(data[i]); sb.append(' '); put(data[i + 1]); sb.append(' '); put(data[i + 2]); sb.append('\n')
+    }
+    return sb.toString().toByteArray(Charsets.US_ASCII)
+}
