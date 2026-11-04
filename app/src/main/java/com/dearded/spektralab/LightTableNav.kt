@@ -71,10 +71,19 @@ fun AppScreens(editor: EditorViewModel) {
             BackHandler(enabled = fromTable) { fromTable = false; screen = Screen.TABLE }
             EditorScreen(editor, onLightTable = { screen = Screen.TABLE })
         }
-        Screen.TABLE -> LightTableScreen(
-            table = table,
-            onBack = { fromTable = false; screen = Screen.EDITOR },
-            onOpen = { frames, i -> frames.getOrNull(i)?.let(::openInEditor) },
-        )
+        Screen.TABLE -> {
+            // The loupe stays open under the editor: back from an edit returns to the same page.
+            val loupe by table.loupe.collectAsState()
+            val open = loupe
+            if (open != null) {
+                LightTableLoupe(table, open, onEdit = ::openInEditor, onClose = table::closeLoupe)
+            } else {
+                LightTableScreen(
+                    table = table,
+                    onBack = { fromTable = false; screen = Screen.EDITOR },
+                    onOpen = table::openLoupe,
+                )
+            }
+        }
     }
 }

@@ -28,8 +28,13 @@ data class TableState(
     val selection: Set<String> = emptySet(),
     /** Photos still being read in by an import (0 = none running). */
     val importing: Int = 0,
+    /** After a pick or a reject in the loupe, move on to the next frame. */
+    val autoAdvance: Boolean = true,
     val message: String? = null,
 )
+
+/** The loupe's run of frames (by id, so a re-filtered grid does not move it) and where it opened. */
+data class Loupe(val ids: List<String>, val start: Int)
 
 /** The frame the editor has open for the light table, so its edits go back to that frame's sidecar. */
 data class EditLink(val id: String, val name: String)
@@ -48,15 +53,29 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     private val _state = MutableStateFlow(TableState(
         columns = prefs.getInt("columns", 3).takeIf { it in COLUMNS } ?: 3,
         filter = runCatching { FrameFilter.valueOf(prefs.getString("filter", "ALL")!!) }.getOrDefault(FrameFilter.ALL),
+        autoAdvance = prefs.getBoolean("auto_advance", true),
     ))
     val state: StateFlow<TableState> = _state
 
     private val _editing = MutableStateFlow<EditLink?>(null)
     val editing: StateFlow<EditLink?> = _editing
 
+    private val _loupe = MutableStateFlow<Loupe?>(null)
+    val loupe: StateFlow<Loupe?> = _loupe
+
     init {
         viewModelScope.launch(Dispatchers.IO) { store.load() }
     }
+
+    fun openLoupe(frames: List<Frame>, index: Int) {
+        if (index !in frames.indices) return
+        _loupe.value = Loupe(frames.map { it.id }, index)
+    }
+
+    /** The loupe moved to [index]; reopening it after the editor comes back there. */
+    fun loupeAt(index: Int) = _loupe.update { it?.copy(start = index) }
+
+    fun closeLoupe() { _loupe.value = null }
 
     fun visible(all: List<Frame>, filter: FrameFilter) = if (filter == FrameFilter.ALL) all else all.filter(filter::keeps)
 
@@ -90,6 +109,19 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun setFilter(f: FrameFilter) {
         prefs.edit().putString("filter", f.name).apply()
         _state.update { it.copy(filter = f) }
+    }
+
+    fun setAutoAdvance(on: Boolean) {
+        prefs.edit().putBoolean("auto_advance", on).apply()
+        _state.update { it.copy(autoAdvance = on) }
+    }
+
+    // --- marks ------------------------------------------------------------------------
+
+    /** Picks (1), rejects (-1) or clears (0) [ids], and/or sets their stars; null leaves that mark alone. */
+    fun rate(ids: Set<String>, pick: Int? = null, stars: Int? = null) {
+        if (ids.isEmpty() || (pick == null && stars == null)) return
+        viewModelScope.launch(Dispatchers.IO) { store.rate(ids, pick?.coerceIn(-1, 1), stars) }
     }
 
     // --- selection ----------------------------------------------------------------
