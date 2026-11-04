@@ -145,7 +145,8 @@ class EngineHost(private val app: Application) {
     // Engine thread, under the mutex.
     private fun build(film: String, paper: String): Ready {
         val dir = EngineAssets.install(app)
-        val device = NativeEngine.deviceInfo()
+        // Before create: the probe runs on a VkDevice of its own.
+        val device = StorageProbe.annotate(app, NativeEngine.deviceInfo(), events)
         val catalog = Catalog.load(dir)
         val tmp = File(app.cacheDir, "engine-tmp").apply { mkdirs() }
         val handle = NativeEngine.create(dir.absolutePath, tmp.absolutePath)

@@ -18,6 +18,13 @@ object NativeEngine {
     external fun lastError(): String
     external fun deviceInfo(): String
 
+    /**
+     * The storage-buffer size, in bytes up to [ceiling], whose far writes were
+     * measured to land on a throwaway VkDevice; 0 when even 128 MiB failed
+     * (lastError has the log). Slow: EngineHost runs it once per driver.
+     */
+    external fun probeStorageRange(ceiling: Long): Long
+
     external fun create(resourcesDir: String, tmpDir: String): Long
     external fun destroy(engine: Long)
     external fun capabilities(engine: Long): String
