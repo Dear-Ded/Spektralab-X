@@ -29,6 +29,8 @@ object Palette {
     val OnSurface = Color(0xFFECE9E3)
     val OnSurfaceSoft = Color(0xFF9E9A93)
     val Outline = Color(0xFF3A3A40)
+    /** A slider's unfilled track: 3:1 against the panel (UI.md 1). */
+    val Track = Color(0xFF6A6A72)
     val OutlineSoft = Color(0xFF26262A)
     val Amber = Color(0xFFE8A24A)
     val OnAmber = Color(0xFF1A1206)
@@ -62,14 +64,25 @@ private val Scheme = darkColorScheme(
     error = Palette.Warning,
 )
 
+// UI.md 1: no letter spacing on Chinese, nothing under 12 sp, and zh-CN so
+// shared Han characters never fall back to Japanese glyph shapes.
+private val Zh = androidx.compose.ui.text.intl.LocaleList("zh-CN")
+
+private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh)
+
 private val Type = Typography().let { t ->
     t.copy(
-        titleMedium = t.titleMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp),
-        labelLarge = t.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+        headlineSmall = t.headlineSmall.zh(),
+        titleLarge = t.titleLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold).zh(),
+        titleMedium = t.titleMedium.copy(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold).zh(),
+        titleSmall = t.titleSmall.zh(),
+        bodyLarge = t.bodyLarge.zh(),
+        bodyMedium = t.bodyMedium.copy(fontSize = 14.sp, lineHeight = 22.sp).zh(),
+        bodySmall = t.bodySmall.copy(fontSize = 12.sp, lineHeight = 18.sp).zh(),
+        labelLarge = t.labelLarge.copy(fontSize = 13.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium).zh(),
         labelMedium = t.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium,
-            fontFeatureSettings = "tnum"),
-        labelSmall = t.labelSmall.copy(fontSize = 11.sp, letterSpacing = 0.2.sp),
-        bodySmall = t.bodySmall.copy(fontSize = 12.sp, lineHeight = 17.sp),
+            fontFeatureSettings = "tnum").zh(),
+        labelSmall = t.labelSmall.copy(fontSize = 12.sp, lineHeight = 18.sp).zh(),
     )
 }
 

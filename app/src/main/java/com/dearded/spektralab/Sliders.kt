@@ -200,7 +200,7 @@ internal fun LabeledSlider(
             val x1 = size.width - r
             fun xOf(v: Float) = x0 + (v - lo) / span * (x1 - x0)
             val fill = if (enabled) Palette.Amber else Palette.Outline
-            drawRoundRect(Palette.PanelHighest, Offset(x0, cy - track / 2), Size(x1 - x0, track), CornerRadius(track / 2))
+            drawRoundRect(if (enabled) Palette.Track else Palette.PanelHighest, Offset(x0, cy - track / 2), Size(x1 - x0, track), CornerRadius(track / 2))
             val xd = xOf(def)
             val xv = xOf(local)
             drawRect(fill, Offset(minOf(xd, xv), cy - track / 2), Size(abs(xv - xd), track))

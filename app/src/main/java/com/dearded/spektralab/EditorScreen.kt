@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -339,6 +341,7 @@ private fun Preview(
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
+    val view = androidx.compose.ui.platform.LocalView.current
     Box(modifier.background(Palette.Surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
@@ -350,7 +353,10 @@ private fun Preview(
                         detectTapGestures(
                             onTap = { toggle() },
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
-                            onLongPress = { holding = true },
+                            onLongPress = {
+                                holding = true
+                                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                            },
                             onPress = {
                                 tryAwaitRelease()
                                 holding = false
@@ -426,16 +432,15 @@ private fun Preview(
                 else null
             }
             Column(Modifier.align(Alignment.TopStart).padding(8.dp).chrome(chrome)) {
-                Row {
-                    TextButton(onClick = { showHistogram = !showHistogram }) {
-                        Text(if (showHistogram) "隐藏直方图" else "直方图", color = Color.White.copy(alpha = 0.8f))
-                    }
-                    TextButton(onClick = onDetail, enabled = !ui.loadingDetail && ui.imageTier.isNotEmpty()) {
-                        Text(if (ui.loadingDetail) "渲染中…" else "1:1", color = Color.White.copy(alpha = 0.8f))
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    OverlayChip(if (showHistogram) "隐藏直方图" else "直方图", on = showHistogram) { showHistogram = !showHistogram }
+                    OverlayChip(if (ui.loadingDetail) "渲染中…" else "1:1",
+                        enabled = !ui.loadingDetail && ui.imageTier.isNotEmpty(), onClick = onDetail)
                 }
+                Spacer(Modifier.height(6.dp))
                 histogram?.let { h ->
-                    HistogramView(h, Modifier.width(160.dp).height(80.dp).background(Color.Black.copy(alpha = 0.5f)))
+                    HistogramView(h, Modifier.width(160.dp).height(80.dp)
+                        .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.5f)))
                     if (h.clippedLow > 0.005f || h.clippedHigh > 0.005f) {
                         Text(
                             String.format(Locale.ROOT, "暗部溢出 %.1f%% · 高光溢出 %.1f%%", h.clippedLow * 100, h.clippedHigh * 100),
@@ -453,11 +458,41 @@ private fun Preview(
                     ui.imageTier == "live" -> "快速预览 · 长按看原图"
                     else -> "预览 · 长按看原图"
                 },
-                color = Color.White.copy(alpha = 0.6f),
+                color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome)
+                    .clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.45f))
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
+    }
+}
+
+/**
+ * A pill over the photo: a dark scrim so it reads on a white sky as well as
+ * a black one; "on" is shown by fill and an amber label, not colour alone.
+ * Pressed it shrinks to 0.96 (UI.md 1, 按钮按下).
+ */
+@Composable
+private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
+    val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "chip")
+    Box(
+        Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+            .clip(RoundedCornerShape(50))
+            .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
+            .clickable(enabled = enabled, interactionSource = press,
+                indication = androidx.compose.material3.ripple(), onClick = onClick)
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.labelLarge, color = when {
+            !enabled -> Color.White.copy(alpha = 0.4f)
+            on -> Palette.Amber
+            else -> Color.White.copy(alpha = 0.9f)
+        })
     }
 }
 

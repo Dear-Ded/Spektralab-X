@@ -252,6 +252,7 @@ internal const val STYLE_STRENGTH_PREFS = "style_strength"
 @Composable
 internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) {
     val context = LocalContext.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
     val strengths = remember { mutableStateMapOf<String, Double>() }
     fun strengthOf(id: String) = strengths[id] ?: prefs.getFloat(id, 1f).toDouble().coerceIn(0.0, 1.0)
@@ -279,7 +280,11 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                     .border(if (on) 2.dp else 1.dp, ring, RoundedCornerShape(10.dp))
                     .clickable(enabled = enabled) {
                         if (on) open = if (open == s.id) null else s.id
-                        else { open = null; onPick(s.atStrength(strengthOf(s.id))) }
+                        else {
+                            open = null
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                            onPick(s.atStrength(strengthOf(s.id)))
+                        }
                     }
                     .padding(bottom = 6.dp),
             ) {
