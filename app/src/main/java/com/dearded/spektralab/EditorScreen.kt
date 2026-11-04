@@ -91,6 +91,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.windowInsetsPadding
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -1106,10 +1108,12 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
  */
 @Composable
 private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = onClose,
-        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-    ) {
+    // A full-screen layer in the activity's own window, not a Dialog: a dialog is
+    // a second window, and opening or closing it brings the system bars back
+    // (docs/UI.md, 沉浸式). One window, one insets controller.
+    var label by remember { mutableStateOf(true) }
+    SystemBarsHidden(true)
+    Box(Modifier.fillMaxSize().zIndex(10f)) {
         var back by remember { mutableFloatStateOf(0f) }
         androidx.activity.compose.PredictiveBackHandler { events ->
             try {
@@ -1135,7 +1139,8 @@ private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
         Box(Modifier.fillMaxSize().graphicsLayer {
             val k = 1f - 0.1f * back; scaleX = k; scaleY = k; alpha = 1f - 0.3f * back
         }.background(Color.Black)) {
-            Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)) {
+            Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)
+                .pointerInput(Unit) { detectTapGestures(onTap = { label = !label }) }) {
                 Image(
                     bitmap = image,
                     contentDescription = null,
@@ -1143,8 +1148,13 @@ private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
                     modifier = with(density) { Modifier.width(bitmap.width.toDp()).height(bitmap.height.toDp()) },
                 )
             }
+            // Clear of the cutout and the curved edges; a tap on the photo hides it.
             Row(
-                Modifier.align(Alignment.TopEnd).padding(8.dp).background(Color.Black.copy(alpha = 0.5f)),
+                Modifier.align(Alignment.TopEnd)
+                    .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.safeDrawing)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .chrome(label)
+                    .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,
