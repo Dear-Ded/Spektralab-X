@@ -254,6 +254,15 @@ fun EditorScreen(vm: EditorViewModel) {
                                 text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
                                 onClick = { moreMenu = false; vm.showQueue(true) },
                             )
+                            val update by Updater.state.collectAsState()
+                            val waiting = update is Updater.State.Available || update is Updater.State.Ready
+                            DropdownMenuItem(
+                                text = { Text(if (waiting) "有新版本 · 查看" else "检查更新") },
+                                onClick = {
+                                    moreMenu = false
+                                    if (waiting) Updater.show() else { Updater.show(); Updater.check(context, manual = true) }
+                                },
+                            )
                             DropdownMenuItem(
                                 text = { Text("设置") },
                                 leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
@@ -314,6 +323,7 @@ fun EditorScreen(vm: EditorViewModel) {
     if (showSettings) SettingsDialog(ui, vm) { showSettings = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
     ui.detail?.let { DetailViewer(it, vm::closeDetail) }
+    UpdateDialog(editing = ui.hasImage)
 }
 
 @Composable
@@ -1077,6 +1087,21 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 var copied by remember { mutableStateOf(false) }
                 TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
                     Text(if (copied) "已复制诊断信息" else "复制诊断信息")
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("更新", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    "只连 GitHub 上本项目的发布页，不上传任何内容。安装包核对校验和与签名后才安装。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                run {
+                    val c = androidx.compose.ui.platform.LocalContext.current
+                    var auto by remember { mutableStateOf(Updater.autoCheck(c)) }
+                    var wifi by remember { mutableStateOf(Updater.wifiDownload(c)) }
+                    SwitchRow("自动检查更新", auto, true) { auto = it; Updater.setAutoCheck(c, it) }
+                    SwitchRow("Wi-Fi 下自动下载新版本", wifi, auto) { wifi = it; Updater.setWifiDownload(c, it) }
+                    TextButton(onClick = { onDismiss(); Updater.show(); Updater.check(c, manual = true) }) { Text("立即检查更新") }
                 }
                 LocalCoach.current?.let { c ->
                     TextButton(onClick = { c.replay(); onDismiss() }) { Text("重新查看引导") }

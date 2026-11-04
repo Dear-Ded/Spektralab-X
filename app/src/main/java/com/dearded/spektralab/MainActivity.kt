@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         DisplayColor.attach(this)
-        if (savedInstanceState == null) handleIntent(intent)
+        if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
             // Always dark: judging a print against a white UI skews it.
             SpektraTheme { CoachHost { EditorScreen(viewModel) } }

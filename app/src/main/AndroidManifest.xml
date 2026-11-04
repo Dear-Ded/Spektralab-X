@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Keeps an export alive while the app is in the background (HyperOS kills
-         background processes early). No network permission: nothing leaves the phone. -->
+         background processes early). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <!-- Android 16 Live Updates (the HyperOS 3 island shows them); install-time, not a prompt. -->
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <!-- Update check and download (Updater.kt), from this repository's GitHub Releases
+         only; photos never leave the phone. Off in 设置 → 自动检查更新. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
 
     <uses-feature android:name="android.hardware.vulkan.version" android:version="0x400000" android:required="true" />
     <uses-feature android:name="android.hardware.vulkan.compute" android:version="0" android:required="false" />
@@ -49,5 +55,8 @@
             android:name=".ExportService"
             android:exported="false"
             android:foregroundServiceType="dataSync|mediaProcessing" />
+        <receiver
+            android:name=".UpdateReceiver"
+            android:exported="false" />
     </application>
 </manifest>
