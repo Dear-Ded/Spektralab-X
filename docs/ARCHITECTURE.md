@@ -69,6 +69,8 @@ Spektralab-X 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。
 | `0003-raw-half-size-budget` | 传感器远大于工作尺寸时，按半尺寸解码 |
 | `0004-dng-dual-illuminant-matrix` | DNG 按拍摄白平衡在两组色彩矩阵之间插值 |
 | `0005-lock-print-lut-caches` | 相纸查找表缓存加锁，编辑和导出两条引擎线程可同时首次使用 |
+| `0006-dng-opcode-gain-map` | 把 DNG OpcodeList2 的镜头阴影增益乘到拜耳数据上，小米、Pixel 的 DNG 四角不再偏暗 |
+| `0007-grain-size-and-unsharp-on-the-wire` | 颗粒尺寸和扫描锐化作为线上参数开放；不传或用默认值时输出逐字节不变 |
 | `0008-latch-device-lost` | 第一次 GPU 设备丢失后锁存，之后的提交和 flush 立即失败，不再对已丢失的设备重复提交 |
 
 补丁在 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh) 下载上游源码后按文件名顺序应用。补丁内容一变，CI 缓存键也跟着变。
