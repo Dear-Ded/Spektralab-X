@@ -8,6 +8,7 @@
 
 按真实胶片的特性曲线和光谱灵敏度，把 RAW 和手机照片“曝光”到胶片上、显影、放大到相纸。<br>
 SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Adreno）优化 · 开源免费<br>
+胶片建模基于 [spektrafilm](https://github.com/andreavolpato/spektrafilm) · film modeling powered by [spektrafilm](https://github.com/andreavolpato/spektrafilm)<br>
 **免费、无广告、无内购；除了检查更新不联网，照片不离开手机。**
 
 简体中文 | [English](README.en.md)
@@ -36,6 +37,9 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 
 > [!WARNING]
 > **尚未在真机上充分验证。** 目前只在一台手机上试过一次早期版本，之后的版本只经过 CI 编译和云主机测试，可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
+
+> [!NOTE]
+> **这不是 SpektraLab 官方版本。** Spektralab-X 是独立开发的安卓衍生项目，与 SpektraLab 的作者和所有者没有关联，也没有得到他们的认可或背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。桌面版请认准[上游仓库](https://github.com/JamesQiu2005/SpektraLab)。
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
 
@@ -351,7 +355,9 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 设计上参考了另外两个安卓移植踩过的坑：[SAINTTaiYi/SpektraLab-Android](https://github.com/SAINTTaiYi/SpektraLab-Android) 和 [thetechgeekko/Spektrafilm-android](https://github.com/thetechgeekko/Spektrafilm-android)。
 
-本项目与 SpektraLab 上游、小米公司均无关联。“SpektraLab”名称由上游项目管理；“小米”“骁龙”“Adreno”是各自所有者的商标。
+胶片建模基于 [spektrafilm](https://github.com/andreavolpato/spektrafilm)（film modeling powered by spektrafilm）。
+
+本项目是非官方衍生版本，与 SpektraLab 的作者和所有者、小米公司均无关联，也未获得其背书。SpektraLab™ 及其图标是其所有者的商标（注册中）；“小米”“骁龙”“Adreno”是各自所有者的商标。
 
 边框水印里的相机、手机和胶片品牌 logo 是各自权利人的商标，不属于本项目的 GPL-3.0 授权范围，只用于标识拍摄器材，与各品牌无隶属或背书关系。来源逐个记录在 [docs/LOGOS.md](docs/LOGOS.md)。权利人如有异议，请提 issue，我们会及时移除。
 

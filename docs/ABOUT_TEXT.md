@@ -15,7 +15,7 @@
 版本 {version}（{code}）
 
 **关于本项目**
-光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。
+光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。**这不是 SpektraLab 官方版本**，与 SpektraLab 的作者和所有者无关联，未获其背书。
 作者：Spektralab-X 贡献者
 源码：https://github.com/Dear-Ded/Spektralab-X
 
@@ -40,8 +40,9 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 **致谢**
 渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab
 胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm
+胶片建模基于 spektrafilm（film modeling powered by spektrafilm）
 RAW 解码：LibRaw（LGPL-2.1）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
-本应用与 SpektraLab 上游、小米公司均无关联。
+本应用是非官方版本，与 SpektraLab 的作者和所有者、小米公司均无关联，未获其背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。
 
 ## English
 
@@ -49,7 +50,7 @@ RAW 解码：LibRaw（LGPL-2.1）；volk、stb（MIT）；Liberation Sans（OFL 
 Version {version} ({code})
 
 **About**
-Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly.
+Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly. **This is not an official SpektraLab build**, and it is not affiliated with or endorsed by the authors or owners of SpektraLab.
 Author: Spektralab-X contributors
 Source: https://github.com/Dear-Ded/Spektralab-X
 
@@ -74,8 +75,9 @@ This app is released under GPL-3.0: you may use, modify and redistribute it. If 
 **Credits**
 Rendering engine: SpektraLab (GPL-3.0) · github.com/JamesQiu2005/SpektraLab
 Film process model, film and paper data: spektrafilm by Andrea Volpato (GPL-3.0 / CC BY-SA 4.0) · github.com/andreavolpato/spektrafilm
+Film modeling powered by spektrafilm
 RAW decoding: LibRaw (LGPL-2.1); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
-Not affiliated with the SpektraLab project or with Xiaomi.
+Unofficial: not affiliated with or endorsed by the authors and owners of SpektraLab, or by Xiaomi. SpektraLab™ and its icon are trademarks of their owner (registration pending).
 
 ## 字符串资源 / String resources
 
