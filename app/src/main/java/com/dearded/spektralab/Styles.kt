@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -266,11 +268,27 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
 
     var group by remember { mutableStateOf(all.firstOrNull { applied(it) }?.group ?: groups.first()) }
     var open by remember { mutableStateOf<String?>(null) }
+    // Search across every group by name, inspiration, film and folk name (StyleTags.kt).
+    var searching by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
     Text("一键风格", style = MaterialTheme.typography.labelLarge)
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        for (g in groups) FilterChip(selected = group == g, onClick = { group = g }, label = { Text(g) })
+        FilterChip(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
+            label = { Text("搜索") })
+        for (g in groups) FilterChip(selected = !searching && group == g,
+            onClick = { searching = false; query = ""; group = g }, label = { Text(g) })
     }
-    val styles = all.filter { it.group == group && ui.catalog.film(it.film) != null }
+    if (searching) {
+        OutlinedTextField(value = query, onValueChange = { query = it.take(30) }, singleLine = true,
+            placeholder = { Text("富士味、CCD、徕卡味、电影感…") }, modifier = Modifier.fillMaxWidth())
+    }
+    val styles = all.filter { s ->
+        ui.catalog.film(s.film) != null &&
+            (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty()) else s.group == group)
+    }
+    if (searching && styles.isEmpty()) {
+        Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
+    }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
