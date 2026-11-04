@@ -139,6 +139,23 @@ the EXIF Software field.
 许可文本随应用打包在 assets/engine/licenses/。
 Licence texts ship in the app under assets/engine/licenses/.
 
+品牌 logo / Brand logos
+-----------------------
+app/src/main/assets/logos/ 中的相机、手机和胶片品牌 logo 为各自权利人的商标，
+不属于本项目的 GPL-3.0 授权范围，仅用于标识拍摄器材和所用胶片，与各品牌
+无隶属或背书关系。图形取自 Simple Icons（CC0 1.0）和 Wikimedia Commons 的
+公有领域文件，来源逐个记录在 docs/LOGOS.md，详见该目录的 LICENSE-LOGOS.md。
+权利人如有异议，请提 issue，我们会及时移除。
+
+The camera, phone and film brand logos in app/src/main/assets/logos/ are
+trademarks of their owners and are not covered by this project's GPL-3.0
+licence. They are used only to identify the equipment and film a photo was
+made with; the project is not affiliated with or endorsed by these brands.
+Artwork comes from Simple Icons (CC0 1.0) and public-domain Wikimedia Commons
+files; each source is listed in docs/LOGOS.md. See LICENSE-LOGOS.md in that
+directory. Rights holders who object: please open an issue and we will remove
+the logo promptly.
+
 本项目与 SpektraLab 上游、小米公司均无关联。“小米”“骁龙”“Adreno”是各自所有者的商标。
 Not affiliated with the SpektraLab project or with Xiaomi. Xiaomi, Snapdragon
 and Adreno are trademarks of their owners.
