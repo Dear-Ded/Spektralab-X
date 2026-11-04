@@ -1,0 +1,82 @@
+Lock the engine's print-LUT caches, so two threads can render at once
+
+The Android app renders exports on a second engine thread (ExportThread)
+while the editor keeps rendering on its own (EngineThread). Everything a
+render touches is already safe for that: each render holds only its own
+session's lock, the Vulkan backend serialises submits on its dispatch
+mutex, the setup cache and the session list are locked, and the error
+string is per thread. Two caches are filled lazily without a lock:
+
+  - spk_engine::print_lut_buffers, the device copy of each print LUT and
+    the DI view table (lut_buffer_for, di_view_table);
+  - PrintLutLibrary::cache_, the host tables (PrintLutLibrary::get).
+
+Two sessions using the same stock for the first time at the same moment
+would race on the map insert. This adds one mutex to each and takes it
+for the whole lookup-or-fill, so a table is still uploaded exactly once.
+print_lut_lock is always taken before the backend's dispatch mutex, never
+inside it, so there is no new lock order. Nothing else changes: the
+pointers handed out stay valid (std::map and std::unordered_map nodes do
+not move), and single-threaded callers pay one uncontended lock per
+lookup.
+
+--- a/engine/src/core/print_lut.cpp
++++ b/engine/src/core/print_lut.cpp
+@@ -69,6 +69,7 @@
+ 
+ const PrintLut* PrintLutLibrary::get(const Blob& blob, const std::string& stock,
+                                      std::string& error) {
++    std::lock_guard<std::mutex> guard(lock_);
+     const auto cached = cache_.find(stock);
+     if (cached != cache_.end()) return &cached->second;
+ 
+--- a/engine/src/core/print_lut.hpp
++++ b/engine/src/core/print_lut.hpp
+@@ -22,6 +22,7 @@
+ // That is a design decision, not a gap.
+ #pragma once
+ #include <map>
++#include <mutex>
+ #include <string>
+ #include <vector>
+ 
+@@ -69,6 +70,10 @@
+         uint32_t size = 0;
+     };
+     std::map<std::string, Meta> index_;
++    // Android: get() is reached from two engine threads (editor and export),
++    // so the lazy fill is locked. std::map nodes never move, so a returned
++    // pointer stays valid after the lock is released.
++    std::mutex lock_;
+     std::map<std::string, PrintLut> cache_;
+     std::string catalog_;
+ };
+--- a/engine/src/pipeline/engine.cpp
++++ b/engine/src/pipeline/engine.cpp
+@@ -300,6 +300,10 @@
+     // stocks is the whole point of this path, so re-uploading 431 kB on every
+     // flip would be paying for the thing the LUT exists to avoid.
+     std::unordered_map<std::string, gpu::BufferRef> print_lut_buffers;
++    // Android: guards `print_lut_buffers`, which two sessions on two threads
++    // can fill at once. Held across the first upload so a table is uploaded
++    // once; taken before the backend's dispatch lock, never after it.
++    std::mutex print_lut_lock;
+     // The C_max tables `spk_output_transform` hands out, one per destination
+     // colour space, as the float32 the caller's kernel reads.
+     //
+@@ -1662,6 +1666,7 @@
+ // interpolation and grading remain float32 and share one UNORM16 boundary.
+ static bool di_view_table(spk_engine* engine, gpu::BufferRef& table, std::string& error) {
+     constexpr const char* key = "@di-view-prophoto-65";
++    std::lock_guard<std::mutex> guard(engine->print_lut_lock);
+     auto found = engine->print_lut_buffers.find(key);
+     if (found != engine->print_lut_buffers.end()) { table = found->second; return true; }
+     std::ifstream input(file_path(engine->resources_dir + "/DI/SpektraLab DI view, Cineon to ProPhoto RGB.cube"));
+@@ -2005,6 +2010,7 @@
+ // subsequent flip reads, in a pool sized for full-frame buffers.
+ bool lut_buffer_for(spk_engine* engine, const PrintLut& lut, gpu::BufferRef& out,
+                     std::string& error) {
++    std::lock_guard<std::mutex> guard(engine->print_lut_lock);
+     auto it = engine->print_lut_buffers.find(lut.stock);
+     if (it != engine->print_lut_buffers.end()) { out = it->second; return true; }
+     gpu::BufferRef buffer = engine->gpu->upload_persistent(
