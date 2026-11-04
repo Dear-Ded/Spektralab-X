@@ -343,7 +343,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)
                                 .pointerInput(heights) {
                                     val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
-                                    androidx.compose.foundation.gestures.detectVerticalDragGestures(
+                                    detectVerticalDragGestures(
                                         onDragStart = { dragDy = 0f; handleDown = true; tracker.resetTracking() },
                                         onDragEnd = {
                                             val v = tracker.calculateVelocity().y
