@@ -34,7 +34,7 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 > 本项目由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发。
 
 > [!WARNING]
-> **尚未在真机上验证。** 目前所有版本都只通过了 CI 编译，可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
+> **尚未在真机上充分验证。** 目前只在一台手机上试过一次早期版本，之后的版本只经过 CI 编译和云主机测试，可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
 
@@ -89,7 +89,7 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 
 ## 和桌面版的差别
 
-**结论：颜色看不出差别。** 安卓版的色彩链和上游 Linux 版（`spektralab-host`）逐像素对照了 43 组：RAW 导出平均 ΔE00 0.000、最大 ≤ 0.015，手机 JPEG / P3 平均 ≤ 0.016。人眼大约在 ΔE00 1 才能分辨，这些差别小两个数量级。数字来自云主机上的软件 GPU（lavapipe），**还没在 Adreno 真机上验证**，也还没和 macOS 版直接比过。
+**结论：颜色看不出差别。** 安卓版的色彩链和上游 Linux 版（`spektralab-host`）逐像素对照了 43 组：RAW 导出平均 ΔE00 0.000、最大 ≤ 0.015，手机 JPEG / P3 平均 ≤ 0.016。人眼大约在 ΔE00 1 才能分辨，这些差别小两个数量级。数字来自云主机上的软件 GPU（lavapipe），**还没在 Adreno 真机上充分验证**，也还没和 macOS 版直接比过。
 
 | 方面 | macOS / Windows 桌面版 | 安卓（Spektralab-X） | 原因 |
 |---|---|---|---|

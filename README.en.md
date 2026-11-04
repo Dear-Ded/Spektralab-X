@@ -34,7 +34,7 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 > Built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek).
 
 > [!WARNING]
-> **Not yet verified on a real phone.** Every release so far has only been built by CI. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
+> **Not yet fully tested on real phones.** An early build was tried once on one phone; every release since has only been built by CI and tested on a cloud machine. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
 
@@ -89,7 +89,7 @@ Every image below was rendered by the same engine this app ships, at default set
 
 ## Differences from desktop
 
-**Bottom line: you will not see a colour difference.** The Android colour path was compared pixel by pixel with upstream's Linux host (`spektralab-host`) on 43 cases: RAW exports differ by a mean ΔE00 of 0.000 (max ≤ 0.015), phone JPEG / P3 by a mean of ≤ 0.016. The eye starts to notice at about ΔE00 1, two orders of magnitude more. These numbers come from a software GPU (lavapipe) on a cloud machine; **they have not been verified on an Adreno phone yet**, and the macOS app has not been compared directly.
+**Bottom line: you will not see a colour difference.** The Android colour path was compared pixel by pixel with upstream's Linux host (`spektralab-host`) on 43 cases: RAW exports differ by a mean ΔE00 of 0.000 (max ≤ 0.015), phone JPEG / P3 by a mean of ≤ 0.016. The eye starts to notice at about ΔE00 1, two orders of magnitude more. These numbers come from a software GPU (lavapipe) on a cloud machine; **they have not been fully verified on an Adreno phone yet**, and the macOS app has not been compared directly.
 
 | Area | macOS / Windows desktop | Android (Spektralab-X) | Why |
 |---|---|---|---|
