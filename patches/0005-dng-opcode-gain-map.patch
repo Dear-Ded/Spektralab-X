@@ -1,0 +1,203 @@
+diff --git a/engine/src/io/dng_gain_map.hpp b/engine/src/io/dng_gain_map.hpp
+new file mode 100644
+index 0000000..99382c9
+--- /dev/null
++++ b/engine/src/io/dng_gain_map.hpp
+@@ -0,0 +1,167 @@
++#pragma once
++// DNG OpcodeList2 GainMap (opcode 9): the lens-shading correction phones
++// write into their DNGs (one map per Bayer phase, gains up to ~4.6 in the
++// corners on Xiaomi). LibRaw 0.22.2 parses the opcode list but applies none
++// of it without the Adobe DNG SDK, so these files decode with dark corners.
++//
++// Applied to the unpacked CFA data (rawdata.raw_image), after unpack() and
++// before dcraw_process(): OpcodeList2 works on linear, black-subtracted
++// stage-2 data, so each pixel's black is taken off, the gain applied, and the
++// black put back for LibRaw's own subtraction. Working on raw_image keeps
++// half-size decoding and LibRaw's channel numbering out of it.
++// Map coordinates follow dng_gain_map_interpolator in the DNG SDK: pixel
++// centre (row + 0.5) over the image height, minus MapOrigin, over MapSpacing,
++// clamped to the map and interpolated bilinearly.
++#include <libraw/libraw.h>
++#include <algorithm>
++#include <cmath>
++#include <cstdint>
++#include <cstring>
++#include <vector>
++
++namespace spk::io::detail {
++
++namespace gain_map_detail {
++inline std::uint32_t be32(const unsigned char* p) {
++    return std::uint32_t(p[0]) << 24 | std::uint32_t(p[1]) << 16 | std::uint32_t(p[2]) << 8 | p[3];
++}
++inline double be_double(const unsigned char* p) {
++    std::uint64_t v = 0;
++    for (int i = 0; i < 8; ++i) v = v << 8 | p[i];
++    double d;
++    std::memcpy(&d, &v, sizeof d);
++    return d;
++}
++inline float be_float(const unsigned char* p) {
++    const std::uint32_t v = be32(p);
++    float f;
++    std::memcpy(&f, &v, sizeof f);
++    return f;
++}
++
++struct GainMap {
++    std::uint32_t top, left, bottom, right, row_pitch, col_pitch;
++    std::uint32_t points_v, points_h;
++    double spacing_v, spacing_h, origin_v, origin_h;
++    std::vector<float> gains;  // points_v * points_h, plane 0
++};
++
++// Interpolation position along one axis: index i0, its neighbour i1, weight of i1.
++struct Tap { std::uint32_t i0, i1; float f; };
++inline Tap tap(double pos, double origin, double spacing, std::uint32_t points) {
++    if (points < 2) return {0, 0, 0.0f};
++    double x = (pos - origin) / spacing;
++    x = std::clamp(x, 0.0, double(points - 1));
++    const auto i0 = std::min(std::uint32_t(x), points - 2);
++    return {i0, i0 + 1, float(x - i0)};
++}
++}  // namespace gain_map_detail
++
++// Returns how many GainMap opcodes were applied (0 when the file has none,
++// is not a Bayer DNG, or the list is malformed: then nothing is touched).
++inline int apply_dng_gain_maps(LibRaw& raw) {
++    using namespace gain_map_detail;
++    auto& id = raw.imgdata;
++    ushort* const cfa = id.rawdata.raw_image;
++    const auto& ops = id.rawdata.color.dng_levels.rawopcodes[1];
++    if (!id.idata.dng_version || !cfa || id.idata.filters <= 1000 || !ops.data || ops.len < 4) return 0;
++    const auto* b = static_cast<const unsigned char*>(ops.data);
++    const std::size_t len = ops.len;
++    const std::uint32_t width = id.sizes.width, height = id.sizes.height;
++    if (!width || !height || id.sizes.left_margin + width > id.sizes.raw_width ||
++        id.sizes.top_margin + height > id.sizes.raw_height)
++        return 0;
++
++    // Parse everything first; a malformed list changes no pixel.
++    std::vector<GainMap> maps;
++    const std::uint32_t count = be32(b);
++    std::size_t p = 4;
++    for (std::uint32_t k = 0; k < count && k < 1024; ++k) {
++        if (len - p < 16) return 0;
++        const std::uint32_t opcode = be32(b + p), bytes = be32(b + p + 12);
++        p += 16;
++        if (bytes > len - p) return 0;
++        if (opcode == 9) {
++            const unsigned char* q = b + p;
++            if (bytes < 76) return 0;
++            GainMap m{};
++            m.top = be32(q); m.left = be32(q + 4); m.bottom = be32(q + 8); m.right = be32(q + 12);
++            const std::uint32_t plane = be32(q + 16), planes = be32(q + 20);
++            m.row_pitch = be32(q + 24); m.col_pitch = be32(q + 28);
++            m.points_v = be32(q + 32); m.points_h = be32(q + 36);
++            m.spacing_v = be_double(q + 40); m.spacing_h = be_double(q + 48);
++            m.origin_v = be_double(q + 56); m.origin_h = be_double(q + 64);
++            const std::uint32_t map_planes = be32(q + 72);
++            if (plane != 0 || planes < 1 || map_planes < 1 || m.row_pitch < 1 || m.col_pitch < 1 ||
++                m.points_v < 1 || m.points_h < 1 || m.points_v > 4096 || m.points_h > 4096 ||
++                map_planes > 4 || m.top >= m.bottom || m.left >= m.right ||
++                !std::isfinite(m.origin_v) || !std::isfinite(m.origin_h) ||
++                !(m.spacing_v > 0) || !(m.spacing_h > 0) ||
++                !std::isfinite(m.spacing_v) || !std::isfinite(m.spacing_h))
++                return 0;
++            const std::uint64_t n = std::uint64_t(m.points_v) * m.points_h;
++            if (76 + n * map_planes * 4 > bytes) return 0;
++            m.gains.resize(n);
++            // Points are stored row by row, planes interleaved; a CFA image has one plane.
++            for (std::uint64_t i = 0; i < n; ++i) {
++                const float g = be_float(q + 76 + i * map_planes * 4);
++                if (!std::isfinite(g) || g < 0.0f || g > 64.0f) return 0;
++                m.gains[i] = g;
++            }
++            // Some phones write Bottom/Right one short of the image (2999 of
++            // 3000), which would leave the last row or column of two Bayer
++            // phases uncorrected: a dark 1 px line where the gain is largest.
++            if (m.bottom == height - 1) m.bottom = height;
++            if (m.right == width - 1) m.right = width;
++            m.bottom = std::min(m.bottom, height);
++            m.right = std::min(m.right, width);
++            if (m.top < m.bottom && m.left < m.right) maps.push_back(std::move(m));
++        }
++        p += bytes;
++    }
++    if (maps.empty()) return 0;
++
++    // Per-pixel black as LibRaw subtracts it: common + per-colour + the
++    // repeating BlackLevel pattern (DNG puts its BlackLevelRepeatDim there).
++    const auto& col = id.rawdata.color;
++    const unsigned pr = col.cblack[4], pc = col.cblack[5];
++    const bool pattern = pr && pc && pr * pc <= LIBRAW_CBLACK_SIZE - 6;
++    // A corrected value past the white level clips, as the DNG SDK's
++    // integer stage 2 does; LibRaw would clip it a little later anyway.
++    const float white = col.maximum ? float(col.maximum) : 65535.0f;
++    const std::size_t pitch = id.sizes.raw_pitch / 2;
++    ushort* const active = cfa + std::size_t(id.sizes.top_margin) * pitch + id.sizes.left_margin;
++
++    for (const GainMap& m : maps) {
++        std::vector<Tap> cols;
++        for (std::uint32_t c = m.left; c < m.right; c += m.col_pitch)
++            cols.push_back(tap((c + 0.5) / width, m.origin_h, m.spacing_h, m.points_h));
++        const auto rows = int((m.bottom - m.top + m.row_pitch - 1) / m.row_pitch);
++#if defined(_OPENMP)
++#pragma omp parallel for schedule(static)
++#endif
++        for (int ri = 0; ri < rows; ++ri) {
++            const std::uint32_t r = m.top + std::uint32_t(ri) * m.row_pitch;
++            const Tap t = tap((r + 0.5) / height, m.origin_v, m.spacing_v, m.points_v);
++            const float* g0 = &m.gains[std::size_t(t.i0) * m.points_h];
++            const float* g1 = &m.gains[std::size_t(t.i1) * m.points_h];
++            ushort* line = active + std::size_t(r) * pitch;
++            std::size_t ci = 0;
++            for (std::uint32_t c = m.left; c < m.right; c += m.col_pitch, ++ci) {
++                const Tap& u = cols[ci];
++                const float top = g0[u.i0] + (g0[u.i1] - g0[u.i0]) * u.f;
++                const float bot = g1[u.i0] + (g1[u.i1] - g1[u.i0]) * u.f;
++                const float gain = top + (bot - top) * t.f;
++                unsigned black = col.black + col.cblack[raw.FC(int(r), int(c))];
++                if (pattern) black += col.cblack[6 + (r % pr) * pc + c % pc];
++                const unsigned v = line[c];
++                if (v <= black) continue;
++                const float out = black + (v - black) * gain + 0.5f;
++                line[c] = ushort(std::min(out, std::min(white, 65535.0f)));
++            }
++        }
++    }
++    return int(maps.size());
++}
++
++}  // namespace spk::io::detail
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 5ab3e54..6b9c2ce 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -1,6 +1,7 @@
+ #include "raw_decoder.hpp"
+ #include "raw_headroom.hpp"
+ #include "raw_camera.hpp"
++#include "dng_gain_map.hpp"
+ 
+ #include <libraw/libraw.h>
+ 
+@@ -350,6 +351,8 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+             error = "RAW unpack: decoder reported corrupt data";
+             return false;
+         }
++        // Lens shading from the DNG's OpcodeList2 (phones), before any processing.
++        detail::apply_dng_gain_maps(*raw);
+         if (!capture_source_metadata(*raw, decoded.metadata, error)) return false;
+         if (const char* name = raw->unpack_function_name()) decoded.metadata.decoder_name = name;
+ 
+@@ -481,6 +484,8 @@ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<f
+             error = "RAW unpack: decoder reported corrupt data";
+             return false;
+         }
++        // Lens shading from the DNG's OpcodeList2 (phones), before any processing.
++        detail::apply_dng_gain_maps(*raw);
+         if (!capture_source_metadata(*raw, decoded.metadata, error) ||
+             !supported_headroom_source(*raw, error)) return false;
+         if (const char* name = raw->unpack_function_name()) decoded.metadata.decoder_name = name;
