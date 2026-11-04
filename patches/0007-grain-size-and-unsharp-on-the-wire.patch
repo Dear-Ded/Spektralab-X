@@ -1,0 +1,55 @@
+diff --git a/engine/src/core/params.cpp b/engine/src/core/params.cpp
+index 8b25267..e9ccfd0 100644
+--- a/engine/src/core/params.cpp
++++ b/engine/src/core/params.cpp
+@@ -210,6 +210,15 @@ const SchemaField kFields[] = {
+     // back-reflection halo only (a film with no anti-halation layer). Native
+     // only, SHOOT, after `camera_filter`. Every film with a layer ignores it.
+     {"halation_headroom_ev",     "film_render.halation.headroom_ev",      F, SHOOT, true, 0.0, 8.0, false},
++    // Android port (patch 0006): grain particle size and the scanner's unsharp
++    // mask, which the model has always had but the wire could not reach.
++    // Native only, after `halation_headroom_ev`. The area is SHOOT (it is the
++    // negative's grain); the unsharp mask is the scanner's, PRINT like
++    // `scanner_lens_blur`. Defaults are the structs', so a request that names
++    // none of them renders byte for byte as before.
++    {"grain_particle_area_um2",  "film_render.grain.particle_area_um2",   F, SHOOT, true, 0.02, 2.0, false},
++    {"scanner_unsharp_sigma",    "scanner.unsharp_mask.sigma",            F, PRINT, true, 0.0, 5.0, false},
++    {"scanner_unsharp_amount",   "scanner.unsharp_mask.amount",           F, PRINT, true, 0.0, 3.0, false},
+     // The app's *preview resolution*: the `live` tier's long edge, and so the
+     // size every interactive edit renders at. PRINT layer, because it is a
+     // decision about the canvas rather than about the film -- but it is one of
+@@ -278,6 +287,9 @@ double* float_slot(Params& p, const std::string& path) {
+     if (path == "film_render.date_imprint.inset_x") return &p.film_render.date_imprint.inset_x;
+     if (path == "film_render.date_imprint.inset_y") return &p.film_render.date_imprint.inset_y;
+     if (path == "print_render.glare.amount") return &p.print_render.glare.amount;
++    if (path == "film_render.grain.particle_area_um2") return &p.film_render.grain.particle_area_um2;
++    if (path == "scanner.unsharp_mask.sigma") return &p.scanner.unsharp_mask[0];
++    if (path == "scanner.unsharp_mask.amount") return &p.scanner.unsharp_mask[1];
+     return nullptr;
+ }
+ 
+diff --git a/engine/tests/parity_schema.py b/engine/tests/parity_schema.py
+index ca161c0..1a867ae 100644
+--- a/engine/tests/parity_schema.py
++++ b/engine/tests/parity_schema.py
+@@ -335,6 +335,20 @@ NATIVE_ONLY = {
+         "path": "film_render.halation.headroom_ev", "type": "float", "layer": "shoot",
+         "default": 4.0, "live": False, "range": [0.0, 8.0],
+     },
++    # Android port (patch 0006): grain particle size and the scanner's unsharp
++    # mask, the two halves of `ScannerParams::unsharp_mask` as two scalars.
++    "grain_particle_area_um2": {
++        "path": "film_render.grain.particle_area_um2", "type": "float", "layer": "shoot",
++        "default": 0.2, "live": False, "range": [0.02, 2.0],
++    },
++    "scanner_unsharp_sigma": {
++        "path": "scanner.unsharp_mask.sigma", "type": "float", "layer": "print",
++        "default": 0.7, "live": False, "range": [0.0, 5.0],
++    },
++    "scanner_unsharp_amount": {
++        "path": "scanner.unsharp_mask.amount", "type": "float", "layer": "print",
++        "default": 0.7, "live": False, "range": [0.0, 3.0],
++    },
+ }
+ 
+ 
