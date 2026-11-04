@@ -134,6 +134,8 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                         // Unsnapped position, so a snap never sticks.
                         var rawT = tone
                         var rawC = colour
+                        val dot = Offset((colour + 100f) / 200f * size.width, (100f - tone) / 200f * size.height)
+                        val onDot = hypot(down.position.x - dot.x, down.position.y - dot.y) <= 48.dp.toPx()
                         // Pad units (-100..100) per pixel: the long side spans 200 at gain 1.
                         val unitsX = 200f / size.width
                         val unitsY = 200f / size.height
@@ -142,7 +144,11 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                             val c = event.changes.firstOrNull { it.id == down.id } ?: break
                             if (!c.pressed) break
                             if (!moved) {
-                                if (hypot(c.position.x - down.position.x, c.position.y - down.position.y) <= slop) {
+                                if (c.isConsumed) return@awaitEachGesture
+                                val dx = c.position.x - down.position.x
+                                val dy = c.position.y - down.position.y
+                                if (hypot(dx, dy) > slop && !onDot && !long && abs(dy) > abs(dx)) return@awaitEachGesture
+                                if (hypot(dx, dy) <= slop) {
                                     if (!long && c.uptimeMillis - down.uptimeMillis > viewConfiguration.longPressTimeoutMillis) {
                                         long = true; fine = true; view.tick()
                                     }

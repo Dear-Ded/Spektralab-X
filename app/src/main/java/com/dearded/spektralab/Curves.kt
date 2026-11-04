@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
@@ -240,7 +241,13 @@ internal fun CurveEditor(
                         val ch = event.changes.firstOrNull { it.id == down.id } ?: break
                         if (!ch.pressed) break
                         if (!moved) {
-                            if ((ch.position - down.position).getDistance() <= viewConfiguration.touchSlop) continue
+                            // The page's scroll took the swipe first: it is not ours.
+                            if (ch.isConsumed) return@awaitEachGesture
+                            val d = ch.position - down.position
+                            if (d.getDistance() <= viewConfiguration.touchSlop) continue
+                            // Off a point, an up/down swipe scrolls the page instead of
+                            // trapping the finger in the curve (only a point is dragged freely).
+                            if (!grabbed && abs(d.y) > abs(d.x)) return@awaitEachGesture
                             moved = true
                             if (!grabbed) {
                                 // Dragging from an empty spot: a new point there, at the curve's own height.
