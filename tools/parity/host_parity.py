@@ -94,6 +94,19 @@ ADJUST = {"enabled": True, "temperature": 20, "tint": -10, "exposure": 0.3, "con
           "colorBalance": {"master": zone(40, 20, 10), "shadows": zone(220, 30, -10),
                            "midtones": zone(120, 10, 0), "highlights": zone(50, 25, 5)}}
 
+# Tone curves on top of the look above, in upstream's row order (rgb, luma,
+# red, green, blue). The app sends them as Look.kt's kCurves tail (a point
+# count, then x, y pairs per row); the host as the sidecar's curves.<row>.points,
+# which view_process.cpp samples to the same 5 x 256 table. Strong on purpose:
+# a path that dropped the curve would miss the host by several ΔE00.
+CURVES = [("rgb", [[0, 0], [0.25, 0.18], [0.75, 0.86], [1, 1]]),
+          ("luma", [[0, 0], [0.5, 0.56], [1, 1]]),
+          ("red", [[0, 0.03], [0.5, 0.55], [1, 1]]),
+          ("green", [[0, 0], [1, 1]]),
+          ("blue", [[0, 0], [0.5, 0.45], [1, 0.96]])]
+CURVE_TAIL = [float(v) for _, pts in CURVES for v in [len(pts)] + [c for p in pts for c in p]]
+ADJUST_CURVES = {**ADJUST, "curves": {k: {"points": pts} for k, pts in CURVES}}
+
 # --- colour ------------------------------------------------------------------
 
 D50 = np.array([0.96422, 1.0, 0.82521])
@@ -354,6 +367,9 @@ def cases(inputs):
     c.append(("layer2_synth_portra", "synth", {**SYNTH, **LOOKS["portra"]}, True))
     c.append(("layer2_dunes_portra", "dunes", {**PHOTO, **LOOKS["portra"]}, True))
     c.append(("layer2_fruit_velvia", "fruit", {**PHOTO, **LOOKS["velvia"]}, True))
+    # The same look plus tone curves (Curves.kt): screen and export against the host's.
+    c.append(("layer2curve_synth_portra", "synth", {**SYNTH, **LOOKS["portra"]}, "curves"))
+    c.append(("layer2curve_dunes_portra", "dunes", {**PHOTO, **LOOKS["portra"]}, "curves"))
     # Grain, glare and halation on: graded as statistics (STATS_BARS).
     c.append(("stoch_synth_portra", "synth", {**SYNTH, **LOOKS["portra"], **STOCH}, False))
     c.append(("stoch_dunes_portra", "dunes", {**PHOTO, **LOOKS["portra"], **STOCH}, False))
@@ -383,7 +399,7 @@ def android_input(kind, path):
 def render_host(host, d, kind, path, params, layer2):
     o, _ = host.call("open", {"path": host_input(kind, path), "params": {**OPEN, **OFF, **params}})
     sid = o["session"]
-    adj = ADJUST if layer2 else {}
+    adj = ADJUST_CURVES if layer2 == "curves" else ADJUST if layer2 else {}
     try:
         for space, wire in (("srgb", "srgb"), ("p3", "display-p3")):
             r, px = host.call("render_view", {"session": sid, "tier": "full", "display": wire, "format": "rgba8",
@@ -417,7 +433,8 @@ def cmd_render(a):
             try:
                 render_host(host, d, kind, path, params, layer2)
                 th = time.time() - t
-                look = ",".join(f"{v:g}" for v in LOOK_VALUES) if layer2 else ""
+                values = LOOK_VALUES + (CURVE_TAIL if layer2 == "curves" else [])
+                look = ",".join(f"{v:g}" for v in values) if layer2 else ""
                 ours = {**OFF, **params, **(CONTROL if name.startswith("stoch_ctrl_") else {})}
                 cmd = [str(a.android), str(a.resources), kind, android_input(kind, path), str(d),
                        json.dumps(ours)] + ([look] if look else [])

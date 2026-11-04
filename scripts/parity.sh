@@ -19,6 +19,8 @@
 #   THREADS=2     lavapipe threads and build jobs (keep it low on a shared box)
 #   ONLY="a b"    render only cases whose names contain one of these
 #   FMA=1         also run tools/parity/fma_check.sh (the fma probe, about 2 min)
+#   SAMPLES_DIR=  a directory already holding the CC0 RAWs (names with _ for
+#                 spaces); files whose SHA-256 matches are linked, not downloaded
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -44,6 +46,8 @@ if [[ ! -x "$W/venv/bin/meson" ]]; then
     python3 -m venv "$W/venv"
     "$W/venv/bin/pip" install -q meson==1.9.2 'ninja>=1.13,<1.14'
 fi
+# The venv's python3 comes first on PATH from here on, and the harness needs numpy.
+"$W/venv/bin/python3" -c 'import numpy' 2>/dev/null || "$W/venv/bin/pip" install -q numpy
 export PATH="$W/venv/bin:$PATH"
 D="$W/deps"
 if [[ ! -f "$D/.done" ]]; then
@@ -83,13 +87,22 @@ UP="$UP" B="$B" SRC="$S" bash "$S/build.sh" >/dev/null
 RAW="$W/raw"
 mkdir -p "$RAW"
 log "samples"
+sum() { sha256sum "$1" | cut -d' ' -f1; }
 while read -r sha url; do
     name="$(basename "$url")"; file="$RAW/${name// /_}"
-    if [[ ! -f "$file" ]] || [[ "$(sha256sum "$file" | cut -d' ' -f1)" != "$sha" ]]; then
-        curl -fsSL --retry 3 -o "$file.part" "${url// /%20}"
-        [[ "$(sha256sum "$file.part" | cut -d' ' -f1)" == "$sha" ]] || { echo "checksum mismatch: $name" >&2; exit 1; }
-        mv "$file.part" "$file"
+    [[ -f "$file" && "$(sum "$file")" == "$sha" ]] && continue
+    # A verified copy already on this machine (SAMPLES_DIR) is linked, not fetched.
+    local_copy="${SAMPLES_DIR:-}/${name// /_}"
+    if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
+        ln -sf "$local_copy" "$file"; continue
     fi
+    # raw.pixls.us sometimes ends a transfer early with no error; resume it.
+    for attempt in 1 2 3 4 5; do
+        curl -fsSL --retry 3 -C - -o "$file.part" "${url// /%20}" || true
+        [[ -f "$file.part" && "$(sum "$file.part")" == "$sha" ]] && break
+    done
+    [[ "$(sum "$file.part")" == "$sha" ]] || { echo "checksum mismatch: $name" >&2; exit 1; }
+    mv "$file.part" "$file"
 done <<'LIST'
 f7b2a6b6d7684536511cf2db2e2bfa46fae1ad7e52214093714f35e7ca60acbf https://raw.pixls.us/getfile.php/1797/nice/Leica - Q (Typ 116) - 14bit (3:2).DNG
 10a1116bd00e92314b09382b403f76706b1eeab3ce33234a6c75fe25ed289756 https://raw.pixls.us/getfile.php/4691/nice/Canon - EOS R5 - RAW, 1.6 crop, dual-pixel (3:2).CR3
