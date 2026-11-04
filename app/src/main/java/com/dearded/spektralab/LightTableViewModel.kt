@@ -30,6 +30,10 @@ data class TableState(
     val importing: Int = 0,
     /** After a pick or a reject in the loupe, move on to the next frame. */
     val autoAdvance: Boolean = true,
+    /** What 复制调整 last took, for 粘贴 (null = nothing copied yet). */
+    val copied: CopiedLook? = null,
+    /** The groups 粘贴 carries, as last chosen. */
+    val pasteGroups: Set<LookGroup> = LookGroup.entries.toSet() - LookGroup.BORDER,
     val message: String? = null,
 )
 
@@ -54,6 +58,9 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         columns = prefs.getInt("columns", 3).takeIf { it in COLUMNS } ?: 3,
         filter = runCatching { FrameFilter.valueOf(prefs.getString("filter", "ALL")!!) }.getOrDefault(FrameFilter.ALL),
         autoAdvance = prefs.getBoolean("auto_advance", true),
+        pasteGroups = prefs.getStringSet("paste_groups", null)
+            ?.mapNotNull { n -> LookGroup.entries.firstOrNull { it.name == n } }?.toSet()
+            ?: (LookGroup.entries.toSet() - LookGroup.BORDER),
     ))
     val state: StateFlow<TableState> = _state
 
@@ -177,6 +184,88 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         viewModelScope.launch(Dispatchers.IO) { store.saveEdit(link.id, edit, wbK, wbTint) }
     }
 
+    // --- batch ---------------------------------------------------------------------
+
+    /** 复制调整: takes [frame]'s whole edit. A frame never edited has nothing to give. */
+    fun copyLook(frame: Frame) {
+        viewModelScope.launch {
+            val car = withContext(Dispatchers.IO) { store.sidecar(frame.id) }
+            if (car == null) { show("这张还没有编辑过，没有可复制的调整"); return@launch }
+            _state.update { it.copy(copied = CopiedLook(car.edit, car.wbK, car.wbTint, frame.name)) }
+            show("已复制「${frame.name}」的调整")
+        }
+    }
+
+    fun setPasteGroups(groups: Set<LookGroup>) {
+        prefs.edit().putStringSet("paste_groups", groups.map { it.name }.toSet()).apply()
+        _state.update { it.copy(pasteGroups = groups) }
+    }
+
+    /**
+     * 粘贴 onto [targets]: the chosen groups of the copied edit, written to
+     * each frame's sidecar. Settings, not results: nothing is developed here,
+     * and each photo meters itself when it is opened or exported.
+     */
+    fun paste(targets: List<Frame>, groups: Set<LookGroup>, catalog: Catalog) {
+        val from = _state.value.copied ?: return
+        if (targets.isEmpty() || groups.isEmpty()) return
+        viewModelScope.launch {
+            val skipped = withContext(Dispatchers.IO) {
+                var skipped = 0
+                for (f in targets) {
+                    val base = store.sidecar(f.id) ?: Sidecar(Edit())
+                    val p = pasteLook(base, f, from, groups, catalog)
+                    if (p.edgeSkipped) skipped++
+                    store.saveEdit(f.id, p.edit, p.wbK, p.wbTint)
+                }
+                skipped
+            }
+            show(if (skipped > 0) "已粘贴到 ${targets.size} 张；其中 $skipped 张尺寸未知，片边先没加，打开一次后再粘贴即可"
+                 else "已粘贴到 ${targets.size} 张")
+        }
+    }
+
+    /**
+     * Queues [targets] for export through the 正在处理 queue, each with its
+     * sidecar (a frame never edited goes with a fresh edit), at the editor's
+     * working size and output choices. Each job opens its own session, so
+     * the editor is not held up.
+     */
+    fun export(targets: List<Frame>, format: ExportFormat, size: ExportSize, editor: UiState) {
+        if (targets.isEmpty()) return
+        viewModelScope.launch {
+            val cars = withContext(Dispatchers.IO) {
+                targets.map { f -> f to (store.sidecar(f.id) ?: Sidecar(Edit())) }
+            }
+            // One at a time: nextId() is unique only once the previous job is in the list.
+            for ((f, car) in cars) host.queue.enqueue(jobFor(f, car, format, size, editor))
+            val fresh = cars.count { (_, car) -> car.updated == 0L }
+            show("已把 ${cars.size} 张加入“正在处理”" + if (fresh > 0) "（$fresh 张未编辑，按默认胶片冲洗）" else "")
+        }
+    }
+
+    private fun jobFor(f: Frame, car: Sidecar, format: ExportFormat, size: ExportSize, ui: UiState): ProcessingJob {
+        val edit = ui.catalog.normalize(car.edit)
+        // The size it will be processed at: the working edge and pixel cap, as the editor opens it.
+        val (w, h) = if (f.dimsKnown) f.width to f.height else ui.workingEdge to ui.workingEdge * 3 / 4
+        val s = SourceLoader.fitScale(w, h, ui.workingEdge, ui.maxPixels)
+        val ow = w * s
+        val oh = h * s
+        val long = maxOf(ow, oh)
+        val px = (ow * oh).toLong()
+        val outPixels = if (size == ExportSize.SHARE && long > SHARE_EDGE) (px * (SHARE_EDGE / long) * (SHARE_EDGE / long)).toLong() else px
+        return ProcessingJob(
+            id = host.queue.nextId(), uri = f.uri, name = f.name, raw = f.raw,
+            editJson = edit.toJson().toString(), wbK = car.wbK, wbTint = car.wbTint,
+            lookJson = if (edit.look.neutral) "" else edit.look.toJson().toString(),
+            format = format, size = size, workingEdge = ui.workingEdge, maxPixels = ui.maxPixels,
+            outPixels = outPixels,
+            frameJson = if (edit.frame.isNone) "" else edit.frame.toJson().toString(),
+            filmLabel = ui.catalog.film(edit.film)?.label ?: "",
+            wideGamut = ui.wideGamut, highlightStops = ui.highlightStops,
+        )
+    }
+
     // --- messages -------------------------------------------------------------------
 
     fun show(text: String) = _state.update { it.copy(message = text) }
@@ -185,5 +274,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     companion object {
         /** The grid's column counts, pinched through in this order. */
         val COLUMNS = listOf(2, 3, 4, 6)
+        /** The engine's preview tier, the share size's long edge (as EditorViewModel). */
+        private const val SHARE_EDGE = 3400.0
     }
 }
