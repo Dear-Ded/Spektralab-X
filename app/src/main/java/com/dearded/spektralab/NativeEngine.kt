@@ -4,11 +4,11 @@ import android.graphics.Bitmap
 
 /**
  * The JNI surface in `spektralab_jni.cpp`. Handles are raw native pointers.
- * Every call must come from [EngineThread]: the engine's last-error string is
- * thread-local, and one session is not safe to drive from two threads. The
- * one exception is the export's render call (exportBitmap, exportTiffFd),
- * which ProcessingQueue runs on its own thread for a session no other thread
- * touches meanwhile; lastError and friends are then read on that thread.
+ * One session is used on one thread only: the editor's on [EngineThread], an
+ * export's on [ExportThread]. lastError, lastWasCancelled and
+ * lastWasDeviceLost read a thread-local string, so they are called on the
+ * thread of the call that failed. Engine-level calls (create, destroy,
+ * capabilities, trimMemory, warmUp) run on EngineThread only.
  */
 object NativeEngine {
     init {

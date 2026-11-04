@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,25 +164,6 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     private val sourcesDir = File(app.filesDir, "job-sources")
     private val exportDir = File(app.cacheDir, "export")
-
-    /**
-     * The export's full-size render runs here, not on EngineThread, so a
-     * slider drag waits for at most one GPU submit instead of the whole
-     * render (seconds at 50 MP). The engine allows it: every render holds only
-     * its own session's lock, the Vulkan backend serialises submits on its
-     * dispatch mutex, the setup cache and the session list are locked, and the
-     * JNI error string is per thread. The paths that touch the engine's
-     * unlocked LUT map (spk_preview_stock_lut, spk_export_di, the desktop
-     * view) are never called by this app. Opening, setOutput, setLook and
-     * release stay on EngineThread. Background priority, so the CPU-side
-     * pack yields to the editor's.
-     */
-    private val renderThread = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
-        Thread(null, {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
-            r.run()
-        }, "spektralab-export", 64L * 1024 * 1024)
-    }.asCoroutineDispatcher()
 
     /** Starts (or wakes) the worker. */
     fun start() {
@@ -455,8 +435,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
                 val path = local?.absolutePath ?: input!!.path
                 step("解码 RAW", 0.12f)
-                withContext(EngineThread.dispatcher) {
-                    NativeEngine.trimMemory(engine)
+                // trimMemory is engine-wide (EngineThread); the session is the export's own.
+                withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+                withContext(ExportThread.dispatcher) {
                     val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
                     val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
                     if (h == 0L) engineFailure(engine, "打开失败")
@@ -469,8 +450,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         } else {
             step("解码照片", 0.10f)
             val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
-            withContext(EngineThread.dispatcher) {
-                NativeEngine.trimMemory(engine)
+            withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+            withContext(ExportThread.dispatcher) {
                 val h = openPhotoSession(engine, photo, job.highlightStops) { space, linear ->
                     Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
                 }.handle
@@ -482,12 +463,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         try {
             // The file's own space, through the CAM16 export path (upstream's export
             // transform, lightness shoulder off). TIFF carries the sRGB profile.
-            withContext(EngineThread.dispatcher) {
+            withContext(ExportThread.dispatcher) {
                 if (!NativeEngine.setOutput(handle, outSpace, true)) engineFailure(engine, "导出失败")
             }
             // Layer 2 rides on the job's own session: every pack below goes through it.
             Look.fromJson(job.lookJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) }).let { look ->
-                if (!look.neutral) withContext(EngineThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
+                if (!look.neutral) withContext(ExportThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor()
@@ -505,7 +486,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
-                                withContext(renderThread) {
+                                withContext(ExportThread.dispatcher) {
                                     if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
                                 }
                             }
@@ -522,7 +503,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     return name
                 }
                 ExportFormat.JPEG -> {
-                    val bitmap: Bitmap = withContext(renderThread) {
+                    val bitmap: Bitmap = withContext(ExportThread.dispatcher) {
                         NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
@@ -568,7 +549,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 }
             }
         } finally {
-            withContext(NonCancellable + EngineThread.dispatcher) {
+            withContext(NonCancellable + ExportThread.dispatcher) {
                 synchronized(handleLock) {
                     NativeEngine.release(handle)
                     runningHandle = 0L
