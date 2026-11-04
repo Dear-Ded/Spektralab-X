@@ -1,0 +1,20 @@
+LibRaw 0.22.2: GetNormalizedModel() keeps `orig` in a function static, so two
+LibRaw objects opening files on different threads (the editor and the export
+queue here) can read each other's normalised model, and with it the colour
+matrix and white level picked for it.
+
+Backport of LibRaw 1a8fd32 ("changed (wrong) static to stack in
+normalize_model", issue #876, in 0.22.3). Upstream's line context differs
+(it adds the ILCE-7M5 table entry); the change is the same one line.
+
+--- a/src/metadata/normalize_model.cpp
++++ b/src/metadata/normalize_model.cpp
+@@ -400,7 +400,7 @@
+       { SonyID_ILME_FX2,       "ILME-FX2"},
+ };
+ 
+-  static const char *orig;
++  const char *orig = NULL;
+ 
+   static const char fujialias[][16] = {
+     "@DBP for GX680", "DX-2000",

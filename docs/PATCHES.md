@@ -14,6 +14,18 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0006-dng-opcode-gain-map.patch` | `io/dng_gain_map.hpp`（新增）、`io/raw_decoder.cpp` | LibRaw 0.22.2 会解析 DNG 的 OpcodeList2，但没有 DNG SDK 时一项都不执行，小米、Pixel 的 DNG 因此缺了镜头阴影校正，四角暗 3–4 倍。补丁在 unpack 之后、dcraw_process 之前把 GainMap 乘到拜耳数据上（先减黑电平、乘增益、再加回），opcode 列表出错时不改任何像素。没有 GainMap 的文件输出逐字节不变。OpcodeList3（WarpRectilinear 等）尚未处理。 |
 | `0007-grain-size-and-unsharp-on-the-wire.patch` | `core/params.cpp`、`tests/parity_schema.py` | 上游 a46627d 的线上参数里没有颗粒尺寸和扫描锐化，应用无法调。补丁加三个仅原生字段：`grain_particle_area_um2`（默认 0.2，0.02–2）、`scanner_unsharp_sigma`（默认 0.7，0–5）、`scanner_unsharp_amount`（默认 0.7，0–3），超范围拒绝。不传或传默认值时输出与未打补丁逐字节相同。注意 preview_mode 档会把两者置零，快速预览里看不到。 |
 
+## LibRaw 补丁
+
+LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeLists.txt` 在构建目录里复制一份 0.22.2，按文件名顺序打上 [`patches/libraw/`](../patches/libraw/) 的补丁再编译；补丁的哈希写进标记文件，改动补丁会重新复制。不整体升到 0.22.3：它改了 X-Trans 去马赛克，富士 RAF 的输出会和上游不同，所以只回移植需要的修复。
+
+| 补丁 | 来源 | 解决的问题 |
+|---|---|---|
+| `0001-openmp-wavelet-denoise-size` | LibRaw #842（a6268d4） | OpenMP 分支的 `wavelet_denoise` 用未初始化的 `size` 分配内存。0.22.3 已正式修复；我们仍在 0.22.2 上，暂时保留，升级时删除。 |
+| `0002-ljpeg-idct-table-once` | 本项目 | `ljpeg_idct` 的余弦表第一次调用时才填，多线程有竞争；改为只初始化一次。0.22.3 和 master 仍未修。 |
+| `0003-xtrans-serial-tiles` | LibRaw #845 | X-Trans 去马赛克的瓦片重叠，多线程输出随调度变化；保持串行，与单线程输出一致。 |
+| `0010`–`0016` | thetechgeekko/Spektrafilm-android（GPL-3.0） | 损坏或恶意 RAW 的分配与工作量上限（TIFF 元数据、LJPEG、DNG tile）；补丁头注明原文件和 sha256。 |
+| `0017-normalize-model-orig-on-stack` | LibRaw #876（1a8fd32，0.22.3） | `GetNormalizedModel()` 的 `orig` 是函数静态变量，编辑和导出两个线程同时打开 RAW 时可能串用对方的机型名、色彩矩阵和白电平。改成局部变量。单线程输出不变。 |
+
 ## 写一个新补丁
 
 ```bash
