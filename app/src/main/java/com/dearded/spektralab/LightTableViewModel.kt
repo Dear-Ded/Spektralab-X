@@ -213,6 +213,30 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         }
     }
 
+    /**
+     * 导出印样: [roll] as one contact-sheet JPEG in Pictures/Spektralab-X, at
+     * most [maxPixels] (the editor's cap). Built from the film thumbnails, so it
+     * waits for an idle engine; on the host scope, so leaving the screen does
+     * not stop it.
+     */
+    fun exportContactSheet(roll: Roll, maxPixels: Long) {
+        if (RollContactSheet.busy) { show("上一张印样还在排版"); return }
+        show("正在排版印样，冲洗完缩略图后存进相册")
+        host.scope.launch {
+            val text = try {
+                RollContactSheet.export(app, store, roll, maxPixels)
+                "印样已存进相册 Pictures/${MediaSaver.FOLDER}"
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: OutOfMemoryError) {
+                "内存不足，印样没有保存"
+            } catch (e: Throwable) {
+                "印样保存失败：${e.message ?: e}"
+            }
+            show(text)
+        }
+    }
+
     // --- batch ---------------------------------------------------------------------
 
     /** 复制调整: takes [frame]'s whole edit. A frame never edited has nothing to give. */
@@ -264,13 +288,35 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         if (targets.isEmpty()) return
         viewModelScope.launch {
             val cars = withContext(Dispatchers.IO) {
-                targets.map { f -> f to (store.sidecar(f.id) ?: Sidecar(Edit())) }
+                targets.map { f -> f to withShootingData(f, store.sidecar(f.id) ?: Sidecar(Edit())) }
             }
             // One at a time: nextId() is unique only once the previous job is in the list.
             for ((f, car) in cars) host.queue.enqueue(jobFor(f, car, format, size, editor))
             val fresh = cars.count { (_, car) -> car.updated == 0L }
             show("已把 ${cars.size} 张加入“正在处理”" + if (fresh > 0) "（$fresh 张未编辑，按默认胶片冲洗）" else "")
         }
+    }
+
+    /**
+     * IO. A frame never opened in the editor has no shooting data resolved:
+     * a pasted date back (with its data line, or the data face) would print
+     * blank. Its EXIF is read once here and fills only what is empty, so a
+     * value the editor resolved, or a JPEG fill the user picked, stays.
+     */
+    private fun withShootingData(f: Frame, car: Sidecar): Sidecar {
+        val e = car.edit
+        val wantsData = e.dateWithData || e.dateStyle == "data"
+        val missing = (e.dateImprint && e.dateText.isEmpty()) || (e.dateImprint && wantsData && e.dateDataText.isEmpty()) ||
+            (e.filmEdge && e.edgeFNumber == 0.0)
+        if (!missing) return car
+        val exif = runCatching { ExifCopy.read(app, Uri.parse(f.uri)) }.getOrNull() ?: return car
+        if (exif.isEmpty) return car
+        val shot = Edit.withShooting(e, exif)
+        return car.copy(edit = e.copy(
+            dateText = e.dateText.ifEmpty { shot.dateText },
+            dateDataText = e.dateDataText.ifEmpty { shot.dateDataText },
+            edgeFNumber = if (e.edgeFNumber == 0.0) shot.edgeFNumber else e.edgeFNumber,
+        ))
     }
 
     private fun jobFor(f: Frame, car: Sidecar, format: ExportFormat, size: ExportSize, ui: UiState): ProcessingJob {
