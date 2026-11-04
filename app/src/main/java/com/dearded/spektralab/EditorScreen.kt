@@ -129,8 +129,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         uri?.let(vm::open)
     }
     // RAW files rarely carry an image/* type, so the document picker accepts anything.
-    val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        uri?.let(vm::open)
+    // It starts where the last file came from (the photo picker has no such option).
+    val pickContext = androidx.compose.ui.platform.LocalContext.current
+    val pickFile = rememberLauncherForActivityResult(OpenDocumentFromLast(pickContext)) { uri: Uri? ->
+        uri?.let { OpenDocumentFromLast.remember(pickContext, it); vm.open(it) }
     }
 
     // Tap the photo to hide every control and the system bars (docs/UI.md,
@@ -1074,6 +1076,33 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 )
                 run { val c = androidx.compose.ui.platform.LocalContext.current; var on by remember { mutableStateOf(LocationSetting.enabled(c)) }; SwitchRow("导出保留拍摄位置", on, true) { on = it; LocationSetting.set(c, it) } }
                 Spacer(Modifier.height(12.dp))
+                Text("新照片的胶片和相纸", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    "只用于没有保存过编辑的照片；已经编辑过的照片按它自己的设置打开。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    Modifier.fillMaxWidth().clickable { vm.setNewPhotoStocks("", "") },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = ui.defaultFilm.isEmpty(), onClick = { vm.setNewPhotoStocks("", "") })
+                    Text("记住上次用的")
+                }
+                val fixFilm = ui.defaultFilm.ifEmpty { ui.edit.film }
+                val fixPaper = ui.defaultPaper.ifEmpty { ui.edit.paper }
+                Row(
+                    Modifier.fillMaxWidth().clickable { vm.setNewPhotoStocks(fixFilm, fixPaper) },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = ui.defaultFilm.isNotEmpty(), onClick = { vm.setNewPhotoStocks(fixFilm, fixPaper) })
+                    Text("固定为")
+                }
+                if (ui.defaultFilm.isNotEmpty()) {
+                    StockPicker("胶片", ui.catalog.films, ui.defaultFilm, true) { vm.setNewPhotoStocks(it, ui.defaultPaper) }
+                    StockPicker("相纸", ui.catalog.papers, ui.defaultPaper, true) { vm.setNewPhotoStocks(ui.defaultFilm, it) }
+                }
+                Spacer(Modifier.height(12.dp))
                 Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
                 Text(
                     "默认关闭：照片按原样交给引擎，和桌面版 SpektraLab 一致。开启后，中灰以上的高光会被展开（Ultra HDR 照片改用增益图），让胶片自己的肩部处理高光；高光会更亮、更浓，可能偏离原版色彩。",
@@ -1273,5 +1302,25 @@ private fun FramedImage(
             FrameSpec.drawCard(n, frame, l, android, caption)
             n.restore()
         }
+    }
+}
+
+/**
+ * The document picker opened in the folder of the last file picked with it
+ * (DocumentsContract.EXTRA_INITIAL_URI, API 26+). The provider decides whether
+ * to honour it; a stale or foreign URI simply opens the picker's own default.
+ */
+private class OpenDocumentFromLast(private val context: android.content.Context) : ActivityResultContracts.OpenDocument() {
+    override fun createIntent(context: android.content.Context, input: Array<String>): android.content.Intent =
+        super.createIntent(context, input).also { intent ->
+            this.context.getSharedPreferences("settings", 0).getString(KEY, null)?.let {
+                intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, Uri.parse(it))
+            }
+        }
+
+    companion object {
+        private const val KEY = "last_document"
+        fun remember(context: android.content.Context, uri: Uri) =
+            context.getSharedPreferences("settings", 0).edit().putString(KEY, uri.toString()).apply()
     }
 }

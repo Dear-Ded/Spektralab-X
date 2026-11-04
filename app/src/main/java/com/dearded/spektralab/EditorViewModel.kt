@@ -1,6 +1,7 @@
 package com.dearded.spektralab
 
 import android.app.Application
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ColorSpace
 import android.graphics.ImageDecoder
@@ -67,6 +68,9 @@ data class UiState(
     /** The full working-size render for 1:1 viewing; dropped on any edit. */
     val detail: Bitmap? = null,
     val loadingDetail: Boolean = false,
+    /** The film and paper a new photo starts on; "" = the last photo's (remembered). */
+    val defaultFilm: String = "",
+    val defaultPaper: String = "",
 ) {
     val hasImage get() = source != null
 }
@@ -78,7 +82,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
         wideGamut = prefs.getBoolean("wide_gamut", true),
-        highlightStops = prefs.getFloat("highlight_stops_v2", 0f)))
+        highlightStops = prefs.getFloat("highlight_stops_v2", 0f),
+        defaultFilm = prefs.getString("default_film", "").orEmpty(),
+        defaultPaper = prefs.getString("default_paper", "").orEmpty()))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -96,6 +102,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val renders = Channel<Unit>(Channel.CONFLATED)
     // A Layer 2 change: the last render re-packed through the new look, no engine pass.
     private val repacks = Channel<Unit>(Channel.CONFLATED)
+    // The open photo and its edit for a new process (saveLoop); declared before init, which starts the loop.
+    private val stateFile = File(app.filesDir, "editor-state.json")
+    private val saves = Channel<Unit>(Channel.CONFLATED)
     /** The look the native session holds (engine thread). */
     private var appliedLook = Look.NEUTRAL
     // Diagnostics: the raw probe replies and the last events, for the copyable report.
@@ -119,6 +128,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { startEngine() }
         viewModelScope.launch { renderLoop() }
         viewModelScope.launch { repackLoop() }
+        viewModelScope.launch { saveLoop() }
         // A lost GPU device (here or in an export) makes EngineHost build a new
         // engine and bump generation; the open photo is reopened on it with the
         // whole edit kept, the way a white-balance re-decode keeps it.
@@ -168,7 +178,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     maxPixels = maxPixels,
                 )
             }
-            pendingOpen?.let { pendingOpen = null; open(it) }
+            val pending = pendingOpen
+            // Nothing asked for: back to the photo and edit the last process left (killed, or closed).
+            if (pending != null) { pendingOpen = null; open(pending) } else if (lastUri == null) restoreLast()
             // Jobs left by a process the system killed pick up where they were.
             if (host.queue.jobs.value.any { it.active }) host.queue.start()
         } catch (e: Throwable) {
@@ -262,6 +274,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val resolver = app.contentResolver
             // A query plus a 4-byte header read: a cloud provider can block for seconds.
             val (name, raw) = withContext(Dispatchers.IO) {
+                if (wb == null) holdGrant(uri)
                 val n = loader.displayName(uri)
                 n to loader.isRaw(n, resolver.getType(uri), uri)
             }
@@ -281,7 +294,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             // Every new frame is metered, a phone photo too: upstream meters JPEG
             // and RAW alike ("balanced", a log average that a bright sky barely moves).
-            val look = _ui.value.catalog.normalize(if (wb != null) wanted else wanted.copy(
+            val carried = _ui.value.catalog.normalize(if (wb != null) wanted else wanted.copy(
                 autoExposure = true,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
@@ -293,6 +306,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     val p = Borders.byId(it.borderId)
                     if (wb == null && p != null && (p.edge != null || p.crop > 0)) it.copy(frame = FrameSpec(), borderId = "none") else it
                 })
+            // Upstream PR #53: the chosen pair only for a photo with no saved edit.
+            val look = if (wb == null) withNewPhotoStocks(carried) else carried
+            lastOpenedAny = true   // any open: [wanted] now holds this photo's pair
             val (wbK, wbTint) = wb ?: (0.0 to 0.0)
             if (wb == null) clearHistory()
             // Free the previous frame before decoding the next, so the two never
@@ -377,6 +393,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             renders.trySend(Unit)
             startFilmCards(handle)
+            saves.trySend(Unit)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e   // superseded by a newer open, or the editor closed: not an error
         } catch (e: OutOfMemoryError) {
@@ -427,8 +444,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
         val edit = _ui.value.catalog.normalize(raw)
         val current = _ui.value.edit
+        // "记住上次用的" across a restart: a new process starts on Edit()'s pair otherwise.
+        if (edit.film != current.film || edit.paper != current.paper)
+            prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper).apply()
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
+        saves.trySend(Unit)
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
         _ui.update {
             it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
@@ -866,6 +887,101 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val src = _ui.value.source ?: return
         if (src.kind == "raw") return
         launchOpen(uri, wb = src.wbK to src.wbTint)
+    }
+
+    // --- surviving process death (Spektrafilm-android #219) ----------------------
+
+    // The open photo and its whole edit, as a sidecar plus its URI. Rewritten
+    // shortly after every edit; read once when a new process starts with
+    // nothing to open, so a photo the system killed us under comes back as it was.
+
+    private suspend fun saveLoop() {
+        for (request in saves) {
+            kotlinx.coroutines.delay(400)
+            saves.tryReceive()
+            val uri = lastUri ?: continue
+            val src = _ui.value.source ?: continue   // mid-open: the old frame is gone, the new not yet there
+            val frame = Frame(id = "", uri = uri.toString(), name = src.name, size = 0, date = 0, mime = "",
+                raw = src.kind == "raw")
+            val json = Sidecar(wanted, src.wbK, src.wbTint, System.currentTimeMillis()).toJson(frame)
+                .put("uri", uri.toString()).toString()
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    val part = File(stateFile.path + ".part")
+                    part.writeText(json)
+                    if (!part.renameTo(stateFile)) { stateFile.delete(); part.renameTo(stateFile) }
+                }
+            }
+        }
+    }
+
+    /**
+     * Reopens the photo the last process had open, edit and RAW white balance
+     * kept. The file is removed first and written again once the open lands, so
+     * a photo that fails (or crashes) to open is not retried at every launch.
+     */
+    private suspend fun restoreLast() {
+        val state = withContext(Dispatchers.IO) {
+            runCatching { JSONObject(stateFile.readText()) }.getOrNull().also { stateFile.delete() }
+        } ?: return
+        val uri = state.optString("uri").takeIf { it.isNotEmpty() }?.let(Uri::parse) ?: return
+        val car = Sidecar.fromJson(state) ?: return
+        val readable = withContext(Dispatchers.IO) {
+            runCatching { app.contentResolver.openFileDescriptor(uri, "r")?.close() != null }.getOrDefault(false)
+        }
+        if (!readable) { log("last photo no longer readable; not restored"); return }
+        log("restoring the last photo")
+        openSaved(uri, car.edit, car.wbK, car.wbTint)
+        _ui.update { it.copy(message = "已回到上次的照片和编辑") }
+    }
+
+    /**
+     * IO. Keeps a read grant on a photo the user picked, so a new process can
+     * open it again; the previous photo's grant is let go unless the light table
+     * or the export queue still reads it.
+     */
+    private fun holdGrant(uri: Uri) {
+        if (uri.scheme != "content") return
+        val resolver = app.contentResolver
+        val took = runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess
+        val previous = prefs.getString("editor_grant", null)
+        if (previous != null && previous != uri.toString()) {
+            val queued = app.getSharedPreferences("processing", 0).getStringSet("grants", emptySet()).orEmpty()
+            if (previous !in queued && !FrameStore.of(app).holds(previous))
+                runCatching { resolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        }
+        prefs.edit().putString("editor_grant", if (took) uri.toString() else null).apply()
+    }
+
+    /** A photo has been opened in this process, so [wanted] already holds the last pair. */
+    private var lastOpenedAny = false
+
+    /**
+     * The film and paper a new photo starts on (upstream PR #53); empty film =
+     * the last photo's, which is what the editor has always carried over.
+     */
+    fun setNewPhotoStocks(film: String, paper: String) {
+        prefs.edit().putString("default_film", film).putString("default_paper", paper).apply()
+        _ui.update { it.copy(defaultFilm = film, defaultPaper = paper) }
+    }
+
+    /**
+     * [e] on the chosen pair. A film no longer in the catalog leaves [e] as it
+     * is; a paper that cannot print the film (colour vs B&W) gives way to the
+     * film's own target print, as picking the film by hand does.
+     */
+    private fun withNewPhotoStocks(e: Edit): Edit {
+        val catalog = _ui.value.catalog
+        // Remembering: in this process the last photo's pair is already carried; the
+        // first photo after a restart takes the pair recorded by applyEdit.
+        val remember = _ui.value.defaultFilm.isEmpty()
+        if (remember && lastOpenedAny) return e
+        val wantFilm = if (remember) prefs.getString("last_film", "").orEmpty() else _ui.value.defaultFilm
+        val wantPaper = if (remember) prefs.getString("last_paper", "").orEmpty() else _ui.value.defaultPaper
+        val film = catalog.film(wantFilm) ?: return e
+        val next = withFilm(e, catalog, film.id) ?: return e
+        val paper = catalog.paper(wantPaper)
+        return if (paper != null && paper.bw == film.bw) catalog.normalize(next.copy(paper = paper.id)) else next
     }
 
     fun setWorkingEdge(edge: Int) {
