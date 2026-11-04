@@ -264,13 +264,35 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         if (targets.isEmpty()) return
         viewModelScope.launch {
             val cars = withContext(Dispatchers.IO) {
-                targets.map { f -> f to (store.sidecar(f.id) ?: Sidecar(Edit())) }
+                targets.map { f -> f to withShootingData(f, store.sidecar(f.id) ?: Sidecar(Edit())) }
             }
             // One at a time: nextId() is unique only once the previous job is in the list.
             for ((f, car) in cars) host.queue.enqueue(jobFor(f, car, format, size, editor))
             val fresh = cars.count { (_, car) -> car.updated == 0L }
             show("已把 ${cars.size} 张加入“正在处理”" + if (fresh > 0) "（$fresh 张未编辑，按默认胶片冲洗）" else "")
         }
+    }
+
+    /**
+     * IO. A frame never opened in the editor has no shooting data resolved:
+     * a pasted date back (with its data line, or the data face) would print
+     * blank. Its EXIF is read once here and fills only what is empty, so a
+     * value the editor resolved, or a JPEG fill the user picked, stays.
+     */
+    private fun withShootingData(f: Frame, car: Sidecar): Sidecar {
+        val e = car.edit
+        val wantsData = e.dateWithData || e.dateStyle == "data"
+        val missing = (e.dateImprint && e.dateText.isEmpty()) || (e.dateImprint && wantsData && e.dateDataText.isEmpty()) ||
+            (e.filmEdge && e.edgeFNumber == 0.0)
+        if (!missing) return car
+        val exif = runCatching { ExifCopy.read(app, Uri.parse(f.uri)) }.getOrNull() ?: return car
+        if (exif.isEmpty) return car
+        val shot = Edit.withShooting(e, exif)
+        return car.copy(edit = e.copy(
+            dateText = e.dateText.ifEmpty { shot.dateText },
+            dateDataText = e.dateDataText.ifEmpty { shot.dateDataText },
+            edgeFNumber = if (e.edgeFNumber == 0.0) shot.edgeFNumber else e.edgeFNumber,
+        ))
     }
 
     private fun jobFor(f: Frame, car: Sidecar, format: ExportFormat, size: ExportSize, ui: UiState): ProcessingJob {
