@@ -1,8 +1,12 @@
 package com.dearded.spektralab
 
 import android.graphics.Bitmap
+import android.graphics.BitmapShader
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Shader
 import android.graphics.Typeface
 import org.json.JSONObject
 import kotlin.math.max
@@ -39,8 +43,20 @@ data class FrameSpec(
     val filmLogo: Boolean = false,
     /** Logos in their own colours; only on light paper, dark paper always gets mono. */
     val logoColor: Boolean = false,
+    /** A hairline round the print and its sprocket strips, as a fraction of the short edge; 0 = none. */
+    val keyline: Float = 0f,
+    /** The gap between the print and the hairline, same unit. */
+    val keylineGap: Float = 0f,
+    /** Rounded print corners, fraction of the short edge. */
+    val radius: Float = 0f,
+    /** The card is the print itself, blurred and dimmed with [paper], instead of plain paper. */
+    val blur: Boolean = false,
+    /** [signText] in pencil under the print's right corner, where a printmaker signs. */
+    val sign: Boolean = false,
+    val signText: String = "",
 ) {
-    val isNone get() = top == 0f && bottom == 0f && side == 0f && canvasAspect == 0f && !caption && perf == null
+    val isNone get() = top == 0f && bottom == 0f && side == 0f && canvasAspect == 0f && !caption && perf == null &&
+        keyline == 0f && radius == 0f && !blur
 
     val lightPaper: Boolean get() = luminance(paper) > 0.5f
 
@@ -54,13 +70,16 @@ data class FrameSpec(
         var x = side * s + p.left
         var y = top * s + p.top
         if (canvasAspect > 0f) {
+            // Padding stops at MAX_PAD times the print's area (a 6x17 strip padded to
+            // 9:16 would be a 5x card): the card then misses the aspect, not the memory budget.
+            val limit = MAX_PAD * w * h
             if (outW / outH < canvasAspect) {
-                val nw = outH * canvasAspect; x += (nw - outW) / 2; outW = nw
+                val nw = minOf(outH * canvasAspect, maxOf(outW, limit / outH)); x += (nw - outW) / 2; outW = nw
             } else {
-                val nh = outW / canvasAspect; y += (nh - outH) / 2; outH = nh
+                val nh = minOf(outW / canvasAspect, maxOf(outH, limit / outW)); y += (nh - outH) / 2; outH = nh
             }
         }
-        return FrameLayout(outW.roundToInt(), outH.roundToInt(), x.roundToInt(), y.roundToInt(), s, p.left, p.right, p.belowPrint)
+        return FrameLayout(outW.roundToInt(), outH.roundToInt(), x.roundToInt(), y.roundToInt(), s, p.left, p.right, p.belowPrint, p.top)
     }
 
     /** Text on paper this light is dark, and the other way round. */
@@ -72,6 +91,8 @@ data class FrameSpec(
         .apply { perf?.let { put("perf", it.toJson()) } }
         .put("layout", captionLayout).put("brand", brand).put("brandText", brandText)
         .put("filmLogo", filmLogo).put("logoColor", logoColor)
+        .put("keyline", keyline.toDouble()).put("keylineGap", keylineGap.toDouble()).put("radius", radius.toDouble())
+        .put("blur", blur).put("sign", sign).put("signText", signText)
 
     companion object {
         const val PAPER_WHITE = 0xFFFFFFFF.toInt()
@@ -81,6 +102,8 @@ data class FrameSpec(
         const val PAPER_BLACK = 0xFF141414.toInt()
         const val PAPER_KRAFT = 0xFFC9A77C.toInt()
         val PAPERS = listOf(PAPER_WHITE, PAPER_CREAM, PAPER_MOUNT, PAPER_KRAFT, PAPER_BLACK)
+        const val PAPER_SMOKE = 0xFF1E1E1E.toInt()
+        private const val MAX_PAD = 4f
 
         fun fromJson(o: JSONObject?): FrameSpec = if (o == null) FrameSpec() else runCatching {
             FrameSpec(
@@ -92,6 +115,12 @@ data class FrameSpec(
                 captionLayout = o.optString("layout", "classic").takeIf { l -> CAPTION_LAYOUTS.any { it.first == l } } ?: "classic",
                 brand = o.optString("brand", "none"), brandText = o.optString("brandText", ""),
                 filmLogo = o.optBoolean("filmLogo", false), logoColor = o.optBoolean("logoColor", false),
+                // Absent before the gallery mats: no hairline, square corners, plain paper.
+                keyline = o.optDouble("keyline", 0.0).toFloat().coerceIn(0f, 0.05f),
+                keylineGap = o.optDouble("keylineGap", 0.0).toFloat().coerceIn(0f, 0.2f),
+                radius = o.optDouble("radius", 0.0).toFloat().coerceIn(0f, 0.2f),
+                blur = o.optBoolean("blur", false),
+                sign = o.optBoolean("sign", false), signText = o.optString("signText", ""),
             )
         }.getOrDefault(FrameSpec())
 
@@ -115,13 +144,123 @@ data class FrameSpec(
             // The card keeps the print's colour space, so a P3 print stays P3.
             val out = Bitmap.createBitmap(l.width, l.height, Bitmap.Config.ARGB_8888, true,
                 image.colorSpace ?: android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.SRGB))
-            val canvas = Canvas(out)
-            canvas.drawColor(spec.paper)
-            spec.perf?.draw(canvas, l.x.toFloat(), l.y.toFloat(), image.width.toFloat(), image.height.toFloat(), l.short,
-                caption?.film ?: "")
-            canvas.drawBitmap(image, l.x.toFloat(), l.y.toFloat(), Paint(Paint.FILTER_BITMAP_FLAG))
-            if (spec.caption && caption != null) drawCaption(canvas, spec, l, image.width, image.height, caption)
+            drawCard(Canvas(out), spec, l, image, caption)
             return out
+        }
+
+        /**
+         * Everything on the card, in card pixels: paper (or the blurred print),
+         * sprocket strips, the print, its hairline, the signature and the
+         * caption. The export draws it on its bitmap and the preview on a
+         * canvas scaled to the screen, so the two never disagree.
+         */
+        fun drawCard(canvas: Canvas, spec: FrameSpec, l: FrameLayout, image: Bitmap, caption: Caption?) {
+            val w = image.width
+            val h = image.height
+            val all = RectF(0f, 0f, l.width.toFloat(), l.height.toFloat())
+            if (!spec.blur || !drawBlurred(canvas, all, image, spec.paper)) {
+                canvas.drawRect(all, Paint().apply { color = spec.paper })
+            }
+            spec.perf?.draw(canvas, l.x.toFloat(), l.y.toFloat(), w.toFloat(), h.toFloat(), l.short, caption?.film ?: "")
+            val dst = RectF(l.x.toFloat(), l.y.toFloat(), (l.x + w).toFloat(), (l.y + h).toFloat())
+            val r = spec.radius * l.short
+            if (r > 0f) {
+                // A shader rather than a clip: a software canvas clips without anti-aliasing.
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+                    shader = BitmapShader(image, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
+                        setLocalMatrix(Matrix().apply { setTranslate(dst.left, dst.top) })
+                    }
+                }
+                canvas.drawRoundRect(dst, r, r, paint)
+            } else {
+                canvas.drawBitmap(image, null, dst, Paint(Paint.FILTER_BITMAP_FLAG))
+            }
+            if (spec.keyline > 0f) {
+                val t = max(1f, spec.keyline * l.short)
+                val g = spec.keylineGap * l.short + t / 2
+                val line = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = t; color = spec.ink }
+                canvas.drawRect(dst.left - l.perfLeft - g, dst.top - l.perfTop - g, dst.right + l.perfRight + g,
+                    dst.bottom + l.perfBelow + g, line)
+            }
+            if (spec.sign && !spec.caption) drawSign(canvas, spec, l, w, h)
+            if (spec.caption && caption != null) drawCaption(canvas, spec, l, w, h, caption)
+        }
+
+        /** The signature in pencil grey, serif italic, right-aligned under the print. */
+        private fun drawSign(canvas: Canvas, spec: FrameSpec, l: FrameLayout, w: Int, h: Int) {
+            val text = spec.signText.trim()
+            val band = spec.bottom * l.short
+            if (text.isEmpty() || band < 4f) return
+            val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = spec.inkSoft; typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+                textAlign = Paint.Align.RIGHT; textSize = max(MIN_TEXT_PX, band * 0.2f)
+            }
+            val room = w + l.perfLeft + l.perfRight
+            val wide = p.measureText(text)
+            if (wide > room) p.textSize = max(MIN_TEXT_PX, p.textSize * room / wide)
+            canvas.drawText(text, l.x + w + l.perfRight, l.y + h + l.perfBelow + band * 0.42f, p)
+        }
+
+        /** Smallest text the data bar and signature are drawn at, in card pixels. */
+        const val MIN_TEXT_PX = 10f
+
+        // The blurred card is built from a 96 px copy of the print, a few tens of
+        // kilobytes; the preview redraws it every frame, so the last one is kept.
+        private var blurSource: java.lang.ref.WeakReference<Bitmap>? = null
+        private var blurGeneration = 0
+        private var blurResult: Bitmap? = null
+
+        /** The print scaled to cover [all], blurred and dimmed with [paper]. False if it cannot be read. */
+        private fun drawBlurred(canvas: Canvas, all: RectF, image: Bitmap, paper: Int): Boolean {
+            val small = synchronized(this) {
+                if (blurSource?.get() === image && blurGeneration == image.generationId) blurResult
+                else runCatching { blurredCopy(image) }.getOrNull().also {
+                    blurSource = java.lang.ref.WeakReference(image); blurGeneration = image.generationId; blurResult = it
+                }
+            } ?: return false
+            val k = max(all.width() / small.width, all.height() / small.height)
+            val sw = small.width * k / 2
+            val sh = small.height * k / 2
+            canvas.drawBitmap(small, null, RectF(all.centerX() - sw, all.centerY() - sh, all.centerX() + sw, all.centerY() + sh),
+                Paint(Paint.FILTER_BITMAP_FLAG))
+            canvas.drawRect(all, Paint().apply { color = paper; alpha = 0x8C })
+            return true
+        }
+
+        private fun blurredCopy(image: Bitmap): Bitmap {
+            val k = 96f / max(image.width, image.height)
+            val src = if (image.config == Bitmap.Config.HARDWARE) image.copy(Bitmap.Config.ARGB_8888, false) else image
+            val scaled = Bitmap.createScaledBitmap(src, max(1, (image.width * k).roundToInt()), max(1, (image.height * k).roundToInt()), true)
+            val small = if (scaled.isMutable && scaled !== image && scaled !== src) scaled
+                else scaled.copy(Bitmap.Config.ARGB_8888, true).also { if (scaled !== image && scaled !== src) scaled.recycle() }
+            // The full-size copy of a HARDWARE print is only needed for the scale-down.
+            if (src !== image && src !== small) src.recycle()
+            val sw = small.width
+            val sh = small.height
+            val px = IntArray(sw * sh)
+            small.getPixels(px, 0, sw, 0, 0, sw, sh)
+            // Three box passes each way come close to a Gaussian of about 5 px at this size.
+            repeat(3) { boxBlur(px, sw, sh, 3, true); boxBlur(px, sw, sh, 3, false) }
+            small.setPixels(px, 0, sw, 0, 0, sw, sh)
+            return small
+        }
+
+        private fun boxBlur(px: IntArray, w: Int, h: Int, r: Int, horizontal: Boolean) {
+            val lines = if (horizontal) h else w
+            val len = if (horizontal) w else h
+            val line = IntArray(len)
+            for (i in 0 until lines) {
+                for (j in 0 until len) line[j] = px[if (horizontal) i * w + j else j * w + i]
+                for (j in 0 until len) {
+                    var a = 0; var rr = 0; var gg = 0; var bb = 0
+                    for (d in -r..r) {
+                        val c = line[(j + d).coerceIn(0, len - 1)]
+                        a += c ushr 24; rr += c shr 16 and 0xFF; gg += c shr 8 and 0xFF; bb += c and 0xFF
+                    }
+                    val n = 2 * r + 1
+                    px[if (horizontal) i * w + j else j * w + i] = (a / n shl 24) or (rr / n shl 16) or (gg / n shl 8) or (bb / n)
+                }
+            }
         }
 
         fun drawCaption(canvas: Canvas, spec: FrameSpec, l: FrameLayout, w: Int, h: Int, c: Caption) {
@@ -151,7 +290,7 @@ data class FrameSpec(
 
 data class FrameLayout(
     val width: Int, val height: Int, val x: Int, val y: Int, val short: Float,
-    val perfLeft: Float = 0f, val perfRight: Float = 0f, val perfBelow: Float = 0f,
+    val perfLeft: Float = 0f, val perfRight: Float = 0f, val perfBelow: Float = 0f, val perfTop: Float = 0f,
 )
 
 /**
@@ -413,6 +552,25 @@ object Borders {
         BorderPreset("logo_film", "胶片信息条（厂牌 logo）", "相机 logo 与胶片厂牌 logo 并排，胶片名与参数", null,
             FrameSpec("logo_film", 0f, 0.13f, 0f, paper = FrameSpec.PAPER_CREAM, caption = true,
                 captionLayout = "film", brand = "auto", filmLogo = true)),
+        // UI.md appendix E.2. Minimal edges, and padding to a feed's shape.
+        BorderPreset("thin_white", "细白边", "窄而均匀的白边", null, FrameSpec("thin_white", 0.02f, 0.02f, 0.02f)),
+        BorderPreset("thin_black", "细黑边", "窄而均匀的黑边", null,
+            FrameSpec("thin_black", 0.02f, 0.02f, 0.02f, paper = FrameSpec.PAPER_BLACK)),
+        BorderPreset("pad_1x1", "1:1 留白", "补成正方形", null, FrameSpec("pad_1x1", 0.03f, 0.03f, 0.03f, canvasAspect = 1f)),
+        BorderPreset("pad_3x4", "3:4 留白", "补成 3:4 竖幅", null, FrameSpec("pad_3x4", 0.03f, 0.03f, 0.03f, canvasAspect = 0.75f)),
+        BorderPreset("pad_9x16", "9:16 留白", "补成 9:16，适合竖屏", null,
+            FrameSpec("pad_9x16", 0.03f, 0.03f, 0.03f, canvasAspect = 9f / 16f)),
+        // Gallery mats: wide margins; a museum mat is weighted at the bottom.
+        BorderPreset("mat_museum", "美术馆卡纸", "米白卡纸，下边加宽", null,
+            FrameSpec("mat_museum", 0.12f, 0.18f, 0.12f, paper = FrameSpec.PAPER_CREAM)),
+        BorderPreset("mat_black", "黑卡纸", "宽黑卡纸", null, FrameSpec("mat_black", 0.10f, 0.10f, 0.10f, paper = FrameSpec.PAPER_BLACK)),
+        BorderPreset("mat_keyline", "细线卡纸", "白卡纸，照片外一圈细线", null,
+            FrameSpec("mat_keyline", 0.12f, 0.12f, 0.12f, keyline = 0.0025f, keylineGap = 0.025f)),
+        BorderPreset("mat_signed", "签名边", "下边留出签名位置，签名在边框面板里填", null,
+            FrameSpec("mat_signed", 0.08f, 0.20f, 0.08f, paper = FrameSpec.PAPER_CREAM, sign = true)),
+        BorderPreset("blur_card", "模糊背景卡", "照片本身虚化成底，补成 4:5，圆角", null,
+            FrameSpec("blur_card", 0.08f, 0.08f, 0.08f, canvasAspect = 0.8f, paper = FrameSpec.PAPER_SMOKE,
+                radius = 0.025f, blur = true)),
     )
 
     fun byId(id: String) = PRESETS.firstOrNull { it.id == id }
