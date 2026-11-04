@@ -184,7 +184,7 @@ fun LightTableScreen(
                 EmptyTable(addFromGallery, addFromFiles)
                 return@Column
             }
-            FilterRow(frames, state.filter, table::setFilter)
+            FilterRow(frames, state.filter, table::setFilter, state.filmThumbs, table::setFilmThumbs)
             if (visible.isEmpty()) {
                 Text("没有${state.filter.label}的照片", Modifier.fillMaxWidth().padding(32.dp),
                     color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center)
@@ -285,6 +285,10 @@ private fun FrameGrid(table: LightTableViewModel, visible: List<Frame>, state: T
                 val selected = f.id in state.selection
                 FrameCell(
                     frame = f, px = cellPx, selected = selected,
+                    film = if (state.filmThumbs) rememberSidecarEdit(table.store, f).value else null,
+                    // Nearest the top of the screen first, read only when the worker chooses
+                    // (reading the scroll position here would recompose every cell per frame).
+                    priority = { kotlin.math.abs(currentIds.indexOf(f.id) - gridState.firstVisibleItemIndex) },
                     onClick = {
                         if (selecting) table.toggle(f.id)
                         else onOpen(visible, visible.indexOf(f))
@@ -303,8 +307,14 @@ private fun LazyGridState.indexAt(at: Offset): Int? {
 }
 
 @Composable
-private fun FrameCell(frame: Frame, px: Int, selected: Boolean, onClick: () -> Unit, onSelect: () -> Unit) {
-    val thumb by rememberThumbnail(frame, px)
+private fun FrameCell(
+    frame: Frame, px: Int, selected: Boolean, film: Edit?, priority: () -> Int,
+    onClick: () -> Unit, onSelect: () -> Unit,
+) {
+    val plain by rememberThumbnail(frame, px)
+    // 胶片 thumbnails show the frame's own edit once the idle path has developed it; the plain one until then.
+    val developed by rememberFilmThumb(frame, film, px, priority)
+    val thumb = developed ?: plain
     val shape = RoundedCornerShape(6.dp)
     Box(
         Modifier
@@ -378,7 +388,10 @@ internal fun describe(f: Frame): String = buildString {
 }
 
 @Composable
-private fun FilterRow(frames: List<Frame>, current: FrameFilter, onPick: (FrameFilter) -> Unit) {
+private fun FilterRow(
+    frames: List<Frame>, current: FrameFilter, onPick: (FrameFilter) -> Unit,
+    filmThumbs: Boolean, onFilmThumbs: (Boolean) -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -387,6 +400,9 @@ private fun FilterRow(frames: List<Frame>, current: FrameFilter, onPick: (FrameF
             val n = if (f == FrameFilter.ALL) frames.size else frames.count(f::keeps)
             FilterChip(selected = f == current, onClick = { onPick(f) }, label = { Text("${f.label} $n") })
         }
+        // UI.md 2.9: thumbnails as shot, or through each frame's own film (developed only when idle).
+        FilterChip(selected = filmThumbs, onClick = { onFilmThumbs(!filmThumbs) },
+            label = { Text(if (filmThumbs) "缩略图：胶片" else "缩略图：原图") })
     }
 }
 
