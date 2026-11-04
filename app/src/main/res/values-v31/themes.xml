@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ system splash on the same ground the in-app glow starts from. -->
+    <style name="Theme.SpektraLab" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF0B0B0C</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenBackground">#FF0B0B0C</item>
+    </style>
+</resources>

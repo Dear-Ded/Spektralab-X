@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,7 +53,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -386,6 +384,7 @@ private fun Preview(
                 }
             }
         } else if (ui.ready && !ui.hasImage) {
+            Aura(Modifier.matchParentSize(), strength = 0.8f)
             EmptyState(onPick = onOpen)
         }
         // Shown only after 400 ms, so quick drag renders never flicker a bar.
@@ -394,7 +393,7 @@ private fun Preview(
             if (ui.rendering) { kotlinx.coroutines.delay(400); value = true }
         }
         if (showProgress) {
-            LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
+            AuraBar(Modifier.align(Alignment.TopCenter))
         }
         // Histogram of what is on screen (the print, or the original while held).
         if (image != null) {
@@ -442,15 +441,17 @@ private fun Preview(
 
 @Composable
 private fun BusyOverlay(text: String) {
+    // The Gemini-style glow (Aura.kt) over a dark scrim: engine start, opening
+    // and decoding all wait on this, with nothing to judge colour against yet.
     Box(
-        Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f))
-            .pointerInput(Unit) { detectTapGestures { } },
+        Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { } },
         contentAlignment = Alignment.Center,
     ) {
+        Aura(Modifier.matchParentSize(), strength = 0.9f, ground = Palette.Background.copy(alpha = 0.92f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
-            Spacer(Modifier.height(12.dp))
-            Text(text, color = Color.White)
+            Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
+            Spacer(Modifier.height(10.dp))
+            Text(text, color = Palette.OnSurface.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
