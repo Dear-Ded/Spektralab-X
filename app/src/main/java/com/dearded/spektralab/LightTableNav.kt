@@ -9,6 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -72,19 +77,58 @@ fun AppScreens(editor: EditorViewModel) {
             EditorScreen(editor, onLightTable = { screen = Screen.TABLE })
         }
         Screen.TABLE -> {
-            // The loupe stays open under the editor: back from an edit returns to the same page.
+            // The loupe, a roll and a compare stay open under the editor: back from an edit returns there.
             val loupe by table.loupe.collectAsState()
+            val nav by table.nav.collectAsState()
+            val frames by table.frames.collectAsState()
+            val catalog by remember(editor) { editor.ui.map { it.catalog }.distinctUntilChanged() }
+                .collectAsState(editor.ui.value.catalog)
+            val rolls = remember(frames, catalog) { rollsOf(frames, catalog) }
+            val exportRoll = rememberNotifiedExport { list -> table.export(list, ExportFormat.JPEG, ExportSize.FULL, editor.ui.value) }
             val open = loupe
-            if (open != null) {
-                LightTableLoupe(table, open, onEdit = ::openInEditor, onClose = table::closeLoupe)
-            } else {
-                LightTableScreen(
+            val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }
+            val roll = nav.roll?.let { id -> rolls.firstOrNull { it.id == id } }
+            when {
+                comparing != null -> RollCompare(table, comparing, catalog, onClose = { table.compare(null) })
+                open != null -> LightTableLoupe(table, open, onEdit = ::openInEditor, onClose = table::closeLoupe)
+                nav.rolls && roll != null -> RollView(
+                    table = table, roll = roll,
+                    onBack = { table.openRoll(null) },
+                    onOpen = table::openLoupe,
+                    onExport = exportRoll,
+                )
+                nav.rolls -> RollList(rolls, onOpen = { table.openRoll(it.id) }, onBack = { table.showRolls(false) })
+                else -> LightTableScreen(
                     table = table,
                     onBack = { fromTable = false; screen = Screen.EDITOR },
                     onOpen = table::openLoupe,
                     selectionActions = { chosen -> BatchActions(table, editor, chosen) },
+                    topActions = { TextButton(onClick = { table.showRolls(true) }) { Text("按卷") } },
                 )
             }
         }
+    }
+}
+
+/**
+ * [run] wrapped the way the editor's export is: on Android 13+ the progress
+ * notification's permission is asked first; a refusal only hides the notification.
+ */
+@Composable
+fun rememberNotifiedExport(run: (List<Frame>) -> Unit): (List<Frame>) -> Unit {
+    val context = LocalContext.current
+    var queued by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        queued?.invoke()
+        queued = null
+    }
+    return { list ->
+        val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (missing) {
+            queued = { run(list) }
+            permission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else run(list)
     }
 }

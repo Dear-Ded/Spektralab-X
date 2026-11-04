@@ -42,6 +42,9 @@ data class TableState(
 /** The loupe's run of frames (by id, so a re-filtered grid does not move it) and where it opened. */
 data class Loupe(val ids: List<String>, val start: Int)
 
+/** Where the table is: the roll list, one roll, and a frame being compared through styles (all optional). */
+data class TableNav(val rolls: Boolean = false, val roll: String? = null, val compare: String? = null)
+
 /** The frame the editor has open for the light table, so its edits go back to that frame's sidecar. */
 data class EditLink(val id: String, val name: String)
 
@@ -72,6 +75,13 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
 
     private val _loupe = MutableStateFlow<Loupe?>(null)
     val loupe: StateFlow<Loupe?> = _loupe
+
+    private val _nav = MutableStateFlow(TableNav())
+    val nav: StateFlow<TableNav> = _nav
+
+    fun showRolls(on: Boolean) = _nav.update { it.copy(rolls = on, roll = if (on) it.roll else null) }
+    fun openRoll(id: String?) = _nav.update { it.copy(rolls = true, roll = id) }
+    fun compare(frame: Frame?) = _nav.update { it.copy(compare = frame?.id) }
 
     init {
         viewModelScope.launch(Dispatchers.IO) { store.load() }
@@ -190,6 +200,17 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
 
     fun save(link: EditLink, edit: Edit, wbK: Double, wbTint: Double) {
         viewModelScope.launch(Dispatchers.IO) { store.saveEdit(link.id, edit, wbK, wbTint) }
+    }
+
+    /** Writes [edit] (a style from 比较风格) as [frame]'s look, keeping its RAW white balance. */
+    fun saveLook(frame: Frame, edit: Edit, label: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val car = store.sidecar(frame.id)
+                store.saveEdit(frame.id, edit, car?.wbK ?: 0.0, car?.wbTint ?: 0.0)
+            }
+            show("已把「$label」用到「${frame.name}」")
+        }
     }
 
     // --- batch ---------------------------------------------------------------------
