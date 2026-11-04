@@ -129,8 +129,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         uri?.let(vm::open)
     }
     // RAW files rarely carry an image/* type, so the document picker accepts anything.
-    val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        uri?.let(vm::open)
+    // It starts where the last file came from (the photo picker has no such option).
+    val pickContext = androidx.compose.ui.platform.LocalContext.current
+    val pickFile = rememberLauncherForActivityResult(OpenDocumentFromLast(pickContext)) { uri: Uri? ->
+        uri?.let { OpenDocumentFromLast.remember(pickContext, it); vm.open(it) }
     }
 
     // Tap the photo to hide every control and the system bars (docs/UI.md,
@@ -1306,5 +1308,25 @@ private fun FramedImage(
             FrameSpec.drawCard(n, frame, l, android, caption)
             n.restore()
         }
+    }
+}
+
+/**
+ * The document picker opened in the folder of the last file picked with it
+ * (DocumentsContract.EXTRA_INITIAL_URI, API 26+). The provider decides whether
+ * to honour it; a stale or foreign URI simply opens the picker's own default.
+ */
+private class OpenDocumentFromLast(private val context: android.content.Context) : ActivityResultContracts.OpenDocument() {
+    override fun createIntent(context: android.content.Context, input: Array<String>): android.content.Intent =
+        super.createIntent(context, input).also { intent ->
+            this.context.getSharedPreferences("settings", 0).getString(KEY, null)?.let {
+                intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, Uri.parse(it))
+            }
+        }
+
+    companion object {
+        private const val KEY = "last_document"
+        fun remember(context: android.content.Context, uri: Uri) =
+            context.getSharedPreferences("settings", 0).edit().putString(KEY, uri.toString()).apply()
     }
 }
