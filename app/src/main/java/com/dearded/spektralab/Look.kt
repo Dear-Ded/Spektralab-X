@@ -55,6 +55,13 @@ data class Look(
     val colourHome: Double = 0.0,
     /** The palette slider: the finish (everything but the pad) at this percentage, 0..100. */
     val palette: Double = 100.0,
+    /**
+     * A user colour table (styles line: LutStore, filesDir/user/luts/<id>.lut), applied
+     * before every slider here at [lutStrength] 0..1. Not in [values]; the editor sends
+     * it with NativeEngine.setLut. Empty is none.
+     */
+    val lut: String = "",
+    val lutStrength: Double = 1.0,
 ) {
     val neutral get() = resolved().copy(vignetteMid = 50.0) == NEUTRAL
 
@@ -66,8 +73,10 @@ data class Look(
      */
     fun resolved(): Look {
         val k = (palette / 100).coerceIn(0.0, 1.0)
-        val base = (if (k < 1.0) finishAt(k) else this)
-            .copy(tone = 0.0, colour = 0.0, toneHome = 0.0, colourHome = 0.0, palette = 100.0)
+        val base = (if (k < 1.0) finishAt(k) else this).let {
+            it.copy(tone = 0.0, colour = 0.0, toneHome = 0.0, colourHome = 0.0, palette = 100.0,
+                    lutStrength = if (lut.isEmpty()) 1.0 else it.lutStrength)
+        }
         val t = (tone / 100).coerceIn(-1.0, 1.0)
         val c = (colour / 100).coerceIn(-1.0, 1.0)
         if (t == 0.0 && c == 0.0) return base
@@ -96,7 +105,7 @@ data class Look(
             temperature = temperature * k, tint = tint * k, exposure = exposure * k, contrast = contrast * k,
             brightness = brightness * k, saturation = saturation * k, vibrance = vibrance * k,
             highlights = highlights * k, shadows = shadows * k, blackPoint = blackPoint * k, whitePoint = whitePoint * k,
-            fade = fade * k, vignette = vignette * k,
+            fade = fade * k, vignette = vignette * k, lutStrength = lutStrength * k,
             master = zone(master), shadowZone = zone(shadowZone), midZone = zone(midZone), highlightZone = zone(highlightZone),
             hsl = hsl.map { Band(it.hue * k, it.sat * k, it.lum * k) },
             curves = CurveSet(curve(curves.rgb), curve(curves.luma), curve(curves.red), curve(curves.green), curve(curves.blue)),
@@ -139,6 +148,7 @@ data class Look(
             for (b in 0 until 8) hsl.getOrElse(b) { Band() }.let { a.put(JSONArray().put(it.hue).put(it.sat).put(it.lum)) }
         })
         if (!curves.isIdentity) put("curves", curves.toJson())
+        if (lut.isNotEmpty()) put("lut", lut).put("lutStrength", lutStrength)
     }
 
     companion object {
@@ -202,6 +212,8 @@ data class Look(
                     bands?.optJSONArray(b)?.let { Band(it.optDouble(0, 0.0), it.optDouble(1, 0.0), it.optDouble(2, 0.0)) } ?: Band()
                 },
                 curves = CurveSet.fromJson(o.optJSONObject("curves")),
+                lut = o.optString("lut", ""),
+                lutStrength = num("lutStrength", 1.0).coerceIn(0.0, 1.0),
                 tone = num("tone", 0.0).coerceIn(-100.0, 100.0), colour = num("colour", 0.0).coerceIn(-100.0, 100.0),
                 toneHome = num("toneHome", 0.0).coerceIn(-100.0, 100.0),
                 colourHome = num("colourHome", 0.0).coerceIn(-100.0, 100.0),

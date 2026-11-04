@@ -18,6 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace spk::android {
@@ -35,11 +36,23 @@ enum LookIndex : int {
     kCurves = 50,
 };
 
+// A colour table applied before everything else in Layer 2 (a user LUT,
+// lut3d.hpp): encoded ProPhoto 0..1 in and out. An interface so this file
+// builds without the table's implementation.
+struct ColourTable {
+    virtual ~ColourTable() = default;
+    virtual void apply(float& r, float& g, float& b) const = 0;
+};
+
 class Layer2 {
 public:
     // `values` in UI units (Look.kt); fewer than kLookSize, or all neutral, is identity.
     explicit Layer2(const std::vector<float>& values);
-    bool identity() const { return identity_; }
+    bool identity() const { return identity_ && !lut_; }
+
+    // The table mixed in at `strength` (0..1) before white balance, after the
+    // print and ahead of every slider. Null or strength 0 clears it.
+    void set_lut(std::shared_ptr<const ColourTable> lut, float strength);
 
     // One pixel, encoded, in place. (u, v) is its position in the frame, 0..1.
     void apply(float& r, float& g, float& b, float u, float v) const;
@@ -57,6 +70,8 @@ private:
     bool hsl_active_ = false;
     std::vector<float> curves_;       // 5 x 256 (upstream's table); empty when every curve is identity
     std::vector<float> bright_lut_;   // c^(1/(1+0.8 b)) over [0, 2]
+    std::shared_ptr<const ColourTable> lut_;
+    float lut_strength_ = 0;
 };
 
 // RGBA16 rows to RGBA8 (display, JPEG) or back into RGBA16 (TIFF), through
