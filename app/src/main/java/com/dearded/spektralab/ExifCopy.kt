@@ -52,6 +52,18 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
 
     fun iso(): Int? = values[ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY]?.split(',')?.firstOrNull()?.trim()?.toIntOrNull()
 
+    /**
+     * True when a RAW lacks shooting data a same-shot JPEG usually carries (phone
+     * DNGs often have no lens model or 35 mm focal length): offer to fill it in.
+     */
+    val missingShooting: Boolean get() = SHOOTING.any { values[it].isNullOrBlank() }
+
+    /** These tags, plus each of [other]'s tags this one lacks. What it already has wins. */
+    fun filledFrom(other: ExifCopy): ExifCopy = ExifCopy(fillMissing(values, other.values))
+
+    /** Tags [other] would add ([filledFrom]). */
+    fun missingFrom(other: ExifCopy): Map<String, String> = fillMissing(values, other.values) - values.keys
+
     /** These tags plus the source's GPS tags ([readLocation]); empty leaves it as it is. */
     fun withLocation(location: Map<String, String>): ExifCopy =
         if (location.isEmpty()) this else ExifCopy(values + location)
@@ -89,6 +101,69 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
             ExifInterface.TAG_ARTIST, ExifInterface.TAG_COPYRIGHT,
         )
 
+        // What a same-shot JPEG is asked for when a RAW lacks it.
+        private val SHOOTING = listOf(
+            ExifInterface.TAG_LENS_MODEL, ExifInterface.TAG_FOCAL_LENGTH,
+            ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM, ExifInterface.TAG_EXPOSURE_TIME,
+            ExifInterface.TAG_F_NUMBER, ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY,
+        )
+
+        /** [base] plus every copied tag of [extra] that [base] has no non-blank value for. Pure. */
+        fun fillMissing(base: Map<String, String>, extra: Map<String, String>): Map<String, String> {
+            val out = LinkedHashMap(base)
+            for (tag in TAGS) {
+                val v = extra[tag]?.trim()
+                if (!v.isNullOrEmpty() && out[tag].isNullOrBlank()) out[tag] = v
+            }
+            return out
+        }
+
+        /**
+         * Seconds between two `yyyy:MM:dd HH:mm:ss` stamps, or null when either is
+         * missing or malformed. A same-shot JPEG is within a few seconds of its RAW.
+         */
+        fun secondsApart(a: String?, b: String?): Long? {
+            fun parse(s: String?): Long? {
+                val m = Regex("""^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})""").find(s?.trim() ?: return null) ?: return null
+                val (y, mo, d, h, mi, se) = m.destructured
+                return runCatching {
+                    java.time.LocalDateTime.of(y.toInt(), mo.toInt(), d.toInt(), h.toInt(), mi.toInt(), se.toInt())
+                        .toEpochSecond(java.time.ZoneOffset.UTC)
+                }.getOrNull()
+            }
+            val x = parse(a) ?: return null
+            val y = parse(b) ?: return null
+            return kotlin.math.abs(x - y)
+        }
+
+        // Tags filled in from a JPEG the user picked, per source URI, so a reopen
+        // and the export queue (which reads the RAW again) carry them too. Only
+        // ever fills gaps ([fillMissing]); the newest 64 sources are kept.
+        private const val FILL_PREFS = "exif_fill"
+        private const val FILL_KEEP = 64
+
+        fun rememberFill(context: Context, source: Uri, tags: Map<String, String>) {
+            if (tags.isEmpty()) return
+            val prefs = context.getSharedPreferences(FILL_PREFS, 0)
+            val text = "${System.currentTimeMillis()}\n" + tags.entries.joinToString("\n") {
+                "${it.key}=${it.value.replace('\n', ' ')}"
+            }
+            val edit = prefs.edit().putString(source.toString(), text)
+            val all = prefs.all.filterKeys { it != source.toString() }
+            if (all.size >= FILL_KEEP) {
+                all.entries.sortedBy { (it.value as? String)?.substringBefore('\n')?.toLongOrNull() ?: 0L }
+                    .take(all.size - FILL_KEEP + 1).forEach { edit.remove(it.key) }
+            }
+            edit.apply()
+        }
+
+        private fun rememberedFill(context: Context, source: Uri): Map<String, String> =
+            context.getSharedPreferences(FILL_PREFS, 0).getString(source.toString(), null)
+                ?.lineSequence()?.drop(1)?.mapNotNull { line ->
+                    val i = line.indexOf('=')
+                    if (i <= 0) null else line.substring(0, i) to line.substring(i + 1)
+                }?.toMap().orEmpty()
+
         /** Never throws: a source without readable EXIF gives [NONE]. */
         fun read(open: () -> InputStream?): ExifCopy = runCatching {
             open()?.use { stream ->
@@ -108,7 +183,28 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
                     ExifCopy(map)
                 }
             }.getOrNull()
-            return fromFd?.takeIf { !it.isEmpty } ?: read { context.contentResolver.openInputStream(uri) }
+            val own = fromFd?.takeIf { !it.isEmpty } ?: read { context.contentResolver.openInputStream(uri) }
+            val filled = rememberedFill(context, uri)
+            return if (filled.isEmpty()) own else ExifCopy(fillMissing(own.values, filled))
+        }
+
+        /**
+         * Fills [raw]'s gaps from [jpeg], a photo the user picked as the same
+         * shot (the system picker hands over only that one URI, no media
+         * permission). Refused, with a reason, when the JPEG carries nothing new
+         * or was taken more than a minute apart from the RAW. Remembered for
+         * [source]. IO; never throws.
+         */
+        fun fillFromJpeg(context: Context, source: Uri, raw: ExifCopy, jpeg: Uri): Pair<ExifCopy, String> {
+            val other = runCatching { read(context, jpeg) }.getOrDefault(NONE)
+            if (other.isEmpty) return raw to "这张照片读不到拍摄参数"
+            val apart = secondsApart(raw.dateTimeOriginal, other.dateTimeOriginal)
+            if (apart != null && apart > 60) return raw to "两张照片的拍摄时间相差 ${apart} 秒，不像同一次拍摄，没有合并"
+            val added = raw.missingFrom(other)
+            if (added.isEmpty()) return raw to "这张照片没有可补充的参数"
+            val all = rememberedFill(context, source) + added
+            rememberFill(context, source, all)
+            return raw.filledFrom(other) to "已从 JPEG 补充 ${added.size} 项拍摄参数"
         }
 
         /**

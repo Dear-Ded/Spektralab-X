@@ -208,6 +208,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         launchOpen(uri, wb = temperatureK to tint)
     }
 
+    /**
+     * Fills the open photo's missing shooting data from [jpeg], a same-shot
+     * JPEG the user picked with the system picker (no media permission). Only
+     * gaps are filled; the date back and data line follow. Remembered for the
+     * source, so a reopen and the export queue carry it.
+     */
+    fun fillExifFrom(jpeg: Uri) {
+        val source = lastUri ?: return
+        viewModelScope.launch {
+            val (filled, note) = withContext(Dispatchers.IO) { ExifCopy.fillFromJpeg(app, source, sourceExif, jpeg) }
+            if (lastUri != source) return@launch
+            if (filled !== sourceExif) {
+                sourceExif = filled
+                val e = wanted
+                applyEdit(Edit.withShooting(e, filled).let { if (it.dateText.isEmpty()) it.copy(dateImprint = false) else it }, record = false)
+                _ui.update { it.copy(exif = filled) }
+            }
+            _ui.update { it.copy(message = note) }
+        }
+    }
+
     private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null) {
         _ui.update { it.copy(busy = "正在读取…", error = null) }
         try {

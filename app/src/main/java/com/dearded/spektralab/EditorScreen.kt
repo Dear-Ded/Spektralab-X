@@ -810,6 +810,17 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            // A RAW without lens or exposure data: the user picks the
+                            // same-shot JPEG (one URI through the picker, no permission).
+                            // Registered unconditionally, so a result survives recreation.
+                            val pickJpeg = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+                                uri?.let(vm::fillExifFrom)
+                            }
+                            if (ui.source?.kind == "raw" && ui.exif.missingShooting) {
+                                androidx.compose.material3.TextButton(enabled = enabled, onClick = {
+                                    pickJpeg.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                }) { Text("从同名 JPEG 补全参数") }
+                            }
                         }
                     }
                     else -> {
