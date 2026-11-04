@@ -570,7 +570,19 @@ private fun Controls(ui: UiState, vm: EditorViewModel, save: @Composable () -> U
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {
-                            DevelopSteps(step, enabled) { step = it }
+                            // A dot on each step that differs from a fresh edit (UI2.md 2.3).
+                            val d = Edit()
+                            val stepEdited = listOf(
+                                e.filmFormatMm != d.filmFormatMm,
+                                false,
+                                !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                                e.grainActive != d.grainActive || e.grainAmount != d.grainAmount || e.halationActive != d.halationActive ||
+                                    e.halationAmount != d.halationAmount || e.glareActive != d.glareActive || e.glareAmount != d.glareAmount ||
+                                    e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
+                                    e.grainLayered != d.grainLayered || e.grainArea != d.grainArea ||
+                                    e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount,
+                            )
+                            DevelopSteps(step, stepEdited, enabled) { step = it }
                             when (step) {
                                 0 -> {
                                     PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。画幅越小，颗粒越明显。")
@@ -944,13 +956,13 @@ private fun PanelHint(text: String) {
 private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放大", "④ 胶片效果")
 
 @Composable
-private fun DevelopSteps(step: Int, enabled: Boolean, onStep: (Int) -> Unit) {
+private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
     val view = androidx.compose.ui.platform.LocalView.current
     Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         DEVELOP_STEPS.forEachIndexed { i, label ->
             SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
-                label = { Text(label) }, enabled = enabled)
+                label = { Text(if (edited.getOrElse(i) { false }) "$label •" else label) }, enabled = enabled)
         }
     }
 }
