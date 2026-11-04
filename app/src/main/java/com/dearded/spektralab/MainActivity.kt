@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
             // Always dark: judging a print against a white UI skews it.
-            SpektraTheme { CoachHost { AppScreens(viewModel) } }
+            SpektraTheme { CoachHost { AppScreens(viewModel) }; ImportHost(viewModel) }
         }
     }
 
@@ -51,13 +51,24 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent?.action == ACTION_SHOW_QUEUE) { viewModel.showQueue(true); return }
-        val uri: Uri? = when (intent?.action) {
-            Intent.ACTION_SEND ->
+        val uris: List<Uri> = when (intent?.action) {
+            Intent.ACTION_SEND -> listOfNotNull(
                 if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
-            Intent.ACTION_VIEW -> intent.data
-            else -> null
+                else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM))
+            Intent.ACTION_SEND_MULTIPLE ->
+                (if (Build.VERSION.SDK_INT >= 33) intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                 else @Suppress("DEPRECATION") intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)).orEmpty()
+            Intent.ACTION_VIEW -> listOfNotNull(intent.data)
+            else -> emptyList()
         }
-        uri?.let(viewModel::open)
+        if (uris.isEmpty()) return
+        // A photo opens in the editor; anything else is a style or film to import (StyleImport.kt).
+        val type = intent?.type ?: uris.firstOrNull()?.let(contentResolver::getType)
+        if (type?.startsWith("image/") == true && !isHaldName(uris.first())) viewModel.open(uris.first())
+        else ImportRequests.add(uris)
     }
+
+    /** A HaldCLUT comes as a PNG; one whose name says so is imported, not opened. */
+    private fun isHaldName(uri: Uri): Boolean =
+        (uri.lastPathSegment ?: "").lowercase().let { it.contains("hald") && it.endsWith(".png") }
 }
