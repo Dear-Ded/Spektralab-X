@@ -1,6 +1,6 @@
 # “关于”页文案 / About screen text
 
-> 状态：**文案定稿，等待界面接入。** 界面由主会话实现（`EditorScreen.kt` 不在本文档的负责范围内）。改文案先改这里，再同步到界面。
+> 状态：**已接入界面**（`AboutSection.kt`，设置底部）。改文案先改这里，再同步到界面。
 > 依据：GPL-3.0 第 5(d) 条要求有交互界面的程序显示“适当的法律声明”（Appropriate Legal Notices）；[NOTICE](../NOTICE) 里的第 7(b) 条附加条款要求衍生版本在这个位置保留署名。
 
 `{version}` 和 `{code}` 是占位符，分别替换为 `BuildConfig.VERSION_NAME` 和 `BuildConfig.VERSION_CODE`。证书指纹与 [`scripts/signing-cert.sha256`](../scripts/signing-cert.sha256) 一致，改密钥时两处一起改。
