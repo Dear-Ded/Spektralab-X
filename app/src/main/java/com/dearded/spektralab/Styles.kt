@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
@@ -287,9 +286,9 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     var query by remember { mutableStateOf("") }
     Text("一键风格", style = MaterialTheme.typography.labelLarge)
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        FilterChip(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
+        SelectPill(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
             label = { Text("搜索") })
-        for (g in groups) FilterChip(selected = !searching && group == g,
+        for (g in groups) SelectPill(selected = !searching && group == g,
             onClick = { searching = false; query = ""; browse(g) }, label = { Text(g) })
     }
     if (searching) {

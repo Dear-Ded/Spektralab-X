@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -102,7 +101,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val zones = listOf("全局", "阴影", "中间调", "高光")
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         zones.forEachIndexed { i, label ->
-            FilterChip(selected = zone == i, onClick = { zone = i }, label = { Text(label) }, enabled = enabled)
+            SelectPill(selected = zone == i, onClick = { zone = i }, label = { Text(label) }, enabled = enabled)
         }
     }
     val z = when (zone) { 1 -> l.shadowZone; 2 -> l.midZone; 3 -> l.highlightZone; else -> l.master }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -609,7 +608,7 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         val mode = when (f.brand) { "", "none" -> "none"; "auto", "custom" -> f.brand; else -> "pick" }
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for ((v, label) in listOf("auto" to "自动", "pick" to "选择品牌", "custom" to "自定义文字", "none" to "无")) {
-                FilterChip(
+                SelectPill(
                     selected = mode == v, enabled = enabled, label = { Text(label) },
                     onClick = {
                         if (v != mode) set(f.copy(brand = if (v == "pick") (detected?.id ?: Brands.ALL.first().id) else v))
@@ -628,7 +627,7 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             )
             "pick" -> Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (b in Brands.ALL) if (b.kind != Brand.Kind.FILM) {
-                    FilterChip(
+                    SelectPill(
                         selected = f.brand == b.id, enabled = enabled, onClick = { set(f.copy(brand = b.id)) },
                         label = {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -655,7 +654,7 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         Text("版式", style = MaterialTheme.typography.labelLarge)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for ((v, label) in FrameSpec.CAPTION_LAYOUTS) {
-                FilterChip(selected = f.captionLayout == v, enabled = enabled, onClick = { set(f.copy(captionLayout = v)) },
+                SelectPill(selected = f.captionLayout == v, enabled = enabled, onClick = { set(f.copy(captionLayout = v)) },
                     label = { Text(label) })
             }
         }

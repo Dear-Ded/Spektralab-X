@@ -37,7 +37,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -165,9 +164,9 @@ fun RollView(
                     Modifier.fillMaxWidth().navigationBarsPadding().height(64.dp).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    FilterChip(selected = !contact, onClick = { contact = false }, label = { Text("片条") })
+                    SelectPill(selected = !contact, onClick = { contact = false }, label = { Text("片条") })
                     Spacer(Modifier.size(8.dp))
-                    FilterChip(selected = contact, onClick = { contact = true }, label = { Text("印样") })
+                    SelectPill(selected = contact, onClick = { contact = true }, label = { Text("印样") })
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = { table.compare(frames[at]) }) { Text("比较风格") }
                     TextButton(onClick = { table.copyLook(frames[at]) }) { Text("复制调整") }

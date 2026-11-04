@@ -52,7 +52,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -530,6 +529,7 @@ private fun BusyOverlay(text: String) {
 @Composable
 private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
     var tab by remember { mutableIntStateOf(0) }
+    var step by remember { mutableIntStateOf(0) }
     val e = ui.edit
     val enabled = ui.hasImage && !ui.exporting
     Surface(modifier, tonalElevation = 2.dp) {
@@ -552,97 +552,84 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                when (page) {
-                    0 -> {
+                    when (page) {
+                        0 -> {
+                            PanelHint("点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。")
                         StyleStrip(ui, enabled) { vm.applyStyle(it) }
-                        FilmStrip(ui, enabled) { vm.pickFilm(it) }
                         PresetRow(ui, vm, enabled)
-                        StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
-                        SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                        Box(Modifier.coachAnchor(CoachStep.RESET)) {
-                            LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
-                                vm.update(e.copy(exposureEv = it))
+                        }
+                        1 -> {
+                            DevelopSteps(step, enabled) { step = it }
+                            when (step) {
+                                0 -> {
+                                    PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。画幅越小，颗粒越明显。")
+                                FilmStrip(ui, enabled) { vm.pickFilm(it) }
+                                StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
+                                Text("画幅", style = MaterialTheme.typography.labelLarge)
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    for ((label, mm) in FORMATS) {
+                                        SelectPill(
+                                            selected = kotlin.math.abs(e.filmFormatMm - mm) < 0.5,
+                                            onClick = { vm.update(e.copy(filmFormatMm = mm)) },
+                                            label = { Text(label) },
+                                            enabled = enabled,
+                                        )
+                                    }
+                                }
+                                    NextStep("相纸") { step = 1 }
+                                }
+                                1 -> {
+                                    PanelHint("相纸决定反差和色调，就像放大时换一盒相纸。默认是这卷胶片推荐的那一款。")
+                                if (e.scanFilm) {
+                                    Text(
+                                        "反转片直接扫描，不经过相纸。",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                } else {
+                                    StockPicker("相纸", ui.catalog.papers, e.paper, enabled) { vm.update(e.copy(paper = it)) }
+                                }
+                                    NextStep("曝光与放大") { step = 2 }
+                                }
+                                2 -> {
+                                    PanelHint("拍摄曝光是按快门时的曝光；放大曝光和黄、品红滤镜是暗房里印相纸时的调整。")
+                                SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
+                                Box(Modifier.coachAnchor(CoachStep.RESET)) {
+                                    LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                        vm.update(e.copy(exposureEv = it))
+                                    }
+                                }
+                                ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
+                                    WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
+                                }
+                                LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(printExposure = it))
+                                }
+                                LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(yShift = it))
+                                }
+                                LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(mShift = it))
+                                }
+                                    NextStep("胶片效果") { step = 3 }
+                                }
+                                else -> {
+                                    PanelHint("颗粒、光晕、眩光这些是胶片和相纸自带的质感，每一项都能单独开关和调强度。")
+                                EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
+                                }
                             }
                         }
-                        ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
-                            WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
-                        }
-                        Text("画幅", style = MaterialTheme.typography.labelLarge)
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            for ((label, mm) in FORMATS) {
-                                FilterChip(
-                                    selected = kotlin.math.abs(e.filmFormatMm - mm) < 0.5,
-                                    onClick = { vm.update(e.copy(filmFormatMm = mm)) },
-                                    label = { Text(label) },
-                                    enabled = enabled,
-                                )
-                            }
-                        }
-                    }
-                    1 -> AdjustPage(ui, vm, enabled)
-                    2 -> {
-                        if (e.scanFilm) {
-                            Text(
-                                "反转片直接扫描，不经过相纸。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        } else {
-                            StockPicker("相纸", ui.catalog.papers, e.paper, enabled) { vm.update(e.copy(paper = it)) }
-                        }
-                        LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(printExposure = it))
-                        }
-                        LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(yShift = it))
-                        }
-                        LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(mShift = it))
-                        }
-                    }
-                    4 -> {
-                        val src = ui.source
-                        // With the film edge on, the crop must stay the gate's shape in the new orientation.
-                        fun reframe(next: Edit) = when {
-                            src == null -> next
-                            next.filmEdge -> Edit.withFilmEdge(next.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0),
-                                src.width, src.height, on = true)
-                            else -> Edit.centredCrop(next, src.width, src.height, next.cropAspect)
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { vm.update(reframe(e.turned(3))) },
-                                enabled = enabled) { Text("向左转") }
-                            OutlinedButton(onClick = { vm.update(reframe(e.turned(1))) },
-                                enabled = enabled) { Text("向右转") }
-                        }
-                        SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
-                        Text("裁剪比例（居中）", style = MaterialTheme.typography.labelLarge)
-                        Row(
-                            Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            for ((label, aspect) in ASPECTS) {
-                                FilterChip(
-                                    selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
-                                    onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
-                                    label = { Text(label) },
-                                    enabled = enabled && !e.filmEdge,
-                                )
-                            }
-                        }
-                        Text(
-                            "旋转和裁剪在胶片之前完成，颗粒按裁剪后的画面计算。长按看到的原图不带裁剪。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                        Text("边框样式", style = MaterialTheme.typography.labelLarge)
+                        2 -> AdjustPage(ui, vm, enabled)
+                        3 -> {
+                            val src = ui.source
+                            PanelHint("先选一款边框；选好后，下面是这一款的设置：相纸颜色、logo、日期、拍摄参数、齿孔和片边。")
+                        Text("选择边框", style = MaterialTheme.typography.labelLarge)
                         Row(
                             Modifier.horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             for (p in Borders.PRESETS) {
-                                FilterChip(
+                                SelectPill(
                                     selected = e.borderId == p.id,
                                     onClick = { if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height)) },
                                     label = { Text(p.label) },
@@ -663,17 +650,17 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             fun setPerf(p: Perforation) = vm.update(e.copy(frame = e.frame.copy(perf = p)))
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("both" to "上下", "top" to "只上", "bottom" to "只下")) {
-                                    FilterChip(selected = perf.where == v, onClick = { setPerf(perf.copy(where = v)) },
+                                    SelectPill(selected = perf.where == v, onClick = { setPerf(perf.copy(where = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                                 for ((v, label) in listOf("ks" to "方孔 KS", "bh" to "圆孔 BH")) {
-                                    FilterChip(selected = perf.shape == v, onClick = { setPerf(perf.copy(shape = v)) },
+                                    SelectPill(selected = perf.shape == v, onClick = { setPerf(perf.copy(shape = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                             }
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((c, label) in Perforation.BASES) {
-                                    FilterChip(selected = perf.base == c,
+                                    SelectPill(selected = perf.base == c,
                                         onClick = { setPerf(perf.copy(base = c, holes = Perforation.holesFor(c))) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
@@ -698,11 +685,11 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 for ((v, label) in listOf("strip" to "整条底片", "filed" to "锉边")) {
-                                    FilterChip(selected = e.edgeMode == v, onClick = { vm.update(e.copy(edgeMode = v)) },
+                                    SelectPill(selected = e.edgeMode == v, onClick = { vm.update(e.copy(edgeMode = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                                 for ((v, label) in listOf("white" to "扫描 · 白孔", "black" to "相纸 · 黑孔")) {
-                                    FilterChip(selected = e.edgeHoles == v, onClick = { vm.update(e.copy(edgeHoles = v)) },
+                                    SelectPill(selected = e.edgeHoles == v, onClick = { vm.update(e.copy(edgeHoles = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                             }
@@ -717,14 +704,14 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("auto" to "随机", "square" to "直角", "rounded" to "圆角", "eared" to "耳朵",
                                     "shouldered" to "肩形", "kicked" to "斜角")) {
-                                    FilterChip(selected = e.edgeGate == v, onClick = { vm.update(e.copy(edgeGate = v)) },
+                                    SelectPill(selected = e.edgeGate == v, onClick = { vm.update(e.copy(edgeGate = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                             }
                             Text("片夹", style = MaterialTheme.typography.labelLarge)
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("none" to "无", "black" to "黑色片夹", "open" to "开口片夹")) {
-                                    FilterChip(selected = e.edgeCarrier == v, onClick = { vm.update(e.copy(edgeCarrier = v)) },
+                                    SelectPill(selected = e.edgeCarrier == v, onClick = { vm.update(e.copy(edgeCarrier = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                             }
@@ -801,7 +788,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 for ((id, label, _) in Edit.EDGE_FORMATS) {
-                                    FilterChip(
+                                    SelectPill(
                                         selected = e.edgeFormat == id,
                                         onClick = {
                                             var next = Edit.withFilmEdge(e, src.width, src.height, true, id)
@@ -838,24 +825,24 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             Text("日期后背", style = MaterialTheme.typography.labelLarge)
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("lcd" to "橙色 LCD", "dots" to "点阵", "data" to "数据后背")) {
-                                    FilterChip(selected = e.dateStyle == v, onClick = { vm.update(e.copy(dateStyle = v)) },
+                                    SelectPill(selected = e.dateStyle == v, onClick = { vm.update(e.copy(dateStyle = v)) },
                                         label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
                                 }
                             }
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("japan" to "年 月 日", "us" to "月 日 年")) {
-                                    FilterChip(selected = e.dateOrder == v,
+                                    SelectPill(selected = e.dateOrder == v,
                                         onClick = { vm.update(e.copy(dateOrder = v, dateText = Edit.dateInOrder(e.dateText, v))) },
                                         label = { Text(label) }, enabled = enabled && e.dateStyle != "data")
                                 }
                             }
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 for ((v, label) in listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")) {
-                                    FilterChip(selected = e.dateCorner == v, onClick = { vm.update(e.copy(dateCorner = v)) },
+                                    SelectPill(selected = e.dateCorner == v, onClick = { vm.update(e.copy(dateCorner = v)) },
                                         label = { Text(label) }, enabled = enabled && e.datePlacement == "frame")
                                 }
                                 for ((v, label) in listOf("frame" to "印在画面", "rebate" to "印在帧间")) {
-                                    FilterChip(selected = e.datePlacement == v, onClick = { vm.update(e.copy(datePlacement = v)) },
+                                    SelectPill(selected = e.datePlacement == v, onClick = { vm.update(e.copy(datePlacement = v)) },
                                         label = { Text(label) }, enabled = enabled && (v == "frame" || e.rebateDateFits))
                                 }
                             }
@@ -899,17 +886,79 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                                 }) { Text("从同名 JPEG 补全参数") }
                             }
                         }
+                        }
+                        else -> {
+                        val src = ui.source
+                        // With the film edge on, the crop must stay the gate's shape in the new orientation.
+                        fun reframe(next: Edit) = when {
+                            src == null -> next
+                            next.filmEdge -> Edit.withFilmEdge(next.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0),
+                                src.width, src.height, on = true)
+                            else -> Edit.centredCrop(next, src.width, src.height, next.cropAspect)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { vm.update(reframe(e.turned(3))) },
+                                enabled = enabled) { Text("向左转") }
+                            OutlinedButton(onClick = { vm.update(reframe(e.turned(1))) },
+                                enabled = enabled) { Text("向右转") }
+                        }
+                        SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
+                        Text("裁剪比例（居中）", style = MaterialTheme.typography.labelLarge)
+                        Row(
+                            Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            for ((label, aspect) in ASPECTS) {
+                                SelectPill(
+                                    selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
+                                    onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
+                                    label = { Text(label) },
+                                    enabled = enabled && !e.filmEdge,
+                                )
+                            }
+                        }
+                        Text(
+                            "旋转和裁剪在胶片之前完成，颗粒按裁剪后的画面计算。长按看到的原图不带裁剪。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        }
                     }
-                    else -> {
-                        EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
-                    }
-                }
             }
             }
             }
             // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
             CategoryBar(selected = tab, enabled = true) { tab = it }
         }
+    }
+}
+
+/** One line under a panel's title: what this step is for, in plain words (UI2.md 2.6). */
+@Composable
+private fun PanelHint(text: String) {
+    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(bottom = 6.dp))
+}
+
+/** The darkroom order (UI2.md 2.3): film, paper, exposure and enlarging, the film's own effects. */
+private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放大", "④ 胶片效果")
+
+@Composable
+private fun DevelopSteps(step: Int, enabled: Boolean, onStep: (Int) -> Unit) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        DEVELOP_STEPS.forEachIndexed { i, label ->
+            SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
+                label = { Text(label) }, enabled = enabled)
+        }
+    }
+}
+
+@Composable
+private fun NextStep(name: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onClick) { Text("下一步：$name ›") }
     }
 }
 

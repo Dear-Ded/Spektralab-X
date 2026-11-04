@@ -43,7 +43,10 @@ import kotlin.math.sin
  * lay it out. The selected item is amber **and** carries a pill under its
  * icon, so "selected" never rests on colour alone (Halide's lesson).
  */
-private val CATEGORIES = listOf("胶片", "调整", "冲印", "效果", "构图")
+// UI2.md 2.2: one-tap styles, the darkroom steps, adjustments, borders, framing.
+private val CATEGORIES = listOf("风格", "冲洗", "调整", "边框", "构图")
+/** Which drawn icon each entry uses: a highlight, the enlarger, sliders, a film frame, crop corners. */
+private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 
 @Composable
 fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
@@ -72,7 +75,7 @@ fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Canvas(Modifier.size(24.dp)) { icon(i, tint, on) }
+                Canvas(Modifier.size(24.dp)) { icon(ICONS[i], tint, on) }
                 Spacer(Modifier.height(3.dp))
                 Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
                 Spacer(Modifier.height(3.dp))

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -200,7 +199,7 @@ internal fun CurveEditor(
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         CHANNELS.forEachIndexed { i, (r, label, _) ->
-            FilterChip(selected = channel == i, onClick = { channel = i }, enabled = enabled,
+            SelectPill(selected = channel == i, onClick = { channel = i }, enabled = enabled,
                 label = { Text(if (curves[r].isIdentity) label else "$label·") })
         }
         androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))

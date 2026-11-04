@@ -30,7 +30,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -136,7 +135,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                for (g in groups) FilterChip(selected = g == group, onClick = { group = g }, label = { Text(g) })
+                for (g in groups) SelectPill(selected = g == group, onClick = { group = g }, label = { Text(g) })
             }
             val grid = rememberLazyGridState()
             BoxWithConstraints(Modifier.fillMaxSize()) {

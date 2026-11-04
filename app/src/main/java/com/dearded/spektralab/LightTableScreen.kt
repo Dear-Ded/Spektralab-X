@@ -48,7 +48,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -399,10 +398,10 @@ private fun FilterRow(
     ) {
         for (f in FrameFilter.entries) {
             val n = if (f == FrameFilter.ALL) frames.size else frames.count(f::keeps)
-            FilterChip(selected = f == current, onClick = { onPick(f) }, label = { Text("${f.label} $n") })
+            SelectPill(selected = f == current, onClick = { onPick(f) }, label = { Text("${f.label} $n") })
         }
         // UI.md 2.9: thumbnails as shot, or through each frame's own film (developed only when idle).
-        FilterChip(selected = filmThumbs, onClick = { onFilmThumbs(!filmThumbs) },
+        SelectPill(selected = filmThumbs, onClick = { onFilmThumbs(!filmThumbs) },
             label = { Text(if (filmThumbs) "缩略图：胶片" else "缩略图：原图") })
     }
 }
