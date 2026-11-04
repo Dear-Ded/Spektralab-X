@@ -90,6 +90,7 @@ internal fun LabeledSlider(
     var lastThumbTap by remember { mutableLongStateOf(0L) }
     val onChangeLatest by rememberUpdatedState(onChange)
     val onDragLatest by rememberUpdatedState(onDrag)
+    val recede = LocalSliderDrag.current
     val changed = abs(local - def) > 1e-6f
 
     fun text(v: Float) = String.format(Locale.ROOT, format, v.toDouble())
@@ -171,7 +172,7 @@ internal fun LabeledSlider(
                                 dragging = true
                                 pressed = true
                                 lastX = c.position.x
-                                onDragLatest(true)
+                                onDragLatest(true); recede(true)
                             }
                             val fine = abs(c.position.y - size.height / 2f) > fineBand
                             raw = (raw + (c.position.x - lastX) * perPx * (if (fine) 0.25f else 1f)).coerceIn(lo, hi)
@@ -181,7 +182,7 @@ internal fun LabeledSlider(
                         }
                         if (dragging) {
                             pressed = false
-                            onDragLatest(false)
+                            onDragLatest(false); recede(false)
                         } else if (onThumb) {
                             val now = down.uptimeMillis
                             if (now - lastThumbTap < viewConfiguration.doubleTapTimeoutMillis) { reset(); lastThumbTap = 0L }
@@ -231,3 +232,9 @@ private fun stepFor(format: String, span: Float): Float {
 
 private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =
     (Math.round(v / step) * step).coerceIn(lo, hi)
+
+/**
+ * UI2.md 3.1: while a finger drags any slider, the top bar and the photo's
+ * overlays fade, leaving the photo and the slider. The editor provides it.
+ */
+val LocalSliderDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean) -> Unit> { {} }

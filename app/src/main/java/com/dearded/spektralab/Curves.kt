@@ -192,6 +192,7 @@ internal fun CurveEditor(
     val curvesLatest by rememberUpdatedState(curves)
     val onChangeLatest by rememberUpdatedState(onChange)
     val onDragLatest by rememberUpdatedState(onDrag)
+    val recede = LocalSliderDrag.current
     var active by remember { mutableStateOf(-1) }
     val histogram by produceState<Histogram?>(null, image) {
         value = image?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(it) } }
@@ -257,7 +258,7 @@ internal fun CurveEditor(
                                 grab = Offset((q.x * w).toFloat(), ((1 - c.points[i].y) * h).toFloat()) - down.position
                             }
                             active = index
-                            onDragLatest(true)
+                            onDragLatest(true); recede(true)
                         }
                         c = c.move(index, toUnit(ch.position + grab))
                         onChangeLatest(curvesLatest.with(row, c))
@@ -265,7 +266,7 @@ internal fun CurveEditor(
                     }
                     if (moved) {
                         active = -1
-                        onDragLatest(false)
+                        onDragLatest(false); recede(false)
                     } else if (grabbed) {
                         val now = down.uptimeMillis
                         if (index == lastTapIndex && now - lastTap < viewConfiguration.doubleTapTimeoutMillis && c.isDeletable(index)) {

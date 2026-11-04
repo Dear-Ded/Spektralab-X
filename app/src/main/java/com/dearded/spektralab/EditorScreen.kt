@@ -146,6 +146,11 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         ui.detail != null || ui.busy != null
     LaunchedEffect(ui.source) { chrome = true }
     SystemBarsHidden(!showChrome)
+    // UI2.md 3.1: chrome recedes while a slider is dragged (the panel itself stays).
+    var dragging by remember { mutableStateOf(false) }
+    val barsShown = showChrome && !dragging
+    val recede by androidx.compose.animation.core.animateFloatAsState(
+        if (dragging) 0.15f else 1f, Motion.defaultEffects(), label = "recede")
     // The first-run guide waits until there is a photo and nothing over it.
     val coach = LocalCoach.current
     val coachAllowed = ui.hasImage && showChrome && ui.busy == null && ui.error == null &&
@@ -170,13 +175,14 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         }
     }
 
+    androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on }) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
             TopAppBar(
                 expandedHeight = 56.dp,
-                modifier = Modifier.chrome(showChrome),
+                modifier = Modifier.chrome(showChrome).graphicsLayer { alpha = recede },
                 windowInsets = WindowInsets.systemBarsIgnoringVisibility.only(
                     androidx.compose.foundation.layout.WindowInsetsSides.Horizontal +
                         androidx.compose.foundation.layout.WindowInsetsSides.Top),
@@ -299,18 +305,19 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = showChrome, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
                     Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = showChrome, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
                     Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
         }
+    }
     }
 
     ui.error?.let { error ->

@@ -70,6 +70,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
     val lookLatest by rememberUpdatedState(look)
     val onChangeLatest by rememberUpdatedState(onChange)
     val onDragLatest by rememberUpdatedState(onDrag)
+    val recede = LocalSliderDrag.current
     val atHome = look.tone == look.toneHome && look.colour == look.colourHome
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -161,7 +162,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                                 moved = true
                                 pressed = true
                                 last = c.position
-                                onDragLatest(true)
+                                onDragLatest(true); recede(true)
                                 continue
                             }
                             val gain = if (long) 0.2f else 0.6f
@@ -179,7 +180,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                         fine = false
                         if (moved) {
                             pressed = false
-                            onDragLatest(false)
+                            onDragLatest(false); recede(false)
                         } else if (!long) {
                             val now = down.uptimeMillis
                             if (now - lastTap < viewConfiguration.doubleTapTimeoutMillis) { send(homeT, homeC); lastTap = 0L }
