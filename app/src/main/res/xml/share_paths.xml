@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the .share FileProvider may hand out: only the exported .spklook files
+     StyleImports.exportLook writes to the cache's share/ directory. -->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

@@ -50,6 +50,36 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
             </intent-filter>
+            <!-- Styles and films to import (StyleImport.kt): .spklook, .cube, HaldCLUT,
+                 Lightroom .xmp / .dng presets, spektrafilm .json, Fuji recipe .txt.
+                 File managers mostly send these as octet-stream, so that type is
+                 listed too; MainActivity routes anything not image/* to the import sheet. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/rdf+xml" />
+                <data android:mimeType="application/xml" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="application/x-spklook" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/rdf+xml" />
+                <data android:mimeType="application/xml" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="application/x-spklook" />
+            </intent-filter>
         </activity>
         <service
             android:name=".ExportService"
@@ -58,5 +88,15 @@
         <receiver
             android:name=".UpdateReceiver"
             android:exported="false" />
+        <!-- Hands an exported .spklook to the share sheet (res/xml/share_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.share"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
     </application>
 </manifest>
