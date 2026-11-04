@@ -623,19 +623,8 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         3 -> {
                             val src = ui.source
                             PanelHint("先选一款边框；选好后，下面是这一款的设置：相纸颜色、logo、日期、拍摄参数、齿孔和片边。")
-                        Text("选择边框", style = MaterialTheme.typography.labelLarge)
-                        Row(
-                            Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            for (p in Borders.PRESETS) {
-                                SelectPill(
-                                    selected = e.borderId == p.id,
-                                    onClick = { if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height)) },
-                                    label = { Text(p.label) },
-                                    enabled = enabled && src != null,
-                                )
-                            }
+                        BorderPicker(e.borderId, enabled && src != null) { p ->
+                            if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
                         }
                         Borders.byId(e.borderId)?.let { p ->
                             Text(p.hint, style = MaterialTheme.typography.bodySmall,
