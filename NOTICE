@@ -145,6 +145,12 @@ the EXIF Software field.
 - 黑白胶片与相纸配置 / black-and-white profiles
   SpektraLab — see Product-profiles-NOTICE.md in the engine assets
 - LibRaw 0.22.2 — LGPL-2.1 (https://www.libraw.org/)
+- libjpeg-turbo 3.2.0 — 极致渲染的 4:4:4 JPEG 导出 / 4:4:4 JPEG export in 极致渲染
+  Copyright (C) 2009–2025 D. R. Commander and others; portions Copyright
+  (C) 1991–2020 Thomas G. Lane, Guido Vollbeding (Independent JPEG Group).
+  IJG License and Modified (3-clause) BSD License; SIMD code under the zlib
+  License (https://libjpeg-turbo.org/).
+  This software is based in part on the work of the Independent JPEG Group.
 - volk — MIT (https://github.com/zeux/volk)
 - stb — MIT (https://github.com/nothings/stb)
 - Liberation Sans — SIL OFL 1.1; DejaVu Sans Mono — Bitstream Vera licence
