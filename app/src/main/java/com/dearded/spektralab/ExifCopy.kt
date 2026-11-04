@@ -174,7 +174,12 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
             }
         }.getOrNull() ?: NONE
 
-        fun read(context: android.content.Context, uri: android.net.Uri): ExifCopy {
+        /**
+         * [uri]'s tags, with any gaps filled from a remembered JPEG ([fillFromJpeg]).
+         * [fillKey] is the URI the fill was remembered under: the export queue
+         * reads a kept local copy but the fill belongs to the picked source.
+         */
+        fun read(context: android.content.Context, uri: android.net.Uri, fillKey: Uri = uri): ExifCopy {
             val fromFd = runCatching {
                 context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
                     val exif = ExifInterface(pfd.fileDescriptor)
@@ -184,7 +189,7 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
                 }
             }.getOrNull()
             val own = fromFd?.takeIf { !it.isEmpty } ?: read { context.contentResolver.openInputStream(uri) }
-            val filled = rememberedFill(context, uri)
+            val filled = rememberedFill(context, fillKey)
             return if (filled.isEmpty()) own else ExifCopy(fillMissing(own.values, filled))
         }
 
