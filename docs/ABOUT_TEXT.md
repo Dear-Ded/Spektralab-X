@@ -76,7 +76,7 @@ This app is released under GPL-3.0: you may use, modify and redistribute it. If 
 Rendering engine: SpektraLab (GPL-3.0) · github.com/JamesQiu2005/SpektraLab
 Film process model, film and paper data: spektrafilm by Andrea Volpato (GPL-3.0 / CC BY-SA 4.0) · github.com/andreavolpato/spektrafilm
 Film modeling powered by spektrafilm
-RAW decoding: LibRaw (LGPL-2.1); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
+RAW decoding: LibRaw (LGPL-2.1); 极致渲染 JPEG: libjpeg-turbo (BSD-3-Clause / IJG); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
 Unofficial: not affiliated with or endorsed by the authors and owners of SpektraLab, or by Xiaomi. SpektraLab™ and its icon are trademarks of their owner (registration pending).
 
 ## 字符串资源 / String resources
