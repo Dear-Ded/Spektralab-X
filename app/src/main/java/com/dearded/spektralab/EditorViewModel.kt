@@ -117,6 +117,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private fun log(event: String) = host.events.add(event)
     private var lastUri: Uri? = null
+    // The edit this photo opened with, for 重置全部.
+    private var openedEdit: Edit? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
     // The open photo's input space, so a film card opens on it the same way.
@@ -216,6 +218,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             previous?.cancelAndJoin()
             sourceExif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
             wanted = _ui.value.catalog.normalize(edit)
+            // A light-table frame resets to the edit it was saved with.
+            openedEdit = wanted
             clearHistory()
             doOpen(uri, wbK to wbTint)
         }
@@ -365,6 +369,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 applied = edit
                 appliedLook = Look.NEUTRAL
                 wanted = edit
+                if (wb == null) openedEdit = edit
                 Triple(edit, JSONObject(NativeEngine.sourceInfo(handle)), NativeEngine.beforeBitmap(handle))
             }
             _ui.update {
@@ -509,6 +514,22 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun redo() {
         applyEdit(history.redo(_ui.value.edit) ?: return, record = false)
+    }
+
+    /**
+     * 重置全部: back to how the photo opened (style, stocks, every parameter,
+     * border, crop), RAW white balance back to as shot. One undo step, so 撤销
+     * brings the edit back.
+     */
+    fun resetAll() {
+        val opened = openedEdit ?: return
+        if (_ui.value.exporting) return
+        applyEdit(opened, record = true)
+        val src = _ui.value.source
+        val uri = lastUri
+        if (src != null && uri != null && src.kind == "raw" && (src.wbK != 0.0 || src.wbTint != 0.0))
+            launchOpen(uri, wb = 0.0 to 0.0)
+        _ui.update { it.copy(message = "已重置为刚打开时的样子，可撤销") }
     }
 
     private fun clearHistory() {

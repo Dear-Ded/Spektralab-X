@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -239,6 +240,18 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                     // A running export stays visible: its count rides on the ⋯ button.
                     val canUndo = ui.canUndo && !ui.exporting
                     val canRedo = ui.canRedo && !ui.exporting
+                    var confirmReset by remember { mutableStateOf(false) }
+                    IconButton(onClick = { confirmReset = true }, enabled = ui.hasImage && !ui.exporting) {
+                        Icon(Icons.Default.Refresh, contentDescription = "重置全部",
+                            tint = if (ui.hasImage && !ui.exporting) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
+                    }
+                    if (confirmReset) AlertDialog(
+                        onDismissRequest = { confirmReset = false },
+                        title = { Text("重置全部调整？") },
+                        text = { Text("照片会回到刚打开时的样子：风格、胶片、相纸、全部参数、边框和裁剪都会还原，RAW 白平衡回到拍摄时。之后仍可以点撤销找回。") },
+                        confirmButton = { TextButton(onClick = { confirmReset = false; vm.resetAll() }) { Text("重置", color = Palette.Warning) } },
+                        dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("取消") } },
+                    )
                     IconButton(onClick = vm::undo, enabled = canUndo) {
                         HistoryIcon(redo = false, tint = if (canUndo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
                     }
