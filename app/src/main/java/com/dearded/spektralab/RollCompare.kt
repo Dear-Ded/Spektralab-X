@@ -164,9 +164,12 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                                 CompareImage(frame, editOf(s), px, { abs(i - grid.firstVisibleItemIndex) }, ContentScale.Crop)
                             }
                             Spacer(Modifier.height(4.dp))
+                            // UI2.md 1.2: the chosen card's name sits on the inverted fill.
                             Text(s?.name ?: "当前", style = MaterialTheme.typography.labelLarge, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = if (on) Palette.Accent else Palette.OnSurface)
+                                color = if (on) Palette.OnAccent else Palette.OnSurface,
+                                modifier = if (on) Modifier.background(Palette.Accent, RoundedCornerShape(50))
+                                    .padding(horizontal = 8.dp, vertical = 2.dp) else Modifier)
                             if (s != null) Text(shortFilmName(catalog.film(s.film)?.label ?: s.film), maxLines = 1,
                                 overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                                 color = Palette.OnSurfaceSoft)
