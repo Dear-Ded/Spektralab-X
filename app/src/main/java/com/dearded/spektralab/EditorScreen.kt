@@ -1364,7 +1364,6 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
     }
 }
 
-@Composable
 /** A settings group's title (UI2.md 1.3): a hairline above, the title quiet, room to breathe. */
 @Composable
 private fun SettingsSection(title: String) {
