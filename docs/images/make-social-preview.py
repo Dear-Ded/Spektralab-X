@@ -123,7 +123,7 @@ def main(src, dst):
         d.text((tx + 12 * S, 392 * S), tag, font=f, fill=DIM)
         tx += tw + 34 * S
 
-    d.text((lx, 540 * S), "Free · No ads · No in-app purchase · Offline", font=font(REG, 15), fill=(110, 106, 100))
+    d.text((lx, 540 * S), "Free · No ads · No in-app purchase · Online only for updates", font=font(REG, 15), fill=(110, 106, 100))
     d.text((lx, 566 * S), "github.com/Dear-Ded/Spektralab-X", font=font(MONO, 15), fill=AMBER)
 
     # Fine film grain over everything except nothing; very light.

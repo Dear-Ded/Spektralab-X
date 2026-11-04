@@ -7,7 +7,7 @@
 
 ## 布局
 
-自上而下七块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（应用没有网络权限，打开外部链接不需要）。证书指纹用等宽字体，旁边放“复制”按钮。
+自上而下七块，每块一个小标题加正文，正文用 `bodySmall`。链接可点击，打开浏览器（交给系统浏览器打开）。证书指纹用等宽字体，旁边放“复制”按钮。
 
 ## 简体中文
 
@@ -29,6 +29,7 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 
 **本应用永久免费**
 官方安装包只在 GitHub Releases 发布，不收取任何费用。欢迎把安装包转发到社区、社群、论坛，无需授权，注明源码地址即可。如果你是付费买到的，那不是官方版本，请申请退款，并到上面的地址下载官方版。
+应用里可以直接更新（设置 → 更新）：只向本仓库的 GitHub Releases 检查和下载，校验 SHA-256 和签名证书后才安装。除了检查更新不联网，照片不离开手机。
 官方签名证书 SHA-256：
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [复制] · 校验方法：github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md
@@ -62,6 +63,7 @@ If it helps you develop a photo you love, a star is the best encouragement you c
 
 **This app is free, forever**
 Official APKs are published only on GitHub Releases and cost nothing. You are welcome to share the APK in communities, groups and forums; no permission is needed, just include the source address. If you paid for this copy, it is not the official build: ask for a refund and download the official one from the address above.
+Updates can be installed from inside the app (Settings → Updates): it checks and downloads only from this repository's GitHub Releases and installs only after the SHA-256 and signing certificate match. Apart from update checks it never goes online, and photos never leave the phone.
 Official signing certificate SHA-256:
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [Copy] · How to verify: github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md

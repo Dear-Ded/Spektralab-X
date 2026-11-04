@@ -1,6 +1,6 @@
 # 远程处理 / Remote processing
 
-> 状态：**规范草案（v1）**。手机端的接口已经留好（[`RemoteApi.kt`](../app/src/main/java/com/dearded/spektralab/RemoteApi.kt)：数据结构、`RemoteBackend` 接口，默认实现 `RemoteBackends.DISABLED` 一律返回“正式版提供”），但没有任何网络代码、不申请网络权限；参考服务端尚未实现，排在正式版。本文是实现时的依据，改动接口必须同时改这里和 `RemoteApi.kt`。
+> 状态：**规范草案（v1）**。手机端的接口已经留好（[`RemoteApi.kt`](../app/src/main/java/com/dearded/spektralab/RemoteApi.kt)：数据结构、`RemoteBackend` 接口，默认实现 `RemoteBackends.DISABLED` 一律返回“正式版提供”），但远程处理没有任何网络代码（应用目前联网只用于检查更新）；参考服务端尚未实现，排在正式版。本文是实现时的依据，改动接口必须同时改这里和 `RemoteApi.kt`。
 
 把照片交给**你自己的**电脑、服务器或云电脑做全分辨率冲印、修复放大或大模型编辑，处理完传回手机。不经过任何第三方服务，没有中转、没有统计。
 
@@ -127,7 +127,7 @@ timeout_s = 600
 - **配对**：服务器首次启动生成自签证书并打印二维码 `spektralab://pair?h=<host:port>&fp=sha256:<指纹>&code=<一次性码>`。配对码 5 分钟或用一次后失效。手机把令牌存在 Keystore 加密的存储里；服务器可列出和吊销设备。
 - **TLS**：手机只接受二维码里那个证书指纹（自定义 TrustManager；单靠 OkHttp 的 CertificatePinner 会先拒掉自签证书）。走 Tailscale 时可用 `*.ts.net` 正式证书。
 - **发现**：mDNS `_spektralab._tcp`，TXT `api=1`、`fp=<指纹前 16 位>`。部分路由器会丢组播，扫码和手动输入始终可用。
-- **网络权限**：当前安卓版不申请网络权限，承诺“没有任何东西离开手机”。远程处理需要 `INTERNET` 权限，该权限用户无法单独关闭，因此远程功能将放在单独的构建变体里，或在隐私说明中明确改写这条承诺，二选一，实施前定。
+- **网络权限**：从 0.1.19 起应用已有 `INTERNET` 权限，但只用于检查和下载更新，承诺是“照片不离开手机”。远程处理会让照片离开手机（发往用户自己的服务器），所以必须默认关闭、由用户明确开启，并在隐私说明里改写这条承诺，实施前定。
 
 ## 7. 手机端
 
