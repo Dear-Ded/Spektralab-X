@@ -1,6 +1,6 @@
 # 一键风格库 / Style library
 
-> 状态：调研完成（2026-11-03），`Styles.kt` 按本文实现，共 87 款。改风格先改这里。
+> 状态：调研完成（2026-11-03），`Styles.kt` 按本文实现，共 87 款；第 7 节是用户导入的规格（2026-11-04）。改风格先改这里。
 > 负责：风格库线（`styles` 分支）。界面怎么展示风格归主会话，见第 6 节。
 
 ## 1. 原则
@@ -224,3 +224,118 @@
 - `Style.inspiredBy` 已填好每款的灵感来源，风格卡片可加副标题“灵感来自 …”；现在的副标题是胶片全名（`Stock.label`，带品牌），按附录 B 可考虑改成“型号 · 工艺”。
 - 分类从 6 个变成 8 个（实验室 / 相机 / 负片 / 反转 / 电影 / 黑白 / 手机 / 摄影师），“相机”有 25 款，三列网格（UI.md 2.3）会比横条好用。
 - 本库需要的引擎 / 界面能力：参数曲线、`camera_filter` 进 `Edit` 和 `Style`（黑白红滤镜）、按色相的肤色保护。都在 ROADMAP M2 里。
+
+## 7. 用户导入：格式、转换与安全（2026-11-04 调研）
+
+ROADMAP M2 两条“用户自定义”的调研结论在这里落成规格。代码：`SpkLook.kt`（格式）、`CubeLut.kt`（LUT）、`PresetImport.kt`（转换器）、`FilmRecipe.kt`（胶片方案）、`StyleImport.kt` 与 `ImportSheet.kt`（安卓侧读取、存储、界面）。
+
+### 7.1 `.spklook` 格式（version 1）
+
+一个 zip，或单独一个 `look.json`。zip 里只认三个顶层条目，按名字整读进内存，**从不按条目名写文件**：
+
+| 条目 | 必需 | 上限 |
+|---|---|---|
+| `look.json` | 是 | 256 KB |
+| `lut.cube` | 否 | 12 MB（65³ 的文本约 7.4 MB） |
+| `thumb.jpg` | 否 | 2 MB |
+
+整个 zip ≤ 16 MB，最多 16 个条目，解压字节边读边计数（防 zip 炸弹）。其他条目、带 `..` 或绝对路径的条目不读，写进导入报告。
+
+`look.json` 字段（全部按名字，缺的取默认，不认识的列进报告“已忽略”）：
+
+```json
+{
+  "format": "spklook", "version": 1,
+  "name": "我的风格", "author": "", "license": "CC-BY-4.0", "category": "导入",
+  "engine": { "film": "kodak_portra_400", "paper": "kodak_portra_endura",
+              "exposure_ev": 0.7, "print_exposure": 1.0, "y_cc": 0, "m_cc": 0,
+              "format_mm": 36, "grain": 1.0, "halation": 1.0, "glare": 1.0 },
+  "layer2": { "temperature": 0, "tint": 0, "exposure": 0, "contrast": 0, "brightness": 0,
+              "saturation": 0, "vibrance": 0, "highlights": 0, "shadows": 0,
+              "black_point": 0, "white_point": 0, "fade": 0, "vignette": 0, "vignette_mid": 50,
+              "wheels": { "global": {"hue": 0, "sat": 0, "lum": 0}, "shadows": {}, "midtones": {}, "highlights": {} },
+              "hsl": { "red": {"hue": 0, "sat": 0, "lum": 0}, "orange": {}, "yellow": {}, "green": {},
+                       "aqua": {}, "blue": {}, "purple": {}, "magenta": {} } },
+  "lut": { "file": "lut.cube", "strength": 1.0, "space": "srgb" },
+  "source": { "kind": "cube", "file": "Teal.cube", "note": "" }
+}
+```
+
+- `engine` 每个字段都可省：省掉的就**沿用当前照片的设置**，所以只有 Layer 2 的文件（XMP、.cube）套用时不换胶片。`film` / `paper` 不在当前版本的胶片目录里时，套用时跳过并提示。
+- 数值全部按滑杆范围夹紧：Layer 2 同 `AdjustPanel.kt`（色温 / 色调 ±100、曝光 ±3、对比 / 亮度 ±50、饱和 / 自然饱和 / 高光 / 阴影 ±100、黑场 / 白场 0–50、褪色 0–100、暗角 ±100、暗角范围 0–100、色轮色相 0–360 取模、强度 0–100、明亮度 ±100、HSL ±100）；`engine` 同胶片页（曝光补偿 ±4、放大曝光 0.2–3、Y / M ±40 CC、画幅 4–200 mm、颗粒 0–2、光晕 0–4、眩光 0–5）。
+- `license` 写 SPDX 标识；导入时不校验许可，只显示。
+- `lut.space`：`srgb`（默认，市面上的 LUT 基本都按 sRGB / Rec.709 显示做）或 `prophoto`（按本应用冲印输出的编码做）。
+
+### 7.2 LUT 放在哪、怎么算
+
+- 位置：冲印之后、Layer 2 之前（ROADMAP 结论）。Layer 2 跑在引擎输出的 ProPhoto 编码值上（γ 1.8，中灰 0.3857，见 `layer2.hpp`），所以 sRGB LUT 先**烘焙**成 ProPhoto 域的表：每个格点 ProPhoto 编码 → 线性 → sRGB 线性（裁到 0–1）→ sRGB 编码 → 原 LUT（四面体插值）→ 反算回 ProPhoto 编码。矩阵是 ProPhoto（D50）与 sRGB（D65）之间的 Bradford 适配矩阵。
+- 局限：超出 sRGB 的颜色进 LUT 前会被裁进 sRGB，强度 100% 时高饱和色会被压一点。强度在原生侧按 `mix(输入, 查表, 强度)` 做，拖强度只重新打包。
+- 原生接口（由调整工具线在 Layer 2 入口实现）：一张边长 N ≤ 65 的表，float RGB，**R 变化最快**，值域是 ProPhoto 编码，加一个强度。风格库线负责解析、重采样、烘焙；原生侧只做四面体插值和混合。
+- `.cube`：认 `TITLE`、`LUT_1D_SIZE`、`LUT_3D_SIZE`、`DOMAIN_MIN` / `DOMAIN_MAX`（Adobe 写法）和 `LUT_1D_INPUT_RANGE` / `LUT_3D_INPUT_RANGE`（Resolve 写法）、`#` 注释；1D 在前、3D 在后时 1D 当整形曲线先用。3D 边长 2–129（更大的拒收，内存原因），超过 65 时四面体重采样到 65；纯 1D 展开成 33³。文件 ≤ 64 MB。来源：[ResolveCafe：Cube LUT 说明](https://github.com/CommandPost/ResolveCafe/blob/main/docs/developers/luts.md)。
+- HaldCLUT PNG：边长 L³（L 为级数，2–16），每通道 N = L² 个采样，像素序号 i = r + g·N + b·N²，行优先、R 最快。按 sRGB LUT 处理，N > 65 重采样。解码前先读尺寸，边长不是立方数或超过 4096 拒收。来源：[HaldCLUT 说明](http://www.quelsolaar.com/technology/clut.html)。
+
+### 7.3 Lightroom XMP / DNG 预设
+
+只取 `crs:` 字段；属性写法和元素写法都认。**解析前拒收任何含 `<!DOCTYPE` 或 `<!ENTITY` 的文件**，再用正则取值，不经过 XML 解析器，所以没有外部实体和实体膨胀的问题。DNG 预设在文件里找 `<x:xmpmeta` … `</x:xmpmeta>` 那一段，文件 ≤ 32 MB。`ProcessVersion` 低于 6.7 拒收（Process 2010 / 2003 的滑杆含义不同）。报告分“对应 / 近似 / 忽略”三类，做法参照 [redlamp 的 Lightroom 预设说明](https://github.com/pdcgomes/redlamp/blob/main/docs/recipes/lightroom-presets.md)。
+
+| crs 字段 | 本应用 | 结果 |
+|---|---|---|
+| `Exposure2012` | 曝光（夹到 ±3） | 对应 |
+| `Contrast2012` | 对比 × 0.5 | 近似（范围不同） |
+| `Highlights2012`、`Shadows2012` | 高光、阴影 | 近似（曲线形状不同） |
+| `Whites2012` | 正值 → 白场 × 0.25；负值 → 高光 × 0.3 | 近似 |
+| `Blacks2012` | 负值 → 黑场 × 0.25；正值 → 褪色 × 0.3 | 近似 |
+| `Saturation`、`Vibrance` | 饱和、自然饱和 | 对应 |
+| `IncrementalTemperature`、`IncrementalTint` | 色温、色调 × 0.5 | 近似 |
+| `Temperature`、`Tint`（开尔文） | — | 忽略：每张照片自己的白平衡 |
+| `HueAdjustment*` / `SaturationAdjustment*` / `LuminanceAdjustment*`（Red Orange Yellow Green Aqua Blue Purple Magenta） | 8 段 HSL | 对应（段一一对应；色相幅度约 ±30°） |
+| `ColorGrade{Shadow,Midtone,Highlight,Global}{Hue,Sat,Lum}` | 四个色轮 | 对应 |
+| `SplitToning{Shadow,Highlight}{Hue,Saturation}` | 暗部 / 高光色轮 | 对应（旧版分离色调） |
+| `ColorGradeBlending`、`SplitToningBalance` | — | 忽略：没有对应参数 |
+| `PostCropVignetteAmount`、`PostCropVignetteMidpoint` | 暗角、暗角范围 | 近似 |
+| `GrainAmount` | 引擎颗粒 = 值 / 50 | 近似：胶片颗粒按乳剂模拟，不是数字噪点 |
+| `ConvertToGrayscale` | 饱和 −100 | 近似：彩色片上去色，不是黑白胶片 |
+| `Clarity2012`、`Texture`、`Dehaze`、`Sharpness`、降噪、镜头校正、`ToneCurve*`、`CameraProfile`、`Look` | — | 忽略：没有对应参数（曲线等调整工具线加上后再接） |
+| `Auto*` 为真 | — | 忽略：自动值逐张计算 |
+
+值为 0 或 False 的字段不进报告。
+
+### 7.4 spektrafilm 预设 JSON
+
+spektrafilm 桌面 GUI 把整个界面状态存成 JSON（`gui_default_state.json`，`spektrafilm_gui/persistence.py`）。胶片和相纸的 id 与本应用的 stock id 相同（同一份数据），所以还原度最高。认两种写法：新版分组（`simulation.selection.film_stock`、`simulation.enlarger.print_exposure` / `y_filter_shift` / `m_filter_shift`、`camera.exposure_compensation_ev` / `film_format_mm`、`grain.active`、`halation.active`、`glare.active`、`simulation.io.scan_film`）和旧版平铺（`film_stock`、`print_paper`、`print_exposure`、`print_y_filter_shift`、`print_m_filter_shift`）。spektrafilm 的滤镜偏移单位是 CC（`EnlargerParams`，`filter_shift_scale` 为 1），直接进 `y_cc` / `m_cc`。颗粒粒径、光晕散射、DIR 耦合、相纸曲线形变、放大机预闪、扩散滤镜、扫描仪锐化这些本应用没开放的参数列进“忽略”。来源：[spektrafilm](https://github.com/andreavolpato/spektrafilm)（`src/spektrafilm_gui/state.py`、`params_mapper.py`、`runtime/params_schema.py`）。
+
+### 7.5 富士配方文本
+
+Fuji X Weekly 一类的配方是每行“键: 值”的纯文本（[示例](https://fujixweekly.com/)）。按“胶片模拟”选本库的底子，再叠加调整，结果一律标“灵感来自 富士配方（近似）”，显示名用文件名或用户自己起的名字，不用模式名：
+
+| 配方项 | 做法 |
+|---|---|
+| Film Simulation | Classic Chrome → `cam_chrome`，Classic Negative → `cam_classic_neg`，Nostalgic Neg. → `cam_nostalgic`，Eterna → `cam_eterna`，Eterna Bleach Bypass → `cam_bleach`，Astia → `cam_astia`，Provia → `slide_positive`，Velvia → `slide_velvia`，Pro Neg. Std / Hi → `neg_portrait`（Hi 加对比 6），Reala Ace → `neg_natural`，Acros → `bw_silver`，Monochrome → `bw_street`，Sepia → `bw_sepia` |
+| Highlight（−2 … +4） | 高光 × 10 |
+| Shadow（−2 … +4） | 阴影 × −10（正值压暗） |
+| Color（−4 … +4） | 饱和 × 6 |
+| White Balance 偏移 “+4 Red & −5 Blue” | 色温 += (R − B) × 3，色调 += (R + B) × 1.5 |
+| Dynamic Range DR200 / DR400 | 高光 −10 / −20 |
+| Grain Effect Weak / Strong，Small / Large | 颗粒 1.0 / 1.5；Large 用半格画幅放大颗粒 |
+| Color Chrome Effect / FX Blue、Clarity、Sharpness、Noise Reduction、ISO | 忽略 |
+| Exposure Compensation、白平衡本身（Auto / Daylight 等） | 忽略：逐张设置 |
+
+### 7.6 胶片方案
+
+- **胶片方案**（默认）：一个基于已有胶片的别名 JSON，与仓库里的 `profiles-extra/cinestill_50d.json` 同一种结构：`derived_from` 加 `info`（名称、`target_print`、`antihalation`），引擎只读这几个键。另带一个 `spektralab_x.recipe` 对象，存推荐相纸、曝光补偿、颗粒等参数，套用时按 `.spklook` 的 `engine` 处理。没有光谱数据，没有许可负担。
+- **完整胶片数据**（进阶）：校验后试开一次，失败即删除。校验项照引擎 `profile.cpp` 的要求：`info.type` 为 negative / positive，`info.stage` 为 filming / printing，`channel_model` 为 color / bw；`data.wavelengths` 81 点、380–780 nm、步长 5；`log_sensitivity`、`channel_density` 为 81×3，`base_density` 81 点（这三项允许 null，已打包的 Portra 400 就有 62 个 null）；`log_exposure` 至少 2 点、严格递增，其余数值有限；`density_curves` 为 n×3，负片逐通道不减、反转片逐通道不增，容差 0.005（已打包数据里负片最大逆行 0.0016（HP5），反转片最大回升 0.0010）；文件 ≤ 4 MB（Portra 400 是 207 KB）。没有 `metadata.license` 的在报告里提示。
+- 存放：`filesDir/user/profiles/user_<名>.json`，名字只留 `[a-z0-9_-]`，总长 ≤ 96（引擎 `valid_stock_name`）。引擎资源每次重新安装都会整个删掉 `engine/`，所以安装后要再把这个目录复制进 `engine/profiles`（`UserProfiles.syncInto`），再读胶片目录。试开用 `NativeEngine.warmUp(engine, film, paper)`。
+
+### 7.7 导出
+
+当前编辑导出成 `.spklook`：胶片、相纸和冲印参数进 `engine`，Layer 2 进 `layer2`，有 LUT 就带上原始 LUT，附一张 512 px 缩略图，通过系统分享面板发出。只导出风格，不导出照片本身的白平衡、裁切和边框。
+
+### 7.8 需要其他线配合的接入点
+
+| 接入点 | 文件 / 线 | 内容 |
+|---|---|---|
+| LUT 阶段 | `layer2.*`、JNI，调整工具线 | 接收烘焙好的表和强度，见 7.2 |
+| `Edit` 里的 LUT | `Model.kt` | `lutId`、`lutStrength` 两个字段，进撤销历史；不发给引擎 |
+| 用户胶片同步 | `EngineHost.build` | `EngineAssets.install` 之后调一次 `UserProfiles.syncInto(dir)` |
+| 设置入口 | `EditorScreen.kt` 设置面板，主会话 | 放 `ImportStylesButton` |
+| 外部打开 | manifest、`MainActivity.handleIntent` | 本线单独提交 |
