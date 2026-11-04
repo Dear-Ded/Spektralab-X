@@ -51,11 +51,12 @@ private val CATEGORIES = listOf("风格", "冲洗", "调整", "边框", "构图"
 private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 
 @Composable
-fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+fun CategoryBar(selected: Int, enabled: Boolean, trailing: @Composable () -> Unit = {}, onSelect: (Int) -> Unit) {
     val view = LocalView.current
-    Box(Modifier.fillMaxWidth().background(Palette.Background).padding(horizontal = 12.dp, vertical = 8.dp)) {
+    Row(Modifier.fillMaxWidth().background(Palette.Background).padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
         Row(
-            Modifier.fillMaxWidth().height(64.dp)
+            Modifier.weight(1f).height(64.dp)
                 .background(Palette.Panel, RoundedCornerShape(32.dp))
                 .border(1.dp, Palette.OutlineSoft, RoundedCornerShape(32.dp))
                 .padding(4.dp),
@@ -91,6 +92,8 @@ fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
                 }
             }
         }
+        Spacer(Modifier.width(8.dp))
+        trailing()
     }
 }
 

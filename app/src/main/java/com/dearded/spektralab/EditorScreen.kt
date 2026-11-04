@@ -175,6 +175,35 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         }
     }
 
+    // UI2.md 2.1: 保存 sits at the right end of the bottom toolbar, under the thumb.
+    val saveButton: @Composable () -> Unit = {
+                    Box {
+                        androidx.compose.material3.Button(
+                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
+                            modifier = Modifier.height(48.dp).coachAnchor(CoachStep.SAVE),
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("保存")
+                        }
+                        DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
+                            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
+                            })
+                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
+                            })
+                            DropdownMenuItem(text = { Text("极致渲染（全分辨率 · 后台）") }, onClick = {
+                                exportMenu = false; vm.exportExtreme()
+                            })
+                        }
+                    }
+    }
+
     androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on }) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
@@ -212,31 +241,6 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             DropdownMenuItem(text = { Text("从文件选择（RAW / DNG）") }, onClick = {
                                 openMenu = false
                                 pickFile.launch(arrayOf("*/*"))
-                            })
-                        }
-                    }
-                    Box {
-                        androidx.compose.material3.Button(
-                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(36.dp).coachAnchor(CoachStep.SAVE),
-                        ) {
-                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text("保存")
-                        }
-                        DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
-                            })
-                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
-                            })
-                            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
-                            })
-                            DropdownMenuItem(text = { Text("极致渲染（全分辨率 · 后台）") }, onClick = {
-                                exportMenu = false; vm.exportExtreme()
                             })
                         }
                     }
@@ -306,13 +310,13 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    Controls(ui, vm, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
+                    Controls(ui, vm, saveButton, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    Controls(ui, vm, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
+                    Controls(ui, vm, saveButton, Modifier.fillMaxWidth().height(boxHeight * 0.42f).chrome(showChrome))
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -534,7 +538,7 @@ private fun BusyOverlay(text: String) {
 }
 
 @Composable
-private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
+private fun Controls(ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit, modifier: Modifier) {
     var tab by remember { mutableIntStateOf(0) }
     var step by remember { mutableIntStateOf(0) }
     val e = ui.edit
@@ -924,7 +928,7 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
             }
             }
             // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
-            CategoryBar(selected = tab, enabled = true) { tab = it }
+            CategoryBar(selected = tab, enabled = true, trailing = save) { tab = it }
         }
     }
 }
