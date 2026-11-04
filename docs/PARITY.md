@@ -338,3 +338,28 @@ c++ -std=c++20 -O2 -fopenmp -I$UP/engine/include -I$UP/engine/src -I$SRC tools/s
     -Wl,--start-group $B/engine/lib*.a -Wl,--end-group -lpthread -ldl -o striped
 ./striped $B/engine/resources '<RAW>' 0 '{"film_stock":"kodak_portra_400","print_stock":"kodak_supra_endura","grain_active":false,"glare_active":false,"auto_exposure":true,"auto_exposure_method":"balanced"}' 1024 509
 ```
+
+## 7. 极致渲染的 4:4:4 JPEG（libjpeg-turbo 3.2.0）
+
+极致渲染的 JPEG 改由应用自带的 libjpeg-turbo 编码（`jpeg444.cpp`：质量 98、4:4:4、优化霍夫曼表、嵌入 ICC），普通导出仍用 `Bitmap.compress`（4:2:0）。在云主机上用同一张渲染图对比（2026-11-04）：
+
+- 输入：Leica Q DNG，原始 6016×4016（24.2 MP），Portra 400 / Supra Endura，颗粒开，自动曝光，引擎直接输出 sRGB，8 位。
+- 应用编码器：主机上同一份 `jpeg444.cpp` 加同版本 libjpeg-turbo（主机无 NASM，关了 SIMD；手机上是 NEON，输出按 libjpeg-turbo 的设计应逐位相同，未在手机上核对）。
+
+| 编码 | 文件大小 | 与源像素的差（8 位，平均 / 最大） |
+|---|---|---|
+| 应用 4:4:4 q98 | 32314 KiB | 1.324 / 12 |
+| PIL 4:4:4 q98 优化 | 32314 KiB | 1.324 / 12 |
+| PIL 4:2:0 q98（相当于 `Bitmap.compress` 的采样） | 18070 KiB | 4.428 / 77 |
+
+- 应用编码器与 PIL 4:4:4 解码后逐像素完全相同（100% 像素差为 0），采样因子都是 1×1，ICC 588 字节已嵌入。
+- 4:4:4 比 4:2:0 大约 79%，与源的平均误差降到约 30%，最大误差从 77 降到 12（4:2:0 的误差集中在颗粒和色彩边缘）。
+
+复现（主机上，`J` 为 libjpeg-turbo 安装目录）：
+
+```bash
+c++ -std=c++20 -O2 -I$J/include -Iapp/src/main/cpp tools/stability/jpeg444_main.cpp app/src/main/cpp/jpeg444.cpp $J/lib/libjpeg.a -o jpeg444
+./render8 <resources> '<RAW>' '<params>' lake.rgb     # tools/stability/render8.cpp
+./jpeg444 lake.rgb app444.jpg 98 <resources>/io/sRGB.icc
+python3 tools/stability/jpeg444_compare.py lake.rgb app444.jpg .
+```
