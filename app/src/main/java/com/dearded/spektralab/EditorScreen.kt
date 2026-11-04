@@ -81,6 +81,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -722,6 +723,14 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                             }
                             SwitchRow("参数文字", e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
                             BrandPanel(ui, vm, enabled)
+                            if (e.frame.sign) {
+                                androidx.compose.material3.OutlinedTextField(
+                                    value = e.frame.signText,
+                                    onValueChange = { vm.update(e.copy(frame = e.frame.copy(signText = it.take(40)))) },
+                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("签名") },
+                                )
+                            }
                             Text("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1256,31 +1265,17 @@ private fun FramedImage(
         Image(bitmap = bitmap, contentDescription = null, contentScale = ContentScale.Fit, modifier = modifier)
         return
     }
+    val android = remember(bitmap) { bitmap.asAndroidBitmap() }
     androidx.compose.foundation.Canvas(modifier) {
         val l = frame.layout(bitmap.width, bitmap.height)
         val k = minOf(size.width / l.width, size.height / l.height)
         val ox = (size.width - l.width * k) / 2f
         val oy = (size.height - l.height * k) / 2f
-        drawRect(Color(frame.paper), topLeft = Offset(ox, oy),
-            size = androidx.compose.ui.geometry.Size(l.width * k, l.height * k))
-        frame.perf?.let { p -> drawIntoCanvas { c ->
+        // The export's own drawing, scaled to the screen: paper or blur, strips, print, hairline, text.
+        drawIntoCanvas { c ->
             val n = c.nativeCanvas
             n.save(); n.translate(ox, oy); n.scale(k, k)
-            p.draw(n, l.x.toFloat(), l.y.toFloat(), bitmap.width.toFloat(), bitmap.height.toFloat(), l.short, caption.film)
-            n.restore()
-        } }
-        drawImage(
-            bitmap,
-            dstOffset = androidx.compose.ui.unit.IntOffset(Math.round(ox + l.x * k), Math.round(oy + l.y * k)),
-            dstSize = androidx.compose.ui.unit.IntSize(Math.round(bitmap.width * k), Math.round(bitmap.height * k)),
-            filterQuality = androidx.compose.ui.graphics.FilterQuality.Medium,
-        )
-        if (frame.caption) drawIntoCanvas { c ->
-            val n = c.nativeCanvas
-            n.save()
-            n.translate(ox, oy)
-            n.scale(k, k)
-            FrameSpec.drawCaption(n, frame, l, bitmap.width, bitmap.height, caption)
+            FrameSpec.drawCard(n, frame, l, android, caption)
             n.restore()
         }
     }
