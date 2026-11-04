@@ -1,0 +1,73 @@
+Latch VK_ERROR_DEVICE_LOST: after the first loss, nothing more reaches the dead VkDevice
+
+A Vulkan device that returned VK_ERROR_DEVICE_LOST never works again, but
+the backend kept submitting to it: every later dispatch, upload and readback
+of the same render tried again, each one another call into a reset GPU, and
+flush() still answered success. Upstream PR #64 latches the loss; this is the
+same idea, Vulkan backend only.
+
+submit_sync sets an atomic flag on the first VK_ERROR_DEVICE_LOST. From then
+on submit_sync and flush fail at once, with an error that still says
+"(VkResult -4)", so the Android app's existing test (lastWasDeviceLost)
+recognises it and replaces the engine once (EngineHost.recover). The flag is
+per backend, so the replacement engine starts clean. Nothing changes while
+the device is healthy: one relaxed-cost atomic load per submit.
+
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -17,6 +17,7 @@
+ #include "volk.h"
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <chrono>
+ #include <cmath>
+ #include <cstdint>
+@@ -711,7 +712,14 @@
+         return submitted;
+     }
+ 
+-    bool flush(std::string&) override { return true; }  // dispatch is synchronous for this milestone
++    bool flush(std::string& error) override {  // dispatch is synchronous for this milestone
++        // Android: a lost device has nothing to flush to; say so rather than succeed.
++        if (device_lost_.load(std::memory_order_acquire)) {
++            error = vk_error("flush", VK_ERROR_DEVICE_LOST) + "; the device was lost earlier";
++            return false;
++        }
++        return true;
++    }
+     void* texture(Buffer* buffer, uint32_t width, uint32_t height,
+                   uint32_t row_stride_px, std::string& error) override {
+         if (!buffer || width == 0 || height == 0 || row_stride_px < width ||
+@@ -844,6 +852,13 @@
+     // completion before any staging allocation or pooled buffer can be reused.
+     template <typename Record>
+     bool submit_sync(Record&& record, const char* operation, std::string& error) {
++        // Android: once the device is lost nothing more is submitted to it
++        // (upstream PR #64's latch). The message keeps "(VkResult -4)", which
++        // the app reads as "replace the engine".
++        if (device_lost_.load(std::memory_order_acquire)) {
++            error = vk_error(operation, VK_ERROR_DEVICE_LOST) + "; the device was lost earlier";
++            return false;
++        }
+         VkCommandBufferAllocateInfo allocate_info{};
+         allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+         allocate_info.commandPool = command_pool_;
+@@ -870,6 +885,7 @@
+             }
+             vkFreeCommandBuffers(device_, command_pool_, 1, &command);
+         }
++        if (result == VK_ERROR_DEVICE_LOST) device_lost_.store(true, std::memory_order_release);
+         if (result != VK_SUCCESS) { error = vk_error(operation, result); return false; }
+         return true;
+     }
+@@ -1256,6 +1272,9 @@
+     VkPhysicalDeviceProperties properties_{};
+     // maxStorageBufferRange, unless probe_cpu_storage_range measured more.
+     VkDeviceSize storage_range_limit_ = 0;
++    // Android: set by the first VK_ERROR_DEVICE_LOST; every later submit and
++    // flush fails at once instead of reaching a dead VkDevice again.
++    std::atomic<bool> device_lost_{false};
+     // -1 unvalidated/rejected, 1 validated fused fma, 0 validated split.
+     int fused_fma_ = -1;
+     bool math_checked_ = false;

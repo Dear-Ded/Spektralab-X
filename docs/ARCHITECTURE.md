@@ -69,6 +69,7 @@ Spektralab-X 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。
 | `0003-raw-half-size-budget` | 传感器远大于工作尺寸时，按半尺寸解码 |
 | `0004-dng-dual-illuminant-matrix` | DNG 按拍摄白平衡在两组色彩矩阵之间插值 |
 | `0005-lock-print-lut-caches` | 相纸查找表缓存加锁，编辑和导出两条引擎线程可同时首次使用 |
+| `0008-latch-device-lost` | 第一次 GPU 设备丢失后锁存，之后的提交和 flush 立即失败，不再对已丢失的设备重复提交 |
 
 补丁在 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh) 下载上游源码后按文件名顺序应用。补丁内容一变，CI 缓存键也跟着变。
 
