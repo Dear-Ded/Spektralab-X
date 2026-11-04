@@ -170,7 +170,7 @@ private fun CoachMark(step: CoachStep, target: Rect, index: Int, onNext: () -> U
             }
             drawPath(path, Color.Black.copy(alpha = 0.62f))
             drawRoundRect(
-                Palette.Amber, topLeft = hole.topLeft, size = hole.size,
+                Palette.Accent, topLeft = hole.topLeft, size = hole.size,
                 cornerRadius = CornerRadius(12.dp.toPx()),
                 style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()),
             )
@@ -201,7 +201,7 @@ private fun CoachMark(step: CoachStep, target: Rect, index: Int, onNext: () -> U
                 Text("$index / ${CoachStep.entries.size} · 轻点任意处继续",
                     style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
                 Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onSkip) { Text("跳过全部", color = Palette.Amber) }
+                TextButton(onClick = onSkip) { Text("跳过全部", color = Palette.Accent) }
             }
         }
     }

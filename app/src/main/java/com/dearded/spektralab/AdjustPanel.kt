@@ -86,7 +86,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                 Modifier.size(if (on) 30.dp else 26.dp)
                     .background(Color(argb), CircleShape)
                     .border(if (on) 2.dp else if (edited) 1.5.dp else 0.dp,
-                        if (on) Palette.OnSurface else Palette.Amber, CircleShape)
+                        if (on) Palette.OnSurface else Palette.Accent, CircleShape)
                     .clickable { band = i },
             )
         }
@@ -127,7 +127,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 
 @Composable
 private fun Group(title: String) {
-    Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.Amber,
+    Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.Accent,
         modifier = Modifier.padding(top = 12.dp, bottom = 2.dp))
 }
 

@@ -171,7 +171,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
             MarkButton("✓", "选中", on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
             Button(
                 onClick = { onEdit(current) },
-                colors = ButtonDefaults.buttonColors(containerColor = Palette.Amber, contentColor = Palette.OnAmber),
+                colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
             ) { Text("编辑") }
         }
     }
@@ -254,9 +254,9 @@ private fun MarkButton(glyph: String, label: String, on: Boolean, onClick: () ->
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            Modifier.size(28.dp).background(if (on) Palette.Amber else Palette.PanelHighest, CircleShape),
+            Modifier.size(28.dp).background(if (on) Palette.Accent else Palette.PanelHighest, CircleShape),
             contentAlignment = Alignment.Center,
-        ) { Text(glyph, color = if (on) Palette.OnAmber else Palette.OnSurface, fontSize = 14.sp) }
+        ) { Text(glyph, color = if (on) Palette.OnAccent else Palette.OnSurface, fontSize = 14.sp) }
         Text(label, fontSize = 12.sp, color = Palette.OnSurfaceSoft)
     }
 }
@@ -272,7 +272,7 @@ private fun Stars(stars: Int, onSet: (Int) -> Unit) {
                 contentAlignment = Alignment.Center,
             ) {
                 Text(if (n <= stars) "★" else "☆", fontSize = 20.sp,
-                    color = if (n <= stars) Palette.Amber else Palette.OnSurfaceSoft)
+                    color = if (n <= stars) Palette.Accent else Palette.OnSurfaceSoft)
             }
         }
     }

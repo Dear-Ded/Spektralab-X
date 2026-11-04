@@ -180,7 +180,7 @@ fun LightTableScreen(
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (state.importing > 0) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Palette.Amber)
+            if (state.importing > 0) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Palette.Accent)
             if (frames.isEmpty()) {
                 EmptyTable(addFromGallery, addFromFiles)
                 return@Column
@@ -322,7 +322,7 @@ private fun FrameCell(
             .aspectRatio(1f)
             .clip(shape)
             .background(Palette.Panel)
-            .then(if (selected) Modifier.border(2.dp, Palette.Amber, shape) else Modifier)
+            .then(if (selected) Modifier.border(2.dp, Palette.Accent, shape) else Modifier)
             .semantics {
                 contentDescription = describe(frame)
                 this.selected = selected
@@ -350,7 +350,7 @@ internal fun FrameMarks(frame: Frame, selected: Boolean) {
             frame.pick < 0 -> MarkBadge("✕", Modifier.align(Alignment.TopStart))
         }
         if (frame.edited) {
-            Box(Modifier.align(Alignment.TopEnd).padding(4.dp).size(6.dp).background(Palette.Amber, CircleShape))
+            Box(Modifier.align(Alignment.TopEnd).padding(4.dp).size(6.dp).background(Palette.Accent, CircleShape))
         }
         if (frame.stars > 0) {
             Text(
@@ -363,9 +363,9 @@ internal fun FrameMarks(frame: Frame, selected: Boolean) {
         }
         if (selected) {
             Box(
-                Modifier.align(Alignment.BottomEnd).size(20.dp).background(Palette.Amber, CircleShape),
+                Modifier.align(Alignment.BottomEnd).size(20.dp).background(Palette.Accent, CircleShape),
                 contentAlignment = Alignment.Center,
-            ) { Text("✓", color = Palette.OnAmber, fontSize = 12.sp) }
+            ) { Text("✓", color = Palette.OnAccent, fontSize = 12.sp) }
         }
     }
 }
@@ -422,7 +422,7 @@ private fun EmptyTable(addFromGallery: () -> Unit, addFromFiles: () -> Unit) {
         )
         Spacer(Modifier.height(24.dp))
         Button(onClick = addFromGallery,
-            colors = ButtonDefaults.buttonColors(containerColor = Palette.Amber, contentColor = Palette.OnAmber)) {
+            colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent)) {
             Text("从相册添加")
         }
         TextButton(onClick = addFromFiles) { Text("从文件添加（RAW / DNG）") }

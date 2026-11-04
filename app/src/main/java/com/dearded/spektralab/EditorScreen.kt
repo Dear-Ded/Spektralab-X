@@ -262,8 +262,8 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                         var moreMenu by remember { mutableStateOf(false) }
                         IconButton(onClick = { moreMenu = true }) {
                             androidx.compose.material3.BadgedBox(badge = {
-                                if (active > 0) androidx.compose.material3.Badge(containerColor = Palette.Amber,
-                                    contentColor = Palette.OnAmber) { Text("$active") }
+                                if (active > 0) androidx.compose.material3.Badge(containerColor = Palette.Accent,
+                                    contentColor = Palette.OnAccent) { Text("$active") }
                             }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "更多")
                             }
@@ -504,7 +504,7 @@ private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = tr
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge, color = when {
             !enabled -> Color.White.copy(alpha = 0.4f)
-            on -> Palette.Amber
+            on -> Palette.Accent
             else -> Color.White.copy(alpha = 0.9f)
         })
     }
@@ -1034,7 +1034,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
             val scale by androidx.compose.animation.core.animateFloatAsState(
                 if (selected) 1f else 0.94f, Motion.fastSpatial(), label = "card")
             val ring by androidx.compose.animation.animateColorAsState(
-                if (selected) Palette.Amber else Color.Transparent, Motion.defaultEffects(), label = "ring")
+                if (selected) Palette.Accent else Color.Transparent, Motion.defaultEffects(), label = "ring")
             val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
             Column(
                 Modifier.width(92.dp)
@@ -1066,7 +1066,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                     film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    color = if (selected) Palette.Amber else MaterialTheme.colorScheme.onSurface,
+                    color = if (selected) Palette.Accent else MaterialTheme.colorScheme.onSurface,
                 )
             }
         }

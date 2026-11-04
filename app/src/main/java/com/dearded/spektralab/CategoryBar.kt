@@ -57,7 +57,7 @@ fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
             val on = i == selected
             val tint by animateColorAsState(
                 when {
-                    on -> Palette.Amber
+                    on -> Palette.Accent
                     enabled -> Palette.OnSurfaceSoft
                     else -> Palette.OnSurfaceSoft.copy(alpha = 0.38f)
                 },
@@ -76,7 +76,7 @@ fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
                 Spacer(Modifier.height(3.dp))
                 Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
                 Spacer(Modifier.height(3.dp))
-                Box(Modifier.width(pill).height(3.dp).background(Palette.Amber, RoundedCornerShape(2.dp)))
+                Box(Modifier.width(pill).height(3.dp).background(Palette.Accent, RoundedCornerShape(2.dp)))
             }
         }
     }

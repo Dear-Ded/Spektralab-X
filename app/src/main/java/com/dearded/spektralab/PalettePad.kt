@@ -208,7 +208,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
             val r = (if (pressed) 12.dp else 10.dp).toPx()
             drawCircle(Color.Black.copy(alpha = 0.35f), r + 2.dp.toPx(), p)
             drawCircle(if (enabled) Palette.OnSurface else Palette.Outline, r, p)
-            if (fine) drawCircle(Palette.Amber, r + 5.dp.toPx(), p, style = Stroke(2.dp.toPx()))
+            if (fine) drawCircle(Palette.Accent, r + 5.dp.toPx(), p, style = Stroke(2.dp.toPx()))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("淡", style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)

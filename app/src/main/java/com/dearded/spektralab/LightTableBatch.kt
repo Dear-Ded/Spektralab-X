@@ -121,7 +121,7 @@ private fun PasteSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(checked = on, onCheckedChange = null,
-                        colors = CheckboxDefaults.colors(checkedColor = Palette.Amber, checkmarkColor = Palette.OnAmber))
+                        colors = CheckboxDefaults.colors(checkedColor = Palette.Accent, checkmarkColor = Palette.OnAccent))
                     Spacer(Modifier.padding(start = 12.dp))
                     Text(g.label)
                 }
@@ -131,7 +131,7 @@ private fun PasteSheet(
                 TextButton(onClick = onDismiss) { Text("取消") }
                 Button(
                     onClick = { onPaste(groups) }, enabled = groups.isNotEmpty(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Palette.Amber, contentColor = Palette.OnAmber),
+                    colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
                 ) { Text("粘贴") }
             }
             Spacer(Modifier.height(8.dp))

@@ -348,7 +348,7 @@ private fun Scrubber(count: Int, current: Int, onJump: (Int) -> Unit) {
                 val h = if (on) size.height * 0.8f else if (k % 5 == 0) size.height * 0.5f else size.height * 0.32f
                 val x = step * k + step / 2
                 drawLine(
-                    if (on) Palette.Amber else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
+                    if (on) Palette.Accent else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
                     Offset(x, (size.height - h) / 2), Offset(x, (size.height + h) / 2),
                     strokeWidth = if (on) 3.dp.toPx() else 1.dp.toPx(),
                 )

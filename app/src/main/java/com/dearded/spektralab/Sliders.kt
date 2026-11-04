@@ -133,7 +133,7 @@ internal fun LabeledSlider(
         }
 
         val measurer = rememberTextMeasurer()
-        val bubbleStyle = TextStyle(fontSize = 12.sp, color = Palette.OnAmber, fontFeatureSettings = "tnum")
+        val bubbleStyle = TextStyle(fontSize = 12.sp, color = Palette.OnAccent, fontFeatureSettings = "tnum")
         Canvas(
             Modifier.fillMaxWidth().height(36.dp).systemGestureExclusion()
                 .semantics {
@@ -199,7 +199,7 @@ internal fun LabeledSlider(
             val x0 = r
             val x1 = size.width - r
             fun xOf(v: Float) = x0 + (v - lo) / span * (x1 - x0)
-            val fill = if (enabled) Palette.Amber else Palette.Outline
+            val fill = if (enabled) Palette.Accent else Palette.Outline
             drawRoundRect(if (enabled) Palette.Track else Palette.PanelHighest, Offset(x0, cy - track / 2), Size(x1 - x0, track), CornerRadius(track / 2))
             val xd = xOf(def)
             val xv = xOf(local)
@@ -215,7 +215,7 @@ internal fun LabeledSlider(
                 val h = layout.size.height + pad
                 val left = (xv - w / 2).coerceIn(0f, size.width - w)
                 val top = cy - thumb - 6.dp.toPx() - h
-                drawRoundRect(Palette.Amber, Offset(left, top), Size(w, h), CornerRadius(h / 2))
+                drawRoundRect(Palette.Accent, Offset(left, top), Size(w, h), CornerRadius(h / 2))
                 drawText(layout, topLeft = Offset(left + pad, top + pad / 2))
             }
         }

@@ -15,39 +15,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * A darkroom palette: near-black neutral surfaces, so nothing around the
- * print biases how its colour is judged, and one warm safelight-amber accent.
- * The accent never touches the photo's edge.
+ * UI2.md 1.1: no hue anywhere in the chrome. Layers are the ground plus white
+ * at 6 / 10 / 14 % (written out opaque here), so a panel never tints the
+ * photo's surround. The one "accent" is near-white: a selected item is an
+ * inverted solid pill (light fill, dark text), not a colour.
  */
 object Palette {
-    val Surround = Color(0xFF121212)       // behind the photo: neutral grey, not black
-    val Background = Color(0xFF0B0B0C)
-    val Surface = Color(0xFF141416)
-    val Panel = Color(0xFF1B1B1E)
-    val PanelHigh = Color(0xFF232327)
-    val PanelHighest = Color(0xFF2C2C31)
-    val OnSurface = Color(0xFFECE9E3)
-    val OnSurfaceSoft = Color(0xFF9E9A93)
-    val Outline = Color(0xFF3A3A40)
-    /** A slider's unfilled track: 3:1 against the panel (UI.md 1). */
-    val Track = Color(0xFF6A6A72)
-    val OutlineSoft = Color(0xFF26262A)
-    val Amber = Color(0xFFE8A24A)
-    val OnAmber = Color(0xFF1A1206)
-    val AmberDim = Color(0xFF5A4022)
-    val Warning = Color(0xFFE5584A)
+    val Surround = Color(0xFF1E1E1E)       // behind the photo only: neutral mid-dark grey
+    val Background = Color(0xFF0E0E10)     // Ground
+    val Surface = Color(0xFF141416)        // top bar, toolbar
+    val Panel = Color(0xFF1D1D1F)          // Layer1: white 6 % on Ground
+    val PanelHigh = Color(0xFF262628)      // Layer2: white 10 %
+    val PanelHighest = Color(0xFF303032)   // Layer3: white 14 %
+    val OnSurface = Color(0xFFEBEBEB)      // text, white 92 %
+    val OnSurfaceSoft = Color(0xFFA8A8A8)  // secondary text, white 64 %
+    val Outline = Color(0xFF3A3A3C)
+    /** A slider's unfilled track: 3:1 against the panel. */
+    val Track = Color(0xFF6A6A6C)
+    val OutlineSoft = Color(0xFF2A2A2C)    // hairline, white 8 %
+    /** Selected and primary: the inverted pill's fill, with [OnAccent] text. */
+    val Accent = Color(0xFFF2F2F2)
+    val OnAccent = Color(0xFF111113)
+    /** A selected item's quiet container (chips that are on but not the focus). */
+    val AccentDim = Color(0xFF3C3C3E)
+    /** Only the confirm text of 重置 / 删除. */
+    val Warning = Color(0xFFFF6B5E)
 }
 
 private val Scheme = darkColorScheme(
-    primary = Palette.Amber,
-    onPrimary = Palette.OnAmber,
-    primaryContainer = Palette.AmberDim,
+    primary = Palette.Accent,
+    onPrimary = Palette.OnAccent,
+    primaryContainer = Palette.AccentDim,
     onPrimaryContainer = Palette.OnSurface,
     secondary = Palette.OnSurfaceSoft,
     onSecondary = Palette.Background,
     secondaryContainer = Palette.PanelHighest,
     onSecondaryContainer = Palette.OnSurface,
-    tertiary = Palette.Amber,
+    tertiary = Palette.Accent,
     background = Palette.Background,
     onBackground = Palette.OnSurface,
     surface = Palette.Surface,

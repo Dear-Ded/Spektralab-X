@@ -66,11 +66,11 @@ internal fun AboutSection() {
         TextButton(onClick = { open(SOURCE) }) { Text("源码：github.com/Dear-Ded/Spektralab-X") }
         for ((title, body) in BLOCKS) {
             Spacer(Modifier.height(8.dp))
-            Text(title, style = MaterialTheme.typography.labelMedium, color = Palette.Amber)
+            Text(title, style = MaterialTheme.typography.labelMedium, color = Palette.Accent)
             Text(body, style = MaterialTheme.typography.bodySmall)
         }
         Spacer(Modifier.height(8.dp))
-        Text("官方签名证书 SHA-256", style = MaterialTheme.typography.labelMedium, color = Palette.Amber)
+        Text("官方签名证书 SHA-256", style = MaterialTheme.typography.labelMedium, color = Palette.Accent)
         Text(CERT, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
         var copied by remember { mutableStateOf(false) }
         Row(verticalAlignment = Alignment.CenterVertically) {

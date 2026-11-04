@@ -120,7 +120,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                             onClose()
                         },
                         enabled = picked != null,
-                        colors = ButtonDefaults.buttonColors(containerColor = Palette.Amber, contentColor = Palette.OnAmber),
+                        colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
                     ) { Text("用这个") }
                 }
             }
@@ -160,14 +160,14 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                         ) {
                             Box(
                                 Modifier.fillMaxWidth().aspectRatio(1f).clip(shape).background(Palette.Panel)
-                                    .border(2.dp, if (on) Palette.Amber else Color.Transparent, shape),
+                                    .border(2.dp, if (on) Palette.Accent else Color.Transparent, shape),
                             ) {
                                 CompareImage(frame, editOf(s), px, { abs(i - grid.firstVisibleItemIndex) }, ContentScale.Crop)
                             }
                             Spacer(Modifier.height(4.dp))
                             Text(s?.name ?: "当前", style = MaterialTheme.typography.labelLarge, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = if (on) Palette.Amber else Palette.OnSurface)
+                                color = if (on) Palette.Accent else Palette.OnSurface)
                             if (s != null) Text(shortFilmName(catalog.film(s.film)?.label ?: s.film), maxLines = 1,
                                 overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                                 color = Palette.OnSurfaceSoft)

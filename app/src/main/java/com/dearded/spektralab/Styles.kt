@@ -306,7 +306,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
-            val ring by animateColorAsState(if (on) Palette.Amber else Palette.OutlineSoft, Motion.defaultEffects(), label = "ring")
+            val ring by animateColorAsState(if (on) Palette.Accent else Palette.OutlineSoft, Motion.defaultEffects(), label = "ring")
             Column(
                 Modifier.width(92.dp).clip(RoundedCornerShape(10.dp))
                     .border(if (on) 2.dp else 1.dp, ring, RoundedCornerShape(10.dp))
