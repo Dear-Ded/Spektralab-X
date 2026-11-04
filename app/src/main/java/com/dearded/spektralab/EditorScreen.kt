@@ -626,6 +626,12 @@ private fun Controls(
                                 }
                                 2 -> {
                                     PanelHint("拍摄曝光是按快门时的曝光；放大曝光和黄、品红滤镜是暗房里印相纸时的调整。")
+                                    val d = Edit()
+                                    StepReset(enabled, !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
+                                        e.yShift != 0.0 || e.mShift != 0.0) {
+                                        vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
+                                            printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
+                                    }
                                 SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
                                 Box(Modifier.coachAnchor(CoachStep.RESET)) {
                                     LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
@@ -648,6 +654,16 @@ private fun Controls(
                                 }
                                 else -> {
                                     PanelHint("颗粒、光晕、眩光这些是胶片和相纸自带的质感，每一项都能单独开关和调强度。")
+                                    val d = Edit()
+                                    val fx = d.copy(film = e.film, paper = e.paper)
+                                    fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
+                                        halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
+                                    StepReset(enabled, e.effects() != fx.effects()) {
+                                        vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
+                                            grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
+                                            scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
+                                            unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
+                                    }
                                 EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
                                 }
                             }
@@ -976,6 +992,14 @@ private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onS
             SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
                 label = { Text(if (edited.getOrElse(i) { false }) "$label •" else label) }, enabled = enabled)
         }
+    }
+}
+
+/** 重置这一项 (UI2.md 2.5): one step back to its defaults, no confirmation, one undo. */
+@Composable
+private fun StepReset(enabled: Boolean, changed: Boolean, onReset: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onReset, enabled = enabled && changed) { Text("重置这一项") }
     }
 }
 
