@@ -131,6 +131,7 @@ fun LightTableScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
+                expandedHeight = 56.dp,
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
                 navigationIcon = {
                     IconButton(onClick = { if (selecting) table.clearSelection() else onBack() }) {

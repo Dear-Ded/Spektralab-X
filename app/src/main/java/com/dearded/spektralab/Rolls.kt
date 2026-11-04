@@ -193,6 +193,7 @@ fun RollList(rolls: List<Roll>, onOpen: (Roll) -> Unit, onBack: () -> Unit) {
         containerColor = Palette.Background,
         topBar = {
             TopAppBar(
+                expandedHeight = 56.dp,
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格") }

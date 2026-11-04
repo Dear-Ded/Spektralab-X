@@ -86,6 +86,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
         containerColor = Palette.Background,
         topBar = {
             TopAppBar(
+                expandedHeight = 56.dp,
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
                 navigationIcon = {
                     IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }

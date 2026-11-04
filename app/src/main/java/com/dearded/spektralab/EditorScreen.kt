@@ -175,6 +175,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
             TopAppBar(
+                expandedHeight = 56.dp,
                 modifier = Modifier.chrome(showChrome),
                 windowInsets = WindowInsets.systemBarsIgnoringVisibility.only(
                     androidx.compose.foundation.layout.WindowInsetsSides.Horizontal +
