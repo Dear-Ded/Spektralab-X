@@ -319,9 +319,15 @@ data class Edit(
         fun withBorder(edit: Edit, preset: BorderPreset, w: Int, h: Int): Edit {
             val edge = preset.edge
             var next = edit.copy(frame = preset.frame.copy(perf = if (preset.edge != null) null else edit.frame.perf), borderId = preset.id)
+            // A date back is only switched on when the photo has a date to print.
+            preset.date?.let { d ->
+                next = next.copy(dateImprint = next.dateText.isNotBlank(), dateStyle = d.style, dateCorner = d.corner,
+                    dateEv = d.ev.coerceIn(-2.0, 8.0), dateWithData = d.withData, datePlacement = "frame")
+            }
             return if (edge != null) {
                 next = next.copy(edgeMode = edge.mode, edgeHoles = edge.holes, edgeGate = edge.gate,
-                    edgeCarrier = edge.carrier, edgeFog = edge.fog, edgeLeaks = edge.leaks)
+                    edgeCarrier = edge.carrier, edgeFog = edge.fog, edgeLeaks = edge.leaks, edgeRealName = edge.realName,
+                    edgeFrameNumber = edge.frameNumber?.coerceIn(0, 99) ?: next.edgeFrameNumber)
                 val e = withFilmEdge(next.copy(cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0), w, h, true, edge.format)
                 if (!dateBackFits(edge.format)) e.copy(dateImprint = false) else e
             } else {

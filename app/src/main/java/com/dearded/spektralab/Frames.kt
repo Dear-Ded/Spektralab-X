@@ -275,11 +275,27 @@ data class FrameSpec(
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
             val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = spec.inkSoft; textSize = l.short * 0.017f }
-            val gap = l.short * 0.008f
+            var gap = l.short * 0.008f
             val leftX = l.x - l.perfLeft + margin - spec.side * l.short
+            val right = l.x + w + l.perfRight - margin + spec.side * l.short
+            // Measured first (UI.md E.3.6): a wide or narrow print shrinks the text to fit,
+            // never under MIN_TEXT_PX; past that the two columns stack, centred.
+            fun col(a: String, b: String) = max(big.measureText(a), small.measureText(b))
+            val need = col(c.camera, c.film) + col(c.settings, c.date) + l.short * 0.04f
+            val k = minOf(1f, (right - leftX) / need)
+            big.textSize *= k; small.textSize *= k; gap *= k
+            if (small.textSize < MIN_TEXT_PX) {
+                big.textSize = max(MIN_TEXT_PX, big.textSize); small.textSize = MIN_TEXT_PX
+                big.textAlign = Paint.Align.CENTER
+                val cx = (leftX + right) / 2
+                val fit = (right - leftX) / max(1f, max(big.measureText(c.camera), big.measureText(c.settings)))
+                if (fit < 1f) big.textSize = max(MIN_TEXT_PX, big.textSize * fit)
+                canvas.drawText(c.camera, cx, mid - gap, big)
+                canvas.drawText(c.settings, cx, mid + gap + big.textSize * 0.75f, big)
+                return
+            }
             canvas.drawText(c.camera, leftX, mid - gap, big)
             canvas.drawText(c.film, leftX, mid + gap + small.textSize, small)
-            val right = l.x + w + l.perfRight - margin + spec.side * l.short
             big.textAlign = Paint.Align.RIGHT
             small.textAlign = Paint.Align.RIGHT
             canvas.drawText(c.settings, right, mid - gap, big)
@@ -313,7 +329,7 @@ data class Caption(
                 exif.focal35()?.let { "${it}mm" },
                 exif.aperture()?.let { "f/$it" },
                 exif.shutter(),
-                exif.iso()?.let { "ISO$it" },
+                exif.iso()?.takeIf { it > 0 }?.let { "ISO$it" },
             ).joinToString("  ")
             val date = exif.dateTimeOriginal?.take(10)?.replace(':', '.') ?: ""
             return Caption(camera, filmLabel, settings, date, exif.make, exif.model, model)
@@ -386,8 +402,8 @@ object BrandCaption {
         // Two stacked lines fill a band at 16 %; the one-line bar can stand taller.
         val cap = b.height * if (spec.captionLayout == "line") 0.26f else 0.16f
         val camera = Brands.cameraMark(spec, c)
-        val film = Brands.filmMark(c)
-        val marks = listOfNotNull(camera, film?.takeIf { spec.filmLogo })
+        val film = Brands.filmMark(c)?.takeIf { spec.filmLogo }
+        val marks = listOfNotNull(camera, film)
         when (spec.captionLayout) {
             "split" -> if (!split(canvas, b, cap, marks, c)) center(canvas, b, cap, marks, c)
             "line" -> line(canvas, b, cap, marks, c)
@@ -498,6 +514,18 @@ data class BorderPreset(
     val edge: EdgeSpec?,
     val frame: FrameSpec,
     val crop: Double = 0.0,
+    /** A date back the preset turns on (null leaves the date switch as it was). */
+    val date: DateBack? = null,
+)
+
+/** The date back a preset sets: the face, the corner and how bright the LEDs burn in. */
+data class DateBack(
+    /** lcd, dots or data; data needs the film edge (it prints between frames). */
+    val style: String = "lcd",
+    val corner: String = "br",
+    val ev: Double = 3.5,
+    /** The shooting data as well as the date (between frames, film edge only). */
+    val withData: Boolean = false,
 )
 
 /** The engine's overscan knobs a preset sets (wire names in Model.kt). */
@@ -509,6 +537,10 @@ data class EdgeSpec(
     val carrier: String = "none",
     val fog: Double = 1.0,
     val leaks: Double = 0.0,
+    /** The film's real name on the edge print (overscan_edge_text). */
+    val realName: Boolean = true,
+    /** 1..99 prints this frame number; null leaves the edit's own (0 = the seed's draw). */
+    val frameNumber: Int? = null,
 )
 
 object Borders {
@@ -524,7 +556,8 @@ object Borders {
         BorderPreset("leak", "漏光胶卷", "片轴漏光与浓重边缘雾", EdgeSpec(fog = 2.5, leaks = 2.0), FrameSpec()),
         BorderPreset("xpan", "XPan 宽幅", "65×24 宽画幅", EdgeSpec(format = "135_xpan", carrier = "black"), FrameSpec()),
         BorderPreset("instant_sq", "宝丽来方卡", "1:1，底边宽", null,
-            FrameSpec("instant_sq", 0.076f, 0.30f, 0.057f, paper = FrameSpec.PAPER_INSTANT), crop = 1.0),
+            // Polaroid 600 card: 5.8 mm sides on a 76.8 mm picture (support.polaroid.com); the sides were 0.057.
+            FrameSpec("instant_sq", 0.076f, 0.296f, 0.076f, paper = FrameSpec.PAPER_INSTANT), crop = 1.0),
         BorderPreset("instant_mini", "拍立得 Mini", "3:4 竖幅小卡", null,
             FrameSpec("instant_mini", 0.13f, 0.39f, 0.087f, paper = FrameSpec.PAPER_INSTANT), crop = 0.75),
         BorderPreset("exif_bar", "参数水印条", "底部白条：机型、镜头参数、日期", null,
@@ -532,7 +565,8 @@ object Borders {
         BorderPreset("exif_bar_dark", "参数水印条 · 黑", "同上，黑底", null,
             FrameSpec("exif_bar_dark", 0f, 0.12f, 0f, paper = FrameSpec.PAPER_BLACK, caption = true)),
         BorderPreset("mount", "幻灯片框", "35mm 幻灯片片框", EdgeSpec(mode = "filed"),
-            FrameSpec("mount", 0.15f, 0.15f, 0.15f, paper = FrameSpec.PAPER_MOUNT)),
+            // A 50 x 50 mm mount round a 34 x 23 mm window: 8 mm a side over the 23 mm height, padded square.
+            FrameSpec("mount", 0.348f, 0.348f, 0.348f, canvasAspect = 1f, paper = FrameSpec.PAPER_MOUNT)),
         BorderPreset("gallery", "画廊白边", "均匀白边", null, FrameSpec("gallery", 0.05f, 0.05f, 0.05f)),
         BorderPreset("feed45", "4:5 留白", "补成 4:5，适合发图", null, FrameSpec("feed45", 0.03f, 0.03f, 0.03f, canvasAspect = 0.8f)),
         // Data bars with a logo slot (UI.md appendix E.2). The brand is picked from
@@ -571,6 +605,43 @@ object Borders {
         BorderPreset("blur_card", "模糊背景卡", "照片本身虚化成底，补成 4:5，圆角", null,
             FrameSpec("blur_card", 0.08f, 0.08f, 0.08f, canvasAspect = 0.8f, paper = FrameSpec.PAPER_SMOKE,
                 radius = 0.025f, blur = true)),
+        // Engine film edges (UI.md E.2). The crop follows the gate's shape; see Edit.withBorder.
+        BorderPreset("edge135_name", "135 带片名", "整条 135，片边印胶片真实名称与编号", EdgeSpec(holes = "black", fog = 0.6), FrameSpec()),
+        BorderPreset("edge135_black", "135 黑框扫描", "黑色片夹压住片边，扫描仪的样子", EdgeSpec(carrier = "black", fog = 0.8), FrameSpec()),
+        BorderPreset("edge135_num", "135 带编号", "片边帧号固定为 12", EdgeSpec(frameNumber = 12), FrameSpec()),
+        BorderPreset("edge_6x7", "6×7", "120 中画幅，圆角片门", EdgeSpec(format = "120_6x7", gate = "rounded", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x8", "6×8 肩形片门", "120，片门带肩", EdgeSpec(format = "120_6x8", gate = "shouldered", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x9", "6×9", "120 长画幅", EdgeSpec(format = "120_6x9", holes = "black"), FrameSpec()),
+        BorderPreset("edge_6x17", "6×17 宽幅", "120 全景，黑色片夹", EdgeSpec(format = "120_6x17", carrier = "black", holes = "black"), FrameSpec()),
+        BorderPreset("edge_half", "半格", "135 半格，竖拍一帧", EdgeSpec(format = "135_half"), FrameSpec()),
+        BorderPreset("enlarger", "暗房放大相纸", "锉开的片夹放在放大机下，白色相纸留边", EdgeSpec(mode = "filed", holes = "black", carrier = "black", fog = 0.4),
+            FrameSpec("enlarger", 0.07f, 0.10f, 0.07f, paper = FrameSpec.PAPER_WHITE)),
+        // Date backs (UI.md E.2): the engine burns the date into the film, upstream's faces.
+        BorderPreset("date_lcd", "橙色 LCD", "相机日期后背：右下角橙色日期", null, FrameSpec(), date = DateBack("lcd")),
+        BorderPreset("date_data", "数据后背", "片间印快门、光圈、焦距，画面内印日期", EdgeSpec(),
+            FrameSpec(), date = DateBack("lcd", withData = true)),
+        // Instant cards (UI.md E.2), margins over the picture's short edge from the makers'
+        // card and picture sizes (Polaroid support; Fujifilm via analog.cafe). Neither
+        // publishes how the top and bottom split, so the top matches the sides.
+        BorderPreset("instant_600", "600 / i-Type", "宝丽来 600 与 i-Type 相纸，88×107 mm", null,
+            FrameSpec("instant_600", 0.076f, 0.296f, 0.076f, paper = FrameSpec.PAPER_INSTANT), crop = 76.80 / 78.94),
+        BorderPreset("instax_square", "Instax Square", "72×86 mm 方形相纸", null,
+            FrameSpec("instax_square", 0.089f, 0.298f, 0.081f, paper = FrameSpec.PAPER_INSTANT), crop = 1.0),
+        BorderPreset("instax_wide", "Instax Wide", "108×86 mm 宽幅相纸", null,
+            FrameSpec("instax_wide", 0.105f, 0.282f, 0.073f, paper = FrameSpec.PAPER_INSTANT), crop = 99.0 / 62.0),
+        BorderPreset("polaroid_go", "Go 小卡", "宝丽来 Go，54×67 mm", null,
+            FrameSpec("polaroid_go", 0.086f, 0.340f, 0.086f, paper = FrameSpec.PAPER_INSTANT), crop = 46.0 / 47.0),
+        BorderPreset("instax_mini_black", "Mini 黑边", "Instax Mini 黑色边框", null,
+            FrameSpec("instax_mini_black", 0.13f, 0.39f, 0.087f, paper = FrameSpec.PAPER_BLACK), crop = 0.75),
+        // Text-only data bars (UI.md E.2): the logo layouts with the logo slot empty.
+        BorderPreset("bar_split", "双栏白条", "左侧机型与胶片，右侧参数与日期，纯文字", null,
+            FrameSpec("bar_split", 0f, 0.12f, 0f, caption = true, captionLayout = "split")),
+        BorderPreset("bar_frame", "相框参数", "四周白边，底部居中一行参数", null,
+            FrameSpec("bar_frame", 0.04f, 0.15f, 0.04f, caption = true, captionLayout = "center")),
+        BorderPreset("bar_line", "单行极简", "细白条，一行机型与参数", null,
+            FrameSpec("bar_line", 0f, 0.07f, 0f, caption = true, captionLayout = "line")),
+        BorderPreset("bar_film", "胶片信息条", "左侧胶片与日期，右侧机型与参数", null,
+            FrameSpec("bar_film", 0f, 0.12f, 0f, paper = FrameSpec.PAPER_CREAM, caption = true, captionLayout = "film")),
     )
 
     fun byId(id: String) = PRESETS.firstOrNull { it.id == id }
