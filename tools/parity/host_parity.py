@@ -19,11 +19,21 @@ OutputTransform / Layer 2 code. Both get the same input bytes:
            profile, the app hands the codes to the engine as openBitmap does
 
     python3 host_parity.py render --host H --resources R --android A \
-        --up <upstream tree> --raw <dir of CC0 RAWs> --out DIR [--only NAME ...]
-    python3 host_parity.py grade DIR [--table out.md] [--where CASE/PAIR]
+        --up <upstream tree> --raw <dir of CC0 RAWs> --out DIR [--only NAME ...] [--prune]
+    python3 host_parity.py grade DIR [--table out.md] [--where CASE/PAIR] [--check]
 
-Grain and glare are off in every case: a pixel comparison of two renders that
-differ only in their noise measures the noise (upstream AGENTS trap 1).
+Grain and glare are off in every pixel case: a pixel comparison of two renders
+that differ only in their noise measures the noise (upstream AGENTS trap 1).
+Halation is deterministic and on (the engine default) everywhere. The `stoch_*`
+cases turn grain and glare on and are graded as statistics, never pixel by
+pixel (upstream engine/tests/parity_metal_vulkan.py, its `grain_*` cases): per
+32 px tile mean and standard deviation, the global mean, and the radially
+averaged power spectrum of the fine detail. `stoch_ctrl_*` is a negative
+control (the app side renders a different grain amount) and must FAIL the bars.
+
+`--prune` grades each case as soon as it is rendered, keeps the numbers in the
+case's grade.json and deletes its pixel dumps (a full run otherwise writes
+about 4 GB). `--check` applies the pass bars below and exits 1 on a failure.
 """
 import argparse
 import json
@@ -52,6 +62,8 @@ PHOTO = {"auto_exposure": True, "auto_exposure_method": "balanced"}
 SYNTH = {"auto_exposure": False, "film_format_mm": 36.0}
 OPEN = {"output_color_space": "ProPhoto RGB", "output_cctf_encoding": True,
         "extended_dynamic_range": False, "product_defaults": True, "preview_long_edge": 1024}
+# The stochastic cases: everything random on, as a user renders a photo.
+STOCH = {"grain_active": True, "glare_active": True, "halation_active": True}
 
 RAWS = {
     "lake": "Leica_-_Q_(Typ_116)_-_14bit_(3:2).DNG",
@@ -342,7 +354,18 @@ def cases(inputs):
     c.append(("layer2_synth_portra", "synth", {**SYNTH, **LOOKS["portra"]}, True))
     c.append(("layer2_dunes_portra", "dunes", {**PHOTO, **LOOKS["portra"]}, True))
     c.append(("layer2_fruit_velvia", "fruit", {**PHOTO, **LOOKS["velvia"]}, True))
+    # Grain, glare and halation on: graded as statistics (STATS_BARS).
+    c.append(("stoch_synth_portra", "synth", {**SYNTH, **LOOKS["portra"], **STOCH}, False))
+    c.append(("stoch_dunes_portra", "dunes", {**PHOTO, **LOOKS["portra"], **STOCH}, False))
+    c.append(("stoch_fruit_cine2383", "fruit", {**PHOTO, **LOOKS["cine2383"], **STOCH}, False))
+    c.append(("stoch_lake_trix", "lake", {**PHOTO, **LOOKS["trix"], **STOCH}, False))
+    c.append(("stoch_jpg_fruit_srgb_portra", "jpg_fruit_srgb", {**PHOTO, **LOOKS["portra"], **STOCH}, False))
+    c.append(("stoch_ctrl_synth_portra", "synth", {**SYNTH, **LOOKS["portra"], **STOCH}, False))
     return c
+
+
+# The negative control's app side only: a grain amount the bars must catch.
+CONTROL = {"grain_amount": 1.3}
 
 
 def host_input(kind, path):
@@ -395,13 +418,18 @@ def cmd_render(a):
                 render_host(host, d, kind, path, params, layer2)
                 th = time.time() - t
                 look = ",".join(f"{v:g}" for v in LOOK_VALUES) if layer2 else ""
+                ours = {**OFF, **params, **(CONTROL if name.startswith("stoch_ctrl_") else {})}
                 cmd = [str(a.android), str(a.resources), kind, android_input(kind, path), str(d),
-                       json.dumps({**OFF, **params})] + ([look] if look else [])
+                       json.dumps(ours)] + ([look] if look else [])
                 p = subprocess.run(cmd, env=a.env, capture_output=True, text=True)
                 if p.returncode:
                     raise RuntimeError("spk_android: " + p.stderr[-400:])
                 log[name] = {"host_s": round(th, 1), "android_s": round(time.time() - t - th, 1)}
                 print(f"{name:<34} host {th:6.1f} s  android {log[name]['android_s']:6.1f} s", flush=True)
+                if a.prune:
+                    (d / "grade.json").write_text(json.dumps(grade_case(d), indent=1))
+                    for f in d.glob("*.rgb"):
+                        f.unlink()
             except Exception as ex:  # noqa: BLE001
                 log[name] = {"error": str(ex)}
                 print(f"{name:<34} ERROR {ex}", flush=True)
@@ -435,23 +463,141 @@ def grade_pair(d, a, b, space):
             "argmax": [int(v) for v in np.unravel_index(int(e.argmax()), e.shape)], "e": e}
 
 
+# --- statistics, for the stochastic cases ------------------------------------
+#
+# Two renders that differ only in their noise realisation are compared as
+# distributions, as upstream's parity_metal_vulkan.py grades its grain_* cases
+# (32 px tiles: mean and standard deviation per tile, plus the global mean, in
+# 8-bit code values), with one addition: the radially averaged power spectrum
+# of the fine detail, so a grain of the right strength but the wrong size
+# (a blur radius, a pixel pitch) fails too.
+
+STATS_PAIRS = [("export_srgb", "host_export_srgb", "export sRGB"),
+               ("export_p3", "host_export_p3", "export P3"),
+               ("view_srgb", "host_view_srgb", "view sRGB")]
+# Upstream's bars for tile mean, tile std and global mean (parity_metal_vulkan.py);
+# the spectrum bar is ours: every band's power within 15 % of the reference's.
+STATS_BARS = {"tile_mean_med": 1.0, "tile_std_rel_med": 0.15, "global_mean_diff": 0.5, "spec_max_rel": 0.15}
+
+
+def _box(x, k):
+    """k x k box mean of a 2-D array, same size (edges use the available pixels)."""
+    p = k // 2
+    c = np.pad(x, ((p + 1, p), (p + 1, p)), mode="edge").cumsum(0).cumsum(1)
+    s = c[k:, k:] - c[:-k, k:] - c[k:, :-k] + c[:-k, :-k]
+    return s / (k * k)
+
+
+def radial_spectrum(img, bands=12):
+    """Power of the fine detail (luma minus a 9 px box mean) in log-spaced radial bands."""
+    y = img[..., 0] * 0.2126 + img[..., 1] * 0.7152 + img[..., 2] * 0.0722
+    d = y - _box(y, 9)
+    p = np.abs(np.fft.rfft2(d)) ** 2
+    fy = np.fft.fftfreq(d.shape[0])[:, None]
+    fx = np.fft.rfftfreq(d.shape[1])[None, :]
+    r = np.hypot(fy, fx)
+    edges = np.geomspace(1 / 128, 0.5 * np.sqrt(2), bands + 1)
+    return np.array([p[(r >= lo) & (r < hi)].mean() for lo, hi in zip(edges[:-1], edges[1:])])
+
+
+def grade_stats(x, y):
+    """x ours, y the reference, encoded 0..1. Codes are 8-bit (as upstream's)."""
+    a, b = x * 255, y * 255
+    t = 32
+    hh, ww = (a.shape[0] // t) * t, (a.shape[1] // t) * t
+    ta = a[:hh, :ww].reshape(hh // t, t, ww // t, t, 3)
+    tb = b[:hh, :ww].reshape(hh // t, t, ww // t, t, 3)
+    dm = np.abs(ta.mean((1, 3)) - tb.mean((1, 3)))
+    sa, sb = ta.std((1, 3)), tb.std((1, 3))
+    sd = np.abs(sa - sb) / np.maximum(0.5, 0.5 * (sa + sb))
+    pa, pb = radial_spectrum(a), radial_spectrum(b)
+    rel = np.abs(pa / np.maximum(pb, 1e-12) - 1)
+    return {"tile_mean_med": float(np.median(dm)), "tile_mean_p95": float(np.quantile(dm, 0.95)),
+            "tile_std_rel_med": float(np.median(sd)), "tile_std_rel_p95": float(np.quantile(sd, 0.95)),
+            "global_mean_diff": float(np.abs(a.mean((0, 1)) - b.mean((0, 1))).max()),
+            "spec_max_rel": float(rel.max()), "spec_rel": [round(float(v), 4) for v in rel],
+            "std_ours": float(sa.mean()), "std_ref": float(sb.mean())}
+
+
+def stats_pass(g):
+    return all(g[k] <= v for k, v in STATS_BARS.items())
+
+
+# Pixel bars (docs/PARITY.md §2): export against the host's export_frame, and
+# the screen against its render_view (8-bit, so its max is one code's worth).
+PIXEL_BARS = {"export": {"mean": 0.1, "p999": 0.5}, "view": {"mean": 0.1, "p999": 1.5}}
+JPEG_BAR_MEAN = 0.05
+
+
+def pixel_pass(case, label, g):
+    if label.startswith("host ") or label.startswith("app "):
+        return True   # upstream's own screen against its own file: informative only
+    kind = "export" if label.startswith("export") else "view"
+    bar = dict(PIXEL_BARS[kind])
+    if case.startswith("jpg_") and kind == "export":
+        bar["mean"] = JPEG_BAR_MEAN
+    return g["mean"] <= bar["mean"] and g["p999"] <= bar["p999"]
+
+
+def grade_case(d, where_pair=None):
+    """Every row for one case directory: pixel rows, plus statistics rows for stoch_*."""
+    rows = []
+    stoch = d.name.startswith("stoch_")
+    for ours, ref, space, label in PAIRS:
+        if not (d / f"{ours}.rgb").exists() or not (d / f"{ref}.rgb").exists():
+            continue
+        g = grade_pair(d, ours, ref, space)
+        if "error" in g:
+            rows.append({"case": d.name, "pair": label, "error": g["error"], "pass": False})
+            continue
+        if where_pair == ours:
+            where(d, ours, ref, space, g)
+        g.pop("e")
+        # A stochastic case's pixels differ by its noise: informative, never a bar.
+        rows.append({"case": d.name, "pair": label, **g, "pass": True if stoch else pixel_pass(d.name, label, g)})
+    if stoch:
+        for ours, ref, label in STATS_PAIRS:
+            x, _ = read_rgb(d / f"{ours}.rgb")
+            y, _ = read_rgb(d / f"{ref}.rgb")
+            g = grade_stats(x, y)
+            ok = stats_pass(g)
+            # The negative control must fail: a grain 1.3x as strong is not upstream's.
+            rows.append({"case": d.name, "pair": "stats " + label, **g,
+                         "pass": (not ok) if d.name.startswith("stoch_ctrl_") else ok})
+    return rows
+
+
+def print_row(r):
+    tag = "" if r.get("pass", True) else "  FAIL"
+    if "error" in r:
+        print(f"{r['case']:<34} {r['pair']:<26} {r['error']}{tag}")
+    elif r["pair"].startswith("stats "):
+        print(f"{r['case']:<34} {r['pair']:<26} tile mean |d| med {r['tile_mean_med']:.3f} p95 {r['tile_mean_p95']:.3f}  "
+              f"tile std rel med {r['tile_std_rel_med']:.3f}  global {r['global_mean_diff']:.3f}  "
+              f"spectrum max rel {r['spec_max_rel']:.3f}  std {r['std_ours']:.3f}/{r['std_ref']:.3f}{tag}", flush=True)
+    else:
+        print(f"{r['case']:<34} {r['pair']:<26} mean {r['mean']:.3f}  p95 {r['p95']:.3f}  p99.9 {r['p999']:.3f}  "
+              f"max {r['max']:.3f}  |d| max {r['code_max']:.2f} mean {r['code_mean']:.4f} code{tag}", flush=True)
+
+
 def cmd_grade(a):
     rows = []
-    for d in sorted(p for p in a.dir.iterdir() if p.is_dir() and (p / "host_export_srgb.rgb").exists()):
-        if not (d / "export_srgb.rgb").exists():
+    for d in sorted(p for p in a.dir.iterdir() if p.is_dir() and p.name != "inputs"):
+        if (d / "host_export_srgb.rgb").exists() and (d / "export_srgb.rgb").exists():
+            wp = a.where.split("/", 1)[1] if a.where and a.where.split("/", 1)[0] == d.name else None
+            case_rows = grade_case(d, wp)
+        elif (d / "grade.json").exists():   # graded and pruned during render
+            case_rows = json.loads((d / "grade.json").read_text())
+        else:
             continue
-        for ours, ref, space, label in PAIRS:
-            g = grade_pair(d, ours, ref, space)
-            if "error" in g:
-                print(f"{d.name:<34} {label:<26} {g['error']}")
-                continue
-            if a.where and a.where == f"{d.name}/{ours}":
-                where(d, ours, ref, space, g)
-            g.pop("e")
-            rows.append({"case": d.name, "pair": label, **g})
-            print(f"{d.name:<34} {label:<26} mean {g['mean']:.3f}  p95 {g['p95']:.3f}  p99.9 {g['p999']:.3f}  "
-                  f"max {g['max']:.3f}  |d| max {g['code_max']:.2f} mean {g['code_mean']:.4f} code", flush=True)
+        for r in case_rows:
+            print_row(r)
+        rows += case_rows
     (a.dir / "grade.json").write_text(json.dumps(rows, indent=1))
+    failed = [r for r in rows if not r.get("pass", True)]
+    cases = len({r["case"] for r in rows})
+    print(f"GRADED {cases} cases, {len(rows)} rows, {len(failed)} failing")
+    rows = [r for r in rows if "mean" in r]
     if a.table:
         by = {}
         for r in rows:
@@ -463,7 +609,7 @@ def cmd_grade(a):
                      for g in (by[case][c] for c in cols)]
             lines.append(f"| {case} | " + " | ".join(cells) + " |")
         Path(a.table).write_text("\n".join(lines) + "\n")
-    return 0
+    return 1 if a.check and failed else 0
 
 
 def where(d, ours, ref, space, g):
@@ -496,10 +642,12 @@ def main():
     r.add_argument("--edge", type=int, default=1536)
     r.add_argument("--threads", type=int, default=3)
     r.add_argument("--only", nargs="*")
+    r.add_argument("--prune", action="store_true", help="grade each case at once and delete its pixel dumps")
     g = sub.add_parser("grade")
     g.add_argument("dir", type=Path)
     g.add_argument("--where")
     g.add_argument("--table", help="also write a markdown table (mean / p95 / p99.9 / max) here")
+    g.add_argument("--check", action="store_true", help="exit 1 when any row fails its bar")
     a = ap.parse_args()
     return cmd_render(a) if a.cmd == "render" else cmd_grade(a)
 
