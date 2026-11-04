@@ -72,6 +72,14 @@ set(SPEKTRALAB_VULKAN_HEADERS "${spk_deps}/Vulkan-Headers/include" CACHE PATH ""
 
 add_subdirectory("${SPK_UPSTREAM}/engine" engine)
 
+# Ceilings for the hardening patches (patches/libraw/001x), the values
+# thetechgeekko/Spektrafilm-android ships on Android: an embedded ICC profile,
+# everything identify() allocates for metadata, and DNG tile streams.
+target_compile_definitions(spk_libraw PUBLIC
+    LIBRAW_MAX_PROFILE_SIZE_MB=16
+    LIBRAW_MAX_METADATA_ALLOC_SIZE_MB=16
+    LIBRAW_MAX_TILE_STREAM_COUNT=131072)
+
 # white_balance.cpp is upstream's desktop-host Temperature/Tint (Robertson
 # isotherms, LibRaw's camera matrix), compiled here unmodified.
 # Upstream's output transform arithmetic (engine/host/output.cpp: the transfer
