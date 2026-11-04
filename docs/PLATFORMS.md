@@ -21,7 +21,7 @@ The film engine is upstream's own code. Against upstream's Linux host the Androi
 | RAW 解码 | Core Image `CIRAWFilter`，`boostAmount = 0`（关闭苹果的色调渲染），镜头校正按用户设置（`modern_UI/.../Import/ImageDecoder.swift:217–227`） | LibRaw 0.22.2，`decode_raw_compatible`，输出线性 ProPhoto；可选 Lensfun 镜头校正（`engine/host/image_io.cpp` `decode_linear_prophoto`） | 同一个 LibRaw 函数（`spektralab_jni.cpp` `openRaw`）。补丁 0004：DNG 双光源矩阵插值（宿主同样打了这个补丁）。补丁 0003：传感器超过工作尺寸 4 倍时用半尺寸解码（2×2 合并，不做去马赛克）。LibRaw 不用 OpenMP。没有镜头校正 |
 | 普通图片解码 | ImageIO / Core Image，按嵌入的 ICC 转换 | `image_io.cpp`：取下 ICC 曲线，用配置文件的 D50 色度点经 XYZ 转线性 ProPhoto；无配置文件按 sRGB（`image_io.hpp` 文件头说明这是照 ColorSync / Core Image 的做法） | `ImageDecoder` 解成 sRGB 或 Display P3 的 ARGB_8888，再由 `input_transform.cpp` 转线性 ProPhoto。这段代码在编译时从上游 `image_io.hpp/.cpp` 截取，和宿主的算法相同。其他配置文件由安卓系统先转成 sRGB 或 P3〔推断：与宿主直接读 ICC 会有小差别，未测〕 |
 | GPU 后端 | Metal，编译选项 `-fmetal-math-mode=safe`（AGENTS.md「Do not」一节） | Vulkan（桌面 GPU；没有 GPU 时用 lavapipe） | Vulkan 1.0，Adreno（小米 15S Pro 是 Mali）。补丁 0001 / 0002 把大计算拆成小批，输出不变 |
-| 精度 | fp32；`spk_math_probe` 发现快速数学就拒绝启动 | fp32；启动时探测 fma（`vulkan_gpu.cpp:313–410`），不精确就改用 Dekker 拆分乘积，拆分乘积也不精确才拒绝启动 | 同 Windows / Linux 的代码。lavapipe 的 fma 是精确的，Adreno 上会走哪条路尚未验证（见第 4 节） |
+| 精度 | fp32；`spk_math_probe` 发现快速数学就拒绝启动 | fp32；启动时探测 fma（`vulkan_gpu.cpp:313–410`），不精确就改用 Dekker 拆分乘积，拆分乘积也不精确才拒绝启动 | 同 Windows / Linux 的代码。实测 lavapipe（LLVM 19.1.7）的 fma 并不精确（探测残差得 0，应为 7.45e-11），引擎改走 Dekker 拆分乘积并正常启动，所以本仓库全部对照数字本来就走这条路。Adreno / Mali 据报告同样不精确，会走同一条路〔推断，未上真机〕。详见 [PARITY.md](PARITY.md) 第 4.4 节 |
 | 工作空间 | 编码 ProPhoto（ROMM，γ1.8） | 同左 | 同左（`Edit.openingParams`：`output_color_space` 为 `ProPhoto RGB`） |
 | 屏幕输出 | 画布纹理标记为 ROMM，由 ColorSync 转到显示器（`Canvas/MetalCanvasView.swift:765`），应用自己不做转换 | `render_view`：矩阵加裁切到 sRGB 或 Display P3，不做色域压缩（`desktop/HOST-PROTOCOL.md` 第 73–76 行） | `output_transform.cpp`：矩阵加裁切到 sRGB 或 Display P3，数学代码在编译时从上游 `engine/host/output.cpp` 截取 |
 | 导出 | CAM16-UCS 色度压缩进文件色域，关闭亮度肩部（`Canvas/ColourManagement.swift:164`） | `export_frame`：同左 | 同左，用的是同一段上游代码 |
@@ -117,7 +117,7 @@ macOS 版用苹果的 `CIRAWFilter`，其相机色彩矩阵、去马赛克和高
 | 项目 | 现状 | 要做什么 |
 |---|---|---|
 | Adreno 真机渲染 | 全部数字都来自 lavapipe | 在小米 12–14 上用调试版本把渲染结果和中间数据导出来，用同样的输入，按 `host_parity.py grade` 评分。最少需要一台 Adreno 7xx 手机 |
-| Adreno 上的 fma 探测 | 读源码的结论：fma 不精确时会改用 Dekker 拆分乘积，不会拒绝启动；只影响 `spk_iir_df_acc`（光晕模糊）和 `spk_geometry_resample_df`（旋转、重采样）两个着色器 | `tools/parity/fma_check.sh` 在 lavapipe 上强制走拆分乘积路径并比较画面，等云主机空闲后运行；之后还需真机读取 `math_mode`（设备信息页显示） |
+| Adreno 上的 fma 探测 | lavapipe 上已测（`tools/parity/fma_check.sh`，[PARITY.md](PARITY.md) 第 4.4 节）：上游 7 种启动情况全部符合预期；fma 不精确时改走 Dekker 拆分乘积，不拒绝启动，画面与拆分路径逐位相同；这正是全部对照数字所走的路径 | 真机上读取设备信息页的 `math_mode`，确认显示 “exact Dekker split product”（或 “fused fma”）；再按第一行做一次 Adreno 像素对照 |
 | 和 macOS 版直接比较 | 没有 Mac | 一台装有 SpektraLab 的 Mac，导出同一批输入（先用线性 TIFF 排除解码器差别，再用 RAW），按同样方法评分 |
 | Windows 版 | 没测 | 上游自带交叉编译脚本（`engine/build-windows-cross.sh`），可以在真实的 Windows GPU 上跑同样的对照 |
 | 真实手机照片、HEIC | JPEG 用例是宿主根据 RAW 场景写出来的，不是手机拍的 | 用小米相机拍的 JPEG、HEIC、Ultra HDR 照片作为输入；HEIC 需要宿主的 libheif 路径 |
