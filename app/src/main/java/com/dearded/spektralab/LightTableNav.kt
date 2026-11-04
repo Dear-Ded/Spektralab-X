@@ -82,6 +82,7 @@ fun AppScreens(editor: EditorViewModel) {
                     table = table,
                     onBack = { fromTable = false; screen = Screen.EDITOR },
                     onOpen = table::openLoupe,
+                    selectionActions = { chosen -> BatchActions(table, editor, chosen) },
                 )
             }
         }
