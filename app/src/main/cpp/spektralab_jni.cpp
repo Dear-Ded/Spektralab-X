@@ -30,6 +30,7 @@
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
 #include "layer2.hpp"
+#include "lut3d.hpp"
 #include "output_transform.hpp"
 #include "input_transform.hpp"
 #include "pipeline/view.hpp"
@@ -67,6 +68,16 @@ struct Session {
     // a display or export render is packed; film cards show the film alone.
     std::unique_ptr<spk::android::Layer2> look;
     const spk::android::Layer2* active_look() const { return look && !look->identity() ? look.get() : nullptr; }
+    // The user LUT (lut3d.hpp) and its strength, kept here so setLook, which
+    // rebuilds `look` on every slider move, re-attaches it without a resend.
+    std::shared_ptr<const spk::android::ColourTable> lut;
+    float lut_strength = 1;
+    std::vector<float> look_values;   // the last setLook array, so setLut can rebuild `look`
+    void rebuild_look() {
+        auto l = std::make_unique<spk::android::Layer2>(look_values);
+        if (lut) l->set_lut(lut, lut_strength);
+        if (l->identity()) look.reset(); else look = std::move(l);
+    }
     // The last display render, kept so an adjustment re-packs it (repack)
     // instead of re-running the engine. One tier only: at the preview tier it
     // is ~70 MB, and the next render or release frees it.
@@ -1164,14 +1175,41 @@ JNI_FN(void, setLook)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j) 
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return;
     try {
-        if (!values_j) { s->look.reset(); return; }
-        std::vector<float> v(size_t(env->GetArrayLength(values_j)));
+        std::vector<float> v(values_j ? size_t(env->GetArrayLength(values_j)) : 0);
         if (!v.empty()) env->GetFloatArrayRegion(values_j, 0, jsize(v.size()), v.data());
-        auto look = std::make_unique<spk::android::Layer2>(v);
-        if (look->identity()) s->look.reset(); else s->look = std::move(look);
+        s->look_values = std::move(v);
+        s->rebuild_look();
     } catch (...) {
         s->look.reset();
     }
+}
+
+// The user LUT for this session (lut3d.hpp): side^3 RGB floats over encoded
+// ProPhoto, red fastest, already baked by CubeLut.kt; mixed in at `strength`
+// before every Layer 2 slider. Null, a bad size or strength 0 clears it.
+// Cheap like setLook: the next pack uses it. False when the table was refused.
+JNI_FN(jboolean, setLut)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j, jint side, jfloat strength) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) return JNI_FALSE;
+    bool ok = true;
+    try {
+        if (!values_j || !(strength > 0)) {
+            s->lut.reset();
+        } else {
+            std::vector<float> v(size_t(env->GetArrayLength(values_j)));
+            if (!v.empty()) env->GetFloatArrayRegion(values_j, 0, jsize(v.size()), v.data());
+            s->lut = spk::android::Lut3d::make(std::move(v), side);
+            ok = s->lut != nullptr;
+        }
+        s->lut_strength = std::isfinite(strength) ? std::min(1.0f, std::max(0.0f, float(strength))) : 0.0f;
+        s->rebuild_look();
+    } catch (...) {
+        s->lut.reset();
+        s->look.reset();
+        ok = false;
+    }
+    if (!ok) fail("setLut: the table was refused (side or length)");
+    return ok ? JNI_TRUE : JNI_FALSE;
 }
 
 // The last display render again, through the current look: what an

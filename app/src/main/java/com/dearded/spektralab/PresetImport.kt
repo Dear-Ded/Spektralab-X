@@ -153,9 +153,21 @@ object PresetImport {
         for ((key, label) in LR_IGNORED) num(key)?.let { if (it != 0.0) report.ignored(key, "$label 没有对应参数") }
         if (on("LensProfileEnable")) report.ignored("LensProfileEnable", "镜头校正属于每支镜头")
         for (key in LR_AUTO) if (on(key)) report.ignored(key, "自动值要逐张计算")
+        // Point curves, 0..255 in Lightroom, onto the same rows as upstream's: base -> rgb, then red, green, blue.
+        var curves = CurveSet.IDENTITY
         for (m in CURVE.findAll(text)) {
-            val points = LI.findAll(m.groupValues[2]).map { it.groupValues[1].replace(" ", "") }.toList()
-            if (points.isNotEmpty() && points != listOf("0,0", "255,255")) report.ignored(m.groupValues[1], "曲线还没有对应工具")
+            val key = m.groupValues[1]
+            val pts = LI.findAll(m.groupValues[2]).mapNotNull { li ->
+                val xy = li.groupValues[1].split(',').map { it.trim().toDoubleOrNull() }
+                if (xy.size == 2 && xy[0] != null && xy[1] != null) CurvePoint(xy[0]!! / 255, xy[1]!! / 255) else null
+            }.toList()
+            if (pts.isEmpty() || pts == Curve.IDENTITY_POINTS) continue
+            val arr = org.json.JSONArray().also { a -> pts.forEach { a.put(org.json.JSONArray().put(it.x).put(it.y)) } }
+            val curve = Curve.fromJson(arr)
+            if (curve.isIdentity) { report.ignored(key, "曲线的点不合规（须 2–256 个、x 递增、在 0–255 内）"); continue }
+            val row = when (key) { "ToneCurvePV2012Red" -> 2; "ToneCurvePV2012Green" -> 3; "ToneCurvePV2012Blue" -> 4; else -> 0 }
+            curves = curves.with(row, curve)
+            report.mapped(key, "→ 曲线")
         }
         f["CameraProfile"]?.let { if (!it.startsWith("Adobe Standard")) report.ignored("CameraProfile", "相机配置文件“${it.take(40)}”属于 Adobe") }
         if ("Look" in present) report.ignored("Look", "预设内嵌的配置文件（Look）读不了")
@@ -171,6 +183,7 @@ object PresetImport {
                 blackPoint = blackPoint, whitePoint = whitePoint, fade = fade,
                 vignette = vignette, vignetteMid = vignetteMid,
                 master = master, shadowZone = shadowZone, midZone = midZone, highlightZone = highlightZone, hsl = hsl,
+                curves = curves,
             ),
             source = SpkSource("xmp", fileName.take(120), "Lightroom 预设（近似）"),
         )

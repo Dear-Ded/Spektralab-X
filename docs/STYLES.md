@@ -295,7 +295,8 @@ ROADMAP M2 两条“用户自定义”的调研结论在这里落成规格。代
 | `PostCropVignetteAmount`、`PostCropVignetteMidpoint` | 暗角、暗角范围 | 近似 |
 | `GrainAmount` | 引擎颗粒 = 值 / 50 | 近似：胶片颗粒按乳剂模拟，不是数字噪点 |
 | `ConvertToGrayscale` | 饱和 −100 | 近似：彩色片上去色，不是黑白胶片 |
-| `Clarity2012`、`Texture`、`Dehaze`、`Sharpness`、降噪、镜头校正、`ToneCurve*`、`CameraProfile`、`Look` | — | 忽略：没有对应参数（曲线等调整工具线加上后再接） |
+| `ToneCurvePV2012`、`ToneCurvePV2012Red` / `Green` / `Blue`（点曲线，0–255） | 曲线 rgb / red / green / blue（÷255） | 对应（同一套单调三次插值） |
+| `Clarity2012`、`Texture`、`Dehaze`、`Sharpness`、降噪、镜头校正、`CameraProfile`、`Look` | — | 忽略：没有对应参数 |
 | `Auto*` 为真 | — | 忽略：自动值逐张计算 |
 
 值为 0 或 False 的字段不进报告。
