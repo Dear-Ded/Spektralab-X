@@ -30,6 +30,8 @@ data class TableState(
     val importing: Int = 0,
     /** After a pick or a reject in the loupe, move on to the next frame. */
     val autoAdvance: Boolean = true,
+    /** Grid thumbnails through each frame's own edit (developed when idle) rather than the photo as shot. */
+    val filmThumbs: Boolean = false,
     /** What 复制调整 last took, for 粘贴 (null = nothing copied yet). */
     val copied: CopiedLook? = null,
     /** The groups 粘贴 carries, as last chosen. */
@@ -58,6 +60,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         columns = prefs.getInt("columns", 3).takeIf { it in COLUMNS } ?: 3,
         filter = runCatching { FrameFilter.valueOf(prefs.getString("filter", "ALL")!!) }.getOrDefault(FrameFilter.ALL),
         autoAdvance = prefs.getBoolean("auto_advance", true),
+        filmThumbs = prefs.getBoolean("film_thumbs", false),
         pasteGroups = prefs.getStringSet("paste_groups", null)
             ?.mapNotNull { n -> LookGroup.entries.firstOrNull { it.name == n } }?.toSet()
             ?: (LookGroup.entries.toSet() - LookGroup.BORDER),
@@ -121,6 +124,11 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun setAutoAdvance(on: Boolean) {
         prefs.edit().putBoolean("auto_advance", on).apply()
         _state.update { it.copy(autoAdvance = on) }
+    }
+
+    fun setFilmThumbs(on: Boolean) {
+        prefs.edit().putBoolean("film_thumbs", on).apply()
+        _state.update { it.copy(filmThumbs = on) }
     }
 
     // --- marks ------------------------------------------------------------------------
