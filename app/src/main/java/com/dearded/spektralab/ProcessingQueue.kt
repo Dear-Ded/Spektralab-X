@@ -429,10 +429,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val handle: Long = if (job.raw) {
             // LibRaw reads a path: the kept copy itself, or the URI's descriptor
             // (/proc/self/fd), falling back to a cache copy (SourceLoader.rawInput).
-            val input = if (local != null) null else withContext(Dispatchers.IO) { loader.rawInput(uri, job.name, "job") }
-            val path = local?.absolutePath ?: input!!.path
-            step("解码 RAW", 0.12f)
+            // Assigned inside the IO hop, so a cancel as it returns still closes it.
+            var input: RawInput? = null
             try {
+                if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
+                val path = local?.absolutePath ?: input!!.path
+                step("解码 RAW", 0.12f)
                 withContext(EngineThread.dispatcher) {
                     NativeEngine.trimMemory(engine)
                     val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
