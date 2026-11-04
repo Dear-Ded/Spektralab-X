@@ -325,6 +325,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                             pick(s, strengthOf(s.id))
                         }
                     }
+                    .background(if (on) Palette.Accent else Palette.Panel)
                     .padding(bottom = 6.dp),
             ) {
                 Box(Modifier.height(64.dp).width(92.dp).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
@@ -336,10 +337,13 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                         Text(s.group, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
                     }
                 }
+                // UI2.md 1.2: the selected card's caption sits on the inverted fill.
                 Text(s.name, style = MaterialTheme.typography.labelMedium, maxLines = 1,
+                    color = if (on) Palette.OnAccent else Palette.OnSurface,
                     modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp))
                 Text(s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film }, style = MaterialTheme.typography.labelSmall,
-                    color = Palette.OnSurfaceSoft, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    color = if (on) Palette.OnAccent.copy(alpha = 0.7f) else Palette.OnSurfaceSoft,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = 6.dp))
             }
         }

@@ -1228,11 +1228,15 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(4.dp))
+                // UI2.md 1.2: the selected film's name becomes an inverted pill.
                 Text(
                     film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    color = if (selected) Palette.Accent else MaterialTheme.colorScheme.onSurface,
+                    color = if (selected) Palette.OnAccent else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .background(if (selected) Palette.Accent else Color.Transparent, RoundedCornerShape(50))
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
                 )
             }
         }
