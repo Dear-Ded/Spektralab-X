@@ -62,7 +62,7 @@ This repository builds SpektraLab's C++ engine for Android with the NDK, runs it
 
 - **A physical model, not a LUT.** Grain, halation and paper glare are computed from the physical parameters of each film and paper.
 - **The full chain on the phone.** Vulkan compute shaders run on the Adreno GPU, with submissions split and memory capped per device.
-- **Offline.** The app requests no network permission and collects no data; exported photos carry no location.
+- **Offline.** The app requests no network permission and collects no data; exported photos carry no location unless you turn that on in Settings.
 
 ## Samples
 
@@ -98,7 +98,7 @@ Every image below was rendered by the same engine this app ships, at default set
 | Resolution limits | Bounded by the computer's GPU memory (inferred) | Xiaomi 12–14 (Adreno 730 / 740 / 750) have a 128 MiB single buffer, about 8 MP, so the working size tops out at 3072; Adreno 650 has 512 MiB, about 33 MP; 42 MP overall ceiling. Preview is 1024 while dragging, 3400 on release | One image plane must fit in one GPU buffer or it cannot render, so large photos are scaled down first. A full-resolution "extreme render" mode is planned |
 | Screen colour | macOS converts through ColorSync with the display profile | A wide-gamut window on P3 screens; matrix and clip into Display P3 or sRGB | The same display path as upstream's `render_view`. HyperOS "Vivid" mode oversaturates (inferred); switch to "Original colour" to judge colour. This affects the screen only, not exported files |
 | Phone JPEGs | Printed as encoded | Printed as encoded; highlight recovery and the Ultra HDR gain map are optional and off by default | A phone JPEG already carries the camera's tone curve, so printing it stacks two curves. Upstream does the same by design; shoot RAW for accurate colour |
-| Not ported yet | All present (masks, tone masks and enlarger controls are off by default on macOS) | Missing: Layer 2 curves; masks, tone masks, enlarger controls; DI / Cineon export and print LUTs (`.cube`); half-frame pairs; lens correction; scene-latitude fit and neutral picker; export soft proof; PNG, 8-bit TIFF and P3 / ProPhoto TIFF (TIFF is 16-bit sRGB only) | The most-used parts came first; the rest is scheduled in the [roadmap](docs/ROADMAP.md). In return, Android adds vibrance, 8-band HSL, fade, one-tap styles, borders, the Ultra HDR gain map and a background processing queue |
+| Not ported yet | All present (masks, tone masks and enlarger controls are off by default on macOS) | Missing: masks, tone masks, enlarger controls; DI / Cineon export and print LUTs (`.cube`); half-frame pairs; lens correction; scene-latitude fit and neutral picker; export soft proof; PNG, 8-bit TIFF and P3 / ProPhoto TIFF (TIFF is 16-bit sRGB only) | The most-used parts came first; the rest is scheduled in the [roadmap](docs/ROADMAP.md). In return, Android adds vibrance, 8-band HSL, fade, one-tap styles, borders, the Ultra HDR gain map and a background processing queue |
 
 Full numbers, the cause of each difference and what is still unverified: [docs/PLATFORMS.md](docs/PLATFORMS.md) (Chinese). Method: [docs/PARITY.md](docs/PARITY.md).
 
@@ -116,22 +116,24 @@ Full numbers, the cause of each difference and what is still unverified: [docs/P
 - Exposure compensation, auto exposure, film format (sets the physical scale of grain and halation), print exposure, yellow / magenta filtration
 - Grain, halation and paper glare, each with its own switch and strength
 - RAW white balance: temperature / tint applied at decode, with upstream's desktop algorithm
-- Post-print adjustments (Adjust tab): white balance, exposure, contrast, highlights, shadows, black/white point, saturation, eight HSL bands, four colour wheels, fade, vignette, previewed live while dragging
+- Post-print adjustments (Adjust tab): white balance, exposure, contrast, highlights, shadows, black/white point, saturation, eight HSL bands, four colour wheels, fade, vignette and RGB / red / green / blue curves, previewed live while dragging
 
 **Framing and borders**
 - Rotate, flip, centred crop (original, 3:2, 4:3, 1:1, 16:9, 65:24 and more)
 - Film edges: 135, half frame, XPan, 645, 6×6, 6×7, 6×9 and more, with edge print and sprocket holes; plus paper borders such as Polaroid, Instax Mini, a parameter strip and gallery white
 - Sprocket strips only: on any film, drawn outside the photo with no crop and no change to the print; position, base colour, hole shape, edge text and frame numbers are adjustable
 - Brand-logo captions: the camera or phone brand is detected from EXIF (or picked by hand, or replaced by your own text), five caption layouts with logos, optional film-maker logo; 33 brands, sources in [docs/LOGOS.md](docs/LOGOS.md)
-- Date back: the EXIF capture time imprinted in a date-back style
+- Film-edge details: gate shape, carrier, the real stock name, frame number, and a re-roll button
+- Date back: the EXIF capture time imprinted in LCD, dot-matrix or data type, Japanese or US order, any corner, in the frame or on the rebate, with size, brightness and insets adjustable and optional shooting data
 
 **Viewing and export**
 - A fast preview while dragging, the sharp render on release; new edits cancel stale renders
 - Hold to compare with the original, tap the photo to hide the interface, histogram with clipping, full-screen 1:1 grain view
+- Sliders show their value while dragging; double-tap to reset, tap beside the thumb to nudge one step, move your finger off the track for a slow, fine drag
 - Undo / redo up to 50 steps; presets save film, paper and effect combinations
 - Background export queue: exports render on their own thread so editing is not blocked, jobs resume after the process is killed, progress notifications support Live Update
 - Safe saving: the gallery entry stays hidden until the file is written and checked, so no half-written photos; an all-black, all-white or single-colour frame is refused and retried once a size down; a lost GPU is replaced and the job retried
-- Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF, no GPS) or 16-bit TIFF (lossless Deflate)
+- Wide-gamut preview on P3 screens; export JPEG (Display P3 or sRGB, with camera, lens, exposure and time EXIF; location only if you turn it on in Settings) or 16-bit TIFF (lossless Deflate)
 
 > [!NOTE]
 > The app's interface is Simplified Chinese only for now.
@@ -223,7 +225,7 @@ On a cloud machine, yes. The engine prints in ProPhoto and the screen and export
 <details>
 <summary><b>Does it need the internet? Are my photos uploaded?</b></summary>
 
-No. The app requests no network permission, everything is computed on the phone, and no data is collected. Exported JPEGs keep the camera, lens and exposure details but no GPS location.
+No. The app requests no network permission, everything is computed on the phone, and no data is collected. Exported JPEGs keep the camera, lens and exposure details; GPS location is left out unless you turn on "Keep location in exports" in Settings.
 </details>
 
 <details>

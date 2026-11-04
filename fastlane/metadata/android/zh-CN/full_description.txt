@@ -9,7 +9,7 @@ Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm �
 <li>曝光、RAW 白平衡、放大曝光、黄/品红滤镜、颗粒、光晕、眩光</li>
 <li>裁剪、旋转、翻转，胶片边框（135、半格、XPan、120 各画幅）和日期戳</li>
 <li>预设、撤销/重做、直方图、长按看原图、1:1 看颗粒</li>
-<li>导出 JPEG（保留拍摄信息，不含位置）或 16 位 TIFF</li>
+<li>导出 JPEG（保留拍摄信息，位置默认不写，可在设置里打开）或 16 位 TIFF</li>
 </ul>
 
 不联网，不收集任何数据。开源（GPL-3.0），官方版永久免费，只在 GitHub Releases 发布。
