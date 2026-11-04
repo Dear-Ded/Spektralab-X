@@ -647,7 +647,6 @@ private fun Controls(
                                 0 -> {
                                     PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。画幅越小，颗粒越明显。")
                                 FilmStrip(ui, enabled) { vm.pickFilm(it) }
-                                StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                                 Text("画幅", style = MaterialTheme.typography.labelLarge)
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     for ((label, mm) in FORMATS) {
@@ -663,15 +662,7 @@ private fun Controls(
                                 }
                                 1 -> {
                                     PanelHint("相纸决定反差和色调，就像放大时换一盒相纸。默认是这卷胶片推荐的那一款。")
-                                if (e.scanFilm) {
-                                    Text(
-                                        "反转片直接扫描，不经过相纸。",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                } else {
-                                    StockPicker("相纸", ui.catalog.papers, e.paper, enabled) { vm.update(e.copy(paper = it)) }
-                                }
+                                PaperStrip(ui, enabled) { vm.update(it) }
                                     NextStep("曝光与放大") { step = 2 }
                                 }
                                 2 -> {
