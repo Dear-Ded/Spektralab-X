@@ -90,7 +90,10 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
             .put("cropAspect", edit.cropAspect)
             .put("frame", edit.frame.toJson())
             .put("borderId", edit.borderId)
-            .put("look", edit.look.toJson()))
+            .put("look", edit.look.toJson())
+            .put("edgeRealName", edit.edgeRealName)
+            .put("dateOrder", edit.dateOrder)
+            .put("dateWithData", edit.dateWithData))
         .put("rawWb", JSONObject().put("k", wbK).put("tint", wbTint))
         .put("rating", JSONObject().put("pick", frame.pick).put("stars", frame.stars))
         .put("updated", updated)
@@ -108,6 +111,9 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
                 frame = FrameSpec.fromJson(app.optJSONObject("frame")),
                 borderId = app.optString("borderId", "none"),
                 look = Look.fromJson(app.optJSONObject("look")),
+                edgeRealName = app.optBoolean("edgeRealName", true),
+                dateOrder = app.optString("dateOrder", "japan"),
+                dateWithData = app.optBoolean("dateWithData", false),
             )
             val wb = o.optJSONObject("rawWb")
             Sidecar(
@@ -349,6 +355,9 @@ fun pasteLook(target: Sidecar, frame: Frame, from: CopiedLook, groups: Set<LookG
         grainActive = s.grainActive, grainAmount = s.grainAmount,
         halationActive = s.halationActive, halationAmount = s.halationAmount,
         glareActive = s.glareActive, glareAmount = s.glareAmount,
+        scatterAmount = s.scatterAmount, couplersAmount = s.couplersAmount,
+        grainLayered = s.grainLayered, grainArea = s.grainArea,
+        unsharpSigma = s.unsharpSigma, unsharpAmount = s.unsharpAmount,
     )
     if (LookGroup.LAYER2 in groups) e = e.copy(look = s.look)
     if (LookGroup.BORDER in groups) {
@@ -361,13 +370,18 @@ fun pasteLook(target: Sidecar, frame: Frame, from: CopiedLook, groups: Set<LookG
             needsShape -> { skipped = true; e.copy(filmEdge = false, borderId = "none") }
             else -> e.copy(filmEdge = false, borderId = s.borderId)
         }
-        val date = Edit.dateBackText(frame.exifDate)
+        // The date in the copied order, from this frame's own EXIF. The frame number
+        // and the shooting-data line belong to the frame, so they stay its own.
+        val date = Edit.dateBackText(frame.exifDate, s.dateOrder)
         e = e.copy(
             frame = s.frame,
             edgeMode = s.edgeMode, edgeHoles = s.edgeHoles, edgeGate = s.edgeGate, edgeCarrier = s.edgeCarrier,
-            edgeFog = s.edgeFog, edgeLeaks = s.edgeLeaks,
+            edgeFog = s.edgeFog, edgeLeaks = s.edgeLeaks, edgeRealName = s.edgeRealName,
             dateImprint = s.dateImprint && date.isNotEmpty() && Edit.dateBackFits(e.edgeFormat),
             dateText = date, dateStyle = s.dateStyle, dateCorner = s.dateCorner,
+            datePlacement = s.datePlacement, dateSize = s.dateSize, dateEv = s.dateEv,
+            dateInsetX = s.dateInsetX, dateInsetY = s.dateInsetY,
+            dateOrder = s.dateOrder, dateWithData = s.dateWithData,
         )
     }
     return Pasted(catalog.normalize(e), wbK, wbTint, skipped)
