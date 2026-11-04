@@ -1,0 +1,36 @@
+LibRaw 0.22.2: lossy_dng_load_raw() fills its tone-curve table cur[4][256]
+only when there is no OpcodeList2 or a PolynomialMap opcode fills it. A
+lossy (JPEG) DNG with an OpcodeList2 that has no PolynomialMap copies
+uninitialised stack into the output pixels.
+
+Backport of LibRaw 62f7098 (issue #862, in 0.22.3), unchanged: the default
+curve is filled first, opcodes refine it. Separate from our GainMap
+(patches/0006), which reads OpcodeList2 bytes and never touches this table.
+
+--- a/src/decoders/dng.cpp
++++ b/src/decoders/dng.cpp
+@@ -257,6 +257,12 @@
+   ushort cur[4][256];
+   double coeff[9], tot;
+ 
++  // Initialize the whole curve table with the default gamma curve first:
++  // an OpcodeList2 tag (meta_offset) carrying zero opcodes, or none of type
++  // PolynomialMap(8), must not leave cur[][] uninitialized.
++  gamma_curve(1 / 2.4, 12.92, 1, 255);
++  FORC4 memcpy(cur[c], curve, sizeof cur[0]);
++
+   if (meta_offset)
+   {
+     fseek(ifp, meta_offset, SEEK_SET);
+@@ -289,11 +295,6 @@
+     }
+     order = sorder;
+   }
+-  else
+-  {
+-    gamma_curve(1 / 2.4, 12.92, 1, 255);
+-    FORC4 memcpy(cur[c], curve, sizeof cur[0]);
+-  }
+ 
+   struct jpeg_error_mgr pub;
+   cinfo.err = jpeg_std_error(&pub);

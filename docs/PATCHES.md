@@ -25,6 +25,7 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0003-xtrans-serial-tiles` | LibRaw #845 | X-Trans 去马赛克的瓦片重叠，多线程输出随调度变化；保持串行，与单线程输出一致。 |
 | `0010`–`0016` | thetechgeekko/Spektrafilm-android（GPL-3.0） | 损坏或恶意 RAW 的分配与工作量上限（TIFF 元数据、LJPEG、DNG tile）；补丁头注明原文件和 sha256。 |
 | `0017-normalize-model-orig-on-stack` | LibRaw #876（1a8fd32，0.22.3） | `GetNormalizedModel()` 的 `orig` 是函数静态变量，编辑和导出两个线程同时打开 RAW 时可能串用对方的机型名、色彩矩阵和白电平。改成局部变量。单线程输出不变。 |
+| `0018-lossy-dng-curve-init` | LibRaw #862（62f7098，0.22.3） | 有损（JPEG）DNG 带 OpcodeList2 但没有 PolynomialMap 时，`lossy_dng_load_raw` 的色调表没初始化，栈里的内容会进像素。改成先填默认曲线，再由 opcode 覆盖。只影响有损 DNG（LinearRaw）；补丁 0006 的 GainMap 只处理拜耳 DNG，两者不重叠。 |
 
 ## 写一个新补丁
 
