@@ -81,6 +81,12 @@ data class Edit(
     val halationAmount: Double = 1.0,
     val glareActive: Boolean = true,
     val glareAmount: Double = 1.0,
+    /** In-emulsion scatter, a mix weight 0..1 (engine halation_scatter_amount; upstream EffectStrengths.scatter). */
+    val scatterAmount: Double = 1.0,
+    /** Inter-layer DIR couplers, the stock's colour separation, 0..1.5 (upstream stops short of the wire's 4). */
+    val couplersAmount: Double = 1.0,
+    /** Grain drawn per sub-layer (fine + coarse) rather than as one layer. */
+    val grainLayered: Boolean = true,
     // Geometry, applied by the engine before the film (shoot layer). Crop
     // fractions are of the source frame before the quarter turns.
     val quarterTurns: Int = 0,
@@ -198,6 +204,9 @@ data class Edit(
             "halation_amount" to { e: Edit -> e.halationAmount },
             "glare_active" to { e: Edit -> e.glareActive },
             "glare_amount" to { e: Edit -> e.glareAmount },
+            "halation_scatter_amount" to { e: Edit -> e.scatterAmount },
+            "dir_couplers_amount" to { e: Edit -> e.couplersAmount },
+            "grain_sublayers_active" to { e: Edit -> e.grainLayered },
             "geometry_quarter_turns" to { e: Edit -> e.quarterTurns },
             "geometry_flip_h" to { e: Edit -> e.flipH },
             "geometry_crop_x" to { e: Edit -> e.cropX },
@@ -250,6 +259,9 @@ data class Edit(
             halationAmount = p.optDouble("halation_amount", fallback.halationAmount),
             glareActive = p.optBoolean("glare_active", fallback.glareActive),
             glareAmount = p.optDouble("glare_amount", fallback.glareAmount),
+            scatterAmount = p.optDouble("halation_scatter_amount", fallback.scatterAmount),
+            couplersAmount = p.optDouble("dir_couplers_amount", fallback.couplersAmount),
+            grainLayered = p.optBoolean("grain_sublayers_active", fallback.grainLayered),
             quarterTurns = p.optInt("geometry_quarter_turns", fallback.quarterTurns),
             flipH = p.optBoolean("geometry_flip_h", fallback.flipH),
             cropX = p.optDouble("geometry_crop_x", fallback.cropX),
