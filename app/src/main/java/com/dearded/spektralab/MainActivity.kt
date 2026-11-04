@@ -29,6 +29,9 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
+        // UI2.md 5: HyperOS paints a scrim behind a 3-button nav bar unless told not to;
+        // the floating toolbar needs the bar clear behind it.
+        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         DisplayColor.attach(this)
         if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
