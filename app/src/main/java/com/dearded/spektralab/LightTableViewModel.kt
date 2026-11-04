@@ -213,6 +213,30 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         }
     }
 
+    /**
+     * 导出印样: [roll] as one contact-sheet JPEG in Pictures/Spektralab-X, at
+     * most [maxPixels] (the editor's cap). Built from the film thumbnails, so it
+     * waits for an idle engine; on the host scope, so leaving the screen does
+     * not stop it.
+     */
+    fun exportContactSheet(roll: Roll, maxPixels: Long) {
+        if (RollContactSheet.busy) { show("上一张印样还在排版"); return }
+        show("正在排版印样，冲洗完缩略图后存进相册")
+        host.scope.launch {
+            val text = try {
+                RollContactSheet.export(app, store, roll, maxPixels)
+                "印样已存进相册 Pictures/${MediaSaver.FOLDER}"
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: OutOfMemoryError) {
+                "内存不足，印样没有保存"
+            } catch (e: Throwable) {
+                "印样保存失败：${e.message ?: e}"
+            }
+            show(text)
+        }
+    }
+
     // --- batch ---------------------------------------------------------------------
 
     /** 复制调整: takes [frame]'s whole edit. A frame never edited has nothing to give. */

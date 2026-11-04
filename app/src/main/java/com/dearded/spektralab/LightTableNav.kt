@@ -96,6 +96,7 @@ fun AppScreens(editor: EditorViewModel) {
                     onBack = { table.openRoll(null) },
                     onOpen = table::openLoupe,
                     onExport = exportRoll,
+                    onContactSheet = { table.exportContactSheet(roll, editor.ui.value.maxPixels) },
                 )
                 nav.rolls -> RollList(rolls, onOpen = { table.openRoll(it.id) }, onBack = { table.showRolls(false) })
                 else -> LightTableScreen(

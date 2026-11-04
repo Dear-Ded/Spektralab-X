@@ -104,6 +104,7 @@ fun RollView(
     onBack: () -> Unit,
     onOpen: (List<Frame>, Int) -> Unit,
     onExport: (List<Frame>) -> Unit,
+    onContactSheet: () -> Unit = {},
 ) {
     BackHandler(onBack = onBack)
     var contact by rememberSaveable { mutableStateOf(false) }
@@ -144,7 +145,16 @@ fun RollView(
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = { table.compare(frames[at]) }) { Text("比较风格") }
                     TextButton(onClick = { table.copyLook(frames[at]) }) { Text("复制调整") }
-                    TextButton(onClick = { onExport(frames) }) { Text("导出本卷") }
+                    Box {
+                        var menu by remember { mutableStateOf(false) }
+                        TextButton(onClick = { menu = true }) { Text("导出") }
+                        androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("导出本卷（每张一个 JPEG）") },
+                                onClick = { menu = false; onExport(frames) })
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("导出印样（整卷一张）") },
+                                onClick = { menu = false; onContactSheet() })
+                        }
+                    }
                 }
             }
         },
