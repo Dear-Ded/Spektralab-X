@@ -106,7 +106,7 @@ data class SpkLook(
         private val TOP = setOf("format", "version", "name", "author", "license", "category", "engine", "layer2", "lut", "source")
         private val ENGINE = setOf("film", "paper", "exposure_ev", "print_exposure", "y_cc", "m_cc", "format_mm", "grain", "halation", "glare")
         private val LAYER2 = setOf("temperature", "tint", "exposure", "contrast", "brightness", "saturation", "vibrance",
-            "highlights", "shadows", "black_point", "white_point", "fade", "vignette", "vignette_mid", "wheels", "hsl")
+            "highlights", "shadows", "black_point", "white_point", "fade", "vignette", "vignette_mid", "wheels", "hsl", "curves")
         private val WHEELS = listOf("global", "shadows", "midtones", "highlights")
         /** Look.hsl order (layer2.cpp kBandHue), with Lightroom's band names. */
         val HSL_BANDS = listOf("red", "orange", "yellow", "green", "aqua", "blue", "purple", "magenta")
@@ -206,7 +206,25 @@ data class SpkLook(
                 vignette = n("vignette", -100.0, 100.0), vignetteMid = n("vignette_mid", 0.0, 100.0, 50.0),
                 master = zone(0), shadowZone = zone(1), midZone = zone(2), highlightZone = zone(3),
                 hsl = List(8) { band(it) },
+                curves = readCurves(l, r),
             )
+        }
+
+        /** layer2.curves: upstream's per-channel point lists; a channel that breaks its rules is dropped and reported. */
+        private fun readCurves(l: JSONObject, r: Fields): CurveSet {
+            val c = r.obj(l, "curves", "layer2") ?: return CurveSet.IDENTITY
+            r.unknown(c, "layer2.curves", CurveSet.KEYS.toSet())
+            val set = CurveSet.fromJson(c)
+            CurveSet.KEYS.forEachIndexed { i, key ->
+                // fromJson reads anything off-rule as identity; only a real identity [[0,0],[1,1]] is not a problem.
+                val written = c.optJSONArray(key)
+                val plain = written != null && written.length() == 2 &&
+                    written.optJSONArray(0)?.let { it.optDouble(0) == 0.0 && it.optDouble(1) == 0.0 } == true &&
+                    written.optJSONArray(1)?.let { it.optDouble(0) == 1.0 && it.optDouble(1) == 1.0 } == true
+                if (c.has(key) && set[i].isIdentity && !plain)
+                    r.report.ignored("layer2.curves.$key", "应为 2–256 个 [x, y]，x 严格递增，都在 0–1")
+            }
+            return set
         }
 
         internal fun engineJson(e: SpkEngine) = JSONObject().apply {
@@ -239,6 +257,7 @@ data class SpkLook(
                     put(key, JSONObject().put("hue", b.hue).put("sat", b.sat).put("lum", b.lum))
                 }
             })
+            if (!l.curves.isIdentity) put("curves", l.curves.toJson())
         }
     }
 }
