@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,12 +40,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * The editor's bottom category bar (docs/UI.md 2.2): line icon plus a two-
- * character label, the way Lightroom, Darkroom and the Xiaomi gallery editor
- * lay it out. The selected item is amber **and** carries a pill under its
- * icon, so "selected" never rests on colour alone (Halide's lesson).
+ * The editor's floating toolbar (UI2.md 2.1, 2.2): one pill 64 dp tall, 12 dp
+ * off the screen edges, holding the five entries in the order a print is made
+ * (one-tap styles, the darkroom steps, adjustments, borders, framing).
+ * The selected entry sits on an inverted near-white pill with dark ink and a
+ * filled icon, so "selected" is told by tone and shape, never by colour alone.
  */
-// UI2.md 2.2: one-tap styles, the darkroom steps, adjustments, borders, framing.
 private val CATEGORIES = listOf("风格", "冲洗", "调整", "边框", "构图")
 /** Which drawn icon each entry uses: a highlight, the enlarger, sliders, a film frame, crop corners. */
 private val ICONS = intArrayOf(3, 2, 1, 0, 4)
@@ -51,35 +53,42 @@ private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 @Composable
 fun CategoryBar(selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
     val view = LocalView.current
-    Row(
-        Modifier.fillMaxWidth().height(64.dp).background(Palette.Surface),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CATEGORIES.forEachIndexed { i, label ->
-            val on = i == selected
-            val tint by animateColorAsState(
-                when {
-                    on -> Palette.Accent
-                    enabled -> Palette.OnSurfaceSoft
-                    else -> Palette.OnSurfaceSoft.copy(alpha = 0.38f)
-                },
-                Motion.defaultEffects(), label = "tint",
-            )
-            val pill by animateDpAsState(if (on) 20.dp else 0.dp, Motion.fastSpatial(), label = "pill")
-            Column(
-                Modifier.weight(1f).fillMaxHeight().selectable(
-                    selected = on, role = Role.Tab,
-                    interactionSource = remember { MutableInteractionSource() }, indication = null,
-                ) { if (!on) { view.tick(); onSelect(i) } },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Canvas(Modifier.size(24.dp)) { icon(ICONS[i], tint, on) }
-                Spacer(Modifier.height(3.dp))
-                Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
-                Spacer(Modifier.height(3.dp))
-                Box(Modifier.width(pill).height(3.dp).background(Palette.Accent, RoundedCornerShape(2.dp)))
+    Box(Modifier.fillMaxWidth().background(Palette.Background).padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().height(64.dp)
+                .background(Palette.Panel, RoundedCornerShape(32.dp))
+                .border(1.dp, Palette.OutlineSoft, RoundedCornerShape(32.dp))
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CATEGORIES.forEachIndexed { i, label ->
+                val on = i == selected
+                val tint by animateColorAsState(
+                    when {
+                        on -> Palette.OnAccent
+                        enabled -> Palette.OnSurface
+                        else -> Palette.OnSurfaceSoft.copy(alpha = 0.38f)
+                    },
+                    Motion.defaultEffects(), label = "tint",
+                )
+                val fill by animateColorAsState(
+                    if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
+                val corner by animateDpAsState(if (on) 28.dp else 16.dp, Motion.fastSpatial(), label = "corner")
+                Column(
+                    Modifier.weight(1f).fillMaxHeight()
+                        .background(fill, RoundedCornerShape(corner))
+                        .selectable(
+                            selected = on, role = Role.Tab,
+                            interactionSource = remember { MutableInteractionSource() }, indication = null,
+                        ) { if (!on) { view.tick(); onSelect(i) } },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Canvas(Modifier.size(22.dp)) { icon(ICONS[i], tint, on) }
+                    Spacer(Modifier.height(2.dp))
+                    Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
+                }
             }
         }
     }
