@@ -41,6 +41,11 @@ cp "$engine/third_party/volk/LICENSE.md" "$out/licenses/volk-LICENSE.md"
 libraw="$up/build/deps/LibRaw-0.22.2"
 cp "$libraw/LICENSE.LGPL" "$out/licenses/LibRaw-LICENSE.LGPL"
 cp "$libraw/COPYRIGHT" "$out/licenses/LibRaw-COPYRIGHT.txt"
+# 极致渲染's 4:4:4 JPEG encoder: BSD-3-Clause, IJG and zlib terms (LICENSE.md),
+# and the IJG notice the IJG licence asks to be kept with it (README.ijg).
+jpegturbo="$up/build/deps/libjpeg-turbo-3.2.0"
+cp "$jpegturbo/LICENSE.md" "$out/licenses/libjpeg-turbo-LICENSE.md"
+cp "$jpegturbo/README.ijg" "$out/licenses/libjpeg-turbo-README.ijg"
 
 kernels="$(sed -n '/set(SPEKTRALAB_VULKAN_KERNELS/,/CACHE INTERNAL/p' "$engine/CMakeLists.txt" |
            grep -o 'spk_[a-z0-9_]*' | grep -v '^spk_$' | sort -u)"

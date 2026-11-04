@@ -116,7 +116,35 @@ ${spk_rgb_space}
 ${spk_spaces}
 ")
 
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp storage_probe.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
+# libjpeg-turbo for 极致渲染's 4:4:4 JPEG (jpeg444.cpp), fetched and checked by
+# scripts/fetch-upstream.sh. Its CMake does not support add_subdirectory (as
+# upstream's engine/cmake/Codecs.cmake notes), so it is built on its own with
+# the same NDK toolchain and linked statically. arm64 SIMD is NEON intrinsics:
+# no NASM.
+include(ExternalProject)
+set(spk_jpeg_src "${spk_deps}/libjpeg-turbo-3.2.0")
+if(NOT EXISTS "${spk_jpeg_src}/CMakeLists.txt")
+    message(FATAL_ERROR "libjpeg-turbo 3.2.0 missing from ${spk_deps}; run scripts/fetch-upstream.sh")
+endif()
+set(spk_jpeg_prefix "${CMAKE_CURRENT_BINARY_DIR}/jpeg-install")
+set(spk_jpeg_lib "${spk_jpeg_prefix}/lib/libjpeg.a")
+file(MAKE_DIRECTORY "${spk_jpeg_prefix}/include")
+ExternalProject_Add(spk_jpeg_build SOURCE_DIR "${spk_jpeg_src}"
+    DOWNLOAD_COMMAND "" UPDATE_COMMAND ""
+    CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DANDROID_ABI=${ANDROID_ABI}
+        -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+        -DCMAKE_INSTALL_PREFIX=${spk_jpeg_prefix} -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        -DENABLE_SHARED=OFF -DENABLE_STATIC=ON -DWITH_TURBOJPEG=OFF
+        -DWITH_TOOLS=OFF -DWITH_TESTS=OFF -DWITH_SIMD=ON
+    BUILD_BYPRODUCTS "${spk_jpeg_lib}" LOG_CONFIGURE ON LOG_BUILD ON LOG_INSTALL ON)
+add_library(spk_jpeg STATIC IMPORTED)
+set_target_properties(spk_jpeg PROPERTIES IMPORTED_LOCATION "${spk_jpeg_lib}"
+    INTERFACE_INCLUDE_DIRECTORIES "${spk_jpeg_prefix}/include")
+add_dependencies(spk_jpeg spk_jpeg_build)
+
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp storage_probe.cpp jpeg444.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
     "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE
@@ -125,7 +153,7 @@ target_include_directories(spektralab_jni PRIVATE
     "${SPK_UPSTREAM}/engine/host"
     "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(spektralab_jni PRIVATE
-    spektralab_engine spk_image_io spk_libraw spk_volk android log jnigraphics z)
+    spektralab_engine spk_image_io spk_libraw spk_volk spk_jpeg android log jnigraphics z)
 # 16 KB page alignment, required by newer Android releases for native code.
 target_link_options(spektralab_jni PRIVATE "-Wl,-z,max-page-size=16384")
 # The NDK links libomp.so by default; this links libomp.a into the library.

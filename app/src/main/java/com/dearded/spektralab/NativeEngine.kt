@@ -74,6 +74,13 @@ object NativeEngine {
      */
     external fun exportBitmap(session: Long, tier: String): Bitmap?
 
+    /**
+     * [bitmap] (ARGB_8888) as a 4:4:4 JPEG at [quality] with optimised
+     * Huffman tables, [icc] embedded when not null (libjpeg-turbo). Any thread,
+     * no session; false with lastError (read on the same thread) on failure.
+     */
+    external fun writeJpeg444(bitmap: Bitmap, path: String, quality: Int, icc: ByteArray?): Boolean
+
     /** Renders [tier] into [reuse] when it is the same size, else into a new bitmap; null on failure. */
     external fun renderReuse(session: Long, tier: String, reuse: Bitmap?): Bitmap?
 
