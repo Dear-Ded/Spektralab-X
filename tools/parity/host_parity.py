@@ -36,6 +36,7 @@ case's grade.json and deletes its pixel dumps (a full run otherwise writes
 about 4 GB). `--check` applies the pass bars below and exits 1 on a failure.
 """
 import argparse
+import hashlib
 import json
 import os
 import struct
@@ -74,7 +75,9 @@ RAWS = {
     "temple": "Fujifilm_-_X100F_-_14bit_14bit_compressed_(3:2).RAF",
 }
 RAWFULL = {"iphone": "Apple_-_iPhone_6s_Plus_-_16bit_(4:3).DNG",
-           "sl1": "Canon_-_EOS_Rebel_SL1_-_RAW_(3:2).CR2"}
+           "sl1": "Canon_-_EOS_Rebel_SL1_-_RAW_(3:2).CR2",
+           # The one sample with a DNG OpcodeList2 GainMap (patch 0006): each side decodes it itself.
+           "pixel": "Google_-_Pixel_2_XL_-_16bit_(4:3).dng"}
 
 # Layer 2, non-neutral: Look.kt's 50 values and the desktop sidecar's own units.
 LOOK_VALUES = [0.0] * 50
@@ -428,6 +431,9 @@ def cmd_render(a):
                 continue
             kind, path = inputs[scene]
             d = a.out / name
+            if a.prune and (d / "grade.json").exists() and not list(d.glob("*.rgb")):
+                print(f"{name:<34} graded already, skipped", flush=True)   # a resumed run
+                continue
             d.mkdir(exist_ok=True)
             t = time.time()
             try:
@@ -445,6 +451,10 @@ def cmd_render(a):
                 print(f"{name:<34} host {th:6.1f} s  android {log[name]['android_s']:6.1f} s", flush=True)
                 if a.prune:
                     (d / "grade.json").write_text(json.dumps(grade_case(d), indent=1))
+                    # Every output's bytes, so two builds can be compared bit for bit
+                    # after the pixels are gone (hashes.json; `host_parity.py same A B`).
+                    sums = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(d.glob("*.rgb"))}
+                    (d / "hashes.json").write_text(json.dumps(sums, indent=1))
                     for f in d.glob("*.rgb"):
                         f.unlink()
             except Exception as ex:  # noqa: BLE001
@@ -473,7 +483,12 @@ def grade_pair(d, a, b, space):
     y, by = read_rgb(d / f"{b}.rgb")
     if x.shape != y.shape:
         return {"error": f"shape {x.shape} vs {y.shape}"}
-    e = ciede2000(to_lab(x, space), to_lab(y, space))
+    # In bands of rows: CIEDE2000 in float64 holds a few dozen frame-sized
+    # temporaries, which for an 18 MP RAW is past 4 GB (the OOM killer took a
+    # full run on a shared 8 GB box). Only the result is kept whole.
+    e = np.empty(x.shape[:2])
+    for r0 in range(0, x.shape[0], 256):
+        e[r0:r0 + 256] = ciede2000(to_lab(x[r0:r0 + 256], space), to_lab(y[r0:r0 + 256], space))
     codes = np.abs(x - y) * 255
     return {"mean": float(e.mean()), "p95": float(np.percentile(e, 95)), "p999": float(np.percentile(e, 99.9)),
             "max": float(e.max()), "code_max": float(codes.max()), "code_mean": float(codes.mean()),
@@ -646,6 +661,26 @@ def where(d, ours, ref, space, g):
         print(f"  ({c:4d},{r:4d}) dE {e[r, c]:6.2f}  ours {np.round(x[r, c] * 255, 1)}  ref {np.round(y[r, c] * 255, 1)}{p}")
 
 
+def cmd_same(a):
+    """Two runs' outputs, byte for byte: every hash in A's hashes.json must equal B's."""
+    diff, n = [], 0
+    for d in sorted(p for p in a.a.iterdir() if (p / "hashes.json").exists()):
+        mine = json.loads((d / "hashes.json").read_text())
+        other_f = a.b / d.name / "hashes.json"
+        if not other_f.exists():
+            diff.append(f"{d.name}: missing in {a.b}")
+            continue
+        other = json.loads(other_f.read_text())
+        for f in sorted(set(mine) | set(other)):
+            n += 1
+            if mine.get(f) != other.get(f):
+                diff.append(f"{d.name}/{f}")
+    for line in diff:
+        print("DIFFERS", line)
+    print(f"SAME {n - len(diff)} of {n} outputs identical")
+    return 1 if diff else 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -665,8 +700,11 @@ def main():
     g.add_argument("--where")
     g.add_argument("--table", help="also write a markdown table (mean / p95 / p99.9 / max) here")
     g.add_argument("--check", action="store_true", help="exit 1 when any row fails its bar")
+    s = sub.add_parser("same", help="compare two runs' hashes.json byte for byte")
+    s.add_argument("a", type=Path)
+    s.add_argument("b", type=Path)
     a = ap.parse_args()
-    return cmd_render(a) if a.cmd == "render" else cmd_grade(a)
+    return {"render": cmd_render, "grade": cmd_grade, "same": cmd_same}[a.cmd](a)
 
 
 if __name__ == "__main__":
