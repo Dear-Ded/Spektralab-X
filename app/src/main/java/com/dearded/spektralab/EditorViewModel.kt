@@ -144,6 +144,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         try {
             val ready = host.start(wanted.film, wanted.paper)
             engine = ready.engine
+            // Imported films live outside engine/ (its reinstall deletes the tree): copy
+            // them back in and list them. Nothing to copy leaves the host's catalog as is.
+            val catalog = withContext(Dispatchers.IO) {
+                val synced = runCatching { UserLibrary.get(app).profiles.syncInto(ready.dir) }.getOrDefault(0)
+                if (synced > 0) runCatching { Catalog.load(ready.dir) }.getOrDefault(ready.catalog) else ready.catalog
+            }
             iccPath = File(ready.dir, "io/sRGB.icc").absolutePath
             deviceJson = ready.deviceJson
             capabilitiesJson = ready.capabilitiesJson
@@ -156,7 +162,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             log(if (ready.reused) "engine reused" else "engine ready")
             _ui.update {
                 it.copy(
-                    ready = true, busy = null, catalog = ready.catalog, workingEdge = edge,
+                    ready = true, busy = null, catalog = catalog, workingEdge = edge,
                     deviceSummary = DeviceProfile.summary(gpu),
                     engineSummary = DeviceProfile.summarizeCapabilities(ready.capabilitiesJson),
                     maxPixels = maxPixels,
@@ -597,6 +603,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     /** Engine thread. */
     private fun applyLook(look: Look) {
         if (look == appliedLook || session == 0L) return
+        UserLibrary.get(app).applyLut(session, look, appliedLook)
         NativeEngine.setLook(session, if (look.neutral) null else look.values())
         appliedLook = look
     }
@@ -886,6 +893,37 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val freed = withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(e) }
             log("trim memory level $level: ${freed shr 20} MB freed")
+        }
+    }
+
+    // --- imported styles and films (StyleImport.kt) ------------------------------
+
+    /** After a film import: the engine directory's profiles read again, so the new stock is listed. */
+    fun reloadCatalog() {
+        viewModelScope.launch {
+            val dir = UserLibrary.get(app).engineDir
+            val catalog = withContext(Dispatchers.IO) { runCatching { Catalog.load(dir) }.getOrNull() } ?: return@launch
+            _ui.update { it.copy(catalog = catalog) }
+        }
+    }
+
+    /**
+     * A just-imported film or paper opened once in the engine (warmUp builds its
+     * tables): null when it works, the engine's error otherwise, so the import
+     * can be deleted again.
+     */
+    suspend fun trialStock(film: String, paper: String): String? = withContext(EngineThread.dispatcher) {
+        if (engine == 0L) return@withContext "引擎还没准备好"
+        if (NativeEngine.warmUp(engine, film, paper)) null else NativeEngine.lastError().ifEmpty { "未知错误" }
+    }
+
+    /** The open edit as a .spklook in the cache, for the share sheet; null when there is no photo. */
+    suspend fun exportLook(name: String): File? {
+        val state = _ui.value
+        if (!state.hasImage) return null
+        return withContext(Dispatchers.IO) {
+            val library = UserLibrary.get(app)
+            library.exportLook(state.edit, state.catalog, name, StyleImports.thumbnail(state.image))
         }
     }
 

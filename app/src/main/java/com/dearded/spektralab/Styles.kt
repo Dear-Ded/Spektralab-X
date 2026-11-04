@@ -22,6 +22,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +88,16 @@ data class Style(
      * This style with its finish at [k] of full strength (0..1), linearly from
      * neutral. Film, paper, print and effects stay as they are; at 1 it is this style.
      */
-    fun atStrength(k: Double): Style = if (k >= 1.0) this else copy(look = look.scaled(k.coerceIn(0.0, 1.0)))
+    fun atStrength(k: Double): Style = if (k >= 1.0) this else copy(look = look.finishAt(k.coerceIn(0.0, 1.0)))
+
+    /** This style as a .spklook (what a Fuji recipe builds on, and what export writes). */
+    fun toSpkLook() = SpkLook(
+        name = name, category = group,
+        engine = SpkEngine(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
+            yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
+        layer2 = look.copy(lut = "", lutStrength = 1.0),
+        source = SpkSource("style", id, inspiredBy),
+    )
 
     companion object {
         // Lab scanner signatures, as the labs describe them (Carmencita, theFINDlab,
@@ -209,18 +219,8 @@ data class Style(
     }
 }
 
-/** Every field of the finish times [k], except vignetteMid (a shape) and the wheels' hues (a direction). */
-private fun Look.scaled(k: Double): Look {
-    fun zone(z: Zone) = z.copy(sat = z.sat * k, lum = z.lum * k)
-    return copy(
-        temperature = temperature * k, tint = tint * k, exposure = exposure * k, contrast = contrast * k,
-        brightness = brightness * k, saturation = saturation * k, vibrance = vibrance * k,
-        highlights = highlights * k, shadows = shadows * k, blackPoint = blackPoint * k, whitePoint = whitePoint * k,
-        fade = fade * k, vignette = vignette * k,
-        master = zone(master), shadowZone = zone(shadowZone), midZone = zone(midZone), highlightZone = zone(highlightZone),
-        hsl = hsl.map { Band(it.hue * k, it.sat * k, it.lum * k) },
-    )
-}
+/** SharedPreferences file of each style's strength (0..1), built-in and imported alike. */
+internal const val STYLE_STRENGTH_PREFS = "style_strength"
 
 /**
  * The 风格 row: the eight group chips over cards, each showing the open photo
@@ -232,18 +232,24 @@ private fun Look.scaled(k: Double): Look {
 @Composable
 internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) {
     val context = LocalContext.current
-    val prefs = remember(context) { context.getSharedPreferences("style_strength", 0) }
+    val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
     val strengths = remember { mutableStateMapOf<String, Double>() }
     fun strengthOf(id: String) = strengths[id] ?: prefs.getFloat(id, 1f).toDouble().coerceIn(0.0, 1.0)
     fun applied(s: Style) = s.atStrength(strengthOf(s.id)).matches(ui.edit, ui.catalog)
 
-    var group by remember { mutableStateOf(Style.ALL.firstOrNull { applied(it) }?.group ?: Style.GROUPS.first()) }
+    // Imported styles (StyleImport.kt) after the built-in ones, under their own categories.
+    val library = remember(context) { UserLibrary.get(context) }
+    val imported by library.styles.all.collectAsState()
+    val all = Style.ALL + imported.map { it.look.toStyle(it.id, ui.edit, it.lutId) }
+    val groups = (Style.GROUPS + imported.map { it.category }).distinct()
+
+    var group by remember { mutableStateOf(all.firstOrNull { applied(it) }?.group ?: groups.first()) }
     var open by remember { mutableStateOf<String?>(null) }
     Text("一键风格", style = MaterialTheme.typography.labelLarge)
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        for (g in Style.GROUPS) FilterChip(selected = group == g, onClick = { group = g }, label = { Text(g) })
+        for (g in groups) FilterChip(selected = group == g, onClick = { group = g }, label = { Text(g) })
     }
-    val styles = Style.ALL.filter { it.group == group && ui.catalog.film(it.film) != null }
+    val styles = all.filter { it.group == group && ui.catalog.film(it.film) != null }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
@@ -275,7 +281,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         }
     }
     // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
-    val current = Style.ALL.firstOrNull { it.id == open }?.takeIf { applied(it) }
+    val current = all.firstOrNull { it.id == open }?.takeIf { applied(it) }
     if (current != null) {
         LabeledSlider("强度 · ${current.name}", strengthOf(current.id) * 100, 0.0, 100.0, 100.0, enabled, "%.0f%%") { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
