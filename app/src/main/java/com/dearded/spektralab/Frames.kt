@@ -281,7 +281,7 @@ data class FrameSpec(
             // Measured first (UI.md E.3.6): a wide or narrow print shrinks the text to fit,
             // never under MIN_TEXT_PX; past that the two columns stack, centred.
             fun col(a: String, b: String) = max(big.measureText(a), small.measureText(b))
-            val need = col(c.camera, c.film) + col(c.settings, c.date) + l.short * 0.04f
+            val need = col(c.camera, c.filmLine) + col(c.settings, c.date) + l.short * 0.04f
             val k = minOf(1f, (right - leftX) / need)
             big.textSize *= k; small.textSize *= k; gap *= k
             if (small.textSize < MIN_TEXT_PX) {
@@ -295,7 +295,7 @@ data class FrameSpec(
                 return
             }
             canvas.drawText(c.camera, leftX, mid - gap, big)
-            canvas.drawText(c.film, leftX, mid + gap + small.textSize, small)
+            canvas.drawText(c.filmLine, leftX, mid + gap + small.textSize, small)
             big.textAlign = Paint.Align.RIGHT
             small.textAlign = Paint.Align.RIGHT
             canvas.drawText(c.settings, right, mid - gap, big)
@@ -317,7 +317,12 @@ data class FrameLayout(
 data class Caption(
     val camera: String, val film: String, val settings: String, val date: String,
     val make: String = "", val exifModel: String = "", val model: String = "",
+    /** EXIF LensModel, or blank (a phone's "<model> back camera ..." is left out: it only repeats the camera). */
+    val lens: String = "",
 ) {
+    /** The soft line under the camera: the film, then the lens when there is one. */
+    val filmLine: String get() = listOf(film, lens).map { it.trim() }.filter { it.isNotEmpty() }.joinToString(" · ")
+
     companion object {
         fun of(exif: ExifCopy, filmLabel: String): Caption {
             val model = Brands.marketName(exif.model)
@@ -326,13 +331,17 @@ data class Caption(
                 .let { parts -> if (parts.size == 2 && parts[1].startsWith(parts[0], ignoreCase = true)) listOf(parts[1]) else parts }
                 .joinToString(" ").ifBlank { "Spektralab-X" }
             val settings = listOfNotNull(
-                exif.focal35()?.let { "${it}mm" },
+                // The 135 equivalent when the file gives one, else the real focal length,
+                // never labelled "equivalent" (UI.md E.3.7).
+                (exif.focal35()?.toString() ?: exif.actualFocal()?.let { "%.1f".format(java.util.Locale.ROOT, it).removeSuffix(".0") })
+                    ?.let { "${it}mm" },
                 exif.aperture()?.let { "f/$it" },
                 exif.shutter(),
                 exif.iso()?.takeIf { it > 0 }?.let { "ISO$it" },
             ).joinToString("  ")
             val date = exif.dateTimeOriginal?.take(10)?.replace(':', '.') ?: ""
-            return Caption(camera, filmLabel, settings, date, exif.make, exif.model, model)
+            val lens = exif.lensModel.takeUnless { l -> exif.model.isNotBlank() && l.contains(exif.model, ignoreCase = true) }.orEmpty()
+            return Caption(camera, filmLabel, settings, date, exif.make, exif.model, model, lens)
         }
     }
 }
@@ -416,13 +425,13 @@ object BrandCaption {
     private fun split(canvas: Canvas, b: Band, cap0: Float, marks: List<Mark>, c: Caption): Boolean {
         fun gap(cap: Float, row: MarkRow?, lines: Lines) = if (row != null && !lines.isEmpty) cap * 0.9f else 0f
         val row0 = b.row(marks, cap0)
-        val left0 = Lines(c.model, c.film, cap0, b)
+        val left0 = Lines(c.model, c.filmLine, cap0, b)
         val need = (row0?.width ?: 0f) + gap(cap0, row0, left0) + left0.width + cap0 * 2f + Lines(c.settings, c.date, cap0, b).width
         val k = minOf(1f, b.width / need)
         if (k < MIN_SIDE_BY_SIDE) return false
         val cap = cap0 * k
         val row = b.row(marks, cap)
-        val left = Lines(c.model, c.film, cap, b)
+        val left = Lines(c.model, c.filmLine, cap, b)
         var x = b.left
         row?.let { it.draw(canvas, x, b.mid, b.ink, b.logoInk); x += it.width + gap(cap, it, left) }
         left.draw(canvas, x, b.mid, alignRight = false)

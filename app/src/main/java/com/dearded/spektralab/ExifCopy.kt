@@ -42,6 +42,12 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
     fun focal35(): Int? = values[ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM]?.toIntOrNull()?.takeIf { it > 0 }
         ?: rational(ExifInterface.TAG_FOCAL_LENGTH)?.let { kotlin.math.round(it).toInt() }
 
+    /** The real focal length in mm (FocalLength), never the 35 mm equivalent; null when the file does not say. */
+    fun actualFocal(): Double? = rational(ExifInterface.TAG_FOCAL_LENGTH)
+
+    /** The lens as the camera names it, or blank. A JPEG fill ([fillMissing]) supplies it only when blank. */
+    val lensModel: String get() = values[ExifInterface.TAG_LENS_MODEL]?.trim().orEmpty()
+
     fun fNumber(): Double? = rational(ExifInterface.TAG_F_NUMBER)
 
     fun aperture(): String? = fNumber()?.let { if (it >= 10) "%.0f".format(it) else "%.1f".format(it).removeSuffix(".0") }
