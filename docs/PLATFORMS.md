@@ -1,10 +1,10 @@
 # 平台差异：Spektralab-X（安卓）与上游 SpektraLab（macOS、Windows / Linux） / Platform differences
 
-更新：2026-11-03 · 对应 `0.1.19-alpha` · 上游固定提交 `a46627d` 加本仓库 `patches/` 0001–0004
+更新：2026-11-04 · 对应 `0.1.19-alpha` · 上游固定提交 `a46627d` 加本仓库 `patches/` 0001–0005
 
 ## 简要说明 / Summary
 
-- **胶片部分是同一个引擎。** 安卓版编译的是上游自己的 C++ 引擎和 Vulkan 着色器，胶片、相纸数据也相同。改动只有 4 个补丁（[PATCHES.md](PATCHES.md)），都是为了在手机 GPU 上跑得动，不改色彩。
+- **胶片部分是同一个引擎。** 安卓版编译的是上游自己的 C++ 引擎和 Vulkan 着色器，胶片、相纸数据也相同。改动只有 5 个补丁（[PATCHES.md](PATCHES.md)），都是为了在手机 GPU 上跑得动，或让编辑和导出两条线程同时渲染，不改色彩。
 - **和上游 Linux 宿主程序比，颜色一致。** 同样的输入、同样的设置，43 组对照里导出图的平均色差是 ΔE00 0.000（RAW、合成图），手机 JPEG 是 0.016 以下。人眼大约在 ΔE00 1 才能分辨，这些差别看不出来。
 - **和 macOS 版还没有直接比过。** 手边没有 Mac。macOS 版用苹果自己的 RAW 解码器，安卓和 Windows / Linux 都用 LibRaw，所以同一个 RAW 在 macOS 上本来就会不同。这一点上游自己的 Windows / Linux 版也一样。
 - **手机的限制在尺寸，不在颜色。** 小米 12–14 的 GPU 单块显存最多 128 MiB，大约只能处理 800 万像素的画面；拖动滑块时预览只有 1024 像素。
@@ -18,14 +18,14 @@ The film engine is upstream's own code. Against upstream's Linux host the Androi
 
 | 阶段 | macOS（上游桌面版） | Windows / Linux（上游 `spektralab-host`） | 安卓（Spektralab-X） |
 |---|---|---|---|
-| RAW 解码 | Core Image `CIRAWFilter`，`boostAmount = 0`（关闭苹果的色调渲染），镜头校正按用户设置（`modern_UI/.../Import/ImageDecoder.swift:217–227`） | LibRaw 0.22.2，`decode_raw_compatible`，输出线性 ProPhoto；可选 Lensfun 镜头校正（`engine/host/image_io.cpp` `decode_linear_prophoto`） | 同一个 LibRaw 函数（`spektralab_jni.cpp` `openRaw`）。补丁 0004：DNG 双光源矩阵插值（宿主同样打了这个补丁）。补丁 0003：传感器超过工作尺寸 4 倍时用半尺寸解码（2×2 合并，不做去马赛克）。LibRaw 不用 OpenMP。没有镜头校正 |
+| RAW 解码 | Core Image `CIRAWFilter`，`boostAmount = 0`（关闭苹果的色调渲染），镜头校正按用户设置（`modern_UI/.../Import/ImageDecoder.swift:217–227`） | LibRaw 0.22.2，`decode_raw_compatible`，输出线性 ProPhoto；可选 Lensfun 镜头校正（`engine/host/image_io.cpp` `decode_linear_prophoto`） | 同一个 LibRaw 函数（`spektralab_jni.cpp` `openRaw`）。补丁 0004：DNG 双光源矩阵插值（宿主同样打了这个补丁）。补丁 0003：传感器超过工作尺寸 4 倍时用半尺寸解码（2×2 合并，不做去马赛克）。LibRaw 用 OpenMP（libomp 静态链接，线程数限制为大核数，X-Trans 保持串行），1 / 2 / 4 线程输出逐字节相同。没有镜头校正 |
 | 普通图片解码 | ImageIO / Core Image，按嵌入的 ICC 转换 | `image_io.cpp`：取下 ICC 曲线，用配置文件的 D50 色度点经 XYZ 转线性 ProPhoto；无配置文件按 sRGB（`image_io.hpp` 文件头说明这是照 ColorSync / Core Image 的做法） | `ImageDecoder` 解成 sRGB 或 Display P3 的 ARGB_8888，再由 `input_transform.cpp` 转线性 ProPhoto。这段代码在编译时从上游 `image_io.hpp/.cpp` 截取，和宿主的算法相同。其他配置文件由安卓系统先转成 sRGB 或 P3〔推断：与宿主直接读 ICC 会有小差别，未测〕 |
 | GPU 后端 | Metal，编译选项 `-fmetal-math-mode=safe`（AGENTS.md「Do not」一节） | Vulkan（桌面 GPU；没有 GPU 时用 lavapipe） | Vulkan 1.0，Adreno（小米 15S Pro 是 Mali）。补丁 0001 / 0002 把大计算拆成小批，输出不变 |
 | 精度 | fp32；`spk_math_probe` 发现快速数学就拒绝启动 | fp32；启动时探测 fma（`vulkan_gpu.cpp:313–410`），不精确就改用 Dekker 拆分乘积，拆分乘积也不精确才拒绝启动 | 同 Windows / Linux 的代码。实测 lavapipe（LLVM 19.1.7）的 fma 并不精确（探测残差得 0，应为 7.45e-11），引擎改走 Dekker 拆分乘积并正常启动，所以本仓库全部对照数字本来就走这条路。Adreno / Mali 据报告同样不精确，会走同一条路〔推断，未上真机〕。详见 [PARITY.md](PARITY.md) 第 4.4 节 |
 | 工作空间 | 编码 ProPhoto（ROMM，γ1.8） | 同左 | 同左（`Edit.openingParams`：`output_color_space` 为 `ProPhoto RGB`） |
 | 屏幕输出 | 画布纹理标记为 ROMM，由 ColorSync 转到显示器（`Canvas/MetalCanvasView.swift:765`），应用自己不做转换 | `render_view`：矩阵加裁切到 sRGB 或 Display P3，不做色域压缩（`desktop/HOST-PROTOCOL.md` 第 73–76 行） | `output_transform.cpp`：矩阵加裁切到 sRGB 或 Display P3，数学代码在编译时从上游 `engine/host/output.cpp` 截取 |
 | 导出 | CAM16-UCS 色度压缩进文件色域，关闭亮度肩部（`Canvas/ColourManagement.swift:164`） | `export_frame`：同左 | 同左，用的是同一段上游代码 |
-| 调整层（Layer 2） | `Shaders.metal` 的 `layer2`，以 0.3857（ProPhoto 中灰）为支点；有曲线和蒙版（蒙版默认关闭） | `spk_view_grade_body.glsl`：同一套算法，结束时截到 0–1 并量化到 16 位 | `layer2.cpp`：同一套算法和截断量化（第 2.3 节）。没有曲线。新增了自然饱和度、8 段 HSL、褪色 |
+| 调整层（Layer 2） | `Shaders.metal` 的 `layer2`，以 0.3857（ProPhoto 中灰）为支点；有曲线和蒙版（蒙版默认关闭） | `spk_view_grade_body.glsl`：同一套算法，结束时截到 0–1 并量化到 16 位 | `layer2.cpp`：同一套算法和截断量化（第 2.3 节）。曲线（RGB、亮度、红、绿、蓝）按上游 `view_process.cpp` 的 Fritsch–Carlson 插值移植，对照宿主导出平均 ΔE00 0.000、p99.9 ≤ 0.007、最大 ≤ 0.025。没有蒙版。新增了自然饱和度、8 段 HSL、褪色 |
 | 屏幕色彩管理 | ColorSync，按显示器的配置文件 | 桌面版（Tauri）把标记好 sRGB / P3 的像素交给 WebView，由它管理显示器〔推断：依赖 WebView 的色彩管理，未测〕 | 屏幕支持广色域时，窗口设为 `COLOR_MODE_WIDE_COLOR_GAMUT`，位图标记 Display P3（`DisplayColor.kt:22–30`）；否则用 sRGB |
 | 导出格式 | JPEG、8 位 PNG、16 位 TIFF、DI 包（`Export/Exporter.swift:29`） | tiff16、tiff8、JPEG、PNG；色彩空间可选 sRGB、Display P3、ProPhoto；ICC 由宿主生成；另有 DI / Cineon、`.cube` | JPEG（sRGB，或开启广色域时为 P3，质量 95）和 16 位 TIFF（只有 sRGB，嵌入引擎自带的 `io/sRGB.icc`） |
 | 预览尺寸 | 预览默认 2560（`Session.swift:778`） | 引擎默认 `preview_long_edge = 1600`（`params.hpp:452`） | 拖动时 1024，松手后 3400（`Model.kt` `LIVE_EDGE`，[ARCHITECTURE.md](ARCHITECTURE.md)） |
@@ -101,7 +101,6 @@ macOS 版用苹果的 `CIRAWFilter`，其相机色彩矩阵、去马赛克和高
 
 | 功能 | 上游 | 安卓 |
 |---|---|---|
-| Layer 2 曲线（亮度、RGB、单通道） | 有 | 没有 |
 | 蒙版、色调蒙版、放大机控制 | 代码在，macOS 默认关闭（`masks`、`toneMask`、`enlarger` 为 false） | 没有 |
 | DI / Cineon 导出、打印 LUT（`.cube`） | 有 | 没有 |
 | 半格双拼（`open_pair`） | 有 | 没有 |
