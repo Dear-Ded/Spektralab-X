@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
             // Always dark: judging a print against a white UI skews it.
-            SpektraTheme { CoachHost { EditorScreen(viewModel) } }
+            SpektraTheme { CoachHost { AppScreens(viewModel) } }
         }
     }
 

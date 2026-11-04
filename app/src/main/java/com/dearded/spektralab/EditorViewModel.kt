@@ -182,6 +182,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         launchOpen(uri, wb = null)
     }
 
+    /** The photo the editor has open (or is opening), for the light table's link to it. */
+    val openUri: Uri? get() = lastUri
+
+    /**
+     * Light table hook: opens [uri] with a saved [edit] kept whole, geometry
+     * and RAW white balance included, the way a white-balance re-decode keeps
+     * it. Undo starts over and the EXIF is read for the new photo.
+     */
+    fun openSaved(uri: Uri, edit: Edit, wbK: Double, wbTint: Double) {
+        if (!_ui.value.ready || _ui.value.exporting) { open(uri); return }
+        lastUri = uri
+        val previous = openJob
+        openJob = viewModelScope.launch {
+            previous?.cancelAndJoin()
+            sourceExif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
+            wanted = _ui.value.catalog.normalize(edit)
+            clearHistory()
+            doOpen(uri, wbK to wbTint)
+        }
+    }
+
     private var openJob: kotlinx.coroutines.Job? = null
 
     /**

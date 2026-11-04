@@ -150,7 +150,18 @@ class FrameStore private constructor(private val context: Context) {
     fun byId(id: String) = _frames.value.firstOrNull { it.id == id }
 
     /** True while a frame on the table reads [uri], so its grant must not be released by anyone else. */
-    fun holds(uri: String) = _frames.value.any { it.uri == uri }
+    fun holds(uri: String): Boolean {
+        load()
+        return _frames.value.any { it.uri == uri }
+    }
+
+    /** Records [id]'s upright shape once the editor has opened it (most RAWs report none before). */
+    fun setSize(id: String, width: Int, height: Int): Unit = synchronized(lock) {
+        val f = byId(id) ?: return
+        if (width <= 0 || height <= 0 || (f.width == width && f.height == height)) return
+        _frames.update { list -> list.map { if (it.id == id) it.copy(width = width, height = height) else it } }
+        writeIndex()
+    }
 
     /**
      * Adds [uris] (the photo picker's), newest capture first. A photo already
