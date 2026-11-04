@@ -41,7 +41,7 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab
 胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm
 胶片建模基于 spektrafilm（film modeling powered by spektrafilm）
-RAW 解码：LibRaw（LGPL-2.1）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
+RAW 解码：LibRaw（LGPL-2.1）；极致渲染 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
 本应用是非官方版本，与 SpektraLab 的作者和所有者、小米公司均无关联，未获其背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。
 
 ## English
