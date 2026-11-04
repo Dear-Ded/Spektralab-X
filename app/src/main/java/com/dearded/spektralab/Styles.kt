@@ -244,7 +244,7 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         for (g in Style.GROUPS) FilterChip(selected = group == g, onClick = { group = g }, label = { Text(g) })
     }
     val styles = Style.ALL.filter { it.group == group && ui.catalog.film(it.film) != null }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
             val ring by animateColorAsState(if (on) Palette.Amber else Palette.OutlineSoft, Motion.defaultEffects(), label = "ring")

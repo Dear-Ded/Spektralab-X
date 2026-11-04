@@ -141,6 +141,11 @@ fun EditorScreen(vm: EditorViewModel) {
         ui.detail != null || ui.busy != null
     LaunchedEffect(ui.source) { chrome = true }
     SystemBarsHidden(!showChrome)
+    // The first-run guide waits until there is a photo and nothing over it.
+    val coach = LocalCoach.current
+    val coachAllowed = ui.hasImage && showChrome && ui.busy == null && ui.error == null &&
+        !ui.showQueue && ui.detail == null && !showSettings && !ui.exporting
+    androidx.compose.runtime.SideEffect { coach?.allowed = coachAllowed }
     androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
     val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
     val toggleChrome: () -> Unit = {
@@ -202,7 +207,7 @@ fun EditorScreen(vm: EditorViewModel) {
                         androidx.compose.material3.Button(
                             onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(36.dp),
+                            modifier = Modifier.height(36.dp).coachAnchor(CoachStep.SAVE),
                         ) {
                             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
@@ -374,7 +379,7 @@ private fun Preview(
                 back = front; front = bitmap; fade.snapTo(0f)
                 try { fade.animateTo(1f, Motion.defaultEffects()) } finally { back = null }
             }
-            Box(gestures) {
+            Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, Modifier.fillMaxSize())
@@ -488,8 +493,10 @@ private fun Controls(ui: UiState, vm: EditorViewModel, modifier: Modifier) {
                         PresetRow(ui, vm, enabled)
                         StockPicker("胶片", ui.catalog.films, e.film, enabled) { vm.pickFilm(it) }
                         SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                        LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
-                            vm.update(e.copy(exposureEv = it))
+                        Box(Modifier.coachAnchor(CoachStep.RESET)) {
+                            LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(exposureEv = it))
+                            }
                         }
                         ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
                             WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
@@ -1067,6 +1074,9 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                 var copied by remember { mutableStateOf(false) }
                 TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
                     Text(if (copied) "已复制诊断信息" else "复制诊断信息")
+                }
+                LocalCoach.current?.let { c ->
+                    TextButton(onClick = { c.replay(); onDismiss() }) { Text("重新查看引导") }
                 }
                 Spacer(Modifier.height(12.dp))
                 Text("关于", style = MaterialTheme.typography.labelLarge)
