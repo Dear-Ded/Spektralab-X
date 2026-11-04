@@ -261,3 +261,29 @@ fma 探测检查（第 4.4 节，约 2 分钟）：
 cd $P && UP=$U B=$P/build-host A=src/spk_android R=build-host/engine/resources IN=run1 OUT=fma \
     LP_NUM_THREADS=2 bash src/fma_check.sh
 ```
+
+## 6. 分条执行（striped）与整幅渲染
+
+目的：确认上游的分条执行（`settings.striped`、`strip_rows`）出图和整幅渲染逐位一致，作为“极致渲染”的前提。
+
+方法：`tools/stability/striped.cpp`，链接打了 0001–0005 补丁的上游引擎（云主机 lavapipe）。RAW 用上游 `decode_raw_compatible` 解一次；每次渲染都新建引擎和会话，渲染 `full` 档，对可见的 RGBA16 像素取 FNV-1a 哈希。颗粒和光晕关闭（两者是随机的）。参数：Portra 400 / Supra Endura，自动曝光 balanced。
+
+| 输入 | 条高（行） | 哈希 | 耗时 | GPU 池峰值 |
+|---|---|---|---|---|
+| Leica Q，缩到 1024×683 | 整幅 | `8b966d8d34223f17` | 509 ms | 43 MB |
+| | 256 / 97 / 7 | 相同 | 540 / 555 / 670 ms | 43 / 41 / 40 MB |
+| Leica Q，原始 6016×4016（24.2 MP） | 整幅 | `895819ad50c20496` | 12.8 s | 1106 MB |
+| | 1024 / 509 | 相同 | 13.8 / 13.8 s | 1126 / 1126 MB |
+
+结论：
+- 所有条高（含除不尽的 97、509 和极窄的 7 行）都和整幅逐位一致。
+- **峰值内存没有下降。** 这个版本的上游里，`choose_strip_height` 不看内存预算，每段可分条的计算结束后结果仍拷回整幅大小的平面（`band_into`），所以整幅平面照样要分配。分条只把一次长提交拆成多次短提交，能缓解 GPU 看门狗，不能突破单缓冲上限（Adreno 7xx 为 128 MiB，24 MP 一个 RGB float 平面就要 290 MB）。
+- 因此手机上的“原始分辨率”不能只靠打开 `striped` 实现，需要应用层分块（见路线图 M5 的衍生项目借鉴）。
+
+复现：
+
+```bash
+c++ -std=c++20 -O2 -fopenmp -I$UP/engine/include -I$UP/engine/src -I$SRC tools/stability/striped.cpp $SRC/resize.cpp \
+    -Wl,--start-group $B/engine/lib*.a -Wl,--end-group -lpthread -ldl -o striped
+./striped $B/engine/resources '<RAW>' 0 '{"film_stock":"kodak_portra_400","print_stock":"kodak_supra_endura","grain_active":false,"glare_active":false,"auto_exposure":true,"auto_exposure_method":"balanced"}' 1024 509
+```

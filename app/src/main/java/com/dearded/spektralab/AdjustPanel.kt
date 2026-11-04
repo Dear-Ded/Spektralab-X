@@ -49,6 +49,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 
+    Group("调色盘")
+    PalettePad(l, enabled, onDrag = vm::setInteracting) { set(it) }
+
     Group("白平衡")
     Adj("色温", l.temperature, -100.0, 100.0, enabled) { set(l.copy(temperature = it)) }
     Adj("色调", l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
