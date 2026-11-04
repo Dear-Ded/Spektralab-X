@@ -90,6 +90,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -152,7 +155,9 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     val barsShown = showChrome && !dragging
     // UI2.md 2.1: tapping the open entry again folds the panel down to the toolbar,
     // so the photo gets the screen; any entry opens it again.
-    var panelOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
+    // Three heights (UI2.md 2.1): folded to the toolbar, half (the default), tall for every parameter.
+    var panelLevel by androidx.compose.runtime.saveable.rememberSaveable { mutableIntStateOf(1) }
+    val panelOpen = panelLevel > 0
     val recede by androidx.compose.animation.core.animateFloatAsState(
         if (dragging) 0.15f else 1f, Motion.defaultEffects(), label = "recede")
     // The first-run guide waits until there is a photo and nothing over it.
@@ -320,10 +325,54 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    val panelH by androidx.compose.animation.core.animateDpAsState(
-                        if (panelOpen) boxHeight * 0.42f else 80.dp, Motion.defaultSpatial(), label = "panel")
-                    Controls(ui, vm, saveButton, panelOpen, { panelOpen = it },
-                        Modifier.fillMaxWidth().height(panelH).chrome(showChrome))
+                    // The handle follows the finger 1:1; on release the panel springs to the
+                    // nearest of its three heights, a fling carrying it one further.
+                    val heights = listOf(96.dp, boxHeight * 0.42f, boxHeight * 0.75f)
+                    var dragDy by remember { mutableFloatStateOf(0f) }
+                    var handleDown by remember { mutableStateOf(false) }
+                    val density = androidx.compose.ui.platform.LocalDensity.current
+                    val target = heights[panelLevel]
+                    val animated by androidx.compose.animation.core.animateDpAsState(
+                        target, Motion.defaultSpatial(), label = "panel")
+                    val panelH = if (handleDown) (target - with(density) { dragDy.toDp() })
+                        .coerceIn(heights.first(), heights.last()) else animated
+                    val view = androidx.compose.ui.platform.LocalView.current
+                    Column(Modifier.fillMaxWidth().height(panelH).chrome(showChrome)) {
+                        Box(
+                            Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)
+                                .pointerInput(heights) {
+                                    val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
+                                    androidx.compose.foundation.gestures.detectVerticalDragGestures(
+                                        onDragStart = { dragDy = 0f; handleDown = true; tracker.resetTracking() },
+                                        onDragEnd = {
+                                            val v = tracker.calculateVelocity().y
+                                            val now = (heights[panelLevel] - with(density) { dragDy.toDp() }).toPx()
+                                            var best = heights.indices.minByOrNull { kotlin.math.abs(heights[it].toPx() - now) }
+                                                ?: panelLevel
+                                            if (kotlin.math.abs(v) > 1500f && best == panelLevel)
+                                                best = (panelLevel + if (v < 0) 1 else -1).coerceIn(0, heights.lastIndex)
+                                            if (best != panelLevel) view.tick()
+                                            panelLevel = best
+                                            handleDown = false; dragDy = 0f
+                                        },
+                                        onDragCancel = { handleDown = false; dragDy = 0f },
+                                    ) { change, dy ->
+                                        change.consume()
+                                        tracker.addPosition(change.uptimeMillis, change.position)
+                                        dragDy += dy
+                                    }
+                                }
+                                .semantics {
+                                    contentDescription = "面板高度"
+                                    stateDescription = listOf("收起", "半屏", "展开")[panelLevel]
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Box(Modifier.width(36.dp).height(4.dp).background(Palette.Outline, RoundedCornerShape(2.dp)))
+                        }
+                        Controls(ui, vm, saveButton, panelOpen, { panelLevel = if (it) maxOf(1, panelLevel) else 0 },
+                            Modifier.fillMaxWidth().weight(1f))
+                    }
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -501,7 +550,7 @@ private fun Preview(
 
 /**
  * A pill over the photo: a dark scrim so it reads on a white sky as well as
- * a black one; "on" is shown by fill and an amber label, not colour alone.
+ * a black one; "on" is shown by fill and a near-white label, not colour alone.
  * Pressed it shrinks to 0.96 (UI.md 1, 按钮按下).
  */
 @Composable

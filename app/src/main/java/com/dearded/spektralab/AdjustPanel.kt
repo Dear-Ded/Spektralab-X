@@ -186,7 +186,7 @@ internal fun PageColumn(content: @Composable () -> Unit) = Column { content() }
 /** No photo yet: one obvious action in the middle, not directions to a corner. */
 @Composable
 internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
-    // UI.md 2.1: one amber action in the middle, the light table as the quiet second.
+    // UI2.md 1.1: one near-white primary action in the middle, the light table as the quiet second.
     val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val pressed by press.collectIsPressedAsState()
     val scale by androidx.compose.animation.core.animateFloatAsState(
