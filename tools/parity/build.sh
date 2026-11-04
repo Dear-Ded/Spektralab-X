@@ -6,9 +6,9 @@
 # B is a build of upstream's engine with SPEKTRALAB_BUILD_NATIVE_RAW=ON (the same
 # configure that builds spektralab-host, see docs/PARITY.md). SRC holds this
 # directory's spk_android.cpp plus the app's output_transform.*, layer2.* and
-# resize.* (app/src/main/cpp) and upstream_output_math.inc, generated the way
-# app/src/main/cpp/CMakeLists.txt generates it. upstream_input_math.inc is
-# generated here from upstream's image_io.{hpp,cpp}, with the same markers.
+# resize.* and input_transform.* (app/src/main/cpp). upstream_output_math.inc
+# and upstream_input_math.inc are generated here from upstream's output.cpp and
+# image_io.{hpp,cpp}, with the markers app/src/main/cpp/CMakeLists.txt uses.
 set -euo pipefail
 UP="${UP:?upstream tree}"; B="${B:?upstream build dir}"; SRC="${SRC:-$(dirname "$0")}"
 E="$B/engine"
@@ -21,6 +21,10 @@ assert a >= 0 and b > a, f"{sys.argv[1]} changed: cannot find markers"
 sys.stdout.write(t[a:b])
 PY
 }
+{ echo "// Generated from $UP/engine/host/output.cpp. Do not edit."
+  slice "$UP/engine/host/output.cpp" "static inline float spow" "bool OutputTransform::fetch"
+  slice "$UP/engine/host/output.cpp" "static inline void cam16ucs_into" "template <typename F>"
+} > "$SRC/upstream_output_math.inc"
 { echo "// Generated from $UP/engine/host/image_io.{hpp,cpp}. Do not edit."
   slice "$UP/engine/host/image_io.hpp" "struct Trc {" "bool parse_icc("
   slice "$UP/engine/host/image_io.cpp" "double Trc::decode" "static uint32_t be32"

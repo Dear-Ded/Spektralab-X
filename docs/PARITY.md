@@ -182,7 +182,49 @@ JPEG 导出平均 ≤ 0.016，p99.9 ≤ 0.072，最大 ≤ 0.24。
 结论：不需要引擎补丁。fma 不精确的 GPU 上，引擎会正常启动，并走 lavapipe 上已逐像素验证过的拆分乘积路径。
 还没做的：真机上从设备信息页读 `math_mode`，确认 Adreno 报告 “exact Dekker split product”（或 “fused fma”）。
 
+### 4.5 颗粒、眩光、光晕全开：按统计量比较
+
+前面的用例都关了颗粒和眩光（随机项，逐像素比较只会测到噪声）；光晕是确定的，一直开着（引擎默认）。
+`stoch_*` 用例把三者全打开，按上游 `engine/tests/parity_metal_vulkan.py` 的 `grain_*` 用例的办法比较统计量：
+32 px 方块的均值差中位数、标准差相对差中位数、全图均值差（8 位码值），再加一项我们自己的：
+细节（亮度减 9 px 方框均值）径向功率谱的 12 个频段，每段功率与宿主的相对差。
+
+合格线（`host_parity.py` 的 `STATS_BARS`）：方块均值差中位数 ≤ 1.0、方块标准差相对差中位数 ≤ 0.15、
+全图均值差 ≤ 0.5（这三条是上游的），功率谱每段相对差 ≤ 0.15。
+`stoch_ctrl_synth_portra` 是反向对照：本应用一侧把 `grain_amount` 改成 1.3，**必须**不过线，用来证明这些线能抓住颗粒强度的变化。
+
+结果（run3，云主机 lavapipe，2026-11-04，导出 sRGB）：
+
+| 用例 | 方块均值差中位数 | 方块标准差相对差 | 全图均值差 | 功率谱最大相对差 | 标准差（本应用 / 宿主） | 结论 |
+|---|---|---|---|---|---|---|
+| stoch_synth_portra | 0.000 | 0.000 | 0.000 | 0.000 | 15.51 / 15.51 | 通过 |
+| stoch_dunes_portra | 0.000 | 0.000 | 0.000 | 0.000 | 15.45 / 15.45 | 通过 |
+| stoch_fruit_cine2383 | 0.000 | 0.000 | 0.000 | 0.000 | 14.40 / 14.40 | 通过 |
+| stoch_lake_trix | 0.000 | 0.000 | 0.000 | 0.000 | 27.69 / 27.69 | 通过 |
+| stoch_jpg_fruit_srgb_portra | 0.010 | 0.001 | 0.025 | 0.000 | 14.87 / 14.87 | 通过 |
+| stoch_ctrl_synth_portra（反向对照） | 0.120 | **0.234** | 0.071 | **0.621** | 15.57 / 15.51 | 按预期不过线 |
+
+**发现**：四个浮点 / RAW 输入的用例，颗粒和眩光开着也逐像素一致（导出 ΔE00 平均 0.000，最大 ≤ 0.007，和关闭时一样）。
+原因：引擎的随机种子每个会话从同一个常数起步（上游 `pipeline/pipeline.hpp:839` `rng_state_` 初值，
+`pipeline.cpp:84` 的 splitmix64 `fresh_seed`），新会话第一次渲染得到的就是同一份颗粒和眩光。所以统计量全为 0，
+这比统计量接近更强。同一会话里再渲染一次会换一份颗粒，那时只有统计量还能比，所以统计比较留着，
+并由反向对照证明它管用（标准差差 23 %、功率谱差 62 %，都远超 15 % 的线）。
+JPEG 用例的逐像素差（导出平均 0.065，p99.9 2.6）比颗粒关闭时（0.009）大：输入上 0.01 级的差别经过颗粒放大，
+但颗粒的统计量与宿主一致（标准差相对差 0.001）。
+
 ## 5. 复现
+
+**一键脚本**：`scripts/parity.sh [工作目录]`（默认 `build/parity`）。在 Linux x64 上从零开始：按固定提交下载上游并打补丁，
+用上游自己的脚本装三组编解码器，编译 `spektralab-host` 和本应用一侧（`tools/parity/build.sh`），按 `docs/SAMPLES.md`
+下载 CC0 RAW 并校验 SHA-256，渲染全部用例（每个用例渲染完立即评分并删掉像素文件），按第 2 节和第 4.5 节的线检查，
+有不过线的就以非零状态退出。`THREADS=2` 控制线程数，`ONLY="stoch_ jpg_"` 只跑部分用例，`FMA=1` 另跑第 4.4 节的检查。
+约需 1.5 GB 磁盘、4 核上 40–60 分钟。要放进 CI 的可选 job，调用这一个脚本即可（需要 lavapipe：`mesa-vulkan-drivers libvulkan1`）。
+
+`host_parity.py render --prune` 边渲染边评分，只留每个用例的 `grade.json`；`grade --check` 按合格线检查，不过线时退出码为 1。
+
+下面是逐步的手动做法：
+
+云主机上（目录可改）：
 
 云主机上（目录可改）：
 
@@ -198,7 +240,7 @@ python $U/engine/setup-lens-codecs.py --sources $P/deps/lens-codecs --build $P/b
 cmake -S $U -B $P/build-host -G Ninja -DCMAKE_BUILD_TYPE=Release -DSPEKTRALAB_BUILD_NATIVE_RAW=ON -DSPEKTRALAB_BUILD_HOST=ON   -DSPEKTRALAB_REQUIRE_VULKAN=ON -DSPEKTRALAB_STATIC_RUNTIME=ON -DSPEKTRALAB_DEPS_DIR=$U/build/deps   -DSPEKTRALAB_CODECS_DIR=$P/deps/export-codecs -DSPEKTRALAB_INPUT_CODEC_PREFIX=$P/deps/input-codecs/install-linux   -DSPEKTRALAB_LENS_PREFIX=$P/deps/lens-codecs/install-linux -DBUILD_TESTING=OFF
 ninja -C $P/build-host spektralab-host
 # 3. 本应用一侧：把 tools/parity/spk_android.cpp、host_parity.py 和 app/src/main/cpp 的
-#    output_transform.*、layer2.*、resize.* 以及 upstream_output_math.inc（CMakeLists.txt 的生成方式）放进 $P/src
+#    output_transform.*、input_transform.*、layer2.*、resize.* 放进 $P/src（两个 .inc 由 build.sh 从上游生成）
 UP=$U B=$P/build-host SRC=$P/src bash tools/parity/build.sh
 # 4. 渲染（约 5 分钟，45 个用例）与评分
 cd $P && python3 src/host_parity.py render --host build-host/engine/host/spektralab-host   --resources build-host/engine/resources --android src/spk_android --up $U --raw /data/home/spk/samples/raw --out run1 --threads 2
@@ -211,7 +253,7 @@ python3 src/host_parity.py grade run1 --where synth_portra/host_view_srgb   # �
 旧的 `run.sh` / `grade.py` / `spk_parity.cpp` 只比较本应用自己的几条路径，保留作历史对照。
 
 磁盘有限时可按 `--only` 分批渲染、评分后删除用例目录（一次完整渲染约 4 GB）。
-`build.sh` 从上游 `image_io.*` 自己生成 `upstream_input_math.inc`，并编译 `input_transform.cpp`。
+`build.sh` 从上游 `output.cpp`、`image_io.*` 生成 `upstream_output_math.inc` 和 `upstream_input_math.inc`，标记与 `CMakeLists.txt` 相同。
 
 fma 探测检查（第 4.4 节，约 2 分钟）：
 
