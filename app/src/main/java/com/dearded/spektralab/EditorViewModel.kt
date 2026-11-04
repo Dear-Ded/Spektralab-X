@@ -865,6 +865,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /**
+     * A just-imported film or paper opened once in the engine (warmUp builds its
+     * tables): null when it works, the engine's error otherwise, so the import
+     * can be deleted again.
+     */
+    suspend fun trialStock(film: String, paper: String): String? = withContext(EngineThread.dispatcher) {
+        if (engine == 0L) return@withContext "引擎还没准备好"
+        if (NativeEngine.warmUp(engine, film, paper)) null else NativeEngine.lastError().ifEmpty { "未知错误" }
+    }
+
     /** The open edit as a .spklook in the cache, for the share sheet; null when there is no photo. */
     suspend fun exportLook(name: String): File? {
         val state = _ui.value
