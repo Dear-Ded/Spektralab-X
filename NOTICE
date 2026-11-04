@@ -3,6 +3,17 @@ https://github.com/Dear-Ded/Spektralab-X
 
 Copyright (C) 2026 Spektralab-X contributors
 
+非官方版本：Spektralab-X 是 SpektraLab 的独立安卓衍生项目，与 SpektraLab 的作者和
+所有者无关联，未获其认可或背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。
+胶片建模基于 spektrafilm（film modeling powered by spektrafilm，
+https://github.com/andreavolpato/spektrafilm）。
+
+Unofficial: Spektralab-X is an independent Android derivative of SpektraLab. It
+is not affiliated with, approved by or endorsed by the authors or owners of
+SpektraLab. SpektraLab(TM) and its icon are trademarks of their owner
+(registration pending). Film modeling powered by spektrafilm
+(https://github.com/andreavolpato/spektrafilm).
+
 本程序是自由软件，以 GNU 通用公共许可证第 3 版（GPL-3.0）发布，完整文本见 LICENSE。
 本程序不提供任何担保。下面的附加条款按 GPL-3.0 第 7 条添加，只适用于本项目
 自己添加的内容（安卓端代码、文档、图标与界面文案），不适用于上游代码和第三方内容。
@@ -56,14 +67,17 @@ redistribute this program, including for a fee.
 3. 名称与图标（GPL-3.0 第 7(e) 条）
    本许可不授予“Spektralab-X”名称和本项目图标的商标权利。公开发布的修改
    版本请使用自己的名称、图标和应用包名（applicationId）。可以说明“基于
-   Spektralab-X”。“SpektraLab”名称由上游项目管理。
+   Spektralab-X”。SpektraLab™ 及其图标是其所有者的商标（注册中），不在本许可
+   范围内；修改版本不得冒充 SpektraLab 官方版本或暗示得到其背书。
 
    Names and icon (GPL-3.0 section 7(e))
    This licence grants no trademark rights to the name "Spektralab-X"
    or to this project's icon. A modified version you publish should use its
    own name, icon and package name (applicationId). Saying it is "based on
-   Spektralab-X" is fine. The name "SpektraLab" is managed by the
-   upstream project.
+   Spektralab-X" is fine. SpektraLab(TM) and its icon are trademarks of
+   their owner (registration pending) and are outside this licence; a
+   modified version must not pass itself off as an official SpektraLab build
+   or imply its endorsement.
 
 
 二、分发者的源码义务 / Source obligations of distributors
@@ -156,6 +170,8 @@ files; each source is listed in docs/LOGOS.md. See LICENSE-LOGOS.md in that
 directory. Rights holders who object: please open an issue and we will remove
 the logo promptly.
 
-本项目与 SpektraLab 上游、小米公司均无关联。“小米”“骁龙”“Adreno”是各自所有者的商标。
-Not affiliated with the SpektraLab project or with Xiaomi. Xiaomi, Snapdragon
-and Adreno are trademarks of their owners.
+本项目与 SpektraLab 的作者和所有者、小米公司均无关联，未获其背书。SpektraLab™ 是其
+所有者的商标；“小米”“骁龙”“Adreno”是各自所有者的商标。
+Not affiliated with or endorsed by the authors and owners of SpektraLab, or by
+Xiaomi. SpektraLab(TM) is a trademark of its owner; Xiaomi, Snapdragon and
+Adreno are trademarks of their owners.

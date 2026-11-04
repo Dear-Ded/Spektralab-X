@@ -8,6 +8,7 @@
 
 Your RAW and phone photos are "exposed" onto film from measured characteristic curves and spectral sensitivities, developed, and printed onto paper.<br>
 Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flagships (Snapdragon / Adreno) · free and open source<br>
+Film modeling powered by [spektrafilm](https://github.com/andreavolpato/spektrafilm)<br>
 **Free, no ads, no in-app purchases; online only to check for updates, and your photos never leave the phone.**
 
 [简体中文](README.md) | English
@@ -36,6 +37,9 @@ Unofficial Android derivative of SpektraLab · tuned for Xiaomi's numbered flags
 
 > [!WARNING]
 > **Not yet fully tested on real phones.** An early build was tried once on one phone; every release since has only been built by CI and tested on a cloud machine. Expect crashes, wrong colours or slow renders, and please [report them](#reporting-problems) with the in-app diagnostics.
+
+> [!NOTE]
+> **This is not an official SpektraLab build.** Spektralab-X is an independently developed Android derivative. It is not affiliated with, approved by or endorsed by the authors or owners of SpektraLab. SpektraLab™ and its icon are trademarks of their owner (registration pending). For the desktop app, use the [upstream repository](https://github.com/JamesQiu2005/SpektraLab).
 
 <p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="Sample: neutral decode vs Kodak Portra 400"></p>
 
@@ -351,7 +355,9 @@ The code in this repository is released under [GPL-3.0](LICENSE), like upstream,
 
 The design draws on lessons from two other Android ports: [SAINTTaiYi/SpektraLab-Android](https://github.com/SAINTTaiYi/SpektraLab-Android) and [thetechgeekko/Spektrafilm-android](https://github.com/thetechgeekko/Spektrafilm-android).
 
-Not affiliated with the SpektraLab project or with Xiaomi. The name "SpektraLab" is managed by the upstream project; Xiaomi, Snapdragon and Adreno are trademarks of their owners.
+Film modeling powered by [spektrafilm](https://github.com/andreavolpato/spektrafilm).
+
+This is an unofficial derivative, not affiliated with or endorsed by the authors and owners of SpektraLab, or by Xiaomi. SpektraLab™ and its icon are trademarks of their owner (registration pending); Xiaomi, Snapdragon and Adreno are trademarks of their owners.
 
 <div align="center">
 
