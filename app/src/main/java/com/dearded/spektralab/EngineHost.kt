@@ -67,6 +67,26 @@ class EngineHost(private val app: Application) {
     @Volatile var lastInteraction = 0L
 
     /**
+     * Pixels of the export render in flight on ExportThread, 0 when none.
+     * Two large renders at once double the GPU pool's peak (upstream issue
+     * #62: a thumbnail render on top of a full one), so the editor's sharp
+     * preview waits for a large one ([yieldToExport]); its live tier does not.
+     */
+    @Volatile var exportRenderPixels = 0L
+
+    /**
+     * Editor, before its 3400 px preview render: waits while an export of
+     * more than [LARGE_EXPORT_PIXELS] is rendering, for at most [maxMs] (the
+     * preview then renders anyway). Returns at once when none is.
+     */
+    suspend fun yieldToExport(maxMs: Long = 20_000L) {
+        val until = android.os.SystemClock.uptimeMillis() + maxMs
+        while (exportRenderPixels > LARGE_EXPORT_PIXELS && android.os.SystemClock.uptimeMillis() < until) {
+            kotlinx.coroutines.delay(100)
+        }
+    }
+
+    /**
      * Bumped each time [recover] replaces the engine. A photo open on the old
      * engine cannot render again: its editor releases it, calls [start] for
      * the new engine and reopens the photo.
@@ -160,6 +180,11 @@ class EngineHost(private val app: Application) {
         // open would do the same work.
         if (film.isNotEmpty() && !NativeEngine.warmUp(handle, film, paper)) events.add("warm up failed: ${NativeEngine.lastError()}")
         return Ready(handle, dir, catalog, device, NativeEngine.capabilities(handle), reused = false).also { ready = it }
+    }
+
+    companion object {
+        /** An export this large makes the editor's sharp preview wait ([yieldToExport]): 12 MP and up. */
+        const val LARGE_EXPORT_PIXELS = 12_000_000L
     }
 }
 

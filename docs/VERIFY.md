@@ -71,3 +71,18 @@ JPEGs exported by the official build carry `Spektralab-X <version>` in the EXIF 
 - Certificate mismatch: not an official build. It may be someone's modified version (allowed by GPL-3.0, though it should be renamed and come with source) or it may have been tampered with. Uninstall it and download again from Releases.
 - If you paid for it: the official build is free; ask the seller for a refund.
 - A build you compiled yourself is debug-signed, so a different certificate is expected, and it cannot install over the official build.
+
+## 稳定性改动的真机待验 / Stability changes still to check on a phone
+
+下面几项只能在真机上确认，CI 和云主机（软件 Vulkan）测不到。结果请附上 **设置 → 复制诊断信息**。
+
+These can only be confirmed on a real phone; CI and the cloud host (software Vulkan) cannot reach them. Please attach **Settings → Copy diagnostics**.
+
+| 项目 / Item | 怎么验 / How | 期望 / Expected |
+|---|---|---|
+| 单缓冲上限实测 / Storage-range probe | 首次启动后看诊断里的“单缓冲上限（实测 …）” | 实测值不超过驱动报告值；Adreno 7xx 为 128 MB；探针失败或崩溃后第二次启动显示“未实测，按保守值” |
+| 设备丢失锁存 / Device-lost latch（补丁 0008） | 大图导出时触发 GPU 重置（如 Adreno 上 44.8 MP 以上） | 事件日志只有一次 `VkResult -4` 后紧接 “replacing the engine”，任务降一档完成或明确失败，不卡死 |
+| 片边画布上限 / Film-edge canvas cap | 开胶片边框导出 45 MP 以上照片 | 不掉设备；导出尺寸约为 42 MP ÷ 1.6 |
+| 大图导出时预览让路 / Preview yields to a large export | 导出 24 MP 以上时拖动滑块、松手 | 拖动流畅；松手后清晰预览最多等 20 秒，不和导出同时渲染 |
+| 内存分档 / Memory tiers | 8 GB 机型连续导出全尺寸 | 诊断里 VmHWM 稳定，不被系统杀；需要时日志有 “memory tier … MP -> … MP” |
+| HyperOS 上 `clear_refs` | 导出后看日志的峰值一行 | 不带 “(process peak)”；带了说明系统拒绝重置，峰值是整个进程的 |

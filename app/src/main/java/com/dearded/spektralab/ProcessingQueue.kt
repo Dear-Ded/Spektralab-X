@@ -480,6 +480,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         prefs.edit().putFloat("peak_bpp", next.toFloat()).apply()
     }
 
+    /**
+     * The frame's pixel cap when the film edge is on: the canvas (frame plus
+     * rebate) must fit [cap] and DeviceProfile.MAX_CANVAS_PIXELS, so the frame
+     * gets that divided by [CANVAS_AREA]. A cap of 0 (none) still gets the
+     * ceiling: the canvas is one plane however the job was sized.
+     */
+    private fun frameCapForCanvas(cap: Long): Long {
+        val canvas = if (cap > 0) min(cap, DeviceProfile.MAX_CANVAS_PIXELS) else DeviceProfile.MAX_CANVAS_PIXELS
+        return (canvas / CANVAS_AREA).toLong()
+    }
+
     /** One working size down, and 60 % of the pixel cap. */
     private fun smaller(job: ProcessingJob): ProcessingJob {
         val edge = DeviceProfile.EDGES.filter { job.workingEdge <= 0 || it < job.workingEdge }.maxOrNull()
@@ -522,6 +533,20 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         else -> "无像素"
     }
 
+    /**
+     * Runs the export's render with its size published to the editor
+     * (EngineHost.exportRenderPixels), so a large one is not overlapped by the
+     * editor's sharp preview. Cleared however the render ends.
+     */
+    private suspend fun <T> rendering(job: ProcessingJob, body: suspend () -> T): T {
+        host.exportRenderPixels = renderedPixels(job)
+        try {
+            return body()
+        } finally {
+            host.exportRenderPixels = 0L
+        }
+    }
+
     /** Records the pending gallery entry before a byte is written. Any thread. */
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
@@ -538,9 +563,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
         step("读取照片", 0.05f)
         val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri, fillKey = Uri.parse(job.uri)) }.withLocation(ExifLocation.decode(job.location))
-        // The film edge lays the frame on a canvas up to 1.6x its area, and that
-        // canvas is one GPU buffer (128 MiB on Adreno 7xx): decode a little smaller.
-        val maxPixels = if (edit.filmEdge && job.maxPixels > 0) job.maxPixels * 10 / 16 else job.maxPixels
+        // The film edge lays the frame on a canvas up to CANVAS_AREA times its
+        // area, and the canvas, not the frame, is the one GPU plane that has to
+        // fit the buffer cap and the 42 MP ceiling (45.75 MP + a 135 edge is
+        // 69.3 MP and took a device down, SAINTTaiYi dd7bd70). A job with no cap
+        // still gets the ceiling here.
+        val maxPixels = if (edit.filmEdge) frameCapForCanvas(job.maxPixels) else job.maxPixels
         // TIFF carries the bundled sRGB profile, so only a JPEG goes wide.
         val wide = job.wideGamut && job.format == ExportFormat.JPEG
         val outSpace = if (wide) "Display P3" else "sRGB"
@@ -605,8 +633,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
-                                withContext(ExportThread.dispatcher) {
-                                    if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                rendering(job) {
+                                    withContext(ExportThread.dispatcher) {
+                                        if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                    }
                                 }
                             }
                         }
@@ -622,8 +652,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     return name
                 }
                 ExportFormat.JPEG -> {
-                    val bitmap: Bitmap = withContext(ExportThread.dispatcher) {
-                        NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                    val bitmap: Bitmap = rendering(job) {
+                        withContext(ExportThread.dispatcher) {
+                            NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                        }
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
@@ -894,6 +926,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // most two minutes of waiting for it: a phone that never cools still exports.
         private const val HOT_HEADROOM = 0.85f
         private const val THERMAL_WAIT_MS = 120_000L
+        /**
+         * Canvas over frame area, worst case over upstream's formats
+         * (overscan.cpp kFormats, strip mode, carrier on): 135 half frame is
+         * (35 + 0.8) / 24 across by (18 + 2 x 0.5) / 18 along = 1.57; full 135
+         * 1.55, XPan 1.53, the 120 formats about 1.23, frame mode about 1.2.
+         */
+        private const val CANVAS_AREA = 1.6
         /** Kept free for the editor's own session and the system UI. */
         private const val MEMORY_RESERVE = 768L shl 20
         /** Peak RSS per rendered pixel before this phone has measured its own (DeviceProfile's 100 B/px). */
