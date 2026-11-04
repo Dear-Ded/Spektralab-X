@@ -533,6 +533,20 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         else -> "无像素"
     }
 
+    /**
+     * Runs the export's render with its size published to the editor
+     * (EngineHost.exportRenderPixels), so a large one is not overlapped by the
+     * editor's sharp preview. Cleared however the render ends.
+     */
+    private suspend fun <T> rendering(job: ProcessingJob, body: suspend () -> T): T {
+        host.exportRenderPixels = renderedPixels(job)
+        try {
+            return body()
+        } finally {
+            host.exportRenderPixels = 0L
+        }
+    }
+
     /** Records the pending gallery entry before a byte is written. Any thread. */
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
@@ -619,8 +633,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
-                                withContext(ExportThread.dispatcher) {
-                                    if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                rendering(job) {
+                                    withContext(ExportThread.dispatcher) {
+                                        if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                    }
                                 }
                             }
                         }
@@ -636,8 +652,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     return name
                 }
                 ExportFormat.JPEG -> {
-                    val bitmap: Bitmap = withContext(ExportThread.dispatcher) {
-                        NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                    val bitmap: Bitmap = rendering(job) {
+                        withContext(ExportThread.dispatcher) {
+                            NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                        }
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }

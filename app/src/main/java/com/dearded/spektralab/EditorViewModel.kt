@@ -672,6 +672,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 renders.tryReceive().getOrNull()?.let { true }
             }
             if (newer == true) { renders.trySend(Unit); continue }
+            // A large export rendering now: the 3400 px preview waits for it
+            // (at most 20 s) rather than doubling the GPU's peak; the live tier above does not.
+            host.yieldToExport()
             renderOnce("preview")
         }
     }
