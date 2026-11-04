@@ -99,18 +99,20 @@ fun SpektraTheme(content: @Composable () -> Unit) {
 }
 
 /**
- * Material motion tokens (spatial springs move things, effect springs fade
- * them and never overshoot). Material3 1.4 has no public MotionScheme yet.
+ * M3 Expressive motion tokens (UI2.md 3.2), copied by hand from material3's
+ * ExpressiveMotionTokens since 1.4.0 keeps MotionScheme.expressive() internal.
+ * Spatial springs move things with a touch of overshoot so a release feels
+ * alive; effect springs fade colour and alpha and never overshoot.
  */
 object Motion {
-    fun <T> fastSpatial() = spring<T>(dampingRatio = 0.9f, stiffness = 1400f)
-    fun <T> defaultSpatial() = spring<T>(dampingRatio = 0.9f, stiffness = 700f)
-    fun <T> slowSpatial() = spring<T>(dampingRatio = 0.9f, stiffness = 300f)
+    fun <T> fastSpatial() = spring<T>(dampingRatio = 0.6f, stiffness = 800f)
+    fun <T> defaultSpatial() = spring<T>(dampingRatio = 0.8f, stiffness = 380f)
+    fun <T> slowSpatial() = spring<T>(dampingRatio = 0.8f, stiffness = 200f)
     fun <T> fastEffects() = spring<T>(dampingRatio = 1f, stiffness = 3800f)
     fun <T> defaultEffects() = spring<T>(dampingRatio = 1f, stiffness = 1600f)
-    /** defaultSpatial for slides, settling at one pixel rather than overshooting forever. */
+    /** defaultSpatial for slides, settling at one pixel rather than ringing on. */
     fun defaultSpatialOffset() = spring(
-        dampingRatio = 0.9f, stiffness = 700f,
+        dampingRatio = 0.8f, stiffness = 380f,
         visibilityThreshold = androidx.compose.ui.unit.IntOffset.VisibilityThreshold,
     )
 }
