@@ -26,6 +26,7 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0010`–`0016` | thetechgeekko/Spektrafilm-android（GPL-3.0） | 损坏或恶意 RAW 的分配与工作量上限（TIFF 元数据、LJPEG、DNG tile）；补丁头注明原文件和 sha256。 |
 | `0017-normalize-model-orig-on-stack` | LibRaw #876（1a8fd32，0.22.3） | `GetNormalizedModel()` 的 `orig` 是函数静态变量，编辑和导出两个线程同时打开 RAW 时可能串用对方的机型名、色彩矩阵和白电平。改成局部变量。单线程输出不变。 |
 | `0018-lossy-dng-curve-init` | LibRaw #862（62f7098，0.22.3） | 有损（JPEG）DNG 带 OpcodeList2 但没有 PolynomialMap 时，`lossy_dng_load_raw` 的色调表没初始化，栈里的内容会进像素。改成先填默认曲线，再由 opcode 覆盖。只影响有损 DNG（LinearRaw）；补丁 0006 的 GainMap 只处理拜耳 DNG，两者不重叠。 |
+| `0019-sony-arw6` | 上游 SpektraLab b5467e8（PR #60）的 `third_party/libraw-arw6` 覆盖层，内含 LibRaw master 的 ARW6 解码器 | 0.22.2 解不了索尼 A7 V（ILCE-7M5）的有损压缩 ARW（Compressed / Compressed HQ，TIFF 压缩 32766）。上游以整文件覆盖的方式叠加；这里改成相对 0.22.2 加本目录补丁的差异，内容与上游覆盖层一致。新增 `sony_arw6.cpp`，其余只加 A7 V 的识别、裁切、色彩矩阵和黑白电平。`LibRaw::version()` 仍为 0.22.2；其他文件解码不变。 |
 
 ## 写一个新补丁
 
