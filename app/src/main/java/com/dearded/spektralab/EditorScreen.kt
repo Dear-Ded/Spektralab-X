@@ -98,7 +98,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun EditorScreen(vm: EditorViewModel) {
+fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     val ui by vm.ui.collectAsState()
     val jobs by vm.jobs.collectAsState()
     val snackbar = remember { SnackbarHostState() }
@@ -244,6 +244,7 @@ fun EditorScreen(vm: EditorViewModel) {
                             }
                         }
                         DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
+                            DropdownMenuItem(text = { Text("观片台") }, onClick = { moreMenu = false; onLightTable() })
                             DropdownMenuItem(
                                 text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
                                 onClick = { moreMenu = false; vm.showQueue(true) },
