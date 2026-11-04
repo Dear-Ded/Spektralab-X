@@ -77,6 +77,8 @@ data class ProcessingJob(
     val secured: Boolean = true,
     /** The pending gallery entry being written, so a kill mid-save is cleaned up or found saved. */
     val pendingUri: String = "",
+    /** The source's GPS tags ([ExifLocation.encode]), read at enqueue when 导出保留拍摄位置 is on; "" = none. */
+    val location: String = "",
 ) {
     val active get() = state == JobState.QUEUED || state == JobState.RUNNING
 
@@ -94,6 +96,7 @@ data class ProcessingJob(
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
+        .put("location", location)
 
     companion object {
         fun fromJson(o: JSONObject): ProcessingJob? = runCatching {
@@ -111,6 +114,7 @@ data class ProcessingJob(
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
                 sourcePath = o.optString("src"), persisted = o.optBoolean("persisted"),
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
+                location = o.optString("location"),
             )
         }.getOrNull()
     }
@@ -175,8 +179,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         _jobs.update { it + job.copy(secured = false) }
         persist()
         host.scope.launch {
-            val secured = withContext(Dispatchers.IO) { secure(job) }
-            set(job.id) { it.copy(sourcePath = secured.sourcePath, persisted = secured.persisted, secured = true) }
+            val secured = withContext(Dispatchers.IO) {
+                // From the URI as the user picked it, while its grant is fresh: a
+                // copy in app storage would carry the GPS tags MediaStore redacted.
+                val location = if (LocationSetting.enabled(app)) ExifLocation.encode(ExifCopy.readLocation(app, Uri.parse(job.uri))) else ""
+                secure(job).copy(location = location)
+            }
+            set(job.id) { it.copy(sourcePath = secured.sourcePath, persisted = secured.persisted, location = secured.location, secured = true) }
             persist()
             start()
         }
@@ -418,7 +427,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val local = job.sourcePath.takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }
         val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
         step("读取照片", 0.05f)
-        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }
+        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri) }.withLocation(ExifLocation.decode(job.location))
         // The film edge lays the frame on a canvas up to 1.6x its area, and that
         // canvas is one GPU buffer (128 MiB on Adreno 7xx): decode a little smaller.
         val maxPixels = if (edit.filmEdge && job.maxPixels > 0) job.maxPixels * 10 / 16 else job.maxPixels

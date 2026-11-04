@@ -1008,6 +1008,7 @@ private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                run { val c = androidx.compose.ui.platform.LocalContext.current; var on by remember { mutableStateOf(LocationSetting.enabled(c)) }; SwitchRow("导出保留拍摄位置", on, true) { on = it; LocationSetting.set(c, it) } }
                 Spacer(Modifier.height(12.dp))
                 Text("手机照片高光恢复", style = MaterialTheme.typography.labelLarge)
                 Text(
