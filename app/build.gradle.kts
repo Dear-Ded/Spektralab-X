@@ -82,6 +82,18 @@ android {
 
     // The bundled UI fonts (Theme.kt UiFonts) are mapped in place, not inflated into memory.
     androidResources { noCompress += "ttf" }
+
+    // Screenshots (docs/SCREENSHOTS.md): Robolectric reads the merged resources and
+    // assets (the bundled fonts), and Roborazzi writes a PNG only while recording.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.systemProperty("roborazzi.test.record", "true")
+                it.maxHeapSize = "2g"
+            }
+        }
+    }
 }
 
 dependencies {
@@ -104,4 +116,21 @@ dependencies {
     // Installs src/main/baseline-prof.txt on sideloaded installs (no Play to deliver it); see that file.
     implementation("androidx.profileinstaller:profileinstaller:1.4.0")
     testImplementation("junit:junit:4.13.2")
+    // Screenshots (app/src/testDebug, docs/SCREENSHOTS.md): debug unit tests only, so the
+    // release build and its unit tests never see them.
+    testDebugImplementation(composeBom)
+    testDebugImplementation("org.robolectric:robolectric:4.17")
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi:1.77.0")
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.77.0")
+    testDebugImplementation("androidx.compose.ui:ui-test-junit4")
+    testDebugImplementation("androidx.test:core:1.7.0")
+    testDebugImplementation("androidx.test.ext:junit:1.3.0")
+    // The empty ComponentActivity createAndroidComposeRule starts; debug APK only.
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// Roborazzi 1.77 is compiled by Kotlin 2.3 (metadata 2.3.0) and this build is on 2.0.21,
+// which reads metadata one version ahead at most. Only the unit-test compile reads it.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    if (name.endsWith("UnitTestKotlin")) compilerOptions.freeCompilerArgs.add("-Xskip-metadata-version-check")
 }
