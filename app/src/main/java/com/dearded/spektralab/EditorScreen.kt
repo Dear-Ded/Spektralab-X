@@ -1446,69 +1446,6 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 }
 
 /**
- * The full render at one image pixel per screen pixel, to judge grain and
- * halation, which the fitted preview cannot show. Pan with one finger.
- */
-@Composable
-private fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
-    // A full-screen layer in the activity's own window, not a Dialog: a dialog is
-    // a second window, and opening or closing it brings the system bars back
-    // (docs/UI.md, 沉浸式). One window, one insets controller.
-    var label by remember { mutableStateOf(true) }
-    SystemBarsHidden(true)
-    Box(Modifier.fillMaxSize().zIndex(10f)) {
-        var back by remember { mutableFloatStateOf(0f) }
-        androidx.activity.compose.PredictiveBackHandler { events ->
-            try {
-                events.collect { back = it.progress }
-                onClose()
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                back = 0f
-                throw e
-            }
-        }
-        val density = androidx.compose.ui.platform.LocalDensity.current
-        val image = remember(bitmap) { bitmap.asImageBitmap() }
-        val h = rememberScrollState()
-        val v = rememberScrollState()
-        // Start in the middle of the frame, where the subject usually is.
-        // maxValue is Int.MAX_VALUE until the first layout, so wait for the real range.
-        LaunchedEffect(bitmap) {
-            androidx.compose.runtime.snapshotFlow { h.maxValue to v.maxValue }
-                .first { (a, b) -> a != Int.MAX_VALUE && b != Int.MAX_VALUE }
-            h.scrollTo(h.maxValue / 2)
-            v.scrollTo(v.maxValue / 2)
-        }
-        Box(Modifier.fillMaxSize().graphicsLayer {
-            val k = 1f - 0.1f * back; scaleX = k; scaleY = k; alpha = 1f - 0.3f * back
-        }.background(Color.Black)) {
-            Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)
-                .pointerInput(Unit) { detectTapGestures(onTap = { label = !label }) }) {
-                Image(
-                    bitmap = image,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = with(density) { Modifier.width(bitmap.width.toDp()).height(bitmap.height.toDp()) },
-                )
-            }
-            // Clear of the cutout and the curved edges; a tap on the photo hides it.
-            Row(
-                Modifier.align(Alignment.TopEnd)
-                    .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.safeDrawing)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .chrome(label)
-                    .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,
-                    style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 8.dp))
-                TextButton(onClick = onClose) { Text("关闭", color = Color.White) }
-            }
-        }
-    }
-}
-
-/**
  * The print on its paper frame, scaled to fit. With no frame it is a plain
  * fitted image. Drawn rather than composed, so the frame costs no bitmap.
  */
