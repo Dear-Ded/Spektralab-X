@@ -280,6 +280,7 @@ object ExitDiagnostics {
         edit.putLong("exit_seen", exits.last().timestamp).putString("exit_last", last).commit()
         events.pin("last exit", "last $last")
         pinCounts(prefs, events)
+        KeepAlive.flagFromExit(context, kind(exits.last()), duringExport(exits.last()), events)
         return kind(exits.last())
     }
 

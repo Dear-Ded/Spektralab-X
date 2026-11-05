@@ -242,6 +242,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         if (paused) return
         paused = true
         host.events.add("queue paused: $why")
+        // M6 hook: a refused foreground start is what the battery / autostart hint helps with (not the time limit).
+        if ("refused" in why) KeepAlive.flag(app, why, host.events)
         _jobs.value.firstOrNull { it.state == JobState.RUNNING }?.let { r ->
             pauseRequested = r.id
             set(r.id) { requeued(it) }

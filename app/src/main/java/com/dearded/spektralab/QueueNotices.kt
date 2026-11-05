@@ -45,6 +45,21 @@ fun QueueNotices() {
         onDispose { lifecycle.removeObserver(observer) }
     }
     notice?.let { n -> NoticeCard(n.text, listOf(n.action to { NotificationNotice.open(context, n) })) }
+    // Once, and only after the system cut an export short (KeepAlive).
+    var keepAlive by remember { mutableStateOf(KeepAlive.due(context)) }
+    if (keepAlive) {
+        // A settings button records the hint as seen but keeps the card up, so
+        // the other button is still there on return; 知道了 hides it.
+        NoticeCard(
+            "上次导出被系统中断了。把省电策略设为“无限制”" + (if (KeepAlive.xiaomi) "、打开自启动" else "") +
+                "，切到后台时就不容易被打断。未完成的任务会自动继续。",
+            buildList<Pair<String, () -> Unit>> {
+                add("省电策略" to { KeepAlive.shown(context); KeepAlive.openBattery(context); Unit })
+                if (KeepAlive.xiaomi) add("自启动" to { KeepAlive.shown(context); KeepAlive.openAutostart(context); Unit })
+                add("知道了" to { KeepAlive.shown(context); keepAlive = false })
+            },
+        )
+    }
 }
 
 @Composable
