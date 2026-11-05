@@ -220,6 +220,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
 
     val nav = remember { EditorNav() }
     var showChanges by remember { mutableStateOf(false) }
+    // The light table's view model is the activity's, so its 复制调整 is visible here too.
+    val table: LightTableViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val tableState by table.state.collectAsState()
+    var showPaste by remember { mutableStateOf(false) }
     androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on },
         LocalEditorNav provides nav) {
     Scaffold(
@@ -299,6 +303,12 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             DropdownMenuItem(text = { Text("观片台") }, onClick = { moreMenu = false; onLightTable() })
                             DropdownMenuItem(text = { Text("修改记录") }, enabled = ui.hasImage,
                                 onClick = { moreMenu = false; showChanges = true })
+                            // 粘贴调整 (ui2_snapseed.md 5): what 观片台's 复制调整 took, by group.
+                            DropdownMenuItem(
+                                text = { Text(tableState.copied?.let { "粘贴调整（来自「${it.fromName}」）" } ?: "粘贴调整（先在观片台复制）") },
+                                enabled = ui.hasImage && !ui.exporting && tableState.copied != null,
+                                onClick = { moreMenu = false; showPaste = true },
+                            )
                             DropdownMenuItem(
                                 text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
                                 onClick = { moreMenu = false; vm.showQueue(true) },
@@ -449,6 +459,25 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     }
 
     if (showSettings) SettingsScreen(ui, vm) { showSettings = false }
+    val copied = tableState.copied
+    val pasteSrc = ui.source
+    if (showPaste && copied != null && pasteSrc != null) PasteSheet(
+        from = copied, count = 1, initial = tableState.pasteGroups,
+        onDismiss = { showPaste = false },
+        onPaste = { groups ->
+            showPaste = false
+            table.setPasteGroups(groups)
+            // The open photo as a frame: its own shape, RAW-ness and EXIF date, so a pasted
+            // date back takes this photo's date and a film edge gets this photo's gate crop.
+            val here = Frame(id = "", uri = "", name = pasteSrc.name, size = 0, date = 0, mime = "",
+                raw = pasteSrc.kind == "raw", width = pasteSrc.width, height = pasteSrc.height,
+                exifDate = ui.exif.dateTimeOriginal.orEmpty())
+            val p = pasteLook(Sidecar(ui.edit, pasteSrc.wbK, pasteSrc.wbTint), here, copied, groups, ui.catalog)
+            vm.update(p.edit)
+            if (here.raw && (p.wbK != pasteSrc.wbK || p.wbTint != pasteSrc.wbTint)) vm.setWhiteBalance(p.wbK, p.wbTint)
+            vm.showMessage("已粘贴「${copied.fromName}」的调整，可撤销")
+        },
+    )
     if (showChanges) ChangesSheet(ui, vm, onGo = { c ->
         nav.tab = c.tab
         if (c.step >= 0) nav.step = c.step
