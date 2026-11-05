@@ -14,16 +14,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -34,18 +36,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -95,8 +90,10 @@ private val Undeveloped = ColorFilter.colorMatrix(ColorMatrix().apply { setToSat
  * current frame to the centre, with sprocket holes, the model and frame
  * numbers on the edge, and a scrubber with one tick per frame; or the roll as
  * a 6-column contact sheet. A tap opens the loupe on the roll's frames.
+ * The head and the floating bar are the table's own (ui-screens_research.md 1):
+ * 片条 / 印样 in the bar's track, the frame's actions beside it, and 导出
+ * as the round primary button.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RollView(
     table: LightTableViewModel,
@@ -112,87 +109,86 @@ fun RollView(
     var current by rememberSaveable(roll.id) { mutableStateOf(0) }
     val frames = roll.frames
     val at = current.coerceIn(0, frames.size - 1)
+    val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + HeadHeight
+    val bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + FloatingBarSpace
 
-    Scaffold(
-        containerColor = Palette.Background,
-        topBar = {
-            TopAppBar(
-                expandedHeight = 56.dp,
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回卷列表") }
-                },
-                title = {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(6.dp).background(roll.process.color, CircleShape))
-                            Spacer(Modifier.size(8.dp))
-                            Text(roll.title, style = MaterialTheme.typography.titleMedium)
-                        }
-                        Text(roll.edgeLine, style = EdgeType, color = Palette.OnSurfaceSoft)
-                    }
-                },
-                actions = {
-                    // A roll the user packed can be renamed or taken apart; an automatic one is the table's.
-                    val id = roll.manualId
-                    if (id != null) {
-                        var menu by remember { mutableStateOf(false) }
-                        var naming by remember { mutableStateOf(false) }
-                        Box {
-                            IconButton(onClick = { menu = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "卷操作")
-                            }
-                            androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                androidx.compose.material3.DropdownMenuItem(text = { Text("改卷名") },
-                                    onClick = { menu = false; naming = true })
-                                androidx.compose.material3.DropdownMenuItem(text = { Text("拆卷（照片回到自动分卷）") },
-                                    onClick = { menu = false; table.dissolveRoll(id) })
-                            }
-                        }
-                        if (naming) RollNameDialog(
-                            title = "改卷名", hint = "最多 40 个字", initial = roll.name, confirm = "改名",
-                            onDismiss = { naming = false },
-                            onDone = { name -> naming = false; table.renameRoll(id, name) },
-                        )
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Surface(color = Palette.Surface) {
-                Row(
-                    Modifier.fillMaxWidth().navigationBarsPadding().height(64.dp).padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SelectPill(selected = !contact, onClick = { contact = false }, label = { Text("片条") })
-                    Spacer(Modifier.size(8.dp))
-                    SelectPill(selected = contact, onClick = { contact = true }, label = { Text("印样") })
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = { table.compare(frames[at]) }) { Text("比较风格") }
-                    TextButton(onClick = { table.copyLook(frames[at]) }) { Text("复制调整") }
-                    Box {
-                        var menu by remember { mutableStateOf(false) }
-                        TextButton(onClick = { menu = true }) { Text("导出") }
-                        androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                            androidx.compose.material3.DropdownMenuItem(text = { Text("导出本卷（每张一个 JPEG）") },
-                                onClick = { menu = false; onExport(frames) })
-                            androidx.compose.material3.DropdownMenuItem(text = { Text("导出印样（整卷一张）") },
-                                onClick = { menu = false; onContactSheet() })
-                        }
-                    }
-                }
-            }
-        },
-    ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+    Box(Modifier.fillMaxSize().background(Palette.Background)) {
+        Box(Modifier.fillMaxSize().padding(top = top, bottom = bottom)) {
             if (contact) {
                 ContactSheet(table, roll, onOpen = { i -> current = i; onOpen(frames, i) })
             } else {
                 Strip(table, roll, start = at, onCentre = { current = it }, onOpen = { i -> onOpen(frames, i) })
             }
         }
+        TableHead(
+            title = roll.title,
+            subtitle = roll.edgeLine,
+            backLabel = "返回卷列表",
+            onBack = onBack,
+            titleLeading = { Box(Modifier.size(6.dp).background(roll.process.color, CircleShape)); Spacer(Modifier.size(8.dp)) },
+            trailing = {
+                // A roll the user packed can be renamed or taken apart; an automatic one is the table's.
+                val id = roll.manualId
+                if (id != null) {
+                    var menu by remember { mutableStateOf(false) }
+                    var naming by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { menu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "卷操作")
+                        }
+                        androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("改卷名") },
+                                onClick = { menu = false; naming = true })
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("拆卷（照片回到自动分卷）") },
+                                onClick = { menu = false; table.dissolveRoll(id) })
+                        }
+                    }
+                    if (naming) RollNameDialog(
+                        title = "改卷名", hint = "最多 40 个字", initial = roll.name, confirm = "改名",
+                        onDismiss = { naming = false },
+                        onDone = { name -> naming = false; table.renameRoll(id, name) },
+                    )
+                }
+            },
+        )
+        FloatingBar(
+            Modifier.align(Alignment.BottomCenter),
+            scroll = true,
+            trailing = {
+                Spacer(Modifier.width(8.dp))
+                ExportButton(onRoll = { onExport(frames) }, onContactSheet = onContactSheet)
+            },
+        ) {
+            Segmented(
+                options = listOf("片条", "印样"), selected = if (contact) 1 else 0,
+                modifier = Modifier.width(132.dp),
+            ) { i -> contact = i == 1 }
+            QuietButton("比较风格") { table.compare(frames[at]) }
+            QuietButton("复制调整") { table.copyLook(frames[at]) }
+        }
     }
 }
+
+/** 导出 as the bar's round primary button, its menu naming what comes out. */
+@Composable
+private fun ExportButton(onRoll: () -> Unit, onContactSheet: () -> Unit) {
+    Box {
+        var menu by remember { mutableStateOf(false) }
+        Box(
+            Modifier.size(64.dp).clip(CircleShape).background(Palette.Accent)
+                .clickable(role = androidx.compose.ui.semantics.Role.Button) { menu = true }
+                .semantics { contentDescription = "导出" },
+            contentAlignment = Alignment.Center,
+        ) { Text("导出", style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
+        androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            androidx.compose.material3.DropdownMenuItem(text = { Text("导出本卷（每张一个 JPEG）") },
+                onClick = { menu = false; onRoll() })
+            androidx.compose.material3.DropdownMenuItem(text = { Text("导出印样（整卷一张）") },
+                onClick = { menu = false; onContactSheet() })
+        }
+    }
+}
+
 
 @Composable
 private fun Strip(table: LightTableViewModel, roll: Roll, start: Int, onCentre: (Int) -> Unit, onOpen: (Int) -> Unit) {

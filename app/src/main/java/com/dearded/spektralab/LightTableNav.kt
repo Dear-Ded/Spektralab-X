@@ -9,8 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -99,14 +97,27 @@ fun AppScreens(editor: EditorViewModel) {
                     onExport = exportRoll,
                     onContactSheet = { table.exportContactSheet(roll, editor.ui.value.maxPixels) },
                 )
-                nav.rolls -> RollList(rolls, onOpen = { table.openRoll(it.id) }, onBack = { table.showRolls(false) })
-                else -> LightTableScreen(
-                    table = table,
+                nav.rolls -> RollList(
+                    table, rolls,
+                    onOpen = { table.openRoll(it.id) },
+                    onGrid = { table.showRolls(false) },
                     onBack = { fromTable = false; screen = Screen.EDITOR },
-                    onOpen = table::openLoupe,
-                    selectionActions = { chosen -> BatchActions(table, editor, chosen); RollSelectionActions(table, chosen) },
-                    topActions = { TextButton(onClick = { table.showRolls(true) }) { Text("按卷") } },
                 )
+                else -> {
+                    // Leaving the table is the one back handled here, and only while the grid has
+                    // nothing selected (the grid clears a selection itself). The editor under it
+                    // never intercepts at the root, so the system's back-to-home stays intact.
+                    val selecting by remember(table) { table.state.map { it.selection.isNotEmpty() }.distinctUntilChanged() }
+                        .collectAsState(false)
+                    BackHandler(enabled = !selecting) { fromTable = false; screen = Screen.EDITOR }
+                    LightTableScreen(
+                        table = table,
+                        onBack = { fromTable = false; screen = Screen.EDITOR },
+                        onOpen = table::openLoupe,
+                        onRolls = { table.showRolls(true) },
+                        selectionActions = { chosen -> BatchActions(table, editor, chosen); RollSelectionActions(table, chosen) },
+                    )
+                }
             }
         }
     }

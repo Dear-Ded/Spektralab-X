@@ -1,5 +1,10 @@
 package com.dearded.spektralab
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -30,12 +35,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -127,52 +129,60 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
             }
         }
 
-        // Top: back, name and position, auto-advance.
+        // Top: back, name and position, auto-advance. A fade rather than a bar,
+        // so the photo's surround stays the neutral grey right up to the text.
         Row(
             Modifier.fillMaxWidth().chrome(showChrome)
-                .background(Palette.Surface.copy(alpha = 0.85f))
+                .background(Brush.verticalGradient(listOf(Palette.Background.copy(alpha = 0.85f), Color.Transparent)))
                 .windowInsetsPadding(WindowInsets.systemBarsIgnoringVisibility.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-                .height(56.dp).padding(end = 8.dp),
+                .height(HeadHeight).padding(end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格") }
+            IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格")
+            }
             Column(Modifier.weight(1f)) {
                 Text(current.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${pager.currentPage + 1} / ${frames.size}", style = MaterialTheme.typography.bodySmall,
-                    color = Palette.OnSurfaceSoft)
+                Text("${pager.currentPage + 1} / ${frames.size}", style = Readout, color = Palette.OnSurfaceSoft)
             }
-            Text("自动下一张", style = MaterialTheme.typography.labelLarge, color = Palette.OnSurfaceSoft)
-            Spacer(Modifier.size(8.dp))
-            Switch(checked = state.autoAdvance, onCheckedChange = { on ->
-                table.setAutoAdvance(on)
-                // TOGGLE_ON / OFF are API 34 (UI.md 1: CLOCK_TICK before).
-                view.performHapticFeedback(when {
-                    android.os.Build.VERSION.SDK_INT < 34 -> HapticFeedbackConstants.CLOCK_TICK
-                    on -> HapticFeedbackConstants.TOGGLE_ON
-                    else -> HapticFeedbackConstants.TOGGLE_OFF
-                })
-            })
+            // 自动下一张 as a whole-row switch would crowd the head; the pill says it in two words.
+            SelectPill(
+                selected = state.autoAdvance,
+                onClick = {
+                    val on = !state.autoAdvance
+                    table.setAutoAdvance(on)
+                    // TOGGLE_ON / OFF are API 34 (UI.md 1: CLOCK_TICK before).
+                    view.performHapticFeedback(when {
+                        android.os.Build.VERSION.SDK_INT < 34 -> HapticFeedbackConstants.CLOCK_TICK
+                        on -> HapticFeedbackConstants.TOGGLE_ON
+                        else -> HapticFeedbackConstants.TOGGLE_OFF
+                    })
+                },
+                label = { Text("自动下一张") },
+            )
         }
 
-        // Bottom: reject, stars, pick, edit.
-        Row(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().chrome(showChrome)
-                .background(Palette.Surface.copy(alpha = 0.85f))
-                .windowInsetsPadding(WindowInsets.systemBarsIgnoringVisibility.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
-                .height(64.dp).padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            MarkButton("✕", "淘汰", on = current.pick < 0) { mark(current, if (current.pick < 0) 0 else -1) }
-            Stars(current.stars) { n ->
-                table.rate(setOf(current.id), stars = if (n == current.stars) 0 else n)
-                view.tick()
+        // Bottom: the table's floating pill: reject, stars, pick; 编辑 as the round primary beside it.
+        Box(Modifier.align(Alignment.BottomCenter).chrome(showChrome)) {
+            FloatingBar(
+                trailing = {
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        Modifier.size(64.dp).clip(CircleShape).background(Palette.Accent)
+                            .clickable(role = Role.Button) { onEdit(current) },
+                        contentAlignment = Alignment.Center,
+                    ) { Text("编辑", style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
+                },
+            ) {
+                MarkButton("✕", "淘汰", on = current.pick < 0) { mark(current, if (current.pick < 0) 0 else -1) }
+                Spacer(Modifier.weight(1f))
+                Stars(current.stars) { n ->
+                    table.rate(setOf(current.id), stars = if (n == current.stars) 0 else n)
+                    view.tick()
+                }
+                Spacer(Modifier.weight(1f))
+                MarkButton("✓", "选中", on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
             }
-            MarkButton("✓", "选中", on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
-            Button(
-                onClick = { onEdit(current) },
-                colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-            ) { Text("编辑") }
         }
     }
 }

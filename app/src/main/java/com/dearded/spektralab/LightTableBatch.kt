@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -19,10 +21,8 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,18 +68,18 @@ fun BatchActions(table: LightTableViewModel, editor: EditorViewModel, chosen: Li
         } else run()
     }
 
-    if (chosen.size == 1) TextButton(onClick = { table.copyLook(chosen.first()) }) { Text("复制调整") }
-    TextButton(onClick = { pasting = true }, enabled = state.copied != null) { Text("粘贴") }
+    if (chosen.size == 1) QuietButton("复制调整") { table.copyLook(chosen.first()) }
+    QuietButton("粘贴", enabled = state.copied != null) { pasting = true }
     Box {
-        TextButton(onClick = { exportMenu = true }) { Text("导出") }
+        QuietButton("导出") { exportMenu = true }
         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
             DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = { exportMenu = false; export(ExportFormat.JPEG, ExportSize.FULL) })
             DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = { exportMenu = false; export(ExportFormat.JPEG, ExportSize.SHARE) })
             DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = { exportMenu = false; export(ExportFormat.TIFF, ExportSize.FULL) })
         }
     }
-    TextButton(onClick = { table.rate(chosen.map { it.id }.toSet(), pick = 1); table.clearSelection() }) { Text("选中") }
-    TextButton(onClick = { table.rate(chosen.map { it.id }.toSet(), pick = -1); table.clearSelection() }) { Text("淘汰") }
+    QuietButton("选中") { table.rate(chosen.map { it.id }.toSet(), pick = 1); table.clearSelection() }
+    QuietButton("淘汰") { table.rate(chosen.map { it.id }.toSet(), pick = -1); table.clearSelection() }
 
     val copied = state.copied
     if (pasting && copied != null) {
@@ -108,10 +108,12 @@ private fun PasteSheet(
     var groups by remember { mutableStateOf(initial) }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.PanelHigh) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text("粘贴调整", style = MaterialTheme.typography.titleMedium)
-            Text("来自「${from.fromName}」，粘贴到 $count 张。粘贴的是设置：每张照片自己测光，日期取自己的拍摄时间。",
-                style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
-            Spacer(Modifier.height(12.dp))
+            PanelHeader(
+                title = "粘贴调整",
+                summary = "「${from.fromName}」→ $count 张",
+                hint = "粘贴的是设置：每张照片自己测光，日期取自己的拍摄时间。",
+            )
+            Spacer(Modifier.height(RowGap))
             for (g in LookGroup.entries) {
                 val on = g in groups
                 Row(
@@ -126,13 +128,16 @@ private fun PasteSheet(
                     Text(g.label)
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss) { Text("取消") }
+            Spacer(Modifier.height(RowGap))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                QuietButton("取消", onClick = onDismiss)
+                Spacer(Modifier.width(8.dp))
+                // The primary action (UI2.md 1.1): the inverted fill, fully round, a size up from the rest.
                 Button(
                     onClick = { onPaste(groups) }, enabled = groups.isNotEmpty(),
+                    shape = CircleShape, modifier = Modifier.height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-                ) { Text("粘贴") }
+                ) { Text("粘贴到 $count 张") }
             }
             Spacer(Modifier.height(8.dp))
         }
