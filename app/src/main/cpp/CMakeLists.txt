@@ -158,3 +158,10 @@ target_link_libraries(spektralab_jni PRIVATE
 target_link_options(spektralab_jni PRIVATE "-Wl,-z,max-page-size=16384")
 # The NDK links libomp.so by default; this links libomp.a into the library.
 target_link_options(spektralab_jni PRIVATE -fopenmp -static-openmp)
+# Export only the JNI entry points (jni_exports.map). With nothing else
+# exported, --gc-sections (the NDK default) drops unreferenced libc++ and
+# LibRaw code, and --icf=safe folds identical functions whose address is never taken. Neither changes any
+# instruction a kept function runs, so output is byte-identical.
+set_property(TARGET spektralab_jni APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/jni_exports.map")
+target_link_options(spektralab_jni PRIVATE
+    "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/jni_exports.map" "-Wl,--gc-sections" "-Wl,--icf=safe")

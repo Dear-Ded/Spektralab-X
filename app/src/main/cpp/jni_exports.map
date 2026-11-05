@@ -1,0 +1,9 @@
+/* Only the JNI entry points NativeEngine.kt binds by name (System.loadLibrary,
+ * no RegisterNatives, no dlsym). Everything else -- libc++, LibRaw, the
+ * engine -- stays local, so --gc-sections can drop what nothing calls. */
+{
+  global:
+    Java_com_dearded_spektralab_NativeEngine_*;
+  local:
+    *;
+};
