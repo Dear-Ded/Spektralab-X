@@ -557,7 +557,8 @@ private fun Preview(
                 }
                 Spacer(Modifier.height(6.dp))
                 histogram?.let { h ->
-                    HistogramView(h, Modifier.width(160.dp).height(80.dp)
+                    // Grey luminance only: no colour over the photo while judging it (UI2.md 1.1).
+                    MonoHistogram(h, Modifier.width(160.dp).height(80.dp)
                         .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.5f)))
                     if (h.clippedLow > 0.005f || h.clippedHigh > 0.005f) {
                         Text(
@@ -583,6 +584,36 @@ private fun Preview(
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
+    }
+}
+
+/**
+ * The photo's histogram as one grey luminance curve (ui2_snapseed.md 10): the
+ * RGB curves in Histogram.kt paint red, green and blue next to the print being
+ * judged. Square-root scale like HistogramView; clipping is a white tick at the
+ * edge, as tall as the clipped share x10.
+ */
+@Composable
+private fun MonoHistogram(h: Histogram, modifier: Modifier) {
+    androidx.compose.foundation.Canvas(modifier) {
+        val scale = kotlin.math.sqrt(maxOf(1, h.y.max()).toFloat())
+        val bw = size.width / Histogram.BINS
+        val path = androidx.compose.ui.graphics.Path().apply {
+            moveTo(0f, size.height)
+            for (i in h.y.indices) {
+                val top = size.height * (1f - kotlin.math.sqrt(h.y[i].toFloat()) / scale)
+                lineTo(i * bw, top); lineTo((i + 1) * bw, top)
+            }
+            lineTo(size.width, size.height); close()
+        }
+        drawPath(path, Color.White.copy(alpha = 0.72f))
+        fun tick(x: Float, share: Float) {
+            if (share <= 0.001f) return
+            val hgt = size.height * minOf(1f, share * 10)
+            drawRect(Color.White, androidx.compose.ui.geometry.Offset(x, size.height - hgt),
+                androidx.compose.ui.geometry.Size(3f, hgt))
+        }
+        tick(0f, h.clippedLow); tick(size.width - 3f, h.clippedHigh)
     }
 }
 
