@@ -736,7 +736,7 @@ private fun Controls(
                                 summary = ui.catalog.film(e.film)?.label.orEmpty(),
                                 hint = "点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。",
                             )
-                        StyleStrip(ui, enabled) { vm.applyStyle(it) }
+                        StyleStrip(ui, enabled, onEdit = vm::update) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {
