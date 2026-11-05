@@ -171,6 +171,24 @@ object MediaSaver {
     }
 
     /**
+     * A HEIF is complete when it opens with an ftyp box of a still-image brand
+     * (heic, heix, mif1) and the platform decoder reports the expected size.
+     */
+    fun checkHeif(file: File, width: Int, height: Int) {
+        val head = RandomAccessFile(file, "r").use { f ->
+            if (f.length() < 12) null else ByteArray(12).also { f.readFully(it) }
+        } ?: throw EngineException("HEIF 校验失败：文件不完整")
+        val box = String(head, 4, 4, Charsets.US_ASCII)
+        val brand = String(head, 8, 4, Charsets.US_ASCII)
+        if (box != "ftyp" || brand !in setOf("heic", "heix", "mif1")) throw EngineException("HEIF 校验失败：不是 HEIF 文件（$box $brand）")
+        val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, opts)
+        if (opts.outWidth != width || opts.outHeight != height) {
+            throw EngineException("HEIF 校验失败：${opts.outWidth}×${opts.outHeight}，应为 ${width}×$height")
+        }
+    }
+
+    /**
      * The TIFF tiff16.cpp writes, read back from the entry: the header points
      * to a directory (patched last, so a cut-off file has none), it is RGB16,
      * the strips cover the frame, and every strip inflates to exactly its rows.

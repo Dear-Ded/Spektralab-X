@@ -131,7 +131,8 @@ object FilmThumbs {
         while (true) {
             val now = android.os.SystemClock.uptimeMillis()
             val busy = now - host.lastInteraction < IDLE_MS ||
-                host.queue.jobs.value.any { it.state == JobState.RUNNING } ||
+                // A running contact sheet is waiting on these very thumbnails.
+                host.queue.jobs.value.any { it.state == JobState.RUNNING && !it.sheet } ||
                 host.thermal.headroom() > HOT_HEADROOM
             if (!busy) return
             delay(250)
