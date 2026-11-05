@@ -63,9 +63,8 @@ class ExportPacer(private val context: Context, private val host: EngineHost) {
             delay(1000)
         }
         if (waited) host.events.add("export waited for the phone to cool (headroom ${"%.2f".format(java.util.Locale.ROOT, host.thermal.headroom())})")
-        if (Build.VERSION.SDK_INT >= 33 && host.thermal.headroom() < lines.first) synchronized(lock) {
-            runCatching { session?.sendHint(PerformanceHintManager.Session.CPU_LOAD_UP) }
-        }
+        // Session.sendHint(CPU_LOAD_UP) is not public API in SDK 36; the target
+        // duration set in ensureSession already tells ADPF what the render needs.
     }
 
     /** Runs [body] (the render) with the efficiency switch kept current. */

@@ -99,7 +99,7 @@ internal enum class NotificationNotice(val text: String, val action: String) {
             val pkg = context.packageName
             val tries = buildList {
                 if (notice == LIVE_OFF && Build.VERSION.SDK_INT >= 36) {
-                    add(Intent(Settings.ACTION_MANAGE_APP_PROMOTED_NOTIFICATIONS).putExtra(Settings.EXTRA_APP_PACKAGE, pkg))
+                    add(Intent(PROMOTED_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, pkg))
                 }
                 add(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, pkg))
                 add(appDetails(context))
@@ -128,3 +128,6 @@ internal fun startFirst(context: Context, intents: List<Intent>): Boolean {
     }
     return false
 }
+
+/** Android 16 Live Updates settings page; no public constant in SDK 36, so the action string (startFirst falls back if absent). */
+private const val PROMOTED_SETTINGS = "android.settings.MANAGE_APP_PROMOTED_NOTIFICATIONS"
