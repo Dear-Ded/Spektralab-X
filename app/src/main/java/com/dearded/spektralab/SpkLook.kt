@@ -390,7 +390,7 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
 
         fun parseJson(bytes: ByteArray, what: String): JSONObject {
             var text = String(bytes, Charsets.UTF_8)
-            if (text.startsWith("FEFF")) text = text.substring(1)
+            if (text.startsWith("\uFEFF")) text = text.substring(1)
             return try { JSONObject(text) } catch (x: JSONException) { throw ImportException("$what 不是有效的 JSON") }
         }
 
