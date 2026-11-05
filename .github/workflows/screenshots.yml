@@ -1,0 +1,88 @@
+name: screenshots
+
+# PNGs of the editor and the light table, rendered on the JVM (Robolectric
+# native graphics + Roborazzi; docs/SCREENSHOTS.md). Separate from the android
+# workflow: it builds no APK, needs no upstream sources or signing key, and a
+# failure here never blocks a release.
+on:
+  push:
+    branches: [main, "ui-*"]
+    paths:
+      - "app/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - ".github/workflows/screenshots.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - ".github/workflows/screenshots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Render
+        run: ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest --tests com.dearded.spektralab.Screenshots
+
+      - name: Contact sheet
+        run: |
+          command -v montage >/dev/null || { sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick; }
+          cd app/build/outputs/roborazzi
+          ls *.png > /dev/null
+          montage *.png -resize 270x600 -geometry +8+8 -tile 5x -background '#0E0E10' \
+            -fill '#EBEBEB' -pointsize 14 -set label '%t' ../contact-sheet.png
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: app/build/outputs/roborazzi/*.png
+          retention-days: 30
+
+      # One unzipped PNG, so it opens in the browser from the run page.
+      - name: Upload contact sheet
+        id: sheet
+        uses: actions/upload-artifact@v7
+        with:
+          path: app/build/outputs/contact-sheet.png
+          archive: false
+          retention-days: 30
+
+      - name: Summary
+        env:
+          SHEET: ${{ steps.sheet.outputs.artifact-url }}
+        run: |
+          {
+            echo "## Screenshots (1080 × 2400, 440 dpi, dark)"
+            echo
+            echo "[Contact sheet: all pages on one PNG]($SHEET)"
+            echo
+            echo "Every PNG: artifact \`screenshots-${{ github.run_number }}\`, or"
+            echo '`gh run download ${{ github.run_id }} -R ${{ github.repository }} -n screenshots-${{ github.run_number }} -D shots`'
+            echo
+            echo "| File | Size |"
+            echo "|---|---|"
+            for f in app/build/outputs/roborazzi/*.png; do
+              echo "| $(basename "$f") | $(( $(stat -c %s "$f") / 1024 )) KB |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
