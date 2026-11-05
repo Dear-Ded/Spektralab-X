@@ -86,3 +86,25 @@ These can only be confirmed on a real phone; CI and the cloud host (software Vul
 | 大图导出时预览让路 / Preview yields to a large export | 导出 24 MP 以上时拖动滑块、松手 | 拖动流畅；松手后清晰预览最多等 20 秒，不和导出同时渲染 |
 | 内存分档 / Memory tiers | 8 GB 机型连续导出全尺寸 | 诊断里 VmHWM 稳定，不被系统杀；需要时日志有 “memory tier … MP -> … MP” |
 | HyperOS 上 `clear_refs` | 导出后看日志的峰值一行 | 不带 “(process peak)”；带了说明系统拒绝重置，峰值是整个进程的 |
+
+## 小米 / HyperOS 4 真机待验 / Xiaomi and HyperOS 4 checks on a phone
+
+以下来自 ROADMAP M6，只能在小米真机（最好是澎湃OS 4 / Android 17）上确认。诊断报告开头以 `*` 开头的固定行（最近一次退出、退出计数、通知状态）会一直保留。
+
+These come from ROADMAP M6 and need a Xiaomi phone, ideally HyperOS 4 / Android 17. The pinned lines starting with `*` at the top of the diagnostics report (last exit, exit counts, notification state) never roll out.
+
+| 项目 / Item | 怎么验 / How | 期望 / Expected |
+|---|---|---|
+| 焦点通知协议值 / Focus protocol | 启动后看诊断固定行 `notifications …` | `focus protocol` 为 3（HyperOS 3/4）、2 或 1；非小米为 0。`canShowFocus` 未获小米批准时为 false |
+| 实时通知上岛与锁屏 / Live Update on island and lock screen | 导出一张大图，切到桌面、锁屏 | 状态栏胶囊、超级岛（HyperOS 3.1+）和锁屏显示进度与剩余时间；完成后消失并发“已冲洗完成” |
+| 实时通知被关闭 / Live Updates turned off | 系统设置里关掉本应用的实时通知，再打开“正在处理” | 顶部提示“实时通知已关闭”，按钮打开对应设置页；打开后回到应用提示消失 |
+| 通知全关 / All notifications off | 关掉本应用通知，打开“正在处理” | 提示“通知已关闭”，按钮打开应用通知设置 |
+| 内存上限 / Memory limiter | `adb shell am memory-limiter status`；可用 `am memory-limiter manual <pid> <MB>` 压低后导出 | 被杀后重开：固定行 `last exit … memory limiter (MemoryLimiter:AnonSwap …)`，计数 +1，任务降一档重试；不出现保活提示 |
+| 后台存活 / Background survival | 导出队列 3 张以上，切后台 5 / 15 / 30 分钟（省电策略默认） | 记下哪一档被打断；被打断后重开：任务自动继续，“正在处理”出现一次保活提示 |
+| 保活提示跳转 / Keep-alive buttons | 点“省电策略”“自启动” | 分别打开省电策略页（或应用详情页）、自启动页（或应用详情页），不闪退；点过后不再出现 |
+| 冻结 / App freezer | 后台导出被冻结后重开 | 固定行计数 `freezer` 或 `system kill during export` +1 |
+| 后台释放 GPU 池 / GPU pool released in background | 只开“正在处理”导出（不进编辑器）后切到后台 | 事件日志有 `trim memory level … (app): N MB freed`（N 可为 0 时不记） |
+| ADPF 与温控线 / ADPF and thermal lines | 导出一张后看事件日志 | `ADPF: hint session on`；Android 15+ 显示系统给的 moderate / severe 线；发热时有 `export waited for the phone to cool` |
+| 导出时编辑流畅 / Editing during an export | 导出 24 MP 时拖动滑块 | 拖动不比空闲时明显卡；导出变慢可以接受 |
+| 滑动刷新率 / Refresh rate while scrolling | 开发者选项“显示刷新率”，滑动胶片列表 | 记录实际刷新率（本版未改，供后续参考） |
+| 小米相机新照片 / New Xiaomi camera photos | HDR JPEG、DNG、UltraRAW 各导入一张 | 由 RAW 会话负责，这里只记录能否打开 |
