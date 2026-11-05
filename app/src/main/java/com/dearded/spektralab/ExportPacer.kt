@@ -19,14 +19,14 @@ import kotlinx.coroutines.withContext
  *  - Before a render ([beforeRender]): waits while the phone is at the
  *    severe thermal line (an ordinary export, at most [WAIT_MS]), or at the
  *    editor's hot line for 极致渲染 (at most [EXTREME_WAIT_MS], as before).
- *    Cool, it tells ADPF the CPU load is about to rise (API 33).
  *  - During a render ([during]): every [TICK_MS], while a finger is on the
  *    editor or the phone is past the moderate line, the export thread's
  *    session prefers power efficiency (API 35), so the scheduler keeps it
  *    off the cores the editor needs; otherwise it does not.
  *
  * The lines come from PowerManager.getThermalHeadroomThresholds (API 35),
- * else the editor's fixed 0.85. No work durations are reported: a render is
+ * else the editor's fixed 0.85. No load hints: Session.sendHint is not in
+ * the public SDK (compileSdk 36). No work durations are reported: a render is
  * one JNI call of seconds, not a periodic workload; per-submit reports would
  * need the engine (docs/ROADMAP.md M6). ExportThread already runs at
  * background priority and LibRaw's workers are already limited to the big
@@ -51,7 +51,7 @@ class ExportPacer(private val context: Context, private val host: EngineHost) {
         moderate to severe
     }
 
-    /** Before an export render starts: the thermal wait, then a load-up hint. */
+    /** Before an export render starts: the thermal wait. */
     suspend fun beforeRender(extreme: Boolean) {
         ensureSession()
         val (_, severe) = lines
@@ -63,8 +63,6 @@ class ExportPacer(private val context: Context, private val host: EngineHost) {
             delay(1000)
         }
         if (waited) host.events.add("export waited for the phone to cool (headroom ${"%.2f".format(java.util.Locale.ROOT, host.thermal.headroom())})")
-        // Session.sendHint(CPU_LOAD_UP) is not public API in SDK 36; the target
-        // duration set in ensureSession already tells ADPF what the render needs.
     }
 
     /** Runs [body] (the render) with the efficiency switch kept current. */
