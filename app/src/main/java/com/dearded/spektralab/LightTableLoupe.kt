@@ -135,18 +135,20 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
         // so the photo's surround stays the neutral grey right up to the text.
         Row(
             Modifier.fillMaxWidth().chrome(showChrome)
-                .background(Brush.verticalGradient(listOf(Palette.Background.copy(alpha = 0.85f), Color.Transparent)))
+                .background(Brush.verticalGradient(0f to Palette.Background.copy(alpha = 0.92f), 0.7f to Palette.Background.copy(alpha = 0.7f), 1f to Color.Transparent))
                 .windowInsetsPadding(WindowInsets.systemBarsIgnoringVisibility.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-                .height(HeadHeight).padding(end = 8.dp),
+                .height(HeadHeight + 16.dp).padding(end = 8.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格", tint = Palette.OnSurface)
             }
             Column(Modifier.weight(1f)) {
-                Text(current.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(current.name, style = MaterialTheme.typography.titleMedium, color = Palette.OnSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("${pager.currentPage + 1} / ${frames.size}", style = Readout, color = Palette.OnSurfaceSoft)
             }
+            // At least 12 dp between the name and the pill; a long name ellipsizes instead.
+            Spacer(Modifier.width(12.dp))
             // 自动下一张 as a whole-row switch would crowd the head; the pill says it in two words.
             SelectPill(
                 selected = state.autoAdvance,

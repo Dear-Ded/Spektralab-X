@@ -179,7 +179,8 @@ private fun TablePages(
     }
     SharedTransitionLayout(Modifier.fillMaxSize()) {
         val shared = this
-        CompositionLocalProvider(LocalSharedScope provides shared) {
+        // The pages draw on Palette ground without a Surface: give them light ink, or bare Text and Icons fall back to black.
+        CompositionLocalProvider(LocalSharedScope provides shared, androidx.compose.material3.LocalContentColor provides Palette.OnSurface) {
             rememberTransition(state, label = "table").AnimatedContent(
                 modifier = Modifier.fillMaxSize(),
                 transitionSpec = {
