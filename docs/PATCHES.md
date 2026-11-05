@@ -20,6 +20,7 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0012-persistent-descriptor-pool.patch` | `gpu/vulkan_gpu.cpp` | 每次 dispatch 都新建、销毁一个 VkDescriptorPool，全分辨率渲染有几百次 dispatch。改成后端只建一个池（按最宽的核 8 个存储缓冲），每次 dispatch 后 reset。dispatch 全程持有 dispatch 锁且提交后等队列空闲，reset 时描述符集不在使用中。超过 8 个绑定的核报清楚的错误。输出逐字节不变。 |
 | `0013-reprint-reuses-print-constants.patch` | `pipeline/pipeline.cpp`、`pipeline/pipeline.hpp` | 每次印放都重算放大机常数（中灰探针、预闪偏移、三次常驻上传），开了黑白场还要从 GPU 读回三张扫描表。这些量在同一个管线里只会被 live 参数改动（其余改动都会重建管线），所以 `apply_live_delta` 把它们标记为过期，未过期时直接复用；扫描表在 build 时按与 `upload_persistent_f32` 相同的 float 截断保留主机副本，不再读回。输出逐字节不变。 |
 | `0014-inline-args-mapped-ring.patch` | `gpu/vulkan_gpu.cpp` | 每个 `inline_bytes` 小参数（元数据、矩阵、LUT 范围）原来都要经暂存缓冲上传，单独一次提交加队列等待。补丁建一块 64 KiB 常驻映射的主机可见存储缓冲，在 dispatch 锁内把小参数拷进去并按 `minStorageBufferOffsetAlignment` 对齐绑定；装不下、没有合适内存类型或设 `SPEKTRAFILM_VULKAN_INLINE_RING=0` 时走原路径。着色器读到的字节不变，输出逐字节不变。 |
+| `0015-vulkan-pipeline-cache.patch` | `gpu/vulkan_gpu.cpp` | 上游每次启动都把约 49 条计算管线重新编译一遍（`vkCreateComputePipelines` 传 `VK_NULL_HANDLE`）。补丁建一个 `VkPipelineCache`，宿主用 `SPEKTRAFILM_VULKAN_PIPELINE_CACHE` 指定文件时跨启动保存。文件头带 GPU 名、厂商/设备号、驱动版本、`pipelineCacheUUID`、长度和 FNV-1a 哈希，任何一项不符或文件损坏就丢弃、从空缓存开始；先写临时文件再改名。应用把它放在 `cacheDir/vk-pipelines-<versionCode>.bin`，旧版本的文件启动时删掉（`EngineHost.kt`）。缓存只保存驱动对同一份 SPIR-V 的编译结果，输出逐字节不变。 |
 
 ## LibRaw 补丁
 

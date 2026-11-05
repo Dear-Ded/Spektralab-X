@@ -1,0 +1,173 @@
+Keep compiled Vulkan pipelines across launches (VkPipelineCache)
+
+vkCreateComputePipelines was passed VK_NULL_HANDLE, so every launch
+recompiled each of the ~49 compute pipelines on first use; only a
+per-process map kept them. This creates one VkPipelineCache at device
+creation and passes it to every pipeline.
+
+The cache is persisted only when the host names a file in
+SPEKTRAFILM_VULKAN_PIPELINE_CACHE (the Android app puts it in cacheDir with
+the app's version code in the name). The file carries a header of our own:
+magic, device name, vendor and device id, driver version and
+pipelineCacheUUID, plus the payload's length and FNV-1a hash. Anything that
+does not match this device and driver exactly, or is short, oversized
+(> 64 MiB) or corrupt, is ignored and the cache starts empty; a driver that
+rejects the data gets an empty cache, and one that rejects that runs with
+none, as before. It is written, to a temporary file then renamed, from
+trim_pool(0) (the app trims when it goes to the background) and from the
+destructor, and only when a pipeline was compiled since the last save.
+
+Output: unchanged by construction. A pipeline cache only returns what the
+driver compiled from the same SPIR-V, layout and specialisation constant;
+nothing a shader computes depends on it. With the variable unset (desktop,
+parity harness) the cache lives in memory for the process only.
+
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -140,6 +140,8 @@
+     ~VulkanGpu() override {
+         if (device_) {
+             vkDeviceWaitIdle(device_);
++            save_pipeline_cache();
++            if (pipeline_cache_) vkDestroyPipelineCache(device_, pipeline_cache_, nullptr);
+             destroy_buffer(&upload_staging_);
+             destroy_buffer(&read_staging_);
+             destroy_buffer(&inline_ring_);
+@@ -310,9 +312,106 @@
+         result = vkCreateCommandPool(device_, &pool_create, nullptr, &command_pool_);
+         if (result != VK_SUCCESS) { error = vk_error("vkCreateCommandPool", result); return false; }
+         create_inline_ring();
++        create_pipeline_cache();
+         return true;
+     }
+ 
++    // Android: compiled compute pipelines kept across launches. The file is
++    // SPEKTRAFILM_VULKAN_PIPELINE_CACHE (the app names it per app version, in
++    // its cache directory). It is wrapped in a header of our own -- device
++    // name, vendor, device, driver version and pipelineCacheUUID, plus the
++    // payload's length and FNV-1a hash -- and anything that does not match
++    // this device and driver exactly, or is short or corrupt, is ignored and
++    // the cache starts empty. A cache only stores what the driver compiled
++    // from the same SPIR-V and specialisation, so it cannot change a result.
++    struct PipelineCacheHeader {
++        char magic[8];
++        char device_name[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
++        uint32_t vendor_id, device_id, driver_version, reserved;
++        uint8_t uuid[VK_UUID_SIZE];
++        uint64_t payload_bytes, payload_fnv;
++    };
++    static constexpr char kPipelineCacheMagic[8] = {'S', 'P', 'K', 'P', 'C', '0', '1', 0};
++    static constexpr size_t kPipelineCacheMaxBytes = size_t(64) << 20;
++
++    static uint64_t fnv1a(const unsigned char* p, size_t n) {
++        uint64_t h = 0xcbf29ce484222325ull;
++        for (size_t i = 0; i < n; ++i) { h ^= p[i]; h *= 0x100000001b3ull; }
++        return h;
++    }
++
++    PipelineCacheHeader pipeline_cache_header(uint64_t bytes, uint64_t fnv) const {
++        PipelineCacheHeader h{};
++        std::memcpy(h.magic, kPipelineCacheMagic, sizeof h.magic);
++        std::memcpy(h.device_name, properties_.deviceName, sizeof h.device_name);
++        h.vendor_id = properties_.vendorID;
++        h.device_id = properties_.deviceID;
++        h.driver_version = properties_.driverVersion;
++        std::memcpy(h.uuid, properties_.pipelineCacheUUID, sizeof h.uuid);
++        h.payload_bytes = bytes;
++        h.payload_fnv = fnv;
++        return h;
++    }
++
++    void create_pipeline_cache() {
++        if (const char* p = std::getenv("SPEKTRAFILM_VULKAN_PIPELINE_CACHE"); p && *p) pipeline_cache_path_ = p;
++        std::vector<unsigned char> payload;
++        if (!pipeline_cache_path_.empty()) {
++            std::ifstream in(file_path(pipeline_cache_path_), std::ios::binary | std::ios::ate);
++            const std::streamsize size = in ? std::streamsize(in.tellg()) : std::streamsize(0);
++            if (size > std::streamsize(sizeof(PipelineCacheHeader)) &&
++                size_t(size) <= sizeof(PipelineCacheHeader) + kPipelineCacheMaxBytes) {
++                std::vector<unsigned char> file(static_cast<size_t>(size));
++                in.seekg(0);
++                if (in.read(reinterpret_cast<char*>(file.data()), size)) {
++                    PipelineCacheHeader got{};
++                    std::memcpy(&got, file.data(), sizeof got);
++                    const unsigned char* body = file.data() + sizeof got;
++                    const size_t body_bytes = file.size() - sizeof got;
++                    const PipelineCacheHeader want = pipeline_cache_header(body_bytes, fnv1a(body, body_bytes));
++                    if (std::memcmp(&got, &want, sizeof got) == 0) payload.assign(body, body + body_bytes);
++                }
++            }
++        }
++        VkPipelineCacheCreateInfo create{};
++        create.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
++        create.initialDataSize = payload.size();
++        create.pInitialData = payload.empty() ? nullptr : payload.data();
++        if (vkCreatePipelineCache(device_, &create, nullptr, &pipeline_cache_) != VK_SUCCESS) {
++            // A driver that refuses the data gets an empty cache; one that
++            // refuses even that runs with none, as before.
++            create.initialDataSize = 0;
++            create.pInitialData = nullptr;
++            if (vkCreatePipelineCache(device_, &create, nullptr, &pipeline_cache_) != VK_SUCCESS)
++                pipeline_cache_ = VK_NULL_HANDLE;
++        }
++    }
++
++    // Written when a pipeline was compiled since the last save: from
++    // trim_pool(0) (the app trims when it goes to the background) and from the
++    // destructor. Temporary file, then rename, so a kill mid-write leaves the
++    // previous file or none, never a torn one (and a torn one fails the hash).
++    void save_pipeline_cache() {
++        if (!pipeline_cache_ || !pipeline_cache_dirty_ || pipeline_cache_path_.empty()) return;
++        size_t bytes = 0;
++        if (vkGetPipelineCacheData(device_, pipeline_cache_, &bytes, nullptr) != VK_SUCCESS ||
++            bytes == 0 || bytes > kPipelineCacheMaxBytes) return;
++        std::vector<unsigned char> data(bytes);
++        if (vkGetPipelineCacheData(device_, pipeline_cache_, &bytes, data.data()) != VK_SUCCESS) return;
++        data.resize(bytes);
++        const PipelineCacheHeader h = pipeline_cache_header(bytes, fnv1a(data.data(), bytes));
++        const std::string tmp = pipeline_cache_path_ + ".tmp";
++        {
++            std::ofstream out(file_path(tmp), std::ios::binary | std::ios::trunc);
++            if (!out) return;
++            out.write(reinterpret_cast<const char*>(&h), sizeof h);
++            out.write(reinterpret_cast<const char*>(data.data()), std::streamsize(bytes));
++            if (!out) { out.close(); std::remove(tmp.c_str()); return; }
++        }
++        if (std::rename(tmp.c_str(), pipeline_cache_path_.c_str()) != 0) { std::remove(tmp.c_str()); return; }
++        pipeline_cache_dirty_ = false;
++    }
++
+     // Android: one small host-visible storage buffer, mapped for the backend's
+     // life, that carries every dispatch's inline arguments (Arg::inline_bytes:
+     // meta counts, matrices, LUT ranges). Without it each such argument was a
+@@ -880,6 +979,7 @@
+         // Match transfer/dispatch lock order. Every queue submission is
+         // synchronous, so owning this lock also makes staging safe to destroy.
+         std::lock_guard<std::mutex> dispatch_lock(dispatch_mutex_);
++        if (keep_bytes == 0) save_pipeline_cache();
+         std::lock_guard<std::mutex> lock(buffers_mutex_);
+         size_t total = 0, freed = 0;
+         for (const Buffer* b : buffers_) if (!b->persistent) total += b->bytes;
+@@ -1354,8 +1454,9 @@
+             pipeline_create.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+             pipeline_create.stage = stage;
+             pipeline_create.layout = p.layout;
+-            result = vkCreateComputePipelines(device_, VK_NULL_HANDLE, 1, &pipeline_create,
++            result = vkCreateComputePipelines(device_, pipeline_cache_, 1, &pipeline_create,
+                                               nullptr, &p.pipeline);
++            if (result == VK_SUCCESS && pipeline_cache_) pipeline_cache_dirty_ = true;
+         }
+         vkDestroyShaderModule(device_, shader, nullptr);
+         if (result != VK_SUCCESS) {
+@@ -1387,6 +1488,11 @@
+     uint32_t queue_family_ = 0;
+     VkCommandPool command_pool_ = VK_NULL_HANDLE;
+     VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;   // guarded by dispatch_mutex_
++    // Android: patch 0015's pipeline cache; guarded by dispatch_mutex_ (every
++    // pipeline is created under it, in dispatch).
++    VkPipelineCache pipeline_cache_ = VK_NULL_HANDLE;
++    std::string pipeline_cache_path_;
++    bool pipeline_cache_dirty_ = false;
+     std::unordered_map<std::string, ComputePipeline> pipelines_;
+     mutable std::mutex buffers_mutex_;
+     std::mutex dispatch_mutex_;
