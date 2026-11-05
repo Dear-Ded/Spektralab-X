@@ -23,6 +23,8 @@
 
 namespace spk::android {
 
+namespace local { class Local; }
+
 // Index of each value in the float array Kotlin sends (Look.kt, same order).
 enum LookIndex : int {
     kTemperature = 0, kTint, kExposure, kContrast, kBrightness, kSaturation, kVibrance,
@@ -34,6 +36,7 @@ enum LookIndex : int {
     // red, green, blue), each a point count n (2..256) then n (x, y) pairs.
     // Missing rows are identity; a malformed tail drops all five.
     kCurves = 50,
+    // After all five rows, optionally: masks and dust (layer2_local.hpp).
 };
 
 // A colour table applied before everything else in Layer 2 (a user LUT,
@@ -49,6 +52,10 @@ public:
     // `values` in UI units (Look.kt); fewer than kLookSize, or all neutral, is identity.
     explicit Layer2(const std::vector<float>& values);
     bool identity() const { return identity_ && !lut_; }
+
+    // The size of the frame about to be packed; masks and dust need its shape
+    // and its pixel. Call before the rows run. The pack functions below do.
+    void frame(uint32_t w, uint32_t h) const;
 
     // The table mixed in at `strength` (0..1) before white balance, after the
     // print and ahead of every slider. Null or strength 0 clears it.
@@ -72,6 +79,7 @@ private:
     std::vector<float> bright_lut_;   // c^(1/(1+0.8 b)) over [0, 2]
     std::shared_ptr<const ColourTable> lut_;
     float lut_strength_ = 0;
+    std::shared_ptr<local::Local> local_;   // masks and dust; null when there are none
 };
 
 // RGBA16 rows to RGBA8 (display, JPEG) or back into RGBA16 (TIFF), through

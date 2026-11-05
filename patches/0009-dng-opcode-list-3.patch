@@ -1,0 +1,425 @@
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+index 6f9909d..ad583f8 100644
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -263,6 +263,8 @@ if(SPEKTRALAB_PORTABLE_BACKEND)
+                 add_executable(spk_raw_camera tests/raw_camera.cpp)
+                 target_link_libraries(spk_raw_camera PRIVATE spk_libraw)
+                 add_test(NAME spk_raw_camera COMMAND spk_raw_camera)
++                add_executable(spk_dng_opcode_list3 tests/dng_opcode_list3.cpp)
++                add_test(NAME spk_dng_opcode_list3 COMMAND spk_dng_opcode_list3)
+                 target_link_libraries(spk_raw_metadata_link PRIVATE spk_libraw)
+                 add_test(NAME spk_raw_metadata_link COMMAND spk_raw_metadata_link)
+                 add_executable(spk_raw_headroom tests/raw_headroom.cpp)
+diff --git a/engine/src/io/dng_opcode_list3.hpp b/engine/src/io/dng_opcode_list3.hpp
+new file mode 100644
+index 0000000..db542e7
+--- /dev/null
++++ b/engine/src/io/dng_opcode_list3.hpp
+@@ -0,0 +1,221 @@
++#pragma once
++// DNG OpcodeList3: WarpRectilinear (opcode 1, lens distortion and lateral
++// chromatic aberration, Leica) and FixVignetteRadial (opcode 3, radial
++// vignetting, iPhone). LibRaw 0.22.2 reads the list into
++// dng_levels.rawopcodes[2] and applies none of it without the Adobe DNG SDK.
++//
++// OpcodeList3 works on the stage-3 image: demosaiced camera RGB before the
++// colour transform. In LibRaw that is imgdata.image just before
++// convert_to_rgb(), which is where CameraLibRaw calls this (the
++// pre_converttorgb callback): black taken off, scaled to 0..65535, still in
++// sensor orientation and in the active area, as the opcodes expect.
++//
++// The arithmetic follows the DNG SDK (dng_lens_correction.cpp):
++// - WarpRectilinear: dng_filter_warp::GetSrcPixelPosition. Centre at
++//   cx * width, cy * height; radius normalised by the farthest image corner;
++//   r^2 capped at 1; radial ratio kr0 + kr1 r^2 + kr2 r^4 + kr3 r^6, then the
++//   tangential terms; destination positions are integer pixel coordinates.
++//   Resampled with the SDK's bicubic kernel (A = -0.75, 32 subsample steps,
++//   edge pixels repeated). Planes past the ones given reuse plane 0.
++// - FixVignetteRadial: dng_opcode_FixVignetteRadial::Prepare. Radius
++//   normalised by the farthest edge in each axis, pixel centres at +0.5,
++//   gain 1 + k0 r^2 + k1 r^4 + k2 r^6 + k3 r^8 + k4 r^10.
++// Values clip at 65535 (the SDK's Pin to 1.0).
++//
++// The whole list is parsed and validated first: a list that is truncated,
++// has a parameter block of the wrong size or a non-finite value, or a centre
++// outside the image, changes no pixel. Other opcodes are skipped whether
++// optional or not; this is not a DNG renderer and the picture is still useful.
++#include <algorithm>
++#include <cmath>
++#include <cstddef>
++#include <cstdint>
++#include <cstring>
++#include <vector>
++
++namespace spk::io::detail {
++
++namespace ol3_detail {
++inline std::uint32_t be32(const unsigned char* p) {
++    return std::uint32_t(p[0]) << 24 | std::uint32_t(p[1]) << 16 | std::uint32_t(p[2]) << 8 | p[3];
++}
++inline double be_double(const unsigned char* p) {
++    std::uint64_t v = 0;
++    for (int i = 0; i < 8; ++i) v = v << 8 | p[i];
++    double d;
++    std::memcpy(&d, &v, sizeof d);
++    return d;
++}
++
++struct Op {
++    std::uint32_t id = 0;
++    std::uint32_t planes = 0;  // WarpRectilinear
++    double k[4][6] = {};       // per plane: kr0..kr3, kt0, kt1 (warp); k0..k4 (vignette, plane 0)
++    double cx = 0.5, cy = 0.5;
++};
++
++inline bool centre_ok(double cx, double cy) {
++    return std::isfinite(cx) && std::isfinite(cy) && cx >= 0 && cx <= 1 && cy >= 0 && cy <= 1;
++}
++
++// The SDK's 4-tap bicubic (dng_resample_bicubic), normalised, for 32 subsample positions.
++struct Bicubic {
++    float w[32][4];
++    Bicubic() {
++        auto kernel = [](double x) {
++            const double A = -0.75;
++            x = std::fabs(x);
++            if (x >= 2.0) return 0.0;
++            if (x >= 1.0) return ((A * x - 5.0 * A) * x + 8.0 * A) * x - 4.0 * A;
++            return ((A + 2.0) * x - (A + 3.0)) * x * x + 1.0;
++        };
++        for (int s = 0; s < 32; ++s) {
++            const double f = s / 32.0;
++            double t = 0, v[4];
++            for (int j = 0; j < 4; ++j) t += v[j] = kernel(j - 1 - f);
++            for (int j = 0; j < 4; ++j) w[s][j] = float(v[j] / t);
++        }
++    }
++};
++
++inline bool is_nop_warp(const Op& op) {
++    for (std::uint32_t p = 0; p < op.planes; ++p) {
++        const double* k = op.k[p];
++        if (k[0] != 1.0 || k[1] != 0.0 || k[2] != 0.0 || k[3] != 0.0 || k[4] != 0.0 || k[5] != 0.0) return false;
++    }
++    return true;
++}
++
++inline void warp(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op) {
++    static const Bicubic bicubic;
++    const double ch = op.cx * width, cv = op.cy * height;
++    const double radius = std::sqrt(std::max({cv * cv + ch * ch, cv * cv + (width - ch) * (width - ch),
++                                              (height - cv) * (height - cv) + ch * ch,
++                                              (height - cv) * (height - cv) + (width - ch) * (width - ch)}));
++    if (!(radius > 0)) return;
++    const double inv = 1.0 / radius;
++    std::vector<std::uint16_t> src(std::size_t(width) * height);
++    for (int c = 0; c < colors; ++c) {
++        for (std::size_t i = 0; i < src.size(); ++i) src[i] = image[i][c];
++        const double* k = op.k[std::uint32_t(c) < op.planes ? c : 0];
++        const long long rows = height;
++#if defined(_OPENMP)
++#pragma omp parallel for schedule(static)
++#endif
++        for (long long row = 0; row < rows; ++row) {
++            for (std::uint32_t col = 0; col < width; ++col) {
++                const double dv = (double(row) - cv) * inv, dh = (double(col) - ch) * inv;
++                const double dvdv = dv * dv, dhdh = dh * dh;
++                const double rr = std::min(dvdv + dhdh, 1.0);
++                const double ratio = k[0] + rr * (k[1] + rr * (k[2] + rr * k[3]));
++                const double tv = k[4] * (rr + 2.0 * dvdv) + 2.0 * k[5] * dh * dv;
++                const double th = k[5] * (rr + 2.0 * dhdh) + 2.0 * k[4] * dh * dv;
++                double sv = cv + radius * (dv * ratio + tv);
++                double sh = ch + radius * (dh * ratio + th);
++                if (!std::isfinite(sv) || !std::isfinite(sh)) sv = double(row), sh = col;
++                sv = std::clamp(sv, 0.0, double(height - 1));
++                sh = std::clamp(sh, 0.0, double(width - 1));
++                const int iv = int(std::floor(sv)), ih = int(std::floor(sh));
++                const int fv = std::min(31, int((sv - iv) * 32)), fh = std::min(31, int((sh - ih) * 32));
++                const float* wv = bicubic.w[fv];
++                const float* wh = bicubic.w[fh];
++                int xs[4];
++                for (int j = 0; j < 4; ++j) xs[j] = std::clamp(ih - 1 + j, 0, int(width) - 1);
++                float total = 0;
++                for (int i = 0; i < 4; ++i) {
++                    const int y = std::clamp(iv - 1 + i, 0, int(height) - 1);
++                    const std::uint16_t* line = src.data() + std::size_t(y) * width;
++                    float acc = 0;
++                    for (int j = 0; j < 4; ++j) acc += wh[j] * line[xs[j]];
++                    total += wv[i] * acc;
++                }
++                image[std::size_t(row) * width + col][c] =
++                    std::uint16_t(std::lround(std::clamp(total, 0.0f, 65535.0f)));
++            }
++        }
++    }
++}
++
++inline void vignette(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op) {
++    const double ch = op.cx * width, cv = op.cy * height;
++    const double radius = std::hypot(std::max(cv, height - cv), std::max(ch, width - ch));
++    if (!(radius > 0)) return;
++    const double* k = op.k[0];
++    const long long rows = height;
++#if defined(_OPENMP)
++#pragma omp parallel for schedule(static)
++#endif
++    for (long long row = 0; row < rows; ++row) {
++        const double y = (double(row) + 0.5 - cv) / radius;
++        for (std::uint32_t col = 0; col < width; ++col) {
++            const double x = (double(col) + 0.5 - ch) / radius;
++            const double r2 = std::min(x * x + y * y, 1.0);
++            const double gain = 1.0 + r2 * (k[0] + r2 * (k[1] + r2 * (k[2] + r2 * (k[3] + r2 * k[4]))));
++            if (!std::isfinite(gain) || gain == 1.0) continue;
++            auto& px = image[std::size_t(row) * width + col];
++            for (int c = 0; c < colors; ++c)
++                px[c] = std::uint16_t(std::lround(std::clamp(px[c] * gain, 0.0, 65535.0)));
++        }
++    }
++}
++}  // namespace ol3_detail
++
++// Applies OpcodeList3 (`data`, `len` bytes, big-endian as stored) to `image`
++// (width x height pixels, channels 0..colors-1 used). Returns how many
++// opcodes changed the image; 0 when there is nothing to do or the list is
++// malformed, and then no pixel is touched.
++inline int apply_dng_opcode_list3(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height,
++                                  int colors, const void* data, std::size_t len) {
++    using namespace ol3_detail;
++    if (!image || !data || len < 4 || width < 2 || height < 2 || colors < 1 || colors > 3) return 0;
++    const auto* b = static_cast<const unsigned char*>(data);
++    const std::uint32_t count = be32(b);
++    if (count > 256) return 0;
++    std::vector<Op> ops;
++    std::size_t p = 4;
++    for (std::uint32_t n = 0; n < count; ++n) {
++        if (len - p < 16) return 0;
++        const std::uint32_t id = be32(b + p), bytes = be32(b + p + 12);
++        p += 16;
++        if (bytes > len - p) return 0;
++        const unsigned char* q = b + p;
++        if (id == 1) {  // WarpRectilinear
++            if (bytes < 4) return 0;
++            Op op;
++            op.id = 1;
++            op.planes = be32(q);
++            if (op.planes < 1 || op.planes > 4 || bytes != 4 + op.planes * 48 + 16) return 0;
++            for (std::uint32_t pl = 0; pl < op.planes; ++pl)
++                for (int i = 0; i < 6; ++i) {
++                    op.k[pl][i] = be_double(q + 4 + (pl * 6 + i) * 8);
++                    if (!std::isfinite(op.k[pl][i])) return 0;
++                }
++            op.cx = be_double(q + 4 + op.planes * 48);
++            op.cy = be_double(q + 4 + op.planes * 48 + 8);
++            if (!centre_ok(op.cx, op.cy)) return 0;
++            if (!is_nop_warp(op)) ops.push_back(op);
++        } else if (id == 3) {  // FixVignetteRadial
++            if (bytes != 56) return 0;
++            Op op;
++            op.id = 3;
++            bool nop = true;
++            for (int i = 0; i < 5; ++i) {
++                op.k[0][i] = be_double(q + i * 8);
++                if (!std::isfinite(op.k[0][i])) return 0;
++                nop &= op.k[0][i] == 0.0;
++            }
++            op.cx = be_double(q + 40);
++            op.cy = be_double(q + 48);
++            if (!centre_ok(op.cx, op.cy)) return 0;
++            if (!nop) ops.push_back(op);
++        }
++        p += bytes;
++    }
++    for (const auto& op : ops) {
++        if (op.id == 1) warp(image, width, height, colors, op);
++        else vignette(image, width, height, colors, op);
++    }
++    return int(ops.size());
++}
++
++}  // namespace spk::io::detail
+diff --git a/engine/src/io/raw_camera.hpp b/engine/src/io/raw_camera.hpp
+index 36751cc..3d3bd01 100644
+--- a/engine/src/io/raw_camera.hpp
++++ b/engine/src/io/raw_camera.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ #include <libraw/libraw.h>
++#include "dng_opcode_list3.hpp"
+ #include <array>
+ #include <cmath>
+ #include <cstring>
+@@ -13,7 +14,13 @@ namespace spk::io::detail {
+ // sensor geometry, black/white levels and all normal LibRaw processing.
+ class CameraLibRaw : public LibRaw {
+ public:
+-    CameraLibRaw() : LibRaw(LIBRAW_OPTIONS_NO_DATAERR_CALLBACK) {}
++    CameraLibRaw() : LibRaw(LIBRAW_OPTIONS_NO_DATAERR_CALLBACK) {
++        callbacks.pre_converttorgb_cb = &CameraLibRaw::opcode_list3;
++    }
++
++    // How many DNG OpcodeList3 opcodes changed the picture in the last
++    // dcraw_process() (dng_opcode_list3.hpp); 0 for files without one.
++    int dng_opcode_list3_applied = 0;
+ 
+     // Correlated colour temperature the DNG matrices were interpolated to,
+     // or 0 when LibRaw's own single matrix was kept.
+@@ -110,6 +117,21 @@ protected:
+     }
+ 
+ private:
++    // OpcodeList3 on the demosaiced camera RGB, just before convert_to_rgb().
++    // Fuji's rotated layout and non-square pixels are not the image the
++    // opcodes describe, so those files are left alone.
++    static void opcode_list3(void* ctx) {
++        auto* self = static_cast<CameraLibRaw*>(static_cast<LibRaw*>(ctx));
++        auto& id = self->imgdata;
++        self->dng_opcode_list3_applied = 0;
++        const auto& ops = id.rawdata.color.dng_levels.rawopcodes[2];
++        if (!id.idata.dng_version || !id.image || !ops.data || ops.len < 4 ||
++            self->is_fuji_rotated() || id.sizes.pixel_aspect != 1.0 || id.idata.colors != 3)
++            return;
++        self->dng_opcode_list3_applied = apply_dng_opcode_list3(
++            id.image, id.sizes.iwidth, id.sizes.iheight, id.idata.colors, ops.data, ops.len);
++    }
++
+     double t1_ = 0, t2_ = 0, cm_[2][9] = {}, cc_[2][9] = {}, ab_[3] = {1, 1, 1};
+ 
+     // EXIF LightSource -> kelvin, as dng_camera_profile::IlluminantToTemperature.
+diff --git a/engine/tests/dng_opcode_list3.cpp b/engine/tests/dng_opcode_list3.cpp
+new file mode 100644
+index 0000000..a6d328d
+--- /dev/null
++++ b/engine/tests/dng_opcode_list3.cpp
+@@ -0,0 +1,131 @@
++// DNG OpcodeList3 (dng_opcode_list3.hpp): a malformed list leaves every pixel
++// alone, a no-op list too, and the two opcodes move pixels as the DNG SDK does.
++#include "../src/io/dng_opcode_list3.hpp"
++#include <cmath>
++#include <cstdint>
++#include <cstdio>
++#include <cstring>
++#include <vector>
++
++namespace {
++void put32(std::vector<unsigned char>& b, std::uint32_t v) {
++    for (int s = 24; s >= 0; s -= 8) b.push_back(static_cast<unsigned char>(v >> s));
++}
++void put_double(std::vector<unsigned char>& b, double d) {
++    std::uint64_t v;
++    std::memcpy(&v, &d, sizeof v);
++    for (int s = 56; s >= 0; s -= 8) b.push_back(static_cast<unsigned char>(v >> s));
++}
++void header(std::vector<unsigned char>& b, std::uint32_t id, std::uint32_t flags, std::uint32_t bytes) {
++    put32(b, id); put32(b, 0x01030000); put32(b, flags); put32(b, bytes);
++}
++std::vector<unsigned char> vignette_list(const double k[5], double cx = 0.5, double cy = 0.5) {
++    std::vector<unsigned char> b;
++    put32(b, 1);
++    header(b, 3, 0, 56);
++    for (int i = 0; i < 5; ++i) put_double(b, k[i]);
++    put_double(b, cx); put_double(b, cy);
++    return b;
++}
++std::vector<unsigned char> warp_list(std::uint32_t planes, const double k[6], double cx = 0.5, double cy = 0.5) {
++    std::vector<unsigned char> b;
++    put32(b, 1);
++    header(b, 1, 1, 4 + planes * 48 + 16);
++    put32(b, planes);
++    for (std::uint32_t p = 0; p < planes; ++p)
++        for (int i = 0; i < 6; ++i) put_double(b, k[i]);
++    put_double(b, cx); put_double(b, cy);
++    return b;
++}
++
++constexpr std::uint32_t W = 64, H = 48;
++std::vector<std::uint16_t> make() {
++    std::vector<std::uint16_t> px(std::size_t(W) * H * 4);
++    for (std::uint32_t y = 0; y < H; ++y)
++        for (std::uint32_t x = 0; x < W; ++x)
++            for (int c = 0; c < 4; ++c)
++                px[(std::size_t(y) * W + x) * 4 + c] = std::uint16_t(1000 + 300 * x + 200 * y + 50 * c);
++    return px;
++}
++int run(std::vector<std::uint16_t>& px, const std::vector<unsigned char>& list) {
++    return spk::io::detail::apply_dng_opcode_list3(reinterpret_cast<std::uint16_t(*)[4]>(px.data()), W, H, 3,
++                                                   list.data(), list.size());
++}
++int fail(int code, const char* what) {
++    std::fprintf(stderr, "dng_opcode_list3: %s\n", what);
++    return code;
++}
++}  // namespace
++
++int main() {
++    const auto original = make();
++    const double vig[5] = {0.5, 0.25, 0, 0, 0};
++
++    // Malformed lists: nothing changes.
++    {
++        auto good = vignette_list(vig);
++        std::vector<std::vector<unsigned char>> bad;
++        bad.push_back({0, 0, 0});                                     // shorter than the count
++        bad.push_back(std::vector<unsigned char>(good.begin(), good.end() - 1));  // truncated parameters
++        auto big = good; big[4 + 15] = 57; bad.push_back(big);        // wrong parameter size
++        auto many = good; many[3] = 2; bad.push_back(many);           // count past the data
++        auto off = vignette_list(vig, 1.5, 0.5); bad.push_back(off);  // centre outside the image
++        const double nan[5] = {NAN, 0, 0, 0, 0};
++        bad.push_back(vignette_list(nan));                            // non-finite coefficient
++        const double wk[6] = {1, -0.05, 0, 0, 0, 0};
++        auto w5 = warp_list(1, wk); w5[4 + 16 + 3] = 5; bad.push_back(w5);  // 5 planes
++        // A good vignette followed by a broken one: the good one is not applied either.
++        auto two = good; two[3] = 2;
++        header(two, 3, 0, 56); for (int i = 0; i < 3; ++i) put_double(two, 0.1);
++        bad.push_back(two);
++        for (const auto& list : bad) {
++            auto px = original;
++            if (run(px, list) != 0 || px != original) return fail(1, "a malformed list changed pixels");
++        }
++    }
++    // The Xiaomi lists: an empty one (count 0) and an identity warp.
++    {
++        auto px = original;
++        const std::vector<unsigned char> empty = {0, 0, 0, 0};
++        const double id[6] = {1, 0, 0, 0, 0, 0};
++        if (run(px, empty) != 0 || run(px, warp_list(1, id, 0, 0)) != 0 || px != original)
++            return fail(2, "a no-op list changed pixels");
++    }
++    // An unknown opcode is skipped, the vignette after it still applies.
++    {
++        std::vector<unsigned char> list;
++        put32(list, 2);
++        header(list, 7, 0, 8); put32(list, 0); put32(list, 0);
++        const auto v = vignette_list(vig);
++        list.insert(list.end(), v.begin() + 4, v.end());
++        auto px = original;
++        if (run(px, list) != 1) return fail(3, "unknown opcode not skipped");
++    }
++    // FixVignetteRadial: the centre is (almost) untouched, corners gain 1 + k0 + k1.
++    {
++        auto px = original;
++        if (run(px, vignette_list(vig)) != 1) return fail(4, "vignette not applied");
++        const std::size_t corner = 0, centre = (std::size_t(H / 2) * W + W / 2) * 4;
++        const double rc = std::hypot((0.5 - H / 2.0) / std::hypot(H / 2.0, W / 2.0),
++                                     (0.5 - W / 2.0) / std::hypot(H / 2.0, W / 2.0));
++        const double r2 = rc * rc, expect = original[corner] * (1 + r2 * (0.5 + r2 * 0.25));
++        if (std::fabs(px[corner] - expect) > 1.0) return fail(5, "vignette corner gain");
++        if (std::abs(int(px[centre]) - int(original[centre])) > original[centre] / 1000) return fail(6, "vignette centre moved");
++        if (px[corner + 3] != original[corner + 3]) return fail(7, "fourth channel touched");
++    }
++    // WarpRectilinear: a pure scale (kr0 = 0.5) samples halfway to the centre.
++    {
++        std::vector<std::uint16_t> px(std::size_t(W) * H * 4);
++        for (std::uint32_t y = 0; y < H; ++y)
++            for (std::uint32_t x = 0; x < W; ++x)
++                for (int c = 0; c < 3; ++c) px[(std::size_t(y) * W + x) * 4 + c] = std::uint16_t(100 * x);
++        const double k[6] = {0.5, 0, 0, 0, 0, 0};
++        if (run(px, warp_list(1, k)) != 1) return fail(8, "warp not applied");
++        // Destination column 0 reads source column W/2 * 0.5 = 16 (a linear ramp survives bicubic).
++        const std::size_t at = (std::size_t(H / 2) * W + 0) * 4;
++        if (std::abs(int(px[at]) - 1600) > 2) return fail(9, "warp sample position");
++        if (std::abs(int(px[(std::size_t(H / 2) * W + W / 2) * 4]) - 3200) > 2) return fail(10, "warp centre");
++    }
++    std::puts("dng_opcode_list3: malformed, no-op, vignette and warp cases passed");
++    return 0;
++}

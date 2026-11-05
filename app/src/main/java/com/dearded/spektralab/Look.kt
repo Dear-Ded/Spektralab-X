@@ -62,6 +62,10 @@ data class Look(
      */
     val lut: String = "",
     val lutStrength: Double = 1.0,
+    /** Local adjustments (蒙版, LocalEdits.kt), applied after the curves and HSL, before fade and vignette. */
+    val masks: List<EditMask> = emptyList(),
+    /** Scan dust and scratches (灰尘 / 划痕), last of all. Strength 0 is off. */
+    val dust: Dust = Dust(),
 ) {
     val neutral get() = resolved().copy(vignetteMid = 50.0) == NEUTRAL
 
@@ -117,7 +121,8 @@ data class Look(
     /** The array LookIndex in layer2.hpp reads, in that order, of [resolved]; the curves follow as the kCurves tail. */
     fun values(): FloatArray {
         val r = resolved()
-        val tail = r.curves.tail()
+        // With masks or dust, all five curve rows and the local block (layer2_local.hpp); else as before.
+        val tail = LocalEdits.tail(r.curves, r.masks, r.dust) ?: r.curves.tail()
         val v = FloatArray(50 + tail.size)
         tail.copyInto(v, 50)
         val scalars = doubleArrayOf(r.temperature, r.tint, r.exposure, r.contrast, r.brightness, r.saturation, r.vibrance,
@@ -151,6 +156,8 @@ data class Look(
         })
         if (!curves.isIdentity) put("curves", curves.toJson())
         if (lut.isNotEmpty()) put("lut", lut).put("lutStrength", lutStrength)
+        if (masks.isNotEmpty()) put("masks", JSONArray().also { a -> masks.forEach { a.put(it.toJson()) } })
+        if (dust != Dust()) put("dust", dust.toJson())
     }
 
     companion object {
@@ -220,6 +227,10 @@ data class Look(
                 toneHome = num("toneHome", 0.0).coerceIn(-100.0, 100.0),
                 colourHome = num("colourHome", 0.0).coerceIn(-100.0, 100.0),
                 palette = num("palette", 100.0).coerceIn(0.0, 100.0),
+                masks = o.optJSONArray("masks")?.let { a ->
+                    (0 until a.length()).mapNotNull { a.optJSONObject(it)?.let(EditMask::fromJson) }.take(LocalEdits.MAX_MASKS)
+                } ?: emptyList(),
+                dust = Dust.fromJson(o.optJSONObject("dust")),
             )
         }
 

@@ -1,5 +1,10 @@
 package com.dearded.spektralab
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.shape.CircleShape
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -140,38 +145,44 @@ fun ImportHost(vm: EditorViewModel) {
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp),
         ) {
-            val left = if (state.left > 0) "（还有 ${state.left} 个）" else ""
+            // ui-screens_research.md 4: what is left in the batch, said plainly in the head's summary.
+            val left = if (state.left > 0) "后面还有 ${state.left} 个" else ""
             when {
                 state.busy -> {
-                    Text("正在读取…$left", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(24.dp))
+                    PanelHeader("正在读取", summary = left, hint = "大文件和 HaldCLUT 图片要几秒。")
+                    // The working bar, never a spinner over the photo (UI2.md 1.1).
+                    AuraBar(Modifier.padding(vertical = RowGap))
                 }
                 state.error != null -> {
-                    Text("没能导入$left", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Text(state.error.orEmpty(), style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(12.dp))
+                    PanelHeader("没能导入", summary = left)
+                    Text(state.error.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+                    Spacer(Modifier.height(RowGap))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { state = ImportUi() }) { Text(if (state.left > 0) "下一个" else "好") }
+                        PrimaryPill(if (state.left > 0) "下一个" else "好") { state = ImportUi() }
                     }
                 }
                 pending != null && pending.kind == ImportKind.STYLE -> {
-                    Text("导入风格$left", style = MaterialTheme.typography.titleMedium)
-                    Text(pending.fileName, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
-                    Spacer(Modifier.height(12.dp))
+                    PanelHeader(
+                        "导入风格", summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
+                        hint = if (before != null) "已经套在当前照片上，下滑这张面板可以看全图。" else "打开一张照片后可以预览和调强度。",
+                    )
                     OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
                         label = { Text("名称") }, modifier = Modifier.fillMaxWidth())
+                    GroupLabel("放进哪个分类")
+                    // The categories already in use first, so a batch lands in one place; a new name below.
+                    val known by library.styles.all.collectAsState()
+                    val categories = remember(known) { known.map { it.category }.filter { it.isNotBlank() }.distinct() }
+                    if (categories.isNotEmpty()) PillRow(Modifier.padding(bottom = 4.dp)) {
+                        for (c in categories) SelectPill(selected = category == c, onClick = { category = c }, label = { Text(c) })
+                    }
                     OutlinedTextField(value = category, onValueChange = { category = it.take(20) }, singleLine = true,
-                        label = { Text("分类") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(Modifier.height(8.dp))
+                        label = { Text(if (categories.isEmpty()) "分类" else "或新建分类") }, modifier = Modifier.fillMaxWidth())
                     if (before != null) {
+                        Spacer(Modifier.height(RowGap))
                         LabeledSlider("强度", strength * 100, 0.0, 100.0, 100.0, true, "%.0f%%") { v ->
                             strength = (v / 100).coerceIn(0.0, 1.0)
                             preview(pending, strength)
                         }
-                    } else {
-                        Text("打开一张照片后可以预览和调强度。", style = MaterialTheme.typography.bodySmall,
-                            color = Palette.OnSurfaceSoft)
                     }
                     ReportList(pending.report)
                     Buttons(onCancel = ::cancel, keep = "保存") {
@@ -186,17 +197,17 @@ fun ImportHost(vm: EditorViewModel) {
                 }
                 pending != null -> {
                     val recipe = pending.kind == ImportKind.FILM_RECIPE
-                    Text(if (recipe) "导入胶片方案$left" else "导入胶片数据$left", style = MaterialTheme.typography.titleMedium)
-                    Text(pending.fileName, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
-                    Spacer(Modifier.height(8.dp))
-                    Text(pending.look.name, style = MaterialTheme.typography.bodyLarge)
-                    Text(
+                    PanelHeader(
+                        if (recipe) "导入胶片方案" else "导入胶片数据",
+                        summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
+                    )
+                    Text(pending.look.name, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurface)
+                    Hint(
                         when {
                             recipe -> "基于 ${ui.catalog.film(pending.base)?.label ?: pending.base}，没有自己的光谱数据"
                             pending.stage == "printing" -> "相纸 · 完整数据，保存前会在引擎里试开一次"
                             else -> "胶片 · 完整数据，保存前会在引擎里试开一次"
                         },
-                        style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
                     )
                     ReportList(pending.report)
                     Buttons(onCancel = ::cancel, keep = "保存") {
@@ -241,27 +252,41 @@ fun ImportHost(vm: EditorViewModel) {
 private fun ReportList(report: ImportReport) {
     val items = report.unconverted.sortedBy { it.kind.ordinal }
     val mapped = report.items.size - items.size
-    Spacer(Modifier.height(12.dp))
-    Text(if (items.isEmpty()) "全部转换（$mapped 项）" else "未能原样转换的项目（另有 $mapped 项已对应）",
-        style = MaterialTheme.typography.labelLarge)
-    for (it in items.take(MAX_REPORT)) {
-        val tag = if (it.kind == ImportReport.Kind.APPROXIMATED) "近似" else "未转换"
-        Text("$tag · ${it.what}" + if (it.why.isNotEmpty()) "：${it.why}" else "",
-            style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
-            modifier = Modifier.padding(top = 2.dp))
+    Spacer(Modifier.height(RowGap))
+    // One line says how it went; the item list is behind a row, so the sheet stays short (UI2.md 2.4).
+    Text(if (items.isEmpty()) "全部转换（$mapped 项）" else "${items.size} 项没能原样转换，另有 $mapped 项已对应",
+        style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+    if (items.isEmpty()) return
+    var open by remember(report) { mutableStateOf(false) }
+    QuietButton(if (open) "收起转换详情" else "查看转换详情", modifier = Modifier.padding(start = 0.dp)) { open = !open }
+    if (open) {
+        for (it in items.take(MAX_REPORT)) {
+            val tag = if (it.kind == ImportReport.Kind.APPROXIMATED) "近似" else "未转换"
+            Hint("$tag · ${it.what}" + if (it.why.isNotEmpty()) "：${it.why}" else "", Modifier.padding(top = 2.dp))
+        }
+        if (items.size > MAX_REPORT) Hint("…还有 ${items.size - MAX_REPORT} 项")
     }
-    if (items.size > MAX_REPORT) Text("…还有 ${items.size - MAX_REPORT} 项", style = MaterialTheme.typography.bodySmall,
-        color = Palette.OnSurfaceSoft)
 }
 
+/** 取消 as a quiet word, the keep action as the near-white primary pill at the right (UI2.md 1.1 Primary). */
 @Composable
 private fun Buttons(onCancel: () -> Unit, keep: String, onKeep: () -> Unit) {
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(GroupGap))
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = onCancel) { Text("取消") }
-        Spacer(Modifier.padding(4.dp))
-        Button(onClick = onKeep) { Text(keep) }
+        QuietButton("取消", onClick = onCancel)
+        Spacer(Modifier.width(8.dp))
+        PrimaryPill(keep, onClick = onKeep)
     }
+}
+
+/** The primary action: near-white, full pill, 48 dp, dark ink. */
+@Composable
+private fun PrimaryPill(text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick, shape = CircleShape, modifier = Modifier.heightIn(min = 48.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
+        contentPadding = PaddingValues(horizontal = 24.dp),
+    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
 }
 
 /**
