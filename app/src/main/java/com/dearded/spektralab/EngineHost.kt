@@ -63,6 +63,8 @@ class EngineHost(private val app: Application) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val events = EventLog()
     val thermal = ThermalMonitor(app)
+    /** Thermal and ADPF pacing of export renders. */
+    val pacer by lazy { ExportPacer(app, this) }
     /** The 正在处理 list. Process-wide, so it outlives every editor. */
     val queue: ProcessingQueue by lazy { ProcessingQueue(app, this) }
     /** Uptime of the last slider move or edit; background jobs wait for a quiet moment. */
