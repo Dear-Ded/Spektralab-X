@@ -682,16 +682,15 @@ private fun Controls(
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
                                     }
                                 SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                                Box(Modifier.coachAnchor(CoachStep.RESET)) {
-                                    LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
-                                        vm.update(e.copy(exposureEv = it))
-                                    }
+                                LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(exposureEv = it))
                                 }
                                 LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
                                 // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
-                                var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+                                val expandAll = rememberExpandAll()
+                                var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
                                 MoreRow(open = moreExposure, edited = e.yShift != 0.0 || e.mShift != 0.0 ||
                                     (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
                                 if (!moreExposure) Hint(if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜")

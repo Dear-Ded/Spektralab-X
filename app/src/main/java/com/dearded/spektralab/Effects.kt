@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit, onChange: (Edit) -> Unit) {
     // UI2.md 2.3: three strengths in reach; the film-nerd knobs behind 更多参数.
-    var more by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val expandAll = rememberExpandAll()
+    var more by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(expandAll) }
 
     Toggle("颗粒", e.grainActive, enabled) { onChange(e.copy(grainActive = it)) }
     LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag) {

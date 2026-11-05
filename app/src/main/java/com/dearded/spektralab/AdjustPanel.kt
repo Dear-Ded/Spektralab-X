@@ -93,10 +93,14 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     }
 
     // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
-    var more by remember(seg) { mutableStateOf(false) }
+    val expandAll = rememberExpandAll()
+    var more by remember(seg) { mutableStateOf(expandAll) }
     when (seg) {
         0 -> {
-            LabeledSlider("曝光", l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
+            // The 双击归零 hint sits on the first slider a newcomer meets, one tap from the photo.
+            Box(Modifier.coachAnchor(CoachStep.RESET)) {
+                LabeledSlider("曝光", l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
+            }
             Adj("对比度", l.contrast, -50.0, 50.0, enabled) { set(l.copy(contrast = it)) }
             Adj("亮度", l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
             MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||

@@ -484,3 +484,15 @@ internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifi
             overflow = TextOverflow.Ellipsis)
     }
 }
+
+/**
+ * Settings → 默认展开全部参数 (UI2.md 0.1, for film players): every 更多参数
+ * starts open. The key is shared with the settings page (ui-screens).
+ */
+internal const val EXPAND_ALL = "expand_all"
+
+@Composable
+internal fun rememberExpandAll(): Boolean {
+    val c = androidx.compose.ui.platform.LocalContext.current
+    return remember(c) { c.getSharedPreferences("settings", 0).getBoolean(EXPAND_ALL, false) }
+}
