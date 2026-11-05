@@ -335,7 +335,7 @@ object ExitDiagnostics {
             e.reason == ApplicationExitInfo.REASON_PERMISSION_CHANGE -> "permission changed"
             e.reason == ApplicationExitInfo.REASON_SIGNALED -> "signal ${e.status}"
             e.reason == ApplicationExitInfo.REASON_USER_REQUESTED -> "stopped by the user"
-            e.reason == ApplicationExitInfo.REASON_USER_STOPPED -> "removed from recents"
+            e.reason == ApplicationExitInfo.REASON_USER_STOPPED -> "user profile stopped"
             e.reason == ApplicationExitInfo.REASON_EXIT_SELF -> "exited"
             e.reason == ApplicationExitInfo.REASON_OTHER -> "killed by the system"
             else -> "reason ${e.reason}"
