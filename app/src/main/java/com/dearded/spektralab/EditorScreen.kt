@@ -1229,6 +1229,10 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                         .background(if (selected) Palette.Accent else Color.Transparent, RoundedCornerShape(50))
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                 )
+                // ISO, colour balance and one trait (ui2_derivatives.md 3): what the stock is, at a glance.
+                Text(FilmNotes.line(film), style = MaterialTheme.typography.labelSmall,
+                    color = Palette.OnSurfaceSoft, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 4.dp))
             }
         }
     }
