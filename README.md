@@ -221,6 +221,8 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/Spektralab
 
 ## 常见问题
 
+更完整的解答（为什么慢、为什么发热、暗红偏紫、屏幕和导出的差别、颗粒像彩噪、为什么要网络权限、怎么核对安装包）见 [docs/FAQ.md](docs/FAQ.md)。
+
 <details>
 <summary><b>和普通的胶片滤镜、LUT 有什么区别？</b></summary>
 

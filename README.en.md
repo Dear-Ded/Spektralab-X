@@ -221,6 +221,8 @@ On the phone, [AppVerifier](https://github.com/soupslurpr/AppVerifier) checks th
 
 ## FAQ
 
+Longer answers (speed, heat, dark reds turning purple, screen vs export, grain that looks like colour noise, the network permission, verifying an APK) are in [docs/FAQ.md](docs/FAQ.md).
+
 <details>
 <summary><b>How is this different from a film filter or a LUT?</b></summary>
 

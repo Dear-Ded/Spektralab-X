@@ -4,7 +4,9 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.Application
 import android.app.ApplicationExitInfo
+import android.content.ComponentCallbacks2
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
@@ -61,6 +63,8 @@ class EngineHost(private val app: Application) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val events = EventLog()
     val thermal = ThermalMonitor(app)
+    /** Thermal and ADPF pacing of export renders. */
+    val pacer by lazy { ExportPacer(app, this) }
     /** The 正在处理 list. Process-wide, so it outlives every editor. */
     val queue: ProcessingQueue by lazy { ProcessingQueue(app, this) }
     /** Uptime of the last slider move or edit; background jobs wait for a quiet moment. */
@@ -94,10 +98,12 @@ class EngineHost(private val app: Application) {
     private val _generation = MutableStateFlow(0)
     val generation: StateFlow<Int> = _generation
 
-    /** The previous process was killed for memory (lmkd or the memory limiter). */
-    @Volatile var lastExitWasMemory = false
+    /** How the previous process ended, as [ExitDiagnostics] read it. */
+    @Volatile var lastExit = ExitKind.NONE
         private set
-    /** Completes once [lastExitWasMemory] is known; the queue waits for it before its first job. */
+    /** The previous process was killed for memory (lmkd or the memory limiter). */
+    val lastExitWasMemory: Boolean get() = lastExit == ExitKind.MEMORY
+    /** Completes once [lastExit] is known; the queue waits for it before its first job. */
     val diagnosed = CompletableDeferred<Unit>()
 
     class Ready(
@@ -113,7 +119,7 @@ class EngineHost(private val app: Application) {
     }
 
     private val mutex = Mutex()
-    private var ready: Ready? = null
+    @Volatile private var ready: Ready? = null
     // The stock pair of the first start, warmed up again by a recovered engine.
     private var stocks = "" to ""
 
@@ -122,7 +128,9 @@ class EngineHost(private val app: Application) {
         scope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    lastExitWasMemory = runCatching { ExitDiagnostics.record(app, events) }.getOrDefault(false)
+                    lastExit = runCatching { ExitDiagnostics.record(app, events) }.getOrDefault(ExitKind.NONE)
+                    // Where the processing notice can show (Live Updates, Xiaomi focus), for the report.
+                    JobNotifier.logStatus(app, events)
                 }
             } finally {
                 diagnosed.complete(Unit)
@@ -131,6 +139,33 @@ class EngineHost(private val app: Application) {
             // killed process left half-written, then waits.
             queue.start()
         }
+        app.registerComponentCallbacks(trimCallbacks)
+    }
+
+    /**
+     * Process-wide onTrimMemory. The editor trims when its activity hides
+     * (EditorViewModel.trimMemory), but a process the queue keeps alive with
+     * no editor open had nobody doing it: here the engine's idle GPU planes
+     * go back as soon as the app is out of sight or memory runs low. Only
+     * idle buffers are freed, so a running export is not touched, and a trim
+     * right after the editor's frees nothing.
+     */
+    private val trimCallbacks = object : ComponentCallbacks2 {
+        override fun onTrimMemory(level: Int) {
+            if (level < ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) return
+            val engine = ready?.engine ?: return
+            scope.launch {
+                // Under the mutex: a recovery cannot destroy this engine mid-call.
+                val freed = mutex.withLock {
+                    if (ready?.engine != engine) 0L
+                    else withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+                }
+                if (freed > 0) events.add("trim memory level $level (app): ${freed shr 20} MB freed")
+            }
+        }
+        override fun onConfigurationChanged(newConfig: Configuration) = Unit
+        @Deprecated("Deprecated in Java")
+        override fun onLowMemory() = Unit
     }
 
     /** Starts the engine once per process; later calls return the same one. */
@@ -188,48 +223,121 @@ class EngineHost(private val app: Application) {
     }
 }
 
+/** How the previous process ended, for the queue and the keep-alive hint. */
+enum class ExitKind {
+    /** Nothing new recorded (first start, Android 10, or already seen). */
+    NONE,
+    /** The memory limiter (Android 17) or lmkd: a smaller retry helps, battery settings do not. */
+    MEMORY,
+    /** Ended by the system for another reason: the freezer, a signal, a vendor kill. */
+    SYSTEM,
+    /** The user removed it, a crash, an update: nothing to hint at. */
+    OTHER,
+}
+
 /**
  * Why earlier processes ended (Android 11+), logged once each at start-up.
- * Android 17's per-app memory limiter says "MemoryLimiter:AnonSwap" in the
- * description; lmkd kills are REASON_LOW_MEMORY. Without this both look like
- * "the app vanished" in a report.
+ * Android 17's per-app memory limiter reports REASON_OTHER with
+ * "MemoryLimiter:AnonSwap" in the description; lmkd kills are
+ * REASON_LOW_MEMORY; the app freezer's are REASON_FREEZER. HyperOS's own
+ * background kills mostly arrive as REASON_SIGNALED or REASON_OTHER with a
+ * vendor description. Without this all of them look like "the app vanished"
+ * in a report.
+ *
+ * Counts per kind are kept across starts and pinned to the top of the
+ * diagnostics report with the newest exit, so the rolling log cannot push
+ * them out.
  */
 object ExitDiagnostics {
-    /** Logs the exits not seen before; true when the newest was a memory kill. */
-    fun record(context: Context, events: EventLog): Boolean {
-        if (Build.VERSION.SDK_INT < 30) return false
-        val am = context.getSystemService(ActivityManager::class.java) ?: return false
+    private val COUNTED = listOf(
+        "memory_limiter" to "memory limiter", "low_memory" to "low memory", "freezer" to "freezer",
+        "system_export" to "system kill during export",
+    )
+
+    /** Logs the exits not seen before; returns how the newest one ended. */
+    fun record(context: Context, events: EventLog): ExitKind {
+        if (Build.VERSION.SDK_INT < 30) return ExitKind.NONE
         val prefs = context.getSharedPreferences("diagnostics", 0)
+        val am = context.getSystemService(ActivityManager::class.java) ?: return ExitKind.NONE
         val seen = prefs.getLong("exit_seen", 0L)
         val exits = runCatching { am.getHistoricalProcessExitReasons(context.packageName, 0, 8) }
             .getOrDefault(emptyList()).filter { it.timestamp > seen }.sortedBy { it.timestamp }
-        if (exits.isEmpty()) return false
-        val clock = SimpleDateFormat("MM-dd HH:mm:ss", Locale.ROOT)
-        for (e in exits) {
-            events.add("exit ${clock.format(Date(e.timestamp))}: ${describe(e)}, importance ${e.importance}, " +
-                "rss ${e.rss / 1024} MB, pss ${e.pss / 1024} MB")
+        if (exits.isEmpty()) {
+            prefs.getString("exit_last", null)?.let { events.pin("last exit", "last $it") }
+            pinCounts(prefs, events)
+            return ExitKind.NONE
         }
-        prefs.edit().putLong("exit_seen", exits.last().timestamp).apply()
-        return memoryKill(exits.last())
+        val clock = SimpleDateFormat("MM-dd HH:mm:ss", Locale.ROOT)
+        val edit = prefs.edit()
+        val counts = HashMap<String, Int>()
+        var last = ""
+        for (e in exits) {
+            last = "exit ${clock.format(Date(e.timestamp))}: ${describe(e)}" +
+                (if (duringExport(e)) " during export" else "") +
+                ", importance ${e.importance}, rss ${e.rss / 1024} MB, pss ${e.pss / 1024} MB"
+            events.add(last)
+            counter(e)?.let { key -> counts[key] = (counts[key] ?: prefs.getInt("exit_count_$key", 0)) + 1 }
+        }
+        for ((key, n) in counts) edit.putInt("exit_count_$key", n)
+        edit.putLong("exit_seen", exits.last().timestamp).putString("exit_last", last).commit()
+        events.pin("last exit", "last $last")
+        pinCounts(prefs, events)
+        KeepAlive.flagFromExit(context, kind(exits.last()), duringExport(exits.last()), events)
+        return kind(exits.last())
+    }
+
+    private fun pinCounts(prefs: android.content.SharedPreferences, events: EventLog) {
+        val counts = COUNTED.joinToString(" · ") { (key, label) -> "$label ${prefs.getInt("exit_count_$key", 0)}" }
+        events.pin("exit counts", "exits so far: $counts")
     }
 
     @RequiresApi(30)
-    private fun memoryKill(e: ApplicationExitInfo): Boolean =
-        e.reason == ApplicationExitInfo.REASON_LOW_MEMORY || e.description.orEmpty().contains("MemoryLimiter")
+    private fun memoryLimiter(e: ApplicationExitInfo) = e.description.orEmpty().contains("MemoryLimiter")
+
+    /** ExportService was foreground, so an export was running. */
+    @RequiresApi(30)
+    private fun duringExport(e: ApplicationExitInfo) =
+        e.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
+
+    @RequiresApi(30)
+    private fun kind(e: ApplicationExitInfo): ExitKind = when {
+        memoryLimiter(e) || e.reason == ApplicationExitInfo.REASON_LOW_MEMORY -> ExitKind.MEMORY
+        e.reason == ApplicationExitInfo.REASON_FREEZER ||
+            e.reason == ApplicationExitInfo.REASON_SIGNALED ||
+            e.reason == ApplicationExitInfo.REASON_OTHER ||
+            e.reason == ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE ||
+            e.reason == ApplicationExitInfo.REASON_DEPENDENCY_DIED -> ExitKind.SYSTEM
+        else -> ExitKind.OTHER
+    }
+
+    /** The count this exit adds to, if any. */
+    @RequiresApi(30)
+    private fun counter(e: ApplicationExitInfo): String? = when {
+        memoryLimiter(e) -> "memory_limiter"
+        e.reason == ApplicationExitInfo.REASON_LOW_MEMORY -> "low_memory"
+        e.reason == ApplicationExitInfo.REASON_FREEZER -> "freezer"
+        kind(e) == ExitKind.SYSTEM && duringExport(e) -> "system_export"
+        else -> null
+    }
 
     @RequiresApi(30)
     private fun describe(e: ApplicationExitInfo): String {
         val d = e.description.orEmpty()
         val what = when {
-            d.contains("MemoryLimiter") -> "memory limiter"
+            memoryLimiter(e) -> "memory limiter"
             e.reason == ApplicationExitInfo.REASON_LOW_MEMORY -> "low-memory killer"
+            e.reason == ApplicationExitInfo.REASON_FREEZER -> "app freezer"
             e.reason == ApplicationExitInfo.REASON_CRASH -> "crash"
             e.reason == ApplicationExitInfo.REASON_CRASH_NATIVE -> "native crash"
             e.reason == ApplicationExitInfo.REASON_ANR -> "ANR"
             e.reason == ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE -> "excessive resource use"
+            e.reason == ApplicationExitInfo.REASON_DEPENDENCY_DIED -> "dependency died"
+            e.reason == ApplicationExitInfo.REASON_PERMISSION_CHANGE -> "permission changed"
             e.reason == ApplicationExitInfo.REASON_SIGNALED -> "signal ${e.status}"
             e.reason == ApplicationExitInfo.REASON_USER_REQUESTED -> "stopped by the user"
+            e.reason == ApplicationExitInfo.REASON_USER_STOPPED -> "removed from recents"
             e.reason == ApplicationExitInfo.REASON_EXIT_SELF -> "exited"
+            e.reason == ApplicationExitInfo.REASON_OTHER -> "killed by the system"
             else -> "reason ${e.reason}"
         }
         return if (d.isEmpty()) what else "$what ($d)"
