@@ -22,13 +22,15 @@ android {
     defaultConfig {
         applicationId = "com.dearded.spektralab"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = appVersionCode
         versionName = appVersion
         ndk { abiFilters += "arm64-v8a" }
         externalNativeBuild {
             cmake {
-                arguments += listOf("-DSPK_UPSTREAM=$upstream", "-DANDROID_STL=c++_static")
+                // ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES: NDK r27 lays out its own runtime for 16 KB pages too
+                // (r28 does by default); CMakeLists.txt links the library at max-page-size 16384.
+                arguments += listOf("-DSPK_UPSTREAM=$upstream", "-DANDROID_STL=c++_static", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
                 System.getenv("GLSLANG")?.let { arguments += "-DSPEKTRALAB_GLSLANG=$it" }
             }
         }
