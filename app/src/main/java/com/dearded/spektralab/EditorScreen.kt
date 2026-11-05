@@ -642,6 +642,13 @@ private fun Controls(
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea ||
                                     e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount,
                             )
+                            // The panel head names the pair being developed (ui2_derivatives.md).
+                            Text(
+                                listOfNotNull(ui.catalog.film(e.film)?.label,
+                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label).joinToString(" · "),
+                                style = MaterialTheme.typography.titleSmall, color = Palette.OnSurface,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 4.dp),
+                            )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             when (step) {
                                 0 -> {
@@ -668,7 +675,7 @@ private fun Controls(
                                 2 -> {
                                     PanelHint("拍摄曝光是按快门时的曝光；放大曝光和黄、品红滤镜是暗房里印相纸时的调整。")
                                     val d = Edit()
-                                    StepReset(enabled, !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
+                                    StepReset(enabled, what = "曝光与放大", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
                                         e.yShift != 0.0 || e.mShift != 0.0) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
@@ -699,7 +706,7 @@ private fun Controls(
                                     val fx = d.copy(film = e.film, paper = e.paper)
                                     fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
-                                    StepReset(enabled, e.effects() != fx.effects()) {
+                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects()) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
@@ -1039,9 +1046,10 @@ private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onS
 
 /** 重置这一项 (UI2.md 2.5): one step back to its defaults, no confirmation, one undo. */
 @Composable
-private fun StepReset(enabled: Boolean, changed: Boolean, onReset: () -> Unit) {
+private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一项", onReset: () -> Unit) {
+    // Upstream's rule: a reset says what it resets (ui2_derivatives.md).
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onReset, enabled = enabled && changed) { Text("重置这一项") }
+        TextButton(onClick = onReset, enabled = enabled && changed) { Text("重置$what") }
     }
 }
 
