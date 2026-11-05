@@ -197,6 +197,20 @@ class EngineHost(private val app: Application) {
         next
     }
 
+    // The Vulkan pipeline cache (patch 0015): compiled compute pipelines kept
+    // in cacheDir across launches, one file per app version. The engine checks
+    // the GPU name, driver version and pipelineCacheUUID in the file's header
+    // and starts empty on any mismatch or a corrupt file; older versions'
+    // files are deleted here.
+    private fun pipelineCache() {
+        val name = "vk-pipelines-${BuildConfig.VERSION_CODE}.bin"
+        app.cacheDir.listFiles { f -> f.name.startsWith("vk-pipelines-") && f.name != name }
+            ?.forEach { it.delete() }
+        runCatching {
+            android.system.Os.setenv("SPEKTRAFILM_VULKAN_PIPELINE_CACHE", File(app.cacheDir, name).absolutePath, true)
+        }
+    }
+
     // Engine thread, under the mutex.
     private fun build(film: String, paper: String): Ready {
         val dir = EngineAssets.install(app)
@@ -204,6 +218,7 @@ class EngineHost(private val app: Application) {
         val device = StorageProbe.annotate(app, NativeEngine.deviceInfo(), events)
         val catalog = Catalog.load(dir)
         val tmp = File(app.cacheDir, "engine-tmp").apply { mkdirs() }
+        pipelineCache()
         val handle = NativeEngine.create(dir.absolutePath, tmp.absolutePath)
         if (handle == 0L) {
             throw EngineException(

@@ -751,7 +751,8 @@ private fun Controls(
                                 !e.noFilm && !e.paperNone(positive),
                                 !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                                 !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
-                                    e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma,
+                                    e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma ||
+                                    e.extraEffectsTuned(d),
                             )
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
@@ -838,11 +839,12 @@ private fun Controls(
                                     val fx = d.copy(film = e.film, paper = e.paper)
                                     fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
-                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects()) {
+                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects() || e.extraEffectsTuned(d)) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
-                                            unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
+                                            unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount)
+                                            .withExtraEffectsReset(d))
                                     }
                                     // 无 first (tools/work/no_film_research.md 4): no grain, halation, glare or sharpening.
                                     Segmented(options = listOf("无", "胶片自带"), selected = if (e.effectsNone) 0 else 1, enabled = enabled) { i ->
