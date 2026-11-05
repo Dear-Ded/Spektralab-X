@@ -53,14 +53,16 @@ internal class Change(val name: String, val detail: String, val tab: Int, val st
 internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     val d = Edit()
     val out = mutableListOf<Change>()
-    if (e.film != d.film || e.filmFormatMm != d.filmFormatMm)
-        out += Change("① 胶卷", listOfNotNull(catalog.film(e.film)?.label,
+    // A new photo opens on 无 (Edit.NONE): a film, a paper or the film's effects are each a change.
+    val positive = catalog.film(e.film)?.positive == true
+    if (!e.noFilm || e.filmFormatMm != d.filmFormatMm)
+        out += Change("① 胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
             FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {
-            it.copy(film = d.film, filmFormatMm = d.filmFormatMm, scanFilm = catalog.film(d.film)?.positive ?: d.scanFilm)
+            it.copy(noFilm = true, filmFormatMm = d.filmFormatMm)
         }
-    if (e.paper != d.paper || e.scanFilm != (catalog.film(e.film)?.positive ?: d.scanFilm))
-        out += Change("② 相纸", if (e.scanFilm) "直接扫描" else catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
-            catalog.normalize(it.copy(paper = catalog.film(it.film)?.targetPrint ?: d.paper, scanFilm = catalog.film(it.film)?.positive ?: false))
+    if (!e.noFilm && !e.paperNone(positive))
+        out += Change("② 相纸", catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
+            catalog.normalize(if (positive) it.copy(scanFilm = true) else it.copy(scanFilm = false, digitalIntermediate = true))
         }
     if (!e.autoExposure || e.exposureEv != d.exposureEv || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
         out += Change("③ 曝光与放大", listOfNotNull(
@@ -72,16 +74,13 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
             it.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv, printExposure = d.printExposure,
                 yShift = d.yShift, mShift = d.mShift)
         }
-    fun Edit.fx() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive, halationAmount,
-        scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
-    if (e.fx() != d.fx())
-        out += Change("④ 胶片效果", listOfNotNull("颗粒".takeIf { e.grainActive != d.grainActive || e.grainAmount != d.grainAmount },
-            "光晕".takeIf { e.halationActive != d.halationActive || e.halationAmount != d.halationAmount },
-            "眩光".takeIf { e.glareActive != d.glareActive || e.glareAmount != d.glareAmount }).joinToString(" · ")
+    val fxTuned = e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
+        e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma
+    if (!e.effectsNone || fxTuned)
+        out += Change("④ 胶片效果", listOfNotNull("颗粒".takeIf { e.grainActive }, "光晕".takeIf { e.halationActive },
+            "眩光".takeIf { e.glareActive }, "锐化".takeIf { e.unsharpAmount > 0 }).joinToString(" · ")
             .ifEmpty { "更多参数" }, 1, step = 3) {
-            it.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea, grainLayered = d.grainLayered,
-                halationActive = d.halationActive, halationAmount = d.halationAmount, scatterAmount = d.scatterAmount,
-                glareActive = d.glareActive, glareAmount = d.glareAmount, unsharpAmount = d.unsharpAmount,
+            it.withoutEffects().copy(grainArea = d.grainArea, grainLayered = d.grainLayered, scatterAmount = d.scatterAmount,
                 unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount)
         }
     adjustEdited(e.look).forEachIndexed { i, on ->
@@ -121,6 +120,14 @@ private val FORMAT_NAMES = mapOf(24.0 to "半格", 36.0 to "135", 56.0 to "645",
 @Composable
 internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Unit, onDismiss: () -> Unit) {
     val changes = changesOf(ui.edit, ui.catalog)
+    // 隐藏: groups taken off the preview only (EditorViewModel.previewOverride); a real
+    // edit clears the override there, so the set follows the edit and the sheet's life.
+    var hidden by androidx.compose.runtime.remember(ui.edit) { androidx.compose.runtime.mutableStateOf(emptySet<String>()) }
+    androidx.compose.runtime.LaunchedEffect(hidden, ui.edit) {
+        vm.previewOverride(if (hidden.isEmpty()) null
+            else changes.filter { it.name in hidden }.fold(ui.edit) { acc, c -> c.reset(acc) })
+    }
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { vm.previewOverride(null) } }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.PanelHigh) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 4.dp)
             .verticalScroll(rememberScrollState())) {
@@ -142,6 +149,11 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
                         if (c.detail.isNotBlank()) Hint(c.detail)
                     }
                     Spacer(Modifier.width(8.dp))
+                    val off = c.name in hidden
+                    // Words, not an eye icon in a colour: 显示 while hidden, 隐藏 otherwise.
+                    QuietButton(if (off) "显示" else "隐藏", enabled = ui.hasImage && !ui.exporting) {
+                        hidden = if (off) hidden - c.name else hidden + c.name
+                    }
                     QuietButton("重置", enabled = ui.hasImage && !ui.exporting) { vm.update(c.reset(ui.edit)) }
                 }
             }

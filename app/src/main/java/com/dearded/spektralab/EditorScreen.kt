@@ -742,17 +742,16 @@ private fun Controls(
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {
-                            // A dot on each step that differs from a fresh edit (UI2.md 2.3).
+                            // A dot on each step that differs from what a new photo opens on (Edit.NONE, 无):
+                            // a film chosen, a paper chosen, exposure moved, or the film's effects on or tuned.
                             val d = Edit()
+                            val positive = ui.catalog.film(e.film)?.positive == true
                             val stepEdited = listOf(
-                                e.filmFormatMm != d.filmFormatMm,
-                                false,
+                                !e.noFilm || e.filmFormatMm != d.filmFormatMm,
+                                !e.noFilm && !e.paperNone(positive),
                                 !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
-                                e.grainActive != d.grainActive || e.grainAmount != d.grainAmount || e.halationActive != d.halationActive ||
-                                    e.halationAmount != d.halationAmount || e.glareActive != d.glareActive || e.glareAmount != d.glareAmount ||
-                                    e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
-                                    e.grainLayered != d.grainLayered || e.grainArea != d.grainArea ||
-                                    e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount,
+                                !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
+                                    e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma,
                             )
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
@@ -870,7 +869,7 @@ private fun Controls(
                                 ).joinToString(" · "),
                                 hint = "先选类别和款式；选好后，下面是这一款的设置。",
                             )
-                        BorderPicker(e.borderId, enabled && src != null) { p ->
+                        BorderPicker(e.borderId, enabled && src != null, noFilm = e.noFilm) { p ->
                             if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
                         }
                         Borders.byId(e.borderId)?.let { p ->

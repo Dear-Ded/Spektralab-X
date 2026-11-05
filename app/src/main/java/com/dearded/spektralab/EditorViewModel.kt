@@ -237,6 +237,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * cached RAW.
      */
     private fun launchOpen(uri: Uri, wb: Pair<Double, Double>?) {
+        clearOverride(render = false)
         val previous = openJob
         openJob = viewModelScope.launch {
             previous?.cancelAndJoin()
@@ -450,6 +451,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
+        // The real edit renders below; after an override the engine holds the override's
+        // params, so even a look-only change must develop again, not re-pack.
+        val wasOverridden = clearOverride(render = false)
         val edit = _ui.value.catalog.normalize(raw)
         val current = _ui.value.edit
         // "记住上次用的" across a restart: a new process would start on 无 otherwise.
@@ -469,7 +473,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // live render of this one starts at once.
         // Only the look moved: the print is the same, so re-pack it (a few ms)
         // instead of developing again. Anything else renders, look included.
-        val lookOnly = edit.copy(look = current.look) == current && edit.look != current.look
+        val lookOnly = !wasOverridden && edit.copy(look = current.look) == current && edit.look != current.look
         if (lookOnly && _ui.value.image != null) { if (render) repacks.trySend(Unit); return }
         cancelStalePreview()
         if (render) renders.trySend(Unit)
@@ -623,14 +627,40 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     /** The last edit the engine refused (engine thread). */
     @Volatile private var rejected: Edit? = null
 
+    /**
+     * 修改记录's 隐藏 (ui2_snapseed.md 4): an edit shown instead of [wanted] for a
+     * moment, so one group can be looked at without it. Display only: it goes
+     * through the same render and re-pack path, is never recorded for undo, never
+     * saved (sidecars and editor state read [wanted]), and exports read the
+     * current edit. Any real edit, a new open and an export start clear it.
+     */
+    @Volatile private var override: Edit? = null
+
+    /** Shows [edit] instead of the current edit until cleared (null) or until anything real happens. */
+    fun previewOverride(edit: Edit?) {
+        val next = edit?.let { _ui.value.catalog.normalize(it) }?.takeIf { it != wanted }
+        if (next == override) return
+        override = next
+        cancelStalePreview()
+        renders.trySend(Unit)
+    }
+
+    /** Drops the override (a real edit, an open, an export): the screen goes back to the current edit. */
+    private fun clearOverride(render: Boolean): Boolean {
+        if (override == null) return false
+        override = null
+        if (render) renders.trySend(Unit)
+        return true
+    }
+
     private fun applyWanted(): String? {
-        val target = wanted
+        val target = override ?: wanted
         applyLook(target.look)
         if (target == applied) return null
         val delta = target.delta(applied)
         if (delta.length() == 0) { applied = target; return null }
         if (NativeEngine.setParams(session, delta.toString()) == null) {
-            rejected = target
+            if (target === override) override = null else rejected = target
             return NativeEngine.lastError()
         }
         applied = target
@@ -668,7 +698,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val out = try {
                 withContext(EngineThread.dispatcher) {
                     if (session == 0L) return@withContext null
-                    applyLook(wanted.look)
+                    applyLook((override ?: wanted).look)
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
                     val bitmap = NativeEngine.repack(session, reuse)?.also(DisplayColor::tag)
                     if (bitmap == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
@@ -826,6 +856,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * in 正在处理 and in the notification (on HyperOS, the island).
      */
     fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL) {
+        clearOverride(render = true)
         val state = _ui.value
         val src = state.source ?: return
         val uri = lastUri ?: return
@@ -856,6 +887,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * queue. The queue steps it down on a lost GPU or a blank frame.
      */
     fun exportExtreme() {
+        clearOverride(render = true)
         val state = _ui.value
         val src = state.source ?: return
         val uri = lastUri ?: return

@@ -47,7 +47,12 @@ internal object BorderGroups {
 }
 
 @Composable
-internal fun BorderPicker(current: String, enabled: Boolean, onPick: (BorderPreset) -> Unit) {
+internal fun BorderPicker(
+    current: String, enabled: Boolean,
+    /** 胶片「无」: a film edge is drawn by the film render, so those styles cannot be picked; said under the row. */
+    noFilm: Boolean = false,
+    onPick: (BorderPreset) -> Unit,
+) {
     var group by rememberSaveable { mutableStateOf(BorderGroups.groupOf(current)) }
     PillRow {
         BorderGroups.NAMES.forEachIndexed { i, name ->
@@ -60,7 +65,10 @@ internal fun BorderPicker(current: String, enabled: Boolean, onPick: (BorderPres
             SelectPill(selected = current == "none", onClick = { onPick(none) }, label = { Text(none.label) }, enabled = enabled)
         }
         for (p in BorderGroups.inGroup(group)) {
-            SelectPill(selected = current == p.id, onClick = { onPick(p) }, label = { Text(p.label) }, enabled = enabled)
+            SelectPill(selected = current == p.id, onClick = { onPick(p) }, label = { Text(p.label) },
+                enabled = enabled && !(noFilm && p.edge != null))
         }
     }
+    if (noFilm && BorderGroups.inGroup(group).any { it.edge != null })
+        Hint("胶片是「无」：片边要有胶片才画得出来，带片边的款式暂时不能选。")
 }
