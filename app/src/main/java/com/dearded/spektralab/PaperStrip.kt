@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 
 /*
@@ -40,9 +41,24 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
         for (p in papers) add(PaperCard(p.id, p.label,
             if (p.id == recommended) "推荐 · 这卷胶片的搭档" else if (p.bw) "黑白相纸" else "彩色相纸"))
     }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)) {
         items(cards, key = { it.id ?: "_scan" }) { c ->
             val on = if (c.id == null) none else !none && e.paper == c.id
+            // 无 is the same card as in the style and film strips (the photo itself, tagged 原图),
+            // a size down so it sits beside the text cards (UI2.md 7.2 point 5).
+            if (c.id == null) {
+                val original = androidx.compose.runtime.remember(ui.before) { ui.before?.asImageBitmap() }
+                NoneCard(selected = on, original = original, size = 64.dp,
+                    subtitle = if (positive) "直接扫描" else if (bw) "需要相纸" else "数字中间片",
+                    enabled = enabled && !(bw && !positive)) {
+                    if (!on) {
+                        view.tick()
+                        onChange(if (positive) e.copy(scanFilm = true) else e.copy(scanFilm = false, digitalIntermediate = true))
+                    }
+                }
+                return@items
+            }
             TextCard(
                 selected = on,
                 title = c.name.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
