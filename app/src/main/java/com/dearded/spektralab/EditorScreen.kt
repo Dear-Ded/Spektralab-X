@@ -1016,7 +1016,18 @@ private fun Controls(
             }
             }
             // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
-            CategoryBar(selected = tab, enabled = true, trailing = save) { i ->
+            // A dot on each entry whose part of the edit differs from a fresh one (UI2.md 7.2 point 10).
+            val fresh = Edit()
+            val entryEdited = listOf(
+                false,
+                e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
+                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 ||
+                    e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                e.look != Look.NEUTRAL,
+                e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,
+                e.cropAspect != 0.0 || e.quarterTurns % 4 != 0 || e.flipH,
+            )
+            CategoryBar(selected = tab, enabled = true, trailing = save, edited = entryEdited) { i ->
                 if (i == tab) onOpen(!open) else { tab = i; onOpen(true) }
             }
         }

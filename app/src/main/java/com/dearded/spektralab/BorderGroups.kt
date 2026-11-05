@@ -49,16 +49,13 @@ internal object BorderGroups {
 @Composable
 internal fun BorderPicker(current: String, enabled: Boolean, onPick: (BorderPreset) -> Unit) {
     var group by rememberSaveable { mutableStateOf(BorderGroups.groupOf(current)) }
-    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    PillRow {
         BorderGroups.NAMES.forEachIndexed { i, name ->
             val count = BorderGroups.inGroup(i).size
             SelectPill(selected = group == i, onClick = { group = i }, label = { Text("$name $count") })
         }
     }
-    Row(
-        Modifier.horizontalScroll(rememberScrollState()).padding(top = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
+    PillRow {
         Borders.byId("none")?.let { none ->
             SelectPill(selected = current == "none", onClick = { onPick(none) }, label = { Text(none.label) }, enabled = enabled)
         }
