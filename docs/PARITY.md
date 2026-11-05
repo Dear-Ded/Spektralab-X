@@ -363,3 +363,42 @@ c++ -std=c++20 -O2 -I$J/include -Iapp/src/main/cpp tools/stability/jpeg444_main.
 ./jpeg444 lake.rgb app444.jpg 98 <resources>/io/sRGB.icc
 python3 tools/stability/jpeg444_compare.py lake.rgb app444.jpg .
 ```
+
+## 8. 「无」（分支 no-film，2026-11-05）
+
+测量在 aoidc 云主机（Ubuntu 22.04，llvmpipe / lavapipe），上游固定提交 a46627d 加 `patches/`，`tools/parity/spk_android` 用 `passthrough.hpp`（与 JNI 同一份代码）。
+
+### 8.1 选了胶片时输出不变
+
+main 的 `spk_android` 用旧参数，本分支的 `spk_android` 用新参数（多出 `x_no_film:false`、`digital_intermediate:false`）。
+4 个输入（dunes、fruit 线性 ProPhoto；fruit sRGB JPEG；synth P3 JPEG）× 4 组胶片相纸（Portra 400 + Supra Endura、Velvia 100 直接扫描、Tri-X 400 + Multigrade IV、Vision3 250D + 2383）× 颗粒眩光开 / 关，
+每例 5 个文件（引擎 16 位印相、sRGB / P3 导出、sRGB / P3 屏幕）：**160 个文件全部逐字节相同，0 个不同**。
+
+### 8.2 「无」与原图（ΔE00，平均 / p99.9 / 最大）
+
+源图是 JPEG 本身（PIL 解码），在文件自己的色彩空间里比较。
+
+| 输入 | 屏幕 | 屏幕 8 位码值完全相同 | 导出 |
+|---|---|---|---|
+| fruit sRGB | 0.058 / 1.01 / 2.49 | 86.0 %，最大差 5 | 0.262 / 2.01 / 2.53 |
+| synth sRGB（色卡） | 0.071 / 0.86 / 2.12 | 81.0 %，最大差 29 | 0.491 / 5.04 / 5.41 |
+| lake sRGB | 0.075 / 0.97 / 2.59 | 78.5 %，最大差 14 | 0.230 / 2.57 / 7.20 |
+| fruit P3 | 0.061 / 1.18 / 2.77 | 86.0 %，最大差 3 | 0.197 / 1.30 / 2.75 |
+| synth P3（色卡） | 0.069 / 0.83 / 2.28 | 83.6 %，最大差 15 | 0.329 / 4.98 / 5.17 |
+
+RAW 解码（线性 ProPhoto）的「无」对照 numpy 里直接转 sRGB（CAT02、截断）：dunes 0.290 / 0.90 / 1.16，fruit 0.284 / 0.94 / 1.14。
+
+解读：
+- 屏幕路径平均 ΔE00 低于 0.08，人眼看不出。差异来自进出两个方向的色适应不同：进引擎时用 ICC 的 Bradford D50 色度坐标（与上游宿主 `image_io.cpp` 一致），离开时用引擎的 CAT02 矩阵（与上游 `render_view` 一致）。白点精确保持，差别集中在高饱和色上，色卡的最大码值差 29 就出在这里。
+- 导出路径多了 CAM16 色度压缩（上游 `export_frame` 的文件边界，亮度肩部关闭），它在色域边界前就开始收拢饱和色，所以平均 0.2–0.5、最大 5–7。有胶片的照片走的是同一步，这一步是上游设计，没有为「无」改动。
+- 想要导出逐码值等于原 JPEG，需要在「无」时跳过 CAM16 压缩并改用 Bradford 回程。这会让「无」的导出和上游桌面版 no_film 不一致，本次没有做，记为待定。
+
+### 8.3 裁剪与旋转
+
+裁剪 x 0.1、y 0.2、w 0.5、h 0.6 加一个四分之一转：输出 614×768，与预期尺寸一致；对照 numpy 里先裁后转的源图 ΔE00 0.71 / 5.0 / 15.2，反方向转为 21.5（方向正确）。残差来自 `spk_view_geometry` 的双线性重采样在像素中心上与 numpy 整像素裁剪差半个像素，集中在边缘和细节处。
+
+### 8.4 数字中间片（相纸「无」）
+
+Portra 400 和 Vision3 250D 的 DI 出图正常（1536×1023，均值约 0.38 / 0.33 / 0.23，标准差 0.19，经 DI 观看表后是中性正像）。
+**Tri-X 400 的 DI 整幅是同一个码值 75**（Cineon 黑位 95 附近），即黑白负片在这个引擎版本上不能做数字中间片。
+因此黑白负片的相纸「无」不可选（`Catalog.normalize` 清掉，相纸卡变灰并写明原因），黑白片仍需选一款相纸。

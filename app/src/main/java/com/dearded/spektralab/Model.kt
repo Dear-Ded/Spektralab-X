@@ -22,7 +22,9 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
         // The edge prints the film's own name for its gauge (UI.md E.1).
         val edge = Edit.edgeTextFor(film(e.film), e.edgeFormat)
         // A slide has no negative to make an intermediate of: its 相纸「无」is scan_film.
-        val di = e.digitalIntermediate && film(e.film)?.positive != true
+        // A B&W negative's intermediate comes out one flat grey on this engine
+        // (docs/PARITY.md 8), so it has no 相纸「无」either.
+        val di = e.digitalIntermediate && film(e.film)?.let { !it.positive && !it.bw } != false
         return if (mono == e.monoPrint && edge == e.edgeText && di == e.digitalIntermediate) e
                else e.copy(monoPrint = mono, edgeText = edge, digitalIntermediate = di)
     }

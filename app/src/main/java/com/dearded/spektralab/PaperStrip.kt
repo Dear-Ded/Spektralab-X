@@ -32,7 +32,11 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
     val positive = film?.positive == true
     val none = e.paperNone(positive)
     val cards = buildList {
-        add(PaperCard(null, "无", if (positive) "直接扫描，反转片原本的样子" else "数字中间片：去掉橙色片基，中性的正像"))
+        add(PaperCard(null, "无", when {
+            positive -> "直接扫描，反转片原本的样子"
+            bw -> "黑白负片没有数字中间片，需要一款相纸"
+            else -> "数字中间片：去掉橙色片基，中性的正像"
+        }))
         for (p in papers) add(PaperCard(p.id, p.label,
             if (p.id == recommended) "推荐 · 这卷胶片的搭档" else if (p.bw) "黑白相纸" else "彩色相纸"))
     }
@@ -43,7 +47,7 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
                 selected = on,
                 title = c.name.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
                 subtitle = c.note,
-                enabled = enabled,
+                enabled = enabled && !(c.id == null && bw && !positive),
             ) {
                 if (!on) {
                     view.tick()

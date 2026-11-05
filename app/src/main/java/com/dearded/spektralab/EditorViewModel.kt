@@ -1128,7 +1128,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val paperBw = catalog.paper(paper)?.bw ?: false
             if (film.targetPrint != null && paperBw != film.bw) paper = film.targetPrint
             // From a slide's direct scan (相纸「无」) to a negative: its 无 is the DI.
-            val di = !film.positive && (edit.digitalIntermediate || edit.scanFilm)
+            val di = !film.positive && !film.bw && (edit.digitalIntermediate || edit.scanFilm)
             return catalog.normalize(edit.copy(film = id, scanFilm = film.positive, paper = paper,
                 noFilm = false, digitalIntermediate = di))
         }

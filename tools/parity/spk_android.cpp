@@ -27,6 +27,7 @@
 #include "layer2.hpp"
 #include "input_transform.hpp"
 #include "output_transform.hpp"
+#include "passthrough.hpp"
 #include "resize.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -206,11 +207,20 @@ int main(int argc, char** argv) {
 
     spk_engine* engine = spk_engine_create(res.c_str(), nullptr);
     if (!engine) { std::fprintf(stderr, "engine: %s\n", spk_last_error(nullptr)); return 1; }
+    // x_no_film / digital_intermediate pick the render as the JNI does (passthrough.hpp).
+    std::string opening = params, err;
+    spk::android::ViewFlags flags;
+    if (!spk::android::take_app_keys(opening, flags, err)) { std::fprintf(stderr, "params: %s\n", err.c_str()); return 1; }
     const spk_image img{rgb.data(), w, h, 3};
-    spk_session* s = spk_open(engine, &img, params.c_str(), nullptr);
+    spk_session* s = spk_open(engine, &img, opening.c_str(), nullptr);
     if (!s) { std::fprintf(stderr, "open: %s\n", spk_last_error(engine)); return 1; }
     spk_result r{};
-    if (spk_render(s, "full", &r) != SPK_OK || !r.rgba16) {
+    if (flags.no_film || flags.di()) {
+        if (!spk::android::render_view(s, "full", flags.no_film, r, err)) {
+            std::fprintf(stderr, "render view: %s\n", err.c_str());
+            return 1;
+        }
+    } else if (spk_render(s, "full", &r) != SPK_OK || !r.rgba16) {
         std::fprintf(stderr, "render: %s\n", spk_last_error(engine));
         return 1;
     }
@@ -218,7 +228,6 @@ int main(int argc, char** argv) {
         const auto print = drop_alpha(r.rgba16, r.row_stride_px, r.width, r.height);
         if (!write_rgb(out + "/print.rgb", r.width, r.height, 16, print.data())) return 1;
     }
-    std::string err;
     for (const auto& [target, tag] : {std::pair{"sRGB", "srgb"}, std::pair{"Display P3", "p3"}}) {
         spk::android::OutputTransform xf;
         if (!xf.fetch(engine, target, true, err)) { std::fprintf(stderr, "transform: %s\n", err.c_str()); return 1; }
