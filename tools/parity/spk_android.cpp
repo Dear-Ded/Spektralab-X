@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <sstream>
@@ -215,12 +216,15 @@ int main(int argc, char** argv) {
     spk_session* s = spk_open(engine, &img, opening.c_str(), nullptr);
     if (!s) { std::fprintf(stderr, "open: %s\n", spk_last_error(engine)); return 1; }
     spk_result r{};
+    // SPK_TIER picks the tier (view_export.py renders "live", the editor's screen); default "full".
+    const char* tier_env = std::getenv("SPK_TIER");
+    const char* tier = tier_env && *tier_env ? tier_env : "full";
     if (flags.no_film || flags.di()) {
-        if (!spk::android::render_view(s, "full", flags.no_film, r, err)) {
+        if (!spk::android::render_view(s, tier, flags.no_film, r, err)) {
             std::fprintf(stderr, "render view: %s\n", err.c_str());
             return 1;
         }
-    } else if (spk_render(s, "full", &r) != SPK_OK || !r.rgba16) {
+    } else if (spk_render(s, tier, &r) != SPK_OK || !r.rgba16) {
         std::fprintf(stderr, "render: %s\n", spk_last_error(engine));
         return 1;
     }
