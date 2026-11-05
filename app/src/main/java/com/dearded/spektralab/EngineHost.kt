@@ -127,6 +127,8 @@ class EngineHost(private val app: Application) {
             try {
                 withContext(Dispatchers.IO) {
                     lastExit = runCatching { ExitDiagnostics.record(app, events) }.getOrDefault(ExitKind.NONE)
+                    // Where the processing notice can show (Live Updates, Xiaomi focus), for the report.
+                    JobNotifier.logStatus(app, events)
                 }
             } finally {
                 diagnosed.complete(Unit)
