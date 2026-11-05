@@ -18,7 +18,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.ViewModelProvider
@@ -75,11 +74,7 @@ class Screenshots {
         tap("风格")
         shot("11_panel_folded")
         tap("风格")
-        compose.onNodeWithContentDescription("面板高度").performTouchInput {
-            down(center)
-            repeat(12) { moveBy(Offset(0f, -100f)) }
-            up()
-        }
+        tallPanel()
         shot("12_panel_tall")
     }
 
@@ -151,9 +146,16 @@ class Screenshots {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.copy(look = ui.edit.look.copy(masks = listOf(EditMask.make(MaskKind.LINEAR))))))
         tap("调整")
-        compose.onAllNodes(hasText("局部蒙版")).onFirst().performScrollTo()
+        tallPanel()
         tap("展开（1 个）")
-        compose.onAllNodes(hasText("局部蒙版")).onFirst().performScrollTo()
+        // performScrollTo animates the scroll, which never ends on the paused clock; a swipe
+        // steps the clock with its own events. Up the tall panel, so the mask section shows.
+        compose.onRoot().performTouchInput {
+            swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.3f), durationMillis = 400)
+        }
+        compose.onRoot().performTouchInput {
+            swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.3f), durationMillis = 400)
+        }
         shot("36_adjust_masks")
     }
 
@@ -278,6 +280,16 @@ class Screenshots {
     private fun tableVm(): LightTableViewModel {
         Fake.seedTable(compose.activity)
         return ViewModelProvider(compose.activity)[LightTableViewModel::class.java]
+    }
+
+    /** Drags the panel's handle up to its tall height. */
+    private fun tallPanel() {
+        compose.onNodeWithContentDescription("面板高度").performTouchInput {
+            down(center)
+            repeat(12) { moveBy(Offset(0f, -100f)) }
+            up()
+        }
+        compose.mainClock.advanceTimeBy(1200)
     }
 
     /** Clicks the first clickable node whose text is exactly [text], wherever it is scrolled. */
