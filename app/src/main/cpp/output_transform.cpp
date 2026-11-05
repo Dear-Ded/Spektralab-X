@@ -134,6 +134,7 @@ namespace {
 template <typename Write>
 void convert(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
              const Layer2* look, const OutputTransform& xf, Write&& write) {
+    if (look) look->frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {

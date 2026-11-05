@@ -5,6 +5,8 @@
 #include <cmath>
 #include <thread>
 
+#include "layer2_local.hpp"
+
 namespace spk::android {
 namespace {
 
@@ -98,6 +100,19 @@ std::vector<float> curve_table(const std::vector<float>& v) {
     return table;
 }
 
+// Where the five curve rows end, or 0 when the tail is short of them or a
+// count is bad (the masks and dust block only follows a complete set).
+size_t curves_end(const std::vector<float>& v) {
+    size_t at = kCurves;
+    for (int row = 0; row < 5; ++row) {
+        if (at >= v.size()) return 0;
+        const float n = v[at++];
+        if (!(n >= 2 && n <= 256) || n != std::floor(n) || at + 2 * size_t(n) > v.size()) return 0;
+        at += 2 * size_t(n);
+    }
+    return at;
+}
+
 // One row of the table at v, as upstream's shader samples it: clamped to
 // 0..1, 255 intervals, linear between entries (GLSL mix).
 inline float lookup(const float* row, float v) {
@@ -132,7 +147,10 @@ void rows(uint32_t h, uint64_t px, F&& body) {
 Layer2::Layer2(const std::vector<float>& v) {
     if (v.size() < size_t(kLookSize)) return;
     curves_ = curve_table(v);
-    bool any = !curves_.empty();
+    if (const size_t end = curves_end(v)) local_ = local::Local::parse(v, end);
+    // With only masks or dust, the global path still runs: at neutral it
+    // leaves every value exactly as it was.
+    bool any = !curves_.empty() || local_;
     for (int i = 0; i < kLookSize; ++i)
         if (i != kVignetteMid && std::isfinite(v[i]) && v[i] != 0.0f) any = true;
     if (!any) return;
@@ -267,6 +285,8 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
             c[2] = hue_to_rgb(p, q, h - 1.0f / 3);
         }
     }
+    // Upstream's step 8: masks after the global adjustments and curves, before the vignette.
+    if (local_) local_->masks(c, u, v);
     if (fade_ != 0) for (float& x : c) x = fade_ + saturate(x) * (1 - fade_);
     if (vignette_ != 0) {
         const float px = (u - 0.5f) * 2, py = (v - 0.5f) * 2;
@@ -274,11 +294,18 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
         const float k = 1 + vignette_ * fall * 0.9f;
         for (float& x : c) x *= k;
     }
+    // Dust last: it sits on the scan, over everything the print had.
+    if (local_) local_->dust(c, u, v);
     r = c[0]; g = c[1]; b = c[2];
+}
+
+void Layer2::frame(uint32_t w, uint32_t h) const {
+    if (local_) local_->set_frame(w, h);
 }
 
 void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_px,
                      uint32_t w, uint32_t h, uint8_t* out, size_t out_stride) {
+    look.frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
@@ -298,6 +325,7 @@ void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_
 }
 
 void apply_rgba16_in_place(const Layer2& look, uint16_t* px, size_t stride_px, uint32_t w, uint32_t h) {
+    look.frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
