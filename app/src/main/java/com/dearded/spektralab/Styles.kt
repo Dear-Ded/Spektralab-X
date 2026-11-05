@@ -265,7 +265,7 @@ private const val LAST_GROUP = "_last_group"
  * scales only the finish. Strengths are kept per style across photos and launches.
  */
 @Composable
-internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) {
+internal fun StyleStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, onPick: (Style) -> Unit) {
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
     val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
@@ -337,6 +337,13 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
+        // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
+        if (!searching) item(key = "_none") {
+            val original = remember(ui.before) { ui.before?.asImageBitmap() }
+            NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "不加胶片和调整") {
+                if (!ui.edit.styleNone) { view.tick(); onNone() }
+            }
+        }
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
             val card = ui.filmCards[s.film]

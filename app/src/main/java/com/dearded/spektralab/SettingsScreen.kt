@@ -317,18 +317,21 @@ private fun Chevron(degrees: Float) {
     }
 }
 
-/** 新照片的胶片和相纸: remember the last pair, or a fixed pair picked from the lists. */
+/** 新照片的胶片和相纸: 无 (the photo as it is), remember the last pair, or a fixed pair picked from the lists. */
 @Composable
 private fun NewPhotoStocks(ui: UiState, vm: EditorViewModel) {
-    val fixed = ui.defaultFilm.isNotEmpty()
-    val value = if (!fixed) "记住上次用的" else listOf(
+    val mode = ui.newPhotoMode
+    val fixed = mode == EditorViewModel.NEW_FIXED
+    val value = if (mode == EditorViewModel.NEW_NONE) "无，打开就是原图" else if (!fixed) "记住上次用的" else listOf(
         ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm,
         ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper,
     ).joinToString(" · ")
     var picking by remember { mutableStateOf<String?>(null) }
-    ChoiceRow("新照片的胶片和相纸", "只用于没有保存过编辑的照片；编辑过的照片按它自己的设置打开。", value) {
-        Segmented(options = listOf("记住上次用的", "固定为"), selected = if (fixed) 1 else 0) { i ->
-            if (i == 0) vm.setNewPhotoStocks("", "")
+    ChoiceRow("新照片的胶片和相纸", "「无」：胶片、相纸、效果、调整和边框都不加。只用于没有保存过编辑的照片；编辑过的照片按它自己的设置打开。", value) {
+        Segmented(options = listOf("无", "记住上次用的", "固定为"),
+            selected = when (mode) { EditorViewModel.NEW_NONE -> 0; EditorViewModel.NEW_REMEMBER -> 1; else -> 2 }) { i ->
+            if (i == 0) vm.setNewPhotoNone()
+            else if (i == 1) vm.setNewPhotoStocks("", "")
             else vm.setNewPhotoStocks(ui.defaultFilm.ifEmpty { ui.edit.film }, ui.defaultPaper.ifEmpty { ui.edit.paper })
         }
         if (fixed) {

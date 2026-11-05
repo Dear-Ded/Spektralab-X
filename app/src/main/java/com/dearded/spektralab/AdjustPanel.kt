@@ -82,6 +82,8 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         hint = "像扫描后再微调；拖动即时生效，不重新冲洗。",
     )
     PillRow {
+        // 无 first: no adjustments, the print (or the photo) as it is.
+        SelectPill(selected = l.neutral, onClick = { if (!l.neutral) set(Look.NEUTRAL) }, label = { Text("无") }, enabled = enabled)
         segments.forEachIndexed { i, name ->
             SelectPill(selected = seg == i, onClick = { seg = i },
                 label = { Text(name) }, enabled = enabled, edited = edited[i])

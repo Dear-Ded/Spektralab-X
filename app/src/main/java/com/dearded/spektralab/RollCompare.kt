@@ -65,7 +65,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
     BackHandler(onBack = onClose)
     val view = LocalView.current
     val base by rememberSidecarEdit(table.store, frame)
-    val start = base ?: Edit()
+    val start = base ?: Edit.NONE
     val groups = remember(catalog) { Style.GROUPS.filter { g -> Style.ALL.any { it.group == g && catalog.film(it.film) != null } } }
     var group by rememberSaveable { mutableStateOf(groups.firstOrNull() ?: "") }
     // null = the frame as it is now (its own edit, or as shot when never edited).
