@@ -491,6 +491,7 @@ private fun Preview(
                 } else {
                     FramedImage(bitmap, frame, caption, Modifier.fillMaxSize())
                 }
+                if (!holding) MaskOverlay(ui, Modifier.fillMaxSize())   // edit-effects: mask handles and brush (MaskPanel.kt)
             }
         } else if (ui.ready && !ui.hasImage) {
             Aura(Modifier.matchParentSize(), strength = 0.8f)
@@ -713,6 +714,7 @@ private fun Controls(
                                             unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
                                     }
                                 EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
+                                DustSection(e.look, enabled, onDrag = vm::setInteracting) { vm.update(e.copy(look = it)) }   // edit-effects: 灰尘 (MaskPanel.kt)
                                 }
                             }
                         }

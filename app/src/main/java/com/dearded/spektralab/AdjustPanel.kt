@@ -156,6 +156,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             }
         }
     }
+    MaskSection(ui, vm, enabled)   // edit-effects: 局部蒙版 (MaskPanel.kt)
 }
 
 /** One line per 调整 segment: what it changes, in plain words (UI2.md 2.6). */
