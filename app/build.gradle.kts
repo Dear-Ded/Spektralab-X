@@ -129,3 +129,9 @@ dependencies {
     // The empty ComponentActivity createAndroidComposeRule starts; debug APK only.
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
+// Roborazzi 1.77 is compiled by Kotlin 2.3 (metadata 2.3.0) and this build is on 2.0.21,
+// which reads metadata one version ahead at most. Only the unit-test compile reads it.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    if (name.endsWith("UnitTestKotlin")) compilerOptions.freeCompilerArgs.add("-Xskip-metadata-version-check")
+}
