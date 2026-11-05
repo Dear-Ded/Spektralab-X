@@ -217,6 +217,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
 
     androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on }) {
     Scaffold(
+        modifier = Modifier.highRefresh(dragging),
         snackbarHost = { SnackbarHost(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
@@ -339,7 +340,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                     val panelH = if (handleDown) (target - with(density) { dragDy.toDp() })
                         .coerceIn(heights.first(), heights.last()) else animated
                     val view = androidx.compose.ui.platform.LocalView.current
-                    Column(Modifier.fillMaxWidth().height(panelH).chrome(showChrome)) {
+                    Column(Modifier.fillMaxWidth().height(panelH).chrome(showChrome).highRefresh(handleDown)) {
                         Box(
                             Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)
                                 .pointerInput(heights) {
