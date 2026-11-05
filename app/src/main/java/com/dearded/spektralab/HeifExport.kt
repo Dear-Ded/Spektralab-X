@@ -45,7 +45,8 @@ object HeifExport {
             } catch (e: Exception) {
                 throw EngineException("HEIF 编码失败：${e.message ?: e.javaClass.simpleName}")
             } finally {
-                writer.close()
+                // HeifWriter is AutoCloseable; WriterBase.close itself is library-internal.
+                (writer as AutoCloseable).close()
             }
         } finally {
             if (src !== bitmap) src.recycle()

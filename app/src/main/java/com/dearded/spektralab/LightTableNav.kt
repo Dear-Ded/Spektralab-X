@@ -77,8 +77,9 @@ fun AppScreens(editor: EditorViewModel) {
     val loupe by table.loupe.collectAsState()
     val nav by table.nav.collectAsState()
     val frames by table.frames.collectAsState()
-    val catalog by remember(editor) { editor.ui.map { it.catalog }.distinctUntilChanged() }
-        .collectAsState(editor.ui.value.catalog)
+    // Only a catalog change recomposes here, not every editor state change.
+    val editorUi = editor.ui.collectAsState()
+    val catalog by remember(editorUi) { androidx.compose.runtime.derivedStateOf { editorUi.value.catalog } }
     val manual by table.manualRolls.rolls.collectAsState()
     val rolls = remember(frames, catalog, manual) { rollsOf(frames, catalog, manual) }
     val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }

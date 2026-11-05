@@ -93,7 +93,7 @@ class StyleImports(private val context: Context) {
     }
 
     private fun fromText(bytes: ByteArray, file: String, stem: String, catalog: Catalog, report: ImportReport): PendingImport {
-        val text = String(bytes, Charsets.UTF_8).removePrefix("﻿")
+        val text = String(bytes, Charsets.UTF_8).removePrefix("FEFF")
         if (text.trimStart().startsWith("{")) {
             val o = SpkPackage.parseJson(bytes, file)
             return when (PresetImport.classifyJson(o)) {
