@@ -76,6 +76,7 @@ Spektralab-X 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。
 | `0011-atomic-cancel-flag` | 渲染的取消标志改成原子量，消除 `spk_cancel` 跨线程写入的数据竞争 |
 | `0012-persistent-descriptor-pool` | 一个常驻 descriptor pool，每次 dispatch 后 reset，不再每次新建、销毁 |
 | `0013-reprint-reuses-print-constants` | 印放常数只在 live 参数改动后重算，黑白场用 build 时留下的主机表，不再读回 GPU |
+| `0014-inline-args-mapped-ring` | dispatch 的小参数写进常驻映射的环形缓冲，不再每个参数单独上传提交一次 |
 
 补丁在 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh) 下载上游源码后按文件名顺序应用。补丁内容一变，CI 缓存键也跟着变。
 

@@ -19,6 +19,7 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0011-atomic-cancel-flag.patch` | `pipeline/pipeline.hpp` | `spk_cancel` 在另一条线程上不加锁写 `Progress::cancelled`，渲染在节点之间读它，普通 `bool` 是数据竞争，编译器可以把读提到循环外。改成可拷贝包装里的 `std::atomic<bool>`（每次渲染都 `session->progress = Progress{}`），写 release、读 acquire，现有用法不变。不涉及运算，输出逐字节不变。 |
 | `0012-persistent-descriptor-pool.patch` | `gpu/vulkan_gpu.cpp` | 每次 dispatch 都新建、销毁一个 VkDescriptorPool，全分辨率渲染有几百次 dispatch。改成后端只建一个池（按最宽的核 8 个存储缓冲），每次 dispatch 后 reset。dispatch 全程持有 dispatch 锁且提交后等队列空闲，reset 时描述符集不在使用中。超过 8 个绑定的核报清楚的错误。输出逐字节不变。 |
 | `0013-reprint-reuses-print-constants.patch` | `pipeline/pipeline.cpp`、`pipeline/pipeline.hpp` | 每次印放都重算放大机常数（中灰探针、预闪偏移、三次常驻上传），开了黑白场还要从 GPU 读回三张扫描表。这些量在同一个管线里只会被 live 参数改动（其余改动都会重建管线），所以 `apply_live_delta` 把它们标记为过期，未过期时直接复用；扫描表在 build 时按与 `upload_persistent_f32` 相同的 float 截断保留主机副本，不再读回。输出逐字节不变。 |
+| `0014-inline-args-mapped-ring.patch` | `gpu/vulkan_gpu.cpp` | 每个 `inline_bytes` 小参数（元数据、矩阵、LUT 范围）原来都要经暂存缓冲上传，单独一次提交加队列等待。补丁建一块 64 KiB 常驻映射的主机可见存储缓冲，在 dispatch 锁内把小参数拷进去并按 `minStorageBufferOffsetAlignment` 对齐绑定；装不下、没有合适内存类型或设 `SPEKTRAFILM_VULKAN_INLINE_RING=0` 时走原路径。着色器读到的字节不变，输出逐字节不变。 |
 
 ## LibRaw 补丁
 
