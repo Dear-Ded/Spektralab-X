@@ -695,7 +695,8 @@ private fun Controls(
                                     (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
                                 if (!moreExposure) Hint(if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜")
                                 if (moreExposure) {
-                                    LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                    LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
+                                        disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有放大机滤镜。" else "") {
                                         vm.update(e.copy(yShift = it))
                                     }
                                     LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
@@ -749,7 +750,8 @@ private fun Controls(
                         }
                         // Sprocket strips only: any photo, any film, no crop, nothing re-developed.
                         val perf = e.frame.perf
-                        SwitchRow("只加齿孔", perf != null, enabled && !e.filmEdge) { on ->
+                        SwitchRow("只加齿孔", perf != null, enabled && !e.filmEdge,
+                            reason = if (enabled && e.filmEdge) "胶片边框已经带齿孔；关掉胶片边框才能单独加。" else "") { on ->
                             vm.update(e.copy(frame = e.frame.copy(perf = if (on) Perforation() else null)))
                         }
                         if (perf != null) {
@@ -900,7 +902,12 @@ private fun Controls(
                             Hint("边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。")
                         }
                         val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
-                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank()) {
+                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank(), reason = when {
+                            !enabled -> ""
+                            e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
+                            !dateOk -> "宽幅画幅没有日期后背。"
+                            else -> ""
+                        }) {
                             vm.update(e.copy(dateImprint = it))
                         }
                         Hint(when {
@@ -918,6 +925,8 @@ private fun Controls(
                                         label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
                                 }
                             }
+                            if (!e.filmEdge) Hint("数据后背印在片边上，要先打开胶片边框。")
+                            if (e.dateStyle == "data") Hint("数据后背按相机的格式印，顺序不能改。")
                             val orders = listOf("japan" to "年 月 日", "us" to "月 日 年")
                             Segmented(orders.map { it.second }, orders.indexOfFirst { it.first == e.dateOrder },
                                 enabled && e.dateStyle != "data") { i ->
@@ -930,6 +939,8 @@ private fun Controls(
                                 optionEnabled = { places[it].first == "frame" || e.rebateDateFits }) { i ->
                                 vm.update(e.copy(datePlacement = places[i].first))
                             }
+                            if (!e.rebateDateFits) Hint("印在帧间需要 135 或半格的胶片边框。")
+                            else if (e.datePlacement != "frame") Hint("印在帧间时位置由片边决定，不用选角落。")
                             val corners = listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")
                             Segmented(corners.map { it.second }, corners.indexOfFirst { it.first == e.dateCorner },
                                 enabled && e.datePlacement == "frame") { i ->
@@ -950,7 +961,12 @@ private fun Controls(
                                 }
                             }
                             if (e.dateStyle != "data") {
-                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank()) {
+                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank(), reason = when {
+                                    !enabled -> ""
+                                    !e.filmEdge -> "拍摄参数印在片边上，要先打开胶片边框。"
+                                    e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息。"
+                                    else -> ""
+                                }) {
                                     vm.update(e.copy(dateWithData = it))
                                 }
                             }
@@ -1113,8 +1129,8 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) =
-    SettingRow(label, checked, enabled, onChange = onChange)
+private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, reason: String = "", onChange: (Boolean) -> Unit) =
+    SettingRow(label, checked, enabled, disabledReason = reason, onChange = onChange)
 
 @Composable
 private fun StockPicker(label: String, stocks: List<Stock>, selected: String, enabled: Boolean, onPick: (String) -> Unit) {

@@ -172,7 +172,8 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         else -> {
             Adj("褪色", l.fade, 0.0, 100.0, enabled) { set(l.copy(fade = it)) }
             Adj("暗角", l.vignette, -100.0, 100.0, enabled) { set(l.copy(vignette = it)) }
-            LabeledSlider("暗角范围", l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f") {
+            LabeledSlider("暗角范围", l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f",
+                disabledReason = if (enabled && l.vignette == 0.0) "先调暗角，范围才有作用。" else "") {
                 set(l.copy(vignetteMid = it))
             }
         }

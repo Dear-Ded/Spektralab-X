@@ -75,7 +75,10 @@ import kotlin.math.pow
 @Composable
 internal fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
-    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
+    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {},
+    /** Shown under the track while the slider is off: why it cannot be used (UI2.md 4, question 3). */
+    disabledReason: String = "",
+    onChange: (Double) -> Unit,
 ) {
     val view = LocalView.current
     val lo = min.toFloat()
@@ -242,6 +245,7 @@ internal fun LabeledSlider(
                 drawText(layout, topLeft = Offset(left + pad, top + pad / 2))
             }
         }
+        if (!enabled && disabledReason.isNotBlank()) Hint(disabledReason)
     }
 
     // The typed value: digits, sign and point only (a unit such as EV, × or % is ignored),

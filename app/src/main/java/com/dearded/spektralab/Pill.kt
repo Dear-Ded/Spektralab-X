@@ -267,6 +267,8 @@ internal fun SettingRow(
     checked: Boolean,
     enabled: Boolean,
     note: String = "",
+    /** Replaces [note] while the row is off: why it cannot be switched (UI2.md 4, question 3). */
+    disabledReason: String = "",
     onChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -278,7 +280,8 @@ internal fun SettingRow(
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyMedium,
                 color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f))
-            if (note.isNotBlank()) Hint(note)
+            val line = if (!enabled && disabledReason.isNotBlank()) disabledReason else note
+            if (line.isNotBlank()) Hint(line)
         }
         Spacer(Modifier.width(12.dp))
         Switch(
