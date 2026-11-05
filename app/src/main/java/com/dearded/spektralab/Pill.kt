@@ -527,3 +527,24 @@ internal fun moreSummary(names: String, vararg values: Pair<String, String?>): S
 /** A whole-number readout with its sign when it differs from [default], else null (for [moreSummary]). */
 internal fun Double.signedOrNull(default: Double): String? =
     if (this == default) null else String.format(java.util.Locale.ROOT, "%+.0f", this)
+
+/**
+ * The 无 card that leads every strip of processing choices (风格, 胶卷, 相纸,
+ * 边框; the no-film-default plan): the photo as it came in, so "no processing"
+ * is shown, not described. Same [ThumbCard] and the same three selected
+ * signals as every other card; the 原图 tag on the picture is what sets it
+ * apart, never a colour. no-film-default owns the state it toggles; callers
+ * pass [original] (UiState.before) and wire [onClick] to its "none" action.
+ */
+@Composable
+internal fun NoneCard(
+    selected: Boolean,
+    original: ImageBitmap?,
+    enabled: Boolean = true,
+    subtitle: String = "不加处理",
+    size: Dp = 104.dp,
+    onClick: () -> Unit,
+) = ThumbCard(
+    selected = selected, image = original, title = "无", subtitle = subtitle,
+    enabled = enabled, size = size, placeholder = "原图", badge = "原图", onClick = onClick,
+)
