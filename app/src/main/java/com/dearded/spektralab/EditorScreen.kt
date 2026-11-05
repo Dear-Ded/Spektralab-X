@@ -1184,6 +1184,10 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
     }
 }
 
+/** FilmStrip's two extra groups, after the four kinds (0..3). */
+private const val FAV = 10
+private const val RECENT = 11
+
 /** The film cards: each film on the open photo. Films whose card has not rendered yet show their name only. */
 @Composable
 private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
@@ -1199,13 +1203,25 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     var kind by androidx.compose.runtime.saveable.rememberSaveable {
         mutableStateOf(ui.catalog.film(ui.edit.film)?.let(::kindOf) ?: 0)
     }
+    // 收藏 and 最近 come first, each only once it has something (ui2_derivatives.md 9).
+    val picks = rememberPicks("film")
+    val favs = picks.favourites.mapNotNull { id -> ui.catalog.films.firstOrNull { it.id == id } }
+    val recents = picks.recent.mapNotNull { id -> ui.catalog.films.firstOrNull { it.id == id } }
+    if ((kind == FAV && favs.isEmpty()) || (kind == RECENT && recents.isEmpty())) kind = 0
     PillRow(Modifier.padding(bottom = 4.dp)) {
+        if (favs.isNotEmpty()) SelectPill(selected = kind == FAV, onClick = { kind = FAV }, label = { Text("收藏 ${favs.size}") })
+        if (recents.isNotEmpty()) SelectPill(selected = kind == RECENT, onClick = { kind = RECENT }, label = { Text("最近") })
         kinds.forEachIndexed { i, name ->
             val n = ui.catalog.films.count { kindOf(it) == i }
             if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
         }
     }
-    val films = ui.catalog.films.filter { kindOf(it) == kind }
+    val films = when (kind) {
+        FAV -> favs
+        RECENT -> recents
+        else -> ui.catalog.films.filter { kindOf(it) == kind }
+    }
+    if (kind != FAV && favs.isEmpty()) Hint("长按卡片可以收藏。")
     val view = androidx.compose.ui.platform.LocalView.current
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
     // The current film is brought into view when the strip appears or the film
@@ -1239,7 +1255,9 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                 subtitle = FilmNotes.line(film),
                 enabled = enabled,
                 placeholder = film.label,
-            ) { if (!selected) { view.tick(); onPick(film.id) } }
+                starred = picks.isFavourite(film.id),
+                onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
+            ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
         }
     }
 }

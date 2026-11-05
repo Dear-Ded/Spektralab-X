@@ -244,6 +244,8 @@ data class Style(
 internal const val STYLE_STRENGTH_PREFS = "style_strength"
 // In the same file; style ids never start with "_", so these keys cannot be a strength.
 private const val HOT_GROUP = "热门"
+private const val FAV_GROUP = "收藏"
+private const val RECENT_GROUP = "最近"
 /** 热门: one each of the looks people ask for by name (富士味, 日系, CCD, 徕卡味, 电影感, 黑白). */
 private val HOT = listOf(
     "lab_daily", "cam_classic_neg", "cam_chrome", "lab_airy", "ph_ccd", "cine_night",
@@ -273,7 +275,12 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val imported by library.styles.all.collectAsState()
     val all = Style.ALL + imported.map { it.look.toStyle(it.id, ui.edit, it.lutId) }
     // 热门 first (UI2.md 2.2): the picks a newcomer is most likely after, by folk name.
-    val groups = (listOf(HOT_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
+    // 收藏 and 最近 in front, each only once it has something (ui2_derivatives.md 9).
+    val picks = rememberPicks("style")
+    val favIds = picks.favourites.filter { id -> all.any { it.id == id } }
+    val recentIds = picks.recent.filter { id -> all.any { it.id == id } }
+    val groups = (listOfNotNull(FAV_GROUP.takeIf { favIds.isNotEmpty() }, RECENT_GROUP.takeIf { recentIds.isNotEmpty() }) +
+        listOf(HOT_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
 
     // The group opens on the applied style, else on the last style picked, else the last
     // group browsed: an edit tweaked after a style no longer matches it, but the row stays put.
@@ -282,9 +289,12 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         val browsed = prefs.getString(LAST_GROUP, null)?.takeIf { it in groups }
         mutableStateOf(all.firstOrNull { applied(it) }?.group ?: last ?: browsed ?: groups.first())
     }
+    // Un-starring the last favourite empties 收藏: fall back to 热门 rather than a blank row.
+    if ((group == FAV_GROUP && favIds.isEmpty()) || (group == RECENT_GROUP && recentIds.isEmpty())) group = HOT_GROUP
     fun browse(g: String) { group = g; prefs.edit().putString(LAST_GROUP, g).apply() }
     fun pick(s: Style, k: Double) {
         prefs.edit().putString(LAST_STYLE, s.id).putString(LAST_GROUP, s.group).putFloat(s.id, k.toFloat()).apply()
+        picks.used(s.id)
         onPick(s.atStrength(k))
     }
     var open by remember { mutableStateOf<String?>(null) }
@@ -305,8 +315,21 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val styles = all.filter { s ->
         ui.catalog.film(s.film) != null &&
             (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty())
-             else if (group == HOT_GROUP) s.id in HOT else s.group == group)
-    }.let { list -> if (!searching && group == HOT_GROUP) list.sortedBy { HOT.indexOf(it.id) } else list }
+             else when (group) {
+                 HOT_GROUP -> s.id in HOT
+                 FAV_GROUP -> s.id in favIds
+                 RECENT_GROUP -> s.id in recentIds
+                 else -> s.group == group
+             })
+    }.let { list ->
+        when {
+            searching -> list
+            group == HOT_GROUP -> list.sortedBy { HOT.indexOf(it.id) }
+            group == FAV_GROUP -> list.sortedBy { favIds.indexOf(it.id) }
+            group == RECENT_GROUP -> list.sortedBy { recentIds.indexOf(it.id) }
+            else -> list
+        }
+    }
     if (searching && styles.isEmpty()) {
         Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
@@ -323,6 +346,8 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
                 subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
                 enabled = enabled,
                 placeholder = s.name,
+                starred = picks.isFavourite(s.id),
+                onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
             ) {
                 if (on) open = if (open == s.id) null else s.id
                 else {

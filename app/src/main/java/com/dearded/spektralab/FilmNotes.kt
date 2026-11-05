@@ -48,3 +48,51 @@ internal object FilmNotes {
         return listOfNotNull(iso?.let { "ISO $it" }, balance, TRAITS[film.id]).joinToString(" · ")
     }
 }
+
+/**
+ * 收藏 and 最近 for films and styles (ui2_derivatives.md 9, after Silverphase's
+ * MaterialChooser): a long press on a card stars it, and every pick moves to
+ * the front of 最近 (twelve kept). Kept per [kind] ("film" / "style") in the
+ * settings file, so they survive photos and launches. Reads are snapshot
+ * state, so a strip redraws as soon as a star changes.
+ */
+internal class Picks private constructor(context: android.content.Context, private val kind: String) {
+    private val prefs = context.getSharedPreferences("settings", 0)
+    private val favKey = "picks_${kind}_fav"
+    private val recentKey = "picks_${kind}_recent"
+
+    val favourites = androidx.compose.runtime.mutableStateListOf<String>().apply {
+        addAll(prefs.getString(favKey, "").orEmpty().split(',').filter { it.isNotBlank() })
+    }
+    val recent = androidx.compose.runtime.mutableStateListOf<String>().apply {
+        addAll(prefs.getString(recentKey, "").orEmpty().split(',').filter { it.isNotBlank() })
+    }
+
+    fun isFavourite(id: String) = id in favourites
+
+    fun toggleFavourite(id: String) {
+        if (!favourites.remove(id)) favourites.add(0, id)
+        prefs.edit().putString(favKey, favourites.joinToString(",")).apply()
+    }
+
+    fun used(id: String) {
+        recent.remove(id)
+        recent.add(0, id)
+        while (recent.size > MAX_RECENT) recent.removeAt(recent.lastIndex)
+        prefs.edit().putString(recentKey, recent.joinToString(",")).apply()
+    }
+
+    companion object {
+        private const val MAX_RECENT = 12
+        private val cache = HashMap<String, Picks>()
+        fun get(context: android.content.Context, kind: String): Picks =
+            synchronized(cache) { cache.getOrPut(kind) { Picks(context.applicationContext, kind) } }
+    }
+}
+
+/** The shared store for [kind], held across recompositions. */
+@androidx.compose.runtime.Composable
+internal fun rememberPicks(kind: String): Picks {
+    val c = androidx.compose.ui.platform.LocalContext.current
+    return androidx.compose.runtime.remember(c, kind) { Picks.get(c, kind) }
+}

@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -348,6 +349,10 @@ internal fun ThumbCard(
     /** A short tag over the picture's corner, e.g. 推荐. */
     badge: String? = null,
     edited: Boolean = false,
+    /** Starred by the user: a small star on the picture's lower corner (收藏). */
+    starred: Boolean = false,
+    /** A long press, e.g. to star the card; null leaves the card tap-only. */
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     val chosen = selected
@@ -362,7 +367,11 @@ internal fun ThumbCard(
         Modifier.width(size + 8.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
             .clip(outer)
-            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton, onClick = onClick)
+            .combinedClickable(
+                enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton,
+                onLongClickLabel = if (onLongClick != null) (if (starred) "取消收藏" else "收藏") else null,
+                onLongClick = onLongClick, onClick = onClick,
+            )
             .semantics { this.selected = chosen },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -387,6 +396,11 @@ internal fun ThumbCard(
                 contentAlignment = Alignment.Center,
             ) { Check(Palette.OnAccent) }
             else if (edited) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+            if (starred) Box(
+                Modifier.align(Alignment.BottomEnd).padding(6.dp).size(20.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) { Star(Palette.OnSurface) }
         }
         Spacer(Modifier.height(6.dp))
         val nameFill by animateColorAsState(if (selected) Palette.Accent else Palette.Accent.copy(alpha = 0f),
@@ -449,6 +463,26 @@ internal fun TextCard(
             Modifier.align(Alignment.TopEnd).size(20.dp).background(Palette.OnAccent, CircleShape),
             contentAlignment = Alignment.Center,
         ) { Check(Palette.Accent) }
+    }
+}
+
+/** A drawn five-point star (收藏), filled. */
+@Composable
+private fun Star(color: Color) {
+    Canvas(Modifier.size(12.dp)) {
+        val c = Offset(size.width / 2, size.height / 2 + size.height * 0.04f)
+        val outer = size.width * 0.5f
+        val inner = outer * 0.42f
+        val path = androidx.compose.ui.graphics.Path()
+        for (k in 0 until 10) {
+            val r = if (k % 2 == 0) outer else inner
+            val a = Math.PI / 2 + k * Math.PI / 5
+            val x = c.x + (r * kotlin.math.cos(a)).toFloat()
+            val y = c.y - (r * kotlin.math.sin(a)).toFloat()
+            if (k == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        drawPath(path, color)
     }
 }
 
