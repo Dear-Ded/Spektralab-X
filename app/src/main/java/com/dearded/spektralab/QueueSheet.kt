@@ -58,6 +58,7 @@ fun QueueSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 6.dp),
             )
+            QueueNotices()
             LazyColumn(Modifier.fillMaxWidth().height(360.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(active + done, key = { it.id }) { job ->
                     JobRow(job, onCancel, onRetry)

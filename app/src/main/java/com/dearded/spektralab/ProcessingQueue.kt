@@ -242,6 +242,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         if (paused) return
         paused = true
         host.events.add("queue paused: $why")
+        // M6 hook: a refused foreground start is what the battery / autostart hint helps with (not the time limit).
+        if ("refused" in why) KeepAlive.flag(app, why, host.events)
         _jobs.value.firstOrNull { it.state == JobState.RUNNING }?.let { r ->
             pauseRequested = r.id
             set(r.id) { requeued(it) }
@@ -500,14 +502,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     /**
      * The editor's live renders go first; nothing here starts while a finger is
-     * moving. [cool]: 极致渲染 also waits, up to [THERMAL_WAIT_MS], while the
-     * phone is near throttling, so its long renders do not start hot.
+     * moving. [render]: the render comes next, so it also waits for the phone
+     * to cool and hints ADPF (ExportPacer; 极致渲染 waits longer and at a lower line).
      */
-    private suspend fun yieldToEditor(cool: Boolean = false) {
+    private suspend fun yieldToEditor(render: Boolean = false, extreme: Boolean = false) {
         while (SystemClock.uptimeMillis() - host.lastInteraction < EDITOR_GRACE_MS) delay(150)
-        if (!cool) return
-        val until = SystemClock.uptimeMillis() + THERMAL_WAIT_MS
-        while (host.thermal.headroom() > HOT_HEADROOM && SystemClock.uptimeMillis() < until) delay(1000)
+        // M6 hook: thermal pacing lives in ExportPacer.
+        if (render) host.pacer.beforeRender(extreme)
     }
 
     /** Engine thread, straight after a failed call: what the failure means for the job. */
@@ -541,7 +542,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private suspend fun <T> rendering(job: ProcessingJob, body: suspend () -> T): T {
         host.exportRenderPixels = renderedPixels(job)
         try {
-            return body()
+            // M6 hook: the export thread yields the big cores while the user edits or the phone is warm.
+            return host.pacer.during(body)
         } finally {
             host.exportRenderPixels = 0L
         }
@@ -684,7 +686,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 if (!look.neutral) withContext(ExportThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
-            yieldToEditor(cool = job.extreme)
+            yieldToEditor(render = true, extreme = job.extreme)
             step(if (job.extreme) "极致冲洗（全分辨率）" else "冲洗", 0.25f)
             val icc = File(ready.dir, "io/sRGB.icc").absolutePath
             when (job.format) {
@@ -993,10 +995,6 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     companion object {
         private const val BASE_SECONDS = 2.0
         private const val EDITOR_GRACE_MS = 1200L
-        // The editor's own "hot" line (EditorViewModel.kHotHeadroom), and at
-        // most two minutes of waiting for it: a phone that never cools still exports.
-        private const val HOT_HEADROOM = 0.85f
-        private const val THERMAL_WAIT_MS = 120_000L
         /**
          * Canvas over frame area, worst case over upstream's formats
          * (overscan.cpp kFormats, strip mode, carrier on): 135 half frame is

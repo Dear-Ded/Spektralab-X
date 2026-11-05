@@ -182,4 +182,48 @@ object JobNotifier {
         extras.putBundle("miui.focus.pics", pics)
         return extras
     }
+
+    /**
+     * Where the processing notice can show on this phone, as the system says
+     * right now. [focusProtocol]: Xiaomi's focus-template version
+     * (Settings.System "notification_focus_protocol": 1 = OS1, 2 = OS2,
+     * 3 = OS3 island; 0 = not a HyperOS that has it). [canShowFocus]: Xiaomi
+     * granted this app focus notifications and the user has not turned them
+     * off. Both from Xiaomi's HyperOS developer guide; the protocol value is
+     * only read and logged, never used to pick a template.
+     */
+    data class Status(
+        val enabled: Boolean,
+        /** Android 16 Live Updates allowed (canPostPromotedNotifications); true before Android 16. */
+        val promoted: Boolean,
+        val focusProtocol: Int,
+        val canShowFocus: Boolean,
+    ) {
+        fun describe() = "notifications ${if (enabled) "on" else "off"} · live updates " +
+            (if (promoted) "on" else "off") + " · focus protocol $focusProtocol · canShowFocus $canShowFocus"
+    }
+
+    /**
+     * Blocking (the focus check is a provider call Xiaomi marks as slow):
+     * call off the main thread. Never throws; anything unreadable is "off".
+     */
+    fun status(context: Context): Status {
+        val nm = context.getSystemService(NotificationManager::class.java)
+        val enabled = runCatching { nm?.areNotificationsEnabled() ?: false }.getOrDefault(false)
+        val promoted = if (Build.VERSION.SDK_INT >= 36) runCatching { nm?.canPostPromotedNotifications() ?: false }.getOrDefault(false) else true
+        val xiaomi = Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)
+        val protocol = if (!xiaomi) 0 else runCatching {
+            android.provider.Settings.System.getInt(context.contentResolver, "notification_focus_protocol", 0)
+        }.getOrDefault(0)
+        val focus = xiaomi && protocol > 0 && runCatching {
+            val extras = Bundle().apply { putString("package", context.packageName) }
+            context.contentResolver.call(android.net.Uri.parse("content://miui.statusbar.notification.public"),
+                "canShowFocus", null, extras)?.getBoolean("canShowFocus", false) ?: false
+        }.getOrDefault(false)
+        return Status(enabled, promoted, protocol, focus)
+    }
+
+    /** IO: [status] into the diagnostics' pinned lines. */
+    fun logStatus(context: Context, events: EventLog): Status =
+        status(context).also { events.pin("notifications", it.describe()) }
 }
