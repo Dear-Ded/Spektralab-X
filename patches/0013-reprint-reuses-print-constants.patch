@@ -1,0 +1,109 @@
+Reprint without re-deriving unchanged print constants or reading back scanner tables
+
+Every print run called refresh_print_constants: the midgray probe through
+the film model (two tc_lut lookups, two density spectra), the preflash
+offset, three persistent uploads of the enlarger's spectral constants, and,
+with black/white correction on, update_bw_references, which read the three
+scanner tables back from the GPU (three more synchronous submits) to
+integrate two pixels on the host.
+
+Nothing those steps read can change between two runs of one Pipeline
+unless a live delta arrives: every other parameter change rebuilds the
+Pipeline (core/params.cpp is_live), and tc_lut_host_ is fixed at build.
+apply_live_delta is the only writer of params_ after build, so it now marks
+the constants stale, and refresh_print_constants returns early while they
+are fresh. The pair path in engine.cpp (apply a layer's live delta, print,
+restore) goes through apply_live_delta both ways, so it re-derives as before.
+
+The scanner tables are kept on the host at build as std::vector<float>,
+narrowed with the same float(double) conversion upload_persistent_f32 uses,
+so update_bw_references integrates exactly the float32 values it used to
+read back. The comment that asked for "the already-narrowed float32 tables"
+still holds.
+
+Output: byte-identical. The constants are the same values computed from the
+same inputs; only how often they are computed changes.
+
+
+--- a/engine/src/pipeline/pipeline.cpp	2026-10-30 02:22:03.000000000 +0800
++++ b/engine/src/pipeline/pipeline.cpp	2026-11-05 16:14:45.824363500 +0800
+@@ -347,6 +347,12 @@
+         baked_.scan_base = gpu_->upload_persistent_f32(sc.base_density.data(), sc.base_density.size(), error);
+         baked_.scan_ixs = gpu_->upload_persistent_f32(sc.illum_x_sens.data(), sc.illum_x_sens.size(), error);
+         if (!baked_.scan_chd || !baked_.scan_base || !baked_.scan_ixs) return false;
++        // The same narrowing upload_persistent_f32 applies, kept on the host
++        // for update_bw_references.
++        const auto narrowed = [](const Vec& v) { return std::vector<float>(v.begin(), v.end()); };
++        scan_chd_host_ = narrowed(sc.channel_density);
++        scan_base_host_ = narrowed(sc.base_density);
++        scan_ixs_host_ = narrowed(sc.illum_x_sens);
+ 
+         // The glare's tint is the viewing illuminant's own XYZ.
+         double illum_xyz[3] = {0, 0, 0};
+@@ -1538,6 +1544,10 @@
+     // are live-mutable -- the caller writes them straight onto this pipeline
+     // between renders. So they are re-derived per print run, exactly as the
+     // reference's node body recomputes them per call.
++    // Android: nothing here can change between two runs unless a live delta
++    // arrived in between (a rebuild makes a new Pipeline), so an unchanged
++    // reprint reuses what the last run derived.
++    if (print_constants_fresh_) return true;
+     if (!print_constants(*colour_, *blob_, params_, tc_lut_host_, baked_.tc_lut_side,
+                          print_constants_, error)) return false;
+ 
+@@ -1560,6 +1570,7 @@
+                                                   black_level_, white_level_);
+     for (int c = 0; c < 3; ++c)
+         print_exposure_gain_[c] = params_.enlarger.print_exposure * bw_gain;
++    print_constants_fresh_ = true;
+     return true;
+ }
+ 
+@@ -1594,10 +1605,16 @@
+     // Read the already-narrowed float32 tables once per update, outside the
+     // two-pixel calculation. Reconstructing from double setup constants would
+     // change the scanner's rounding and the black/white correction.
+-    float chd[kNumWavelengths * 3], base[kNumWavelengths], ixs[kNumWavelengths * 3];
+-    if (!gpu_->read(baked_.scan_chd.get(), 0, chd, sizeof chd, error) ||
+-        !gpu_->read(baked_.scan_base.get(), 0, base, sizeof base, error) ||
+-        !gpu_->read(baked_.scan_ixs.get(), 0, ixs, sizeof ixs, error)) return false;
++    // Android: the host copies made at build are the same float32 values the
++    // GPU holds, so this reads them rather than three device readbacks.
++    if (scan_chd_host_.size() != kNumWavelengths * 3 || scan_base_host_.size() != kNumWavelengths ||
++        scan_ixs_host_.size() != kNumWavelengths * 3) {
++        error = "scanner tables were not prepared";
++        return false;
++    }
++    const float* chd = scan_chd_host_.data();
++    const float* base = scan_base_host_.data();
++    const float* ixs = scan_ixs_host_.data();
+     auto develop_and_y = [&](const Vec& log_raw) -> double {
+         double cmy[3];
+         for (int c = 0; c < 3; ++c) {
+
+--- a/engine/src/pipeline/pipeline.hpp	2026-11-05 16:11:36.532452400 +0800
++++ b/engine/src/pipeline/pipeline.hpp	2026-11-05 16:14:45.823365400 +0800
+@@ -581,7 +581,9 @@
+     // `preflash_exposure`) are written straight onto the baked copy; the print
+     // side re-derives its cheap constants every run, exactly as the reference
+     // does, because the service mutates them between renders.
+-    void apply_live_delta(const Json& delta) { apply_delta(params_, delta); }
++    // Android: a live edit is the only thing that can change what
++    // `refresh_print_constants` derives, so it marks them stale.
++    void apply_live_delta(const Json& delta) { apply_delta(params_, delta); print_constants_fresh_ = false; }
+ 
+     int node_count() const { return node_count_; }
+ 
+@@ -851,6 +853,12 @@
+     double black_level_ = 0.0, white_level_ = 1.0;
+     Vec log_raw_print_black_, log_raw_print_white_;
+     bool have_print_references_ = false;
++    // Android: the print constants are re-derived only when a live delta
++    // could have changed them (see apply_live_delta), and the scanner tables
++    // the black/white references read are kept as the exact float32 values
++    // that were uploaded, so the references need no GPU readback.
++    bool print_constants_fresh_ = false;
++    std::vector<float> scan_chd_host_, scan_base_host_, scan_ixs_host_;
+ 
+     uint64_t rng_state_ = 0x243F6A8885A308D3ull;
+ };

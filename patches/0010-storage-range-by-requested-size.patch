@@ -1,0 +1,41 @@
+Check and bind a storage buffer by the size its borrower asked for
+
+The frame pool hands out the smallest idle block that is at least the
+request and at most max(request, 64 MiB) larger. dispatch() then checked
+that block's capacity (b->bytes) against maxStorageBufferRange and bound the
+whole block. A plane that fits the limit could therefore fail with "buffer
+exceeds maxStorageBufferRange" after a reuse, only because the pool lent it
+a bigger block. On Adreno 7xx the limit is 128 MiB, about the size of the
+planes the app sizes against it (DeviceProfile.maxPixels), so this is the
+case that matters.
+
+This checks and binds requested_bytes, which allocate() already records for
+every hand-out (fresh, reused, persistent). Persistent and promoted buffers
+have requested_bytes == bytes, so nothing changes for them. No kernel reads
+a buffer's length() (checked: grep over shaders/vulkan), every kernel bounds
+itself by its meta counts, so the narrower range changes nothing a shader
+can see and the output is byte-identical.
+
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -650,11 +650,18 @@
+                 b = inline_buffers.back().get();
+             }
+             if (!b) { error = std::string(kernel) + ": empty argument " + std::to_string(i); return false; }
+-            if (b->bytes > storage_range_limit_) {
++            // Android: check and bind what the borrower asked for, not the pool
++            // block it was handed. A reused block can be up to max(request,
++            // 64 MiB) larger, so a plane that fits the limit failed the check
++            // after a reuse. Kernels bound themselves by their meta counts and
++            // none reads a buffer's length(), so the narrower range changes
++            // nothing they can see.
++            const size_t range = b->requested_bytes ? b->requested_bytes : b->bytes;
++            if (range > storage_range_limit_) {
+                 error = std::string(kernel) + ": buffer exceeds maxStorageBufferRange";
+                 return false;
+             }
+-            infos[i] = {b->handle, 0, VkDeviceSize(b->bytes)};
++            infos[i] = {b->handle, 0, VkDeviceSize(range)};
+         }
+ 
+         std::lock_guard<std::mutex> lock(dispatch_mutex_);
