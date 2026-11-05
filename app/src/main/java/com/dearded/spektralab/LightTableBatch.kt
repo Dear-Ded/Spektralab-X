@@ -98,7 +98,7 @@ fun BatchActions(table: LightTableViewModel, editor: EditorViewModel, chosen: Li
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PasteSheet(
+internal fun PasteSheet(
     from: CopiedLook,
     count: Int,
     initial: Set<LookGroup>,

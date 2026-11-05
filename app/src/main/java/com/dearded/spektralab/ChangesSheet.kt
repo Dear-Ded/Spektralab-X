@@ -1,0 +1,151 @@
+package com.dearded.spektralab
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+
+/**
+ * Where the editor's panel is: the entry, the 冲洗 step and the 调整 segment.
+ * One object so 修改记录 can send the user to the step a change lives in.
+ */
+@Stable
+internal class EditorNav {
+    var tab by mutableIntStateOf(0)
+    var step by mutableIntStateOf(0)
+    var adjustSeg by mutableIntStateOf(0)
+}
+
+internal val LocalEditorNav = staticCompositionLocalOf { EditorNav() }
+
+/** One changed group: where it lives and how to put it back. */
+internal class Change(val name: String, val detail: String, val tab: Int, val step: Int = -1, val seg: Int = -1,
+                      val reset: (Edit) -> Edit)
+
+/**
+ * The changed groups of [e] in darkroom order (ui2_snapseed.md 4): 冲洗 ①–④,
+ * the 调整 segments, 蒙版, 灰尘, 边框, 构图. The order is fixed, never sorted by
+ * the user: grain cannot go before the paper. Each reset returns only its own
+ * group to a fresh edit's value.
+ */
+internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
+    val d = Edit()
+    val out = mutableListOf<Change>()
+    if (e.film != d.film || e.filmFormatMm != d.filmFormatMm)
+        out += Change("① 胶卷", listOfNotNull(catalog.film(e.film)?.label,
+            FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {
+            it.copy(film = d.film, filmFormatMm = d.filmFormatMm, scanFilm = catalog.film(d.film)?.positive ?: d.scanFilm)
+        }
+    if (e.paper != d.paper || e.scanFilm != (catalog.film(e.film)?.positive ?: d.scanFilm))
+        out += Change("② 相纸", if (e.scanFilm) "直接扫描" else catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
+            catalog.normalize(it.copy(paper = catalog.film(it.film)?.targetPrint ?: d.paper, scanFilm = catalog.film(it.film)?.positive ?: false))
+        }
+    if (!e.autoExposure || e.exposureEv != d.exposureEv || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
+        out += Change("③ 曝光与放大", listOfNotNull(
+            e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.1f EV", it) },
+            e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
+            "滤镜".takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
+            "手动曝光".takeIf { !e.autoExposure },
+        ).joinToString(" · "), 1, step = 2) {
+            it.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv, printExposure = d.printExposure,
+                yShift = d.yShift, mShift = d.mShift)
+        }
+    fun Edit.fx() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive, halationAmount,
+        scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
+    if (e.fx() != d.fx())
+        out += Change("④ 胶片效果", listOfNotNull("颗粒".takeIf { e.grainActive != d.grainActive || e.grainAmount != d.grainAmount },
+            "光晕".takeIf { e.halationActive != d.halationActive || e.halationAmount != d.halationAmount },
+            "眩光".takeIf { e.glareActive != d.glareActive || e.glareAmount != d.glareAmount }).joinToString(" · ")
+            .ifEmpty { "更多参数" }, 1, step = 3) {
+            it.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea, grainLayered = d.grainLayered,
+                halationActive = d.halationActive, halationAmount = d.halationAmount, scatterAmount = d.scatterAmount,
+                glareActive = d.glareActive, glareAmount = d.glareAmount, unsharpAmount = d.unsharpAmount,
+                unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount)
+        }
+    adjustEdited(e.look).forEachIndexed { i, on ->
+        if (on) out += Change("调整 · ${ADJUST_SEGMENTS[i]}", "", 2, seg = i) { it.copy(look = resetAdjustSegment(it.look, i)) }
+    }
+    if (e.look.masks.isNotEmpty())
+        out += Change("蒙版", "${e.look.masks.size} 个", 2) { it.copy(look = it.look.copy(masks = emptyList())) }
+    if (e.look.dust.active)
+        out += Change("灰尘", "", 1, step = 3) { it.copy(look = it.look.copy(dust = Dust())) }
+    if (e.borderId != d.borderId || e.filmEdge || e.frame.perf != null || e.dateImprint)
+        out += Change("边框", listOfNotNull(Borders.byId(e.borderId)?.takeIf { it.id != "none" }?.label,
+            "片边".takeIf { e.filmEdge }, "齿孔".takeIf { e.frame.perf != null }, "日期".takeIf { e.dateImprint })
+            .joinToString(" · "), 3) {
+            it.copy(borderId = d.borderId, frame = d.frame, filmEdge = false, dateImprint = false,
+                cropX = if (it.filmEdge) d.cropX else it.cropX, cropY = if (it.filmEdge) d.cropY else it.cropY,
+                cropW = if (it.filmEdge) d.cropW else it.cropW, cropH = if (it.filmEdge) d.cropH else it.cropH)
+        }
+    if (e.cropAspect != d.cropAspect || e.quarterTurns != d.quarterTurns || e.flipH != d.flipH)
+        out += Change("构图", listOfNotNull(
+            "裁剪".takeIf { e.cropAspect != d.cropAspect }, "转 ${e.quarterTurns * 90}°".takeIf { e.quarterTurns != 0 },
+            "翻转".takeIf { e.flipH }).joinToString(" · "), 4) {
+            it.copy(cropAspect = d.cropAspect, cropX = d.cropX, cropY = d.cropY, cropW = d.cropW, cropH = d.cropH,
+                quarterTurns = d.quarterTurns, flipH = d.flipH)
+        }
+    return out
+}
+
+private val FORMAT_NAMES = mapOf(24.0 to "半格", 36.0 to "135", 56.0 to "645", 70.0 to "6×7", 127.0 to "4×5")
+
+/**
+ * 修改记录 (ui2_snapseed.md 4, after Snapseed's 查看修改): what is changed on this
+ * photo, one row per group in the darkroom's fixed order. Tap a row to go to
+ * its step; 重置 puts that group back (one undo). No reordering: the chain is
+ * physics, not a stack.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Unit, onDismiss: () -> Unit) {
+    val changes = changesOf(ui.edit, ui.catalog)
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.PanelHigh) {
+        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 4.dp)
+            .verticalScroll(rememberScrollState())) {
+            PanelHeader(
+                title = "修改记录",
+                summary = if (changes.isEmpty()) "还没有改动" else "${changes.size} 组",
+                hint = "按冲洗的先后排。点一行回到那一步；重置只还原这一组，可撤销。",
+            )
+            Spacer(Modifier.padding(top = RowGap))
+            if (changes.isEmpty()) Hint("这张照片还是刚打开时的样子。", Modifier.padding(bottom = 24.dp))
+            for (c in changes) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
+                        .clickable(role = Role.Button) { onGo(c) },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(c.name, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+                        if (c.detail.isNotBlank()) Hint(c.detail)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    QuietButton("重置", enabled = ui.hasImage && !ui.exporting) { vm.update(c.reset(ui.edit)) }
+                }
+            }
+            Spacer(Modifier.padding(top = 8.dp))
+        }
+    }
+}

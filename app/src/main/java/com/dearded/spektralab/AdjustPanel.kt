@@ -50,29 +50,12 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     fun set(next: Look) = vm.update(e.copy(look = next))
 
     // One segment on screen at a time (UI2.md 2.4); a dot marks the ones changed.
-    val segments = listOf("光线", "色彩", "分色", "曲线", "调色盘", "质感")
-    val edited = listOf(
-        l.exposure != n.exposure || l.contrast != n.contrast || l.brightness != n.brightness ||
-            l.highlights != n.highlights || l.shadows != n.shadows || l.blackPoint != n.blackPoint ||
-            l.whitePoint != n.whitePoint,
-        l.temperature != n.temperature || l.tint != n.tint || l.saturation != n.saturation || l.vibrance != n.vibrance,
-        l.hsl != n.hsl || l.master != n.master || l.shadowZone != n.shadowZone ||
-            l.midZone != n.midZone || l.highlightZone != n.highlightZone,
-        l.curves != n.curves,
-        l.tone != l.toneHome || l.colour != l.colourHome,
-        l.fade != n.fade || l.vignette != n.vignette || l.vignetteMid != n.vignetteMid,
-    )
-    fun resetSegment(i: Int) = set(when (i) {
-        0 -> l.copy(exposure = n.exposure, contrast = n.contrast, brightness = n.brightness, highlights = n.highlights,
-            shadows = n.shadows, blackPoint = n.blackPoint, whitePoint = n.whitePoint)
-        1 -> l.copy(temperature = n.temperature, tint = n.tint, saturation = n.saturation, vibrance = n.vibrance)
-        2 -> l.copy(hsl = n.hsl, master = n.master, shadowZone = n.shadowZone, midZone = n.midZone,
-            highlightZone = n.highlightZone)
-        3 -> l.copy(curves = n.curves)
-        4 -> l.copy(tone = l.toneHome, colour = l.colourHome)
-        else -> l.copy(fade = n.fade, vignette = n.vignette, vignetteMid = n.vignetteMid)
-    })
-    var seg by androidx.compose.runtime.saveable.rememberSaveable { mutableIntStateOf(0) }
+    val segments = ADJUST_SEGMENTS
+    val edited = adjustEdited(l)
+    fun resetSegment(i: Int) = set(resetAdjustSegment(l, i))
+    // The segment lives in the editor's nav, so 修改记录 can open this page on one.
+    val nav = LocalEditorNav.current
+    var seg by nav::adjustSeg
 
     // UI2.md 7.2 point 2: title · how many segments changed, the reset on the right.
     val changedCount = edited.count { it }
@@ -181,6 +164,40 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         }
     }
     MaskSection(ui, vm, enabled)   // edit-effects: 局部蒙版 (MaskPanel.kt)
+}
+
+/** The 调整 segments, in page order (UI2.md 2.4). */
+internal val ADJUST_SEGMENTS = listOf("光线", "色彩", "分色", "曲线", "调色盘", "质感")
+
+/** Which [ADJUST_SEGMENTS] differ from neutral; shared by the page's dots and 修改记录. */
+internal fun adjustEdited(l: Look): List<Boolean> {
+    val n = Look.NEUTRAL
+    return listOf(
+        l.exposure != n.exposure || l.contrast != n.contrast || l.brightness != n.brightness ||
+            l.highlights != n.highlights || l.shadows != n.shadows || l.blackPoint != n.blackPoint ||
+            l.whitePoint != n.whitePoint,
+        l.temperature != n.temperature || l.tint != n.tint || l.saturation != n.saturation || l.vibrance != n.vibrance,
+        l.hsl != n.hsl || l.master != n.master || l.shadowZone != n.shadowZone ||
+            l.midZone != n.midZone || l.highlightZone != n.highlightZone,
+        l.curves != n.curves,
+        l.tone != l.toneHome || l.colour != l.colourHome,
+        l.fade != n.fade || l.vignette != n.vignette || l.vignetteMid != n.vignetteMid,
+    )
+}
+
+/** [l] with segment [i] back at neutral (调色盘 back to its style's own point). */
+internal fun resetAdjustSegment(l: Look, i: Int): Look {
+    val n = Look.NEUTRAL
+    return when (i) {
+        0 -> l.copy(exposure = n.exposure, contrast = n.contrast, brightness = n.brightness, highlights = n.highlights,
+            shadows = n.shadows, blackPoint = n.blackPoint, whitePoint = n.whitePoint)
+        1 -> l.copy(temperature = n.temperature, tint = n.tint, saturation = n.saturation, vibrance = n.vibrance)
+        2 -> l.copy(hsl = n.hsl, master = n.master, shadowZone = n.shadowZone, midZone = n.midZone,
+            highlightZone = n.highlightZone)
+        3 -> l.copy(curves = n.curves)
+        4 -> l.copy(tone = l.toneHome, colour = l.colourHome)
+        else -> l.copy(fade = n.fade, vignette = n.vignette, vignetteMid = n.vignetteMid)
+    }
 }
 
 /** One line per 调整 segment: what it changes, in plain words (UI2.md 2.6). */

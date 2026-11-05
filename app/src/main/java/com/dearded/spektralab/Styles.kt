@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
 /**
  * A one-tap style: a film and paper with their print and effect settings, plus
@@ -246,6 +247,10 @@ internal const val STYLE_STRENGTH_PREFS = "style_strength"
 private const val HOT_GROUP = "热门"
 private const val FAV_GROUP = "收藏"
 private const val RECENT_GROUP = "最近"
+/** The photos edited last on the light table (ui2_snapseed.md 6): one tap pastes their settings here. */
+private const val EDITS_GROUP = "最近编辑"
+/** Styles saved from this editor; its first card is + 存为风格. */
+internal const val MINE_GROUP = "我的"
 /** 热门: one each of the looks people ask for by name (富士味, 日系, CCD, 徕卡味, 电影感, 黑白). */
 private val HOT = listOf(
     "lab_daily", "cam_classic_neg", "cam_chrome", "lab_airy", "ph_ccd", "cine_night",
@@ -262,7 +267,12 @@ private const val LAST_GROUP = "_last_group"
  * scales only the finish. Strengths are kept per style across photos and launches.
  */
 @Composable
-internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) {
+internal fun StyleStrip(
+    ui: UiState, enabled: Boolean,
+    /** A whole edit to apply (最近编辑), as one undo step. */
+    onEdit: (Edit) -> Unit = {},
+    onPick: (Style) -> Unit,
+) {
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
     val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
@@ -279,8 +289,18 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     val picks = rememberPicks("style")
     val favIds = picks.favourites.filter { id -> all.any { it.id == id } }
     val recentIds = picks.recent.filter { id -> all.any { it.id == id } }
-    val groups = (listOfNotNull(FAV_GROUP.takeIf { favIds.isNotEmpty() }, RECENT_GROUP.takeIf { recentIds.isNotEmpty() }) +
-        listOf(HOT_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
+    // 最近编辑: the light table's last edited photos, this one left out, read off the main thread.
+    val store = remember(context) { FrameStore.of(context) }
+    val frames by store.frames.collectAsState()
+    val recentFrames = frames.filter { it.edited && it.name != ui.source?.name }.sortedByDescending { it.editedAt }.take(8)
+    val recentEdits by androidx.compose.runtime.produceState(emptyList<Pair<Frame, Sidecar>>(), recentFrames.map { it.id to it.editedAt }) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            recentFrames.mapNotNull { f -> store.sidecar(f.id)?.let { f to it } }
+        }
+    }
+    val groups = (listOfNotNull(FAV_GROUP.takeIf { favIds.isNotEmpty() }, RECENT_GROUP.takeIf { recentIds.isNotEmpty() },
+        EDITS_GROUP.takeIf { recentEdits.isNotEmpty() }) +
+        listOf(HOT_GROUP, MINE_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
 
     // The group opens on the applied style, else on the last style picked, else the last
     // group browsed: an edit tweaked after a style no longer matches it, but the row stays put.
@@ -290,7 +310,10 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         mutableStateOf(all.firstOrNull { applied(it) }?.group ?: last ?: browsed ?: groups.first())
     }
     // Un-starring the last favourite empties 收藏: fall back to 热门 rather than a blank row.
-    if ((group == FAV_GROUP && favIds.isEmpty()) || (group == RECENT_GROUP && recentIds.isEmpty())) group = HOT_GROUP
+    if ((group == FAV_GROUP && favIds.isEmpty()) || (group == RECENT_GROUP && recentIds.isEmpty()) ||
+        (group == EDITS_GROUP && recentEdits.isEmpty())) group = HOT_GROUP
+    var naming by remember { mutableStateOf(false) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     fun browse(g: String) { group = g; prefs.edit().putString(LAST_GROUP, g).apply() }
     fun pick(s: Style, k: Double) {
         prefs.edit().putString(LAST_STYLE, s.id).putString(LAST_GROUP, s.group).putFloat(s.id, k.toFloat()).apply()
@@ -334,7 +357,33 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
         Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
-        items(styles, key = { it.id }) { s ->
+        // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
+        if (!searching && group == MINE_GROUP) item(key = "_save") {
+            TextCard(selected = false, title = "+ 存为风格", subtitle = "把现在的胶卷、相纸、效果和调整存成一张卡",
+                enabled = enabled) { naming = true }
+        }
+        // 最近编辑: another photo's settings onto this one; border and RAW white balance stay this photo's.
+        if (!searching && group == EDITS_GROUP) items(recentEdits, key = { "_edit_" + it.first.id }) { (f, car) ->
+            val card = ui.filmCards[car.edit.film]
+            val bitmap = remember(card) { card?.asImageBitmap() }
+            ThumbCard(
+                selected = false, image = bitmap,
+                title = f.name.substringBeforeLast("."),
+                subtitle = ui.catalog.film(car.edit.film)?.label ?: "原图",
+                enabled = enabled && ui.source != null, placeholder = f.name,
+            ) {
+                val src = ui.source ?: return@ThumbCard
+                val here = Frame(id = "", uri = "", name = src.name, size = 0, date = 0, mime = "",
+                    raw = src.kind == "raw", width = src.width, height = src.height,
+                    exifDate = ui.exif.dateTimeOriginal.orEmpty())
+                val p = pasteLook(Sidecar(ui.edit, src.wbK, src.wbTint), here,
+                    CopiedLook(car.edit, car.wbK, car.wbTint, f.name),
+                    LookGroup.entries.toSet() - LookGroup.BORDER - LookGroup.WHITE_BALANCE, ui.catalog)
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                onEdit(p.edit)
+            }
+        }
+        if (searching || group != EDITS_GROUP) items(styles, key = { it.id }) { s ->
             val on = applied(s)
             val card = ui.filmCards[s.film]
             val bitmap = remember(card) { card?.asImageBitmap() }
@@ -358,6 +407,36 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
             }
         }
     }
+    if (naming) {
+        var name by remember { mutableStateOf("") }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { naming = false },
+            title = { Text("存为风格") },
+            text = {
+                Column {
+                    OutlinedTextField(value = name, onValueChange = { name = it.take(30) }, singleLine = true,
+                        placeholder = { Text("例如：傍晚暖调") }, modifier = Modifier.fillMaxWidth())
+                    Hint("存胶卷、相纸、曝光、效果和调整层；边框、裁剪和白平衡属于这张照片，不存。存好后在「我的」里。",
+                        Modifier.padding(top = 6.dp))
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(enabled = name.isNotBlank(), onClick = {
+                    naming = false
+                    val edit = ui.edit
+                    val photo = ui.image
+                    val title = name.trim()
+                    scope.launch {
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            saveAsStyle(library, edit, title, StyleImports.thumbnail(photo))
+                        }
+                        browse(MINE_GROUP)
+                    }
+                }) { Text("保存") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { naming = false }) { Text("取消") } },
+        )
+    }
     // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
     val current = all.firstOrNull { it.id == open }?.takeIf { applied(it) }
     // UI2.md 3.7: the slider opens in place under the cards (height on defaultSpatial, faded in)
@@ -374,4 +453,29 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
             pick(s, k)
         }
     }
+}
+
+/**
+ * [edit] saved into the user library as a style in 我的 (ui2_snapseed.md 6): the
+ * same fields an exported .spklook carries; a colour table already in the
+ * library is referenced by its id, not copied again. Runs on an IO thread.
+ */
+internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJpeg: ByteArray?) {
+    val r = edit.look.resolved()
+    val table = r.lut.takeIf { it.isNotEmpty() }
+    val look = SpkLook(
+        name = name.take(60), category = MINE_GROUP,
+        engine = SpkEngine(
+            film = edit.film, paper = edit.paper, exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+            yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
+            formatMm = edit.filmFormatMm,
+            grain = if (edit.grainActive) edit.grainAmount else 0.0,
+            halation = if (edit.halationActive) edit.halationAmount else 0.0,
+            glare = if (edit.glareActive) edit.glareAmount else 0.0,
+        ),
+        layer2 = r.copy(lut = "", lutStrength = 1.0),
+        lut = table?.let { SpkLut(strength = r.lutStrength, space = library.luts.original(it)?.second ?: SpkLut.SPACE_SRGB) },
+        source = SpkSource("spektralab-x", "", "存自这台手机"),
+    )
+    library.styles.save(UserStyle(library.styles.newId(), look, table.orEmpty(), System.currentTimeMillis()), thumbJpeg)
 }
