@@ -89,10 +89,19 @@ data class ProcessingJob(
      * check step it down as any job.
      */
     val extreme: Boolean = false,
+    /**
+     * 导出印样: the roll as [RollContactSheet.snapshot] wrote it ("" = a photo
+     * export) and how many frames it lays out, for the estimate. Such a job
+     * has no source to secure and no engine session of its own.
+     */
+    val sheetJson: String = "",
+    val sheetFrames: Int = 0,
 ) {
     val active get() = state == JobState.QUEUED || state == JobState.RUNNING
+    val sheet get() = sheetJson.isNotEmpty()
 
     val label get() = when {
+        sheet -> "印样 · $sheetFrames 张"
         extreme -> "极致渲染 · 全分辨率"
         format == ExportFormat.TIFF -> "16 位 TIFF"
         format == ExportFormat.HEIF -> "HEIF · 全尺寸"
@@ -109,6 +118,7 @@ data class ProcessingJob(
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
         .put("location", location).put("extreme", extreme)
+        .put("sheet", sheetJson).put("sheetFrames", sheetFrames)
 
     companion object {
         fun fromJson(o: JSONObject): ProcessingJob? = runCatching {
@@ -127,6 +137,7 @@ data class ProcessingJob(
                 sourcePath = o.optString("src"), persisted = o.optBoolean("persisted"),
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
                 location = o.optString("location"), extreme = o.optBoolean("extreme"),
+                sheetJson = o.optString("sheet"), sheetFrames = o.optInt("sheetFrames"),
             )
         }.getOrNull()
     }
@@ -188,6 +199,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     }
 
     fun enqueue(job: ProcessingJob) {
+        // A contact sheet reads the light table's own frames (FrameStore holds their grants).
+        if (job.sheet) {
+            _jobs.update { it + job.copy(secured = true) }
+            persist()
+            start()
+            return
+        }
         _jobs.update { it + job.copy(secured = false) }
         persist()
         host.scope.launch {
@@ -323,7 +341,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             val saved = deferred.await()
             learn(queued, (SystemClock.elapsedRealtime() - started) / 1000.0)
             // The job as it ran: fitToMemory or a retry may have shrunk its cap.
-            learnPeak(_jobs.value.firstOrNull { it.id == id } ?: queued, rssBefore, peakReset)
+            // A contact sheet draws thumbnails, not a render: its peak says nothing per pixel.
+            if (!queued.sheet) learnPeak(_jobs.value.firstOrNull { it.id == id } ?: queued, rssBefore, peakReset)
             set(id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0, finishedAt = now(), message = saved, pendingUri = "") }
             host.events.add("job $id done in ${(SystemClock.elapsedRealtime() - started) / 1000}s, ${peakText(rssBefore, peakReset)}")
         } catch (e: CancellationException) {
@@ -367,6 +386,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
      * watchdog fires on the longest submits, which a smaller frame shortens).
      */
     private suspend fun runRecovering(queued: ProcessingJob, step: (String, Float) -> Unit): String {
+        if (queued.sheet) return processSheet(queued, step)
         val job = fitToMemory(queued)
         try {
             return process(job, step)
@@ -618,6 +638,23 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
         persist(sync = true)
+    }
+
+    /**
+     * 导出印样 as a queue job: the roll from its snapshot, its frames from
+     * FrameStore (one removed since is left out), progress per frame laid out.
+     * Saved like any export, its pending entry recorded first. FilmThumbs'
+     * idle wait lets a running sheet through, or its own thumbnails would wait
+     * for it.
+     */
+    private suspend fun processSheet(job: ProcessingJob, step: (String, Float) -> Unit): String {
+        val store = FrameStore.of(app)
+        val roll = withContext(Dispatchers.IO) { store.load(); RollContactSheet.restore(store, job.sheetJson) }
+            ?: throw EngineException("这卷的照片都已从观片台移除，印样没有保存")
+        step("排版", 0.05f)
+        return RollContactSheet.export(app, store, roll, job.maxPixels,
+            progress = { done, total -> step("排版 $done / $total", 0.05f + 0.85f * done / max(1, total)) },
+            onCreated = { markPending(job.id, it) })
     }
 
     private suspend fun process(job: ProcessingJob, step: (String, Float) -> Unit): String {
@@ -923,6 +960,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     }
 
     private fun estimateSeconds(job: ProcessingJob): Int {
+        if (job.sheet) return (BASE_SECONDS + secondsPerFrame() * max(1, job.sheetFrames)).roundToInt()
         val mp = max(0.5, job.outPixels / 1e6)
         return (BASE_SECONDS + secondsPerMp(job) * mp).roundToInt()
     }
@@ -937,7 +975,15 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         return prefs.getFloat(rateKey(job), if (job.extreme) base * 1.5f else base).toDouble()
     }
 
+    /** A contact sheet's learned seconds per frame (a thumbnail developed, or read from cache, and drawn). */
+    private fun secondsPerFrame(): Double = prefs.getFloat(SHEET_RATE_KEY, DEFAULT_SHEET_SPF).toDouble()
+
     private fun learn(job: ProcessingJob, seconds: Double) {
+        if (job.sheet) {
+            val measured = max(0.05, (seconds - BASE_SECONDS) / max(1, job.sheetFrames))
+            prefs.edit().putFloat(SHEET_RATE_KEY, (0.6 * secondsPerFrame() + 0.4 * measured).toFloat()).apply()
+            return
+        }
         val mp = max(0.5, job.outPixels / 1e6)
         val measured = max(0.05, (seconds - BASE_SECONDS) / mp)
         val next = 0.6 * secondsPerMp(job) + 0.4 * measured
@@ -1003,6 +1049,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     companion object {
         private const val BASE_SECONDS = 2.0
         private const val EDITOR_GRACE_MS = 1200L
+        private const val SHEET_RATE_KEY = "spf_contact"
+        private const val DEFAULT_SHEET_SPF = 1.5f
         // The editor's own "hot" line (EditorViewModel.kHotHeadroom), and at
         // most two minutes of waiting for it: a phone that never cools still exports.
         private const val HOT_HEADROOM = 0.85f
@@ -1026,7 +1074,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             var total = 0
             for (j in jobs) when (j.state) {
                 JobState.RUNNING -> total += max(0, j.etaSeconds)
-                JobState.QUEUED -> total += (BASE_SECONDS + perMpJpeg * (if (j.extreme) 1.5 else 1.0) * max(0.5, j.outPixels / 1e6)).roundToInt()
+                JobState.QUEUED -> total += if (j.sheet) (BASE_SECONDS + DEFAULT_SHEET_SPF * max(1, j.sheetFrames)).roundToInt()
+                    else (BASE_SECONDS + perMpJpeg * (if (j.extreme) 1.5 else 1.0) * max(0.5, j.outPixels / 1e6)).roundToInt()
                 else -> Unit
             }
             return total
