@@ -29,7 +29,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-enum class ExportFormat { JPEG, TIFF }
+enum class ExportFormat { JPEG, TIFF, HEIF }
 
 /** "full" is the working size; "preview" is the engine's 3400 px tier, for sharing. */
 enum class ExportSize(val tier: String) { FULL("full"), SHARE("preview") }

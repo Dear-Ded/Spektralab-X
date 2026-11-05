@@ -95,6 +95,7 @@ data class ProcessingJob(
     val label get() = when {
         extreme -> "极致渲染 · 全分辨率"
         format == ExportFormat.TIFF -> "16 位 TIFF"
+        format == ExportFormat.HEIF -> "HEIF · 全尺寸"
         size == ExportSize.SHARE -> "JPEG · 分享尺寸"
         else -> "JPEG · 全尺寸"
     }
@@ -717,7 +718,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     }
                     return name
                 }
-                ExportFormat.JPEG -> {
+                // HEIF takes the JPEG path whole (render, paper frame, .part, check,
+                // gallery) with its own encoder; it is always sRGB (wide is JPEG only).
+                ExportFormat.JPEG, ExportFormat.HEIF -> {
+                    val heif = job.format == ExportFormat.HEIF
                     val bitmap: Bitmap = rendering(job) {
                         withContext(ExportThread.dispatcher) {
                             NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
@@ -726,7 +730,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     // The pixels are P3 already; tag them so compress embeds the profile.
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
                     step("编码", 0.88f)
-                    val name = "$stem.jpg"
+                    val name = if (heif) "$stem.heic" else "$stem.jpg"
                     try {
                         // Encoded to a .part first: EXIF is written in place, and the
                         // file is checked whole before the gallery sees any of it.
@@ -738,15 +742,21 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
                                 val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
                                 try {
-                                    // 极致渲染: 4:4:4 through libjpeg-turbo; anything else, or a
-                                    // failure there, Bitmap.compress (4:2:0).
-                                    val full = job.extreme && encode444(job.id, out, part, wide, ready.dir)
-                                    if (!full) {
-                                        val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
-                                        if (!encoded) throw EngineException("JPEG 编码失败")
+                                    if (heif) {
+                                        // EXIF goes in while encoding: a HEIF cannot be tagged afterwards.
+                                        HeifExport.encode(out, part, HeifExport.exifBlock(exif, out.width, out.height, exportDir))
+                                        MediaSaver.checkHeif(part, out.width, out.height)
+                                    } else {
+                                        // 极致渲染: 4:4:4 through libjpeg-turbo; anything else, or a
+                                        // failure there, Bitmap.compress (4:2:0).
+                                        val full = job.extreme && encode444(job.id, out, part, wide, ready.dir)
+                                        if (!full) {
+                                            val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
+                                            if (!encoded) throw EngineException("JPEG 编码失败")
+                                        }
+                                        exif.applyTo(part, out.width, out.height, wide = wide)
+                                        MediaSaver.checkJpeg(part, out.width, out.height)
                                     }
-                                    exif.applyTo(part, out.width, out.height, wide = wide)
-                                    MediaSaver.checkJpeg(part, out.width, out.height)
                                 } finally {
                                     if (out !== bitmap) out.recycle()
                                 }
@@ -759,7 +769,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                         step("写入相册", 0.92f)
                         try {
                             withContext(Dispatchers.IO) {
-                                MediaSaver.saveFile(app, part, name, "image/jpeg") { markPending(job.id, it) }
+                                MediaSaver.saveFile(app, part, name, if (heif) "image/heic" else "image/jpeg") { markPending(job.id, it) }
                             }
                         } finally {
                             part.delete()
