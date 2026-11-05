@@ -363,3 +363,56 @@ c++ -std=c++20 -O2 -I$J/include -Iapp/src/main/cpp tools/stability/jpeg444_main.
 ./jpeg444 lake.rgb app444.jpg 98 <resources>/io/sRGB.icc
 python3 tools/stability/jpeg444_compare.py lake.rgb app444.jpg .
 ```
+
+## 8. 预览与导出一致（`tools/parity/view_export.py`）
+
+起因：Snapseed 4.x 用户大量反映“导出比预览更饱和”。这一节只比本应用自己的两条路径，不涉及上游宿主：同一张图、同一组参数，编辑器屏幕上显示的结果和导出文件，换算到同一色彩空间后算 ΔE00。
+
+- 屏幕：`live` 档（`preview_long_edge` 1024，只在拖动滑块时）和 `preview` 档（松手后的清晰帧），经 `pack_rgba8` 和显示变换（矩阵加裁切），8 位。
+- 导出：`full` 档，经 `pack_rgba16` 和导出变换（CAM16 色域压缩），16 位。
+- 场景：synth、lake、skyline、fruit；胶片 Portra 400、Velvia 100、Tri-X 400；sRGB 和 Display P3。几何用例（lake、skyline，固定曝光）：转 90°、居中裁剪一半。
+- `spk_android` 读环境变量 `SPK_TIER` 选档（默认 `full`）。比较前导出在线性光下按面积缩到屏幕尺寸。
+
+### 8.1 门槛
+
+| 比较 | 门槛 |
+|---|---|
+| 同一次 full 渲染：屏幕打包 vs 导出打包 | 平均 < 1 |
+| 屏幕档 vs 导出，128 px（长边） | 平均 < 1。这一项防的就是颜色或饱和度偏移：缩到 128 px 后锐化和重采样的差别消失，颜色差别留下 |
+| 转 90° vs 原图转 90° | 平均 < 1 |
+| 居中裁剪 vs 原图同一区域，128 px | 平均 < 1 |
+| 原尺寸的屏幕档 vs 导出、原尺寸裁剪 | 平均 < 1；基线本身 ≥ 1 的那几对（下表）是已知的细节差别，不卡 1，但比基线变差超过 0.3 判失败。基线在 `tools/parity/view_export_baseline.json`，`--record` 重写 |
+
+### 8.2 结果（aoidc，lavapipe，2026-11-05，main + raw-m6）
+
+126 对，0 失败。按比较类型的平均 ΔE00 范围：
+
+| 比较 | 对数 | 最小 | 最大 |
+|---|---|---|---|
+| full：屏幕打包 vs 导出 | 24 | 0.085 | 0.789（synth Velvia sRGB） |
+| live vs 导出，128 px | 24 | 0.034 | 0.797（lake Portra sRGB） |
+| preview vs 导出，128 px | 24 | 0.009 | 0.613（fruit Velvia sRGB） |
+| live vs 导出，原尺寸 | 24 | 0.181 | 2.229（lake Portra sRGB） |
+| preview vs 导出，原尺寸 | 24 | 0.085 | 0.789 |
+| 转 90° | 2 | 0.002 | 0.003 |
+| 居中裁剪，128 px | 2 | 0.014 | 0.553（lake） |
+| 居中裁剪，原尺寸 | 2 | 0.015 | 1.467（lake） |
+
+结论：缩到 128 px 后所有屏幕档与导出的平均差都在 0.8 以下，没有“导出比预览更饱和”的现象。
+
+### 8.3 原尺寸超过 1 的几对：差在细节，不在颜色
+
+基线 ≥ 1 的 9 对：live vs 导出 synth Portra sRGB 1.105、synth Velvia sRGB 1.069、lake Portra sRGB 2.229 / P3 2.099、lake Velvia sRGB 1.896 / P3 1.774、lake Tri-X sRGB 1.219 / P3 1.222；lake 居中裁剪原尺寸 1.467。
+
+- live 档是 1024 px 的独立渲染，扫描锐化和重采样与 full 档不同；导出缩到 1024 px 后保留的边缘细节和 live 档不一样。这些对的 p99 在 9–13.5，平均只有 1.1–2.2，同一对缩到 128 px 后降到 0.30–0.80：差别集中在边缘，不是整片颜色。
+- lake 裁剪：原尺寸 1.467、p99 9.9，128 px 降到 0.553，skyline 裁剪两种都很小（0.015 / 0.014）。推测是与画幅成比例的模糊类效果在裁剪后相对像素变大，lake 有水面强光，所以明显；未逐项验证。
+- 松手后的 preview 档：在这组 1536 px 的对照输入上，preview 档（长边 3400）与 full 档渲染出完全相同的像素（24 对全部一致），所以“preview vs 导出”就等于“full：屏幕打包 vs 导出”，比 live 档接近得多（128 px 最大 0.613 对 0.797，原尺寸最大 0.789 对 2.229）。这只说明输入小于 3400 px 时两档相同；50 MP 照片上 preview 档与 full 档仍会不同，这组用例没有覆盖。
+
+### 8.4 复现
+
+在 `scripts/parity.sh` 跑完的工作目录里（需要 `run/inputs` 和编好的 `spk_android`）：
+
+```bash
+python3 tools/parity/view_export.py --android <work>/src/spk_android \
+  --resources <work>/build-host/engine/resources --inputs <work>/run/inputs --out ve --check
+```

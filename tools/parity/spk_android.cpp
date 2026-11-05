@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <sstream>
@@ -210,7 +211,9 @@ int main(int argc, char** argv) {
     spk_session* s = spk_open(engine, &img, params.c_str(), nullptr);
     if (!s) { std::fprintf(stderr, "open: %s\n", spk_last_error(engine)); return 1; }
     spk_result r{};
-    if (spk_render(s, "full", &r) != SPK_OK || !r.rgba16) {
+    // SPK_TIER picks the tier (view_export.py renders "live", the editor's screen); default "full".
+    const char* tier = std::getenv("SPK_TIER");
+    if (spk_render(s, tier && *tier ? tier : "full", &r) != SPK_OK || !r.rgba16) {
         std::fprintf(stderr, "render: %s\n", spk_last_error(engine));
         return 1;
     }
