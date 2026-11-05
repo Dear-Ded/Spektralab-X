@@ -218,7 +218,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                     }
     }
 
-    androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on }) {
+    val nav = remember { EditorNav() }
+    var showChanges by remember { mutableStateOf(false) }
+    androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on },
+        LocalEditorNav provides nav) {
     Scaffold(
         modifier = Modifier.highRefresh(dragging),
         snackbarHost = { SnackbarHost(snackbar) },
@@ -294,6 +297,8 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                         }
                         DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
                             DropdownMenuItem(text = { Text("观片台") }, onClick = { moreMenu = false; onLightTable() })
+                            DropdownMenuItem(text = { Text("修改记录") }, enabled = ui.hasImage,
+                                onClick = { moreMenu = false; showChanges = true })
                             DropdownMenuItem(
                                 text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
                                 onClick = { moreMenu = false; vm.showQueue(true) },
@@ -444,6 +449,13 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     }
 
     if (showSettings) SettingsScreen(ui, vm) { showSettings = false }
+    if (showChanges) ChangesSheet(ui, vm, onGo = { c ->
+        nav.tab = c.tab
+        if (c.step >= 0) nav.step = c.step
+        if (c.seg >= 0) nav.adjustSeg = c.seg
+        panelLevel = maxOf(1, panelLevel)
+        showChanges = false
+    }) { showChanges = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
     ui.detail?.let { DetailViewer(it, vm::closeDetail) }
     UpdateDialog(editing = ui.hasImage)
@@ -667,8 +679,10 @@ private fun Controls(
     ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit,
     open: Boolean, onOpen: (Boolean) -> Unit, modifier: Modifier,
 ) {
-    var tab by remember { mutableIntStateOf(0) }
-    var step by remember { mutableIntStateOf(0) }
+    // Held by the screen (ChangesSheet.kt), so 修改记录 can open an entry at its step.
+    val nav = LocalEditorNav.current
+    var tab by nav::tab
+    var step by nav::step
     val e = ui.edit
     val enabled = ui.hasImage && !ui.exporting
     Surface(modifier, tonalElevation = 2.dp) {
