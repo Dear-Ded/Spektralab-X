@@ -1,0 +1,102 @@
+Keep one Vulkan descriptor pool and reset it, instead of one per dispatch
+
+Every compute dispatch created a VkDescriptorPool sized for its kernel,
+allocated one set, submitted, waited, and destroyed the pool: two driver
+object round trips per dispatch, and a full-resolution render issues
+hundreds of dispatches (each IIR blur alone is ceil(h/256) + ceil(w/256)
+launches, patch 0001).
+
+The backend now creates one pool on first use, sized for the widest kernel
+(8 storage buffers, the most any entry in kKernels declares), and resets it
+after every dispatch. That is safe for the same reason the old code could
+destroy its pool there: dispatch holds dispatch_mutex_ for the whole call
+and submit_sync waits for the queue to go idle, so the one set is never in
+flight when the pool is reset. A kernel that ever declared more than 8
+bindings is refused with a clear error rather than failing inside the
+driver. The pool is destroyed with the device.
+
+Output: unchanged by construction. Descriptor sets carry the same buffers
+and ranges, recorded in the same command buffer; no shader, argument or
+dispatch size changes.
+
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -56,6 +56,7 @@
+ namespace {
+ 
+ constexpr uint32_t kWorkgroup = 256;
++constexpr uint32_t kMaxBindings = 8;   // the widest kernel in the table below
+ 
+ std::string vk_error(const char* operation, VkResult result) {
+     return std::string(operation) + " failed (VkResult " + std::to_string(int(result)) + ")";
+@@ -148,6 +149,7 @@
+                 if (p.layout) vkDestroyPipelineLayout(device_, p.layout, nullptr);
+                 if (p.descriptors) vkDestroyDescriptorSetLayout(device_, p.descriptors, nullptr);
+             }
++            if (descriptor_pool_) vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+             if (command_pool_) vkDestroyCommandPool(device_, command_pool_, nullptr);
+             vkDestroyDevice(device_, nullptr);
+         }
+@@ -668,15 +670,27 @@
+         ComputePipeline* pipeline = get_pipeline(*spec, error);
+         if (!pipeline) return false;
+ 
+-        VkDescriptorPoolSize pool_size{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, spec->bindings};
+-        VkDescriptorPoolCreateInfo pool_create{};
+-        pool_create.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+-        pool_create.maxSets = 1;
+-        pool_create.poolSizeCount = 1;
+-        pool_create.pPoolSizes = &pool_size;
+-        VkDescriptorPool descriptor_pool = VK_NULL_HANDLE;
+-        VkResult result = vkCreateDescriptorPool(device_, &pool_create, nullptr, &descriptor_pool);
+-        if (result != VK_SUCCESS) { error = vk_error("vkCreateDescriptorPool", result); return false; }
++        // Android: one descriptor pool for the backend's life, reset after each
++        // dispatch, instead of a pool created and destroyed per dispatch. The
++        // dispatch mutex is held and the submit below waits for completion, so
++        // the one set is idle by the time the pool is reset.
++        if (!descriptor_pool_) {
++            VkDescriptorPoolSize pool_size{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, kMaxBindings};
++            VkDescriptorPoolCreateInfo pool_create{};
++            pool_create.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
++            pool_create.maxSets = 1;
++            pool_create.poolSizeCount = 1;
++            pool_create.pPoolSizes = &pool_size;
++            const VkResult created = vkCreateDescriptorPool(device_, &pool_create, nullptr, &descriptor_pool_);
++            if (created != VK_SUCCESS) {
++                descriptor_pool_ = VK_NULL_HANDLE;
++                error = vk_error("vkCreateDescriptorPool", created);
++                return false;
++            }
++        }
++        if (spec->bindings > kMaxBindings) { error = std::string(kernel) + ": too many bindings"; return false; }
++        VkDescriptorPool descriptor_pool = descriptor_pool_;
++        VkResult result = VK_SUCCESS;
+         VkDescriptorSetAllocateInfo set_alloc{};
+         set_alloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+         set_alloc.descriptorPool = descriptor_pool;
+@@ -686,7 +700,7 @@
+         result = vkAllocateDescriptorSets(device_, &set_alloc, &set);
+         if (result != VK_SUCCESS) {
+             error = vk_error("vkAllocateDescriptorSets", result);
+-            vkDestroyDescriptorPool(device_, descriptor_pool, nullptr);
++            vkResetDescriptorPool(device_, descriptor_pool, 0);
+             return false;
+         }
+         std::vector<VkWriteDescriptorSet> writes(args.size());
+@@ -715,7 +729,7 @@
+                     vkCmdDispatch(command, uint32_t((count + spec->workgroup - 1) / spec->workgroup), 1, 1);
+                 }
+             }, "Vulkan compute dispatch", error);
+-        vkDestroyDescriptorPool(device_, descriptor_pool, nullptr);
++        vkResetDescriptorPool(device_, descriptor_pool, 0);
+         return submitted;
+     }
+ 
+@@ -1291,6 +1305,7 @@
+     VkQueue queue_ = VK_NULL_HANDLE;
+     uint32_t queue_family_ = 0;
+     VkCommandPool command_pool_ = VK_NULL_HANDLE;
++    VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;   // guarded by dispatch_mutex_
+     std::unordered_map<std::string, ComputePipeline> pipelines_;
+     mutable std::mutex buffers_mutex_;
+     std::mutex dispatch_mutex_;
