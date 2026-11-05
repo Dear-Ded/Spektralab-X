@@ -81,6 +81,8 @@ cp "$repo"/tools/parity/{spk_android.cpp,host_parity.py,fma_check.sh,build.sh} "
 for f in output_transform input_transform layer2 resize; do
     cp "$repo/app/src/main/cpp/$f.hpp" "$repo/app/src/main/cpp/$f.cpp" "$S/"
 done
+# layer2.cpp's masks and dust (header only).
+cp "$repo/app/src/main/cpp/layer2_local.hpp" "$S/"
 UP="$UP" B="$B" SRC="$S" bash "$S/build.sh" >/dev/null
 
 # --- 5. the CC0 RAWs (docs/SAMPLES.md), checked against their SHA-256 ----------
@@ -92,10 +94,16 @@ while read -r sha url; do
     name="$(basename "$url")"; file="$RAW/${name// /_}"
     [[ -f "$file" && "$(sum "$file")" == "$sha" ]] && continue
     # A verified copy already on this machine (SAMPLES_DIR) is linked, not fetched.
-    local_copy="${SAMPLES_DIR:-}/${name// /_}"
-    if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
-        ln -sf "$local_copy" "$file"; continue
-    fi
+    # tools/samples/regress.sh names its copies <raw.pixls.us id>-<file>, since
+    # several files share a name (two Nikon Z 7 samples here and there).
+    id="${url#*/getfile.php/}"; id="${id%%/*}"
+    linked=0
+    for local_copy in "${SAMPLES_DIR:-}/$id-${name// /_}" "${SAMPLES_DIR:-}/${name// /_}"; do
+        if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
+            ln -sf "$local_copy" "$file"; linked=1; break
+        fi
+    done
+    (( linked )) && continue
     # raw.pixls.us sometimes ends a transfer early with no error; resume it.
     for attempt in 1 2 3 4 5; do
         curl -fsSL --retry 3 -C - -o "$file.part" "${url// /%20}" || true
@@ -108,7 +116,7 @@ f7b2a6b6d7684536511cf2db2e2bfa46fae1ad7e52214093714f35e7ca60acbf https://raw.pix
 10a1116bd00e92314b09382b403f76706b1eeab3ce33234a6c75fe25ed289756 https://raw.pixls.us/getfile.php/4691/nice/Canon - EOS R5 - RAW, 1.6 crop, dual-pixel (3:2).CR3
 05513ee72f7cac4165534c9f64995412084f414a033c80c473c79fd94154292e https://raw.pixls.us/getfile.php/3115/nice/Ricoh - GR III - 14bit (3:2).DNG
 5541093a369f0487fef92bcd1f5fef1be6e4e3cec2aa4d52ad38d2211f3309d7 https://raw.pixls.us/getfile.php/2206/nice/Google - Pixel 2 XL - 16bit (4:3).dng
-e54a6c4264bf685214f538036fd9d39088e510b2bfedf288e568f0db1897880e https://raw.pixls.us/getfile.php/2795/nice/Nikon - Z 7 - 12bit 12bit compressed (3:2).NEF
+e54a6c4264bf685214f538036fd9d39088e510b2bfedf288e568f0db1897880e https://raw.pixls.us/getfile.php/2789/nice/Nikon - Z 7 - 12bit 12bit compressed (3:2).NEF
 bca8ad027b0ee0038107c01792ccb5c6b776512b77b584c6f93c6f2ced5f15a3 https://raw.pixls.us/getfile.php/1936/nice/Fujifilm - X100F - 14bit 14bit compressed (3:2).RAF
 845fee4f09c832af3728778737f5ae9b99124debb821b6e2066b94aed1daa91c https://raw.pixls.us/getfile.php/915/nice/Apple - iPhone 6s Plus - 16bit (4:3).DNG
 56faa7db3947c32c5e6e31bc0db027ebf95163533e043bd8c4f18166a129692c https://raw.pixls.us/getfile.php/1201/nice/Canon - EOS Rebel SL1 - RAW (3:2).CR2

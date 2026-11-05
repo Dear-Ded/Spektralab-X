@@ -41,12 +41,16 @@ fi
 
 sum() { sha256sum "$1" | cut -d' ' -f1; }
 fetch() {  # fetch <sha> <rpu id> <name> -> path
-    local sha="$1" id="$2" name="$3" file="$W/raw/${3// /_}"
+    # Several files share a name (six A7 V samples, two names), so the
+    # download carries the raw.pixls.us id; a SAMPLES_DIR copy may have either.
+    local sha="$1" id="$2" name="$3" file="$W/raw/$2-${3// /_}"
     if [[ -f "$file" && "$(sum "$file")" == "$sha" ]]; then echo "$file"; return; fi
-    local local_copy="${SAMPLES_DIR:-}/${name// /_}"
-    if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
-        echo "$local_copy"; return
-    fi
+    local local_copy
+    for local_copy in "${SAMPLES_DIR:-}/$id-${name// /_}" "${SAMPLES_DIR:-}/${name// /_}"; do
+        if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
+            echo "$local_copy"; return
+        fi
+    done
     local url="https://raw.pixls.us/getfile.php/$id/nice/$name"
     for attempt in 1 2 3 4 5; do
         curl -fsSL --retry 3 -C - -o "$file.part" "${url// /%20}" || true
