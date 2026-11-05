@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -63,14 +64,22 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
             v.scrollTo(v.maxValue / 2)
         }
         Box(Modifier.fillMaxSize().predictiveBack(back).background(Color.Black)) {
-            Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)
-                .pointerInput(Unit) { detectTapGestures(onTap = { label = !label }) }) {
-                Image(
-                    bitmap = image,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = with(density) { Modifier.width(bitmap.width.toDp()).height(bitmap.height.toDp()) },
-                )
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                val viewW = maxWidth
+                val viewH = maxHeight
+                Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)
+                    .pointerInput(Unit) { detectTapGestures(onTap = { label = !label }) }) {
+                    // At least the screen in both directions, the picture centred in it: a render
+                    // narrower or shorter than the screen sits in the middle, not in the top-left corner.
+                    Box(Modifier.sizeIn(minWidth = viewW, minHeight = viewH), contentAlignment = Alignment.Center) {
+                        Image(
+                            bitmap = image,
+                            contentDescription = null,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = with(density) { Modifier.width(bitmap.width.toDp()).height(bitmap.height.toDp()) },
+                        )
+                    }
+                }
             }
             // Clear of the cutout and the curved edges; a tap on the photo hides it.
             Row(
