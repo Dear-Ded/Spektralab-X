@@ -371,6 +371,8 @@ private fun FrameCell(
         Modifier
             .aspectRatio(1f)
             .graphicsLayer { scaleX = scale; scaleY = scale }
+            // UI2.md 3.7: the cell grows into the loupe and shrinks back (Transitions.kt).
+            .sharedFrame(frame.id, shape)
             .clip(shape)
             .background(Palette.Panel)
             .semantics {

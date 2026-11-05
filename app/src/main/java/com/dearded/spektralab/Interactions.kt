@@ -344,7 +344,7 @@ fun backThrough(): ContentTransform =
 // --- predictive back ---------------------------------------------------------
 
 /** STANDARD_DECELERATE, PathInterpolator(0, 0, 0, 1): the guide says to feed back progress through it, never raw. */
-private val BackEase = CubicBezierEasing(0f, 0f, 0f, 1f)
+internal val BackEase = CubicBezierEasing(0f, 0f, 0f, 1f)
 
 /**
  * A back gesture's progress, 0 at rest to 1 at the commit point, already

@@ -1,6 +1,15 @@
 package com.dearded.spektralab
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,62 +73,172 @@ fun AppScreens(editor: EditorViewModel) {
             }
     }
 
-    fun openInEditor(frame: Frame) {
-        if (table.edit(frame, editor)) { fromTable = true; screen = Screen.EDITOR }
-    }
+    // The light table's own state, read here so the back gesture knows which page is showing.
+    val loupe by table.loupe.collectAsState()
+    val nav by table.nav.collectAsState()
+    val frames by table.frames.collectAsState()
+    val catalog by remember(editor) { editor.ui.map { it.catalog }.distinctUntilChanged() }
+        .collectAsState(editor.ui.value.catalog)
+    val manual by table.manualRolls.rolls.collectAsState()
+    val rolls = remember(frames, catalog, manual) { rollsOf(frames, catalog, manual) }
+    val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }
+    val roll = nav.roll?.let { id -> rolls.firstOrNull { it.id == id } }
+    val page = pageOf(nav.rolls, roll != null, loupe != null, comparing != null)
+    val selecting by remember(table) { table.state.map { it.selection.isNotEmpty() }.distinctUntilChanged() }
+        .collectAsState(false)
 
-    when (screen) {
-        Screen.EDITOR -> {
-            // Composed before the editor, so the editor's own back (leaving immersive) wins.
-            BackHandler(enabled = fromTable) { fromTable = false; screen = Screen.TABLE }
-            EditorScreen(editor, onLightTable = { screen = Screen.TABLE })
+    // UI2.md 3.7 / 3.8: the switch is one SeekableTransitionState, so a back
+    // gesture scrubs it under the finger. Opening the table from the editor is a
+    // step deeper (forwardThrough); returning either way is backThrough.
+    var backward by remember { mutableStateOf(false) }
+    fun leaveTable() { backward = true; fromTable = false; screen = Screen.EDITOR }
+    val outer = rememberSeekableNav(screen)
+    // Composed before the screens, so their own backs (immersive, panel, 1:1, a selection) win.
+    // With nowhere in the app to go back to (the editor opened on its own) nothing is
+    // registered: the system keeps back, and with it the back-to-home animation.
+    val outerBack = when {
+        screen == Screen.EDITOR && fromTable -> Screen.TABLE
+        screen == Screen.TABLE && page.root && !selecting -> Screen.EDITOR
+        else -> null
+    }
+    SeekBack(outer, outerBack, onStart = { backward = true }) {
+        if (screen == Screen.EDITOR) { backward = true; fromTable = false; screen = Screen.TABLE } else leaveTable()
+    }
+    rememberTransition(outer, label = "screen").AnimatedContent(
+        modifier = Modifier.fillMaxSize(),
+        transitionSpec = { if (backward) backThrough() else forwardThrough() },
+    ) { s ->
+        when (s) {
+            Screen.EDITOR -> EditorScreen(editor, onLightTable = { backward = false; screen = Screen.TABLE })
+            Screen.TABLE -> TablePages(
+                table = table, editor = editor, page = page, rolls = rolls, catalog = catalog,
+                loupe = loupe, comparing = comparing, roll = roll,
+                onEdit = { f -> if (table.edit(f, editor)) { backward = false; fromTable = true; screen = Screen.EDITOR } },
+                onLeave = ::leaveTable,
+            )
         }
-        Screen.TABLE -> {
-            // The loupe, a roll and a compare stay open under the editor: back from an edit returns there.
-            val loupe by table.loupe.collectAsState()
-            val nav by table.nav.collectAsState()
-            val frames by table.frames.collectAsState()
-            val catalog by remember(editor) { editor.ui.map { it.catalog }.distinctUntilChanged() }
-                .collectAsState(editor.ui.value.catalog)
-            val manual by table.manualRolls.rolls.collectAsState()
-            val rolls = remember(frames, catalog, manual) { rollsOf(frames, catalog, manual) }
-            val exportRoll = rememberNotifiedExport { list -> table.export(list, ExportFormat.JPEG, ExportSize.FULL, editor.ui.value) }
-            val open = loupe
-            val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }
-            val roll = nav.roll?.let { id -> rolls.firstOrNull { it.id == id } }
-            when {
-                comparing != null -> RollCompare(table, comparing, catalog, onClose = { table.compare(null) })
-                open != null -> LightTableLoupe(table, open, onEdit = ::openInEditor, onClose = table::closeLoupe)
-                nav.rolls && roll != null -> RollView(
-                    table = table, roll = roll,
-                    onBack = { table.openRoll(null) },
-                    onOpen = table::openLoupe,
-                    onExport = exportRoll,
-                    onContactSheet = { table.exportContactSheet(roll, editor.ui.value.maxPixels) },
-                )
-                nav.rolls -> RollList(
-                    table, rolls,
-                    onOpen = { table.openRoll(it.id) },
-                    onGrid = { table.showRolls(false) },
-                    onBack = { fromTable = false; screen = Screen.EDITOR },
-                )
-                else -> {
-                    // Leaving the table is the one back handled here, and only while the grid has
-                    // nothing selected (the grid clears a selection itself). The editor under it
-                    // never intercepts at the root, so the system's back-to-home stays intact.
-                    val selecting by remember(table) { table.state.map { it.selection.isNotEmpty() }.distinctUntilChanged() }
-                        .collectAsState(false)
-                    BackHandler(enabled = !selecting) { fromTable = false; screen = Screen.EDITOR }
-                    LightTableScreen(
-                        table = table,
-                        onBack = { fromTable = false; screen = Screen.EDITOR },
-                        onOpen = table::openLoupe,
-                        onRolls = { table.showRolls(true) },
-                        selectionActions = { chosen -> BatchActions(table, editor, chosen); RollSelectionActions(table, chosen) },
-                    )
+    }
+}
+
+/** The light table's pages, deepest last; [root] pages hand back to the editor. */
+private enum class TablePage(val depth: Int, val root: Boolean = false) {
+    GRID(0, true), ROLLS(0, true), ROLL(1), LOUPE(2), COMPARE(3)
+}
+
+/** Which page shows, in the order the table always used (a compare over the loupe over a roll). */
+private fun pageOf(rolls: Boolean, roll: Boolean, loupe: Boolean, compare: Boolean) = when {
+    compare -> TablePage.COMPARE
+    loupe -> TablePage.LOUPE
+    rolls && roll -> TablePage.ROLL
+    rolls -> TablePage.ROLLS
+    else -> TablePage.GRID
+}
+
+/** What a page's back returns to inside the table (null: back leaves the table). */
+private fun underOf(page: TablePage, rolls: Boolean, roll: Boolean, loupe: Boolean): TablePage? = when (page) {
+    TablePage.COMPARE -> pageOf(rolls, roll, loupe, false)
+    TablePage.LOUPE -> pageOf(rolls, roll, false, false)
+    TablePage.ROLL -> TablePage.ROLLS
+    TablePage.GRID, TablePage.ROLLS -> null
+}
+
+/** The last loupe, compare and roll shown, so a page that is leaving can still draw itself. */
+private class LastShown { var loupe: Loupe? = null; var comparing: Frame? = null; var roll: Roll? = null }
+
+/**
+ * The light table inside a SharedTransitionLayout (Transitions.kt): a frame
+ * opened from the grid or a roll flies into the loupe and back
+ * (Modifier.sharedFrame), pages a level apart move by fade through, and the
+ * back gesture scrubs each switch. The grid, the roll list and a roll keep
+ * their scroll position while a deeper page is open, so a frame flies back to
+ * the cell it came from.
+ */
+@Composable
+private fun TablePages(
+    table: LightTableViewModel, editor: EditorViewModel, page: TablePage,
+    rolls: List<Roll>, catalog: Catalog, loupe: Loupe?, comparing: Frame?, roll: Roll?,
+    onEdit: (Frame) -> Unit, onLeave: () -> Unit,
+) {
+    val nav by table.nav.collectAsState()
+    val last = remember { LastShown() }
+    if (loupe != null) last.loupe = loupe
+    if (comparing != null) last.comparing = comparing
+    if (roll != null) last.roll = roll
+    val exportRoll = rememberNotifiedExport { list -> table.export(list, ExportFormat.JPEG, ExportSize.FULL, editor.ui.value) }
+    val holder = rememberSaveableStateHolder()
+    val state = rememberSeekableNav(page)
+    // Back inside the table: compare, loupe and roll each close to what is under them.
+    SeekBack(state, underOf(page, nav.rolls, roll != null, loupe != null)) {
+        when (page) {
+            TablePage.COMPARE -> table.compare(null)
+            TablePage.LOUPE -> table.closeLoupe()
+            TablePage.ROLL -> table.openRoll(null)
+            TablePage.GRID, TablePage.ROLLS -> {}
+        }
+    }
+    SharedTransitionLayout(Modifier.fillMaxSize()) {
+        val shared = this
+        CompositionLocalProvider(LocalSharedScope provides shared) {
+            rememberTransition(state, label = "table").AnimatedContent(
+                modifier = Modifier.fillMaxSize(),
+                transitionSpec = {
+                    val a = initialState
+                    val b = targetState
+                    when {
+                        // The frame itself carries the motion; the pages only cross-fade.
+                        a == TablePage.LOUPE || b == TablePage.LOUPE ->
+                            fadeIn(Motion.defaultEffects()) togetherWith fadeOut(Motion.fastEffects())
+                        b.depth > a.depth -> forwardThrough()
+                        b.depth < a.depth -> backThrough()
+                        else -> fadeIn(Motion.defaultEffects()) togetherWith fadeOut(Motion.fastEffects())
+                    }
+                },
+            ) { p ->
+                val scope = this
+                CompositionLocalProvider(LocalNavScope provides scope) {
+                    // The loupe and the compare start fresh each time; the others keep their scroll.
+                    if (p.depth < TablePage.LOUPE.depth) holder.SaveableStateProvider(p) {
+                        TablePageContent(p, table, editor, rolls, last, exportRoll, onLeave)
+                    } else when (p) {
+                        TablePage.COMPARE -> last.comparing?.let { RollCompare(table, it, catalog, onClose = { table.compare(null) }) }
+                        TablePage.LOUPE -> last.loupe?.let { LightTableLoupe(table, it, onEdit = onEdit, onClose = table::closeLoupe) }
+                        else -> {}
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TablePageContent(
+    p: TablePage, table: LightTableViewModel, editor: EditorViewModel, rolls: List<Roll>,
+    last: LastShown, exportRoll: (List<Frame>) -> Unit, onLeave: () -> Unit,
+) {
+    when (p) {
+        TablePage.ROLL -> last.roll?.let { r ->
+            RollView(
+                table = table, roll = r,
+                onBack = { table.openRoll(null) },
+                onOpen = table::openLoupe,
+                onExport = exportRoll,
+                onContactSheet = { table.exportContactSheet(r, editor.ui.value.maxPixels) },
+            )
+        }
+        TablePage.ROLLS -> RollList(
+            table, rolls,
+            onOpen = { table.openRoll(it.id) },
+            onGrid = { table.showRolls(false) },
+            onBack = onLeave,
+        )
+        TablePage.GRID -> LightTableScreen(
+            table = table,
+            onBack = onLeave,
+            onOpen = table::openLoupe,
+            onRolls = { table.showRolls(true) },
+            selectionActions = { chosen -> BatchActions(table, editor, chosen); RollSelectionActions(table, chosen) },
+        )
+        TablePage.LOUPE, TablePage.COMPARE -> {}
     }
 }
 

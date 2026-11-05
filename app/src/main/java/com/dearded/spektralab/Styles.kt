@@ -360,11 +360,18 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     }
     // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
     val current = all.firstOrNull { it.id == open }?.takeIf { applied(it) }
-    if (current != null) {
-        LabeledSlider("强度 · ${current.name}", strengthOf(current.id) * 100, 0.0, 100.0, 100.0, enabled, "%.0f%%") { v ->
+    // UI2.md 3.7: the slider opens in place under the cards (height on defaultSpatial, faded in)
+    // and, closing, keeps showing the style it belonged to until it has folded away. A plain
+    // holder, not state: remembering the last style must not recompose anything.
+    val last = remember { arrayOfNulls<Style>(1) }
+    if (current != null) last[0] = current
+    val shown = current ?: last[0]
+    Expandable(open = current != null) {
+        val s = shown ?: return@Expandable
+        LabeledSlider("强度 · ${s.name}", strengthOf(s.id) * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
-            strengths[current.id] = k
-            pick(current, k)
+            strengths[s.id] = k
+            pick(s, k)
         }
     }
 }
