@@ -499,3 +499,15 @@ internal fun rememberExpandAll(): Boolean {
     val c = androidx.compose.ui.platform.LocalContext.current
     return remember(c) { c.getSharedPreferences("settings", 0).getBoolean(EXPAND_ALL, false) }
 }
+
+/**
+ * The line under a closed 更多参数 (upstream's collapsed SectionHeader): the
+ * values that differ from their defaults ("高光 +20 · 黑场 +5"), or, when
+ * nothing inside changed, the names of what is in there.
+ */
+internal fun moreSummary(names: String, vararg values: Pair<String, String?>): String =
+    values.filter { it.second != null }.joinToString(" · ") { "${it.first} ${it.second}" }.ifEmpty { names }
+
+/** A whole-number readout with its sign when it differs from [default], else null (for [moreSummary]). */
+internal fun Double.signedOrNull(default: Double): String? =
+    if (this == default) null else String.format(java.util.Locale.ROOT, "%+.0f", this)

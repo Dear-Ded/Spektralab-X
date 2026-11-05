@@ -650,8 +650,11 @@ private fun Controls(
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
                                 title = "冲洗",
+                                // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
                                 summary = listOfNotNull(ui.catalog.film(e.film)?.label,
-                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label).joinToString(" · "),
+                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label,
+                                    if (e.exposureEv != 0.0) String.format(java.util.Locale.ROOT, "%+.1f EV", e.exposureEv) else null,
+                                ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             when (step) {
@@ -693,7 +696,12 @@ private fun Controls(
                                 var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
                                 MoreRow(open = moreExposure, edited = e.yShift != 0.0 || e.mShift != 0.0 ||
                                     (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
-                                if (!moreExposure) Hint(if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜")
+                                if (!moreExposure) Hint(moreSummary(
+                                    if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜",
+                                    "黄" to e.yShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
+                                    "品红" to e.mShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
+                                    "白平衡" to ui.source?.takeIf { it.wbK > 0 }?.let { String.format(java.util.Locale.ROOT, "%.0f K", it.wbK) },
+                                ))
                                 if (moreExposure) {
                                     LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
                                         disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有放大机滤镜。" else "") {

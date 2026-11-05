@@ -47,7 +47,14 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     val tuned = e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
         e.unsharpAmount != 0.7 || e.unsharpSigma != 0.7 || e.couplersAmount != 1.0
     MoreRow(open = more, edited = tuned) { more = !more }
-    if (!more) Hint("颗粒尺寸、分层颗粒、乳剂散射、扫描锐化、色彩分离")
+    if (!more) Hint(moreSummary("颗粒尺寸、分层颗粒、乳剂散射、扫描锐化、色彩分离",
+        "颗粒尺寸" to e.grainArea.takeIf { it != 0.2 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "分层颗粒" to if (!e.grainLayered) "关" else null,
+        "散射" to e.scatterAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "锐化" to e.unsharpAmount.takeIf { it != 0.7 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "半径" to e.unsharpSigma.takeIf { it != 0.7 }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
+        "色彩分离" to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+    ))
     if (more) {
         LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
             disabledReason = if (enabled && !e.grainActive) "颗粒已关闭，打开上面的开关再调。" else "") {

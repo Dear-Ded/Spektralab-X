@@ -105,7 +105,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Adj("亮度", l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
             MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
                 l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
-            if (!more) Hint("高光、阴影、黑场、白场")
+            if (!more) Hint(moreSummary("高光、阴影、黑场、白场",
+                "高光" to l.highlights.signedOrNull(n.highlights), "阴影" to l.shadows.signedOrNull(n.shadows),
+                "黑场" to l.blackPoint.signedOrNull(n.blackPoint), "白场" to l.whitePoint.signedOrNull(n.whitePoint)))
             if (more) {
                 Adj("高光", l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
                 Adj("阴影", l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
@@ -118,7 +120,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Adj("色调", l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
             Adj("饱和度", l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
             MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
-            if (!more) Hint("自然饱和度")
+            if (!more) Hint(moreSummary("自然饱和度", "自然饱和度" to l.vibrance.signedOrNull(n.vibrance)))
             if (more) Adj("自然饱和度", l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
         }
         2 -> {
