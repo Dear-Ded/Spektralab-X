@@ -112,3 +112,22 @@ UP=<patched upstream tree> B=<build dir> bash tools/samples/regress.sh <workdir>
 decode change; say why in the commit). `ONLY="xiaomi sony-a7v"` limits the run,
 `SAMPLES_DIR=` reuses files already on the machine, `KEEP=1` keeps the
 downloads.
+
+### Upstream #48 (B&W films rendering black on a Xiaomi 13 Ultra DNG)
+
+The reporter closed it as rare and not reproducible. There is no 13 Ultra
+sample, so [`tools/samples/bw_regress.sh`](../tools/samples/bw_regress.sh)
+checks the same kind of file (phone DNG with a GainMap) for the ways it could
+happen: the decode at 1, 2 and 4 LibRaw threads in both modes has no NaN/Inf, a
+mean above 1e-3 and a non-zero maximum in every channel; and Tri-X 400, HP5
+Plus 400, T-Max 100 and Acros 100 II on Multigrade IV each render 20 times with
+a mean above 3 %.
+
+```bash
+T=<spk_render> D=<spk_decode> R=<engine resources> bash tools/samples/bw_regress.sh <workdir> <dng>...
+```
+
+First run (cloud box, 2026-11-05, lavapipe): the four Xiaomi DNGs (M2010J19CG,
+MI 8, Mi 9 Lite, Redmi Note 7) and the Pixel 2 XL all pass; the decodes are
+identical at 1, 2 and 4 threads, and the lowest render mean over the 400
+renders is 0.38 (Mi 9 Lite, HP5 Plus).
