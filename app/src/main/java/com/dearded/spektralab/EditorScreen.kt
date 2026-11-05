@@ -1105,35 +1105,24 @@ private val FORMATS = listOf("半格" to 24.0, "135" to 36.0, "645" to 56.0, "6�
  */
 @Composable
 private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Double) -> Unit) {
+    // The same slider as every other parameter (ui-audit.md, 冲洗 ③). A drag only moves the
+    // readout and commits on release; a tap, a typed value or a reset commits at once.
+    // The default is the camera's as-shot setting, so ↺ and the default dot mean 原始.
     val currentK = if (s.wbK > 0) s.wbK else s.asShotK
     val currentTint = if (s.wbK > 0) s.wbTint else s.asShotTint
     var k by remember(s) { mutableFloatStateOf(currentK.toFloat().coerceIn(2000f, 12000f)) }
     var tint by remember(s) { mutableFloatStateOf(currentTint.toFloat().coerceIn(-150f, 150f)) }
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("白平衡", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-            Text(
-                String.format(Locale.ROOT, "%.0f K · 色调 %+.0f", k, tint),
-                style = MaterialTheme.typography.labelMedium,
-            )
-            TextButton(onClick = { onCommit(0.0, 0.0) }, enabled = enabled && s.wbK > 0) { Text("原始") }
-        }
-        Slider(
-            value = k, onValueChange = { k = it },
-            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
-            valueRange = 2000f..12000f, enabled = enabled,
-        )
-        Slider(
-            value = tint, onValueChange = { tint = it },
-            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
-            valueRange = -150f..150f, enabled = enabled,
-        )
-        Text(
-            "在解码时应用，松手后重新解码 RAW，需要几秒。",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    var dragging by remember { mutableStateOf(false) }
+    fun commit() {
+        val asShot = kotlin.math.abs(k - s.asShotK) < 1 && kotlin.math.abs(tint - s.asShotTint) < 0.5
+        if (asShot) { if (s.wbK > 0) onCommit(0.0, 0.0) } else onCommit(k.toDouble(), tint.toDouble())
     }
+    GroupLabel("RAW 白平衡")
+    LabeledSlider("色温", k.toDouble(), 2000.0, 12000.0, s.asShotK.coerceIn(2000.0, 12000.0), enabled, "%.0f K",
+        onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
+    LabeledSlider("色调", tint.toDouble(), -150.0, 150.0, s.asShotTint.coerceIn(-150.0, 150.0), enabled, "%+.0f",
+        onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
+    Hint("在解码时应用，松手后重新解码 RAW，需要几秒。默认是相机拍摄时的设置。")
 }
 
 @Composable
