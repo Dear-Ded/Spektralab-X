@@ -1032,7 +1032,7 @@ private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onS
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         DEVELOP_STEPS.forEachIndexed { i, label ->
             SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
-                label = { Text(if (edited.getOrElse(i) { false }) "$label •" else label) }, enabled = enabled)
+                label = { Text(label) }, enabled = enabled, edited = edited.getOrElse(i) { false })
         }
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
@@ -42,6 +43,8 @@ fun SelectPill(
     onClick: () -> Unit,
     label: @Composable () -> Unit,
     enabled: Boolean = true,
+    /** Changed from its default: a solid dot at the top-right corner (ui2_derivatives.md). */
+    edited: Boolean = false,
 ) {
     val press = remember { MutableInteractionSource() }
     val pressed by press.collectIsPressedAsState()
@@ -77,5 +80,9 @@ fun SelectPill(
             LocalTextStyle provides MaterialTheme.typography.labelLarge.copy(
                 color = ink, fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal),
         ) { label() }
+        if (edited) Box(
+            Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 4.dp).size(6.dp)
+                .background(if (selected) Palette.OnAccent else Palette.Accent, androidx.compose.foundation.shape.CircleShape),
+        )
     }
 }

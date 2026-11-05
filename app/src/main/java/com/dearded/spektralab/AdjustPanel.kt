@@ -79,7 +79,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     ) {
         segments.forEachIndexed { i, name ->
             SelectPill(selected = seg == i, onClick = { seg = i },
-                label = { Text(if (edited[i]) "$name •" else name) }, enabled = enabled)
+                label = { Text(name) }, enabled = enabled, edited = edited[i])
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
