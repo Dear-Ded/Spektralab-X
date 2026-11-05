@@ -1,6 +1,7 @@
 package com.dearded.spektralab
 
 import android.graphics.Bitmap
+import android.media.MediaCodecList
 import androidx.heifwriter.HeifWriter
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -21,6 +22,18 @@ object HeifExport {
     private const val QUALITY = 90
     /** HeifWriter.stop's wait, in ms: a full-size grid encode takes seconds, not minutes. */
     private const val STOP_TIMEOUT_MS = 180_000L
+
+    /**
+     * A HEVC (or HEIC image) encoder this phone offers; 保存 lists HEIF only
+     * then. Read once: the codec list does not change while the app runs.
+     */
+    val available: Boolean by lazy {
+        runCatching {
+            MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos.any { c ->
+                c.isEncoder && c.supportedTypes.any { it.equals("video/hevc", true) || it.equals("image/vnd.android.heic", true) }
+            }
+        }.getOrDefault(false)
+    }
 
     /** IO. Encodes [bitmap] into [part] with [exif] (from [exifBlock]); throws on any failure. */
     fun encode(bitmap: Bitmap, part: File, exif: ByteArray?) {

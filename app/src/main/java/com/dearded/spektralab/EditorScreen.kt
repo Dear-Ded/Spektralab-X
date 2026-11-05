@@ -214,7 +214,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
-                            DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
+                            if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
                             DropdownMenuItem(text = { Text("全分辨率导出（后台）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
