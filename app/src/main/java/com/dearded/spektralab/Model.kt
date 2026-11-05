@@ -92,6 +92,22 @@ data class Edit(
     /** The scanner's unsharp mask (patch 0007): radius in full-size pixels, and gain. */
     val unsharpSigma: Double = 0.7,
     val unsharpAmount: Double = 0.7,
+    // engine_deepdive 1.1-1.2: upstream fields the app did not send. Defaults are
+    // the engine's own; at the default nothing is sent at open (EXTRA_FIELDS).
+    /** Enlarger preflash, 0..0.3 of the engine's 0..1 (print side, live): greys the paper's highlights. */
+    val preflash: Double = 0.0,
+    /** density_curve_gamma: the negative's contrast, 0.7..1.4 of the engine's 0.2..4. */
+    val negativeGamma: Double = 1.0,
+    /** halation_boost_ev: extra highlight energy above protect_ev, 0..3 EV of 0..8. */
+    val highlightBoostEv: Double = 0.0,
+    /** lens_blur_um: a soft lens in front of the film, 0..30 um of 0..200. */
+    val lensBlurUm: Double = 0.0,
+    /** antihalation_removed: the film without its anti-halation layer (a red halo, like CineStill). */
+    val noAntihalation: Boolean = false,
+    /** camera_filter for black-and-white film: "" or w8 w11 w12 w15 w21 w25 w47 w58. */
+    val cameraFilter: String = "",
+    /** scanner_white_correction + scanner_black_correction: the lab scan's own black and white points. */
+    val labLevels: Boolean = false,
     // Geometry, applied by the engine before the film (shoot layer). Crop
     // fractions are of the source frame before the quarter turns.
     val quarterTurns: Int = 0,
@@ -162,6 +178,10 @@ data class Edit(
 
     fun toJson(): JSONObject = JSONObject().apply {
         for ((key, get) in FIELDS) put(key, get(this@Edit))
+        // Only off their defaults, so a frame that never touches them opens on
+        // exactly the wire it always did.
+        val d = DEFAULT
+        for ((key, get) in EXTRA_FIELDS) get(this@Edit).let { if (it != get(d)) put(key, it) }
         if (monoPrint) putMonoPack(this)
     }
 
@@ -171,7 +191,7 @@ data class Edit(
      * slide's direct-scan mode would survive switching back to a negative.
      */
     fun delta(previous: Edit): JSONObject = JSONObject().apply {
-        for ((key, get) in FIELDS) {
+        for ((key, get) in FIELDS + EXTRA_FIELDS) {
             val value = get(this@Edit)
             if (value != get(previous)) put(key, value)
         }
@@ -190,6 +210,28 @@ data class Edit(
 
         /** What the Y/M sliders' ends are, in CC. Unsent, the engine's 1 makes the whole slider one CC. */
         const val FILTER_SHIFT_CC = 40.0
+
+        private val DEFAULT = Edit()
+
+        /** The lens filters camera_filter accepts (engine camera_filters.hpp), "" for none. */
+        val CAMERA_FILTERS = listOf("", "w8", "w11", "w12", "w15", "w21", "w25", "w47", "w58")
+
+        /**
+         * engine_deepdive 1.1-1.2. Clamped to params.cpp's ranges (one value out of
+         * range and the engine refuses the whole delta). The lens filter only
+         * reaches black-and-white film, and the lab's black/white points never a
+         * direct scan, which the engine refuses for a slide.
+         */
+        private val EXTRA_FIELDS: List<Pair<String, (Edit) -> Any>> = listOf(
+            "preflash_exposure" to { e: Edit -> e.preflash.coerceIn(0.0, 1.0) },
+            "density_curve_gamma" to { e: Edit -> e.negativeGamma.coerceIn(0.2, 4.0) },
+            "halation_boost_ev" to { e: Edit -> e.highlightBoostEv.coerceIn(0.0, 8.0) },
+            "lens_blur_um" to { e: Edit -> e.lensBlurUm.coerceIn(0.0, 200.0) },
+            "antihalation_removed" to { e: Edit -> e.noAntihalation },
+            "camera_filter" to { e: Edit -> if (e.monoPrint && e.cameraFilter in CAMERA_FILTERS) e.cameraFilter else "" },
+            "scanner_white_correction" to { e: Edit -> e.labLevels && !e.scanFilm },
+            "scanner_black_correction" to { e: Edit -> e.labLevels && !e.scanFilm },
+        )
 
         private val FIELDS: List<Pair<String, (Edit) -> Any>> = listOf(
             "film_stock" to { e: Edit -> e.film },
@@ -273,6 +315,14 @@ data class Edit(
             grainArea = p.optDouble("grain_particle_area_um2", fallback.grainArea),
             unsharpSigma = p.optDouble("scanner_unsharp_sigma", fallback.unsharpSigma),
             unsharpAmount = p.optDouble("scanner_unsharp_amount", fallback.unsharpAmount),
+            // toJson leaves these out at their defaults, so a missing key is the default.
+            preflash = p.optDouble("preflash_exposure", DEFAULT.preflash),
+            negativeGamma = p.optDouble("density_curve_gamma", DEFAULT.negativeGamma),
+            highlightBoostEv = p.optDouble("halation_boost_ev", DEFAULT.highlightBoostEv),
+            lensBlurUm = p.optDouble("lens_blur_um", DEFAULT.lensBlurUm),
+            noAntihalation = p.optBoolean("antihalation_removed", DEFAULT.noAntihalation),
+            cameraFilter = p.optString("camera_filter", DEFAULT.cameraFilter),
+            labLevels = p.optBoolean("scanner_white_correction", DEFAULT.labLevels) && p.optBoolean("scanner_black_correction", DEFAULT.labLevels),
             quarterTurns = p.optInt("geometry_quarter_turns", fallback.quarterTurns),
             flipH = p.optBoolean("geometry_flip_h", fallback.flipH),
             cropX = p.optDouble("geometry_crop_x", fallback.cropX),

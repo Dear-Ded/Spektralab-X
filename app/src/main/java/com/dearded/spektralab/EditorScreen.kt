@@ -676,7 +676,8 @@ private fun Controls(
                                     e.halationAmount != d.halationAmount || e.glareActive != d.glareActive || e.glareAmount != d.glareAmount ||
                                     e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea ||
-                                    e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount,
+                                    e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount ||
+                                    e.extraEffectsTuned(d),
                             )
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
@@ -760,11 +761,12 @@ private fun Controls(
                                     val fx = d.copy(film = e.film, paper = e.paper)
                                     fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
-                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects()) {
+                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects() || e.extraEffectsTuned(d)) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
-                                            unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
+                                            unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount)
+                                            .withExtraEffectsReset(d))
                                     }
                                 EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
                                 DustSection(e.look, enabled, onDrag = vm::setInteracting) { vm.update(e.copy(look = it)) }   // edit-effects: 灰尘 (MaskPanel.kt)
