@@ -500,7 +500,9 @@ private fun Preview(
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
     val view = androidx.compose.ui.platform.LocalView.current
-    Box(modifier.background(Palette.Surround), contentAlignment = Alignment.Center) {
+    // The surround the user chose in 设置 (18 % 灰 / 黑 / 白), never a hue (UI2.md 1.1).
+    val surround = rememberSurround()
+    Box(modifier.background(surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
