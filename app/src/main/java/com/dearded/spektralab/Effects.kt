@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit, onChange: (Edit) -> Unit) {
     // UI2.md 2.3: three strengths in reach; the film-nerd knobs behind 更多参数.
+    // Defaults come from Edit() (no-film-default moves scan sharpening to 0), never literals.
+    val fxd = Edit()
     val expandAll = rememberExpandAll()
     var more by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(expandAll) }
 
@@ -45,14 +47,14 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     }
 
     val tuned = e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
-        e.unsharpAmount != 0.7 || e.unsharpSigma != 0.7 || e.couplersAmount != 1.0
+        e.unsharpAmount != fxd.unsharpAmount || e.unsharpSigma != fxd.unsharpSigma || e.couplersAmount != 1.0
     MoreRow(open = more, edited = tuned) { more = !more }
     if (!more) Hint(moreSummary("颗粒尺寸、分层颗粒、乳剂散射、扫描锐化、色彩分离",
         "颗粒尺寸" to e.grainArea.takeIf { it != 0.2 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
         "分层颗粒" to if (!e.grainLayered) "关" else null,
         "散射" to e.scatterAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "锐化" to e.unsharpAmount.takeIf { it != 0.7 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "半径" to e.unsharpSigma.takeIf { it != 0.7 }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
+        "锐化" to e.unsharpAmount.takeIf { it != fxd.unsharpAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "半径" to e.unsharpSigma.takeIf { it != fxd.unsharpSigma }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
         "色彩分离" to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
     ))
     Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
@@ -73,10 +75,10 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
             onChange(e.copy(scatterAmount = it))
         }
         Note("光晕是片基反射回来的红晕；散射是光在乳剂里的扩散，调低画面更锐。")
-        LabeledSlider("扫描锐化", e.unsharpAmount, 0.0, 2.0, 0.7, enabled, "%.2f", onDrag = onDrag) {
+        LabeledSlider("扫描锐化", e.unsharpAmount, 0.0, 2.0, fxd.unsharpAmount, enabled, "%.2f", onDrag = onDrag) {
             onChange(e.copy(unsharpAmount = it))
         }
-        LabeledSlider("锐化半径", e.unsharpSigma, 0.2, 3.0, 0.7, enabled && e.unsharpAmount > 0, "%.1f px", onDrag = onDrag,
+        LabeledSlider("锐化半径", e.unsharpSigma, 0.2, 3.0, fxd.unsharpSigma, enabled && e.unsharpAmount > 0, "%.1f px", onDrag = onDrag,
             disabledReason = if (enabled && e.unsharpAmount <= 0) "扫描锐化为 0，半径不起作用。" else "") {
             onChange(e.copy(unsharpSigma = it))
         }
