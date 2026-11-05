@@ -120,6 +120,14 @@ private val FORMAT_NAMES = mapOf(24.0 to "半格", 36.0 to "135", 56.0 to "645",
 @Composable
 internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Unit, onDismiss: () -> Unit) {
     val changes = changesOf(ui.edit, ui.catalog)
+    // 隐藏: groups taken off the preview only (EditorViewModel.previewOverride); a real
+    // edit clears the override there, so the set follows the edit and the sheet's life.
+    var hidden by androidx.compose.runtime.remember(ui.edit) { androidx.compose.runtime.mutableStateOf(emptySet<String>()) }
+    androidx.compose.runtime.LaunchedEffect(hidden, ui.edit) {
+        vm.previewOverride(if (hidden.isEmpty()) null
+            else changes.filter { it.name in hidden }.fold(ui.edit) { acc, c -> c.reset(acc) })
+    }
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { vm.previewOverride(null) } }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.PanelHigh) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 4.dp)
             .verticalScroll(rememberScrollState())) {
@@ -141,6 +149,11 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
                         if (c.detail.isNotBlank()) Hint(c.detail)
                     }
                     Spacer(Modifier.width(8.dp))
+                    val off = c.name in hidden
+                    // Words, not an eye icon in a colour: 显示 while hidden, 隐藏 otherwise.
+                    QuietButton(if (off) "显示" else "隐藏", enabled = ui.hasImage && !ui.exporting) {
+                        hidden = if (off) hidden - c.name else hidden + c.name
+                    }
                     QuietButton("重置", enabled = ui.hasImage && !ui.exporting) { vm.update(c.reset(ui.edit)) }
                 }
             }
