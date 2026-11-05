@@ -1,0 +1,34 @@
+# key	sha256	raw.pixls.us id	file name (all CC0 1.0, https://raw.pixls.us/)
+xiaomi-yi	04aad34d8c3e2892fab76a9ef01b53c51eddddc98256f477eae1f2e607a50974	778	Xiaomi - Yi.RAW
+xiaomi-hm-note-1lte	44e0aa0d12dab142e94f5121950ed153649e45cb5e4fb8ac5a0d94fd8ffbe338	3974	Xiaomi - HM NOTE 1LTE - 10bit (4:3).dng
+xiaomi-mi-max	f19827776d09b81aa4c562e8c2f8af2ff5a6d5344b2554a3b328cdde10724adb	3973	Xiaomi - MI MAX - 10bit (4:3).dng
+xiaomi-mi-8	f1793dd915e12a7c7c0a8a83cab269f05ae99cc6155e81dc913feed57e6ce8a5	3662	Xiaomi - MI 8 - 16bit (16:9).dng
+xiaomi-redmi-note-7	0fb715f9427037cb72f13f27f51e2f0bfe825a9ed06a4ef743800d095781ff04	3228	Xiaomi - Redmi Note 7 - 16bit (4:3).dng
+xiaomi-mi-9-lite	5d443fe71ec4372804587079e3fa8f46a6612f709008e7fc4ebe34be00206c4b	3816	Xiaomi - Mi 9 Lite - 16bit (4:3).dng
+xiaomi-redmi-note-8t	b9284b49a1f583d4a11319c4a55090df7d946c19caa97d735a3f207a9c67bea3	4003	Xiaomi - Redmi Note 8T - 16bit (4:3).dng
+xiaomi-m2010j19cg	e1cb49299faa6609547bbb9b2c5a6167031694a99a1d252e1e048ce18ddf214f	4233	Xiaomi - M2010J19CG - 16bit (4:3).dng
+canon-rebel-sl1	56faa7db3947c32c5e6e31bc0db027ebf95163533e043bd8c4f18166a129692c	1201	Canon - EOS Rebel SL1 - RAW (3:2).CR2
+canon-r5-crop	10a1116bd00e92314b09382b403f76706b1eeab3ce33234a6c75fe25ed289756	4691	Canon - EOS R5 - RAW, 1.6 crop, dual-pixel (3:2).CR3
+canon-r50-craw	38fc458f2f74d0cfa04afd0ce513b40797080079f0786bedbfc55c39cc28d7d8	6645	Canon - EOS R50 - CRAW (3:2).CR3
+nikon-z7-12c	85e08750866f339f9e810b9004e542b0a623edf83df911459c7ae0057fe1a1dd	2795	Nikon - Z 7 - 12bit 12bit compressed (3:2).NEF
+nikon-z6-14lossless	c079345fc93f53a4f0d322f8ddaae505f920c36015f25b58befccaa61db1af31	3582	Nikon - Z 6 - 14bit 14bit lossless compressed (3:2).NEF
+sony-a7m3-14c	250784580ea527442c09004417bb0eead484f2bf3ee8f9121a776ac65bb50d0f	2414	Sony - ILCE-7M3 - 14bit 14bit compressed (3:2).ARW
+sony-a7rm4-12c	3421b919ee81224d59f78872ee099a021bff0e2a47ae5fbbac385b182ac7241e	3479	Sony - ILCE-7RM4 - 12bit 12bit compressed (3:2).ARW
+sony-a7v-8845	8c35cd1ab0ca36b487ae50ae5e0333a8e967122700fce5678e1e5b97561896a4	8845	Sony - ILCE-7M5 - 14bit (4:3).ARW
+sony-a7v-8846	4e3a99cbcf2a348decaf3ca68c5de22b7a05eaa590f4e9184735c1f9c45213a7	8846	Sony - ILCE-7M5 - 14bit (3:2).ARW
+sony-a7v-8847	46d73475dfd8f96fd7e2f4d4a721a36cbbaba3d6ea95a4851809cd9d252b2a80	8847	Sony - ILCE-7M5 - 14bit (3:2).ARW
+sony-a7v-8848	51ad709cba01a5f05e3c723b779f6b5fda8fa7b378494dbb40b4d3d3aa5494a4	8848	Sony - ILCE-7M5 - 14bit (4:3).ARW
+sony-a7v-8849	c16cae99d26a2f8ad183d31a23823310a994aa058d55cfe56e4f82ba56865f57	8849	Sony - ILCE-7M5 - 14bit (3:2).ARW
+sony-a7v-8850	8315af2a9889709f4c836dbaadc23d226847e5a0630fda212a9f896d5fe0569f	8850	Sony - ILCE-7M5 - 14bit (3:2).ARW
+fuji-x100f-xtrans	bca8ad027b0ee0038107c01792ccb5c6b776512b77b584c6f93c6f2ced5f15a3	1936	Fujifilm - X100F - 14bit 14bit compressed (3:2).RAF
+fuji-xt3-xtrans	95b33021160b239ceb1a09d46a1b29cb60cb7dd47581feb126b337c219091754	2783	Fujifilm - X-T3 - 14bit 14bit compressed (3:2).RAF
+fuji-xpro3-xtrans	8c50e965d7627932414e8790a5ef1d673fcb44b548b64130df6b9be42c418554	3700	Fujifilm - X-Pro3 - 14bit 14bit uncompressed (3:2).RAF
+leica-q-ol3warp	f7b2a6b6d7684536511cf2db2e2bfa46fae1ad7e52214093714f35e7ca60acbf	1797	Leica - Q (Typ 116) - 14bit (3:2).DNG
+leica-m10	26be5e06dfb53a2938dab3ca8f06024533a9c0dd0c652938f39eb48bc325f95e	1603	Leica - M10 - 16bit 16bit uncompressed (3:2).dng
+ricoh-gr3	05513ee72f7cac4165534c9f64995412084f414a033c80c473c79fd94154292e	3115	Ricoh - GR III - 14bit (3:2).DNG
+apple-iphone-6s-plus-ol3vig	845fee4f09c832af3728778737f5ae9b99124debb821b6e2066b94aed1daa91c	915	Apple - iPhone 6s Plus - 16bit (4:3).DNG
+apple-iphone-xs	50bc64ee8cfbbfb6c0531e29ab428ff985506a16fe2d1d2e74656f21b54505f6	3372	Apple - iPhone XS - 16bit (4:3).dng
+apple-iphone-12-pro	e91e77a4533ed7cce551d83330676ea5c47dd5e55fb38adda7819366afdbdfc2	4264	Apple - iPhone 12 Pro - 8bit (4:3).DNG
+google-pixel-2-xl	5541093a369f0487fef92bcd1f5fef1be6e4e3cec2aa4d52ad38d2211f3309d7	2206	Google - Pixel 2 XL - 16bit (4:3).dng
+google-pixel-4a	11b38186ee3455376291bcdb3049728a3f9dcd94b9e82ff76855d9f3430e44be	4176	Google - Pixel 4a - 16bit (4:3).dng
+google-pixel-8-pro	45420c595401547cca950ae58d552bc82b32d31ce1d58c082df33004016197f5	7751	Google - Pixel 8 Pro - 16bit (4:3).dng
