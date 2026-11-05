@@ -1,5 +1,8 @@
 package com.dearded.spektralab
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -76,6 +79,9 @@ private val WORKING_EDGES = listOf(
     0 to "原始尺寸",
 )
 
+/** 照片四周's names, keyed as Theme.kt SURROUNDS. */
+private val SURROUND_LABELS = mapOf("dark" to "深灰（默认）", "grey18" to "18% 灰", "black" to "黑", "white" to "白")
+
 private val HIGHLIGHT_STOPS = listOf(0f to "关（推荐）", 1f to "1 档", 2f to "2 档")
 
 /**
@@ -136,6 +142,32 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                         "默认展开全部参数", expandAll, true,
                         note = "冲洗和调整的每一步直接显示“更多参数”，和桌面版一样全。关着时先看常用的两三项。",
                     ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
+                }
+                // ui-visual's key (Theme.kt SURROUND_KEY / SURROUNDS); the editor follows it while it changes.
+                add {
+                    var surround by remember { mutableStateOf(prefs.getString(SURROUND_KEY, "dark") ?: "dark") }
+                    ChoiceRow(
+                        "照片四周",
+                        "编辑时照片外面的颜色，不进导出。判断颜色用 18% 灰最准。",
+                        value = SURROUND_LABELS[surround] ?: SURROUND_LABELS.getValue("dark"),
+                    ) {
+                        PillRow {
+                            for ((key, colour) in SURROUNDS) {
+                                SelectPill(
+                                    selected = surround == key,
+                                    onClick = { surround = key; prefs.edit().putString(SURROUND_KEY, key).apply() },
+                                    label = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(Modifier.size(14.dp).background(colour, CircleShape)
+                                                .border(1.dp, Palette.Outline, CircleShape))
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(SURROUND_LABELS[key] ?: key)
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
                 add { NewPhotoStocks(ui, vm) }
                 // ui-motion_splash.md 6: LaunchIntro reads this at launch; off by itself when animations are off.
