@@ -109,6 +109,7 @@ These come from ROADMAP M6 and need a Xiaomi phone, ideally HyperOS 4 / Android 
 | 滑动刷新率 / Refresh rate while scrolling | 开发者选项“显示刷新率”，滑动胶片列表 | 记录实际刷新率（本版未改，供后续参考） |
 | 小米相机新照片 / New Xiaomi camera photos | HDR JPEG、DNG、UltraRAW 各导入一张 | 由 RAW 会话负责，这里只记录能否打开 |
 | HEIF 导出 / HEIF export | 保存 → HEIF · 全尺寸（sRGB），导出一张带边框的照片；`exiftool -a -G1 file.heic` | 小米相册能打开、颜色与同图 JPEG 一致；EXIF 有拍摄参数和 `Software Spektralab-X`；没有 HEVC/HEIC 编码器的手机菜单里不出现此项。编码器存在不保证支持每个尺寸，失败须明确提示。颜色配置：HeifWriter 1.1 不嵌 ICC，记下 exiftool 是否显示 `colr`（nclx）|
+| 印样进队列 / Contact sheet in the queue | 观片台 → 按卷 → 导出印样；排版中杀掉应用再打开；再试一次取消 | “正在处理”显示“印样 · 卷名”、逐帧进度和剩余时间；被杀后重开自动重新排版且只存一张；取消后相册里没有残留 |
 
 ## 「无」真机待验 / 无 checks on a phone
 

@@ -101,7 +101,7 @@ data class ProcessingJob(
     val sheet get() = sheetJson.isNotEmpty()
 
     val label get() = when {
-        sheet -> "印样 · $sheetFrames 张"
+        sheet -> "印样 · $name"
         extreme -> "全分辨率导出"
         format == ExportFormat.TIFF -> "16 位 TIFF"
         format == ExportFormat.HEIF -> "HEIF · 全尺寸"
