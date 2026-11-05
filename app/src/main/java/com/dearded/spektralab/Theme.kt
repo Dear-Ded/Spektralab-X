@@ -72,11 +72,87 @@ private val Scheme = darkColorScheme(
 // shared Han characters never fall back to Japanese glyph shapes.
 private val Zh = androidx.compose.ui.text.intl.LocaleList("zh-CN")
 
-private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh)
+/*
+ * Bundled faces (tools/work/ui-fonts.md, set A): Inter for Latin and digits,
+ * Noto Sans SC (思源黑体) for Chinese, JetBrains Mono for readouts. All OFL 1.1,
+ * licences in assets/fonts/licenses, listed in NOTICE. The same on every phone,
+ * whatever the maker's system font.
+ *
+ * Compose picks a font by weight only, never by script, so each weight is one
+ * platform Typeface built with CustomFallbackBuilder (API 29, our minSdk): the
+ * Latin face first, Noto Sans SC for any glyph it lacks, then the system font.
+ * The files are stored uncompressed (build.gradle.kts noCompress), so a Typeface
+ * maps the APK in place; each weight is built once, on first use or by [UiFonts.warm].
+ */
+internal object UiFonts {
+    private val WEIGHTS = intArrayOf(400, 500, 600, 700)
+    private val cache = HashMap<String, android.graphics.Typeface>()
+
+    private fun face(c: android.content.Context, path: String, weight: Int, axis: Int = weight) =
+        android.graphics.fonts.Font.Builder(c.assets, path)
+            .setWeight(weight)
+            .setFontVariationSettings("'wght' $axis")
+            .build()
+
+    fun typeface(c: android.content.Context, latin: String, weight: Int): android.graphics.Typeface =
+        synchronized(cache) {
+            cache.getOrPut("$latin@$weight") {
+                runCatching {
+                    val first = android.graphics.fonts.FontFamily.Builder(face(c, latin, weight)).build()
+                    val cjk = android.graphics.fonts.FontFamily.Builder(face(c, CJK, weight)).build()
+                    android.graphics.Typeface.CustomFallbackBuilder(first)
+                        .addCustomFallback(cjk)
+                        .setSystemFallback("sans-serif")
+                        .setStyle(android.graphics.fonts.FontStyle(weight, android.graphics.fonts.FontStyle.FONT_SLANT_UPRIGHT))
+                        .build()
+                }.getOrElse { android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, weight, false) }
+            }
+        }
+
+    /** Builds every weight ahead of the first frame that needs it; safe on any thread. */
+    fun warm(c: android.content.Context) {
+        val app = c.applicationContext
+        for (w in WEIGHTS) { typeface(app, SANS, w); typeface(app, MONO, w) }
+    }
+
+    const val SANS = "fonts/Inter-VF.ttf"
+    const val MONO = "fonts/JetBrainsMono-VF.ttf"
+    const val CJK = "fonts/NotoSansSC-VF.ttf"
+
+    @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+    private class Bundled(val latin: String, override val weight: FontWeight) :
+        androidx.compose.ui.text.font.AndroidFont(
+            androidx.compose.ui.text.font.FontLoadingStrategy.Blocking, Loader,
+            androidx.compose.ui.text.font.FontVariation.Settings(),
+        ) {
+        override val style: androidx.compose.ui.text.font.FontStyle = androidx.compose.ui.text.font.FontStyle.Normal
+    }
+
+    private object Loader : androidx.compose.ui.text.font.AndroidFont.TypefaceLoader {
+        override fun loadBlocking(context: android.content.Context, font: androidx.compose.ui.text.font.AndroidFont) =
+            (font as Bundled).let { typeface(context, it.latin, it.weight.weight) }
+        override suspend fun awaitLoad(context: android.content.Context, font: androidx.compose.ui.text.font.AndroidFont) =
+            loadBlocking(context, font)
+    }
+
+    fun family(latin: String) = androidx.compose.ui.text.font.FontFamily(WEIGHTS.map { Bundled(latin, FontWeight(it)) })
+}
+
+/** Headings, labels and body: Inter with Noto Sans SC behind it. */
+val UiSans = UiFonts.family(UiFonts.SANS)
+/** Readouts, film codes, frame numbers: JetBrains Mono with Noto Sans SC behind it. */
+val UiMono = UiFonts.family(UiFonts.MONO)
+
+private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh, fontFamily = UiSans)
 
 private val Type = Typography().let { t ->
     t.copy(
-        headlineSmall = t.headlineSmall.zh(),
+        displayLarge = t.displayLarge.zh(),
+        displayMedium = t.displayMedium.zh(),
+        displaySmall = t.displaySmall.zh(),
+        headlineLarge = t.headlineLarge.zh(),
+        headlineMedium = t.headlineMedium.zh(),
+        headlineSmall = t.headlineSmall.copy(fontWeight = FontWeight.SemiBold).zh(),
         titleLarge = t.titleLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold).zh(),
         titleMedium = t.titleMedium.copy(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold).zh(),
         titleSmall = t.titleSmall.zh(),
@@ -90,11 +166,15 @@ private val Type = Typography().let { t ->
     )
 }
 
-/** Tabular figures for any readout that changes while a finger moves. */
-val Readout = TextStyle(fontFeatureSettings = "tnum", fontWeight = FontWeight.Medium, fontSize = 13.sp)
+/** Any readout that changes while a finger moves: monospaced, so its width never jitters. */
+val Readout = TextStyle(fontFamily = UiMono, fontFeatureSettings = "tnum", fontWeight = FontWeight.Medium,
+    fontSize = 13.sp, localeList = Zh)
 
 @Composable
 fun SpektraTheme(content: @Composable () -> Unit) {
+    // Build the four weights on a worker while the first frame lays out (ui-fonts.md 5).
+    val c = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.runtime.remember(c) { Thread({ UiFonts.warm(c) }, "ui-fonts").apply { isDaemon = true; start() } }
     MaterialTheme(colorScheme = Scheme, typography = Type, content = content)
 }
 
