@@ -11,24 +11,42 @@
 - 合并顺序按依赖：底层（引擎补丁、JNI、解码）先合，界面后合。
 - 交付前先 `git rebase main`，冲突自己解决；涉及共用文件的冲突交给主会话。
 
-## 当前分工
+## 当前分工（0.1.20，2026-11-05 起）
+
+0.1.20 的主线是 UI 2.0，规范见 [UI2.md](UI2.md)。“负责的文件”写的是本线新增或主要改动的文件；没定下来的写“见会话”，由会话在第一次提交时写清楚，再由主会话补进本表。
 
 | 线 | 会话 | 分支 / 工作区 | 负责的文件 | 当前任务 |
 |---|---|---|---|---|
-| 主会话：界面与新功能 | 主会话 | `main` / `wt-main` | `EditorScreen.kt`（边框区除外）、`AdjustPanel.kt`、`Theme.kt`、`QueueSheet.kt`、`Immersive.kt`、`CategoryBar.kt`、`TopBarIcons.kt`、引导与更新检测新文件、`docs/PROJECT.md`、`ROADMAP.md`、`UI.md`、`WORKSTREAMS.md` | 0.1.19 定稿（2026-11-04）。已合并：首次引导、应用内更新、关于页定稿、新照片的胶片和相纸、被杀后回到原照片、文件选择器记住文件夹、显存实测、界面打磨（字号、滑杆、胶囊按钮、震动、顶栏 56 dp、空白页观片台入口）；待做：发布、真机验证 |
-| 色彩对照 | colour-parity | `parity-upstream-host` / `spektralab-android` | `tools/parity/`、`docs/PARITY.md`、`output_transform.*`、`patches/`（色彩相关）、本轮另允许 JNI 的 `openBitmap` / `openBitmapHdr` 输入解码 | 进行中。已完成：JPEG/P3 输入改按上游换算（均值 ≤ 0.016）、lavapipe 上的 fma 探测验证、`scripts/parity.sh`、Pixel GainMap DNG 对照用例；待做：Adreno 真机对照 |
-| 导出稳定性 | export-stability | `stability-m5` / `wt-stability` | `ProcessingQueue.kt`、`ExportService.kt`、`MediaSaver.kt`、`EngineHost.kt`、`tiff16.cpp`、JNI 中导出与恢复相关函数 | 0.1.19 范围已合并：画面检查、TIFF Deflate、导出独立线程、引擎补丁 0005 / 0008、极致渲染（整帧，4:4:4 JPEG）、大图导出时清晰预览让路、片边画布 42 MP 上限、补丁 0001 改为 256 行；应用侧分条渲染排到正式版；待真机验证 |
-| RAW 解码 | raw-decode-2（`local_5a8e66c8-5ae9-4993-a795-1bca201b28ad`，2026-11-03 接替 raw-decode：多轮无提交） | `raw-decode` / `wt-raw` | `SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`、`patches/`（解码相关）、`cpp/CMakeLists.txt` 的 LibRaw 部分、JNI 的 `openRaw`；本轮另允许 `EditorViewModel.kt`、`ProcessingQueue.kt` 各一处 RAW 打开调用 | 0.1.19 范围已合并：描述符直读、多线程解码、LibRaw 加固、DNG GainMap（引擎补丁 0006）、LibRaw 0017 / 0018 / 0019（索尼 A7 V）、镜头型号读取；待做：A7 V 的 APS-C 与无损样张、真机验证 |
-| 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、ROADMAP、UI、WORKSTREAMS、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、署名与“关于”文案 | 0.1.19 更新说明、商店文案、README 功能列表已定稿；随后续合并继续同步 |
-| 风格库扩充 | styles-library | `styles` / `wt-styles` | `Styles.kt`、`app/src/main/assets/styles/`、`docs/STYLES.md`、新增导入与 `.spklook` 文件、manifest 的导入 intent（单独提交） | 0.1.19 范围已合并：87 款风格、导入界面与全部格式、胶片方案、俗称标签搜索、跨分组搜索、记住上次风格和分组；待真机逐款核对 |
-| 品牌 logo 与边框 | brand-logos | `brand-logos` / `wt-logos` | `assets/logos/`、`Frames.kt`、`Perforations.kt`、`Model.kt` 的边框与片边字段、`EditorScreen.kt` 构图页边框区、`NOTICE` 商标声明段 | 0.1.19 范围已合并：33 个品牌 logo、只加齿孔、上游片边与日期后背全部字段、30 款新边框（共 50 款）、E.3 兼容规则、数据条镜头型号与实际焦距；待真机验证 |
-| 调整工具 | adjust-tools | 见会话 | `layer2.*`、`Look.kt`、`AdjustPanel.kt` 调整页内容、新增调色盘与曲线文件 | 0.1.19 范围已合并：曲线、调色盘（每个风格有默认点）、颗粒尺寸与扫描锐化（引擎补丁 0007）、效果页分项强度；待做：HSL 补全 |
-| 观片台 | light-table | 见会话 | 新增观片台文件、Room 索引、侧边文件 | 0.1.19 范围已合并：照片库与侧边文件、网格挑片、放大镜与星级、批量粘贴与导出（补拍摄参数）、胶片小样、逐卷查看、手动装卷、导出印样；待真机验证 |
-| 上游调研 | upstream-watch | 只读，不建分支 | 不改仓库文件，结论交主会话写入文档 | 新线（2026-11-04）：跟踪上游 SpektraLab、spektrafilm 和其他二创项目的新动向，判断哪些值得移植 |
+| 主会话：派活、审核、发布 | 主会话 | `main` / `wt-main` | `docs/PROJECT.md`、`ROADMAP.md`（与 repo-polish 协作）、`UI.md`、`UI2.md`、`WORKSTREAMS.md`（与 repo-polish 协作）；共用文件的冲突 | 审核合并各线，跑 CI，发布 0.1.20 |
+| 截图流水线 | ui-shots | `ui-shots` / `wt-shots` | CI 自动出图的测试与脚本（截图测试、出图工作流里新增的步骤，不改发版逻辑）；具体文件见会话 | 每次合并后自动生成各页面截图，供逐页检查（UI2.md 第 4 节）和 README 使用 |
+| 编辑器视觉 | ui-visual | `ui-visual` / `wt-visual` | `Theme.kt`、编辑器的版式、层级、卡片和面板组件（UI2.md 第 1、2 节）；`EditorScreen.kt` 的视觉部分，与 ui-motion 分界见会话 | 编辑器视觉重做：配色、选中状态、字体与间距、卡片、面板 |
+| 交互动效 | ui-motion | `ui-motion` / `wt-motion` | 转场、跟手返回、按压反馈与震动（UI2.md 第 3 节）；`SharedTransitionLayout`、`PredictiveBackHandler` 相关代码；具体文件见会话 | 卡片到大图的共享元素、跟手的预测性返回、面板上拉、按压与震动 |
+| 其他页面 | ui-screens | `ui-screens` / `wt-screens` | 观片台、设置、正在处理、导入页、更新弹窗的界面文件（`LightTable*.kt`、`QueueSheet.kt`、`ImportSheet.kt`、`UpdateDialog.kt` 等的布局部分） | 按 UI2.md 第 6 节第 5 步给其他页面换装，再按第 4 节逐页检查 |
+| 局部蒙版与灰尘 | edit-effects | `edit-effects` / `wt-effects` | 局部蒙版、灰尘效果的新增文件；`Effects.kt`、`layer2.*` 中相关部分；需要时的引擎补丁；具体文件见会话 | 局部蒙版（ROADMAP M2）、效果页加灰尘（USER_VOICES） |
+| 平台与导出 | platform-export | `platform-export` / `wt-platform` | HEIF 导出、印样进“正在处理”队列；`app/build.gradle.kts` 的 targetSdk 36、16 KB 页对齐、Baseline Profile；高刷新率请求；具体文件见会话 | HEIF、印样入队、targetSdk 36、16 KB、Baseline Profile、高刷 |
+| 小米深度适配 | xiaomi-m6 | `xiaomi-m6` / `wt-xiaomi` | `JobNotifier.kt`（超级岛）、保活引导、温控调度（`DeviceProfile.kt` 相关部分）、`ApplicationExitInfo` 退出诊断；具体文件见会话 | 超级岛、后台保活、温控、退出诊断（ROADMAP M6） |
+| RAW 收尾 | raw-m6 | `raw-m6` / `wt-raw6` | `patches/`（解码相关）、`patches/libraw/`、`SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`；样片回归库的工具与清单 | OpcodeList3（WarpRectilinear、FixVignetteRadial）、小米 HDR 与色彩空间识别、小米 10–18 和主流相机的样片回归库 |
+| 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、UI、UI2、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、“关于”文案；本轮另负责 `ROADMAP.md` 勾选和本页状态表 | 0.1.20 更新说明草稿、`docs/FAQ.md`、ROADMAP 状态，随合并同步 |
 
-`EditorViewModel.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。
+`EditorViewModel.kt`、`EditorScreen.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。四条界面线（ui-visual、ui-motion、ui-screens、ui-shots）动 `EditorScreen.kt` 前先在提交说明里写明改了哪一段。
 
-已暂停：远程处理参考服务端（M4 排到正式版，见路线图）。会话 remote-server 已归档（2026-11-03）。
+已暂停：远程处理参考服务端（M4 排到正式版，接口已留，见路线图）。
+
+## 归档记录
+
+### 0.1.19（2026-11-04 发布，会话已全部归档）
+
+| 线 | 会话 | 分支 | 交付 |
+|---|---|---|---|
+| 色彩对照 | colour-parity | `parity-upstream-host` | 与上游 Linux 宿主逐像素对照（RAW 平均 ΔE00 0.000，手机 JPEG / P3 ≤ 0.016）、fma 探测验证、`scripts/parity.sh`、补丁 0001 改为 256 行、4:4:4 编码核对（[PARITY.md](PARITY.md)） |
+| 导出稳定性 | export-stability | `stability-m5` | 画面检查、事务式保存、GPU 设备丢失恢复、TIFF Deflate、导出独立线程、引擎补丁 0005 / 0008、内存分档、极致渲染（4:4:4 JPEG） |
+| RAW 解码 | raw-decode → raw-decode-2 | `raw-decode` | 描述符直读、LibRaw 多线程、LibRaw 加固、DNG GainMap（补丁 0006）、LibRaw 0017–0019（索尼 A7 V）、镜头型号读取 |
+| 风格库扩充 | styles-library | `styles` | 87 款风格、`.spklook` v1、.cube / HaldCLUT / XMP / spektrafilm / 富士配方导入、胶片方案、俗称搜索 |
+| 品牌 logo 与边框 | brand-logos | `brand-logos` | 33 个品牌 logo、只加齿孔、上游片边与日期后背全部字段、30 款新边框（共 50 款）、E.3 兼容规则 |
+| 调整工具 | adjust-tools | `adjust-tools` | 曲线、调色盘（每款风格有默认点）、颗粒尺寸与扫描锐化（补丁 0007）、效果页分项强度 |
+| 观片台 | light-table | `light-table` | 照片库与侧边文件、网格与放大镜挑片、批量粘贴与导出、胶片小样、逐卷查看、手动装卷、导出印样 |
+| 上游调研 | upstream-watch | 只读 | 上游与二创项目新动向，结论写进 ROADMAP 和 PLATFORMS |
+| 远程处理服务端 | remote-server | — | 2026-11-03 暂停并归档，接口规范见 [REMOTE.md](REMOTE.md) |
 
 ## 会话管理
 
