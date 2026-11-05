@@ -264,7 +264,8 @@ class StyleImports(private val context: Context) {
         val look = SpkLook(
             name = title,
             engine = SpkEngine(
-                film = edit.film, paper = edit.paper, exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+                film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
+                exposureEv = edit.exposureEv, printExposure = edit.printExposure,
                 yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
                 formatMm = edit.filmFormatMm,
                 grain = if (edit.grainActive) edit.grainAmount else 0.0,

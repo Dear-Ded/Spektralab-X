@@ -27,6 +27,11 @@ data class Preset(
     val glareAmount: Double,
     /** Layer 2. Older saves have none and load neutral. */
     val look: Look = Look.NEUTRAL,
+    /** 胶片「无」and a negative's 相纸「无」; older saves always had a film and a paper. */
+    val noFilm: Boolean = false,
+    val digitalIntermediate: Boolean = false,
+    /** Older saves were made with the scanner sharpening at the engine's 0.7. */
+    val unsharpAmount: Double = Edit.SCAN_UNSHARP,
 ) {
     fun applyTo(edit: Edit) = edit.copy(
         film = film, paper = paper, scanFilm = scanFilm, filmFormatMm = filmFormatMm,
@@ -35,6 +40,7 @@ data class Preset(
         halationActive = halationActive, halationAmount = halationAmount,
         glareActive = glareActive, glareAmount = glareAmount,
         look = look,
+        noFilm = noFilm, digitalIntermediate = digitalIntermediate, unsharpAmount = unsharpAmount,
     )
 
     fun toJson(): JSONObject = JSONObject()
@@ -44,13 +50,14 @@ data class Preset(
         .put("grainActive", grainActive).put("grainAmount", grainAmount)
         .put("halationActive", halationActive).put("halationAmount", halationAmount)
         .put("glareActive", glareActive).put("glareAmount", glareAmount)
+        .put("noFilm", noFilm).put("digitalIntermediate", digitalIntermediate).put("unsharpAmount", unsharpAmount)
         .apply { if (!look.neutral) put("look", look.toJson()) }
 
     companion object {
         fun of(name: String, e: Edit) = Preset(
             name, e.film, e.paper, e.scanFilm, e.filmFormatMm, e.printExposure, e.yShift, e.mShift,
             e.grainActive, e.grainAmount, e.halationActive, e.halationAmount, e.glareActive, e.glareAmount,
-            e.look,
+            e.look, e.noFilm, e.digitalIntermediate, e.unsharpAmount,
         )
 
         /** Missing keys take the defaults of a fresh [Edit], so older saves keep loading. */
@@ -73,6 +80,9 @@ data class Preset(
                 glareActive = o.optBoolean("glareActive", d.glareActive),
                 glareAmount = o.optDouble("glareAmount", d.glareAmount),
                 look = Look.fromJson(o.optJSONObject("look")),
+                noFilm = o.optBoolean("noFilm", false),
+                digitalIntermediate = o.optBoolean("digitalIntermediate", false),
+                unsharpAmount = o.optDouble("unsharpAmount", Edit.SCAN_UNSHARP),
             )
         }
     }

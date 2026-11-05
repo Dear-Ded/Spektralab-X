@@ -69,7 +69,10 @@ data class Style(
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
         val stock = catalog.film(film) ?: return null
-        val base = edit.copy(film = film, scanFilm = stock.positive,
+        // A style is a film on a paper: 无 off, the paper chosen. Coming from 效果「无」
+        // it develops with the scanner's own sharpening, as every style was tuned with.
+        val base = edit.copy(film = film, scanFilm = stock.positive, noFilm = false, digitalIntermediate = false,
+            unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
             paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
         return catalog.normalize(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,

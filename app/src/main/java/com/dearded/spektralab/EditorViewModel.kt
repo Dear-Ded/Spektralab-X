@@ -71,6 +71,8 @@ data class UiState(
     /** The film and paper a new photo starts on; "" = the last photo's (remembered). */
     val defaultFilm: String = "",
     val defaultPaper: String = "",
+    /** What a newly opened photo starts on: NEW_NONE (every stage 无), NEW_REMEMBER or NEW_FIXED. */
+    val newPhotoMode: String = EditorViewModel.NEW_NONE,
 ) {
     val hasImage get() = source != null
 }
@@ -84,7 +86,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         wideGamut = prefs.getBoolean("wide_gamut", true),
         highlightStops = prefs.getFloat("highlight_stops_v2", 0f),
         defaultFilm = prefs.getString("default_film", "").orEmpty(),
-        defaultPaper = prefs.getString("default_paper", "").orEmpty()))
+        defaultPaper = prefs.getString("default_paper", "").orEmpty(),
+        newPhotoMode = newPhotoMode(prefs)))
     val ui: StateFlow<UiState> = _ui
 
     // Touched only on EngineThread, except where marked volatile.
@@ -97,7 +100,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     @Volatile private var inFlightTier: String? = null
     private var applied = Edit()
     private var iccPath = ""
-    @Volatile private var wanted = Edit()
+    @Volatile private var wanted = Edit.NONE
 
     private val renders = Channel<Unit>(Channel.CONFLATED)
     // A Layer 2 change: the last render re-packed through the new look, no engine pass.
@@ -449,9 +452,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
         val edit = _ui.value.catalog.normalize(raw)
         val current = _ui.value.edit
-        // "记住上次用的" across a restart: a new process starts on Edit()'s pair otherwise.
-        if (edit.film != current.film || edit.paper != current.paper)
-            prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper).apply()
+        // "记住上次用的" across a restart: a new process would start on 无 otherwise.
+        if (edit.film != current.film || edit.paper != current.paper || edit.noFilm != current.noFilm ||
+            edit.digitalIntermediate != current.digitalIntermediate)
+            prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper)
+                .putBoolean("last_no_film", edit.noFilm).putBoolean("last_di", edit.digitalIntermediate).apply()
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         wanted = edit
         saves.trySend(Unit)
@@ -573,6 +578,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val state = _ui.value
         update(withFilm(state.edit, state.catalog, id) ?: return)
     }
+
+    /** 胶片「无」: the photo itself. Film and paper stay chosen, so picking a film brings them back. */
+    fun pickNoFilm() = update(_ui.value.edit.copy(noFilm = true))
+
+    /** 风格「无」: no film, no film effects, no Layer 2; geometry and border stay. */
+    fun clearStyle() = update(_ui.value.edit.withoutStyle())
 
     /**
      * One card per film, rendered after the photo opens: the open photo's small
@@ -830,7 +841,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             format = format, size = size, workingEdge = state.workingEdge, maxPixels = state.maxPixels,
             outPixels = outPixels,
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
-            filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
+            filmLabel = if (state.edit.noFilm) "" else state.catalog.film(state.edit.film)?.label ?: "",
             wideGamut = state.wideGamut,
             highlightStops = state.highlightStops,
         )
@@ -858,7 +869,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             format = ExportFormat.JPEG, size = ExportSize.FULL, workingEdge = 0, maxPixels = state.maxPixels,
             outPixels = if (state.maxPixels > 0) minOf(px, state.maxPixels) else px,
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
-            filmLabel = state.catalog.film(state.edit.film)?.label ?: "",
+            filmLabel = if (state.edit.noFilm) "" else state.catalog.film(state.edit.film)?.label ?: "",
             wideGamut = state.wideGamut,
             highlightStops = state.highlightStops,
             extreme = true,
@@ -985,8 +996,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * the last photo's, which is what the editor has always carried over.
      */
     fun setNewPhotoStocks(film: String, paper: String) {
-        prefs.edit().putString("default_film", film).putString("default_paper", paper).apply()
-        _ui.update { it.copy(defaultFilm = film, defaultPaper = paper) }
+        val mode = if (film.isEmpty()) NEW_REMEMBER else NEW_FIXED
+        prefs.edit().putString("default_film", film).putString("default_paper", paper)
+            .putString("new_photo_mode", mode).apply()
+        _ui.update { it.copy(defaultFilm = film, defaultPaper = paper, newPhotoMode = mode) }
+    }
+
+    /** 新照片的胶片和相纸 → 无: every new photo opens as it is, nothing applied. */
+    fun setNewPhotoNone() {
+        prefs.edit().putString("new_photo_mode", NEW_NONE).apply()
+        _ui.update { it.copy(newPhotoMode = NEW_NONE) }
     }
 
     /**
@@ -996,16 +1015,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      */
     private fun withNewPhotoStocks(e: Edit): Edit {
         val catalog = _ui.value.catalog
+        val mode = _ui.value.newPhotoMode
+        // 无: the photo as it is. Only display preferences and this photo's own
+        // shooting data come along, nothing of the last photo's look.
+        if (mode == NEW_NONE) return catalog.normalize(Edit.NONE.copy(
+            dateOrder = e.dateOrder, dateWithData = e.dateWithData, edgeRealName = e.edgeRealName,
+            dateText = e.dateText, dateDataText = e.dateDataText, edgeFNumber = e.edgeFNumber,
+        ))
         // Remembering: in this process the last photo's pair is already carried; the
         // first photo after a restart takes the pair recorded by applyEdit.
-        val remember = _ui.value.defaultFilm.isEmpty()
+        val remember = mode == NEW_REMEMBER
         if (remember && lastOpenedAny) return e
         val wantFilm = if (remember) prefs.getString("last_film", "").orEmpty() else _ui.value.defaultFilm
         val wantPaper = if (remember) prefs.getString("last_paper", "").orEmpty() else _ui.value.defaultPaper
         val film = catalog.film(wantFilm) ?: return e
         val next = withFilm(e, catalog, film.id) ?: return e
         val paper = catalog.paper(wantPaper)
-        return if (paper != null && paper.bw == film.bw) catalog.normalize(next.copy(paper = paper.id)) else next
+        val paired = if (paper != null && paper.bw == film.bw) catalog.normalize(next.copy(paper = paper.id)) else next
+        // A fixed pair is a film and a paper; remembering also brings back a last 无.
+        return if (!remember) paired
+               else catalog.normalize(paired.copy(noFilm = prefs.getBoolean("last_no_film", false),
+                   digitalIntermediate = prefs.getBoolean("last_di", false)))
     }
 
     fun setWorkingEdge(edge: Int) {
@@ -1087,14 +1117,34 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         /** The engine's preview tier, which the share size exports. */
         private const val SHARE_EDGE = 3400.0
 
-        /** [edit] with film [id]; the paper changes only when it cannot print it (colour vs B&W). */
+        /**
+         * [edit] with film [id] and 胶片「无」off; the paper changes only when it
+         * cannot print it (colour vs B&W). A negative's 相纸「无」(the Digital
+         * Intermediate) carries to the next negative; a slide is scanned directly.
+         */
         fun withFilm(edit: Edit, catalog: Catalog, id: String): Edit? {
             val film = catalog.film(id) ?: return null
             var paper = edit.paper
             val paperBw = catalog.paper(paper)?.bw ?: false
             if (film.targetPrint != null && paperBw != film.bw) paper = film.targetPrint
-            return catalog.normalize(edit.copy(film = id, scanFilm = film.positive, paper = paper))
+            // From a slide's direct scan (相纸「无」) to a negative: its 无 is the DI.
+            val di = !film.positive && (edit.digitalIntermediate || edit.scanFilm)
+            return catalog.normalize(edit.copy(film = id, scanFilm = film.positive, paper = paper,
+                noFilm = false, digitalIntermediate = di))
         }
+
+        const val NEW_NONE = "none"
+        const val NEW_REMEMBER = "remember"
+        const val NEW_FIXED = "fixed"
+
+        /**
+         * The stored 新照片 mode. Before 无 a fixed pair was a non-empty
+         * default_film and "remember" the empty one, which cannot be told from
+         * never having chosen: both read as 无, the new default.
+         */
+        fun newPhotoMode(prefs: android.content.SharedPreferences): String =
+            prefs.getString("new_photo_mode", null)
+                ?: if (prefs.getString("default_film", "").orEmpty().isNotEmpty()) NEW_FIXED else NEW_NONE
 
     }
 }
