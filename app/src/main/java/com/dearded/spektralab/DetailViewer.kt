@@ -20,7 +20,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -47,16 +45,11 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
     var label by remember { mutableStateOf(true) }
     SystemBarsHidden(true)
     Box(Modifier.fillMaxSize().zIndex(10f)) {
-        var back by remember { mutableFloatStateOf(0f) }
-        androidx.activity.compose.PredictiveBackHandler { events ->
-            try {
-                events.collect { back = it.progress }
-                onClose()
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                back = 0f
-                throw e
-            }
-        }
+        // UI2.md 3.8: the viewer shrinks to 90 % under the finger (eased progress, shifted
+        // away from the swiped edge, corners rounding) with the editor showing around it;
+        // a cancel springs it back to full screen.
+        val back = rememberBackProgress()
+        PredictiveBack(progress = back, onBack = onClose)
         val density = androidx.compose.ui.platform.LocalDensity.current
         val image = remember(bitmap) { bitmap.asImageBitmap() }
         val h = rememberScrollState()
@@ -69,9 +62,7 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
             h.scrollTo(h.maxValue / 2)
             v.scrollTo(v.maxValue / 2)
         }
-        Box(Modifier.fillMaxSize().graphicsLayer {
-            val k = 1f - 0.1f * back; scaleX = k; scaleY = k; alpha = 1f - 0.3f * back
-        }.background(Color.Black)) {
+        Box(Modifier.fillMaxSize().predictiveBack(back).background(Color.Black)) {
             Box(Modifier.fillMaxSize().horizontalScroll(h).verticalScroll(v)
                 .pointerInput(Unit) { detectTapGestures(onTap = { label = !label }) }) {
                 Image(
