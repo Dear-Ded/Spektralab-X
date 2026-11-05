@@ -331,6 +331,7 @@ fun UserLibrarySection(vm: EditorViewModel) {
                         val uri = FileProvider.getUriForFile(context, context.packageName + SHARE_AUTHORITY, file)
                         val send = Intent(Intent.ACTION_SEND).setType("application/octet-stream")
                             .putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            .apply { clipData = android.content.ClipData.newRawUri("", uri) }
                         context.startActivity(Intent.createChooser(send, "分享风格"))
                     }
                 }) { Text("分享") }

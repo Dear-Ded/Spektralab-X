@@ -16,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,6 +35,10 @@ import kotlin.math.sqrt
  * idle), never a full-size render, so the sheet costs one small session per
  * frame not yet cached. Frames never edited print in black and white, as the
  * roll view shows them. Saved to Pictures/Spektralab-X through MediaSaver.
+ *
+ * It runs as a job in the 正在处理 queue ([job]): the roll goes in as a
+ * [snapshot] (Roll is computed from the frames, never stored), so a sheet a
+ * kill interrupted is laid out again from the same frames at the next start.
  */
 object RollContactSheet {
     private const val COLUMNS = 6
@@ -44,10 +50,15 @@ object RollContactSheet {
     val busy get() = lock.isLocked
 
     /**
-     * Lays out and saves [roll]'s sheet; returns the gallery entry. The long
-     * edge follows [maxPixels] (DeviceProfile's cap; 0 = its canvas ceiling).
+     * Lays out and saves [roll]'s sheet; returns its file name. The long edge
+     * follows [maxPixels] (DeviceProfile's cap; 0 = its canvas ceiling).
+     * [progress] hears each frame drawn; [onCreated] the pending gallery entry
+     * before a byte is written.
      */
-    suspend fun export(context: Context, store: FrameStore, roll: Roll, maxPixels: Long): Uri = lock.withLock {
+    suspend fun export(
+        context: Context, store: FrameStore, roll: Roll, maxPixels: Long,
+        progress: (done: Int, total: Int) -> Unit = { _, _ -> }, onCreated: (Uri) -> Unit = {},
+    ): String = lock.withLock {
         val app = context.applicationContext
         val g = Geometry.fit(roll.frames.size, maxPixels)
         val sheet = withContext(Dispatchers.Default) { Bitmap.createBitmap(g.width, g.height, Bitmap.Config.ARGB_8888) }
@@ -57,11 +68,42 @@ object RollContactSheet {
             roll.frames.forEachIndexed { i, f ->
                 val (thumb, developed) = thumbFor(app, store, f)
                 withContext(Dispatchers.Default) { drawFrame(canvas, g, roll, i, thumb, developed, f.landscape) }
+                progress(i + 1, roll.frames.size)
             }
-            save(app, sheet, roll)
+            save(app, sheet, onCreated)
         } finally {
             sheet.recycle()
         }
+    }
+
+    // --- the queue job ------------------------------------------------------------
+
+    /** [roll] as a 正在处理 job; [ProcessingQueue] runs it through [export]. */
+    fun job(roll: Roll, id: Long, maxPixels: Long) = ProcessingJob(
+        id = id, uri = "", name = roll.title, raw = false, editJson = "{}", wbK = 0.0, wbTint = 0.0,
+        format = ExportFormat.JPEG, size = ExportSize.FULL, workingEdge = 0, maxPixels = maxPixels, outPixels = 0,
+        sheetJson = snapshot(roll).toString(), sheetFrames = roll.frames.size,
+    )
+
+    /** Everything the sheet prints about [roll], and its frames by id in order. */
+    fun snapshot(roll: Roll): JSONObject = JSONObject()
+        .put("id", roll.id).put("film", roll.film).put("name", roll.name).put("process", roll.process.name)
+        .put("iso", roll.iso).put("day", roll.day).put("part", roll.part).put("model", roll.model)
+        .put("manual", roll.manualId ?: "")
+        .put("frames", JSONArray().apply { roll.frames.forEach { put(it.id) } })
+
+    /** IO, FrameStore loaded. The roll [snapshot] wrote, with the frames still on the table; null when none are. */
+    fun restore(store: FrameStore, json: String): Roll? {
+        val o = runCatching { JSONObject(json) }.getOrNull() ?: return null
+        val ids = o.optJSONArray("frames") ?: return null
+        val frames = (0 until ids.length()).mapNotNull { store.byId(ids.optString(it)) }
+        if (frames.isEmpty()) return null
+        return Roll(
+            id = o.optString("id"), film = o.optString("film"), name = o.optString("name"),
+            process = runCatching { FilmProcess.valueOf(o.optString("process")) }.getOrDefault(FilmProcess.NONE),
+            iso = o.optString("iso"), day = o.optLong("day"), part = o.optInt("part", 1), frames = frames,
+            model = o.optString("model"), manualId = o.optString("manual").ifEmpty { null },
+        )
     }
 
     /** The frame through its own film when it has an edit, else the photo as shot (printed in black and white). */
@@ -218,7 +260,7 @@ object RollContactSheet {
 
     // --- saving ----------------------------------------------------------------------
 
-    private suspend fun save(app: Context, sheet: Bitmap, roll: Roll): Uri = withContext(Dispatchers.IO) {
+    private suspend fun save(app: Context, sheet: Bitmap, onCreated: (Uri) -> Unit): String = withContext(Dispatchers.IO) {
         val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date())
         val name = "Spektralab-X_contact_$stamp.jpg"
         val dir = File(app.cacheDir, "contact").apply { mkdirs() }
@@ -226,7 +268,8 @@ object RollContactSheet {
         try {
             part.outputStream().use { if (!sheet.compress(Bitmap.CompressFormat.JPEG, 92, it)) throw EngineException("印样编码失败") }
             MediaSaver.checkJpeg(part, sheet.width, sheet.height)
-            MediaSaver.saveFile(app, part, name, "image/jpeg")
+            MediaSaver.saveFile(app, part, name, "image/jpeg", onCreated)
+            name
         } finally {
             part.delete()
         }
