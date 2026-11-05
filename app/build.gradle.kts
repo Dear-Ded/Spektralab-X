@@ -94,5 +94,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    // Installs src/main/baseline-prof.txt on sideloaded installs (no Play to deliver it); see that file.
+    implementation("androidx.profileinstaller:profileinstaller:1.4.0")
     testImplementation("junit:junit:4.13.2")
 }

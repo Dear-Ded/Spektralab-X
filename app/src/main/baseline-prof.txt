@@ -1,0 +1,71 @@
+# Baseline Profile, written by hand (docs: developer.android.com/topic/performance/baselineprofiles/manually-create-measure).
+# AGP compiles it into the release APK (assets/dexopt/baseline.prof) and profileinstaller
+# hands it to ART on first launch, so these paths run AOT-compiled from the first start
+# instead of interpreted until the cloud profile arrives (sideloaded builds never get one).
+#
+# Not generated in CI: a Macrobenchmark run needs an arm64 device or emulator with
+# Vulkan, and GitHub's x86_64 runners can load neither libspektralab_jni.so (arm64-v8a
+# only) nor a Vulkan driver. Compose, activity and lifecycle ship their own profiles;
+# these lines cover this app's code. Update when a hot path moves to a new class.
+
+# --- startup: Application, engine host, activity, theme, the first composition -----------
+HSPLcom/dearded/spektralab/SpektraLabApp;->**(**)**
+HSPLcom/dearded/spektralab/EngineHost**->**(**)**
+HSPLcom/dearded/spektralab/ExitDiagnostics;->**(**)**
+HSPLcom/dearded/spektralab/ProcMemory;->**(**)**
+HSPLcom/dearded/spektralab/DeviceProfile**->**(**)**
+HSPLcom/dearded/spektralab/EngineThread**->**(**)**
+HSPLcom/dearded/spektralab/EngineAssets**->**(**)**
+HSPLcom/dearded/spektralab/NativeEngine;->**(**)**
+HSPLcom/dearded/spektralab/MainActivity**->**(**)**
+HSPLcom/dearded/spektralab/DisplayColor;->**(**)**
+HSPLcom/dearded/spektralab/ThemeKt**->**(**)**
+HSPLcom/dearded/spektralab/Palette;->**(**)**
+HSPLcom/dearded/spektralab/Motion;->**(**)**
+HSPLcom/dearded/spektralab/LightTableNavKt**->**(**)**
+HSPLcom/dearded/spektralab/CoachKt**->**(**)**
+HSPLcom/dearded/spektralab/ImportSheetKt**->**(**)**
+HSPLcom/dearded/spektralab/Updater**->**(**)**
+HSPLcom/dearded/spektralab/ProcessingQueue**->**(**)**
+HSPLcom/dearded/spektralab/ProcessingJob**->**(**)**
+
+# --- the editor screen and opening a photo -----------------------------------------------
+HSPLcom/dearded/spektralab/EditorScreenKt**->**(**)**
+HSPLcom/dearded/spektralab/EditorViewModel**->**(**)**
+HSPLcom/dearded/spektralab/UiState;->**(**)**
+HSPLcom/dearded/spektralab/Catalog**->**(**)**
+HSPLcom/dearded/spektralab/Edit**->**(**)**
+HSPLcom/dearded/spektralab/Look**->**(**)**
+HSPLcom/dearded/spektralab/SourceLoader**->**(**)**
+HSPLcom/dearded/spektralab/Photo**->**(**)**
+HSPLcom/dearded/spektralab/GainmapReader;->**(**)**
+HSPLcom/dearded/spektralab/ExifCopy**->**(**)**
+HSPLcom/dearded/spektralab/Histogram**->**(**)**
+HSPLcom/dearded/spektralab/EditHistory**->**(**)**
+HSPLcom/dearded/spektralab/ImmersiveKt**->**(**)**
+HSPLcom/dearded/spektralab/TopBarIconsKt**->**(**)**
+
+# --- dragging a slider, a curve, the palette pad, the panel ------------------------------
+HSPLcom/dearded/spektralab/SlidersKt**->**(**)**
+HSPLcom/dearded/spektralab/CurvesKt**->**(**)**
+HSPLcom/dearded/spektralab/CurveSet**->**(**)**
+HSPLcom/dearded/spektralab/PalettePadKt**->**(**)**
+HSPLcom/dearded/spektralab/AdjustPanelKt**->**(**)**
+HSPLcom/dearded/spektralab/EffectsKt**->**(**)**
+HSPLcom/dearded/spektralab/PillKt**->**(**)**
+HSPLcom/dearded/spektralab/CategoryBarKt**->**(**)**
+HSPLcom/dearded/spektralab/HistogramKt**->**(**)**
+
+# --- switching to the light table and the rolls ------------------------------------------
+HSPLcom/dearded/spektralab/LightTableScreenKt**->**(**)**
+HSPLcom/dearded/spektralab/LightTableViewModel**->**(**)**
+HSPLcom/dearded/spektralab/LightTableThumbsKt**->**(**)**
+HSPLcom/dearded/spektralab/Thumbnails**->**(**)**
+HSPLcom/dearded/spektralab/FilmThumbs**->**(**)**
+HSPLcom/dearded/spektralab/FrameStore**->**(**)**
+HSPLcom/dearded/spektralab/Frame**->**(**)**
+HSPLcom/dearded/spektralab/RollsKt**->**(**)**
+HSPLcom/dearded/spektralab/Roll**->**(**)**
+HSPLcom/dearded/spektralab/RollViewKt**->**(**)**
+HSPLcom/dearded/spektralab/LightTableLoupeKt**->**(**)**
+HSPLcom/dearded/spektralab/StylesKt**->**(**)**
