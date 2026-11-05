@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -21,7 +22,9 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.ViewModelProvider
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
@@ -72,11 +75,7 @@ class Screenshots {
         tap("风格")
         shot("11_panel_folded")
         tap("风格")
-        compose.onNodeWithContentDescription("面板高度").performTouchInput {
-            down(center)
-            repeat(12) { moveBy(Offset(0f, -100f)) }
-            up()
-        }
+        tallPanel()
         shot("12_panel_tall")
     }
 
@@ -134,6 +133,125 @@ class Screenshots {
         shot("72_table_loupe_controls")
     }
 
+    // --- batch 2: 无, sheets, viewers, rolls, launch ----------------------------------
+
+    @Test fun editorNoFilm() {
+        val ui = Fake.ui()
+        editor(ui.copy(edit = ui.edit.withoutStyle()))
+        shot("13_style_none")
+        tap("冲洗")
+        shot("24_develop_none")
+    }
+
+    @Test fun editorMasks() {
+        val ui = Fake.ui()
+        editor(ui.copy(edit = ui.edit.copy(look = ui.edit.look.copy(masks = listOf(EditMask.make(MaskKind.LINEAR))))))
+        tap("调整")
+        tallPanel()
+        tap("展开（1 个）")
+        // performScrollTo animates the scroll, which never ends on the paused clock; a swipe
+        // steps the clock with its own events. Up the tall panel, so the mask section shows.
+        compose.onRoot().performTouchInput {
+            swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.3f), durationMillis = 400)
+        }
+        compose.onRoot().performTouchInput {
+            swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.3f), durationMillis = 400)
+        }
+        shot("36_adjust_masks")
+    }
+
+    @Test fun changesSheet() {
+        val ui = Fake.ui()
+        val e = Edit.withBorder(ui.edit, Borders.byId("gallery")!!, ui.source!!.width, ui.source!!.height)
+            .copy(autoExposure = false, exposureEv = 0.7, look = ui.edit.look.copy(contrast = 12.0, saturation = -8.0))
+        val vm = editorVm(ui.copy(edit = e))
+        content { EditorScreen(vm); ChangesSheet(vm.ui.value, vm, onGo = {}, onDismiss = {}) }
+        screenShot("61_changes")
+    }
+
+    @Test fun pasteSheet() {
+        val ui = Fake.ui()
+        val vm = editorVm(ui)
+        content {
+            EditorScreen(vm)
+            PasteSheet(CopiedLook(ui.edit, 0.0, 0.0, "DSC_4121.JPG"), count = 1,
+                initial = LookGroup.entries.toSet() - LookGroup.BORDER, onDismiss = {}, onPaste = {})
+        }
+        screenShot("62_paste")
+    }
+
+    @Test fun queueSheet() {
+        val vm = editorVm(Fake.ui())
+        fun job(id: Long, name: String, state: JobState, progress: Float = 0f, phase: String = "", eta: Int = -1) =
+            ProcessingJob(id, "file:///shots/$name", name, raw = name.endsWith("DNG"), editJson = "{}", wbK = 0.0, wbTint = 0.0,
+                format = ExportFormat.JPEG, size = ExportSize.FULL, workingEdge = 4096, maxPixels = 0, outPixels = 24_000_000,
+                filmLabel = "Kodak Portra 400", state = state, progress = progress, phase = phase, etaSeconds = eta,
+                finishedAt = if (state == JobState.DONE || state == JobState.FAILED) 1_760_000_000_000L - id else 0)
+        val jobs = listOf(
+            job(1, "L1000412.DNG", JobState.RUNNING, 0.42f, "冲洗", 38),
+            job(2, "DSC_4121.JPG", JobState.QUEUED),
+            job(3, "DSC_4119.JPG", JobState.DONE, 1f),
+            job(4, "DSC_4117.JPG", JobState.FAILED).copy(message = "内存不足：请调小工作尺寸后重试"),
+        )
+        content { EditorScreen(vm); QueueSheet(jobs, {}, {}, {}, {}) }
+        screenShot("63_queue")
+    }
+
+    @Test fun importSheet() {
+        val vm = editorVm(Fake.ui())
+        val cube = File(compose.activity.cacheDir, "暖调胶片.cube")
+        cube.writeText(buildString {
+            append("TITLE \"暖调胶片\"\nLUT_3D_SIZE 2\n")
+            for (b in 0..1) for (g in 0..1) for (r in 0..1) append("${r * 0.95 + 0.03} ${g * 0.9 + 0.02} ${b * 0.8}\n")
+        })
+        ImportRequests.add(listOf(android.net.Uri.fromFile(cube)))
+        content { EditorScreen(vm); ImportHost(vm) }
+        // The file is read on Dispatchers.IO: real threads, so wait in real time.
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(120) { compose.mainClock.advanceTimeBy(50); main.idle(); Thread.sleep(25) }
+        screenShot("64_import")
+    }
+
+    @Test fun updateSheet() {
+        val vm = editorVm(Fake.ui().copy(source = null, image = null))
+        Updater.state.value = Updater.State.Available(Updater.Release(
+            version = "0.1.20-alpha",
+            notes = "- 全新编辑器版式：每一步一个标题、一行说明\n- 胶片「无」：打开就是原图\n- 局部蒙版：线性、径向和画笔\n- 观片台按卷整理",
+            page = Updater.RELEASES_PAGE, apkName = "Spektralab-X-0.1.20-alpha-arm64-v8a.apk",
+            apkUrl = "https://example.invalid/app.apk", apkSize = 48L shl 20, sumsUrl = null))
+        Updater.show()
+        content { EditorScreen(vm) }
+        screenShot("65_update")
+        Updater.later()
+        Updater.state.value = Updater.State.Idle
+    }
+
+    @Test fun detailViewer() {
+        content { DetailViewer(Fake.detail, onClose = {}) }
+        shot("66_detail_1to1")
+    }
+
+    @Test fun rolls() {
+        val table = tableVm()
+        val rolls = rollsOf(Fake.frames, Fake.catalog)
+        content { RollList(table, rolls, onOpen = {}, onGrid = {}, onBack = {}) }
+        shot("73_table_rolls")
+    }
+
+    @Test fun rollStrip() {
+        val table = tableVm()
+        val roll = rollsOf(Fake.frames, Fake.catalog).maxBy { it.frames.size }
+        content { RollView(table, roll, onBack = {}, onOpen = { _, _ -> }, onExport = {}) }
+        shot("74_table_roll_strip")
+    }
+
+    @Test fun launchIntro() {
+        content { LaunchIntro(ready = false, onDone = {}) }
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(3) { compose.mainClock.advanceTimeBy(150); main.idleFor(java.time.Duration.ofMillis(150)) }
+        compose.onRoot().captureRoboImage("$OUT/00_launch_intro.png")
+    }
+
     // --- helpers ------------------------------------------------------------------
 
     private fun content(body: @Composable () -> Unit) = compose.setContent { SpektraTheme { body() } }
@@ -165,6 +283,16 @@ class Screenshots {
         return ViewModelProvider(compose.activity)[LightTableViewModel::class.java]
     }
 
+    /** Drags the panel's handle up to its tall height. */
+    private fun tallPanel() {
+        compose.onNodeWithContentDescription("面板高度").performTouchInput {
+            down(center)
+            repeat(12) { moveBy(Offset(0f, -100f)) }
+            up()
+        }
+        compose.mainClock.advanceTimeBy(1200)
+    }
+
     /** Clicks the first clickable node whose text is exactly [text], wherever it is scrolled. */
     private fun tap(text: String) {
         compose.onAllNodes(hasText(text) and hasClickAction()).onFirst()
@@ -181,6 +309,18 @@ class Screenshots {
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("$OUT/$name.png")
+    }
+
+    /** Like [shot], but the whole screen: a bottom sheet or dialog is a window of its own. */
+    @OptIn(ExperimentalRoborazziApi::class)
+    private fun screenShot(name: String) {
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(8) {
+            compose.mainClock.advanceTimeBy(200)
+            main.idleFor(java.time.Duration.ofMillis(200))
+        }
+        compose.waitForIdle()
+        captureScreenRoboImage("$OUT/$name.png")
     }
 
     private companion object {
@@ -209,6 +349,8 @@ private object Fake {
     }
 
     private val lake by lazy { load("compare_lake.jpg") }
+    /** The 1:1 viewer's "full render": the after half, unscaled. */
+    val detail by lazy { after(lake) }
     /** films_dunes.jpg: six 629 x 420 tiles, three a row. */
     private val dunes by lazy {
         val b = load("films_dunes.jpg")

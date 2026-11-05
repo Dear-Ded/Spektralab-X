@@ -41,20 +41,32 @@ tools/aoidc.sh get /data/work/<会话名>/repo/app/build/outputs/roborazzi tools
 
 | 文件 | 内容 |
 |---|---|
+| `00_launch_intro` | 开屏动画（停在终态的一帧） |
 | `01_editor_empty` | 空白页（没有照片） |
 | `10_style` | 风格（面板半屏，默认） |
 | `11_panel_folded` | 面板收起到工具栏 |
 | `12_panel_tall` | 面板展开（拖动把手） |
+| `13_style_none` | 风格，胶片「无」 |
 | `20`–`23_develop_*` | 冲洗四步：胶卷、相纸、曝光与放大、胶片效果 |
+| `24_develop_none` | 冲洗，胶片「无」 |
 | `30`–`35_adjust_*` | 调整六段：光线、色彩、分色、曲线、调色盘、质感 |
+| `36_adjust_masks` | 局部蒙版（一个线性渐变，展开） |
 | `40_border` | 边框（画廊白边） |
 | `50_crop` | 构图 |
 | `60_settings` | 设置页 |
+| `61_changes` | 修改记录 |
+| `62_paste` | 粘贴调整 |
+| `63_queue` | 正在处理（进行中、排队、完成、失败各一） |
+| `64_import` | 导入风格（一个 .cube） |
+| `65_update` | 更新提示（有新版本） |
+| `66_detail_1to1` | 1:1 查看 |
 | `70_table_grid` | 观片台网格（14 张，有选中、淘汰、星级、已编辑标记） |
 | `71_table_loupe` | 单张查看（沉浸） |
 | `72_table_loupe_controls` | 单张查看，点一下出现上下控件 |
+| `73_table_rolls` | 观片台按卷 |
+| `74_table_roll_strip` | 一卷的片条 |
 
-加一页：在 `Screenshots.kt` 里写一个 `@Test`，用 `editor(ui)` 或 `content { … }` 摆好界面，`tap("文字")` 点到要的状态，`shot("名字")` 截图。
+加一页：在 `Screenshots.kt` 里写一个 `@Test`，用 `editor(ui)` 或 `content { … }` 摆好界面，`tap("文字")` 点到要的状态，`shot("名字")` 截图；底部面板、对话框这类自成窗口的用 `screenShot("名字")`（整屏）。
 
 ## 怎么绕开引擎
 
@@ -102,5 +114,5 @@ tools/aoidc.sh get /data/work/<会话名>/repo/app/build/outputs/roborazzi tools
   `testReleaseUnitTest` 看不到这个测试；`ui-test-manifest` 只进 debug APK。
 - **动画**：主时钟手动推进（`autoAdvance = false`），截图前推进 1.5 秒让弹簧停稳；
   光晕这类无限动画不会卡住等待。截出来的是动画终态，看不到过渡本身。
-- **截不到的**：GPU 渲染出的真实冲印效果（照片是现成的样图）、系统栏、DropdownMenu 之类的弹出窗口
-  （需要 `captureScreenRoboImage`，以后要时再加）。
+- **截不到的**：GPU 渲染出的真实冲印效果（照片是现成的样图）、系统栏。
+- **不要用 `performScrollTo`**：它是动画滚动，时钟暂停时永远等不完，测试会卡死；用 `swipe` 代替（见 `editorMasks`）。
