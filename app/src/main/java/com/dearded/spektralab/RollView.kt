@@ -1,6 +1,5 @@
 package com.dearded.spektralab
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -103,7 +102,7 @@ fun RollView(
     onExport: (List<Frame>) -> Unit,
     onContactSheet: () -> Unit = {},
 ) {
-    BackHandler(onBack = onBack)
+    // Back is LightTableNav's SeekBack: it scrubs this page back to the roll list (UI2.md 3.8).
     var contact by rememberSaveable { mutableStateOf(false) }
     // The frame at the strip's centre; the contact sheet and the actions use it too.
     var current by rememberSaveable(roll.id) { mutableStateOf(0) }

@@ -1,6 +1,5 @@
 package com.dearded.spektralab
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
@@ -62,7 +61,7 @@ import kotlin.math.abs
  */
 @Composable
 fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onClose: () -> Unit) {
-    BackHandler(onBack = onClose)
+    // Back is LightTableNav's SeekBack: it scrubs the compare closed (UI2.md 3.8).
     val view = LocalView.current
     val base by rememberSidecarEdit(table.store, frame)
     val start = base ?: Edit()

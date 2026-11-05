@@ -1,6 +1,5 @@
 package com.dearded.spektralab
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -189,7 +188,7 @@ internal val EdgeType = TextStyle(fontSize = 11.sp, lineHeight = 14.sp, fontWeig
  */
 @Composable
 fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Unit, onGrid: () -> Unit, onBack: () -> Unit) {
-    BackHandler(onBack = onBack)
+    // Back is LightTableNav's SeekBack: it scrubs the table back to the editor (UI2.md 3.8).
     val add = rememberAddPhotos(table)
     val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + HeadHeight
     val bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + FloatingBarSpace

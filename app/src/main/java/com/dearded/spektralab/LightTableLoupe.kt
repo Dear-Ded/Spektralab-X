@@ -96,7 +96,9 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
     val canHide = immersiveAllowed()
     val showChrome = chrome || !canHide
     SystemBarsHidden(!showChrome)
-    BackHandler { if (showChrome && canHide) chrome = false else onClose() }
+    // Back first hides the controls; closing is LightTableNav's SeekBack, which scrubs the
+    // frame back into its grid cell under the finger (UI2.md 3.8).
+    BackHandler(enabled = showChrome && canHide) { chrome = false }
 
     val current = frames[pager.currentPage.coerceIn(0, frames.size - 1)]
 
@@ -121,7 +123,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 LoupePage(
-                    frame = frames[page], px = px,
+                    frame = frames[page], px = px, shared = page == pager.currentPage,
                     onTap = { if (canHide) chrome = !chrome },
                     onPick = { mark(frames[page], 1) },
                     onReject = { mark(frames[page], -1) },
@@ -189,7 +191,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
 
 /** One frame, fitted, following a vertical drag until it passes the pick / reject threshold. */
 @Composable
-private fun LoupePage(frame: Frame, px: Int, onTap: () -> Unit, onPick: () -> Unit, onReject: () -> Unit) {
+private fun LoupePage(frame: Frame, px: Int, shared: Boolean, onTap: () -> Unit, onPick: () -> Unit, onReject: () -> Unit) {
     val thumb by rememberThumbnail(frame, px)
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(0f) }
@@ -229,7 +231,9 @@ private fun LoupePage(frame: Frame, px: Int, onTap: () -> Unit, onPick: () -> Un
             val image = remember(b) { b.asImageBitmap() }
             Image(
                 image, contentDescription = null, contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize().graphicsLayer {
+                // UI2.md 3.7: the page on screen is the grid cell grown large (Transitions.kt);
+                // before the drag offset, so a pick or reject swipe moves the image, not the match.
+                modifier = Modifier.fillMaxSize().sharedFrame(frame.id, enabled = shared).graphicsLayer {
                     translationY = offset.value
                     // The frame fades a little as it nears a decision, so the threshold is felt.
                     alpha = 1f - (abs(offset.value) / (threshold * 4)).coerceIn(0f, 0.4f)
