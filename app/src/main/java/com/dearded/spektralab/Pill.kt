@@ -104,29 +104,17 @@ fun SelectPill(
     /** Changed from its default: a solid dot at the top-right corner (ui2_derivatives.md). */
     edited: Boolean = false,
 ) {
+    // Fill, corner and press come from ui-motion's one draw-phase layer (Interactions.kt).
     val press = remember { MutableInteractionSource() }
-    val pressed by press.collectIsPressedAsState()
-    val fill by animateColorAsState(
-        if (selected) Palette.Accent else Palette.Panel, Motion.defaultEffects(), label = "pill-fill")
-    val ink by animateColorAsState(
-        when {
-            selected -> Palette.OnAccent
-            enabled -> Palette.OnSurface
-            else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f)
-        },
-        Motion.defaultEffects(), label = "pill-ink",
-    )
-    val corner by animateDpAsState(if (selected) 20.dp else 12.dp, Motion.fastSpatial(), label = "pill-corner")
-    val scale by animateFloatAsState(if (pressed) 0.95f else 1f, Motion.fastSpatial(), label = "pill-press")
-    val shape = RoundedCornerShape(corner)
+    val style = rememberSelectionStyle(selected, enabled)
+    val ink = style.ink
     Box(
         Modifier
             .minimumInteractiveComponentSize()
             .height(40.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled || selected) 1f else 0.5f }
-            .clip(shape)
-            .background(fill)
-            .border(1.dp, if (selected) fill else Palette.OutlineSoft, shape)
+            .graphicsLayer { alpha = if (enabled || selected) 1f else 0.5f }
+            .morphingPill(style, press)
+            .then(if (selected) Modifier else Modifier.border(1.dp, Palette.OutlineSoft, RoundedCornerShape(12.dp)))
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
                 interactionSource = press, indication = ripple(), onClick = onClick,
@@ -357,15 +345,13 @@ internal fun ThumbCard(
 ) {
     val chosen = selected
     val press = remember { MutableInteractionSource() }
-    val pressed by press.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "card-press")
     val ring by animateColorAsState(if (selected) Palette.Accent else Color.Transparent,
         Motion.defaultEffects(), label = "card-ring")
     val outer = RoundedCornerShape(16.dp)
     val inner = RoundedCornerShape(12.dp)
     Column(
         Modifier.width(size + 8.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
+            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
             .clip(outer)
             .combinedClickable(
                 enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton,
@@ -436,15 +422,13 @@ internal fun TextCard(
 ) {
     val chosen = selected
     val press = remember { MutableInteractionSource() }
-    val pressed by press.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "tcard-press")
     val fill by animateColorAsState(if (selected) Palette.Accent else Palette.Panel, Motion.defaultEffects(), label = "tcard-fill")
     val ink by animateColorAsState(if (selected) Palette.OnAccent else Palette.OnSurface, Motion.defaultEffects(), label = "tcard-ink")
     val corner by animateDpAsState(if (selected) 20.dp else 12.dp, Motion.fastSpatial(), label = "tcard-corner")
     val shape = RoundedCornerShape(corner)
     Box(
         Modifier.width(width).heightIn(min = 80.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
+            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
             .clip(shape).background(fill)
             .border(1.dp, if (selected) fill else Palette.OutlineSoft, shape)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.RadioButton, onClick = onClick)
@@ -505,12 +489,10 @@ private fun Check(color: Color) {
 @Composable
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
-    val pressed by press.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "tonal-press")
     val shape = RoundedCornerShape(24.dp)
     Box(
         modifier.heightIn(min = 48.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
+            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
             .clip(shape).background(Palette.PanelHigh)
             .border(1.dp, Palette.OutlineSoft, shape)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)

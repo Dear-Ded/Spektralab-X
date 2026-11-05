@@ -704,7 +704,7 @@ private fun Controls(
                                     "品红" to e.mShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
                                     "白平衡" to ui.source?.takeIf { it.wbK > 0 }?.let { String.format(java.util.Locale.ROOT, "%.0f K", it.wbK) },
                                 ))
-                                if (moreExposure) {
+                                Expandable(moreExposure, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
                                     LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
                                         disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有放大机滤镜。" else "",
                                         ends = "偏黄" to "偏蓝") {
