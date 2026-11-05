@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.SpektraLab" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">#FF0B0B0C</item>
+        <item name="android:windowBackground">#FF0E0E10</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- The launcher activity's starting theme (core-splashscreen): the film strip on the
+         editor's ground, then Theme.SpektraLab. Below API 31 the icon is drawn still. -->
+    <style name="Theme.SpektraLab.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF0E0E10</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_strip</item>
+        <item name="postSplashScreenTheme">@style/Theme.SpektraLab</item>
     </style>
 </resources>

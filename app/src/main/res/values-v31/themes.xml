@@ -2,9 +2,18 @@
 <resources>
     <!-- Android 12+ system splash on the same ground the in-app glow starts from. -->
     <style name="Theme.SpektraLab" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">#FF0B0B0C</item>
+        <item name="android:windowBackground">#FF0E0E10</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowSplashScreenBackground">#FF0B0B0C</item>
+        <item name="android:windowSplashScreenBackground">#FF0E0E10</item>
+    </style>
+
+    <!-- The strip's spectrum wipes on over 450 ms (ignored from API 33, where the
+         drawable's own duration rules); LaunchIntro finishes whatever is left. -->
+    <style name="Theme.SpektraLab.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF0E0E10</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_strip</item>
+        <item name="windowSplashScreenAnimationDuration">450</item>
+        <item name="postSplashScreenTheme">@style/Theme.SpektraLab</item>
     </style>
 </resources>

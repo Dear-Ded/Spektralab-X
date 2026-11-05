@@ -8,6 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -22,7 +26,22 @@ class MainActivity : ComponentActivity() {
     private val viewModel: EditorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // ui-motion_splash.md 6: the system splash, then LaunchIntro from the same strip.
+        // No keep-on-screen condition: the intro, not the splash, waits for the engine.
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val intro = savedInstanceState == null && launchIntroWanted(this, intent)
+        splash.setOnExitAnimationListener { p ->
+            if (intro) {
+                val r = android.graphics.Rect()
+                if (p.iconView.getGlobalVisibleRect(r)) LaunchIcon.rect = r
+                // The AVD's wipe runs 450 ms from iconAnimationStartMillis (0 below API 31: still icon).
+                val start = p.iconAnimationStartMillis
+                LaunchIcon.wipe = if (start <= 0L) 1f
+                    else ((System.currentTimeMillis() - start) / 450f).coerceIn(0f, 1f)
+            }
+            p.view.animate().alpha(0f).setDuration(120).withEndAction { p.remove() }.start()
+        }
         // The UI is always dark: without this, a phone in light mode draws dark
         // status-bar icons on the dark top bar, where they vanish.
         enableEdgeToEdge(
@@ -36,7 +55,15 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
             // Always dark: judging a print against a white UI skews it.
-            SpektraTheme { CoachHost { AppScreens(viewModel) }; ImportHost(viewModel) }
+            SpektraTheme {
+                CoachHost { AppScreens(viewModel) }; ImportHost(viewModel)
+                // Over everything, until the engine is ready (600 ms to 1.6 s) or a tap skips it.
+                var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
+                if (showIntro) {
+                    val ui by viewModel.ui.collectAsState()
+                    LaunchIntro(ready = ui.ready, onDone = { showIntro = false })
+                }
+            }
         }
     }
 

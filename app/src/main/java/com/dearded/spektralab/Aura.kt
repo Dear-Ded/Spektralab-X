@@ -70,14 +70,26 @@ private val Blobs = listOf(
 )
 
 /** True unless the user turned animations off (developer options or accessibility). */
-private fun motionAllowed() = ValueAnimator.areAnimatorsEnabled()
+internal fun motionAllowed() = ValueAnimator.areAnimatorsEnabled()
+
+/**
+ * Where every Aura is in its loop: process uptime, not a per-call animation
+ * from zero, so the launch intro's glow and the editor's empty-state glow are
+ * the same frame when one replaces the other (ui-motion_splash.md 5).
+ */
+private fun auraPhase(): Float = (android.os.SystemClock.uptimeMillis() % PERIOD_MS) / PERIOD_MS.toFloat()
 
 /**
  * The glow, filling [modifier]'s bounds. [strength] scales its opacity:
  * 1 for the launch screen, about 0.5 under text on a waiting overlay.
  */
 @Composable
-fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Background) {
+fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Background) =
+    Aura(modifier, { strength }, ground)
+
+/** [Aura] whose [strength] is read in the draw phase, so an animated strength recomposes nothing. */
+@Composable
+fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Background) {
     val moving = remember { motionAllowed() }
     // One clock for everything; every motion is a whole number of cycles per
     // period, so the loop has no seam.
@@ -88,7 +100,8 @@ fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Backg
         )
     } else null
     Canvas(modifier) {
-        val t = clock?.value ?: 0f
+        // Reading the clock asks for the next frame; the phase itself is shared.
+        val t = if (clock != null) { clock.value; auraPhase() } else 0f
         if (ground.alpha > 0f) drawRect(ground)
         val w = size.width
         val h = size.height
@@ -102,7 +115,7 @@ fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Backg
             // Breathe: the radius swells and settles twice a period.
             val r = span * b.r * (0.92f + 0.08f * sin(2f * a + b.phase))
             val colour = AuraColors.at(b.hue + t)
-            val alpha = 0.55f * strength
+            val alpha = 0.55f * strength()
             drawCircle(
                 brush = Brush.radialGradient(
                     0f to colour.copy(alpha = alpha),

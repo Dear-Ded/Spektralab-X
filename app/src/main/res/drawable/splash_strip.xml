@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The splash icon below API 31: the launcher strip, still (no AVD there). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF24242A" android:pathData="M25,36h58a3,3 0,0 1,3 3v30a3,3 0,0 1,-3 3h-58a3,3 0,0 1,-3 -3v-30a3,3 0,0 1,3 -3z" />
+    <path android:pathData="M22,43h64v22h-64z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear"
+                android:startX="22" android:startY="54" android:endX="86" android:endY="54">
+                <item android:offset="0" android:color="#FF7B3FE4" />
+                <item android:offset="0.2" android:color="#FF3A6CF0" />
+                <item android:offset="0.38" android:color="#FF2FC2B0" />
+                <item android:offset="0.55" android:color="#FFF2D24A" />
+                <item android:offset="0.75" android:color="#FFF08A2E" />
+                <item android:offset="1" android:color="#FFE0383A" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FF121216" android:pathData="M25.00,37.7h5.2v3.6h-5.2zM35.56,37.7h5.2v3.6h-5.2zM46.12,37.7h5.2v3.6h-5.2zM56.68,37.7h5.2v3.6h-5.2zM67.24,37.7h5.2v3.6h-5.2zM77.80,37.7h5.2v3.6h-5.2zM25.00,66.7h5.2v3.6h-5.2zM35.56,66.7h5.2v3.6h-5.2zM46.12,66.7h5.2v3.6h-5.2zM56.68,66.7h5.2v3.6h-5.2zM67.24,66.7h5.2v3.6h-5.2zM77.80,66.7h5.2v3.6h-5.2z" />
+</vector>

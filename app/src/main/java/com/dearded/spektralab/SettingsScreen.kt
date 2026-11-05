@@ -138,6 +138,16 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
                 }
                 add { NewPhotoStocks(ui, vm) }
+                // ui-motion_splash.md 6: LaunchIntro reads this at launch; off by itself when animations are off.
+                add {
+                    var intro by remember { mutableStateOf(prefs.getBoolean(LAUNCH_INTRO, true)) }
+                    val motion = remember { motionAllowed() }
+                    SettingRow(
+                        "启动动画", intro && motion, motion,
+                        note = "从桌面打开时，胶片条和光晕先出现，引擎准备好就进入；点一下可以跳过。",
+                        disabledReason = "系统已关闭动画，启动动画不会播放。",
+                    ) { intro = it; prefs.edit().putBoolean(LAUNCH_INTRO, it).apply() }
+                }
                 if (coach != null) add {
                     ActionRow("重新查看引导", "回到编辑器后，五个入口的提示会再出现一次。") { coach.replay(); onClose() }
                 }
