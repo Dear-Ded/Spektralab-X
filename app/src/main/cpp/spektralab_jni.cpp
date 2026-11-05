@@ -34,6 +34,7 @@
 #include "layer2.hpp"
 #include "lut3d.hpp"
 #include "output_transform.hpp"
+#include "passthrough.hpp"
 #include "input_transform.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
@@ -95,6 +96,9 @@ struct Session {
     // never told gets the sRGB display path, never ProPhoto codes in an sRGB
     // bitmap. `prophoto` is false only for a session opened in another space.
     bool prophoto = true;
+    // 无 (passthrough.hpp): which render the params ask for, kept from the open
+    // and every accepted set_params, since x_no_film never reaches the engine.
+    spk::android::ViewFlags view;
     spk::android::OutputTransform out;
     const spk::android::OutputTransform* transform() {
         if (!out.ready()) {
@@ -284,8 +288,11 @@ void fit(uint32_t w, uint32_t h, uint32_t max_edge, uint64_t max_pixels, uint32_
 }
 
 Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, uint32_t h,
-                     const std::string& params) {
+                     std::string params) {
     if (!engine_usable(engine)) { fail("open image: the engine was replaced after a GPU fault"); return nullptr; }
+    spk::android::ViewFlags view;
+    std::string bad;
+    if (!spk::android::take_app_keys(params, view, bad)) { fail("open image: " + bad); return nullptr; }
     const spk_image input{rgb.data(), w, h, 3};
     char* reply = nullptr;
     spk_session* s = spk_open(engine, &input, params.c_str(), &reply);
@@ -298,6 +305,7 @@ Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, ui
     session->width = w;
     session->height = h;
     session->prophoto = renders_prophoto(params);
+    session->view = view;
     return session;
 }
 
@@ -424,6 +432,17 @@ void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t
 
 bool render(Session* s, const std::string& tier, spk_result& out) {
     std::memset(&out, 0, sizeof out);
+    if (s->view.no_film || s->view.di()) {
+        // 无: the decoded photo, or a negative's Digital Intermediate through
+        // its view table, from upstream's view path (passthrough.hpp).
+        std::string error;
+        if (!spk::android::render_view(s->session, tier, s->view.no_film, out, error)) {
+            spk_result_free(&out);
+            fail("render " + tier + ": " + error);
+            return false;
+        }
+        return true;
+    }
     // spk_reprint reuses the cached negative when the last edit was print-side
     // and develops a new one otherwise, so it is right after every edit.
     const spk_status status = spk_reprint(s->session, tier.c_str(), &out);
@@ -933,12 +952,21 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
     if (!s || s->small_rgb.empty()) { fail("no preview source"); return nullptr; }
     try {
         const spk_image input{s->small_rgb.data(), s->small_w, s->small_h, 3};
-        const std::string params = str(env, params_j);
+        std::string params = str(env, params_j);
+        spk::android::ViewFlags view;
+        std::string bad;
+        if (!spk::android::take_app_keys(params, view, bad)) { fail("film preview: " + bad); return nullptr; }
         std::unique_ptr<spk_session, decltype(&spk_session_release)> card(
             spk_open(s->engine, &input, params.c_str(), nullptr), &spk_session_release);
         if (!card) { fail(engine_error("film preview")); return nullptr; }
         ResultGuard result;
-        if (spk_render(card.get(), "full", &result.r) != SPK_OK || !result.r.rgba16) {
+        if (view.no_film || view.di()) {
+            // A card on 相纸「无」shows the intermediate as the print does.
+            if (!spk::android::render_view(card.get(), "full", view.no_film, result.r, bad)) {
+                fail("film preview render: " + bad);
+                return nullptr;
+            }
+        } else if (spk_render(card.get(), "full", &result.r) != SPK_OK || !result.r.rgba16) {
             fail(engine_error("film preview render"));
             return nullptr;
         }
@@ -975,11 +1003,16 @@ JNI_FN(jstring, setParams)(JNIEnv* env, jobject, jlong handle, jstring delta_j) 
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
     try {
-        const std::string delta = str(env, delta_j);
+        std::string delta = str(env, delta_j);
+        // Kept only once the engine has taken the rest of the delta.
+        spk::android::ViewFlags view = s->view;
+        std::string bad;
+        if (!spk::android::take_app_keys(delta, view, bad)) { fail("set params: " + bad); return nullptr; }
         char* reply = nullptr;
         const spk_status st = spk_set_params(s->session, delta.c_str(), &reply);
         std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
         if (st != SPK_OK) { fail(engine_error("set params")); return nullptr; }
+        s->view = view;
         return jstr(env, reply ? reply : "{}");
     } catch (const std::exception& e) {
         fail(std::string("set params: ") + e.what());
@@ -997,7 +1030,7 @@ JNI_FN(jstring, getParams)(JNIEnv* env, jobject, jlong handle) {
         const spk_status st = spk_get_params(s->session, &reply);
         std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
         if (st != SPK_OK) { fail(engine_error("get params")); return nullptr; }
-        return jstr(env, reply ? reply : "{}");
+        return jstr(env, spk::android::with_app_keys(reply ? reply : "{}", s->view));
     } catch (const std::exception& e) {
         fail(std::string("get params: ") + e.what());
     } catch (...) {

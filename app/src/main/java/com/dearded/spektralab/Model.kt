@@ -21,7 +21,12 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
         val mono = film(e.film)?.bw == true && paper(e.paper)?.bw == true
         // The edge prints the film's own name for its gauge (UI.md E.1).
         val edge = Edit.edgeTextFor(film(e.film), e.edgeFormat)
-        return if (mono == e.monoPrint && edge == e.edgeText) e else e.copy(monoPrint = mono, edgeText = edge)
+        // A slide has no negative to make an intermediate of: its 相纸「无」is scan_film.
+        // A B&W negative's intermediate comes out one flat grey on this engine
+        // (docs/PARITY.md 8), so it has no 相纸「无」either.
+        val di = e.digitalIntermediate && film(e.film)?.let { !it.positive && !it.bw } != false
+        return if (mono == e.monoPrint && edge == e.edgeText && di == e.digitalIntermediate) e
+               else e.copy(monoPrint = mono, edgeText = edge, digitalIntermediate = di)
     }
 
     companion object {
@@ -66,6 +71,20 @@ data class Edit(
     // Supra Endura, not the reference's Portra Endura.
     val paper: String = "kodak_supra_endura",
     val scanFilm: Boolean = false,
+    /**
+     * 胶片「无」(upstream's Sidecar.noFilm, "Don't Apply Film Simulation"): the
+     * decoded photo goes straight to Layer 2 and the output, through the
+     * engine's own no_film view (passthrough.hpp). [film] and [paper] stay
+     * as they were, so picking a film brings them back. App-side: sent as
+     * `x_no_film`, which the JNI takes off before the engine sees the params.
+     */
+    val noFilm: Boolean = false,
+    /**
+     * 相纸「无」on a negative: the Digital Intermediate (RFC-028), the negative
+     * with its mask removed and reversed on its own neutral curve, shown
+     * through upstream's DI view table. A slide's 相纸「无」is [scanFilm].
+     */
+    val digitalIntermediate: Boolean = false,
     val autoExposure: Boolean = true,
     /** The meter's intent. Upstream sends "balanced" (a log average) for every new frame;
      *  left unsent the engine meters "center_weighted", an arithmetic mean a bright sky drags up. */
@@ -154,6 +173,19 @@ data class Edit(
     /** A date between frames needs a 135 film edge to print on (upstream's `between`, the wire's `rebate`). */
     val rebateDateFits: Boolean get() = filmEdge && (edgeFormat == "135" || edgeFormat == "135_half")
 
+    /** 胶片效果「无」: no grain, halation (and with it the scatter), glare or scanner sharpening. */
+    val effectsNone: Boolean get() = !grainActive && !halationActive && !glareActive && unsharpAmount == 0.0
+
+    fun withoutEffects() = copy(grainActive = false, halationActive = false, glareActive = false, unsharpAmount = 0.0)
+
+    /** 相纸「无」: a slide scanned directly, a negative as its Digital Intermediate. */
+    fun paperNone(positive: Boolean) = if (positive) scanFilm else digitalIntermediate && !scanFilm
+
+    /** 风格「无」: no film, no film effects, no Layer 2. Geometry, border and paper choice stay. */
+    val styleNone: Boolean get() = noFilm && effectsNone && look.neutral
+
+    fun withoutStyle() = withoutEffects().copy(noFilm = true, look = Look.NEUTRAL)
+
     /** A quarter turn by [by]: the same crop region, so its output aspect flips on odd turns. */
     fun turned(by: Int) = copy(
         quarterTurns = (quarterTurns + by) % 4,
@@ -188,6 +220,16 @@ data class Edit(
             o.put("c_filter_neutral", 0.0).put("m_filter_neutral", 0.0).put("y_filter_neutral", 68.0)
         }
 
+        /**
+         * A newly opened photo with nothing applied: every stage on 无, the photo
+         * as it is. [Edit]'s own defaults stay the with-film values, so older
+         * saves, presets and queued jobs that leave a key out read as before.
+         */
+        val NONE = Edit(noFilm = true, digitalIntermediate = true).withoutEffects()
+
+        /** The scanner sharpening a film develops with when it is turned on from 无 (the engine's 0.7). */
+        const val SCAN_UNSHARP = 0.7
+
         /** What the Y/M sliders' ends are, in CC. Unsent, the engine's 1 makes the whole slider one CC. */
         const val FILTER_SHIFT_CC = 40.0
 
@@ -195,6 +237,8 @@ data class Edit(
             "film_stock" to { e: Edit -> e.film },
             "print_stock" to { e: Edit -> e.paper },
             "scan_film" to { e: Edit -> e.scanFilm },
+            "x_no_film" to { e: Edit -> e.noFilm },
+            "digital_intermediate" to { e: Edit -> e.digitalIntermediate },
             "auto_exposure" to { e: Edit -> e.autoExposure },
             "auto_exposure_method" to { e: Edit -> e.aeMethod },
             "exposure_compensation_ev" to { e: Edit -> e.exposureEv },
@@ -254,6 +298,11 @@ data class Edit(
             film = p.optString("film_stock", fallback.film),
             paper = p.optString("print_stock", fallback.paper),
             scanFilm = p.optBoolean("scan_film", fallback.scanFilm),
+            // Params written before 无 existed name a film and have neither key:
+            // they always developed on a film and a paper.
+            noFilm = p.optBoolean("x_no_film", if (p.has("film_stock")) false else fallback.noFilm),
+            digitalIntermediate = p.optBoolean("digital_intermediate",
+                if (p.has("film_stock")) false else fallback.digitalIntermediate),
             autoExposure = p.optBoolean("auto_exposure", fallback.autoExposure),
             aeMethod = p.optString("auto_exposure_method", fallback.aeMethod),
             exposureEv = p.optDouble("exposure_compensation_ev", fallback.exposureEv),

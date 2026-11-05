@@ -306,7 +306,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             val skipped = withContext(Dispatchers.IO) {
                 var skipped = 0
                 for (f in targets) {
-                    val base = store.sidecar(f.id) ?: Sidecar(Edit())
+                    val base = store.sidecar(f.id) ?: Sidecar(Edit.NONE)
                     val p = pasteLook(base, f, from, groups, catalog)
                     if (p.edgeSkipped) skipped++
                     store.saveEdit(f.id, p.edit, p.wbK, p.wbTint)
@@ -328,7 +328,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         if (targets.isEmpty()) return
         viewModelScope.launch {
             val cars = withContext(Dispatchers.IO) {
-                targets.map { f -> f to withShootingData(f, store.sidecar(f.id) ?: Sidecar(Edit())) }
+                targets.map { f -> f to withShootingData(f, store.sidecar(f.id) ?: Sidecar(Edit.NONE)) }
             }
             // One at a time: nextId() is unique only once the previous job is in the list.
             for ((f, car) in cars) host.queue.enqueue(jobFor(f, car, format, size, editor))
@@ -376,7 +376,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             format = format, size = size, workingEdge = ui.workingEdge, maxPixels = ui.maxPixels,
             outPixels = outPixels,
             frameJson = if (edit.frame.isNone) "" else edit.frame.toJson().toString(),
-            filmLabel = ui.catalog.film(edit.film)?.label ?: "",
+            filmLabel = if (edit.noFilm) "" else ui.catalog.film(edit.film)?.label ?: "",
             wideGamut = ui.wideGamut, highlightStops = ui.highlightStops,
         )
     }

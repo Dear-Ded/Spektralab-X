@@ -735,10 +735,10 @@ private fun Controls(
                         0 -> {
                             PanelHeader(
                                 title = "风格",
-                                summary = ui.catalog.film(e.film)?.label.orEmpty(),
+                                summary = if (e.noFilm) "原图" else ui.catalog.film(e.film)?.label.orEmpty(),
                                 hint = "点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。",
                             )
-                        StyleStrip(ui, enabled, onEdit = vm::update) { vm.applyStyle(it) }
+                        StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {
@@ -758,16 +758,19 @@ private fun Controls(
                             PanelHeader(
                                 title = "冲洗",
                                 // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
-                                summary = listOfNotNull(ui.catalog.film(e.film)?.label,
-                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label,
+                                summary = listOfNotNull(if (e.noFilm) "无胶片" else ui.catalog.film(e.film)?.label,
+                                    if (e.noFilm) null else if (e.scanFilm) "直接扫描" else if (e.digitalIntermediate) "数字中间片" else ui.catalog.paper(e.paper)?.label,
                                     if (e.exposureEv != 0.0) String.format(java.util.Locale.ROOT, "%+.1f EV", e.exposureEv) else null,
                                 ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
+                            // 胶片「无」: the steps after the film have nothing to develop; they keep their settings.
+                            val enabled = enabled && !(e.noFilm && step > 0)
+                            if (e.noFilm && step > 0) Hint("胶片是「无」：相纸、曝光与放大、胶片效果都不起作用。设置会保留，选一款胶片就恢复。")
                             when (step) {
                                 0 -> {
                                     PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。")
-                                FilmStrip(ui, enabled) { vm.pickFilm(it) }
+                                FilmStrip(ui, enabled, onNone = vm::pickNoFilm) { vm.pickFilm(it) }
                                 GroupLabel("画幅")
                                 // One set, one track (UI2.md 7.2 point 8); a size not in the list selects nothing.
                                 Segmented(
@@ -779,7 +782,7 @@ private fun Controls(
                                     NextStep("相纸") { step = 1 }
                                 }
                                 1 -> {
-                                    PanelHint("相纸决定反差和色调，就像放大时换一盒相纸。默认是这卷胶片推荐的那一款。")
+                                    PanelHint("相纸决定反差和色调，就像放大时换一盒相纸。「无」不经过相纸。")
                                 PaperStrip(ui, enabled) { vm.update(it) }
                                     NextStep("曝光与放大") { step = 2 }
                                 }
@@ -825,7 +828,7 @@ private fun Controls(
                                     Hint(if (e.scanFilm) "直接扫描不经过相纸，没有放大机的滤镜可调。"
                                          else "放大机上的黄、品红滤镜，用来校正相纸上的偏色。")
                                     ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
-                                        WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
+                                        WhiteBalance(s, ui.hasImage && !ui.exporting) { k, t -> vm.setWhiteBalance(k, t) }
                                     }
                                 }
                                     NextStep("胶片效果") { step = 3 }
@@ -841,6 +844,11 @@ private fun Controls(
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
                                             unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
+                                    }
+                                    // 无 first (tools/work/no_film_research.md 4): no grain, halation, glare or sharpening.
+                                    Segmented(options = listOf("无", "胶片自带"), selected = if (e.effectsNone) 0 else 1, enabled = enabled) { i ->
+                                        vm.update(if (i == 0) e.withoutEffects() else e.copy(grainActive = true, halationActive = true,
+                                            glareActive = true, unsharpAmount = if (e.unsharpAmount == 0.0) Edit.SCAN_UNSHARP else e.unsharpAmount))
                                     }
                                 EffectsSection(e, enabled, onDrag = vm::setInteracting) { vm.update(it) }
                                 DustSection(e.look, enabled, onDrag = vm::setInteracting) { vm.update(e.copy(look = it)) }   // edit-effects: 灰尘 (MaskPanel.kt)
@@ -1247,7 +1255,7 @@ private const val RECENT = 11
 
 /** The film cards: each film on the open photo. Films whose card has not rendered yet show their name only. */
 @Composable
-private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
+private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
     // UI2.md 2.3 ①: four kinds of film, the current one's kind open first.
     val kinds = listOf("彩色负片", "反转片", "电影卷", "黑白")
@@ -1283,7 +1291,8 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
     // The current film is brought into view when the strip appears or the film
     // changes from elsewhere (a preset, undo), with the motion spring.
-    val selectedIndex = films.indexOfFirst { it.id == ui.edit.film }
+    // Item 0 is 无.
+    val selectedIndex = if (ui.edit.noFilm) 0 else films.indexOfFirst { it.id == ui.edit.film }.let { if (it < 0) -1 else it + 1 }
     LaunchedEffect(selectedIndex) {
         if (selectedIndex < 0) return@LaunchedEffect
         val visible = state.layoutInfo.visibleItemsInfo
@@ -1299,8 +1308,15 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
         flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state),
         modifier = Modifier.fillMaxWidth(),
     ) {
+        // 无 leads the strip and is a new photo's default (tools/work/no_film_research.md).
+        item(key = "_none") {
+            val original = remember(ui.before) { ui.before?.asImageBitmap() }
+            NoneCard(selected = ui.edit.noFilm, original = original, enabled = enabled) {
+                if (!ui.edit.noFilm) { view.tick(); onNone() }
+            }
+        }
         items(films, key = { it.id }) { film ->
-            val selected = film.id == ui.edit.film
+            val selected = !ui.edit.noFilm && film.id == ui.edit.film
             val card = ui.filmCards[film.id]
             val bitmap = remember(card) { card?.asImageBitmap() }
             // UI2.md 7.2 points 3-4: a 104 dp square, the name, and ISO · balance · one trait.

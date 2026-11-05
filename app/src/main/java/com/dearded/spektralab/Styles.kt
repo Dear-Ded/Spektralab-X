@@ -70,7 +70,10 @@ data class Style(
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
         val stock = catalog.film(film) ?: return null
-        val base = edit.copy(film = film, scanFilm = stock.positive,
+        // A style is a film on a paper: 无 off, the paper chosen. Coming from 效果「无」
+        // it develops with the scanner's own sharpening, as every style was tuned with.
+        val base = edit.copy(film = film, scanFilm = stock.positive, noFilm = false, digitalIntermediate = false,
+            unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
             paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
         return catalog.normalize(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
@@ -271,6 +274,8 @@ internal fun StyleStrip(
     ui: UiState, enabled: Boolean,
     /** A whole edit to apply (最近编辑), as one undo step. */
     onEdit: (Edit) -> Unit = {},
+    /** 无: no film, no film effects, no adjustments. */
+    onNone: () -> Unit = {},
     onPick: (Style) -> Unit,
 ) {
     val context = LocalContext.current
@@ -357,6 +362,13 @@ internal fun StyleStrip(
         Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
+        // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
+        if (!searching) item(key = "_none") {
+            val original = remember(ui.before) { ui.before?.asImageBitmap() }
+            NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "不加胶片和调整") {
+                if (!ui.edit.styleNone) { view.tick(); onNone() }
+            }
+        }
         // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
         if (!searching && group == MINE_GROUP) item(key = "_save") {
             TextCard(selected = false, title = "+ 存为风格", subtitle = "把现在的胶卷、相纸、效果和调整存成一张卡",

@@ -260,7 +260,7 @@ class FrameStore private constructor(private val context: Context) {
     fun saveEdit(id: String, edit: Edit, wbK: Double, wbTint: Double): Unit = synchronized(lock) {
         val frame = byId(id) ?: return
         val now = System.currentTimeMillis()
-        val updated = frame.copy(edited = true, film = edit.film, editedAt = now)
+        val updated = frame.copy(edited = true, film = if (edit.noFilm) "" else edit.film, editedAt = now)
         writeAtomically(File(dir, "$id.json"), Sidecar(edit, wbK, wbTint, now).toJson(updated).toString())
         _frames.update { list -> list.map { if (it.id == id) updated else it } }
         writeIndex()
@@ -347,6 +347,7 @@ fun pasteLook(target: Sidecar, frame: Frame, from: CopiedLook, groups: Set<LookG
     var skipped = false
     if (LookGroup.FILM_PAPER in groups) e = e.copy(
         film = s.film, paper = s.paper, scanFilm = s.scanFilm, filmFormatMm = s.filmFormatMm,
+        noFilm = s.noFilm, digitalIntermediate = s.digitalIntermediate,
         printExposure = s.printExposure, yShift = s.yShift, mShift = s.mShift,
     )
     if (LookGroup.EXPOSURE in groups) e = e.copy(autoExposure = s.autoExposure, aeMethod = s.aeMethod, exposureEv = s.exposureEv)

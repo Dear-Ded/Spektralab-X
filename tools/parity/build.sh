@@ -5,7 +5,7 @@
 #
 # B is a build of upstream's engine with SPEKTRALAB_BUILD_NATIVE_RAW=ON (the same
 # configure that builds spektralab-host, see docs/PARITY.md). SRC holds this
-# directory's spk_android.cpp plus the app's output_transform.*, layer2.* and
+# directory's spk_android.cpp plus the app's output_transform.*, layer2.*, passthrough.hpp and
 # resize.* and input_transform.* (app/src/main/cpp). upstream_output_math.inc
 # and upstream_input_math.inc are generated here from upstream's output.cpp and
 # image_io.{hpp,cpp}, with the markers app/src/main/cpp/CMakeLists.txt uses.
@@ -32,7 +32,7 @@ PY
 openmp=""
 grep -q 'SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON' "$B/CMakeCache.txt" && openmp="-fopenmp"
 c++ -std=c++20 -O2 $openmp \
-    -I"$SRC" -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/host" \
+    -I"$SRC" -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/src/core" -I"$UP/engine/host" \
     -I"$UP/engine/third_party/stb" -I"$UP/build/deps/LibRaw-0.22.2" \
     "$SRC/spk_android.cpp" "$SRC/output_transform.cpp" "$SRC/input_transform.cpp" "$SRC/layer2.cpp" "$SRC/resize.cpp" \
     -Wl,--start-group "$E/libspektralab_engine.a" "$E/libspektralab_core.a" "$E/libspk_image_io.a" \
