@@ -170,10 +170,31 @@ struct Tone {
     }
 };
 
+struct Stamp { float x, y, r, soft, flow; };
+
+// What one frame size needs, built once per pack by Local::place and only
+// read while the rows run. Nothing in Local changes after parse, so two packs
+// of one Layer 2 (the editor's and an export's) never share mutable state.
+struct Placed {
+    float aspect = 1.5f, px = 1.0f / 1024, short_side = 2.0f / 3;
+    struct MaskGeo {
+        float la[2] = {0, 0}, axis[2] = {0, 1}, inv_len2 = 1;   // long-edge units
+        std::vector<Stamp> le;
+        detail::Grid grid;
+    };
+    std::vector<MaskGeo> masks;
+    std::vector<std::array<float, 4>> hair_box;
+    detail::Grid dust;
+
+    void to_le(float u, float v, float& x, float& y) const {
+        if (aspect >= 1) { x = u; y = v / aspect; } else { x = u * aspect; y = v; }
+    }
+};
+
 class Local {
 public:
     // The block starting at v[at], or null when there is none or it is malformed.
-    static std::shared_ptr<Local> parse(const std::vector<float>& v, size_t at) {
+    static std::shared_ptr<const Local> parse(const std::vector<float>& v, size_t at) {
         using detail::clampf;
         auto have = [&](size_t n) { return at <= v.size() && v.size() - at >= n; };
         auto finite = [&](size_t n) {
@@ -219,47 +240,49 @@ public:
         return out;
     }
 
-    // The frame about to be packed, before its rows run (one pack at a time
-    // per Layer 2, as every caller does). Cheap when the size is unchanged.
-    void set_frame(uint32_t w, uint32_t h) {
-        if (w == 0 || h == 0 || (w == w_ && h == h_)) return;
-        w_ = w; h_ = h;
-        aspect_ = float(w) / float(h);
-        px_ = 1.0f / float(std::max(w, h));
-        short_ = float(std::min(w, h)) / float(std::max(w, h));
-        for (auto& m : masks_) frame_mask(m);
-        if (dusty()) frame_dust();
+    // The geometry for a w x h frame: masks and dust in long-edge units, their
+    // cell lists, and the pixel a sub-pixel speck is widened to.
+    std::shared_ptr<const Placed> place(uint32_t w, uint32_t h) const {
+        auto p = std::make_shared<Placed>();
+        if (w == 0 || h == 0) return p;
+        p->aspect = float(w) / float(h);
+        p->px = 1.0f / float(std::max(w, h));
+        p->short_side = float(std::min(w, h)) / float(std::max(w, h));
+        p->masks.resize(masks_.size());
+        for (size_t i = 0; i < masks_.size(); ++i) place_mask(*p, masks_[i], p->masks[i]);
+        if (dusty()) place_dust(*p);
+        return p;
     }
 
     // Step 8 of upstream's kernel: each mask mixes in its own tone by its coverage.
-    void masks(float c[3], float u, float v) const {
-        if (masks_.empty()) return;
+    void masks(const Placed& p, float c[3], float u, float v) const {
+        if (masks_.empty() || p.masks.size() != masks_.size()) return;
         float x, y;
-        to_le(u, v, x, y);
-        for (const auto& m : masks_) {
-            const float cover = coverage(m, x, y);
+        p.to_le(u, v, x, y);
+        for (size_t i = 0; i < masks_.size(); ++i) {
+            const float cover = coverage(masks_[i], p.masks[i], x, y);
             if (cover > 0.0005f) {
                 float t[3] = {c[0], c[1], c[2]};
-                m.tone.apply(t);
-                for (int i = 0; i < 3; ++i) c[i] += (t[i] - c[i]) * cover;
+                masks_[i].tone.apply(t);
+                for (int k = 0; k < 3; ++k) c[k] += (t[k] - c[k]) * cover;
             }
         }
     }
 
     // White specks go toward the paper's white, dark ones toward black.
-    void dust(float c[3], float u, float v) const {
-        if (!dusty()) return;
+    void dust(const Placed& p, float c[3], float u, float v) const {
+        if (!dusty() || p.hair_box.size() != hairs_.size()) return;
         using detail::smooth;
         float x, y;
-        to_le(u, v, x, y);
+        p.to_le(u, v, x, y);
         float keep_white = 1, keep_dark = 1;   // products of (1 - coverage)
-        const float half = 0.5f * px_;
+        const float half = 0.5f * p.px;
         auto add = [&](bool dark, float cover) {
             cover *= strength_;
             if (cover <= 0) return;
             (dark ? keep_dark : keep_white) *= 1 - std::min(1.0f, cover);
         };
-        auto [b, e] = grid_.at(x, y);
+        auto [b, e] = p.dust.at(x, y);
         for (const uint32_t* it = b; it != e; ++it) {
             const uint32_t id = *it;
             if (id < specks_.size()) {
@@ -280,8 +303,10 @@ public:
                 const float area = (s.r / re) * (s.r / re);
                 add(s.dark, s.o * area * (1 - smooth(-w, w, d - edge)));
             } else {
-                const Hair& h = hairs_[id - specks_.size()];
-                if (x < h.box[0] || y < h.box[1] || x > h.box[2] || y > h.box[3]) continue;
+                const size_t hi = id - specks_.size();
+                const Hair& h = hairs_[hi];
+                const auto& box = p.hair_box[hi];
+                if (x < box[0] || y < box[1] || x > box[2] || y > box[3]) continue;
                 float best = 1e9f;
                 for (int k = 0; k < 4; ++k) {
                     const float ax = h.p[k][0], ay = h.p[k][1];
@@ -296,7 +321,7 @@ public:
         }
         if (!scratches_.empty()) {
             // Along the film's transport: the frame's long edge.
-            const float t = aspect_ >= 1 ? u : v, s = aspect_ >= 1 ? v : u;
+            const float t = p.aspect >= 1 ? u : v, s = p.aspect >= 1 ? v : u;
             const float k = detail::sat01(t) * (kScratchSamples - 1);
             const int i0 = std::min(kScratchSamples - 2, int(k));
             const float f = k - float(i0);
@@ -305,7 +330,7 @@ public:
                 if (vis <= 0) continue;
                 const float pos = sc.pos[i0] + (sc.pos[i0 + 1] - sc.pos[i0]) * f;
                 const float re = std::max(sc.hw, half), w = std::max(half, 0.3f * sc.hw);
-                const float d = std::fabs(s - pos) * short_;
+                const float d = std::fabs(s - pos) * p.short_side;
                 if (d > re + w) continue;
                 add(sc.dark, sc.o * vis * (sc.hw / re) * (1 - smooth(-w, w, d - re)));
             }
@@ -318,7 +343,6 @@ private:
     static constexpr int kScratchSamples = 512;
     static constexpr float kWhite = 0.97f, kDark = 0.03f;   // encoded ProPhoto: the paper's white, a print's black
 
-    struct Stamp { float x, y, r, soft, flow; };
     struct Mask {
         int kind = 0;
         bool inverted = false;
@@ -326,38 +350,30 @@ private:
         Tone tone;
         float a[2] = {0, 0}, b[2] = {0, 0}, radii[2] = {0.3f, 0.3f}, cs = 1, sn = 0, feather = 0.5f;
         std::vector<Stamp> stamps;   // x, y in the frame's 0..1
-        // set_frame: everything in long-edge units.
-        float la[2] = {0, 0}, axis[2] = {0, 1}, inv_len2 = 1;
-        std::vector<Stamp> le;
-        detail::Grid grid;
     };
     struct Speck { float x, y, r, o, soft, h2c, h2s, h3c, h3s; bool dark; };
-    struct Hair { float p[5][2]; float box[4]; float hw, o; bool dark; };
+    struct Hair { float p[5][2]; float hw, o; bool dark; };
     struct Scratch { std::array<float, kScratchSamples> pos, vis; float hw, o; bool dark; };
 
     bool dusty() const { return strength_ > 0 && (!specks_.empty() || !scratches_.empty()); }
 
-    void to_le(float u, float v, float& x, float& y) const {
-        if (aspect_ >= 1) { x = u; y = v / aspect_; } else { x = u * aspect_; y = v; }
-    }
-
-    float coverage(const Mask& m, float x, float y) const {
+    static float coverage(const Mask& m, const Placed::MaskGeo& g, float x, float y) {
         using detail::smooth;
         float c = 0;
         if (m.kind == 0) {
             // Upstream's linearCoverage: 0 before a, 1 past b.
-            const float t = ((x - m.la[0]) * m.axis[0] + (y - m.la[1]) * m.axis[1]) * m.inv_len2;
+            const float t = ((x - g.la[0]) * g.axis[0] + (y - g.la[1]) * g.axis[1]) * g.inv_len2;
             c = smooth(0.0f, 1.0f, detail::sat01(t));
         } else if (m.kind == 1) {
             // radialCoverage: into the ellipse's frame, normalised so r is 1 on its edge.
-            const float dx = x - m.la[0], dy = y - m.la[1];
+            const float dx = x - g.la[0], dy = y - g.la[1];
             const float ex = (dx * m.cs + dy * m.sn) / m.radii[0], ey = (-dx * m.sn + dy * m.cs) / m.radii[1];
             c = 1 - smooth(1 - m.feather, 1.0f, std::sqrt(ex * ex + ey * ey));
         } else {
             // Stamps in the order painted: paint goes over, erasing takes away.
-            auto [b, e] = m.grid.at(x, y);
+            auto [b, e] = g.grid.at(x, y);
             for (const uint32_t* it = b; it != e; ++it) {
-                const Stamp& s = m.le[*it];
+                const Stamp& s = g.le[*it];
                 const float dx = x - s.x, dy = y - s.y, d2 = dx * dx + dy * dy;
                 if (d2 >= s.r * s.r) continue;
                 const float a = std::fabs(s.flow) * (1 - smooth(1 - s.soft, 1.0f, std::sqrt(d2) / s.r));
@@ -368,17 +384,17 @@ private:
         return detail::sat01(c) * m.amount;
     }
 
-    void frame_mask(Mask& m) {
-        to_le(m.a[0], m.a[1], m.la[0], m.la[1]);
+    static void place_mask(const Placed& p, const Mask& m, Placed::MaskGeo& g) {
+        p.to_le(m.a[0], m.a[1], g.la[0], g.la[1]);
         float lb[2];
-        to_le(m.b[0], m.b[1], lb[0], lb[1]);
-        m.axis[0] = lb[0] - m.la[0]; m.axis[1] = lb[1] - m.la[1];
-        m.inv_len2 = 1.0f / std::max(m.axis[0] * m.axis[0] + m.axis[1] * m.axis[1], 1e-9f);
+        p.to_le(m.b[0], m.b[1], lb[0], lb[1]);
+        g.axis[0] = lb[0] - g.la[0]; g.axis[1] = lb[1] - g.la[1];
+        g.inv_len2 = 1.0f / std::max(g.axis[0] * g.axis[0] + g.axis[1] * g.axis[1], 1e-9f);
         if (m.kind != 2) return;
-        m.le = m.stamps;
-        for (auto& s : m.le) to_le(s.x, s.y, s.x, s.y);
-        m.grid.build(48, m.le.size(), [&](size_t i, float b[4]) {
-            const Stamp& s = m.le[i];
+        g.le = m.stamps;
+        for (auto& s : g.le) p.to_le(s.x, s.y, s.x, s.y);
+        g.grid.build(48, g.le.size(), [&](size_t i, float b[4]) {
+            const Stamp& s = g.le[i];
             b[0] = s.x - s.r; b[1] = s.y - s.r; b[2] = s.x + s.r; b[3] = s.y + s.r;
         });
     }
@@ -470,24 +486,26 @@ private:
     }
 
     // The grid's reach depends on the pixel (a sub-pixel speck is drawn half a pixel wide).
-    void frame_dust() {
-        const float half = 0.5f * px_;
-        for (auto& h : hairs_) {
+    void place_dust(Placed& p) const {
+        const float half = 0.5f * p.px;
+        p.hair_box.resize(hairs_.size());
+        for (size_t i = 0; i < hairs_.size(); ++i) {
+            const Hair& h = hairs_[i];
+            auto& box = p.hair_box[i];
             const float m = std::max(h.hw, half) + std::max(half, 0.3f * h.hw);
-            h.box[0] = h.box[1] = 1e9f; h.box[2] = h.box[3] = -1e9f;
-            for (const auto& p : h.p) {
-                h.box[0] = std::min(h.box[0], p[0] - m); h.box[1] = std::min(h.box[1], p[1] - m);
-                h.box[2] = std::max(h.box[2], p[0] + m); h.box[3] = std::max(h.box[3], p[1] + m);
+            box = {1e9f, 1e9f, -1e9f, -1e9f};
+            for (const auto& q : h.p) {
+                box[0] = std::min(box[0], q[0] - m); box[1] = std::min(box[1], q[1] - m);
+                box[2] = std::max(box[2], q[0] + m); box[3] = std::max(box[3], q[1] + m);
             }
         }
-        grid_.build(32, specks_.size() + hairs_.size(), [&](size_t i, float b[4]) {
+        p.dust.build(32, specks_.size() + hairs_.size(), [&](size_t i, float b[4]) {
             if (i < specks_.size()) {
                 const Speck& s = specks_[i];
                 const float reach = std::max(s.r, half) * 1.6f + std::max(half, s.soft * s.r);
                 b[0] = s.x - reach; b[1] = s.y - reach; b[2] = s.x + reach; b[3] = s.y + reach;
             } else {
-                const Hair& h = hairs_[i - specks_.size()];
-                for (int k = 0; k < 4; ++k) b[k] = h.box[k];
+                for (int k = 0; k < 4; ++k) b[k] = p.hair_box[i - specks_.size()][k];
             }
         });
     }
@@ -497,9 +515,6 @@ private:
     std::vector<Speck> specks_;
     std::vector<Hair> hairs_;
     std::vector<Scratch> scratches_;
-    detail::Grid grid_;
-    uint32_t w_ = 0, h_ = 0;
-    float aspect_ = 1.5f, px_ = 1.0f / 1024, short_ = 2.0f / 3;
 };
 
 }  // namespace spk::android::local

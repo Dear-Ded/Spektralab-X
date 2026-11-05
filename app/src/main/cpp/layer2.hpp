@@ -23,7 +23,7 @@
 
 namespace spk::android {
 
-namespace local { class Local; }
+namespace local { class Local; struct Placed; }
 
 // Index of each value in the float array Kotlin sends (Look.kt, same order).
 enum LookIndex : int {
@@ -53,16 +53,24 @@ public:
     explicit Layer2(const std::vector<float>& values);
     bool identity() const { return identity_ && !lut_; }
 
-    // The size of the frame about to be packed; masks and dust need its shape
-    // and its pixel. Call before the rows run. The pack functions below do.
-    void frame(uint32_t w, uint32_t h) const;
+    // What masks and dust need of the frame about to be packed: its shape and
+    // its pixel, with their geometry laid out for that size. Built once per
+    // pack, before the rows run, and only read by them; empty (and free) when
+    // the look has neither. The pack functions below build their own.
+    struct Frame {
+        std::shared_ptr<const local::Placed> placed;
+    };
+    Frame frame(uint32_t w, uint32_t h) const;
 
     // The table mixed in at `strength` (0..1) before white balance, after the
     // print and ahead of every slider. Null or strength 0 clears it.
     void set_lut(std::shared_ptr<const ColourTable> lut, float strength);
 
     // One pixel, encoded, in place. (u, v) is its position in the frame, 0..1.
-    void apply(float& r, float& g, float& b, float u, float v) const;
+    void apply(float& r, float& g, float& b, float u, float v) const { apply(r, g, b, u, v, Frame{}); }
+    // The same with `f`, this look's frame(w, h) for the frame (u, v) is in;
+    // without it masks and dust are skipped.
+    void apply(float& r, float& g, float& b, float u, float v, const Frame& f) const;
 
 private:
     bool identity_ = true;
@@ -79,7 +87,7 @@ private:
     std::vector<float> bright_lut_;   // c^(1/(1+0.8 b)) over [0, 2]
     std::shared_ptr<const ColourTable> lut_;
     float lut_strength_ = 0;
-    std::shared_ptr<local::Local> local_;   // masks and dust; null when there are none
+    std::shared_ptr<const local::Local> local_;   // masks and dust; null when there are none
 };
 
 // RGBA16 rows to RGBA8 (display, JPEG) or back into RGBA16 (TIFF), through

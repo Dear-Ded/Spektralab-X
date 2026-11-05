@@ -134,7 +134,7 @@ namespace {
 template <typename Write>
 void convert(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
              const Layer2* look, const OutputTransform& xf, Write&& write) {
-    if (look) look->frame(w, h);
+    const Layer2::Frame frame = look ? look->frame(w, h) : Layer2::Frame{};
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
@@ -144,7 +144,7 @@ void convert(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
                 float c[3];
                 if (look) {
                     c[0] = s[4 * x] / 65535.0f; c[1] = s[4 * x + 1] / 65535.0f; c[2] = s[4 * x + 2] / 65535.0f;
-                    look->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v);
+                    look->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v, frame);
                     // Upstream's grade ends at the UNORM16 boundary before any
                     // output conversion (spk_view_grade_body.glsl): clamp to
                     // 0..1 and round to 16 bits, so CAM16 never sees overshoot.
