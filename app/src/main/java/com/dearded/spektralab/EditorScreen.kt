@@ -218,7 +218,14 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                     }
     }
 
-    androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on }) {
+    val nav = remember { EditorNav() }
+    var showChanges by remember { mutableStateOf(false) }
+    // The light table's view model is the activity's, so its 复制调整 is visible here too.
+    val table: LightTableViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val tableState by table.state.collectAsState()
+    var showPaste by remember { mutableStateOf(false) }
+    androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on },
+        LocalEditorNav provides nav) {
     Scaffold(
         modifier = Modifier.highRefresh(dragging),
         snackbarHost = { SnackbarHost(snackbar) },
@@ -294,6 +301,14 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                         }
                         DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
                             DropdownMenuItem(text = { Text("观片台") }, onClick = { moreMenu = false; onLightTable() })
+                            DropdownMenuItem(text = { Text("修改记录") }, enabled = ui.hasImage,
+                                onClick = { moreMenu = false; showChanges = true })
+                            // 粘贴调整 (ui2_snapseed.md 5): what 观片台's 复制调整 took, by group.
+                            DropdownMenuItem(
+                                text = { Text(tableState.copied?.let { "粘贴调整（来自「${it.fromName}」）" } ?: "粘贴调整（先在观片台复制）") },
+                                enabled = ui.hasImage && !ui.exporting && tableState.copied != null,
+                                onClick = { moreMenu = false; showPaste = true },
+                            )
                             DropdownMenuItem(
                                 text = { Text(if (active > 0) "正在处理（$active）" else "正在处理") },
                                 onClick = { moreMenu = false; vm.showQueue(true) },
@@ -444,6 +459,32 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     }
 
     if (showSettings) SettingsScreen(ui, vm) { showSettings = false }
+    val copied = tableState.copied
+    val pasteSrc = ui.source
+    if (showPaste && copied != null && pasteSrc != null) PasteSheet(
+        from = copied, count = 1, initial = tableState.pasteGroups,
+        onDismiss = { showPaste = false },
+        onPaste = { groups ->
+            showPaste = false
+            table.setPasteGroups(groups)
+            // The open photo as a frame: its own shape, RAW-ness and EXIF date, so a pasted
+            // date back takes this photo's date and a film edge gets this photo's gate crop.
+            val here = Frame(id = "", uri = "", name = pasteSrc.name, size = 0, date = 0, mime = "",
+                raw = pasteSrc.kind == "raw", width = pasteSrc.width, height = pasteSrc.height,
+                exifDate = ui.exif.dateTimeOriginal.orEmpty())
+            val p = pasteLook(Sidecar(ui.edit, pasteSrc.wbK, pasteSrc.wbTint), here, copied, groups, ui.catalog)
+            vm.update(p.edit)
+            if (here.raw && (p.wbK != pasteSrc.wbK || p.wbTint != pasteSrc.wbTint)) vm.setWhiteBalance(p.wbK, p.wbTint)
+            vm.showMessage("已粘贴「${copied.fromName}」的调整，可撤销")
+        },
+    )
+    if (showChanges) ChangesSheet(ui, vm, onGo = { c ->
+        nav.tab = c.tab
+        if (c.step >= 0) nav.step = c.step
+        if (c.seg >= 0) nav.adjustSeg = c.seg
+        panelLevel = maxOf(1, panelLevel)
+        showChanges = false
+    }) { showChanges = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
     ui.detail?.let { DetailViewer(it, vm::closeDetail) }
     UpdateDialog(editing = ui.hasImage)
@@ -459,7 +500,9 @@ private fun Preview(
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
     var holding by remember { mutableStateOf(false) }
     val view = androidx.compose.ui.platform.LocalView.current
-    Box(modifier.background(Palette.Surround), contentAlignment = Alignment.Center) {
+    // The surround the user chose in 设置 (18 % 灰 / 黑 / 白), never a hue (UI2.md 1.1).
+    val surround = rememberSurround()
+    Box(modifier.background(surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
@@ -557,7 +600,8 @@ private fun Preview(
                 }
                 Spacer(Modifier.height(6.dp))
                 histogram?.let { h ->
-                    HistogramView(h, Modifier.width(160.dp).height(80.dp)
+                    // Grey luminance only: no colour over the photo while judging it (UI2.md 1.1).
+                    MonoHistogram(h, Modifier.width(160.dp).height(80.dp)
                         .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.5f)))
                     if (h.clippedLow > 0.005f || h.clippedHigh > 0.005f) {
                         Text(
@@ -583,6 +627,36 @@ private fun Preview(
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
+    }
+}
+
+/**
+ * The photo's histogram as one grey luminance curve (ui2_snapseed.md 10): the
+ * RGB curves in Histogram.kt paint red, green and blue next to the print being
+ * judged. Square-root scale like HistogramView; clipping is a white tick at the
+ * edge, as tall as the clipped share x10.
+ */
+@Composable
+private fun MonoHistogram(h: Histogram, modifier: Modifier) {
+    androidx.compose.foundation.Canvas(modifier) {
+        val scale = kotlin.math.sqrt(maxOf(1, h.y.max()).toFloat())
+        val bw = size.width / Histogram.BINS
+        val path = androidx.compose.ui.graphics.Path().apply {
+            moveTo(0f, size.height)
+            for (i in h.y.indices) {
+                val top = size.height * (1f - kotlin.math.sqrt(h.y[i].toFloat()) / scale)
+                lineTo(i * bw, top); lineTo((i + 1) * bw, top)
+            }
+            lineTo(size.width, size.height); close()
+        }
+        drawPath(path, Color.White.copy(alpha = 0.72f))
+        fun tick(x: Float, share: Float) {
+            if (share <= 0.001f) return
+            val hgt = size.height * minOf(1f, share * 10)
+            drawRect(Color.White, androidx.compose.ui.geometry.Offset(x, size.height - hgt),
+                androidx.compose.ui.geometry.Size(3f, hgt))
+        }
+        tick(0f, h.clippedLow); tick(size.width - 3f, h.clippedHigh)
     }
 }
 
@@ -636,8 +710,10 @@ private fun Controls(
     ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit,
     open: Boolean, onOpen: (Boolean) -> Unit, modifier: Modifier,
 ) {
-    var tab by remember { mutableIntStateOf(0) }
-    var step by remember { mutableIntStateOf(0) }
+    // Held by the screen (ChangesSheet.kt), so 修改记录 can open an entry at its step.
+    val nav = LocalEditorNav.current
+    var tab by nav::tab
+    var step by nav::step
     val e = ui.edit
     val enabled = ui.hasImage && !ui.exporting
     Surface(modifier, tonalElevation = 2.dp) {
@@ -662,7 +738,7 @@ private fun Controls(
                                 summary = ui.catalog.film(e.film)?.label.orEmpty(),
                                 hint = "点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。",
                             )
-                        StyleStrip(ui, enabled) { vm.applyStyle(it) }
+                        StyleStrip(ui, enabled, onEdit = vm::update) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {

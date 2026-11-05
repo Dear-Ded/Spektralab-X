@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -204,4 +206,31 @@ fun View.tick(strong: Boolean = false) {
         else -> HapticFeedbackConstants.CLOCK_TICK
     }
     performHapticFeedback(c)
+}
+
+/**
+ * What sits behind the photo (UI2.md 1.1; ui2_snapseed.md 5, a user asked for a
+ * grey to judge colour against). Settings key [SURROUND_KEY] in "settings":
+ * "dark" (default), "grey18" (18 % reflectance, L* 50, sRGB #777777, the
+ * photographer's mid grey), "black", "white". Neutral every one of them.
+ */
+internal const val SURROUND_KEY = "surround"
+internal val SURROUNDS = listOf(
+    "dark" to Palette.Surround, "grey18" to Color(0xFF777777),
+    "black" to Color(0xFF000000), "white" to Color(0xFFFFFFFF),
+)
+
+/** The chosen surround, following the setting while it is changed elsewhere. */
+@Composable
+internal fun rememberSurround(): Color {
+    val c = androidx.compose.ui.platform.LocalContext.current
+    val prefs = androidx.compose.runtime.remember(c) { c.getSharedPreferences("settings", 0) }
+    fun read() = SURROUNDS.firstOrNull { it.first == prefs.getString(SURROUND_KEY, "dark") }?.second ?: Palette.Surround
+    var colour by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(read()) }
+    androidx.compose.runtime.DisposableEffect(prefs) {
+        val l = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, k -> if (k == SURROUND_KEY) colour = read() }
+        prefs.registerOnSharedPreferenceChangeListener(l)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(l) }
+    }
+    return colour
 }
