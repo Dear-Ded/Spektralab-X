@@ -73,6 +73,7 @@ Spektralab-X 分三层：Compose 界面、Kotlin 编辑器状态、C++ 引擎。
 | `0007-grain-size-and-unsharp-on-the-wire` | 颗粒尺寸和扫描锐化作为线上参数开放；不传或用默认值时输出逐字节不变 |
 | `0008-latch-device-lost` | 第一次 GPU 设备丢失后锁存，之后的提交和 flush 立即失败，不再对已丢失的设备重复提交 |
 | `0010-storage-range-by-requested-size` | 存储缓冲按请求大小（不是池块容量）检查上限和绑定，复用大块时不再误报超限 |
+| `0011-atomic-cancel-flag` | 渲染的取消标志改成原子量，消除 `spk_cancel` 跨线程写入的数据竞争 |
 
 补丁在 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh) 下载上游源码后按文件名顺序应用。补丁内容一变，CI 缓存键也跟着变。
 

@@ -1,0 +1,51 @@
+Make the render's cancel flag atomic
+
+spk_cancel is called from another thread while a render runs; it writes
+Progress::cancelled without the session lock (on purpose: the render holds
+that lock for its whole length), and SPK_NODE reads it between nodes. A plain
+bool written and read on two threads is a data race, which the compiler may
+hoist out of the node loop. This makes it a std::atomic<bool> behind a small
+copyable wrapper, because every render resets the session's progress with
+`session->progress = Progress{}`. Release on write, acquire on read; every
+existing use (`= true`, `if (... cancelled)`, `Json(p.cancelled)`) compiles
+unchanged. No arithmetic changes, so output is byte-identical.
+
+--- a/engine/src/pipeline/pipeline.hpp
++++ b/engine/src/pipeline/pipeline.hpp
+@@ -24,6 +24,7 @@
+ // per-run argument, so the parameter works. That is a knowing divergence and
+ // the render-parity harness reports it as one.
+ #pragma once
++#include <atomic>
+ #include <optional>
+ #include <string>
+ #include <unordered_map>
+@@ -100,12 +101,27 @@
+ // With `detailed`, each node flushes before its timer stops, so the numbers
+ // are real GPU time and the batching is given up for the run. Set
+ // `SPEKTRAFILM_NODE_TIMINGS=1` to ask for it.
++// Android: `spk_cancel` sets `cancelled` from another thread while the render
++// reads it between nodes, so it is atomic. The wrapper keeps Progress copyable,
++// because every render starts with `session->progress = Progress{}`.
++struct CancelFlag {
++    std::atomic<bool> value{false};
++    CancelFlag() = default;
++    CancelFlag(const CancelFlag& o) : value(o.value.load(std::memory_order_acquire)) {}
++    CancelFlag& operator=(const CancelFlag& o) {
++        value.store(o.value.load(std::memory_order_acquire), std::memory_order_release);
++        return *this;
++    }
++    CancelFlag& operator=(bool v) { value.store(v, std::memory_order_release); return *this; }
++    operator bool() const { return value.load(std::memory_order_acquire); }
++};
++
+ struct Progress {
+     std::string progress_id;
+     int total_nodes = 0;
+     int fired = 0;
+     std::string stage = "queued";
+-    bool cancelled = false;
++    CancelFlag cancelled;
+     bool done = false;
+     bool detailed = false;
+     std::unordered_map<std::string, double> node_ms;
