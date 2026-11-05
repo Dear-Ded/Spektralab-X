@@ -108,3 +108,21 @@ These come from ROADMAP M6 and need a Xiaomi phone, ideally HyperOS 4 / Android 
 | 导出时编辑流畅 / Editing during an export | 导出 24 MP 时拖动滑块 | 拖动不比空闲时明显卡；导出变慢可以接受 |
 | 滑动刷新率 / Refresh rate while scrolling | 开发者选项“显示刷新率”，滑动胶片列表 | 记录实际刷新率（本版未改，供后续参考） |
 | 小米相机新照片 / New Xiaomi camera photos | HDR JPEG、DNG、UltraRAW 各导入一张 | 由 RAW 会话负责，这里只记录能否打开 |
+
+## 引擎补丁 0010–0015 与深度拆解的真机待验 / Engine patches 0010–0015 and deep-dive checks on a phone
+
+0010–0015 在云主机 lavapipe 上逐字节对照过（`scripts/parity.sh`，与改动前逐字节相同），下面这些只有 Adreno 真机能回答。依据见 `tools/work/engine_deepdive.md`（不在仓库里）。
+
+0010–0015 were checked byte for byte on lavapipe (`scripts/parity.sh`, identical to the build before them); only an Adreno phone can answer the items below.
+
+| 项目 / Item | 怎么验 / How | 期望 / Expected |
+|---|---|---|
+| 存储缓冲上限与池复用 / Storage range after pool reuse (0010) | 在 128 MiB 机型（小米 12–14）上用接近上限的工作尺寸，连续切换胶片、导出两次 | 不再出现 “buffer exceeds maxStorageBufferRange”；第二次和第一次一样能出图 |
+| 取消渲染 / Cancel during a render (0011) | 全尺寸渲染中途返回或切换照片 | 渲染在下一个节点停下（事件日志 “render cancelled”），不卡住、不闪退 |
+| 描述符池复用 / Descriptor pool reuse (0012) | 连续编辑 10 分钟、导出 5 张 | 无 `vkAllocateDescriptorSets` / `vkCreateDescriptorPool` 错误；出图与 0.1.19 相同 |
+| 重印不重算常数 / Reprint reuses print constants (0013) | 开“冲扫黑白场”，拖放大曝光和黄/品红滤镜，再拖眩光强度 | 每次松手出图都对；和 0.1.19 同参数导出逐字节相同 |
+| 小参数环形缓冲 / Inline-argument ring (0014) | 正常编辑、导出 | 出图与 0.1.19 相同；若异常，设 `SPEKTRAFILM_VULKAN_INLINE_RING=0`（调试版）对比 |
+| 管线缓存 / Pipeline cache (0015) | 安装后冷启动两次，记下第一张预览出图时间；更新应用版本后再启动 | 第二次冷启动更快；`cacheDir` 里只有一个 `vk-pipelines-<版本号>.bin`；文件坏了（手动截断）也能正常启动 |
+| IIR 每批行数 / IIR lines per launch (engine_deepdive 第 6 节第 10 项，未改代码) | 光晕重的风格（CineStill 800T）导出 24 MP，看 GPU 时间；调试版改 `kIirLinesPerLaunch`（256 → 512 / 1024）对比 | 找出不触发设备丢失的最大值，再决定是否按设备调 |
+| Adreno 设备参数 / Adreno device limits | 诊断里的 GPU 信息，或 `vulkaninfo` | 记下 `maxStorageBufferRange`、内存类型（是否有 DEVICE_LOCAL+HOST_VISIBLE）、`maxPushConstantsSize`、`minStorageBufferOffsetAlignment`、子组大小、`math_mode`（fused 或 split） |
+| 每次渲染的提交次数和耗时 / Submits and time per render | 设 `SPEKTRAFILM_TRANSFER_TIMINGS=1`（调试版）渲染一张 24 MP | 记下上传/读回次数和总耗时，量化 0014 在 Adreno 上的收益 |
