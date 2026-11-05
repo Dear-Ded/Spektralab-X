@@ -291,8 +291,8 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     // Search across every group by name, inspiration, film and folk name (StyleTags.kt).
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-    Text("一键风格", style = MaterialTheme.typography.labelLarge)
-    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    // The panel's title row and the group pills (UI2.md 7.2 point 2); search sits first, as a pill.
+    PillRow {
         SelectPill(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
             label = { Text("搜索") })
         for (g in groups) SelectPill(selected = !searching && group == g,
@@ -313,38 +313,23 @@ internal fun StyleStrip(ui: UiState, enabled: Boolean, onPick: (Style) -> Unit) 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         items(styles, key = { it.id }) { s ->
             val on = applied(s)
-            val ring by animateColorAsState(if (on) Palette.Accent else Palette.OutlineSoft, Motion.defaultEffects(), label = "ring")
-            Column(
-                Modifier.width(92.dp).clip(RoundedCornerShape(10.dp))
-                    .border(if (on) 2.dp else 1.dp, ring, RoundedCornerShape(10.dp))
-                    .clickable(enabled = enabled) {
-                        if (on) open = if (open == s.id) null else s.id
-                        else {
-                            open = null
-                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                            pick(s, strengthOf(s.id))
-                        }
-                    }
-                    .background(if (on) Palette.Accent else Palette.Panel)
-                    .padding(bottom = 6.dp),
+            val card = ui.filmCards[s.film]
+            val bitmap = remember(card) { card?.asImageBitmap() }
+            // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
+            ThumbCard(
+                selected = on,
+                image = bitmap,
+                title = s.name,
+                subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
+                enabled = enabled,
+                placeholder = s.name,
             ) {
-                Box(Modifier.height(64.dp).width(92.dp).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
-                    val card = ui.filmCards[s.film]
-                    if (card != null) {
-                        val bitmap = remember(card) { card.asImageBitmap() }
-                        Image(bitmap, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    } else {
-                        Text(s.group, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
-                    }
+                if (on) open = if (open == s.id) null else s.id
+                else {
+                    open = null
+                    view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                    pick(s, strengthOf(s.id))
                 }
-                // UI2.md 1.2: the selected card's caption sits on the inverted fill.
-                Text(s.name, style = MaterialTheme.typography.labelMedium, maxLines = 1,
-                    color = if (on) Palette.OnAccent else Palette.OnSurface,
-                    modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp))
-                Text(s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film }, style = MaterialTheme.typography.labelSmall,
-                    color = if (on) Palette.OnAccent.copy(alpha = 0.7f) else Palette.OnSurfaceSoft,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 6.dp))
             }
         }
     }
