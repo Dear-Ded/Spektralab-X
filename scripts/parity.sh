@@ -94,10 +94,16 @@ while read -r sha url; do
     name="$(basename "$url")"; file="$RAW/${name// /_}"
     [[ -f "$file" && "$(sum "$file")" == "$sha" ]] && continue
     # A verified copy already on this machine (SAMPLES_DIR) is linked, not fetched.
-    local_copy="${SAMPLES_DIR:-}/${name// /_}"
-    if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
-        ln -sf "$local_copy" "$file"; continue
-    fi
+    # tools/samples/regress.sh names its copies <raw.pixls.us id>-<file>, since
+    # several files share a name (two Nikon Z 7 samples here and there).
+    id="${url#*/getfile.php/}"; id="${id%%/*}"
+    linked=0
+    for local_copy in "${SAMPLES_DIR:-}/$id-${name// /_}" "${SAMPLES_DIR:-}/${name// /_}"; do
+        if [[ -n "${SAMPLES_DIR:-}" && -f "$local_copy" && "$(sum "$local_copy")" == "$sha" ]]; then
+            ln -sf "$local_copy" "$file"; linked=1; break
+        fi
+    done
+    (( linked )) && continue
     # raw.pixls.us sometimes ends a transfer early with no error; resume it.
     for attempt in 1 2 3 4 5; do
         curl -fsSL --retry 3 -C - -o "$file.part" "${url// /%20}" || true
