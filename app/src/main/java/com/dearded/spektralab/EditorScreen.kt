@@ -99,6 +99,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.layout.layout
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.windowInsetsPadding
 import java.util.Locale
 
@@ -330,39 +333,70 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
                     // The handle follows the finger 1:1; on release the panel springs to the
                     // nearest of its three heights, a fling carrying it one further.
+                    // UI2.md 3.1: the height lives in an Animatable read only in the layout
+                    // phase below, so a drag frame re-measures the panel and recomposes nothing.
                     val heights = listOf(96.dp, boxHeight * 0.42f, boxHeight * 0.75f)
-                    var dragDy by remember { mutableFloatStateOf(0f) }
-                    var handleDown by remember { mutableStateOf(false) }
                     val density = androidx.compose.ui.platform.LocalDensity.current
-                    val target = heights[panelLevel]
-                    val animated by androidx.compose.animation.core.animateDpAsState(
-                        target, Motion.defaultSpatial(), label = "panel")
-                    val panelH = if (handleDown) (target - with(density) { dragDy.toDp() })
-                        .coerceIn(heights.first(), heights.last()) else animated
+                    val anchors = remember(heights, density) { with(density) { heights.map { it.toPx() } } }
+                    val panelPx = remember { androidx.compose.animation.core.Animatable(anchors[panelLevel]) }
+                    var handleDown by remember { mutableStateOf(false) }
+                    // Set on release: the finger's speed carried into the spring (px/s, + = taller).
+                    var releaseVelocity by remember { mutableFloatStateOf(0f) }
+                    var settleKey by remember { mutableIntStateOf(0) }
+                    val panelScope = androidx.compose.runtime.rememberCoroutineScope()
                     val view = androidx.compose.ui.platform.LocalView.current
-                    Column(Modifier.fillMaxWidth().height(panelH).chrome(showChrome).highRefresh(handleDown)) {
+                    // Any level change (a drag, an entry tapped again, back) or a new screen size springs there.
+                    LaunchedEffect(panelLevel, anchors, settleKey) {
+                        if (handleDown) return@LaunchedEffect
+                        val v = releaseVelocity
+                        releaseVelocity = 0f
+                        panelPx.settle(anchors[panelLevel], v)
+                    }
+                    // UI2.md 3.8: back from the tall panel folds it to half, following the finger.
+                    val panelBack = rememberBackProgress()
+                    PredictiveBack(enabled = showChrome && panelLevel == 2, progress = panelBack, resetOnCommit = true) {
+                        panelLevel = 1
+                    }
+                    Column(
+                        Modifier.fillMaxWidth()
+                            .layout { measurable, constraints ->
+                                val full = panelPx.value
+                                val h = (full - (full - anchors[1]).coerceAtLeast(0f) * panelBack.value)
+                                    .roundToInt().coerceIn(0, constraints.maxHeight)
+                                val p = measurable.measure(constraints.copy(minHeight = h, maxHeight = h))
+                                layout(p.width, h) { p.place(0, 0) }
+                            }
+                            .chrome(showChrome).highRefresh(handleDown),
+                    ) {
                         Box(
                             Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)
-                                .pointerInput(heights) {
+                                .pointerInput(anchors) {
                                     val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
+                                    var at = 0f
                                     detectVerticalDragGestures(
-                                        onDragStart = { dragDy = 0f; handleDown = true; tracker.resetTracking() },
-                                        onDragEnd = {
-                                            val v = tracker.calculateVelocity().y
-                                            val now = (heights[panelLevel] - with(density) { dragDy.toDp() }).toPx()
-                                            var best = heights.indices.minByOrNull { kotlin.math.abs(heights[it].toPx() - now) }
-                                                ?: panelLevel
-                                            if (kotlin.math.abs(v) > 1500f && best == panelLevel)
-                                                best = (panelLevel + if (v < 0) 1 else -1).coerceIn(0, heights.lastIndex)
-                                            if (best != panelLevel) view.tick()
-                                            panelLevel = best
-                                            handleDown = false; dragDy = 0f
+                                        onDragStart = {
+                                            handleDown = true
+                                            tracker.resetTracking()
+                                            at = panelPx.value
+                                            view.haptic(HapticEvent.GestureStart)
                                         },
-                                        onDragCancel = { handleDown = false; dragDy = 0f },
+                                        onDragEnd = {
+                                            // A finger moving up (negative y) makes the panel taller.
+                                            val v = -tracker.calculateVelocity().y
+                                            val best = snapIndex(anchors, at, v, from = panelLevel)
+                                            if (best != panelLevel) view.haptic(HapticEvent.Segment)
+                                            releaseVelocity = v
+                                            panelLevel = best
+                                            handleDown = false
+                                            settleKey++
+                                        },
+                                        onDragCancel = { handleDown = false; settleKey++ },
                                     ) { change, dy ->
                                         change.consume()
                                         tracker.addPosition(change.uptimeMillis, change.position)
-                                        dragDy += dy
+                                        at = (at - dy).coerceIn(anchors.first(), anchors.last())
+                                        val now = at
+                                        panelScope.launch { panelPx.snapTo(now) }
                                     }
                                 }
                                 .semantics {
@@ -612,13 +646,7 @@ private fun Controls(
             Box(Modifier.weight(1f).clipToBounds()) {
             androidx.compose.animation.AnimatedContent(
                 targetState = tab,
-                transitionSpec = {
-                    val dir = if (targetState > initialState) 1 else -1
-                    (androidx.compose.animation.slideInHorizontally(Motion.defaultSpatialOffset()) { it / 8 * dir } +
-                        androidx.compose.animation.fadeIn(Motion.defaultEffects())) togetherWith
-                        (androidx.compose.animation.slideOutHorizontally(Motion.defaultSpatialOffset()) { -it / 8 * dir } +
-                            androidx.compose.animation.fadeOut(Motion.fastEffects()))
-                },
+                transitionSpec = { directionalSwap(targetState > initialState) },
                 label = "tab",
             ) { page ->
             Column(
