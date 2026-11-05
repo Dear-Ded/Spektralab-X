@@ -44,20 +44,23 @@ jobs:
       - name: Render
         run: ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest --tests com.dearded.spektralab.Screenshots
 
-      - name: Contact sheet
-        run: |
-          command -v montage >/dev/null || { sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick; }
-          cd app/build/outputs/roborazzi
-          ls *.png > /dev/null
-          montage *.png -resize 270x600 -geometry +8+8 -tile 5x -background '#0E0E10' \
-            -fill '#EBEBEB' -pointsize 14 -set label '%t' ../contact-sheet.png
-
+      # First, so a failing contact sheet never loses the PNGs.
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-${{ github.run_number }}
           path: app/build/outputs/roborazzi/*.png
+          if-no-files-found: error
           retention-days: 30
+
+      # The runner's ImageMagick has no default font: label with the app's bundled Inter.
+      - name: Contact sheet
+        run: |
+          command -v montage >/dev/null || { sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick; }
+          font="$PWD/app/src/main/assets/fonts/Inter-VF.ttf"
+          cd app/build/outputs/roborazzi
+          montage *.png -resize 270x600 -geometry +8+8 -tile 5x -background '#0E0E10' \
+            -font "$font" -fill '#EBEBEB' -pointsize 14 -set label '%t' ../contact-sheet.png
 
       # One unzipped PNG, so it opens in the browser from the run page.
       - name: Upload contact sheet
