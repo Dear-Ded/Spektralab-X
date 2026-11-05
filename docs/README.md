@@ -17,6 +17,7 @@ Most documents are in Chinese; those marked EN have English.
 | [FAQ.md](FAQ.md) | 常见问题：速度、发热、暗红偏紫、屏幕与导出、颗粒、网络权限、核对安装包 · EN |
 | [VERIFY.md](VERIFY.md) | 校验安装包：签名证书、SHA256SUMS、构建溯源证明 · EN |
 | [DEVICES.md](DEVICES.md) | 小米数字系列 10–18 的芯片、内存、建议工作尺寸、已知风险和 GPU 限制 |
+| [XIAOMI_ISLAND.md](XIAOMI_ISLAND.md) | 小米超级岛：官方权限的申请条件、审核步骤和邮件草稿；目前以 Android 标准实时通知为主 |
 | [更新记录 / CHANGELOG](../CHANGELOG.md) | 每个版本的改动 |
 
 ## 计划 / Plans
