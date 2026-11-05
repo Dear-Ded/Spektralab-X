@@ -81,6 +81,8 @@ cp "$repo"/tools/parity/{spk_android.cpp,host_parity.py,fma_check.sh,build.sh} "
 for f in output_transform input_transform layer2 resize; do
     cp "$repo/app/src/main/cpp/$f.hpp" "$repo/app/src/main/cpp/$f.cpp" "$S/"
 done
+# layer2.cpp's masks and dust (header only).
+cp "$repo/app/src/main/cpp/layer2_local.hpp" "$S/"
 UP="$UP" B="$B" SRC="$S" bash "$S/build.sh" >/dev/null
 
 # --- 5. the CC0 RAWs (docs/SAMPLES.md), checked against their SHA-256 ----------
