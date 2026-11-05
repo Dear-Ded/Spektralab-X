@@ -134,27 +134,34 @@
 
 ## 3. 交互与动效
 
+> 调研：`ui2_research_benchmarks.md`、`ui2_tech.md`，以及 2026-11-05 补充调研 `ui-motion-research.md`（M3 Expressive 源码、预测性返回官方指引、HapticFeedbackConstants）。Gemini、Google Photos、Lightroom 都没有公开动效数值，下面凡是写“推断”的，是按它们的行为和官方指引定的，等真机校对。
+> 组件在 `Interactions.kt`（按压、选中、震动、吸附、预测性返回）和 `Transitions.kt`（共享元素）。其他文件直接调用，不要自己再写一套。
+
 ### 3.1 跟手
 
-- 拖动时数值、位置 1:1 跟手指，不加动画；松手后带手指速度进入弹簧。
-- 拖动中读的状态只在绘制阶段读（lambda modifier、`graphicsLayer`），不触发重组。
-- 编辑器申请高刷：`preferredFrameRate`（API 35+ 生效），其他版本按系统默认。
+- 拖动时数值、位置 1:1 跟手指，不加动画；松手后带手指速度进入弹簧（`Animatable.animateTo(..., initialVelocity = v)`）。
+- 拖动中读的状态只在 layout / draw 阶段读：`Modifier.offset { }`、`graphicsLayer { }`、`drawBehind { }`。不写 `Modifier.height(x.dp)` 这类在组合阶段读的形式。
+- 越过阈值才生效的判断（面板该吸到哪档、滑过一格）用 `derivedStateOf`，只在结果变化时重组一次。
+- 编辑器和观片台申请高刷：`Modifier.preferredFrameRate(FrameRateCategory.High)`，只在 API 35+ 生效；Compose 在图层动画时本来也会投 High 票。
 
 ### 3.2 弹簧（照搬 M3 Expressive 数值，手写，不升级 Material3）
 
-| 用途 | 阻尼 / 刚度 |
-|---|---|
-| 小元素位移（胶囊、指示器、按钮按下） | 0.6 / 800 |
-| 面板、卡片、默认位移 | 0.8 / 380 |
-| 大面板、全屏转场 | 0.8 / 200 |
-| 颜色、透明度（快 / 默认 / 慢） | 1.0 / 3800、1600、800，不回弹 |
+| 用途 | 阻尼 / 刚度 | `Motion.` |
+|---|---|---|
+| 小元素：胶囊、开关、按下、指示器 | 0.6 / 800 | `fastSpatial` |
+| 面板、卡片、默认位移 | 0.8 / 380 | `defaultSpatial` |
+| 全屏转场、共享元素 | 0.8 / 200 | `slowSpatial` |
+| 颜色、透明度（快 / 默认 / 慢） | 1.0 / 3800、1600、800 | `fastEffects` / `defaultEffects` / `slowEffects` |
+
+- 规则（M3 `MotionScheme` 源码原话）：改形状、尺寸、位置的用 spatial；颜色和透明度用 effects，effects 不回弹。
+- 按尺寸选快慢（MDC Motion 文档）：小控件 fast，盖住一部分屏幕的（底部面板）default，全屏 slow。
+- 没有时长和缓动曲线：弹簧会被打断后从当前速度接着走，适合手势随时反悔。
 
 ### 3.3 手势规则
 
 - 二维控件（曲线、调色盘）只在按住控制点时接管手指；从空白处上下滑交给页面滚动。
 - 滑杆只接管横向拖动；竖向一律让给页面。
 - 每个手势都有可见按钮：长按对比 ↔ “对比”按钮；双击缩放 ↔ “1:1”按钮；滑杆双击归零 ↔ “重置这一项”。
-- 返回：面板展开时先收面板，再退出沉浸，再离开编辑器；用 `PredictiveBackHandler` 让返回跟手。观片台根部的 `BackHandler`（LightTableScreen.kt）改掉，恢复系统返回桌面动画。
 
 ### 3.4 沉浸
 
@@ -165,7 +172,70 @@
 
 ### 3.5 震动
 
-沿用 UI.md 第 1 节的震动表，补充：面板吸附到半高/全高时 `SEGMENT_TICK`（回退 `CLOCK_TICK`）；工序“下一步”时 `CONTEXT_CLICK`。
+统一调用 `Interactions.kt` 的 `View.haptic(HapticEvent)`；API 30 / 34 的新常量都有回退，最低 API 29。`performHapticFeedback` 遵守系统“触摸反馈”开关，不需要 VIBRATE 权限；官方不建议用 `createOneShot` 这类马达直驱。
+
+| 事件 | `HapticEvent` | 常量 | 回退 |
+|---|---|---|---|
+| 滑杆经过 / 吸附默认值 | `Tick` | CLOCK_TICK | — |
+| 滑杆到头 | `Edge` | GESTURE_THRESHOLD_ACTIVATE (34) | CLOCK_TICK |
+| 档位拨盘每一档、面板吸附到一档、片条过一格、网格换列数 | `Segment` | SEGMENT_TICK (34) | CLOCK_TICK |
+| 重置、导出完成、选中照片 | `Confirm` | CONFIRM (30) | VIRTUAL_KEY |
+| 套用风格、工序“下一步” | `Click` | CONTEXT_CLICK | — |
+| 打开强度面板、开始拖动面板 | `GestureStart` | GESTURE_START (30) | CONTEXT_CLICK |
+| 拖动面板松手 | `GestureEnd` | GESTURE_END (30) | — |
+| 长按对比、长按多选 | `LongPress` | LONG_PRESS | — |
+| 开关打开 / 关闭 | `ToggleOn` / `ToggleOff` | TOGGLE_ON / OFF (34) | CLOCK_TICK |
+| 出错、淘汰照片 | `Reject` | REJECT (30) | LONG_PRESS |
+
+拖动过程中不连续震动，滑过胶片条时也不逐个震动；只在跨过档位的那一下震一次。
+
+### 3.6 按压与选中
+
+| 状态 | 视觉 | 动画 |
+|---|---|---|
+| 按下 | 缩到 0.96 | `fastSpatial`，松手回弹略过 1.0 |
+| 选中 | 填充反色（近白底深色字）+ 圆角从 12 dp 变到全圆 + 字重 Medium | 圆角 `fastSpatial`，颜色 `defaultEffects` |
+| 不可用 | 透明度 0.6，不缩放 | — |
+
+- M3 Expressive 自己的按钮按下是“形状变方”（全圆 → 8 dp），不缩放；ToggleButton 选中时变形用 FastSpatial。我们两样都要：按下缩放给手指确认，选中变形告诉眼睛状态。数值见 `ui-motion-research.md` 第 1 节。
+- 连在一起的按钮组（分段按钮）：间隙 2 dp，内侧圆角 8 dp，选中的那段变成全圆。
+- 实现：`Modifier.pressScale(interactionSource)`、`rememberSelectionStyle(selected)`、`Modifier.morphingPill(...)`，都在 `Interactions.kt`。
+
+### 3.7 转场
+
+| 从 → 到 | 怎么走 | 弹簧 |
+|---|---|---|
+| 观片台网格缩略图 → 单张查看 | 共享元素：缩略图的位置和大小长到全屏，背景从 0 淡到不透明 | 位置 `slowSpatial`（推断：Google Photos 的同类动作） |
+| 单张查看 → 编辑器 | 共享元素：同一张照片原位不动，周围的面板从下往上进来 | `defaultSpatial` |
+| 风格 / 胶卷卡片 → 强度面板 | 卡片的圆角容器长成面板（sharedBounds），文字淡入 | `defaultSpatial` |
+| 编辑器五个入口之间 | 方向性滑动：往右的入口从右进，往左的从左进，位移 1/8 宽，淡入淡出 | 位移 `defaultSpatial`，淡入 `defaultEffects`，淡出 `fastEffects` |
+| 面板三档高度 | 拖动 1:1；松手按位置和速度吸到最近一档，快速甩动多走一档 | `defaultSpatial`，带松手速度 |
+| “更多参数”展开收起 | 高度展开 + 内容淡入；箭头转 180° | 高度 `defaultSpatial`，淡入 `defaultEffects` |
+
+- 照片本身不做慢动画：前后对比、换胶片后的结果、拖动中的实时渲染一律立即替换（换胶片保留现有的 `defaultEffects` 交叉淡化，不用位移）。
+- 共享元素只在 `SharedTransitionLayout` 内生效；拿不到作用域时组件退回普通显示，不报错。
+
+### 3.8 预测性返回
+
+| 位置 | 返回手势中 | 松手提交 | 取消 |
+|---|---|---|---|
+| 底部面板展开 | 面板跟手往下收，最多收到少一档 | 吸到下一档 | 弹回原高度 |
+| 1:1 查看 | 整屏缩到 90%，边距 8 dp，向手势反方向偏移，背景渐暗 | 收回到编辑器 | 回到 100% |
+| 单张查看 → 网格 | 照片跟手缩小，松手后共享元素飞回格子 | 回网格 | 回全屏 |
+| 编辑器 → 观片台 | 编辑器缩到 90% 淡出，观片台从 110% 缩回 100% 淡入（官方“fade through”） | 进观片台 | 回编辑器 |
+| 观片台根部 | 不拦截，交给系统做返回桌面动画 | — | — |
+
+- 官方指引：进度先过 `PathInterpolator(0, 0, 0, 1)`（减速）再用，不直接用原始进度；最小缩放 90%，边距 8 dp，水平偏移 `宽/20 − 8 dp`。
+- 根 Activity 拦截返回会让系统“返回桌面”动画失效。所以观片台根部只在有多选时才注册返回（`BackHandler(enabled = selecting)`）；直接退到桌面交给系统。
+- 返回顺序：面板展开时先收面板，再退出沉浸，再离开编辑器（见 3.3）。
+- 实现：`rememberBackProgress()` + `Modifier.predictiveBackScale(...)`，`SeekableTransitionState` 驱动整屏切换（`Interactions.kt`、`LightTableNav.kt`）。
+
+### 3.9 系统“移除动画”
+
+- Compose 读 `ANIMATOR_DURATION_SCALE`：为 0 时所有弹簧、`animate*AsState`、`Animatable`、`Transition` 下一帧直接到终点，不用自己判断。
+- 不受影响的是手势值（拖动位移、返回进度、`seekTo`），这本来就该跟手。
+- 自己写的帧循环（`withFrameNanos`、Aura 的无限动画）要查 `rememberReduceMotion()`（`Interactions.kt`），为 true 时停住。
+- 共享元素在移除动画下直接切换，不飞。
 
 ## 4. 逐页检查表
 
