@@ -845,6 +845,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     val jobs: StateFlow<List<ProcessingJob>> get() = host.queue.jobs
 
     fun showQueue(on: Boolean) = _ui.update { it.copy(showQueue = on) }
+    /** A photo opened from another app (share / open with); AppScreens brings the editor forward. */
+    val externalOpens = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     fun cancelJob(id: Long) = host.queue.cancel(id)
     fun retryJob(id: Long) = host.queue.retry(id)
     fun clearFinishedJobs() = host.queue.clearFinished()
