@@ -409,7 +409,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         )
     }
 
-    if (showSettings) SettingsDialog(ui, vm) { showSettings = false }
+    if (showSettings) SettingsScreen(ui, vm) { showSettings = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
     ui.detail?.let { DetailViewer(it, vm::closeDetail) }
     UpdateDialog(editing = ui.hasImage)
@@ -1131,50 +1131,6 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
 private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, reason: String = "", onChange: (Boolean) -> Unit) =
     SettingRow(label, checked, enabled, disabledReason = reason, onChange = onChange)
 
-@Composable
-private fun StockPicker(label: String, stocks: List<Stock>, selected: String, enabled: Boolean, onPick: (String) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    val current = stocks.firstOrNull { it.id == selected }
-    OutlinedButton(onClick = { open = true }, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
-        Text("$label：${current?.label ?: selected}", maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
-    if (open) {
-        AlertDialog(
-            onDismissRequest = { open = false },
-            confirmButton = { TextButton(onClick = { open = false }) { Text("取消") } },
-            title = { Text("选择$label") },
-            text = {
-                LazyColumn {
-                    items(stocks, key = { it.id }) { stock ->
-                        Row(
-                            Modifier.fillMaxWidth().clickable { open = false; onPick(stock.id) }
-                                .padding(vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(stock.label, modifier = Modifier.weight(1f))
-                            val tags = listOfNotNull(
-                                if (stock.positive) "反转" else null,
-                                if (stock.bw) "黑白" else null,
-                            )
-                            if (tags.isNotEmpty()) {
-                                Text(
-                                    tags.joinToString(" "),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            if (stock.id == selected) {
-                                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.padding(start = 8.dp))
-                            }
-                        }
-                        HorizontalDivider()
-                    }
-                }
-            },
-        )
-    }
-}
-
 /** FilmStrip's two extra groups, after the four kinds (0..3). */
 private const val FAV = 10
 private const val RECENT = 11
@@ -1257,136 +1213,6 @@ private val ASPECTS = listOf(
     "原始" to 0.0, "3:2" to 1.5, "2:3" to 2.0 / 3.0, "4:3" to 4.0 / 3.0, "3:4" to 0.75,
     "1:1" to 1.0, "16:9" to 16.0 / 9.0, "XPan 65:24" to 65.0 / 24.0,
 )
-
-private val HIGHLIGHT_STOPS = listOf(
-    0f to "关（与桌面版一致，推荐）",
-    1f to "1 档",
-    2f to "2 档",
-)
-
-private val WORKING_EDGES = listOf(
-    2048 to "2048 px（最快）",
-    3072 to "3072 px",
-    4096 to "4096 px（推荐）",
-    6144 to "6144 px",
-    0 to "原始尺寸（受 GPU 上限约束）",
-)
-
-// A sheet, not a dialog: the photo stays in view, it follows the finger down,
-// and Material3's sheet already answers predictive back.
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SettingsDialog(ui: UiState, vm: EditorViewModel, onDismiss: () -> Unit) {
-    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.Panel) {
-            Column(
-                Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp)
-            ) {
-                Text("设置", style = MaterialTheme.typography.titleMedium)
-                SettingsSection("工作尺寸（长边）")
-                Text(
-                    "打开照片时先缩到这个尺寸再处理，导出也是这个尺寸。越大越慢、越占内存。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                for ((edge, label) in WORKING_EDGES) {
-                    Row(
-                        Modifier.fillMaxWidth().clickable { vm.setWorkingEdge(edge) },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(selected = ui.workingEdge == edge, onClick = { vm.setWorkingEdge(edge) })
-                        Text(label)
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
-                SwitchRow("广色域导出（Display P3）", ui.wideGamut, true) { vm.setWideGamut(it) }
-                Text(
-                    "JPEG 按 P3 色域冲印并嵌入色彩配置，反转片和电影拷贝的饱和色不会被截掉。TIFF 始终是 sRGB。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                run { val c = androidx.compose.ui.platform.LocalContext.current; var on by remember { mutableStateOf(LocationSetting.enabled(c)) }; SwitchRow("导出保留拍摄位置", on, true) { on = it; LocationSetting.set(c, it) } }
-                SettingsSection("新照片的胶片和相纸")
-                Text(
-                    "只用于没有保存过编辑的照片；已经编辑过的照片按它自己的设置打开。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Row(
-                    Modifier.fillMaxWidth().clickable { vm.setNewPhotoStocks("", "") },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = ui.defaultFilm.isEmpty(), onClick = { vm.setNewPhotoStocks("", "") })
-                    Text("记住上次用的")
-                }
-                val fixFilm = ui.defaultFilm.ifEmpty { ui.edit.film }
-                val fixPaper = ui.defaultPaper.ifEmpty { ui.edit.paper }
-                Row(
-                    Modifier.fillMaxWidth().clickable { vm.setNewPhotoStocks(fixFilm, fixPaper) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = ui.defaultFilm.isNotEmpty(), onClick = { vm.setNewPhotoStocks(fixFilm, fixPaper) })
-                    Text("固定为")
-                }
-                if (ui.defaultFilm.isNotEmpty()) {
-                    StockPicker("胶片", ui.catalog.films, ui.defaultFilm, true) { vm.setNewPhotoStocks(it, ui.defaultPaper) }
-                    StockPicker("相纸", ui.catalog.papers, ui.defaultPaper, true) { vm.setNewPhotoStocks(ui.defaultFilm, it) }
-                }
-                SettingsSection("手机照片高光恢复")
-                Text(
-                    "默认关闭：照片按原样交给引擎，和桌面版 SpektraLab 一致。开启后，中灰以上的高光会被展开（Ultra HDR 照片改用增益图），让胶片自己的肩部处理高光；高光会更亮、更浓，可能偏离原版色彩。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                for ((stops, label) in HIGHLIGHT_STOPS) {
-                    Row(
-                        Modifier.fillMaxWidth().clickable { vm.setHighlightStops(stops) },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(selected = ui.highlightStops == stops, onClick = { vm.setHighlightStops(stops) })
-                        Text(label)
-                    }
-                }
-                SettingsSection("设备")
-                Text(ui.deviceSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
-                Text(ui.engineSummary.ifEmpty { "—" }, style = MaterialTheme.typography.bodySmall)
-                val clipboard = LocalClipboardManager.current
-                var copied by remember { mutableStateOf(false) }
-                TextButton(onClick = { clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true }) {
-                    Text(if (copied) "已复制诊断信息" else "复制诊断信息")
-                }
-                SettingsSection("更新")
-                Text(
-                    "只连 GitHub 上本项目的发布页，不上传任何内容。安装包核对校验和与签名后才安装。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                run {
-                    val c = androidx.compose.ui.platform.LocalContext.current
-                    var auto by remember { mutableStateOf(Updater.autoCheck(c)) }
-                    var wifi by remember { mutableStateOf(Updater.wifiDownload(c)) }
-                    SwitchRow("自动检查更新", auto, true) { auto = it; Updater.setAutoCheck(c, it) }
-                    SwitchRow("Wi-Fi 下自动下载新版本", wifi, auto) { wifi = it; Updater.setWifiDownload(c, it) }
-                    TextButton(onClick = { onDismiss(); Updater.show(); Updater.check(c, manual = true) }) { Text("立即检查更新") }
-                }
-                LocalCoach.current?.let { c ->
-                    TextButton(onClick = { c.replay(); onDismiss() }) { Text("重新查看引导") }
-                }
-                Spacer(Modifier.height(12.dp))
-                AboutSection()
-            }
-    }
-}
-
-/** A settings group's title (UI2.md 1.3): a hairline above, the title quiet, room to breathe. */
-@Composable
-private fun SettingsSection(title: String) {
-    Column(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)) {
-        HorizontalDivider(color = Palette.OutlineSoft)
-        Spacer(Modifier.height(12.dp))
-        Text(title, style = MaterialTheme.typography.titleSmall, color = Palette.OnSurface)
-    }
-}
 
 @Composable
 private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {

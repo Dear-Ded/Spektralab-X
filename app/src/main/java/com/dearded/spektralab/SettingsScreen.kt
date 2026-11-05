@@ -1,0 +1,383 @@
+package com.dearded.spektralab
+
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import kotlinx.coroutines.CancellationException
+
+private val WORKING_EDGES = listOf(
+    2048 to "2048 px（最快）",
+    3072 to "3072 px",
+    4096 to "4096 px（推荐）",
+    6144 to "6144 px",
+    0 to "原始尺寸",
+)
+
+private val HIGHLIGHT_STOPS = listOf(0f to "关（推荐）", 1f to "1 档", 2f to "2 档")
+
+/**
+ * 设置 (ui-screens_research.md 2): a full page over the editor, not a sheet,
+ * grouped from most to least used. Each group is one card of joined rows with
+ * a 2 dp seam between them (M3 Expressive segmented list): the outer corners
+ * 20 dp, the inner 4. A row names the setting, says in one line what it does,
+ * and shows its current value; choosing among several values opens in place.
+ * The back gesture shrinks the page under the finger.
+ */
+@Composable
+fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
+    val context = LocalContext.current
+    var back by remember { mutableFloatStateOf(0f) }
+    PredictiveBackHandler { events ->
+        try {
+            events.collect { back = it.progress }
+            onClose()
+        } catch (e: CancellationException) {
+            back = 0f
+            throw e
+        }
+    }
+    Box(
+        Modifier.fillMaxSize().zIndex(10f)
+            .graphicsLayer {
+                val k = 1f - 0.1f * back
+                scaleX = k; scaleY = k
+                shape = RoundedCornerShape((28 * back).dp); clip = back > 0f
+            }
+            .background(Palette.Background)
+            // Same window as the editor: without a pointer node here, taps on blank
+            // space would fall through to the editor underneath.
+            .pointerInput(Unit) { awaitEachGesture { awaitFirstDown(requireUnconsumed = false) } },
+    ) {
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp),
+        ) {
+            Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回编辑器")
+                }
+            }
+            Text("设置", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 8.dp))
+
+            // 编辑: how the editor starts.
+            // UI2.md 0.1: the key is ui-visual's (Pill.kt EXPAND_ALL); the editor reads it with rememberExpandAll().
+            val prefs = remember(context) { context.getSharedPreferences("settings", 0) }
+            var expandAll by remember { mutableStateOf(prefs.getBoolean(EXPAND_ALL, false)) }
+            val coach = LocalCoach.current
+            SettingsGroup("编辑", buildList<@Composable () -> Unit> {
+                add {
+                    SettingRow(
+                        "默认展开全部参数", expandAll, true,
+                        note = "冲洗和调整的每一步直接显示“更多参数”，和桌面版一样全。关着时先看常用的两三项。",
+                    ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
+                }
+                add { NewPhotoStocks(ui, vm) }
+                if (coach != null) add {
+                    ActionRow("重新查看引导", "回到编辑器后，五个入口的提示会再出现一次。") { coach.replay(); onClose() }
+                }
+            })
+
+            // 画质与导出: size, colour, what goes into the file.
+            SettingsGroup("画质与导出", listOf<@Composable () -> Unit>(
+                {
+                    ChoiceRow(
+                        "工作尺寸（长边）",
+                        "打开照片时先缩到这个尺寸再处理，导出也是这个尺寸。越大越慢、越占内存。",
+                        value = WORKING_EDGES.firstOrNull { it.first == ui.workingEdge }?.second ?: "${ui.workingEdge} px",
+                    ) {
+                        PillRow {
+                            for ((edge, label) in WORKING_EDGES) {
+                                SelectPill(selected = ui.workingEdge == edge, onClick = { vm.setWorkingEdge(edge) },
+                                    label = { Text(label) })
+                            }
+                        }
+                    }
+                },
+                {
+                    SettingRow(
+                        "广色域导出（Display P3）", ui.wideGamut, true,
+                        note = "JPEG 按 P3 冲印并嵌入色彩配置，反转片和电影拷贝的饱和色不会被截掉。TIFF 始终是 sRGB。",
+                    ) { vm.setWideGamut(it) }
+                },
+                {
+                    ChoiceRow(
+                        "手机照片高光恢复",
+                        "关时照片按原样交给引擎，和桌面版一致。开启后中灰以上的高光会展开，让胶片自己处理；更亮更浓，可能偏离原版色彩。",
+                        value = HIGHLIGHT_STOPS.firstOrNull { it.first == ui.highlightStops }?.second ?: "${ui.highlightStops} 档",
+                    ) {
+                        Segmented(
+                            options = HIGHLIGHT_STOPS.map { it.second },
+                            selected = HIGHLIGHT_STOPS.indexOfFirst { it.first == ui.highlightStops }.coerceAtLeast(0),
+                        ) { i -> vm.setHighlightStops(HIGHLIGHT_STOPS[i].first) }
+                    }
+                },
+                {
+                    var on by remember { mutableStateOf(LocationSetting.enabled(context)) }
+                    SettingRow("导出保留拍摄位置", on, true, note = "关着时导出的照片不带 GPS 位置。") {
+                        on = it; LocationSetting.set(context, it)
+                    }
+                },
+            ))
+
+            // 我的风格: what the user brought in.
+            SettingsGroup("我的风格", listOf<@Composable () -> Unit>({ Column(Modifier.padding(vertical = 8.dp)) { UserLibrarySection(vm) } }))
+
+            // 更新
+            SettingsGroup("更新", listOf<@Composable () -> Unit>(
+                {
+                    var auto by remember { mutableStateOf(Updater.autoCheck(context)) }
+                    var wifi by remember { mutableStateOf(Updater.wifiDownload(context)) }
+                    Column {
+                        SettingRow("自动检查更新", auto, true,
+                            note = "只连 GitHub 上本项目的发布页，不上传任何内容。") { auto = it; Updater.setAutoCheck(context, it) }
+                        SettingRow("Wi-Fi 下自动下载新版本", wifi, auto,
+                            note = "安装包核对校验和与签名后才安装。") { wifi = it; Updater.setWifiDownload(context, it) }
+                    }
+                },
+                {
+                    ActionRow("立即检查更新", "当前 ${BuildConfig.VERSION_NAME}") {
+                        onClose(); Updater.show(); Updater.check(context, manual = true)
+                    }
+                },
+            ))
+
+            // 关于与诊断
+            SettingsGroup("关于与诊断", listOf<@Composable () -> Unit>(
+                { InfoRow("设备", ui.deviceSummary.ifEmpty { "—" }) },
+                { InfoRow("引擎", ui.engineSummary.ifEmpty { "—" }) },
+                {
+                    val clipboard = LocalClipboardManager.current
+                    var copied by remember { mutableStateOf(false) }
+                    ActionRow(if (copied) "已复制诊断信息" else "复制诊断信息", "报告问题时一起贴上，里面没有照片和位置。") {
+                        clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true
+                    }
+                },
+                { Column(Modifier.padding(vertical = 12.dp)) { AboutSection() } },
+            ))
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+/**
+ * One group: its name, then the rows as one card with 2 dp seams. The outer
+ * corners are 20 dp and the inner ones 4, so the rows read as one set.
+ */
+@Composable
+private fun SettingsGroup(title: String, rows: List<@Composable () -> Unit>) {
+    Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurfaceSoft,
+        modifier = Modifier.padding(start = 4.dp, top = GroupGap, bottom = 8.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        rows.forEachIndexed { i, row ->
+            val top = if (i == 0) 20.dp else 4.dp
+            val bottom = if (i == rows.lastIndex) 20.dp else 4.dp
+            Box(
+                Modifier.fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
+                    .background(Palette.Panel)
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            ) { row() }
+        }
+    }
+}
+
+/** A name and one line on the left, a chevron on the right; the whole row is the button. */
+@Composable
+private fun ActionRow(label: String, note: String = "", onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+            if (note.isNotBlank()) Hint(note)
+        }
+        Chevron(0f)
+    }
+}
+
+/** A fact, not a control: the name over its value. */
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Column(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 8.dp)) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+        Hint(value)
+    }
+}
+
+/**
+ * A setting with several values: collapsed it shows the current one on the
+ * right (the upstream's "a closed section says what is set"); tapped, the
+ * choices open under it in place.
+ */
+@Composable
+private fun ChoiceRow(label: String, note: String, value: String, choices: @Composable () -> Unit) {
+    var open by rememberSaveable(label) { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                .clickable(role = Role.Button) { open = !open }
+                .semantics { stateDescription = if (open) "已展开" else "已收起" }
+                .padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
+                if (!open) Text(value, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            val turn by animateFloatAsState(if (open) 90f else 0f, Motion.defaultSpatial(), label = "choice-turn")
+            Chevron(turn)
+        }
+        AnimatedVisibility(open, enter = expandVertically(Motion.defaultSpatial()) + fadeIn(Motion.defaultEffects()),
+            exit = shrinkVertically(Motion.defaultSpatial()) + fadeOut(Motion.fastEffects())) {
+            Column(Modifier.padding(bottom = 12.dp)) {
+                Hint(note, Modifier.padding(bottom = 10.dp))
+                choices()
+            }
+        }
+    }
+}
+
+/** A right-pointing chevron, turned by [degrees] (90 = open, pointing down). */
+@Composable
+private fun Chevron(degrees: Float) {
+    Canvas(Modifier.size(20.dp).graphicsLayer { rotationZ = degrees }) {
+        val u = size.width / 20f
+        val w = 1.6f * u
+        drawLine(Palette.OnSurfaceSoft, Offset(8 * u, 5 * u), Offset(13 * u, 10 * u), w, StrokeCap.Round)
+        drawLine(Palette.OnSurfaceSoft, Offset(13 * u, 10 * u), Offset(8 * u, 15 * u), w, StrokeCap.Round)
+    }
+}
+
+/** 新照片的胶片和相纸: remember the last pair, or a fixed pair picked from the lists. */
+@Composable
+private fun NewPhotoStocks(ui: UiState, vm: EditorViewModel) {
+    val fixed = ui.defaultFilm.isNotEmpty()
+    val value = if (!fixed) "记住上次用的" else listOf(
+        ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm,
+        ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper,
+    ).joinToString(" · ")
+    var picking by remember { mutableStateOf<String?>(null) }
+    ChoiceRow("新照片的胶片和相纸", "只用于没有保存过编辑的照片；编辑过的照片按它自己的设置打开。", value) {
+        Segmented(options = listOf("记住上次用的", "固定为"), selected = if (fixed) 1 else 0) { i ->
+            if (i == 0) vm.setNewPhotoStocks("", "")
+            else vm.setNewPhotoStocks(ui.defaultFilm.ifEmpty { ui.edit.film }, ui.defaultPaper.ifEmpty { ui.edit.paper })
+        }
+        if (fixed) {
+            Spacer(Modifier.height(RowGap))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TonalButton("胶片：" + (ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm),
+                    modifier = Modifier.weight(1f)) { picking = "film" }
+                TonalButton("相纸：" + (ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper),
+                    modifier = Modifier.weight(1f)) { picking = "paper" }
+            }
+        }
+    }
+    when (picking) {
+        "film" -> StockSheet("新照片的胶片", ui.catalog.films, ui.defaultFilm, { picking = null }) {
+            vm.setNewPhotoStocks(it, ui.defaultPaper)
+        }
+        "paper" -> StockSheet("新照片的相纸", ui.catalog.papers, ui.defaultPaper, { picking = null }) {
+            vm.setNewPhotoStocks(ui.defaultFilm, it)
+        }
+    }
+}
+
+/** A stock list in a sheet: one 56 dp row per stock, the current one on the inverted fill. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StockSheet(title: String, stocks: List<Stock>, selected: String, onDismiss: () -> Unit, onPick: (String) -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Palette.PanelHigh) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            PanelHeader(title)
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 480.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                items(stocks, key = { it.id }) { s ->
+                    val on = s.id == selected
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(if (on) 28.dp else 12.dp))
+                            .background(if (on) Palette.Accent else Palette.Panel)
+                            .clickable(role = Role.RadioButton) { onPick(s.id); onDismiss() }
+                            .semantics { contentDescription = s.label + if (on) "，当前" else "" }
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(s.label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
+                            color = if (on) Palette.OnAccent else Palette.OnSurface)
+                        val tags = listOfNotNull(if (s.positive) "反转" else null, if (s.bw) "黑白" else null)
+                        if (tags.isNotEmpty()) Text(tags.joinToString(" "), style = MaterialTheme.typography.labelSmall,
+                            color = if (on) Palette.OnAccent else Palette.OnSurfaceSoft)
+                    }
+                }
+            }
+            Spacer(Modifier.navigationBarsPadding().height(16.dp))
+        }
+    }
+}
