@@ -108,7 +108,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             if (!more) Hint(moreSummary("高光、阴影、黑场、白场",
                 "高光" to l.highlights.signedOrNull(n.highlights), "阴影" to l.shadows.signedOrNull(n.shadows),
                 "黑场" to l.blackPoint.signedOrNull(n.blackPoint), "白场" to l.whitePoint.signedOrNull(n.whitePoint)))
-            if (more) {
+            Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
                 Adj("高光", l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
                 Adj("阴影", l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
                 Adj("黑场", l.blackPoint, 0.0, 50.0, enabled) { set(l.copy(blackPoint = it)) }

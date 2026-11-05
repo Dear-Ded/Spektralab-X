@@ -79,6 +79,9 @@ android {
     packaging {
         jniLibs { useLegacyPackaging = false }
     }
+
+    // The bundled UI fonts (Theme.kt UiFonts) are mapped in place, not inflated into memory.
+    androidResources { noCompress += "ttf" }
 }
 
 dependencies {

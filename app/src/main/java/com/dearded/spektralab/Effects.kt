@@ -55,7 +55,7 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
         "半径" to e.unsharpSigma.takeIf { it != 0.7 }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
         "色彩分离" to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
     ))
-    if (more) {
+    Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
         LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
             disabledReason = if (enabled && !e.grainActive) "颗粒已关闭，打开上面的开关再调。" else "") {
             onChange(e.copy(grainArea = it))

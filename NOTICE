@@ -154,6 +154,10 @@ the EXIF Software field.
 - volk — MIT (https://github.com/zeux/volk)
 - stb — MIT (https://github.com/nothings/stb)
 - Liberation Sans — SIL OFL 1.1; DejaVu Sans Mono — Bitstream Vera licence
+- 界面字体 / UI fonts — SIL OFL 1.1, texts in assets/fonts/licenses/:
+  Noto Sans SC (Copyright 2014-2021 Adobe, Reserved Font Name 'Source'),
+  Inter (Copyright 2020 The Inter Project Authors),
+  JetBrains Mono (Copyright 2020 The JetBrains Mono Project Authors)
 - README 样片原图 / README sample RAWs: raw.pixls.us — CC0 1.0
 
 许可文本随应用打包在 assets/engine/licenses/。
