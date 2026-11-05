@@ -34,7 +34,7 @@ object JobNotifier {
     const val PAUSED_ID = 3
     private const val CHANNEL = "processing"
     private const val CHANNEL_DONE = "processing_done"
-    private const val ACCENT = 0xFFE8A24A.toInt()
+    private const val ACCENT = 0xFFE6E6E6.toInt()   // UI2.md 1.1: neutral, no amber
     private var sequence = 0
 
     fun ensureChannels(context: Context) {
