@@ -459,3 +459,28 @@ private fun Check(color: Color) {
         drawLine(color, Offset(4.9f * u, 9f * u), Offset(9.8f * u, 3.4f * u), w, StrokeCap.Round)
     }
 }
+
+/**
+ * A secondary action that is not a choice (向左转, 重新抽取, 套用预设): a Layer1
+ * pill 48 dp tall with white 92 % text, the press shrinking it a little. Lighter
+ * than the near-white primary (保存), heavier than a [QuietButton].
+ */
+@Composable
+internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val press = remember { MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "tonal-press")
+    val shape = RoundedCornerShape(24.dp)
+    Box(
+        modifier.heightIn(min = 48.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
+            .clip(shape).background(Palette.PanelHigh)
+            .border(1.dp, Palette.OutlineSoft, shape)
+            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
+            .padding(horizontal = 18.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
+    }
+}
