@@ -381,7 +381,7 @@ internal fun StyleStrip(
             ThumbCard(
                 selected = false, image = bitmap,
                 title = f.name.substringBeforeLast("."),
-                subtitle = ui.catalog.film(car.edit.film)?.label ?: "原图",
+                subtitle = if (car.edit.noFilm) "原图" else ui.catalog.film(car.edit.film)?.label ?: "原图",
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
                 val src = ui.source ?: return@ThumbCard
