@@ -197,7 +197,7 @@ void Layer2::set_lut(std::shared_ptr<const ColourTable> lut, float strength) {
     lut_strength_ = lut_ ? s : 0;
 }
 
-void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
+void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& f) const {
     if (lut_) {
         float lr = r, lg = g, lb = b;
         lut_->apply(lr, lg, lb);
@@ -286,7 +286,7 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
         }
     }
     // Upstream's step 8: masks after the global adjustments and curves, before the vignette.
-    if (local_) local_->masks(c, u, v);
+    if (local_ && f.placed) local_->masks(*f.placed, c, u, v);
     if (fade_ != 0) for (float& x : c) x = fade_ + saturate(x) * (1 - fade_);
     if (vignette_ != 0) {
         const float px = (u - 0.5f) * 2, py = (v - 0.5f) * 2;
@@ -295,17 +295,17 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v) const {
         for (float& x : c) x *= k;
     }
     // Dust last: it sits on the scan, over everything the print had.
-    if (local_) local_->dust(c, u, v);
+    if (local_ && f.placed) local_->dust(*f.placed, c, u, v);
     r = c[0]; g = c[1]; b = c[2];
 }
 
-void Layer2::frame(uint32_t w, uint32_t h) const {
-    if (local_) local_->set_frame(w, h);
+Layer2::Frame Layer2::frame(uint32_t w, uint32_t h) const {
+    return local_ ? Frame{local_->place(w, h)} : Frame{};
 }
 
 void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_px,
                      uint32_t w, uint32_t h, uint8_t* out, size_t out_stride) {
-    look.frame(w, h);
+    const Layer2::Frame frame = look.frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
@@ -314,7 +314,7 @@ void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_
             const float v = (y + 0.5f) * ih;
             for (uint32_t x = 0; x < w; ++x) {
                 float r = s[4 * x] / 65535.0f, g = s[4 * x + 1] / 65535.0f, b = s[4 * x + 2] / 65535.0f;
-                look.apply(r, g, b, (x + 0.5f) * iw, v);
+                look.apply(r, g, b, (x + 0.5f) * iw, v, frame);
                 d[4 * x + 0] = uint8_t(std::lround(saturate(r) * 255.0f));
                 d[4 * x + 1] = uint8_t(std::lround(saturate(g) * 255.0f));
                 d[4 * x + 2] = uint8_t(std::lround(saturate(b) * 255.0f));
@@ -325,7 +325,7 @@ void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_
 }
 
 void apply_rgba16_in_place(const Layer2& look, uint16_t* px, size_t stride_px, uint32_t w, uint32_t h) {
-    look.frame(w, h);
+    const Layer2::Frame frame = look.frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
@@ -333,7 +333,7 @@ void apply_rgba16_in_place(const Layer2& look, uint16_t* px, size_t stride_px, u
             const float v = (y + 0.5f) * ih;
             for (uint32_t x = 0; x < w; ++x) {
                 float r = s[4 * x] / 65535.0f, g = s[4 * x + 1] / 65535.0f, b = s[4 * x + 2] / 65535.0f;
-                look.apply(r, g, b, (x + 0.5f) * iw, v);
+                look.apply(r, g, b, (x + 0.5f) * iw, v, frame);
                 s[4 * x + 0] = uint16_t(std::lround(saturate(r) * 65535.0f));
                 s[4 * x + 1] = uint16_t(std::lround(saturate(g) * 65535.0f));
                 s[4 * x + 2] = uint16_t(std::lround(saturate(b) * 65535.0f));
