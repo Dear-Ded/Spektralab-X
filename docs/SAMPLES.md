@@ -76,3 +76,39 @@ python3 tools/samples/compose.py compare:lake:ektar100 compare:fruit:velvia100 \
 `samples.sh` expects a `raw/` directory with the files above, renamed with
 spaces replaced by underscores. Any Vulkan 1.2 device works; the published set
 was rendered on Mesa lavapipe (CPU), so results do not depend on a GPU vendor.
+
+## RAW regression set
+
+[`tools/samples/manifest.tsv`](../tools/samples/manifest.tsv) lists 33 CC0
+files from raw.pixls.us with their SHA-256: every Xiaomi file the site has, and
+Canon (CR2, CR3, CRAW), Nikon (lossy and lossless NEF), Sony (including all six
+A7 V / ILCE-7M5 samples), Fujifilm X-Trans (compressed and uncompressed),
+Leica, Ricoh, Apple and Google Pixel. Some of them exercise one engine patch
+each: `leica-q-ol3warp` and `apple-iphone-6s-plus-ol3vig` carry DNG
+OpcodeList3 (patch 0009), the Xiaomi and Pixel DNGs carry an OpcodeList2
+GainMap (patch 0006), the A7 V files need the ARW6 decoder (LibRaw patch 0019).
+
+Not covered: raw.pixls.us has no Xiaomi phone newer than the POCO M3
+(M2010J19CG), so the Xiaomi 10–18 series, the 13 Ultra of upstream #48 and
+UltraRAW are missing. A sample offered under CC0 goes into the manifest with
+its SHA-256 and raw.pixls.us id (or a URL the script can fetch).
+
+[`tools/samples/expected.tsv`](../tools/samples/expected.tsv) holds, per file
+and decode mode (`compatible`, `headroom`), what `spk_decode` printed: size,
+SHA-256 of the float frame, per-channel mean and maximum, non-finite count and
+LibRaw's decoder name. The hash is exact only for the compiler and CPU that
+recorded it (the cloud box, GCC 14, x86-64); elsewhere a mean within 0.5 % is
+reported as `close` and passes.
+
+One command on a Linux box with an engine build (`scripts/parity.sh` leaves one
+in its work directory) downloads each file, checks it, decodes it in both modes,
+deletes it again and compares:
+
+```bash
+UP=<patched upstream tree> B=<build dir> bash tools/samples/regress.sh <workdir>
+```
+
+`record` instead of a comparison rewrites `expected.tsv` (after a deliberate
+decode change; say why in the commit). `ONLY="xiaomi sony-a7v"` limits the run,
+`SAMPLES_DIR=` reuses files already on the machine, `KEEP=1` keeps the
+downloads.
