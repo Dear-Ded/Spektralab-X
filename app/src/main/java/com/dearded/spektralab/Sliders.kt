@@ -78,6 +78,8 @@ internal fun LabeledSlider(
     enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {},
     /** Shown under the track while the slider is off: why it cannot be used (UI2.md 4, question 3). */
     disabledReason: String = "",
+    /** Words under the two ends of the track, e.g. 偏黄 / 偏蓝: which way each end moves the picture. */
+    ends: Pair<String, String>? = null,
     onChange: (Double) -> Unit,
 ) {
     val view = LocalView.current
@@ -244,6 +246,12 @@ internal fun LabeledSlider(
                 drawRoundRect(Palette.Accent, Offset(left, top), Size(w, h), CornerRadius(h / 2))
                 drawText(layout, topLeft = Offset(left + pad, top + pad / 2))
             }
+        }
+        // Neutral words, never a hue: the direction is told in text (UI2.md 1.1).
+        if (ends != null) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+            Text(ends.first, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+            Text(ends.second, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
         }
         if (!enabled && disabledReason.isNotBlank()) Hint(disabledReason)
     }
