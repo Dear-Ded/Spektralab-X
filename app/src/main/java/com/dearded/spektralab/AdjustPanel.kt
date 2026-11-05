@@ -93,15 +93,21 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     }
 
     // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
-    var more by remember(seg) { mutableStateOf(false) }
+    val expandAll = rememberExpandAll()
+    var more by remember(seg) { mutableStateOf(expandAll) }
     when (seg) {
         0 -> {
-            LabeledSlider("曝光", l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
+            // The 双击归零 hint sits on the first slider a newcomer meets, one tap from the photo.
+            Box(Modifier.coachAnchor(CoachStep.RESET)) {
+                LabeledSlider("曝光", l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
+            }
             Adj("对比度", l.contrast, -50.0, 50.0, enabled) { set(l.copy(contrast = it)) }
             Adj("亮度", l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
             MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
                 l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
-            if (!more) Hint("高光、阴影、黑场、白场")
+            if (!more) Hint(moreSummary("高光、阴影、黑场、白场",
+                "高光" to l.highlights.signedOrNull(n.highlights), "阴影" to l.shadows.signedOrNull(n.shadows),
+                "黑场" to l.blackPoint.signedOrNull(n.blackPoint), "白场" to l.whitePoint.signedOrNull(n.whitePoint)))
             if (more) {
                 Adj("高光", l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
                 Adj("阴影", l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
@@ -114,7 +120,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Adj("色调", l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
             Adj("饱和度", l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
             MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
-            if (!more) Hint("自然饱和度")
+            if (!more) Hint(moreSummary("自然饱和度", "自然饱和度" to l.vibrance.signedOrNull(n.vibrance)))
             if (more) Adj("自然饱和度", l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
         }
         2 -> {
@@ -168,7 +174,8 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         else -> {
             Adj("褪色", l.fade, 0.0, 100.0, enabled) { set(l.copy(fade = it)) }
             Adj("暗角", l.vignette, -100.0, 100.0, enabled) { set(l.copy(vignette = it)) }
-            LabeledSlider("暗角范围", l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f") {
+            LabeledSlider("暗角范围", l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f",
+                disabledReason = if (enabled && l.vignette == 0.0) "先调暗角，范围才有作用。" else "") {
                 set(l.copy(vignetteMid = it))
             }
         }

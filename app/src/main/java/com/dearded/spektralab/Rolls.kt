@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,17 +23,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -184,42 +180,45 @@ fun rollsOf(frames: List<Frame>, catalog: Catalog, manual: List<ManualRoll> = em
 internal val EdgeType = TextStyle(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium,
     fontFeatureSettings = "tnum", letterSpacing = 0.4.sp)
 
-/** The roll list: one plain card per roll, no film-can cabinet (UI.md appendix D). */
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * The roll list: one plain card per roll, no film-can cabinet (UI.md appendix
+ * D). It is the table's second view, not a page under the grid: the same
+ * transparent head and floating bar, with 按卷 chosen in the bar's track.
+ * Back leaves for the grid's own parent (the editor), as switching to 网格 is
+ * a view change and not a step deeper.
+ */
 @Composable
-fun RollList(rolls: List<Roll>, onOpen: (Roll) -> Unit, onBack: () -> Unit) {
+fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Unit, onGrid: () -> Unit, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
-    Scaffold(
-        containerColor = Palette.Background,
-        topBar = {
-            TopAppBar(
-                expandedHeight = 56.dp,
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格") }
-                },
-                title = {
-                    Column {
-                        Text("按卷查看", style = MaterialTheme.typography.titleMedium)
-                        Text("${rolls.size} 卷 · 按胶片和日期自动分卷", style = MaterialTheme.typography.bodySmall,
-                            color = Palette.OnSurfaceSoft)
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val add = rememberAddPhotos(table)
+    val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + HeadHeight
+    val bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + FloatingBarSpace
+    Box(Modifier.fillMaxSize().background(Palette.Background)) {
         if (rolls.isEmpty()) {
-            Text("观片台上还没有照片", Modifier.fillMaxWidth().padding(padding).padding(32.dp),
-                color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center)
-            return@Scaffold
+            Column(
+                Modifier.fillMaxSize().padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("观片台上还没有照片", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(8.dp))
+                Hint("用右下角的“+”放上来，冲洗过的照片会按胶片和日期自动分卷。")
+            }
+        } else {
+            LazyColumn(
+                Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = top + 8.dp, bottom = bottom + 8.dp),
+                verticalArrangement = Arrangement.spacedBy(RowGap),
+            ) {
+                items(rolls, key = { it.id }, contentType = { "roll" }) { roll -> RollCard(roll) { onOpen(roll) } }
+            }
         }
-        LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(rolls, key = { it.id }, contentType = { "roll" }) { roll -> RollCard(roll) { onOpen(roll) } }
-        }
+        TableHead(
+            title = "按卷查看",
+            subtitle = "${rolls.size} 卷 · 按胶片和日期自动分卷",
+            onBack = onBack,
+        )
+        TableBar(rolls = true, onGrid = onGrid, onRolls = {}, add = add, modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 
@@ -245,7 +244,7 @@ private fun RollCard(roll: Roll, onClick: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 for (f in roll.frames.take(MAX_PREVIEW)) {
                     val thumb by rememberThumbnail(f, px)
-                    Box(Modifier.size(cell).clip(RoundedCornerShape(6.dp)).background(Palette.PanelHigh)) {
+                    Box(Modifier.size(cell).clip(RoundedCornerShape(8.dp)).background(Palette.PanelHigh)) {
                         thumb?.let { b ->
                             val image = remember(b) { b.asImageBitmap() }
                             Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

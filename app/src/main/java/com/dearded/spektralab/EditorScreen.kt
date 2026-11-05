@@ -680,8 +680,11 @@ private fun Controls(
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
                                 title = "冲洗",
+                                // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
                                 summary = listOfNotNull(ui.catalog.film(e.film)?.label,
-                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label).joinToString(" · "),
+                                    if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label,
+                                    if (e.exposureEv != 0.0) String.format(java.util.Locale.ROOT, "%+.1f EV", e.exposureEv) else null,
+                                ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             when (step) {
@@ -712,21 +715,26 @@ private fun Controls(
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
                                     }
                                 SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
-                                Box(Modifier.coachAnchor(CoachStep.RESET)) {
-                                    LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
-                                        vm.update(e.copy(exposureEv = it))
-                                    }
+                                LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
+                                    vm.update(e.copy(exposureEv = it))
                                 }
                                 LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
                                 // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
-                                var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+                                val expandAll = rememberExpandAll()
+                                var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
                                 MoreRow(open = moreExposure, edited = e.yShift != 0.0 || e.mShift != 0.0 ||
                                     (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
-                                if (!moreExposure) Hint(if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜")
+                                if (!moreExposure) Hint(moreSummary(
+                                    if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜",
+                                    "黄" to e.yShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
+                                    "品红" to e.mShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
+                                    "白平衡" to ui.source?.takeIf { it.wbK > 0 }?.let { String.format(java.util.Locale.ROOT, "%.0f K", it.wbK) },
+                                ))
                                 if (moreExposure) {
-                                    LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                    LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
+                                        disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有放大机滤镜。" else "") {
                                         vm.update(e.copy(yShift = it))
                                     }
                                     LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
@@ -780,7 +788,8 @@ private fun Controls(
                         }
                         // Sprocket strips only: any photo, any film, no crop, nothing re-developed.
                         val perf = e.frame.perf
-                        SwitchRow("只加齿孔", perf != null, enabled && !e.filmEdge) { on ->
+                        SwitchRow("只加齿孔", perf != null, enabled && !e.filmEdge,
+                            reason = if (enabled && e.filmEdge) "胶片边框已经带齿孔；关掉胶片边框才能单独加。" else "") { on ->
                             vm.update(e.copy(frame = e.frame.copy(perf = if (on) Perforation() else null)))
                         }
                         if (perf != null) {
@@ -931,7 +940,12 @@ private fun Controls(
                             Hint("边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。")
                         }
                         val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
-                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank()) {
+                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank(), reason = when {
+                            !enabled -> ""
+                            e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
+                            !dateOk -> "宽幅画幅没有日期后背。"
+                            else -> ""
+                        }) {
                             vm.update(e.copy(dateImprint = it))
                         }
                         Hint(when {
@@ -949,6 +963,8 @@ private fun Controls(
                                         label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
                                 }
                             }
+                            if (!e.filmEdge) Hint("数据后背印在片边上，要先打开胶片边框。")
+                            if (e.dateStyle == "data") Hint("数据后背按相机的格式印，顺序不能改。")
                             val orders = listOf("japan" to "年 月 日", "us" to "月 日 年")
                             Segmented(orders.map { it.second }, orders.indexOfFirst { it.first == e.dateOrder },
                                 enabled && e.dateStyle != "data") { i ->
@@ -961,6 +977,8 @@ private fun Controls(
                                 optionEnabled = { places[it].first == "frame" || e.rebateDateFits }) { i ->
                                 vm.update(e.copy(datePlacement = places[i].first))
                             }
+                            if (!e.rebateDateFits) Hint("印在帧间需要 135 或半格的胶片边框。")
+                            else if (e.datePlacement != "frame") Hint("印在帧间时位置由片边决定，不用选角落。")
                             val corners = listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")
                             Segmented(corners.map { it.second }, corners.indexOfFirst { it.first == e.dateCorner },
                                 enabled && e.datePlacement == "frame") { i ->
@@ -981,7 +999,12 @@ private fun Controls(
                                 }
                             }
                             if (e.dateStyle != "data") {
-                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank()) {
+                                SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank(), reason = when {
+                                    !enabled -> ""
+                                    !e.filmEdge -> "拍摄参数印在片边上，要先打开胶片边框。"
+                                    e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息。"
+                                    else -> ""
+                                }) {
                                     vm.update(e.copy(dateWithData = it))
                                 }
                             }
@@ -1112,40 +1135,29 @@ private val FORMATS = listOf("半格" to 24.0, "135" to 36.0, "645" to 56.0, "6�
  */
 @Composable
 private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Double) -> Unit) {
+    // The same slider as every other parameter (ui-audit.md, 冲洗 ③). A drag only moves the
+    // readout and commits on release; a tap, a typed value or a reset commits at once.
+    // The default is the camera's as-shot setting, so ↺ and the default dot mean 原始.
     val currentK = if (s.wbK > 0) s.wbK else s.asShotK
     val currentTint = if (s.wbK > 0) s.wbTint else s.asShotTint
     var k by remember(s) { mutableFloatStateOf(currentK.toFloat().coerceIn(2000f, 12000f)) }
     var tint by remember(s) { mutableFloatStateOf(currentTint.toFloat().coerceIn(-150f, 150f)) }
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("白平衡", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-            Text(
-                String.format(Locale.ROOT, "%.0f K · 色调 %+.0f", k, tint),
-                style = MaterialTheme.typography.labelMedium,
-            )
-            TextButton(onClick = { onCommit(0.0, 0.0) }, enabled = enabled && s.wbK > 0) { Text("原始") }
-        }
-        Slider(
-            value = k, onValueChange = { k = it },
-            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
-            valueRange = 2000f..12000f, enabled = enabled,
-        )
-        Slider(
-            value = tint, onValueChange = { tint = it },
-            onValueChangeFinished = { onCommit(k.toDouble(), tint.toDouble()) },
-            valueRange = -150f..150f, enabled = enabled,
-        )
-        Text(
-            "在解码时应用，松手后重新解码 RAW，需要几秒。",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    var dragging by remember { mutableStateOf(false) }
+    fun commit() {
+        val asShot = kotlin.math.abs(k - s.asShotK) < 1 && kotlin.math.abs(tint - s.asShotTint) < 0.5
+        if (asShot) { if (s.wbK > 0) onCommit(0.0, 0.0) } else onCommit(k.toDouble(), tint.toDouble())
     }
+    GroupLabel("RAW 白平衡")
+    LabeledSlider("色温", k.toDouble(), 2000.0, 12000.0, s.asShotK.coerceIn(2000.0, 12000.0), enabled, "%.0f K",
+        onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
+    LabeledSlider("色调", tint.toDouble(), -150.0, 150.0, s.asShotTint.coerceIn(-150.0, 150.0), enabled, "%+.0f",
+        onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
+    Hint("在解码时应用，松手后重新解码 RAW，需要几秒。默认是相机拍摄时的设置。")
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) =
-    SettingRow(label, checked, enabled, onChange = onChange)
+private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, reason: String = "", onChange: (Boolean) -> Unit) =
+    SettingRow(label, checked, enabled, disabledReason = reason, onChange = onChange)
 
 @Composable
 private fun StockPicker(label: String, stocks: List<Stock>, selected: String, enabled: Boolean, onPick: (String) -> Unit) {
@@ -1191,6 +1203,10 @@ private fun StockPicker(label: String, stocks: List<Stock>, selected: String, en
     }
 }
 
+/** FilmStrip's two extra groups, after the four kinds (0..3). */
+private const val FAV = 10
+private const val RECENT = 11
+
 /** The film cards: each film on the open photo. Films whose card has not rendered yet show their name only. */
 @Composable
 private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
@@ -1206,13 +1222,25 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     var kind by androidx.compose.runtime.saveable.rememberSaveable {
         mutableStateOf(ui.catalog.film(ui.edit.film)?.let(::kindOf) ?: 0)
     }
+    // 收藏 and 最近 come first, each only once it has something (ui2_derivatives.md 9).
+    val picks = rememberPicks("film")
+    val favs = picks.favourites.mapNotNull { id -> ui.catalog.films.firstOrNull { it.id == id } }
+    val recents = picks.recent.mapNotNull { id -> ui.catalog.films.firstOrNull { it.id == id } }
+    if ((kind == FAV && favs.isEmpty()) || (kind == RECENT && recents.isEmpty())) kind = 0
     PillRow(Modifier.padding(bottom = 4.dp)) {
+        if (favs.isNotEmpty()) SelectPill(selected = kind == FAV, onClick = { kind = FAV }, label = { Text("收藏 ${favs.size}") })
+        if (recents.isNotEmpty()) SelectPill(selected = kind == RECENT, onClick = { kind = RECENT }, label = { Text("最近") })
         kinds.forEachIndexed { i, name ->
             val n = ui.catalog.films.count { kindOf(it) == i }
             if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
         }
     }
-    val films = ui.catalog.films.filter { kindOf(it) == kind }
+    val films = when (kind) {
+        FAV -> favs
+        RECENT -> recents
+        else -> ui.catalog.films.filter { kindOf(it) == kind }
+    }
+    if (kind != FAV && favs.isEmpty()) Hint("长按卡片可以收藏。")
     val view = androidx.compose.ui.platform.LocalView.current
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
     // The current film is brought into view when the strip appears or the film
@@ -1246,7 +1274,9 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
                 subtitle = FilmNotes.line(film),
                 enabled = enabled,
                 placeholder = film.label,
-            ) { if (!selected) { view.tick(); onPick(film.id) } }
+                starred = picks.isFavourite(film.id),
+                onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
+            ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
         }
     }
 }

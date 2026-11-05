@@ -1,43 +1,37 @@
 package com.dearded.spektralab
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +60,6 @@ import kotlin.math.abs
  * path, nearest the top first. Tapping a card shows it large above the grid;
  * 用这个 writes that style into the frame's sidecar. Nothing is applied until then.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onClose: () -> Unit) {
     BackHandler(onBack = onClose)
@@ -80,61 +73,17 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
     val styles = remember(group, catalog) { Style.ALL.filter { it.group == group && catalog.film(it.film) != null } }
     fun editOf(s: Style?) = if (s == null) base else s.applyTo(start, catalog)
     val picked = Style.ALL.firstOrNull { it.id == chosen }
+    val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + HeadHeight
+    val bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + FloatingBarSpace
 
-    Scaffold(
-        containerColor = Palette.Background,
-        topBar = {
-            TopAppBar(
-                expandedHeight = 56.dp,
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Palette.Surface),
-                navigationIcon = {
-                    IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                },
-                title = {
-                    Column {
-                        Text("比较风格", style = MaterialTheme.typography.titleMedium)
-                        Text(frame.name, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Surface(color = Palette.Surface) {
-                Row(
-                    Modifier.fillMaxWidth().navigationBarsPadding().height(64.dp).padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        picked?.let { "${it.name} · ${it.inspiredBy.ifEmpty { it.group }}" } ?: "当前效果",
-                        Modifier.weight(1f), style = MaterialTheme.typography.bodySmall,
-                        color = Palette.OnSurfaceSoft, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    )
-                    Button(
-                        onClick = {
-                            val s = picked ?: return@Button
-                            val e = s.applyTo(start, catalog) ?: return@Button
-                            table.saveLook(frame, e, s.name)
-                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                            onClose()
-                        },
-                        enabled = picked != null,
-                        colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-                    ) { Text("用这个") }
-                }
-            }
-        },
-    ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+    Box(Modifier.fillMaxSize().background(Palette.Background)) {
+        Column(Modifier.fillMaxSize().padding(top = top)) {
             // The chosen look, large; the photo itself switches at once (UI.md 0.6).
             BoxWithConstraints(Modifier.fillMaxWidth().aspectRatio(1.5f).background(Palette.Surround)) {
                 val px = with(LocalDensity.current) { maxWidth.roundToPx() }
                 CompareImage(frame, editOf(picked), px, priority = { -1 }, ContentScale.Fit)
             }
-            Row(
-                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            PillRow(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                 for (g in groups) SelectPill(selected = g == group, onClick = { group = g }, label = { Text(g) })
             }
             val grid = rememberLazyGridState()
@@ -144,38 +93,75 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     state = grid,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottom + 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(RowGap),
                 ) {
                     // The first card is the frame as it stands, so every style is judged against it.
                     val cards: List<Style?> = listOf<Style?>(null) + styles
                     itemsIndexed(cards, key = { _, s -> s?.id ?: "current" }, contentType = { _, _ -> "style" }) { i, s ->
                         val on = s?.id == chosen
-                        val shape = RoundedCornerShape(6.dp)
+                        // UI2.md 1.2: thumbnails round 12; selected adds a 2 dp white ring and a check.
+                        val shape = RoundedCornerShape(12.dp)
                         Column(
-                            Modifier.clickable { chosen = s?.id; view.tick() }
+                            Modifier.clip(RoundedCornerShape(14.dp)).clickable { chosen = s?.id; view.tick() }
                                 .semantics { contentDescription = s?.name ?: "当前效果"; selected = on },
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Box(
                                 Modifier.fillMaxWidth().aspectRatio(1f).clip(shape).background(Palette.Panel)
                                     .border(2.dp, if (on) Palette.Accent else Color.Transparent, shape),
                             ) {
                                 CompareImage(frame, editOf(s), px, { abs(i - grid.firstVisibleItemIndex) }, ContentScale.Crop)
+                                if (on) Box(
+                                    Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp).background(Palette.Accent, CircleShape),
+                                    contentAlignment = Alignment.Center,
+                                ) { Text("✓", color = Palette.OnAccent, style = MaterialTheme.typography.labelSmall) }
                             }
-                            Spacer(Modifier.height(4.dp))
-                            // UI2.md 1.2: the chosen card's name sits on the inverted fill.
+                            Spacer(Modifier.height(6.dp))
+                            // The chosen card's name sits on the inverted fill.
                             Text(s?.name ?: "当前", style = MaterialTheme.typography.labelLarge, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                                fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
                                 color = if (on) Palette.OnAccent else Palette.OnSurface,
-                                modifier = if (on) Modifier.background(Palette.Accent, RoundedCornerShape(50))
-                                    .padding(horizontal = 8.dp, vertical = 2.dp) else Modifier)
+                                modifier = if (on) Modifier.background(Palette.Accent, RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 8.dp, vertical = 1.dp) else Modifier)
                             if (s != null) Text(shortFilmName(catalog.film(s.film)?.label ?: s.film), maxLines = 1,
-                                overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
+                                overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall,
                                 color = Palette.OnSurfaceSoft)
                         }
                     }
                 }
+            }
+        }
+        TableHead(title = "比较风格", subtitle = frame.name, backLabel = "返回", onBack = onClose)
+        FloatingBar(
+            Modifier.align(Alignment.BottomCenter),
+            trailing = {
+                Spacer(Modifier.width(8.dp))
+                val can = picked != null
+                Box(
+                    Modifier.height(64.dp).clip(RoundedCornerShape(32.dp))
+                        .background(if (can) Palette.Accent else Palette.PanelHigh)
+                        .clickable(enabled = can, role = Role.Button) {
+                            val s = picked ?: return@clickable
+                            val e = s.applyTo(start, catalog) ?: return@clickable
+                            table.saveLook(frame, e, s.name)
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                            onClose()
+                        }
+                        .padding(horizontal = 22.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("用这个", style = MaterialTheme.typography.labelLarge,
+                        color = if (can) Palette.OnAccent else Palette.OnSurfaceSoft)
+                }
+            },
+        ) {
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(picked?.name ?: "当前效果", style = MaterialTheme.typography.bodyMedium, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+                Hint(picked?.let { it.inspiredBy.ifEmpty { it.group } } ?: "点一张卡片，在上面看大图")
             }
         }
     }

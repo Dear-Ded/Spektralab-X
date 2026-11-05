@@ -38,7 +38,7 @@ fun RollSelectionActions(table: LightTableViewModel, chosen: List<Frame>) {
         chosen.any { it.id in ids }
     }
     Box {
-        TextButton(onClick = { menu = true }, enabled = chosen.isNotEmpty()) { Text("装卷") }
+        QuietButton("装卷", enabled = chosen.isNotEmpty()) { menu = true }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             DropdownMenuItem(text = { Text("装成一卷…") }, onClick = { menu = false; naming = true })
             if (manual.isNotEmpty()) {

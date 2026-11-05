@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -73,7 +75,10 @@ import kotlin.math.pow
 @Composable
 internal fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
-    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {}, onChange: (Double) -> Unit,
+    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {},
+    /** Shown under the track while the slider is off: why it cannot be used (UI2.md 4, question 3). */
+    disabledReason: String = "",
+    onChange: (Double) -> Unit,
 ) {
     val view = LocalView.current
     val lo = min.toFloat()
@@ -86,6 +91,7 @@ internal fun LabeledSlider(
     // it, except mid-drag, where the model's echo lags the finger.
     var local by remember { mutableFloatStateOf(value.toFloat().coerceIn(lo, hi)) }
     var pressed by remember { mutableStateOf(false) }
+    var typing by remember { mutableStateOf(false) }
     LaunchedEffect(value, lo, hi) { if (!pressed) local = value.toFloat().coerceIn(lo, hi) }
     var lastThumbTap by remember { mutableLongStateOf(0L) }
     val onChangeLatest by rememberUpdatedState(onChange)
@@ -124,8 +130,17 @@ internal fun LabeledSlider(
                 color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
                 modifier = Modifier.weight(1f))
             if (changed) { EditedDot(); androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp)) }
-            Text(text(local), style = Readout,
-                color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
+            // Tap the readout to type a value (Silverphase RulerParameterRow, upstream ScrubSlider).
+            Box(
+                Modifier.heightIn(min = 48.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                    .clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.Button) { typing = true }
+                    .semantics { contentDescription = "输入$label" }
+                    .padding(horizontal = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text(local), style = Readout,
+                    color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
+            }
             // The space is kept when hidden, so the readout does not jump as ↺ comes and goes.
             Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
                 if (changed && enabled) {
@@ -199,9 +214,12 @@ internal fun LabeledSlider(
                     }
                 },
         ) {
-            val r = 12.dp.toPx()
+            // ui2_visual_refs.md 2.8: a 2 dp track, filled from the default to the thumb; the
+            // default is a 4 dp dot; the thumb is a hollow ring with a centre point, 22 dp at
+            // rest and 28 dp under the finger.
+            val r = 14.dp.toPx()
             val cy = size.height / 2f
-            val track = 3.dp.toPx()
+            val track = 2.dp.toPx()
             val x0 = r
             val x1 = size.width - r
             fun xOf(v: Float) = x0 + (v - lo) / span * (x1 - x0)
@@ -210,10 +228,12 @@ internal fun LabeledSlider(
             val xd = xOf(def)
             val xv = xOf(local)
             drawRect(fill, Offset(minOf(xd, xv), cy - track / 2), Size(abs(xv - xd), track))
-            // The default's tick, 2 dp wide, standing proud of the track.
-            drawRect(Palette.OnSurfaceSoft, Offset(xd - 1.dp.toPx(), cy - 5.dp.toPx()), Size(2.dp.toPx(), 10.dp.toPx()))
-            val thumb = (if (pressed) 12.dp else 10.dp).toPx()
-            drawCircle(if (enabled) Palette.OnSurface else Palette.Outline, thumb, Offset(xv, cy))
+            drawCircle(if (changed) Palette.OnSurfaceSoft else Palette.Track, 2.dp.toPx(), Offset(xd, cy))
+            val thumb = (if (pressed) 14.dp else 11.dp).toPx()
+            val ink = if (enabled) Palette.OnSurface else Palette.Outline
+            drawCircle(Palette.Surface, thumb, Offset(xv, cy))
+            drawCircle(ink, thumb - 1.dp.toPx(), Offset(xv, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+            drawCircle(ink, 2.dp.toPx(), Offset(xv, cy))
             if (pressed) {
                 val layout = measurer.measure(text(local), bubbleStyle)
                 val pad = 6.dp.toPx()
@@ -225,6 +245,38 @@ internal fun LabeledSlider(
                 drawText(layout, topLeft = Offset(left + pad, top + pad / 2))
             }
         }
+        if (!enabled && disabledReason.isNotBlank()) Hint(disabledReason)
+    }
+
+    // The typed value: digits, sign and point only (a unit such as EV, × or % is ignored),
+    // clamped to the slider's range; anything unreadable leaves the value alone.
+    if (typing) {
+        var entry by remember { mutableStateOf(String.format(Locale.ROOT, "%.4f", local.toDouble()).trimEnd('0').trimEnd('.')) }
+        val parsed = entry.filter { it.isDigit() || it == '-' || it == '.' }.toFloatOrNull()
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { typing = false },
+            title = { Text(label) },
+            text = {
+                Column {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = entry, onValueChange = { entry = it.take(12) }, singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text("范围 ${text(lo)} 到 ${text(hi)}，默认 ${text(def)}",
+                        style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+                        modifier = Modifier.padding(top = 6.dp))
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(enabled = parsed != null, onClick = {
+                    parsed?.let { moveTo(it.coerceIn(lo, hi)) }
+                    typing = false
+                }) { Text("确定") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { typing = false }) { Text("取消") } },
+        )
     }
 }
 

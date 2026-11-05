@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -267,6 +268,8 @@ internal fun SettingRow(
     checked: Boolean,
     enabled: Boolean,
     note: String = "",
+    /** Replaces [note] while the row is off: why it cannot be switched (UI2.md 4, question 3). */
+    disabledReason: String = "",
     onChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -278,7 +281,8 @@ internal fun SettingRow(
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyMedium,
                 color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f))
-            if (note.isNotBlank()) Hint(note)
+            val line = if (!enabled && disabledReason.isNotBlank()) disabledReason else note
+            if (line.isNotBlank()) Hint(line)
         }
         Spacer(Modifier.width(12.dp))
         Switch(
@@ -345,6 +349,10 @@ internal fun ThumbCard(
     /** A short tag over the picture's corner, e.g. 推荐. */
     badge: String? = null,
     edited: Boolean = false,
+    /** Starred by the user: a small star on the picture's lower corner (收藏). */
+    starred: Boolean = false,
+    /** A long press, e.g. to star the card; null leaves the card tap-only. */
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     val chosen = selected
@@ -359,7 +367,11 @@ internal fun ThumbCard(
         Modifier.width(size + 8.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (enabled) 1f else 0.5f }
             .clip(outer)
-            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton, onClick = onClick)
+            .combinedClickable(
+                enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton,
+                onLongClickLabel = if (onLongClick != null) (if (starred) "取消收藏" else "收藏") else null,
+                onLongClick = onLongClick, onClick = onClick,
+            )
             .semantics { this.selected = chosen },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -384,6 +396,11 @@ internal fun ThumbCard(
                 contentAlignment = Alignment.Center,
             ) { Check(Palette.OnAccent) }
             else if (edited) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+            if (starred) Box(
+                Modifier.align(Alignment.BottomEnd).padding(6.dp).size(20.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) { Star(Palette.OnSurface) }
         }
         Spacer(Modifier.height(6.dp))
         val nameFill by animateColorAsState(if (selected) Palette.Accent else Palette.Accent.copy(alpha = 0f),
@@ -449,6 +466,26 @@ internal fun TextCard(
     }
 }
 
+/** A drawn five-point star (收藏), filled. */
+@Composable
+private fun Star(color: Color) {
+    Canvas(Modifier.size(12.dp)) {
+        val c = Offset(size.width / 2, size.height / 2 + size.height * 0.04f)
+        val outer = size.width * 0.5f
+        val inner = outer * 0.42f
+        val path = androidx.compose.ui.graphics.Path()
+        for (k in 0 until 10) {
+            val r = if (k % 2 == 0) outer else inner
+            val a = Math.PI / 2 + k * Math.PI / 5
+            val x = c.x + (r * kotlin.math.cos(a)).toFloat()
+            val y = c.y - (r * kotlin.math.sin(a)).toFloat()
+            if (k == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        drawPath(path, color)
+    }
+}
+
 /** A drawn check mark, so it never depends on an icon font. */
 @Composable
 private fun Check(color: Color) {
@@ -484,3 +521,27 @@ internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifi
             overflow = TextOverflow.Ellipsis)
     }
 }
+
+/**
+ * Settings → 默认展开全部参数 (UI2.md 0.1, for film players): every 更多参数
+ * starts open. The key is shared with the settings page (ui-screens).
+ */
+internal const val EXPAND_ALL = "expand_all"
+
+@Composable
+internal fun rememberExpandAll(): Boolean {
+    val c = androidx.compose.ui.platform.LocalContext.current
+    return remember(c) { c.getSharedPreferences("settings", 0).getBoolean(EXPAND_ALL, false) }
+}
+
+/**
+ * The line under a closed 更多参数 (upstream's collapsed SectionHeader): the
+ * values that differ from their defaults ("高光 +20 · 黑场 +5"), or, when
+ * nothing inside changed, the names of what is in there.
+ */
+internal fun moreSummary(names: String, vararg values: Pair<String, String?>): String =
+    values.filter { it.second != null }.joinToString(" · ") { "${it.first} ${it.second}" }.ifEmpty { names }
+
+/** A whole-number readout with its sign when it differs from [default], else null (for [moreSummary]). */
+internal fun Double.signedOrNull(default: Double): String? =
+    if (this == default) null else String.format(java.util.Locale.ROOT, "%+.0f", this)
