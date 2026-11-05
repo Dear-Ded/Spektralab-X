@@ -104,9 +104,9 @@ class SourceLoader(private val context: Context) {
 
     /**
      * Phone photos (JPEG, HEIC/HEIF, Ultra HDR JPEG, PNG, WebP). ImageDecoder
-     * applies the EXIF rotation. Display P3 sources stay in P3 so their wide
-     * gamut reaches the engine; everything else is converted to sRGB. Returns
-     * the bitmap and the engine's name for its space.
+     * applies the EXIF rotation. A source wider than sRGB is decoded to
+     * Display P3 so its wide gamut reaches the engine ([wideSource]); the rest
+     * is converted to sRGB. Returns the bitmap and the engine's name for its space.
      */
     fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Photo {
         val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
@@ -115,7 +115,7 @@ class SourceLoader(private val context: Context) {
         val decoded = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.setTargetColorSpace(
-                if (info.colorSpace == p3) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
+                if (wideSource(info.colorSpace)) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
             )
             val s = fitScale(info.size.width, info.size.height, edge, maxPixels)
             if (s < 1.0) decoder.setTargetSize(max(1, (info.size.width * s).toInt()), max(1, (info.size.height * s).toInt()))
@@ -160,6 +160,26 @@ class SourceLoader(private val context: Context) {
         /** A failure to open the file at all, as opposed to a file LibRaw cannot decode. */
         fun isOpenFailure(error: String): Boolean =
             error.contains("RAW open") || error.contains("cannot read the RAW metadata")
+
+        /**
+         * Whether a photo in [cs] should open in Display P3 rather than sRGB.
+         * Judged by primaries, not object identity: an ICC-tagged P3 JPEG or a
+         * HEIC with nclx P3 (Xiaomi) decodes to a ColorSpace.Rgb that is not
+         * the named DISPLAY_P3 instance, and was converted to sRGB before.
+         * A wider space (BT.2020 HDR HEIC, Adobe RGB, DCI-P3) also goes to P3:
+         * the engine takes only sRGB and P3, and P3 keeps more of it than sRGB.
+         */
+        fun wideSource(cs: ColorSpace?): Boolean {
+            val rgb = cs as? ColorSpace.Rgb ?: return false
+            return gamutArea(rgb.getPrimaries()) > SRGB_AREA * 1.05
+        }
+
+        // The xy triangle's area of [x0, y0, x1, y1, x2, y2] primaries.
+        fun gamutArea(p: FloatArray): Double =
+            kotlin.math.abs((p[2] - p[0]).toDouble() * (p[5] - p[1]) - (p[4] - p[0]).toDouble() * (p[3] - p[1])) / 2
+
+        // sRGB 0.1121, Display P3 0.1520, BT.2020 0.2119.
+        private val SRGB_AREA = gamutArea(floatArrayOf(0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f))
 
         /** Scale that fits (w, h) inside [edge] on the long side and [maxPixels] in area; 0 = no limit. */
         fun fitScale(w: Int, h: Int, edge: Int, maxPixels: Long): Double {
