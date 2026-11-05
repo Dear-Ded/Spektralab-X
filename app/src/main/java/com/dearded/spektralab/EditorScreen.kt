@@ -231,7 +231,6 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on },
         LocalEditorNav provides nav) {
     Scaffold(
-        modifier = Modifier.highRefresh(dragging),
         snackbarHost = { SwipeNotice(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
@@ -388,7 +387,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 val p = measurable.measure(constraints.copy(minHeight = h, maxHeight = h))
                                 layout(p.width, h) { p.place(0, 0) }
                             }
-                            .chrome(showChrome).highRefresh(handleDown),
+                            .chrome(showChrome),
                     ) {
                         Box(
                             Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)

@@ -74,6 +74,12 @@ class MainActivity : ComponentActivity() {
         viewModel.trimMemory(level)
     }
 
+    // 拖动时请求高刷 (FrameRateBoost.kt): read only, the event goes on to super unchanged.
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        FrameRateBoost.observe(this, ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
