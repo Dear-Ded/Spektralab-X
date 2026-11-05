@@ -1,25 +1,11 @@
 package com.dearded.spektralab
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /*
@@ -49,25 +35,16 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
         items(cards, key = { it.id ?: "_scan" }) { c ->
             val on = if (c.id == null) e.scanFilm else !e.scanFilm && e.paper == c.id
-            val fill by animateColorAsState(if (on) Palette.Accent else Palette.Panel, Motion.defaultEffects(), label = "paper-fill")
-            val ink by animateColorAsState(if (on) Palette.OnAccent else Palette.OnSurface, Motion.defaultEffects(), label = "paper-ink")
-            val shape = RoundedCornerShape(if (on) 20.dp else 12.dp)
-            Column(
-                Modifier.width(128.dp).heightIn(min = 72.dp)
-                    .background(fill, shape)
-                    .border(if (on) 2.dp else 1.dp, if (on) fill else Palette.OutlineSoft, shape)
-                    .clickable(enabled = enabled) {
-                        if (on) return@clickable
-                        view.tick()
-                        onChange(if (c.id == null) e.copy(scanFilm = true) else e.copy(scanFilm = false, paper = c.id))
-                    }
-                    .semantics { selected = on }
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            TextCard(
+                selected = on,
+                title = c.name.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
+                subtitle = c.note,
+                enabled = enabled,
             ) {
-                Text(c.name.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                    style = MaterialTheme.typography.labelLarge, color = ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text(c.note, style = MaterialTheme.typography.labelSmall,
-                    color = ink.copy(alpha = 0.7f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (!on) {
+                    view.tick()
+                    onChange(if (c.id == null) e.copy(scanFilm = true) else e.copy(scanFilm = false, paper = c.id))
+                }
             }
         }
     }

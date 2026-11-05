@@ -620,12 +620,17 @@ private fun Controls(
                 label = "tab",
             ) { page ->
             Column(
-                Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                // UI2.md 7.2 point 1: rows 12 dp apart, groups 20; no dividers.
+                Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(RowGap),
             ) {
                     when (page) {
                         0 -> {
-                            PanelHint("点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。")
+                            PanelHeader(
+                                title = "风格",
+                                summary = ui.catalog.film(e.film)?.label.orEmpty(),
+                                hint = "点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。",
+                            )
                         StyleStrip(ui, enabled) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
@@ -643,28 +648,24 @@ private fun Controls(
                                     e.unsharpSigma != d.unsharpSigma || e.unsharpAmount != d.unsharpAmount,
                             )
                             // The panel head names the pair being developed (ui2_derivatives.md).
-                            Text(
-                                listOfNotNull(ui.catalog.film(e.film)?.label,
+                            PanelHeader(
+                                title = "冲洗",
+                                summary = listOfNotNull(ui.catalog.film(e.film)?.label,
                                     if (e.scanFilm) "直接扫描" else ui.catalog.paper(e.paper)?.label).joinToString(" · "),
-                                style = MaterialTheme.typography.titleSmall, color = Palette.OnSurface,
-                                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 4.dp),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             when (step) {
                                 0 -> {
-                                    PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。画幅越小，颗粒越明显。")
+                                    PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。")
                                 FilmStrip(ui, enabled) { vm.pickFilm(it) }
-                                Text("画幅", style = MaterialTheme.typography.labelLarge)
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    for ((label, mm) in FORMATS) {
-                                        SelectPill(
-                                            selected = kotlin.math.abs(e.filmFormatMm - mm) < 0.5,
-                                            onClick = { vm.update(e.copy(filmFormatMm = mm)) },
-                                            label = { Text(label) },
-                                            enabled = enabled,
-                                        )
-                                    }
-                                }
+                                GroupLabel("画幅")
+                                // One set, one track (UI2.md 7.2 point 8); a size not in the list selects nothing.
+                                Segmented(
+                                    options = FORMATS.map { it.first },
+                                    selected = FORMATS.indexOfFirst { kotlin.math.abs(e.filmFormatMm - it.second) < 0.5 },
+                                    enabled = enabled,
+                                ) { i -> vm.update(e.copy(filmFormatMm = FORMATS[i].second)) }
+                                Hint("画幅越小，同样放大到一张照片，颗粒越明显。")
                                     NextStep("相纸") { step = 1 }
                                 }
                                 1 -> {
@@ -686,17 +687,27 @@ private fun Controls(
                                         vm.update(e.copy(exposureEv = it))
                                     }
                                 }
-                                ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
-                                    WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
-                                }
                                 LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
-                                LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
-                                    vm.update(e.copy(yShift = it))
-                                }
-                                LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
-                                    vm.update(e.copy(mShift = it))
+                                // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
+                                var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+                                MoreRow(open = moreExposure, edited = e.yShift != 0.0 || e.mShift != 0.0 ||
+                                    (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
+                                if (!moreExposure) Hint(if (ui.source?.kind == "raw") "黄 / 品红滤镜、RAW 白平衡" else "黄 / 品红滤镜")
+                                if (moreExposure) {
+                                    LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                        vm.update(e.copy(yShift = it))
+                                    }
+                                    LabeledSlider("品红滤镜", e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting) {
+                                        vm.update(e.copy(mShift = it))
+                                    }
+                                    // A control that cannot be used says why (ui2_derivatives.md 10).
+                                    Hint(if (e.scanFilm) "直接扫描不经过相纸，没有放大机的滤镜可调。"
+                                         else "放大机上的黄、品红滤镜，用来校正相纸上的偏色。")
+                                    ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
+                                        WhiteBalance(s, enabled) { k, t -> vm.setWhiteBalance(k, t) }
+                                    }
                                 }
                                     NextStep("胶片效果") { step = 3 }
                                 }
@@ -719,13 +730,23 @@ private fun Controls(
                         2 -> AdjustPage(ui, vm, enabled)
                         3 -> {
                             val src = ui.source
-                            PanelHint("先选一款边框；选好后，下面是这一款的设置：相纸颜色、logo、日期、拍摄参数、齿孔和片边。")
+                            // UI2.md 7.2 point 2: the head says which border is on and offers to take it off.
+                            val border = Borders.byId(e.borderId)
+                            PanelHeader(
+                                title = "边框",
+                                summary = listOfNotNull(
+                                    border?.takeIf { it.id != "none" }?.label ?: "无边框",
+                                    if (e.filmEdge) "片边" else null,
+                                    if (e.frame.perf != null) "齿孔" else null,
+                                    if (e.dateImprint) "日期" else null,
+                                ).joinToString(" · "),
+                                hint = "先选类别和款式；选好后，下面是这一款的设置。",
+                            )
                         BorderPicker(e.borderId, enabled && src != null) { p ->
                             if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
                         }
                         Borders.byId(e.borderId)?.let { p ->
-                            Text(p.hint, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Hint(p.hint)
                         }
                         // Sprocket strips only: any photo, any film, no crop, nothing re-developed.
                         val perf = e.frame.perf
@@ -734,17 +755,17 @@ private fun Controls(
                         }
                         if (perf != null) {
                             fun setPerf(p: Perforation) = vm.update(e.copy(frame = e.frame.copy(perf = p)))
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                for ((v, label) in listOf("both" to "上下", "top" to "只上", "bottom" to "只下")) {
-                                    SelectPill(selected = perf.where == v, onClick = { setPerf(perf.copy(where = v)) },
-                                        label = { Text(label) }, enabled = enabled)
-                                }
-                                for ((v, label) in listOf("ks" to "方孔 KS", "bh" to "圆孔 BH")) {
-                                    SelectPill(selected = perf.shape == v, onClick = { setPerf(perf.copy(shape = v)) },
-                                        label = { Text(label) }, enabled = enabled)
-                                }
+                            // Two separate either-or sets, each in its own track (UI2.md 7.2 point 8).
+                            val wheres = listOf("both" to "上下", "top" to "只上", "bottom" to "只下")
+                            Segmented(wheres.map { it.second }, wheres.indexOfFirst { it.first == perf.where }, enabled) { i ->
+                                setPerf(perf.copy(where = wheres[i].first))
                             }
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            val shapes = listOf("ks" to "方孔 KS", "bh" to "圆孔 BH")
+                            Segmented(shapes.map { it.second }, shapes.indexOfFirst { it.first == perf.shape }, enabled) { i ->
+                                setPerf(perf.copy(shape = shapes[i].first))
+                            }
+                            GroupLabel("片基颜色")
+                            PillRow {
                                 for ((c, label) in Perforation.BASES) {
                                     SelectPill(selected = perf.base == c,
                                         onClick = { setPerf(perf.copy(base = c, holes = Perforation.holesFor(c))) },
@@ -760,24 +781,17 @@ private fun Controls(
                                 )
                                 SwitchRow("帧号", perf.numbers, enabled) { setPerf(perf.copy(numbers = it)) }
                             }
-                            Text("画在照片外侧，不裁剪、不改任何冲印参数；导出 JPEG 时加上。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Hint("画在照片外侧，不裁剪、不改任何冲印参数；导出 JPEG 时加上。")
                         }
                         if (e.filmEdge) {
-                            Text("片边", style = MaterialTheme.typography.labelLarge)
-                            Row(
-                                Modifier.horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                for ((v, label) in listOf("strip" to "整条底片", "filed" to "锉边")) {
-                                    SelectPill(selected = e.edgeMode == v, onClick = { vm.update(e.copy(edgeMode = v)) },
-                                        label = { Text(label) }, enabled = enabled)
-                                }
-                                for ((v, label) in listOf("white" to "扫描 · 白孔", "black" to "相纸 · 黑孔")) {
-                                    SelectPill(selected = e.edgeHoles == v, onClick = { vm.update(e.copy(edgeHoles = v)) },
-                                        label = { Text(label) }, enabled = enabled)
-                                }
+                            GroupLabel("片边")
+                            val modes = listOf("strip" to "整条底片", "filed" to "锉边")
+                            Segmented(modes.map { it.second }, modes.indexOfFirst { it.first == e.edgeMode }, enabled) { i ->
+                                vm.update(e.copy(edgeMode = modes[i].first))
+                            }
+                            val holes = listOf("white" to "扫描 · 白孔", "black" to "相纸 · 黑孔")
+                            Segmented(holes.map { it.second }, holes.indexOfFirst { it.first == e.edgeHoles }, enabled) { i ->
+                                vm.update(e.copy(edgeHoles = holes[i].first))
                             }
                             LabeledSlider("边缘雾化", e.edgeFog, 0.0, 3.0, 1.0, enabled, "%.1f", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(edgeFog = it))
@@ -786,16 +800,16 @@ private fun Controls(
                                 vm.update(e.copy(edgeLeaks = it))
                             }
                             // Upstream's gate families and carriers (overscan.cpp accepts exactly these).
-                            Text("片门", style = MaterialTheme.typography.labelLarge)
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            GroupLabel("片门")
+                            PillRow {
                                 for ((v, label) in listOf("auto" to "随机", "square" to "直角", "rounded" to "圆角", "eared" to "耳朵",
                                     "shouldered" to "肩形", "kicked" to "斜角")) {
                                     SelectPill(selected = e.edgeGate == v, onClick = { vm.update(e.copy(edgeGate = v)) },
                                         label = { Text(label) }, enabled = enabled)
                                 }
                             }
-                            Text("片夹", style = MaterialTheme.typography.labelLarge)
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            GroupLabel("片夹")
+                            PillRow {
                                 for ((v, label) in listOf("none" to "无", "black" to "黑色片夹", "open" to "开口片夹")) {
                                     SelectPill(selected = e.edgeCarrier == v, onClick = { vm.update(e.copy(edgeCarrier = v)) },
                                         label = { Text(label) }, enabled = enabled)
@@ -803,34 +817,37 @@ private fun Controls(
                             }
                             SwitchRow("使用真实片名", e.edgeRealName, enabled) { vm.update(e.copy(edgeRealName = it)) }
                             if (e.edgeRealName && e.edgeText.isNotBlank()) {
-                                Text("片边印字：${e.edgeText}", style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Hint("片边印字：${e.edgeText}")
                             }
                             LabeledSlider("画幅编号", e.edgeFrameNumber.toDouble(), 0.0, 99.0, 0.0, enabled, "%.0f") {
                                 vm.update(e.copy(edgeFrameNumber = Math.round(it).toInt().coerceIn(0, 99)))
                             }
-                            Text("0 为随机编号。", style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            OutlinedButton(onClick = {
+                            Hint("0 为随机编号。")
+                            TonalButton("重新抽取片门和漏光", enabled = enabled) {
                                 // New "camera" and "this frame": gate centring, weave and leak positions re-drawn.
                                 val r = java.util.Random()
                                 vm.update(e.copy(edgeCameraSeed = 1 + r.nextInt(Int.MAX_VALUE - 1),
                                     edgeFrameSeed = 1 + r.nextInt(Int.MAX_VALUE - 1)))
-                            }, enabled = enabled) { Text("重新抽取") }
+                            }
                         }
                         if (!e.frame.isNone) {
-                            Text("相纸", style = MaterialTheme.typography.labelLarge)
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+                            GroupLabel("相纸")
+                            // 48 dp targets around 30 dp swatches; the chosen one wears the card's ring (UI2.md 1.2).
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 for (c in FrameSpec.PAPERS) {
                                     val on = e.frame.paper == c
                                     Box(
-                                        Modifier.size(30.dp)
-                                            .background(Color(c), androidx.compose.foundation.shape.CircleShape)
-                                            .border(if (on) 2.dp else 1.dp,
-                                                if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                                androidx.compose.foundation.shape.CircleShape)
-                                            .clickable(enabled = enabled) { vm.update(e.copy(frame = e.frame.copy(paper = c))) },
-                                    )
+                                        Modifier.size(48.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                                            .clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.RadioButton) {
+                                                vm.update(e.copy(frame = e.frame.copy(paper = c)))
+                                            },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Box(Modifier.size(42.dp).border(2.dp, if (on) Palette.Accent else Color.Transparent,
+                                            androidx.compose.foundation.shape.CircleShape))
+                                        Box(Modifier.size(30.dp).background(Color(c), androidx.compose.foundation.shape.CircleShape)
+                                            .border(1.dp, Palette.Outline, androidx.compose.foundation.shape.CircleShape))
+                                    }
                                 }
                             }
                             // A data bar has only a bottom band; every other card scales as a whole.
@@ -856,9 +873,7 @@ private fun Controls(
                                     label = { Text("签名") },
                                 )
                             }
-                            Text("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Hint("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。")
                         }
                         SwitchRow("胶片边框", e.filmEdge, enabled && src != null) { on ->
                             if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on).let {
@@ -869,10 +884,7 @@ private fun Controls(
                             })
                         }
                         if (e.filmEdge && src != null) {
-                            Row(
-                                Modifier.horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
+                            PillRow {
                                 for ((id, label, _) in Edit.EDGE_FORMATS) {
                                     SelectPill(
                                         selected = e.edgeFormat == id,
@@ -886,51 +898,43 @@ private fun Controls(
                                     )
                                 }
                             }
-                            Text(
-                                "边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Hint("边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。")
                         }
                         val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
                         SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank()) {
                             vm.update(e.copy(dateImprint = it))
                         }
-                        Text(
-                            when {
+                        Hint(when {
                                 e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
                                 !dateOk -> "宽幅画幅没有日期后背。"
                                 else -> "日期：${e.dateText}（取自拍摄时间）"
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                            })
                         if (e.dateImprint && dateOk) {
                             // Upstream's limits (FilmEdge.swift): the data face and between-frames
                             // placement need a film edge; 120 backs print in the margin.
-                            Text("日期后背", style = MaterialTheme.typography.labelLarge)
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            GroupLabel("日期后背")
+                            PillRow {
                                 for ((v, label) in listOf("lcd" to "橙色 LCD", "dots" to "点阵", "data" to "数据后背")) {
                                     SelectPill(selected = e.dateStyle == v, onClick = { vm.update(e.copy(dateStyle = v)) },
                                         label = { Text(label) }, enabled = enabled && (v != "data" || e.filmEdge))
                                 }
                             }
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                for ((v, label) in listOf("japan" to "年 月 日", "us" to "月 日 年")) {
-                                    SelectPill(selected = e.dateOrder == v,
-                                        onClick = { vm.update(e.copy(dateOrder = v, dateText = Edit.dateInOrder(e.dateText, v))) },
-                                        label = { Text(label) }, enabled = enabled && e.dateStyle != "data")
-                                }
+                            val orders = listOf("japan" to "年 月 日", "us" to "月 日 年")
+                            Segmented(orders.map { it.second }, orders.indexOfFirst { it.first == e.dateOrder },
+                                enabled && e.dateStyle != "data") { i ->
+                                val v = orders[i].first
+                                vm.update(e.copy(dateOrder = v, dateText = Edit.dateInOrder(e.dateText, v)))
                             }
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                for ((v, label) in listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")) {
-                                    SelectPill(selected = e.dateCorner == v, onClick = { vm.update(e.copy(dateCorner = v)) },
-                                        label = { Text(label) }, enabled = enabled && e.datePlacement == "frame")
-                                }
-                                for ((v, label) in listOf("frame" to "印在画面", "rebate" to "印在帧间")) {
-                                    SelectPill(selected = e.datePlacement == v, onClick = { vm.update(e.copy(datePlacement = v)) },
-                                        label = { Text(label) }, enabled = enabled && (v == "frame" || e.rebateDateFits))
-                                }
+                            // Where first, then which corner: the corner only matters on the picture.
+                            val places = listOf("frame" to "印在画面", "rebate" to "印在帧间")
+                            Segmented(places.map { it.second }, places.indexOfFirst { it.first == e.datePlacement }, enabled,
+                                optionEnabled = { places[it].first == "frame" || e.rebateDateFits }) { i ->
+                                vm.update(e.copy(datePlacement = places[i].first))
+                            }
+                            val corners = listOf("br" to "右下", "bl" to "左下", "tr" to "右上", "tl" to "左上")
+                            Segmented(corners.map { it.second }, corners.indexOfFirst { it.first == e.dateCorner },
+                                enabled && e.datePlacement == "frame") { i ->
+                                vm.update(e.copy(dateCorner = corners[i].first))
                             }
                             LabeledSlider("字号", e.dateSize, 0.4, 3.0, 1.0, enabled, "%.1f", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(dateSize = it))
@@ -951,15 +955,11 @@ private fun Controls(
                                     vm.update(e.copy(dateWithData = it))
                                 }
                             }
-                            Text(
-                                when {
+                            Hint(when {
                                     e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息，数据后背无内容。"
                                     !e.filmEdge -> "数据后背和帧间日期需要打开胶片边框。"
                                     else -> "拍摄参数：${e.dateDataText}"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                                })
                             // A RAW without lens or exposure data: the user picks the
                             // same-shot JPEG (one URI through the picker, no permission).
                             // Registered unconditionally, so a result survives recreation.
@@ -974,7 +974,15 @@ private fun Controls(
                         }
                         }
                         else -> {
-                            PanelHint("先定方向，再选比例；裁剪在冲洗之前完成，颗粒按裁剪后的画面计算。")
+                            PanelHeader(
+                                title = "构图",
+                                summary = listOfNotNull(
+                                    ASPECTS.firstOrNull { kotlin.math.abs(e.cropAspect - it.second) < 1e-3 }?.first ?: "自定",
+                                    if (e.quarterTurns % 4 != 0) "转 ${e.quarterTurns % 4 * 90}°" else null,
+                                    if (e.flipH) "翻转" else null,
+                                ).joinToString(" · "),
+                                hint = "选画面比例，裁剪居中；旋转和裁剪在冲洗之前完成。",
+                            )
                         val src = ui.source
                         // With the film edge on, the crop must stay the gate's shape in the new orientation.
                         fun reframe(next: Edit) = when {
@@ -983,18 +991,8 @@ private fun Controls(
                                 src.width, src.height, on = true)
                             else -> Edit.centredCrop(next, src.width, src.height, next.cropAspect)
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { vm.update(reframe(e.turned(3))) },
-                                enabled = enabled) { Text("向左转") }
-                            OutlinedButton(onClick = { vm.update(reframe(e.turned(1))) },
-                                enabled = enabled) { Text("向右转") }
-                        }
-                        SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
-                        Text("裁剪比例（居中）", style = MaterialTheme.typography.labelLarge)
-                        Row(
-                            Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
+                        // UI2.md 2.2: the ratio is the first thing on the page; turning and flipping under it.
+                        PillRow {
                             for ((label, aspect) in ASPECTS) {
                                 SelectPill(
                                     selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
@@ -1004,18 +1002,32 @@ private fun Controls(
                                 )
                             }
                         }
-                        Text(
-                            "旋转和裁剪在胶片之前完成，颗粒按裁剪后的画面计算。长按看到的原图不带裁剪。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        if (e.filmEdge) Hint("胶片边框打开时，比例跟着片门走；关掉边框才能选。")
+                        GroupLabel("方向")
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TonalButton("向左转 90°", enabled = enabled, modifier = Modifier.weight(1f)) { vm.update(reframe(e.turned(3))) }
+                            TonalButton("向右转 90°", enabled = enabled, modifier = Modifier.weight(1f)) { vm.update(reframe(e.turned(1))) }
+                        }
+                        SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
+                        Hint("颗粒按裁剪后的画面计算。长按照片看到的原图不带裁剪。")
                         }
                     }
             }
             }
             }
             // Bottom category bar: icon + short label, thumb-reachable (docs/UI.md 2.2).
-            CategoryBar(selected = tab, enabled = true, trailing = save) { i ->
+            // A dot on each entry whose part of the edit differs from a fresh one (UI2.md 7.2 point 10).
+            val fresh = Edit()
+            val entryEdited = listOf(
+                false,
+                e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
+                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 ||
+                    e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                e.look != Look.NEUTRAL,
+                e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,
+                e.cropAspect != 0.0 || e.quarterTurns % 4 != 0 || e.flipH,
+            )
+            CategoryBar(selected = tab, enabled = true, trailing = save, edited = entryEdited) { i ->
                 if (i == tab) onOpen(!open) else { tab = i; onOpen(true) }
             }
         }
@@ -1024,10 +1036,7 @@ private fun Controls(
 
 /** One line under a panel's title: what this step is for, in plain words (UI2.md 2.6). */
 @Composable
-private fun PanelHint(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(bottom = 6.dp))
-}
+private fun PanelHint(text: String) = Hint(text, Modifier.padding(bottom = 4.dp))
 
 /** The darkroom order (UI2.md 2.3): film, paper, exposure and enlarging, the film's own effects. */
 private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放大", "④ 胶片效果")
@@ -1035,8 +1044,7 @@ private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放
 @Composable
 private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
     val view = androidx.compose.ui.platform.LocalView.current
-    Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    PillRow(Modifier.padding(bottom = 4.dp)) {
         DEVELOP_STEPS.forEachIndexed { i, label ->
             SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
                 label = { Text(label) }, enabled = enabled, edited = edited.getOrElse(i) { false })
@@ -1044,19 +1052,25 @@ private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onS
     }
 }
 
-/** 重置这一项 (UI2.md 2.5): one step back to its defaults, no confirmation, one undo. */
+/**
+ * 重置这一项 (UI2.md 2.5): one step back to its defaults, no confirmation, one undo.
+ * Upstream's rule: a reset says what it resets (ui2_derivatives.md). Shown only
+ * once something changed, so an untouched step has nothing to second-guess.
+ */
 @Composable
 private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一项", onReset: () -> Unit) {
-    // Upstream's rule: a reset says what it resets (ui2_derivatives.md).
+    if (!changed) return
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onReset, enabled = enabled && changed) { Text("重置$what") }
+        QuietButton("重置$what", enabled = enabled, onClick = onReset)
     }
 }
 
+/** The step's last row: the next step as a quiet pill on the right, after a group's worth of space. */
 @Composable
 private fun NextStep(name: String, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onClick) { Text("下一步：$name ›") }
+    Row(Modifier.fillMaxWidth().padding(top = GroupGap - RowGap), horizontalArrangement = Arrangement.End) {
+        QuietButton("下一步：$name  ›", onClick = onClick,
+            modifier = Modifier.background(Palette.Panel, RoundedCornerShape(24.dp)))
     }
 }
 
@@ -1100,12 +1114,8 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
-    }
-}
+private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) =
+    SettingRow(label, checked, enabled, onChange = onChange)
 
 @Composable
 private fun StockPicker(label: String, stocks: List<Stock>, selected: String, enabled: Boolean, onPick: (String) -> Unit) {
@@ -1166,8 +1176,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     var kind by androidx.compose.runtime.saveable.rememberSaveable {
         mutableStateOf(ui.catalog.film(ui.edit.film)?.let(::kindOf) ?: 0)
     }
-    Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    PillRow(Modifier.padding(bottom = 4.dp)) {
         kinds.forEachIndexed { i, name ->
             val n = ui.catalog.films.count { kindOf(it) == i }
             if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
@@ -1188,60 +1197,26 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onPick: (String) -> Unit) {
     }
     LazyRow(
         state = state,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
         // Flings settle on a card edge rather than halfway through one.
         flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state),
         modifier = Modifier.fillMaxWidth(),
     ) {
         items(films, key = { it.id }) { film ->
             val selected = film.id == ui.edit.film
-            val scale by androidx.compose.animation.core.animateFloatAsState(
-                if (selected) 1f else 0.94f, Motion.fastSpatial(), label = "card")
-            val ring by androidx.compose.animation.animateColorAsState(
-                if (selected) Palette.Accent else Color.Transparent, Motion.defaultEffects(), label = "ring")
-            val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
-            Column(
-                Modifier.width(92.dp)
-                    .graphicsLayer { scaleX = scale; scaleY = scale }
-                    .clickable(enabled = enabled) { if (!selected) { view.tick(); onPick(film.id) } },
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    Modifier.size(92.dp)
-                        .clip(shape)
-                        .background(Palette.PanelHigh)
-                        .border(2.dp, ring, shape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val card = ui.filmCards[film.id]
-                    if (card != null) {
-                        val bitmap = remember(card) { card.asImageBitmap() }
-                        Image(bitmap, contentDescription = film.label, contentScale = ContentScale.Crop,
-                              modifier = Modifier.fillMaxSize())
-                    } else {
-                        Text(
-                            if (film.bw) "B&W" else if (film.positive) "E-6" else "C-41",
-                            color = Palette.OnSurfaceSoft, style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(4.dp))
-                // UI2.md 1.2: the selected film's name becomes an inverted pill.
-                Text(
-                    film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    color = if (selected) Palette.OnAccent else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .background(if (selected) Palette.Accent else Color.Transparent, RoundedCornerShape(50))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                )
-                // ISO, colour balance and one trait (ui2_derivatives.md 3): what the stock is, at a glance.
-                Text(FilmNotes.line(film), style = MaterialTheme.typography.labelSmall,
-                    color = Palette.OnSurfaceSoft, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 4.dp))
-            }
+            val card = ui.filmCards[film.id]
+            val bitmap = remember(card) { card?.asImageBitmap() }
+            // UI2.md 7.2 points 3-4: a 104 dp square, the name, and ISO · balance · one trait.
+            // Before its card renders, the stock's own name stands in for the picture.
+            ThumbCard(
+                selected = selected,
+                image = bitmap,
+                title = film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
+                subtitle = FilmNotes.line(film),
+                enabled = enabled,
+                placeholder = film.label,
+            ) { if (!selected) { view.tick(); onPick(film.id) } }
         }
     }
 }
@@ -1389,9 +1364,8 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     LaunchedEffect(Unit) { vm.loadPresets() }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box {
-            OutlinedButton(onClick = { menu = true }, enabled = enabled && ui.presets.isNotEmpty()) {
-                Text(if (ui.presets.isEmpty()) "还没有预设" else "套用预设（${ui.presets.size}）")
-            }
+            TonalButton(if (ui.presets.isEmpty()) "还没有预设" else "套用预设（${ui.presets.size}）",
+                enabled = enabled && ui.presets.isNotEmpty()) { menu = true }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 for (p in ui.presets) {
                     DropdownMenuItem(
@@ -1404,7 +1378,7 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                 }
             }
         }
-        TextButton(onClick = { naming = true }, enabled = enabled) { Text("存为预设") }
+        QuietButton("存为预设", enabled = enabled) { naming = true }
     }
     if (naming) {
         var name by remember { mutableStateOf("") }

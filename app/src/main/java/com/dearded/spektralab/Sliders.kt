@@ -118,9 +118,14 @@ internal fun LabeledSlider(
             },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+            // UI2.md 7.2 point 6: name left, readout right in tabular figures; a moved
+            // value turns white 92 % and gets the changed dot, never a hue.
+            Text(label, style = MaterialTheme.typography.bodyMedium,
+                color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
+                modifier = Modifier.weight(1f))
+            if (changed) { EditedDot(); androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp)) }
             Text(text(local), style = Readout,
-                color = if (changed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
             // The space is kept when hidden, so the readout does not jump as ↺ comes and goes.
             Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
                 if (changed && enabled) {

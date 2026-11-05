@@ -42,13 +42,8 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
 
     val tuned = e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
         e.unsharpAmount != 0.7 || e.unsharpSigma != 0.7 || e.couplersAmount != 1.0
-    androidx.compose.material3.TextButton(onClick = { more = !more }) {
-        Text(when {
-            more -> "收起更多参数"
-            tuned -> "更多参数 •"
-            else -> "更多参数（颗粒尺寸、散射、锐化、色彩分离）"
-        })
-    }
+    MoreRow(open = more, edited = tuned) { more = !more }
+    if (!more) Hint("颗粒尺寸、分层颗粒、乳剂散射、扫描锐化、色彩分离")
     if (more) {
         LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag) {
             onChange(e.copy(grainArea = it))
@@ -75,15 +70,8 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
 }
 
 @Composable
-private fun Toggle(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
-    }
-}
+private fun Toggle(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) =
+    SettingRow(label, checked, enabled, onChange = onChange)
 
 @Composable
-private fun Note(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(bottom = 4.dp))
-}
+private fun Note(text: String) = Hint(text, Modifier.padding(bottom = 4.dp))

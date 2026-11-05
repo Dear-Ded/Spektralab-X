@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +52,12 @@ private val CATEGORIES = listOf("风格", "冲洗", "调整", "边框", "构图"
 private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 
 @Composable
-fun CategoryBar(selected: Int, enabled: Boolean, trailing: @Composable () -> Unit = {}, onSelect: (Int) -> Unit) {
+fun CategoryBar(
+    selected: Int, enabled: Boolean, trailing: @Composable () -> Unit = {},
+    /** Which entries differ from a fresh edit: a dot on the icon's corner (UI2.md 7.2 point 10). */
+    edited: List<Boolean> = emptyList(),
+    onSelect: (Int) -> Unit,
+) {
     val view = LocalView.current
     Row(Modifier.fillMaxWidth().background(Palette.Background).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically) {
@@ -86,7 +92,11 @@ fun CategoryBar(selected: Int, enabled: Boolean, trailing: @Composable () -> Uni
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Canvas(Modifier.size(22.dp)) { icon(ICONS[i], tint, on) }
+                    Box {
+                        Canvas(Modifier.size(22.dp)) { icon(ICONS[i], tint, on) }
+                        if (edited.getOrElse(i) { false }) EditedDot(onFill = on,
+                            modifier = Modifier.align(Alignment.TopEnd).offset(x = 5.dp, y = (-2).dp))
+                    }
                     Spacer(Modifier.height(2.dp))
                     Text(label, style = MaterialTheme.typography.labelSmall, color = tint)
                 }

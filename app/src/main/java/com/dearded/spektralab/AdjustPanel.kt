@@ -30,6 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.draw.clip
 
 /**
  * The 调整 page: Layer 2 (Look), the adjustments to the finished print. Every
@@ -68,83 +74,94 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     })
     var seg by androidx.compose.runtime.saveable.rememberSaveable { mutableIntStateOf(0) }
 
-    Text(
-        "作用在冲好的照片上，像扫描后再微调；拖动即时生效，不重新冲洗。",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    // UI2.md 7.2 point 2: title · how many segments changed, the reset on the right.
+    val changedCount = edited.count { it }
+    PanelHeader(
+        title = "调整",
+        summary = if (changedCount == 0) "作用在冲好的照片上" else "已改 $changedCount 段",
+        hint = "像扫描后再微调；拖动即时生效，不重新冲洗。",
     )
-    Row(
-        Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
+    PillRow {
         segments.forEachIndexed { i, name ->
             SelectPill(selected = seg == i, onClick = { seg = i },
                 label = { Text(name) }, enabled = enabled, edited = edited[i])
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(SEGMENT_HINTS[seg], style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-        TextButton(onClick = { resetSegment(seg) }, enabled = enabled && edited[seg]) { Text("重置这一项") }
+        Hint(SEGMENT_HINTS[seg], Modifier.weight(1f))
+        if (edited[seg]) QuietButton("重置${segments[seg]}", enabled = enabled) { resetSegment(seg) }
     }
 
+    // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
+    var more by remember(seg) { mutableStateOf(false) }
     when (seg) {
         0 -> {
             LabeledSlider("曝光", l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
             Adj("对比度", l.contrast, -50.0, 50.0, enabled) { set(l.copy(contrast = it)) }
             Adj("亮度", l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
-            Adj("高光", l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
-            Adj("阴影", l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
-            Adj("黑场", l.blackPoint, 0.0, 50.0, enabled) { set(l.copy(blackPoint = it)) }
-            Adj("白场", l.whitePoint, 0.0, 50.0, enabled) { set(l.copy(whitePoint = it)) }
+            MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
+                l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
+            if (!more) Hint("高光、阴影、黑场、白场")
+            if (more) {
+                Adj("高光", l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
+                Adj("阴影", l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
+                Adj("黑场", l.blackPoint, 0.0, 50.0, enabled) { set(l.copy(blackPoint = it)) }
+                Adj("白场", l.whitePoint, 0.0, 50.0, enabled) { set(l.copy(whitePoint = it)) }
+            }
         }
         1 -> {
             Adj("色温", l.temperature, -100.0, 100.0, enabled) { set(l.copy(temperature = it)) }
             Adj("色调", l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
             Adj("饱和度", l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
-            Adj("自然饱和度", l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
+            MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
+            if (!more) Hint("自然饱和度")
+            if (more) Adj("自然饱和度", l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
         }
         2 -> {
-            Group("HSL 分色")
-            var band by remember { mutableIntStateOf(0) }
-            Row(
-                Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Look.BANDS.forEachIndexed { i, (_, argb) ->
-                    val on = band == i
-                    val bandEdited = !l.hsl.getOrElse(i) { Band() }.neutral
-                    Box(
-                        Modifier.size(if (on) 34.dp else 28.dp)
-                            .background(Color(argb), CircleShape)
-                            .border(if (on) 2.5.dp else if (bandEdited) 1.5.dp else 0.dp,
-                                if (on) Palette.OnSurface else Palette.OnSurfaceSoft, CircleShape)
-                            .clickable { band = i },
-                    )
+            // Two tools that never share the screen: one colour at a time, or one tonal zone.
+            var tool by remember { mutableIntStateOf(0) }
+            Segmented(listOf("单色调整", "色彩平衡"), tool, enabled) { tool = it }
+            if (tool == 0) {
+                var band by remember { mutableIntStateOf(0) }
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Look.BANDS.forEachIndexed { i, (bandName, argb) ->
+                        val on = band == i
+                        val bandEdited = !l.hsl.getOrElse(i) { Band() }.neutral
+                        // A 48 dp target around a 28 dp swatch; the chosen one wears a white ring
+                        // outside a gap, the same signal as a picked card.
+                        Box(
+                            Modifier.size(48.dp).clip(CircleShape)
+                                .selectable(selected = on, enabled = enabled, role = Role.Tab) { band = i }
+                                .semantics { contentDescription = bandName },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Box(Modifier.size(40.dp).border(2.dp, if (on) Palette.Accent else Color.Transparent, CircleShape))
+                            Box(Modifier.size(28.dp).background(Color(argb), CircleShape))
+                            if (bandEdited && !on) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
+                        }
+                    }
                 }
+                val b = l.hsl.getOrElse(band) { Band() }
+                val name = Look.BANDS[band].first
+                Adj("${name} · 色相", b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
+                Adj("${name} · 饱和度", b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
+                Adj("${name} · 明亮度", b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
+            } else {
+                var zone by remember { mutableIntStateOf(0) }
+                Segmented(listOf("全局", "阴影", "中间调", "高光"), zone, enabled) { zone = it }
+                val z = when (zone) { 1 -> l.shadowZone; 2 -> l.midZone; 3 -> l.highlightZone; else -> l.master }
+                fun setZone(next: Zone) = set(when (zone) {
+                    1 -> l.copy(shadowZone = next); 2 -> l.copy(midZone = next); 3 -> l.copy(highlightZone = next)
+                    else -> l.copy(master = next)
+                })
+                LabeledSlider("色相", z.hue, 0.0, 360.0, 0.0, enabled, "%.0f°") { setZone(z.copy(hue = it)) }
+                Adj("强度", z.sat, 0.0, 100.0, enabled) { setZone(z.copy(sat = it)) }
+                Adj("明亮度", z.lum, -100.0, 100.0, enabled) { setZone(z.copy(lum = it)) }
             }
-            val b = l.hsl.getOrElse(band) { Band() }
-            val name = Look.BANDS[band].first
-            Adj("${name} · 色相", b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
-            Adj("${name} · 饱和度", b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
-            Adj("${name} · 明亮度", b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
-
-            Group("色彩平衡")
-            var zone by remember { mutableIntStateOf(0) }
-            val zones = listOf("全局", "阴影", "中间调", "高光")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                zones.forEachIndexed { i, label ->
-                    SelectPill(selected = zone == i, onClick = { zone = i }, label = { Text(label) }, enabled = enabled)
-                }
-            }
-            val z = when (zone) { 1 -> l.shadowZone; 2 -> l.midZone; 3 -> l.highlightZone; else -> l.master }
-            fun setZone(next: Zone) = set(when (zone) {
-                1 -> l.copy(shadowZone = next); 2 -> l.copy(midZone = next); 3 -> l.copy(highlightZone = next)
-                else -> l.copy(master = next)
-            })
-            LabeledSlider("色相", z.hue, 0.0, 360.0, 0.0, enabled, "%.0f°") { setZone(z.copy(hue = it)) }
-            Adj("强度", z.sat, 0.0, 100.0, enabled) { setZone(z.copy(sat = it)) }
-            Adj("明亮度", z.lum, -100.0, 100.0, enabled) { setZone(z.copy(lum = it)) }
         }
         3 -> CurveEditor(l.curves, ui.image, enabled, onDrag = vm::setInteracting) { set(l.copy(curves = it)) }
         4 -> PalettePad(l, enabled, onDrag = vm::setInteracting) { set(it) }
