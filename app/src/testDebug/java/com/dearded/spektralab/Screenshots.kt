@@ -173,7 +173,12 @@ class Screenshots {
     }
 
     private fun shot(name: String) {
-        compose.mainClock.advanceTimeBy(1500)
+        // Compose frames and the view's own draw both: the window is captured as drawn last.
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(8) {
+            compose.mainClock.advanceTimeBy(200)
+            main.idleFor(java.time.Duration.ofMillis(200))
+        }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("$OUT/$name.png")
     }
@@ -274,6 +279,8 @@ private object Fake {
             // Every size the grid and the loupe may ask for, so nothing waits on a decoder.
             val cache = Thumbnails::class.java.getDeclaredField("cache").apply { isAccessible = true }
                 .get(null) as android.util.LruCache<String, Bitmap>
+            // Its 48 MB cap counts each bucket's copy: four sizes of 14 photos would evict the first ones.
+            cache.resize(512 shl 20)
             for ((f, b) in list) for (bucket in listOf(256, 512, 1024, 2048)) cache.put("$bucket|${f.uri}", b)
         }.map { it.first }
     }
