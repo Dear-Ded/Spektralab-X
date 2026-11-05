@@ -26,6 +26,7 @@
 | 平台与导出 | platform-export | `platform-export` / `wt-platform` | HEIF 导出、印样进“正在处理”队列；`app/build.gradle.kts` 的 targetSdk 36、16 KB 页对齐、Baseline Profile；高刷新率请求；具体文件见会话 | HEIF、印样入队、targetSdk 36、16 KB、Baseline Profile、高刷 |
 | 小米深度适配 | xiaomi-m6 | `xiaomi-m6` / `wt-xiaomi` | `JobNotifier.kt`（超级岛）、保活引导、温控调度（`DeviceProfile.kt` 相关部分）、`ApplicationExitInfo` 退出诊断；具体文件见会话 | 超级岛、后台保活、温控、退出诊断（ROADMAP M6） |
 | RAW 收尾 | raw-m6 | `raw-m6` / `wt-raw6` | `patches/`（解码相关）、`patches/libraw/`、`SourceLoader.kt`、`Photo.kt`、`ExifCopy.kt`；样片回归库的工具与清单 | OpcodeList3（WarpRectilinear、FixVignetteRadial）、小米 HDR 与色彩空间识别、小米 10–18 和主流相机的样片回归库 |
+| 无胶片模式 | no-film-default（`local_f88c8f84-1799-477b-bb43-bc6e3bb08235`） | 见会话 | 先登记为：`Model.kt` 默认值、`Catalog`、`EditorViewModel.kt` 打开流程、引擎直出路径；确切范围由该会话报给主会话 | 所有处理默认“无”：风格、胶卷、相纸、胶片效果、调整层、边框的第一项和默认值都是“无”，新照片打开即原图 |
 | 仓库装修 | repo-polish | `repo-polish` / `wt-repo` | `README*.md`、`docs/`（不含 PROJECT、UI、UI2、PARITY）、`fastlane/`、`.github/`（不含 workflow 逻辑）、`NOTICE`、“关于”文案；本轮另负责 `ROADMAP.md` 勾选和本页状态表 | 0.1.20 更新说明草稿、`docs/FAQ.md`、ROADMAP 状态，随合并同步 |
 
 `EditorViewModel.kt`、`EditorScreen.kt` 和 `spektralab_jni.cpp` 是共用文件：改动尽量小，只加新函数，不重排已有代码，合并时由主会话处理冲突。四条界面线（ui-visual、ui-motion、ui-screens、ui-shots）动 `EditorScreen.kt` 前先在提交说明里写明改了哪一段。
