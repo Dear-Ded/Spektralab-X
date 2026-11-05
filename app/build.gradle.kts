@@ -90,7 +90,6 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.systemProperty("roborazzi.test.record", "true")
-                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
                 it.maxHeapSize = "2g"
             }
         }
