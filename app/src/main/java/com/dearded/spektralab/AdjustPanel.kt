@@ -61,18 +61,18 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val changedCount = edited.count { it }
     PanelHeader(
         title = "调整",
-        summary = if (changedCount == 0) "冲好之后微调，不重新冲洗" else "已改 $changedCount 段",
+        summary = if (changedCount == 0) "" else "已改 $changedCount 段",
+        // 无 is the panel's reset, not a segment: one row, one thing selected (ui_ai_flavor_audit).
+        resetLabel = "重置调整", changed = !l.neutral, enabled = enabled, onReset = { set(Look.NEUTRAL) },
     )
     PillRow {
-        // 无 first: no adjustments, the print (or the photo) as it is.
-        SelectPill(selected = l.neutral, onClick = { if (!l.neutral) set(Look.NEUTRAL) }, label = { Text("无") }, enabled = enabled)
         segments.forEachIndexed { i, name ->
             SelectPill(selected = seg == i, onClick = { seg = i },
                 label = { Text(name) }, enabled = enabled, edited = edited[i])
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        FoldHint(SEGMENT_HINTS[seg], Modifier.weight(1f))
+        if (SEGMENT_HINTS[seg].isEmpty()) Spacer(Modifier.weight(1f)) else FoldHint(SEGMENT_HINTS[seg], Modifier.weight(1f))
         if (edited[seg]) QuietButton("重置${segments[seg]}", enabled = enabled) { resetSegment(seg) }
     }
 
@@ -168,7 +168,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 }
 
 /** The 调整 segments, in page order (UI2.md 2.4). */
-internal val ADJUST_SEGMENTS = listOf("光线", "色彩", "分色", "曲线", "调色盘", "质感")
+internal val ADJUST_SEGMENTS = listOf("光线", "色彩", "分色", "曲线", "调色盘", "暗角")
 
 /** Which [ADJUST_SEGMENTS] differ from neutral; shared by the page's dots and 修改记录. */
 internal fun adjustEdited(l: Look): List<Boolean> {
@@ -201,14 +201,14 @@ internal fun resetAdjustSegment(l: Look, i: Int): Look {
     }
 }
 
-/** One line per 调整 segment: what it changes, in plain words (UI2.md 2.6). */
+/** A line only where the gesture cannot be seen (ui_ai_flavor_audit): the curve and the pad. */
 private val SEGMENT_HINTS = listOf(
-    "整体明暗、反差，高光和阴影。",
-    "冷暖、色调和浓淡。",
-    "单调一种颜色，或给明暗分区染色。",
-    "按住点拖动，双击点删除；空白处上下滑滚动页面。",
-    "左右是浓淡，上下是明暗；双击回到默认点。",
-    "褪色和暗角，老照片的质感。",
+    "",
+    "",
+    "",
+    "按住点拖动，双击删除。",
+    "左右浓淡，上下明暗；双击回到默认点。",
+    "",
 )
 
 @Composable
@@ -235,10 +235,6 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
     val scale by androidx.compose.animation.core.animateFloatAsState(
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "open")
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-        Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
-        Spacer(Modifier.height(6.dp))
-        Text("光谱胶片冲印", style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft)
-        Spacer(Modifier.height(32.dp))
         androidx.compose.material3.Button(
             onClick = onPick, interactionSource = press,
             modifier = Modifier.height(52.dp).widthIn(min = 200.dp)
@@ -248,11 +244,11 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         }
         Spacer(Modifier.height(8.dp))
         TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text("去观片台挑一张", color = Palette.OnSurface.copy(alpha = 0.85f))
+            Text("观片台", color = Palette.OnSurface.copy(alpha = 0.85f))
         }
         Spacer(Modifier.height(20.dp))
         Text(
-            "JPEG · HEIC · PNG · 相机 RAW（DNG、CR3、NEF、ARW、RAF…）",
+            "支持 JPEG、HEIC、PNG 和相机 RAW",
             style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
         )
     }

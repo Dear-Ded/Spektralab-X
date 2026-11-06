@@ -100,11 +100,11 @@ class Screenshots {
         editor(Fake.ui())
         tap("冲洗")
         shot("20_develop_1_film")
-        tap("② 相纸")
+        tap("相纸")
         shot("21_develop_2_paper")
-        tap("③ 曝光与放大")
+        tap("曝光")
         shot("22_develop_3_exposure")
-        tap("④ 胶片效果")
+        tap("效果")
         shot("23_develop_4_effects")
     }
 

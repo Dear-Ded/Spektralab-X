@@ -133,11 +133,10 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
             .verticalScroll(rememberScrollState())) {
             PanelHeader(
                 title = "修改记录",
-                summary = if (changes.isEmpty()) "还没有改动" else "${changes.size} 组",
-                hint = "按冲洗的先后排。点一行回到那一步；重置只还原这一组，可撤销。",
+                summary = if (changes.isEmpty()) "" else "${changes.size} 组",
             )
             Spacer(Modifier.padding(top = RowGap))
-            if (changes.isEmpty()) Hint("这张照片还是刚打开时的样子。", Modifier.padding(bottom = 24.dp))
+            if (changes.isEmpty()) Hint("没有改动", Modifier.padding(bottom = 24.dp))
             for (c in changes) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
