@@ -31,18 +31,18 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
 
     Toggle("颗粒", e.grainActive, enabled) { onChange(e.copy(grainActive = it)) }
     LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag,
-        disabledReason = if (enabled && !e.grainActive) "颗粒已关闭，打开上面的开关再调。" else "") {
+        disabledReason = "") {
         onChange(e.copy(grainAmount = it))
     }
     Toggle("光晕（Halation）", e.halationActive, enabled) { onChange(e.copy(halationActive = it)) }
     LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
-        disabledReason = if (enabled && !e.halationActive) "光晕已关闭，打开上面的开关再调。" else "") {
+        disabledReason = "") {
         onChange(e.copy(halationAmount = it))
     }
     Toggle("相纸眩光", e.glareActive, enabled) { onChange(e.copy(glareActive = it)) }
     // Upstream's 0..30 (RFC-034): the paper's own veil is 1, and nothing under ~4 is visible.
     LabeledSlider("眩光强度", e.glareAmount, 0.0, 30.0, 1.0, enabled && e.glareActive, "%.1f", onDrag = onDrag,
-        disabledReason = if (enabled && !e.glareActive) "眩光已关闭，打开上面的开关再调。" else "") {
+        disabledReason = "") {
         onChange(e.copy(glareAmount = it))
     }
 
@@ -52,7 +52,7 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
         e.lensBlurUm != fxd.lensBlurUm || e.noAntihalation != fxd.noAntihalation || e.cameraFilter != fxd.cameraFilter ||
         e.preflash != fxd.preflash || e.labLevels != fxd.labLevels
     MoreRow(open = more, edited = tuned) { more = !more }
-    if (!more) Hint(moreSummary("颗粒尺寸、分层颗粒、乳剂散射、扫描锐化、色彩分离、负片反差、高光能量、镜头柔化、去防光晕层、镜前滤镜、预闪、冲扫黑白场",
+    if (!more) Hint(moreSummary("12 项",
         "负片反差" to e.negativeGamma.takeIf { it != fxd.negativeGamma }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
         "高光能量" to e.highlightBoostEv.takeIf { it != fxd.highlightBoostEv }?.let { String.format(java.util.Locale.ROOT, "%.1f EV", it) },
         "柔化" to e.lensBlurUm.takeIf { it != fxd.lensBlurUm }?.let { String.format(java.util.Locale.ROOT, "%.0f µm", it) },
@@ -69,7 +69,7 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     ))
     Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
         LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
-            disabledReason = if (enabled && !e.grainActive) "颗粒已关闭，打开上面的开关再调。" else "") {
+            disabledReason = "") {
             onChange(e.copy(grainArea = it))
         }
         Toggle("分层颗粒", e.grainLayered, enabled && e.grainActive && !e.monoPrint, reason = when {
@@ -126,7 +126,7 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
                         onClick = { onChange(e.copy(cameraFilter = f)) }, label = { Text(filterLabel(f)) })
                 }
             }
-            Note("黑白片的彩色滤镜：黄、橙压暗蓝天，红更戏剧，绿让植物变亮，蓝反过来。")
+            Note("黄、橙、红逐级压暗蓝天；绿提亮植物。")
         }
 
         GroupLabel("相纸与扫描")

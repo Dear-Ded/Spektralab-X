@@ -575,10 +575,10 @@ internal fun NoneCard(
     selected: Boolean,
     original: ImageBitmap?,
     enabled: Boolean = true,
-    subtitle: String = "不加处理",
+    subtitle: String = "",
     size: Dp = 104.dp,
     onClick: () -> Unit,
 ) = ThumbCard(
     selected = selected, image = original, title = "无", subtitle = subtitle,
-    enabled = enabled, size = size, placeholder = "原图", badge = "原图", onClick = onClick,
+    enabled = enabled, size = size, placeholder = "原图", badge = null, onClick = onClick,
 )

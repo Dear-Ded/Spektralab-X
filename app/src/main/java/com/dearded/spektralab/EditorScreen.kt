@@ -180,7 +180,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
             chrome = !chrome
             if (!chrome && !hintPrefs.getBoolean("hint_immersive", false)) {
                 hintPrefs.edit().putBoolean("hint_immersive", true).apply()
-                vm.showMessage("轻点照片或按返回，恢复界面")
+                vm.showMessage("轻点照片恢复界面")
             }
         }
     }
@@ -215,7 +215,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
                             DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text("极致渲染（全分辨率 · 后台）") }, onClick = {
+                            DropdownMenuItem(text = { Text("JPEG · 全分辨率（较慢）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }
@@ -243,10 +243,11 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                         androidx.compose.foundation.layout.WindowInsetsSides.Top),
                 title = {
                     Column {
-                        Text("Spektralab-X", style = MaterialTheme.typography.titleMedium)
+                        Text(ui.source?.name ?: "Spektralab-X", style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
                         ui.source?.let { s ->
                             Text(
-                                listOf(s.name, s.camera, "${s.width}×${s.height}").filter { it.isNotBlank() }
+                                listOf(s.camera, "${s.width}×${s.height}").filter { it.isNotBlank() }
                                     .joinToString(" · "),
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -628,13 +629,9 @@ private fun Preview(
                 }
             }
         }
-        if (ui.image != null && ui.imageTier.isNotEmpty()) {
+        if (ui.image != null && holding && ui.before != null) {
             Text(
-                when {
-                    holding && ui.before != null -> "原图"
-                    ui.imageTier == "live" -> "快速预览 · 长按看原图"
-                    else -> "预览 · 长按看原图"
-                },
+                "原图",
                 color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome)
@@ -713,8 +710,6 @@ private fun BusyOverlay(text: String) {
     ) {
         Aura(Modifier.matchParentSize(), strength = 0.9f, ground = Palette.Background.copy(alpha = 0.92f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Spektralab-X", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
-            Spacer(Modifier.height(10.dp))
             Text(text, color = Palette.OnSurface.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyMedium)
         }
     }
@@ -751,7 +746,6 @@ private fun Controls(
                             PanelHeader(
                                 title = "风格",
                                 summary = if (e.noFilm) "原图" else ui.catalog.film(e.film)?.label.orEmpty(),
-                                hint = "点一下出片，再点一下调强度。",
                             )
                         StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
@@ -773,7 +767,7 @@ private fun Controls(
                             PanelHeader(
                                 title = "冲洗",
                                 // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
-                                summary = listOfNotNull(if (e.noFilm) "无胶片" else ui.catalog.film(e.film)?.label,
+                                summary = listOfNotNull(if (e.noFilm) "无胶卷" else ui.catalog.film(e.film)?.label,
                                     if (e.noFilm) null else if (e.scanFilm) "直接扫描" else if (e.digitalIntermediate) "数字中间片" else ui.catalog.paper(e.paper)?.label,
                                     if (e.exposureEv != 0.0) String.format(java.util.Locale.ROOT, "%+.1f EV", e.exposureEv) else null,
                                 ).joinToString(" · "),
@@ -781,11 +775,10 @@ private fun Controls(
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             // 胶片「无」: the steps after the film have nothing to develop; they keep their settings.
                             val enabled = enabled && !(e.noFilm && step > 0)
-                            if (e.noFilm && step > 0) FoldHint("胶片是「无」，这一步不起作用；选一款胶片就恢复。")
+                            if (e.noFilm && step > 0) FoldHint("没有选胶卷，这一步不起作用。")
                             when (step) {
                                 0 -> {
                                 FilmStrip(ui, enabled, onNone = vm::pickNoFilm) { vm.pickFilm(it) }
-                                PanelHint("胶卷决定颜色、反差和颗粒；长按卡片可收藏。")
                                 GroupLabel("画幅")
                                 // One set, one track (UI2.md 7.2 point 8); a size not in the list selects nothing.
                                 Segmented(
@@ -793,18 +786,16 @@ private fun Controls(
                                     selected = FORMATS.indexOfFirst { kotlin.math.abs(e.filmFormatMm - it.second) < 0.5 },
                                     enabled = enabled,
                                 ) { i -> vm.update(e.copy(filmFormatMm = FORMATS[i].second)) }
-                                Hint("画幅越小，同样放大到一张照片，颗粒越明显。")
                                     NextStep("相纸") { step = 1 }
                                 }
                                 1 -> {
-                                    PanelHint("相纸决定反差和色调；「无」不经过相纸。")
                                 PaperStrip(ui, enabled) { vm.update(it) }
                                     NextStep("曝光与放大") { step = 2 }
                                 }
                                 2 -> {
                                     val d = Edit()
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                        FoldHint("拍摄曝光在按快门时，放大曝光和滤镜在印相时。", Modifier.weight(1f))
+                                        Spacer(Modifier.weight(1f))
                                     StepReset(enabled, what = "曝光与放大", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
                                         e.yShift != 0.0 || e.mShift != 0.0) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
@@ -839,7 +830,7 @@ private fun Controls(
                                 ))
                                 Expandable(moreExposure, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
                                     LabeledSlider("黄滤镜", e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
-                                        disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有放大机滤镜。" else "",
+                                        disabledReason = "",
                                         ends = "偏黄" to "偏蓝") {
                                         vm.update(e.copy(yShift = it))
                                     }
@@ -850,8 +841,7 @@ private fun Controls(
                                         vm.update(e.copy(mShift = it))
                                     }
                                     // A control that cannot be used says why (ui2_derivatives.md 10).
-                                    Hint(if (e.scanFilm) "直接扫描不经过相纸，没有放大机的滤镜可调。"
-                                         else "放大机上的黄、品红滤镜，用来校正相纸上的偏色。")
+                                    if (e.scanFilm) Hint("直接扫描没有放大机滤镜。")
                                     ui.source?.takeIf { it.kind == "raw" && it.asShotK > 0 }?.let { s ->
                                         WhiteBalance(s, ui.hasImage && !ui.exporting) { k, t -> vm.setWhiteBalance(k, t) }
                                     }
@@ -864,7 +854,7 @@ private fun Controls(
                                     fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                        FoldHint("胶片和相纸自带的质感，每项可单独开关。", Modifier.weight(1f))
+                                        Spacer(Modifier.weight(1f))
                                     StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects() || e.extraEffectsTuned(d)) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
@@ -896,7 +886,6 @@ private fun Controls(
                                     if (e.frame.perf != null) "齿孔" else null,
                                     if (e.dateImprint) "日期" else null,
                                 ).joinToString(" · "),
-                                hint = "先选类别和款式，设置在下面。",
                             )
                         BorderPicker(e.borderId, enabled && src != null, noFilm = e.noFilm) { p ->
                             if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
@@ -937,7 +926,6 @@ private fun Controls(
                             )
                             SwitchRow("帧号", perf.numbers, enabled && perf.edgeText,
                                 reason = if (enabled && !perf.edgeText) "片基字打开后才印文字和帧号。" else "") { setPerf(perf.copy(numbers = it)) }
-                            Hint("画在照片外侧，不裁剪、不改任何冲印参数；导出 JPEG 时加上。")
                         }
                         if (e.filmEdge) {
                             GroupLabel("片边")
@@ -1033,7 +1021,7 @@ private fun Controls(
                         }
                         // bughunt_main 1: 胶片「无」 skips the pipeline that draws the edge and the date back.
                         SwitchRow("胶片边框", e.filmEdge, enabled && src != null && !e.noFilm,
-                            reason = if (enabled && e.noFilm) "胶片是「无」：片边要有胶片才画得出来。" else "") { on ->
+                            reason = if (enabled && e.noFilm) "没有选胶卷，画不出片边。" else "") { on ->
                             if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on).let {
                                 if (!on && Borders.byId(e.borderId)?.edge != null && e.frame.isNone) it.copy(borderId = "none") else it
                             }.let {
@@ -1061,7 +1049,7 @@ private fun Controls(
                         val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
                         SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank() && !e.noFilm, reason = when {
                             !enabled -> ""
-                            e.noFilm -> "胶片是「无」：日期印在底片上，要先选一卷胶片。"
+                            e.noFilm -> "没有选胶卷，日期印不上。"
                             e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
                             !dateOk -> "宽幅画幅没有日期后背。"
                             else -> ""
@@ -1155,7 +1143,6 @@ private fun Controls(
                                     if (e.quarterTurns % 4 != 0) "转 ${e.quarterTurns % 4 * 90}°" else null,
                                     if (e.flipH) "翻转" else null,
                                 ).joinToString(" · "),
-                                hint = "选比例，裁剪居中，在冲洗之前完成。",
                             )
                         val src = ui.source
                         // With the film edge on, the crop must stay the gate's shape in the new orientation.
@@ -1183,7 +1170,6 @@ private fun Controls(
                             TonalButton("向右转 90°", enabled = enabled, modifier = Modifier.weight(1f)) { vm.update(reframe(e.turned(1))) }
                         }
                         SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
-                        Hint("颗粒按裁剪后的画面计算。长按照片看到的原图不带裁剪。")
                         }
                     }
             }
@@ -1213,7 +1199,7 @@ private fun Controls(
 private fun PanelHint(text: String) = FoldHint(text)
 
 /** The darkroom order (UI2.md 2.3): film, paper, exposure and enlarging, the film's own effects. */
-private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放大", "④ 胶片效果")
+private val DEVELOP_STEPS = listOf("胶卷", "相纸", "曝光", "效果")
 
 @Composable
 private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
@@ -1241,7 +1227,7 @@ private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一
 @Composable
 private fun NextStep(name: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = GroupGap - RowGap), horizontalArrangement = Arrangement.End) {
-        QuietButton("下一步：$name  ›", onClick = onClick,
+        QuietButton("下一步：$name", onClick = onClick,
             modifier = Modifier.background(Palette.Panel, RoundedCornerShape(24.dp)))
     }
 }
@@ -1271,7 +1257,7 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
         onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
     LabeledSlider("色调", tint.toDouble(), -150.0, 150.0, s.asShotTint.coerceIn(-150.0, 150.0), enabled, "%+.0f",
         onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
-    Hint("在解码时应用，松手后重新解码 RAW，需要几秒。默认是相机拍摄时的设置。")
+    Hint("松手后重新解码，需要几秒。")
 }
 
 @Composable

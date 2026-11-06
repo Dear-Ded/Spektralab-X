@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
  * disappearing.
  */
 internal object BorderGroups {
-    val NAMES = listOf("简洁留白", "胶片片边", "拍立得", "品牌数据条")
+    val NAMES = listOf("留白", "胶片片边", "拍立得", "品牌数据条")
 
     private val FILM = setOf(
         "scan135", "filed", "6x6", "645", "leak", "xpan", "edge135_name", "edge135_black", "edge135_num",
@@ -72,5 +72,5 @@ internal fun BorderPicker(
         }
     }
     if (noFilm && BorderGroups.inGroup(group).any { it.edge != null })
-        Hint("胶片是「无」：片边要有胶片才画得出来，带片边的款式暂时不能选。")
+        Hint("没有选胶卷，带片边的款式不能选。")
 }

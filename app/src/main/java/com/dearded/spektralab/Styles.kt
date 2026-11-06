@@ -346,7 +346,7 @@ internal fun StyleStrip(
     }
     if (searching) {
         OutlinedTextField(value = query, onValueChange = { query = it.take(30) }, singleLine = true,
-            placeholder = { Text("富士味、CCD、徕卡味、电影感…") }, modifier = Modifier.fillMaxWidth())
+            placeholder = { Text("搜索风格、胶卷或相机") }, modifier = Modifier.fillMaxWidth())
     }
     val styles = all.filter { s ->
         ui.catalog.film(s.film) != null &&
@@ -373,13 +373,13 @@ internal fun StyleStrip(
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
         if (!searching) item(key = "_none") {
             val original = remember(ui.before) { ui.before?.asImageBitmap() }
-            NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "不加胶片和调整") {
+            NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "") {
                 if (!ui.edit.styleNone) { view.tick(); onNone() }
             }
         }
         // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
         if (!searching && group == MINE_GROUP) item(key = "_save") {
-            TextCard(selected = false, title = "+ 存为风格", subtitle = "把现在的胶卷、相纸、效果和调整存成一张卡",
+            TextCard(selected = false, title = "+ 存为风格", subtitle = "",
                 enabled = enabled) { naming = true }
         }
         // 最近编辑: another photo's settings onto this one; border and RAW white balance stay this photo's.
@@ -437,7 +437,7 @@ internal fun StyleStrip(
                 Column {
                     OutlinedTextField(value = name, onValueChange = { name = it.take(30) }, singleLine = true,
                         placeholder = { Text("例如：傍晚暖调") }, modifier = Modifier.fillMaxWidth())
-                    Hint("存胶卷、相纸、曝光、效果和调整层；边框、裁剪和白平衡属于这张照片，不存。存好后在「我的」里。",
+                    Hint("不含边框、裁剪和白平衡。",
                         Modifier.padding(top = 6.dp))
                 }
             },
