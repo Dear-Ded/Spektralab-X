@@ -606,6 +606,8 @@ private fun Preview(
                     OverlayChip(if (showHistogram) "隐藏直方图" else "直方图", on = showHistogram) { showHistogram = !showHistogram }
                     OverlayChip(if (ui.loadingDetail) "渲染中…" else "1:1",
                         enabled = !ui.loadingDetail && ui.imageTier.isNotEmpty(), onClick = onDetail)
+                    // ui2_icecream.md 6.9: zoomed in, a visible way back besides the double tap.
+                    if (scale != 1f || offset != Offset.Zero) OverlayChip("适应") { scale = 1f; offset = Offset.Zero }
                 }
                 Spacer(Modifier.height(6.dp))
                 histogram?.let { h ->
