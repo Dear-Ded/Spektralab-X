@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
@@ -114,7 +115,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
         }
 
         Canvas(
-            Modifier.fillMaxWidth().padding(vertical = 6.dp).aspectRatio(1.6f).systemGestureExclusion()
+            Modifier.fillMaxWidth().padding(vertical = 6.dp).height(116.dp).systemGestureExclusion()
                 .clearAndSetSemantics {
                     contentDescription = "调色盘"
                     stateDescription = String.format(Locale.ROOT, "色调 %+.0f，色彩 %+.0f", tone, colour)

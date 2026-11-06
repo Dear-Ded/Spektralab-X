@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
@@ -210,7 +211,7 @@ internal fun CurveEditor(
 
     val color = CHANNELS[channel].third
     Canvas(
-        Modifier.fillMaxWidth().aspectRatio(1f).padding(vertical = 6.dp).systemGestureExclusion()
+        Modifier.fillMaxWidth().height(124.dp).padding(vertical = 6.dp).systemGestureExclusion()
             .semantics {
                 contentDescription = "${CHANNELS[channel].second} 曲线，${curve.points.size} 个控制点"
                 if (enabled && !curve.isIdentity)
