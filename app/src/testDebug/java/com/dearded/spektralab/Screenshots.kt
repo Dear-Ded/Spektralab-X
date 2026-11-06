@@ -288,6 +288,8 @@ class Screenshots {
         val edit = style.atStrength(0.7f.toDouble()).applyTo(ui.edit, ui.catalog)!!
         editor(ui.copy(edit = edit))
         tallPanel()
+        // The strip opens on the applied style's own group, where this card may sit off-screen; 热门 lists it first.
+        tap("热门")
         // A tap on the applied style opens its strength. A real touch: the card's press scale and click run as on the phone.
         compose.onAllNodes(hasText(style.name) and hasClickAction()).onFirst().performTouchInput { click(Offset(centerX, height * 0.3f)) }
         compose.mainClock.advanceTimeBy(1200)
