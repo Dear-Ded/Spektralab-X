@@ -384,7 +384,8 @@ internal fun StyleStrip(
         }
         // 最近编辑: another photo's settings onto this one; border and RAW white balance stay this photo's.
         if (!searching && group == EDITS_GROUP) items(recentEdits, key = { "_edit_" + it.first.id }) { (f, car) ->
-            val card = ui.filmCards[car.edit.film]
+            // A 无 edit is shown as what it is, the photo itself (bughunt_main 7).
+            val card = if (car.edit.noFilm) ui.before else ui.filmCards[car.edit.film]
             val bitmap = remember(card) { card?.asImageBitmap() }
             ThumbCard(
                 selected = false, image = bitmap,

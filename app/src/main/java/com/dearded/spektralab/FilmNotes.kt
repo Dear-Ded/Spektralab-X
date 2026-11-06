@@ -39,7 +39,8 @@ internal object FilmNotes {
 
     /** "ISO 400 · 日光 · 人像标杆，宽容度大", or less when a part is unknown. */
     fun line(film: Stock): String {
-        val iso = Regex("""(\d{2,4})(?:[TD])?\b""").findAll(film.label).lastOrNull()?.groupValues?.get(1)
+        // A speed may carry one letter: 500T, 50D, Provia 100F, Pro 400H (bughunt_main 8).
+        val iso = Regex("""(?<!\d)(\d{2,4})[A-Z]?\b""").findAll(film.label).lastOrNull()?.groupValues?.get(1)
         val balance = when {
             film.bw -> "黑白"
             Regex("""\d+T\b""").containsMatchIn(film.label) -> "灯光"
