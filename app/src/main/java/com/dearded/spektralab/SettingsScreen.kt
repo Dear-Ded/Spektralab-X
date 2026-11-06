@@ -110,7 +110,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
             .graphicsLayer {
                 val k = 1f - 0.1f * back
                 scaleX = k; scaleY = k
-                shape = RoundedCornerShape((28 * back).dp); clip = back > 0f
+                shape = RoundedCornerShape((24 * back).dp); clip = back > 0f
             }
             .background(Palette.Background)
             // Same window as the editor: without a pointer node here, taps on blank
@@ -266,23 +266,18 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
 }
 
 /**
- * One group: its name, then the rows as one card with 2 dp seams. The outer
- * corners are 20 dp and the inner ones 4, so the rows read as one set.
+ * One group: its name, then the rows in one container (ui_corners.md 5):
+ * the container's outer corners are Corners.l, the rows inside are square,
+ * a hairline between them, no seams.
  */
 @Composable
 private fun SettingsGroup(title: String, rows: List<@Composable () -> Unit>) {
     Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurfaceSoft,
         modifier = Modifier.padding(start = 4.dp, top = GroupGap, bottom = 8.dp))
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(Modifier.fillMaxWidth().clip(Corners.l).background(Palette.Panel)) {
         rows.forEachIndexed { i, row ->
-            val top = if (i == 0) 20.dp else 4.dp
-            val bottom = if (i == rows.lastIndex) 20.dp else 4.dp
-            Box(
-                Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
-                    .background(Palette.Panel)
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-            ) { row() }
+            if (i > 0) Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(1.dp).background(Palette.OutlineSoft))
+            Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) { row() }
         }
     }
 }
@@ -405,7 +400,7 @@ private fun StockSheet(title: String, stocks: List<Stock>, selected: String, onD
                 items(stocks, key = { it.id }) { s ->
                     val on = s.id == selected
                     Row(
-                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(if (on) 28.dp else 12.dp))
+                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(Corners.m)
                             .background(if (on) Palette.Accent else Palette.Panel)
                             .clickable(role = Role.RadioButton) { onPick(s.id); onDismiss() }
                             .semantics { contentDescription = s.label + if (on) "，当前" else "" }
@@ -413,6 +408,7 @@ private fun StockSheet(title: String, stocks: List<Stock>, selected: String, onD
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(s.label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (on) androidx.compose.ui.text.font.FontWeight.Medium else androidx.compose.ui.text.font.FontWeight.Normal,
                             color = if (on) Palette.OnAccent else Palette.OnSurface)
                         val tags = listOfNotNull(if (s.positive) "反转" else null, if (s.bw) "黑白" else null)
                         if (tags.isNotEmpty()) Text(tags.joinToString(" "), style = MaterialTheme.typography.labelSmall,
