@@ -87,7 +87,7 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
                     .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.safeDrawing)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .chrome(label)
-                    .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
+                    .background(Color.Black.copy(alpha = 0.5f), Corners.s),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,

@@ -207,7 +207,7 @@ fun SwipeNotice(state: SnackbarHostState, modifier: Modifier = Modifier) {
         label = "notice",
     ) {
         val d = shown ?: return@AnimatedVisibility
-        val shape = RoundedCornerShape(16.dp)
+        val shape = Corners.m
         Box(Modifier.fillMaxWidth().padding(12.dp), contentAlignment = Alignment.BottomCenter) {
             Row(
                 Modifier

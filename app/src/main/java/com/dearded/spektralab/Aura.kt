@@ -160,7 +160,7 @@ fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Back
  * The aurora band (after React Bits' Aurora, rebuilt from how it looks, never
  * from its source: MIT + Commons Clause does not mix with GPL-3.0,
  * ui2_reactbits.md 8.1). A wide band along the bottom edge whose top edge rises
- * and falls slowly, with soft vertical folds drifting through it like a
+ * and falls slowly, with wide soft folds swelling through it like a
  * curtain, fading into the near-black ground. Colour runs across it blue ->
  * teal -> green -> yellow, mostly blue; red never enters it.
  *
@@ -215,33 +215,38 @@ private class CpuAurora {
     private var key: List<Any>? = null
 
     fun draw(scope: DrawScope, t: Float, strength: Float, reach: Float) = with(scope) {
-        val bw = (size.width / 8f).toInt().coerceAtLeast(1)
-        val bh = (size.height / 8f).toInt().coerceAtLeast(1)
+        // Half resolution, scaled up bilinearly: close enough to the shader for screenshots to judge.
+        val bw = (size.width / 2f).toInt().coerceAtLeast(1)
+        val bh = (size.height / 2f).toInt().coerceAtLeast(1)
         val k = listOf(bw, bh, (t * 30f).toInt(), strength, reach)
         if (k != key) { cache = render(bw, bh, t, strength, reach); key = k }
         drawImage(cache!!, dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt()),
-            filterQuality = androidx.compose.ui.graphics.FilterQuality.Medium)
+            filterQuality = androidx.compose.ui.graphics.FilterQuality.Low)
     }
 
     private fun render(bw: Int, bh: Int, t: Float, strength: Float, reach: Float): androidx.compose.ui.graphics.ImageBitmap {
         val px = IntArray(bw * bh)
         val blue = AuraColors.Blue; val teal = AuraColors.Teal; val green = AuraColors.Green; val yellow = AuraColors.Yellow
-        val shift = 0.18f * snoise(t * 0.02f, 7.3f)
-        for (y in 0 until bh) for (x in 0 until bw) {
-            val u = (x + 0.5f) / bw
+        val shift = 0.08f * snoise(t * 0.02f, 7.3f)
+        for (y in 0 until bh) {
             val d = 1f - (y + 0.5f) / bh
-            val lift = 0.5f + 0.5f * snoise(u * 1.3f + t * 0.045f, t * 0.03f)
-            val edge = reach * (1f - AURORA_AMPLITUDE + AURORA_AMPLITUDE * lift)
-            var body = 1f - smooth(0f, edge, d)
-            body = body * body * (3f - 2f * body)
-            val folds = 0.78f + 0.22f * snoise(u * 5f - t * 0.06f, d * 1.5f + t * 0.04f)
-            val a = (body * folds * strength).coerceIn(0f, 1f)
-            if (a <= 0f) continue
-            val s = (u + shift).coerceIn(0f, 1f)
-            var c = lerp(blue, teal, smooth(0.50f, 0.70f, s))
-            c = lerp(c, green, smooth(0.70f, 0.88f, s))
-            c = lerp(c, yellow, 0.45f * smooth(0.88f, 1f, s))
-            px[y * bw + x] = c.copy(alpha = a).toArgb()
+            if (d > reach) continue   // above the band's highest edge: nothing to draw
+            for (x in 0 until bw) {
+                val u = (x + 0.5f) / bw
+                val lift = 0.5f + 0.5f * snoise(u * 1.3f + t * 0.045f, t * 0.03f)
+                val edge = reach * (1f - AURORA_AMPLITUDE + AURORA_AMPLITUDE * lift)
+                var body = 1f - smooth(0.2f * edge, edge, d)
+                body *= body
+                if (body <= 0f) continue
+                val folds = 0.86f + 0.14f * snoise(u * 1.6f - t * 0.03f, d * 2.2f + t * 0.02f)
+                val s = (u + shift).coerceIn(0f, 1f)
+                val g = smooth(0.80f, 0.95f, s)
+                var c = lerp(blue, teal, smooth(0.45f, 0.72f, s))
+                c = lerp(c, green, 0.6f * g)
+                c = lerp(c, yellow, 0.25f * smooth(0.92f, 1f, s))
+                val a = (body * folds * strength * (1f - 0.5f * g)).coerceIn(0f, 1f)
+                px[y * bw + x] = c.copy(alpha = a).toArgb()
+            }
         }
         return android.graphics.Bitmap.createBitmap(px, bw, bh, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap()
     }
@@ -343,16 +348,18 @@ half4 main(float2 p) {
     // The band's top edge rises and falls along its length.
     float lift = 0.5 + 0.5 * snoise(float2(uv.x * 1.3 + t * 0.045, t * 0.03));
     float edge = uReach * (1.0 - uAmp + uAmp * lift);
-    float body = 1.0 - smoothstep(0.0, edge, d);
-    body = body * body * (3.0 - 2.0 * body);
-    // Vertical folds drifting sideways: the curtain.
-    float folds = 0.78 + 0.22 * snoise(float2(uv.x * 5.0 - t * 0.06, d * 1.5 + t * 0.04));
-    float k = clamp(body * folds * uStrength, 0.0, 1.0);
-    // Blue for most of the width, then teal, green and a little yellow; the ramp drifts slowly.
-    float x = clamp(uv.x + 0.18 * snoise(float2(t * 0.02, 7.3)), 0.0, 1.0);
-    float3 c = mix(uBlue, uTeal, smoothstep(0.50, 0.70, x));
-    c = mix(c, uGreen, smoothstep(0.70, 0.88, x));
-    c = mix(c, uYellow, 0.45 * smoothstep(0.88, 1.0, x));
+    // Full at the bottom, fading over the upper 80 % of the band: one long soft edge, no step.
+    float body = 1.0 - smoothstep(0.2 * edge, edge, d);
+    body = body * body;
+    // Wide horizontal folds, slow and low: the curtain swells instead of standing in columns.
+    float folds = 0.86 + 0.14 * snoise(float2(uv.x * 1.6 - t * 0.03, d * 2.2 + t * 0.02));
+    // Blue and teal carry the band; green and a touch of yellow only at the far right, dimmer.
+    float x = clamp(uv.x + 0.08 * snoise(float2(t * 0.02, 7.3)), 0.0, 1.0);
+    float g = smoothstep(0.80, 0.95, x);
+    float3 c = mix(uBlue, uTeal, smoothstep(0.45, 0.72, x));
+    c = mix(c, uGreen, 0.6 * g);
+    c = mix(c, uYellow, 0.25 * smoothstep(0.92, 1.0, x));
+    float k = clamp(body * folds * uStrength * (1.0 - 0.5 * g), 0.0, 1.0);
     // One step of dither, so the dark tail does not band.
     k = clamp(k + (fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0, 0.0, 1.0);
     return half4(float4(c * k, k));
