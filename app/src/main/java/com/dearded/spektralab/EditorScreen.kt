@@ -76,6 +76,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -114,6 +115,8 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
     var showSettings by remember { mutableStateOf(false) }
     var openMenu by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
+    // ui2_reactbits.md 3.4 C: when 保存 last queued an export, so its icon follows that job (Moments.kt SaveMark).
+    var savedAt by remember { mutableLongStateOf(0L) }
 
     // Android 13+: the export's progress notification needs POST_NOTIFICATIONS.
     // Asked when an export starts; a refusal only hides the notification.
@@ -124,6 +127,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         queuedExport = null
     }
     fun exportWithNotice(format: ExportFormat, size: ExportSize) {
+        savedAt = System.currentTimeMillis()
         val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -196,7 +200,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
                             modifier = Modifier.height(48.dp).coachAnchor(CoachStep.SAVE),
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                            SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))
                             Text("保存")
                         }
@@ -212,7 +216,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             })
                             DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
                             DropdownMenuItem(text = { Text("极致渲染（全分辨率 · 后台）") }, onClick = {
-                                exportMenu = false; vm.exportExtreme()
+                                exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }
                     }
