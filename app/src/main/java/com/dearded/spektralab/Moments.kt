@@ -59,6 +59,14 @@ import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
 
 /*
  * Moments (tools/work/ui2_reactbits.md 3.4): the few places where the app
@@ -252,5 +260,29 @@ fun SwipeNotice(state: SnackbarHostState, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+/**
+ * The editor's "still developing" line along the photo's top edge, in place of
+ * the coloured AuraBar there (ui2_reactbits.md 8.2, rule A: nothing coloured
+ * next to a print being judged). A 2 dp neutral track with one short
+ * near-white segment passing along it, no hue. With animations off the track
+ * shows alone, still. The coloured AuraBar stays where no photo is on screen.
+ */
+@Composable
+fun WorkLine(modifier: Modifier = Modifier) {
+    val moving = remember { motionAllowed() }
+    val clock = if (moving) {
+        rememberInfiniteTransition(label = "work-line").animateFloat(
+            0f, 1f, infiniteRepeatable(tween(1400, easing = LinearEasing), RepeatMode.Restart), label = "t",
+        )
+    } else null
+    Canvas(modifier.fillMaxWidth().height(2.dp)) {
+        drawRect(Color.White.copy(alpha = 0.12f))
+        val t = clock?.value ?: return@Canvas
+        val seg = size.width * 0.22f
+        val x = -seg + (size.width + seg) * t
+        drawRect(Color(0xFFF2F2F2).copy(alpha = 0.7f), Offset(x, 0f), androidx.compose.ui.geometry.Size(seg, size.height))
     }
 }

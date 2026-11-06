@@ -573,7 +573,9 @@ private fun Preview(
                 shownFilm = film
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
                 back = front; front = bitmap; fade.snapTo(0f)
-                try { fade.animateTo(1f, Motion.defaultEffects()) } finally { back = null }
+                // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
+                // is gone before the eye settles on the new one; with animations off it is a cut.
+                try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
             }
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
@@ -595,7 +597,8 @@ private fun Preview(
             if (ui.rendering) { kotlinx.coroutines.delay(400); value = true }
         }
         if (showProgress) {
-            AuraBar(Modifier.align(Alignment.TopCenter))
+            // ui2_reactbits.md 8.2: next to the photo only a neutral line, never the coloured AuraBar.
+            WorkLine(Modifier.align(Alignment.TopCenter))
         }
         // Histogram of what is on screen (the print, or the original while held).
         if (image != null) {
