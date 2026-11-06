@@ -227,7 +227,7 @@ internal fun GroupLabel(text: String, modifier: Modifier = Modifier) {
 internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     Box(
-        modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
+        modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
@@ -249,6 +249,8 @@ internal fun Segmented(
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     optionEnabled: (Int) -> Boolean = { true },
+    /** Segments changed from their default: the changed dot on the segment's corner. */
+    edited: (Int) -> Boolean = { false },
     onSelect: (Int) -> Unit,
 ) {
     Row(
@@ -274,6 +276,7 @@ internal fun Segmented(
                 Text(label, style = MaterialTheme.typography.labelLarge, color = ink, maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal)
+                if (edited(i)) EditedDot(onFill = on, modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 10.dp))
             }
         }
     }
@@ -523,7 +526,7 @@ private fun Check(color: Color) {
 @Composable
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(12.dp)
     Box(
         modifier.heightIn(min = 48.dp)
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
@@ -575,10 +578,10 @@ internal fun NoneCard(
     selected: Boolean,
     original: ImageBitmap?,
     enabled: Boolean = true,
-    subtitle: String = "不加处理",
+    subtitle: String = "",
     size: Dp = 104.dp,
     onClick: () -> Unit,
 ) = ThumbCard(
     selected = selected, image = original, title = "无", subtitle = subtitle,
-    enabled = enabled, size = size, placeholder = "原图", badge = "原图", onClick = onClick,
+    enabled = enabled, size = size, placeholder = "原图", badge = null, onClick = onClick,
 )

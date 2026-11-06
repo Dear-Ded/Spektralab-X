@@ -113,7 +113,6 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Text(when { open -> "收起"; masks.isEmpty() -> "展开"; else -> "展开（${masks.size} 个）" })
         }
     }
-    Hint("只调画面的一部分：拉一道渐变、圈出一块，或用手指涂。每个蒙版带自己的一组调整。")
     if (!open) return
 
     if (masks.isNotEmpty()) Row(
@@ -136,22 +135,20 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             }, label = { Text("+ ${k.label}") }, enabled = enabled && masks.size < LocalEdits.MAX_MASKS)
         }
     }
-    Hint("线性渐变适合天空和地平线，径向渐变圈出主体，画笔涂出任意形状。最多 ${LocalEdits.MAX_MASKS} 个。")
     if (masks.isEmpty()) return
 
     val m = masks[sel]
     fun set(f: (EditMask) -> EditMask) = vm.setMask(sel, f)
     Hint(when (m.kind) {
-        MaskKind.LINEAR -> "在照片上拖两端的圆点改方向和过渡宽度，拖中间的圆点整体移动。实线一端是全部效果，虚线一端没有效果。"
-        MaskKind.RADIAL -> "在照片上拖中心移动，拖椭圆边上的两个圆点改大小和角度。"
-        MaskKind.BRUSH -> "单指在照片上涂；两指同时落下照常缩放照片。"
+        MaskKind.LINEAR -> "拖两端改方向和过渡，拖中间移动。"
+        MaskKind.RADIAL -> "拖中心移动，拖边上的点改大小和角度。"
+        MaskKind.BRUSH -> "单指涂，双指缩放。"
     })
     // ui2_snapseed.md 8 #1: the photo stays uncoloured while you judge it; the coverage
     // shows only while this is held, or while a handle or the brush is dragged.
     HoldToShow(enabled)
-    Hint("照片上平时只画轮廓。按住这个按钮，或拖动手柄、涂画笔时，才用红色标出作用范围；松手后消失，不会导出。")
+    Hint("按住或拖动手柄时显示作用范围，不会导出。")
     SwitchRow("反选", m.inverted, enabled) { on -> set { it.copy(inverted = on) } }
-    Hint("改为作用在区域以外的地方。")
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         TextButton(enabled = enabled && masks.size < LocalEdits.MAX_MASKS, onClick = {
             vm.setMasks { it + m.copy(inverted = !m.inverted, tone = MaskTone()) }
@@ -162,28 +159,21 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             MaskUi.selected = max(0, sel - 1)
         }) { Text("删除这个蒙版", color = Palette.Warning) }
     }
-    Hint("复制并反选：做出互补的一对，例如天空压暗、地面提亮。")
 
     val drag = vm::setInteracting
     LabeledSlider("总量", m.amount, 0.0, 100.0, 100.0, enabled, "%.0f", onDrag = drag) { v -> set { it.copy(amount = v) } }
-    Hint("整个蒙版的不透明度：100 是满额，0 等于关掉。")
     when (m.kind) {
         MaskKind.RADIAL -> {
             LabeledSlider("羽化", m.feather, 0.0, 100.0, 50.0, enabled, "%.0f", onDrag = drag) { v -> set { it.copy(feather = v) } }
-            Hint("边缘过渡的宽度：0 是硬边，100 从中心就开始减弱。")
         }
         MaskKind.BRUSH -> {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 4.dp)) {
                 SelectPill(selected = !MaskUi.erase, onClick = { MaskUi.erase = false }, label = { Text("涂抹") }, enabled = enabled)
                 SelectPill(selected = MaskUi.erase, onClick = { MaskUi.erase = true }, label = { Text("擦除") }, enabled = enabled)
             }
-            Hint("涂抹加进蒙版，擦除从蒙版里去掉涂过的地方。")
             LabeledSlider("画笔大小", MaskUi.brushSize.toDouble(), 1.0, 30.0, 6.0, enabled, "%.0f%%") { MaskUi.brushSize = it.toFloat() }
-            Hint("画笔直径的一半，按照片长边的百分比，放大照片时不变。")
             LabeledSlider("柔和度", MaskUi.brushSoft.toDouble(), 0.0, 100.0, 50.0, enabled, "%.0f") { MaskUi.brushSoft = it.toFloat() }
-            Hint("笔触边缘多软：0 是硬边，100 从中心就开始变淡。")
             LabeledSlider("流量", MaskUi.brushFlow.toDouble(), 5.0, 100.0, 60.0, enabled, "%.0f") { MaskUi.brushFlow = it.toFloat() }
-            Hint("每一笔落下多少；来回涂会越涂越满。")
             TextButton(enabled = enabled && m.stamps.isNotEmpty(), onClick = { set { it.copy(stamps = emptyList()) } }) {
                 Text("清除笔画")
             }
@@ -195,25 +185,15 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val t = m.tone
     fun tone(f: (MaskTone) -> MaskTone) = set { it.copy(tone = f(it.tone)) }
     LabeledSlider("曝光", t.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV", onDrag = drag) { v -> tone { it.copy(exposure = v) } }
-    Hint("区域整体变亮或变暗，单位是档。")
     LabeledSlider("对比度", t.contrast, -50.0, 50.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(contrast = v) } }
-    Hint("区域里亮的更亮、暗的更暗；负值变平。")
     LabeledSlider("亮度", t.brightness, -50.0, 50.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(brightness = v) } }
-    Hint("提亮或压暗中间调，高光和阴影动得少。")
     LabeledSlider("高光", t.highlights, -100.0, 100.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(highlights = v) } }
-    Hint("只调区域里的亮部；负值找回天空的层次。")
     LabeledSlider("阴影", t.shadows, -100.0, 100.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(shadows = v) } }
-    Hint("只调区域里的暗部；正值提亮暗处。")
     LabeledSlider("黑场", t.blackPoint, 0.0, 50.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(blackPoint = v) } }
-    Hint("把区域最暗的部分压成黑色，画面更扎实。")
     LabeledSlider("白场", t.whitePoint, 0.0, 50.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(whitePoint = v) } }
-    Hint("把区域最亮的部分推成白色。")
     LabeledSlider("色温", t.temperature, -100.0, 100.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(temperature = v) } }
-    Hint("区域偏冷（负）或偏暖（正）。")
     LabeledSlider("色调", t.tint, -100.0, 100.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(tint = v) } }
-    Hint("区域偏绿（负）或偏品红（正）。")
     LabeledSlider("饱和度", t.saturation, -100.0, 100.0, 0.0, enabled, "%+.0f", onDrag = drag) { v -> tone { it.copy(saturation = v) } }
-    Hint("区域颜色更浓或更淡；-100 是黑白。")
     TextButton(enabled = enabled && !t.neutral, onClick = { set { it.copy(tone = MaskTone()) } }) { Text("重置这个蒙版的调整") }
 }
 
@@ -228,25 +208,19 @@ internal fun DustSection(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit
     fun set(next: Dust) = onChange(look.copy(dust = next))
     Spacer(Modifier.height(8.dp))
     SwitchRow("灰尘与划痕", d.strength > 0, enabled) { on -> set(d.copy(strength = if (on) 50.0 else 0.0)) }
-    Hint("扫描时落在底片、相纸和玻璃上的灰尘、毛发和划痕。同一组参数，每次导出完全一样。")
     if (d.strength <= 0) return
     LabeledSlider("灰尘强度", d.strength, 1.0, 100.0, 50.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(strength = it)) }
-    Hint("灰尘、毛发和划痕有多明显。")
     LabeledSlider("灰尘数量", d.count, 0.0, 100.0, 35.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(count = it)) }
-    Hint("画面里有多少颗灰尘和毛发；0 只留划痕。")
     LabeledSlider("灰尘大小", d.size, 0.0, 100.0, 50.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(size = it)) }
-    Hint("所有颗粒一起放大或缩小；50 接近 35 mm 底片上的真实尺寸。")
     LabeledSlider("黑点比例", d.dark, 0.0, 100.0, 20.0, enabled, "%.0f%%", onDrag = onDrag) { set(d.copy(dark = it)) }
     Hint("白点是底片上的灰尘，黑点是相纸或扫描玻璃上的灰尘。")
     LabeledSlider("划痕", d.scratches, 0.0, 100.0, 0.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(scratches = it)) }
-    Hint("沿胶片走向的细长划痕有多少条；0 没有划痕。")
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text("种子 ${d.seed}", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+        Text("灰尘位置", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
         TextButton(enabled = enabled, onClick = { set(d.copy(seed = kotlin.random.Random.nextInt(1, Dust.MAX_SEED))) }) {
-            Text("换一组")
+            Text("换一组位置")
         }
     }
-    Hint("决定灰尘落在哪里。种子不变，结果永远相同；换一组只换位置。")
     TextButton(enabled = enabled && d != Dust(strength = d.strength), onClick = { set(Dust(strength = d.strength)) }) {
         Text("恢复默认")
     }

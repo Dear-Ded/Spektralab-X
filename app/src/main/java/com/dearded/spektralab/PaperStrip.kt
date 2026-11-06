@@ -34,12 +34,12 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
     val none = e.paperNone(positive)
     val cards = buildList {
         add(PaperCard(null, "无", when {
-            positive -> "直接扫描，反转片原本的样子"
-            bw -> "黑白负片没有数字中间片，需要一款相纸"
-            else -> "数字中间片：去掉橙色片基，中性的正像"
+            positive -> "直接扫描"
+            bw -> "需要相纸"
+            else -> "数字中间片"
         }))
         for (p in papers) add(PaperCard(p.id, p.label,
-            if (p.id == recommended) "推荐 · 这卷胶片的搭档" else if (p.bw) "黑白相纸" else "彩色相纸"))
+            if (p.id == recommended) "推荐" else if (p.bw) "黑白相纸" else "彩色相纸"))
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)) {

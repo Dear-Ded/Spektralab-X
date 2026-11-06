@@ -45,7 +45,7 @@ internal class Change(val name: String, val detail: String, val tab: Int, val st
                       val reset: (Edit) -> Edit)
 
 /**
- * The changed groups of [e] in darkroom order (ui2_snapseed.md 4): 冲洗 ①–④,
+ * The changed groups of [e] in darkroom order (ui2_snapseed.md 4): 冲洗 胶卷 / 相纸 / 曝光 / 效果,
  * the 调整 segments, 蒙版, 灰尘, 边框, 构图. The order is fixed, never sorted by
  * the user: grain cannot go before the paper. Each reset returns only its own
  * group to a fresh edit's value.
@@ -56,16 +56,16 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     // A new photo opens on 无 (Edit.NONE): a film, a paper or the film's effects are each a change.
     val positive = catalog.film(e.film)?.positive == true
     if (!e.noFilm || e.filmFormatMm != d.filmFormatMm)
-        out += Change("① 胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
+        out += Change("胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
             FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {
             it.copy(noFilm = true, filmFormatMm = d.filmFormatMm)
         }
     if (!e.noFilm && !e.paperNone(positive))
-        out += Change("② 相纸", catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
+        out += Change("相纸", catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
             catalog.normalize(if (positive) it.copy(scanFilm = true) else it.copy(scanFilm = false, digitalIntermediate = true))
         }
     if (!e.autoExposure || e.exposureEv != d.exposureEv || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
-        out += Change("③ 曝光与放大", listOfNotNull(
+        out += Change("曝光", listOfNotNull(
             e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.1f EV", it) },
             e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
             "滤镜".takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
@@ -77,7 +77,7 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     val fxTuned = e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
         e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma
     if (!e.effectsNone || fxTuned)
-        out += Change("④ 胶片效果", listOfNotNull("颗粒".takeIf { e.grainActive }, "光晕".takeIf { e.halationActive },
+        out += Change("效果", listOfNotNull("颗粒".takeIf { e.grainActive }, "光晕".takeIf { e.halationActive },
             "眩光".takeIf { e.glareActive }, "锐化".takeIf { e.unsharpAmount > 0 }).joinToString(" · ")
             .ifEmpty { "更多参数" }, 1, step = 3) {
             it.withoutEffects().copy(grainArea = d.grainArea, grainLayered = d.grainLayered, scatterAmount = d.scatterAmount,
@@ -133,11 +133,10 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
             .verticalScroll(rememberScrollState())) {
             PanelHeader(
                 title = "修改记录",
-                summary = if (changes.isEmpty()) "还没有改动" else "${changes.size} 组",
-                hint = "按冲洗的先后排。点一行回到那一步；重置只还原这一组，可撤销。",
+                summary = if (changes.isEmpty()) "" else "${changes.size} 组",
             )
             Spacer(Modifier.padding(top = RowGap))
-            if (changes.isEmpty()) Hint("这张照片还是刚打开时的样子。", Modifier.padding(bottom = 24.dp))
+            if (changes.isEmpty()) Hint("没有改动", Modifier.padding(bottom = 24.dp))
             for (c in changes) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
