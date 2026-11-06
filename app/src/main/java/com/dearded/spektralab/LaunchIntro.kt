@@ -51,8 +51,10 @@ import kotlin.math.sin
  *   0-500 ms    the Gemini glow rises behind the strip (Aura, slowEffects)
  *   0-450 ms    the spectrum finishes its wipe if the splash cut it short
  *   60-600 ms   the sprockets pull one frame to the left (defaultSpatial)
- *   120-900 ms  a blue light leak with a warm edge sweeps once across (slowSpatial)
- *   200-520 ms  "Spektralab-X" fades in and rises 8 dp under the strip
+ *   200-520 ms  "Spektralab-X" fades in under the strip, in place
+ *
+ * No light-leak sweep and no rising wordmark: decoration that says nothing
+ * (tools/work/ui_ai_flavor_audit.md 10).
  *
  * It never holds the app up: it leaves when the engine is ready, no sooner
  * than 600 ms (no flicker) and no later than 1.6 s, and a tap after 150 ms
@@ -96,7 +98,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
     val glow = remember { Animatable(0f) }
     val wipe = remember { Animatable(LaunchIcon.wipe.coerceIn(0f, 1f)) }
     val pull = remember { Animatable(0f) }
-    val leak = remember { Animatable(0f) }
     val word = remember { Animatable(0f) }
     val shown = remember { Animatable(1f) }
 
@@ -104,7 +105,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
         launch { glow.animateTo(1f, Motion.slowEffects()) }
         launch { wipe.animateTo(1f, Motion.defaultEffects()) }
         launch { delay(60); pull.animateTo(1f, Motion.defaultSpatial()) }
-        launch { delay(120); leak.animateTo(1f, Motion.slowSpatial()) }
         launch { delay(200); word.animateTo(1f, Motion.fastEffects()) }
         // Exit at clamp(engine ready, 600 ms, 1.6 s).
         withTimeoutOrNull(1600) { snapshotFlow { isReady }.first { it } }
@@ -146,24 +146,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
             fun x(v: Float) = box.left + v * u
             fun y(v: Float) = box.top + v * u
 
-            // Light leak first, so the strip sits on top of it: a soft diagonal band, brightest mid-sweep.
-            val p = leak.value
-            if (p > 0f && p < 1.2f) {
-                val diag = size.width + size.height
-                val c = -0.3f * diag + 1.6f * diag * p
-                val a = (sin(PI.toFloat() * p.coerceIn(0f, 1f)) * 0.35f).coerceAtLeast(0f)
-                drawRect(
-                    Brush.linearGradient(
-                        0f to Color.Transparent,
-                        0.4f to AuraColors.Blue.copy(alpha = a),
-                        0.6f to AuraColors.Yellow.copy(alpha = a * 0.6f),
-                        1f to Color.Transparent,
-                        start = Offset(c - diag * 0.25f, 0f), end = Offset(c + diag * 0.25f, 0f),
-                    ),
-                    blendMode = BlendMode.Screen,
-                )
-            }
-
             // The strip's body.
             val body = Rect(x(22f), y(36f), x(86f), y(72f))
             drawRoundRect(Color(0xFF24242A), body.topLeft, body.size, CornerRadius(3f * u))
@@ -183,7 +165,7 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                 }
             }
         }
-        // The wordmark under the strip, rising 8 dp as it fades in.
+        // The wordmark under the strip, fading in where it stays (no rise: ui_ai_flavor_audit.md 10).
         val r = LaunchIcon.rect
         Text(
             "Spektralab-X",
@@ -201,10 +183,7 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                         pl.place(0, y)
                     }
                 }
-                .graphicsLayer {
-                    alpha = word.value
-                    translationY = with(density) { 8.dp.toPx() } * (1f - word.value)
-                },
+                .graphicsLayer { alpha = word.value },
         )
     }
 }
