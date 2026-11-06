@@ -916,14 +916,13 @@ private fun Controls(
                                 }
                             }
                             SwitchRow("片基字", perf.edgeText, enabled) { setPerf(perf.copy(edgeText = it)) }
-                            if (perf.edgeText) {
-                                androidx.compose.material3.OutlinedTextField(
-                                    value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
-                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("片基文字（留空用胶片名）") },
-                                )
-                                SwitchRow("帧号", perf.numbers, enabled) { setPerf(perf.copy(numbers = it)) }
-                            }
+                            androidx.compose.material3.OutlinedTextField(
+                                value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
+                                singleLine = true, enabled = enabled && perf.edgeText, modifier = Modifier.fillMaxWidth(),
+                                label = { Text("片基文字（留空用胶片名）") },
+                            )
+                            SwitchRow("帧号", perf.numbers, enabled && perf.edgeText,
+                                reason = if (enabled && !perf.edgeText) "片基字打开后才印文字和帧号。" else "") { setPerf(perf.copy(numbers = it)) }
                             Hint("画在照片外侧，不裁剪、不改任何冲印参数；导出 JPEG 时加上。")
                         }
                         if (e.filmEdge) {
@@ -1097,13 +1096,14 @@ private fun Controls(
                             LabeledSlider("亮度", e.dateEv, -2.0, 8.0, 3.5, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(dateEv = it))
                             }
-                            if (e.datePlacement == "frame") {
-                                LabeledSlider("横向边距", e.dateInsetX, 0.0, 30.0, 3.0, enabled, "%.1f mm", onDrag = vm::setInteracting) {
-                                    vm.update(e.copy(dateInsetX = it))
-                                }
-                                LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled, "%.1f mm", onDrag = vm::setInteracting) {
-                                    vm.update(e.copy(dateInsetY = it))
-                                }
+                            // ui2_icecream.md 6.4: greyed with the reason, not hidden, so the user knows they exist.
+                            val onPicture = e.datePlacement == "frame"
+                            LabeledSlider("横向边距", e.dateInsetX, 0.0, 30.0, 3.0, enabled && onPicture, "%.1f mm", onDrag = vm::setInteracting) {
+                                vm.update(e.copy(dateInsetX = it))
+                            }
+                            LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled && onPicture, "%.1f mm", onDrag = vm::setInteracting,
+                                disabledReason = if (enabled && !onPicture) "边距只在印在画面时有用。" else "") {
+                                vm.update(e.copy(dateInsetY = it))
                             }
                             if (e.dateStyle != "data") {
                                 SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank(), reason = when {
