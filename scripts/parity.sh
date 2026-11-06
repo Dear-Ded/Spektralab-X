@@ -61,11 +61,27 @@ if [[ ! -f "$D/.done" ]]; then
 fi
 
 # --- 3. spektralab-host, the reference ----------------------------------------
+# LibRaw as the app builds it (app/src/main/cpp/CMakeLists.txt): the pinned
+# 0.22.2 with patches/libraw/*.patch in name order. Both sides link this one
+# library. Unpatched, the OpenMP X-Trans demosaic is not deterministic (LibRaw
+# #845, patch 0003): every Fuji case hashed differently from run to run.
+L="$W/libraw-spk"
+libraw_stamp="$(cat "$repo"/patches/libraw/*.patch | sha256sum | cut -c1-16)"
+if [[ "$(cat "$L/.spk-patches" 2>/dev/null)" != "$libraw_stamp" ]]; then
+    log "LibRaw + patches/libraw"
+    rm -rf "$L"
+    cp -a "$UP/build/deps/LibRaw-0.22.2" "$L"
+    for p in $(ls "$repo"/patches/libraw/*.patch | sort); do
+        patch -d "$L" -p1 --forward --batch -i "$p" >/dev/null || { echo "parity.sh: $p does not apply" >&2; exit 1; }
+    done
+    echo "$libraw_stamp" > "$L/.spk-patches"
+fi
 B="$W/build-host"
 log "spektralab-host"
 cmake -S "$UP" -B "$B" -G Ninja -DCMAKE_BUILD_TYPE=Release \
     -DSPEKTRALAB_BUILD_NATIVE_RAW=ON -DSPEKTRALAB_BUILD_HOST=ON -DSPEKTRALAB_REQUIRE_VULKAN=ON \
     -DSPEKTRALAB_STATIC_RUNTIME=ON -DSPEKTRALAB_DEPS_DIR="$UP/build/deps" \
+    -DSPEKTRALAB_LIBRAW_SOURCE="$L" \
     -DSPEKTRALAB_CODECS_DIR="$D/export-codecs" \
     -DSPEKTRALAB_INPUT_CODEC_PREFIX="$D/input-codecs/install-linux" \
     -DSPEKTRALAB_LENS_PREFIX="$D/lens-codecs/install-linux" \
