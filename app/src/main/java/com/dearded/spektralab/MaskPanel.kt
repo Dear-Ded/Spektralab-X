@@ -5,6 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -67,7 +69,10 @@ internal object MaskUi {
     /** The section is expanded on screen: the overlay draws and takes its gestures. */
     var open by mutableStateOf(false)
     var selected by mutableIntStateOf(0)
-    var showCover by mutableStateOf(true)
+    /** The 按住显示范围 button is held. */
+    var peeking by mutableStateOf(false)
+    /** A handle or the brush is being dragged on the photo. */
+    var dragging by mutableStateOf(false)
     var erase by mutableStateOf(false)
     var brushSize by mutableFloatStateOf(6f)    // % of the long edge
     var brushSoft by mutableFloatStateOf(50f)
@@ -141,8 +146,10 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         MaskKind.RADIAL -> "在照片上拖中心移动，拖椭圆边上的两个圆点改大小和角度。"
         MaskKind.BRUSH -> "单指在照片上涂；两指同时落下照常缩放照片。"
     })
-    SwitchRow("显示范围", MaskUi.showCover, enabled) { MaskUi.showCover = it }
-    Hint("照片上用红色标出这个蒙版作用的地方。只在编辑时显示，不会导出。")
+    // ui2_snapseed.md 8 #1: the photo stays uncoloured while you judge it; the coverage
+    // shows only while this is held, or while a handle or the brush is dragged.
+    HoldToShow(enabled)
+    Hint("照片上平时只画轮廓。按住这个按钮，或拖动手柄、涂画笔时，才用红色标出作用范围；松手后消失，不会导出。")
     SwitchRow("反选", m.inverted, enabled) { on -> set { it.copy(inverted = on) } }
     Hint("改为作用在区域以外的地方。")
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -243,6 +250,19 @@ internal fun DustSection(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit
     TextButton(enabled = enabled && d != Dust(strength = d.strength), onClick = { set(Dust(strength = d.strength)) }) {
         Text("恢复默认")
     }
+}
+
+/** 按住显示范围: shows the coverage only while pressed, then it lingers 300 ms and fades. */
+@Composable
+private fun HoldToShow(enabled: Boolean) {
+    val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    SideEffect { MaskUi.peeking = enabled && pressed }
+    DisposableEffect(Unit) { onDispose { MaskUi.peeking = false } }
+    androidx.compose.material3.OutlinedButton(
+        onClick = {}, enabled = enabled, interactionSource = press,
+        modifier = Modifier.pressScale(press),
+    ) { Text(if (pressed) "松开隐藏" else "按住显示范围") }
 }
 
 @Composable
@@ -366,9 +386,18 @@ internal fun MaskOverlay(ui: UiState, modifier: Modifier) {
     val h = image.height
     val aspect = w.toDouble() / h
     val layout = remember(ui.edit.frame, w, h) { ui.edit.frame.layout(w, h) }
-    val showCover = MaskUi.showCover
+    val asked = MaskUi.peeking || MaskUi.dragging
+    // Shown while asked for and 300 ms after, then faded out (fastEffects); never left on.
+    var linger by remember { mutableStateOf(false) }
+    LaunchedEffect(asked) {
+        if (asked) linger = true else { kotlinx.coroutines.delay(300); linger = false }
+    }
+    val showCover = asked || linger
+    val coverAlpha by androidx.compose.animation.core.animateFloatAsState(
+        if (showCover) 1f else 0f, Motion.fastEffects(), label = "mask-cover")
     val cover by produceState<ImageBitmap?>(null, mask, aspect, showCover) {
-        value = if (showCover) withContext(Dispatchers.Default) { coverImage(mask, aspect) } else null
+        // Kept after release so the fade-out has something to fade; rebuilt only while shown.
+        if (showCover) value = withContext(Dispatchers.Default) { coverImage(mask, aspect) }
     }
     val latest by rememberUpdatedState(mask)
     var cursor by remember { mutableStateOf<Offset?>(null) }
@@ -407,6 +436,7 @@ internal fun MaskOverlay(ui: UiState, modifier: Modifier) {
                         if (!painting) {
                             if ((ch.position - down.position).getDistance() < viewConfiguration.touchSlop) continue
                             painting = true
+                            MaskUi.dragging = true
                             vm.setInteracting(true)
                             dab(last.first, last.second)
                         }
@@ -430,7 +460,7 @@ internal fun MaskOverlay(ui: UiState, modifier: Modifier) {
                         }
                     }
                 } finally {
-                    if (painting) vm.setInteracting(false)
+                    if (painting) { vm.setInteracting(false); MaskUi.dragging = false }
                     cursor = null
                 }
                 return@awaitEachGesture
@@ -438,6 +468,7 @@ internal fun MaskOverlay(ui: UiState, modifier: Modifier) {
             val grip = grips(start, p).map { (g, o) -> g to (o - down.position).getDistance() }
                 .filter { it.second <= grab }.minByOrNull { it.second }?.first ?: return@awaitEachGesture
             down.consume()
+            MaskUi.dragging = true
             vm.setInteracting(true)
             try {
                 while (true) {
@@ -450,16 +481,18 @@ internal fun MaskOverlay(ui: UiState, modifier: Modifier) {
                 }
             } finally {
                 vm.setInteracting(false)
+                MaskUi.dragging = false
             }
         }
     }
 
     Canvas(modifier.then(gestures)) {
         val p = place(size.width, size.height)
-        cover?.let {
+        val ca = coverAlpha
+        if (ca > 0f) cover?.let {
             drawImage(it, dstOffset = IntOffset(p.left.roundToInt(), p.top.roundToInt()),
                 dstSize = IntSize(p.width.roundToInt().coerceAtLeast(1), p.height.roundToInt().coerceAtLeast(1)),
-                filterQuality = FilterQuality.Low)
+                alpha = ca, filterQuality = FilterQuality.Low)
         }
         when (mask.kind) {
             MaskKind.LINEAR -> clipRect(p.left, p.top, p.left + p.width, p.top + p.height) {
