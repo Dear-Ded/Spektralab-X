@@ -153,6 +153,7 @@ the EXIF Software field.
   This software is based in part on the work of the Independent JPEG Group.
 - volk — MIT (https://github.com/zeux/volk)
 - stb — MIT (https://github.com/nothings/stb)
+- webgl-noise 2D simplex noise (Aura.kt aurora band) — Ian McEwan, Ashima Arts; Stefan Gustavson; MIT (https://github.com/ashima/webgl-noise)
 - Liberation Sans — SIL OFL 1.1; DejaVu Sans Mono — Bitstream Vera licence
 - 界面字体 / UI fonts — SIL OFL 1.1, texts in assets/fonts/licenses/:
   Noto Sans SC (Copyright 2014-2021 Adobe, Reserved Font Name 'Source'),

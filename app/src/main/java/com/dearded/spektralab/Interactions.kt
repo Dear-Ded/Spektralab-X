@@ -175,7 +175,7 @@ fun Modifier.morphingPill(
     val scale = animateFloatAsState(if (pressed?.value == true) pressedScale else 1f, Motion.fastSpatial(), label = "pill-press")
     graphicsLayer {
         scaleX = scale.value; scaleY = scale.value
-        shape = RoundedCornerShape(style.corner)
+        shape = SmoothCornerShape(style.corner)
         clip = true
     }.drawBehind { drawRect(style.fill) }
 }
@@ -415,7 +415,7 @@ fun Modifier.predictiveBack(progress: BackProgress, minScale: Float = 0.9f, corn
         val shift = (size.width / 20f - 8.dp.toPx()).coerceAtLeast(0f)
         translationX = shift * p * if (progress.edge == BackEventCompat.EDGE_RIGHT) -1f else 1f
         if (p > 0f) {
-            shape = RoundedCornerShape(corner * p)
+            shape = SmoothCornerShape(corner * p)
             clip = true
         }
     }
