@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.pinch
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -269,7 +270,91 @@ class Screenshots {
         compose.onRoot().captureRoboImage("$OUT/00_launch_intro.png")
     }
 
+    // --- batch 3: states away from the defaults ------------------------------------
+
+    @Test fun adjustLightMoved() {
+        val ui = Fake.ui()
+        editor(ui.copy(edit = ui.edit.copy(look = ui.edit.look.copy(exposure = 0.6, contrast = 15.0))))
+        tap("调整")
+        shot("37_adjust_light_moved")
+    }
+
+    @Test fun styleStrength() {
+        val ui = Fake.ui()
+        val style = Style.ALL.first { it.id == "lab_daily" }
+        // The strip reads each style's strength from its prefs: 0.7 is 中.
+        compose.activity.getSharedPreferences(STYLE_STRENGTH_PREFS, 0).edit().putFloat(style.id, 0.7f).commit()
+        val edit = style.atStrength(0.7).applyTo(ui.edit, ui.catalog)!!
+        editor(ui.copy(edit = edit))
+        tallPanel()
+        // A tap on the applied style opens its strength.
+        tap(style.name)
+        shot("14_style_strength")
+    }
+
+    @Test fun zoomed() {
+        editor(Fake.ui())
+        compose.onRoot().performTouchInput {
+            val c = Offset(centerX, height * 0.3f)
+            pinch(c - Offset(40f, 0f), c - Offset(240f, 0f), c + Offset(40f, 0f), c + Offset(240f, 0f), durationMillis = 400)
+        }
+        shot("15_zoomed")
+    }
+
+    @Test fun developExposureDark() = developExposure(Fake.toned(0.22f, 0f), "25_develop_3_dark")
+
+    @Test fun developExposureBright() = developExposure(Fake.toned(1.5f, 70f), "26_develop_3_bright")
+
+    private fun developExposure(image: Bitmap, name: String) {
+        editor(Fake.ui().copy(image = image))
+        tap("冲洗")
+        tap("③ 曝光与放大")
+        // The 偏暗 / 偏亮 line comes from a histogram worked out on Dispatchers.Default.
+        waitReal(3000)
+        shot(name)
+    }
+
+    @Test fun developGrainOff() {
+        val ui = Fake.ui()
+        editor(ui.copy(edit = ui.edit.copy(grainActive = false)))
+        tap("冲洗")
+        tap("④ 胶片效果")
+        tallPanel()
+        shot("27_develop_4_grain_off")
+    }
+
+    @Test fun borderDateBetweenFrames() {
+        val ui = Fake.ui()
+        val src = ui.source!!
+        val edit = Edit.withFilmEdge(ui.edit, src.width, src.height, true, "135")
+            .copy(dateImprint = true, dateText = "'26 11 4", datePlacement = "rebate")
+        editor(ui.copy(edit = edit))
+        tap("边框")
+        tallPanel()
+        swipeUntil("纵向边距")
+        shot("41_border_date_rebate")
+    }
+
     // --- helpers ------------------------------------------------------------------
+
+    /** Lets real threads (Dispatchers.Default / IO) finish while the paused clock steps along. */
+    private fun waitReal(ms: Long) {
+        val main = shadowOf(Looper.getMainLooper())
+        repeat((ms / 25).toInt()) { compose.mainClock.advanceTimeBy(50); main.idle(); Thread.sleep(25) }
+    }
+
+    /** Swipes the tall panel up until the node reading [text] sits in the top three quarters of the screen. */
+    private fun swipeUntil(text: String) {
+        repeat(10) {
+            val h = compose.onRoot().fetchSemanticsNode().size.height
+            val top = compose.onAllNodes(hasText(text)).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.top
+            if (top != null && top in 0f..h * 0.75f) return
+            compose.onRoot().performTouchInput {
+                swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.45f), durationMillis = 400)
+            }
+            compose.mainClock.advanceTimeBy(800)
+        }
+    }
 
     private fun content(body: @Composable () -> Unit) = compose.setContent { SpektraTheme { body() } }
 
@@ -368,6 +453,15 @@ private object Fake {
     private val lake by lazy { load("compare_lake.jpg") }
     /** The 1:1 viewer's "full render": the after half, unscaled. */
     val detail by lazy { after(lake) }
+
+    /** The lake's print, scaled by [k] and lifted by [add] (0..255): a dark or a bright fixture. */
+    fun toned(k: Float, add: Float): Bitmap {
+        val b = after(lake)
+        val out = Bitmap.createBitmap(b.width, b.height, Bitmap.Config.ARGB_8888)
+        val m = ColorMatrix(floatArrayOf(k, 0f, 0f, 0f, add, 0f, k, 0f, 0f, add, 0f, 0f, k, 0f, add, 0f, 0f, 0f, 1f, 0f))
+        Canvas(out).drawBitmap(b, 0f, 0f, Paint().apply { colorFilter = ColorMatrixColorFilter(m) })
+        return out
+    }
     /** films_dunes.jpg: six 629 x 420 tiles, three a row. */
     private val dunes by lazy {
         val b = load("films_dunes.jpg")
