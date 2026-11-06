@@ -168,7 +168,7 @@ fun LightTableScreen(
                 }
             }
         }
-        SnackbarHost(
+        SwipeNotice(
             snackbar,
             Modifier.align(Alignment.BottomCenter)
                 .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + FloatingBarSpace),

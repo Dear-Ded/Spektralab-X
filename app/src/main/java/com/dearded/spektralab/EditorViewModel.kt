@@ -910,7 +910,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${sw}x$sh")
-        _ui.update { it.copy(message = "已加入“正在处理”：极致渲染较慢，可以继续编辑或切到后台") }
+        _ui.update { it.copy(message = "已加入“正在处理”：全分辨率导出较慢，可以继续编辑或切到后台") }
     }
 
     // --- settings ------------------------------------------------------------

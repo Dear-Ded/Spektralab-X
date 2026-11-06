@@ -215,7 +215,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
                             DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text("JPEG · 全分辨率（较慢）") }, onClick = {
+                            DropdownMenuItem(text = { Text("全分辨率导出（后台）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }
@@ -232,7 +232,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         LocalEditorNav provides nav) {
     Scaffold(
         modifier = Modifier.highRefresh(dragging),
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SwipeNotice(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
             TopAppBar(
@@ -574,7 +574,9 @@ private fun Preview(
                 shownFilm = film
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
                 back = front; front = bitmap; fade.snapTo(0f)
-                try { fade.animateTo(1f, Motion.defaultEffects()) } finally { back = null }
+                // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
+                // is gone before the eye settles on the new one; with animations off it is a cut.
+                try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
             }
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
@@ -596,7 +598,8 @@ private fun Preview(
             if (ui.rendering) { kotlinx.coroutines.delay(400); value = true }
         }
         if (showProgress) {
-            AuraBar(Modifier.align(Alignment.TopCenter))
+            // ui2_reactbits.md 8.2: next to the photo only a neutral line, never the coloured AuraBar.
+            WorkLine(Modifier.align(Alignment.TopCenter))
         }
         // Histogram of what is on screen (the print, or the original while held).
         if (image != null) {
