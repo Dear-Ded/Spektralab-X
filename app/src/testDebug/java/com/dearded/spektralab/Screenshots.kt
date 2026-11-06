@@ -262,7 +262,7 @@ class Screenshots {
         shot("74_table_roll_strip")
     }
 
-    @Test fun launchIntro() {
+    @Test fun launchIntroEarly() {
         content { LaunchIntro(ready = false, onDone = {}) }
         val main = shadowOf(Looper.getMainLooper())
         repeat(3) { compose.mainClock.advanceTimeBy(150); main.idleFor(java.time.Duration.ofMillis(150)) }
