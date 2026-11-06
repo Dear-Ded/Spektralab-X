@@ -133,7 +133,7 @@ private fun Notes(r: Updater.Release) {
         r.notes.ifBlank { "（没有更新说明）" },
         style = MaterialTheme.typography.bodySmall, color = Palette.OnSurface,
         modifier = Modifier.fillMaxWidth().padding(vertical = RowGap)
-            .background(Palette.PanelHigh, RoundedCornerShape(16.dp))
+            .background(Palette.PanelHigh, Corners.l)
             .heightIn(max = 280.dp).verticalScroll(rememberScrollState())
             .padding(16.dp),
     )
@@ -144,7 +144,7 @@ private fun Notes(r: Updater.Release) {
 private fun Actions(primary: String, onPrimary: () -> Unit, quiet: List<Pair<String, () -> Unit>> = emptyList()) {
     Spacer(Modifier.height(RowGap))
     Box(
-        Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp)).background(Palette.Accent)
+        Modifier.fillMaxWidth().height(56.dp).clip(Corners.full).background(Palette.Accent)
             .clickable(role = Role.Button, onClick = onPrimary),
         contentAlignment = Alignment.Center,
     ) { Text(primary, style = MaterialTheme.typography.titleSmall, color = Palette.OnAccent) }

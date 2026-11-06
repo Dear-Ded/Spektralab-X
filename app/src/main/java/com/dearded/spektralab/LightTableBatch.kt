@@ -135,7 +135,7 @@ internal fun PasteSheet(
                 // The primary action (UI2.md 1.1): the inverted fill, fully round, a size up from the rest.
                 Button(
                     onClick = { onPaste(groups) }, enabled = groups.isNotEmpty(),
-                    shape = CircleShape, modifier = Modifier.height(48.dp),
+                    shape = Corners.full, modifier = Modifier.height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
                 ) { Text("粘贴到 $count 张") }
             }

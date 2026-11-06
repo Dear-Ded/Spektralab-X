@@ -69,8 +69,8 @@ internal fun FloatingBar(
     ) {
         Row(
             Modifier.weight(1f).height(64.dp)
-                .background(Palette.Panel, RoundedCornerShape(32.dp))
-                .border(1.dp, Palette.OutlineSoft, RoundedCornerShape(32.dp))
+                .background(Palette.Panel, Corners.full)
+                .border(1.dp, Palette.OutlineSoft, Corners.full)
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .then(if (scroll) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -105,7 +105,7 @@ internal fun AddButton(add: AddPhotos) {
             modifier = Modifier.size(64.dp),
             colors = IconButtonDefaults.iconButtonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
         ) {
-            Box(Modifier.size(64.dp).background(Palette.Accent, CircleShape), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(64.dp).background(Palette.Accent, Corners.full), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Add, contentDescription = "添加照片", tint = Palette.OnAccent)
             }
         }

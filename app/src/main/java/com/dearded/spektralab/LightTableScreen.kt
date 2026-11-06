@@ -367,7 +367,7 @@ private fun FrameCell(
     val thumb = developed ?: plain
     // Selected steps in a little and takes the white ring (UI2.md 1.2), so the choice reads at a glance.
     val scale by animateFloatAsState(if (selected) 0.92f else 1f, Motion.fastSpatial(), label = "cell-select")
-    val shape = RoundedCornerShape(8.dp)
+    val shape = Corners.s
     Box(
         Modifier
             .aspectRatio(1f)
@@ -408,7 +408,7 @@ internal fun FrameMarks(frame: Frame, selected: Boolean) {
             Text(
                 "★${frame.stars}",
                 Modifier.align(Alignment.BottomStart)
-                    .background(Palette.Background.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                    .background(Palette.Background.copy(alpha = 0.6f), Corners.xs)
                     .padding(horizontal = 6.dp, vertical = 1.dp),
                 color = Palette.OnSurface, fontSize = 12.sp,
             )

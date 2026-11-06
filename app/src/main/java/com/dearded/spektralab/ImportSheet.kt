@@ -282,7 +282,7 @@ private fun Buttons(onCancel: () -> Unit, keep: String, onKeep: () -> Unit) {
 @Composable
 private fun PrimaryPill(text: String, onClick: () -> Unit) {
     Button(
-        onClick = onClick, shape = CircleShape, modifier = Modifier.heightIn(min = 48.dp),
+        onClick = onClick, shape = Corners.full, modifier = Modifier.heightIn(min = 48.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
         contentPadding = PaddingValues(horizontal = 24.dp),
     ) { Text(text, style = MaterialTheme.typography.labelLarge) }

@@ -172,7 +172,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
                 trailing = {
                     Spacer(Modifier.width(8.dp))
                     Box(
-                        Modifier.size(64.dp).clip(CircleShape).background(Palette.Accent)
+                        Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
                             .clickable(role = Role.Button) { onEdit(current) },
                         contentAlignment = Alignment.Center,
                     ) { Text("编辑", style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
@@ -256,7 +256,7 @@ private fun LoupePage(frame: Frame, px: Int, shared: Boolean, onTap: () -> Unit,
 private fun LoupeBadge(text: String) {
     Text(
         text,
-        Modifier.background(Palette.Background.copy(alpha = 0.6f), CircleShape).padding(horizontal = 10.dp, vertical = 4.dp),
+        Modifier.background(Palette.Background.copy(alpha = 0.6f), Corners.s).padding(horizontal = 10.dp, vertical = 4.dp),
         color = Palette.OnSurface, fontSize = 13.sp,
     )
 }
