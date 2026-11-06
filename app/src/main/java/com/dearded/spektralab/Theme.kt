@@ -177,7 +177,7 @@ fun SpektraTheme(content: @Composable () -> Unit) {
     // Build the four weights on a worker while the first frame lays out (ui-fonts.md 5).
     val c = androidx.compose.ui.platform.LocalContext.current
     androidx.compose.runtime.remember(c) { Thread({ UiFonts.warm(c) }, "ui-fonts").apply { isDaemon = true; start() } }
-    MaterialTheme(colorScheme = Scheme, typography = Type, content = content)
+    MaterialTheme(colorScheme = Scheme, typography = Type, shapes = Corners.material, content = content)
 }
 
 /**

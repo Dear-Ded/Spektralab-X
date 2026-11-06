@@ -136,7 +136,7 @@ internal fun LabeledSlider(
             if (changed && !enabled) { EditedDot(); androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp)) }
             // Tap the readout to type a value (Silverphase RulerParameterRow, upstream ScrubSlider).
             Box(
-                Modifier.heightIn(min = 48.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                Modifier.heightIn(min = 48.dp).clip(Corners.m)
                     .clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.Button) { typing = true }
                     .semantics { contentDescription = "输入$label" }
                     .padding(horizontal = 6.dp),

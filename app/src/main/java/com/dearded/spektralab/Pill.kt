@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -109,15 +110,16 @@ fun SelectPill(
 ) {
     // Fill, corner and press come from ui-motion's one draw-phase layer (Interactions.kt).
     val press = remember { MutableInteractionSource() }
-    val style = rememberSelectionStyle(selected, enabled)
+    // ui_corners.md: selected is told by the fill and the weight, not by a shape change.
+    val style = rememberSelectionStyle(selected, enabled, restCorner = 12.dp, selectedCorner = 12.dp)
     val ink = style.ink
     Box(
         Modifier
             .minimumInteractiveComponentSize()
             .height(40.dp)
             .graphicsLayer { alpha = if (enabled || selected) 1f else 0.5f }
-            .morphingPill(style, press)
-            .then(if (selected) Modifier else Modifier.border(1.dp, Palette.OutlineSoft, RoundedCornerShape(12.dp)))
+            .pressScale(press).clip(Corners.m).drawBehind { drawRect(style.fill) }
+            .then(if (selected) Modifier else Modifier.border(1.dp, Palette.OutlineSoft, Corners.m))
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
                 interactionSource = press, indication = ripple(), onClick = onClick,
@@ -227,7 +229,7 @@ internal fun GroupLabel(text: String, modifier: Modifier = Modifier) {
 internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     Box(
-        modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
+        modifier.heightIn(min = 48.dp).clip(Corners.m)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
@@ -255,8 +257,8 @@ internal fun Segmented(
 ) {
     Row(
         modifier.fillMaxWidth().height(48.dp)
-            .background(Palette.Panel, RoundedCornerShape(24.dp))
-            .border(1.dp, Palette.OutlineSoft, RoundedCornerShape(24.dp))
+            .background(Palette.Panel, Corners.m)
+            .border(1.dp, Palette.OutlineSoft, Corners.m)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -269,7 +271,7 @@ internal fun Segmented(
                 when { on -> Palette.OnAccent; can -> Palette.OnSurface; else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f) },
                 Motion.defaultEffects(), label = "seg-ink")
             Box(
-                Modifier.weight(1f).fillMaxSize().clip(RoundedCornerShape(20.dp)).background(fill)
+                Modifier.weight(1f).fillMaxSize().clip(Corners.s).background(fill)
                     .selectable(selected = on, enabled = can, role = Role.Tab) { if (!on) onSelect(i) },
                 contentAlignment = Alignment.Center,
             ) {
@@ -298,7 +300,7 @@ internal fun SettingRow(
     onChange: (Boolean) -> Unit,
 ) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(Corners.m)
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange)
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -338,7 +340,7 @@ internal fun SettingRow(
 internal fun MoreRow(open: Boolean, edited: Boolean, onToggle: () -> Unit) {
     val turn by animateFloatAsState(if (open) 180f else 0f, Motion.defaultSpatial(), label = "more-turn")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp))
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(Corners.m)
             .clickable(role = Role.Button, onClick = onToggle)
             .padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -384,8 +386,8 @@ internal fun ThumbCard(
     val press = remember { MutableInteractionSource() }
     val ring by animateColorAsState(if (selected) Palette.Accent else Color.Transparent,
         Motion.defaultEffects(), label = "card-ring")
-    val outer = RoundedCornerShape(16.dp)
-    val inner = RoundedCornerShape(12.dp)
+    val outer = Corners.l
+    val inner = Corners.m
     Column(
         Modifier.width(size + 8.dp)
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
@@ -410,7 +412,7 @@ internal fun ThumbCard(
             if (badge != null) Text(
                 badge, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurface,
                 modifier = Modifier.align(Alignment.TopStart).padding(6.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                    .background(Color.Black.copy(alpha = 0.6f), Corners.s)
                     .padding(horizontal = 6.dp, vertical = 1.dp),
             )
             if (selected) Box(
@@ -433,7 +435,7 @@ internal fun ThumbCard(
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (selected) Palette.OnAccent else Palette.OnSurface,
             maxLines = 1, overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.background(nameFill, RoundedCornerShape(10.dp)).padding(horizontal = 8.dp, vertical = 1.dp),
+            modifier = Modifier.background(nameFill, Corners.s).padding(horizontal = 8.dp, vertical = 1.dp),
         )
         if (subtitle.isNotBlank()) Text(
             subtitle, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft,
@@ -461,8 +463,7 @@ internal fun TextCard(
     val press = remember { MutableInteractionSource() }
     val fill by animateColorAsState(if (selected) Palette.Accent else Palette.Panel, Motion.defaultEffects(), label = "tcard-fill")
     val ink by animateColorAsState(if (selected) Palette.OnAccent else Palette.OnSurface, Motion.defaultEffects(), label = "tcard-ink")
-    val corner by animateDpAsState(if (selected) 20.dp else 12.dp, Motion.fastSpatial(), label = "tcard-corner")
-    val shape = RoundedCornerShape(corner)
+    val shape = Corners.m
     Box(
         Modifier.width(width).heightIn(min = 80.dp)
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
@@ -526,7 +527,7 @@ private fun Check(color: Color) {
 @Composable
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(12.dp)
+    val shape = Corners.m
     Box(
         modifier.heightIn(min = 48.dp)
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
