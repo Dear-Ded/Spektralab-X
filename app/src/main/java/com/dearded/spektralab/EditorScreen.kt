@@ -390,6 +390,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 .pointerInput(anchors) {
                                     val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
                                     var at = 0f
+                                    // bughunt_main 5: new anchors restart this block mid-drag, and a cancelled
+                                    // coroutine never calls onDragCancel; the finally lets go of the panel
+                                    // (and the 120 Hz vote) and springs it back to a height.
+                                    try {
                                     detectVerticalDragGestures(
                                         onDragStart = {
                                             handleDown = true
@@ -414,6 +418,9 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                         at = (at - dy).coerceIn(anchors.first(), anchors.last())
                                         val now = at
                                         panelScope.launch { panelPx.snapTo(now) }
+                                    }
+                                    } finally {
+                                        if (handleDown) { handleDown = false; settleKey++ }
                                     }
                                 }
                                 .semantics {
@@ -1011,7 +1018,9 @@ private fun Controls(
                             }
                             Hint("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。")
                         }
-                        SwitchRow("胶片边框", e.filmEdge, enabled && src != null) { on ->
+                        // bughunt_main 1: 胶片「无」 skips the pipeline that draws the edge and the date back.
+                        SwitchRow("胶片边框", e.filmEdge, enabled && src != null && !e.noFilm,
+                            reason = if (enabled && e.noFilm) "胶片是「无」：片边要有胶片才画得出来。" else "") { on ->
                             if (src != null) vm.update(Edit.withFilmEdge(e, src.width, src.height, on).let {
                                 if (!on && Borders.byId(e.borderId)?.edge != null && e.frame.isNone) it.copy(borderId = "none") else it
                             }.let {
@@ -1037,8 +1046,9 @@ private fun Controls(
                             Hint("边框打开时画面会裁成片门的比例；裁剪比例按钮暂时不可用。")
                         }
                         val dateOk = !e.filmEdge || Edit.dateBackFits(e.edgeFormat)
-                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank(), reason = when {
+                        SwitchRow("日期戳", e.dateImprint, enabled && dateOk && e.dateText.isNotBlank() && !e.noFilm, reason = when {
                             !enabled -> ""
+                            e.noFilm -> "胶片是「无」：日期印在底片上，要先选一卷胶片。"
                             e.dateText.isBlank() -> "这张照片没有拍摄时间，不能加日期戳。"
                             !dateOk -> "宽幅画幅没有日期后背。"
                             else -> ""
