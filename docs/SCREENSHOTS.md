@@ -51,6 +51,12 @@ tools/aoidc.sh get /data/work/<会话名>/repo/app/build/outputs/roborazzi tools
 | `24_develop_none` | 冲洗，胶片「无」 |
 | `30`–`35_adjust_*` | 调整六段：光线、色彩、分色、曲线、调色盘、质感 |
 | `36_adjust_masks` | 局部蒙版（一个线性渐变，展开） |
+| `14_style_strength` | 风格已套用，强度面板打开（轻/中/重 + 滑杆，70% = 中） |
+| `15_zoomed` | 照片放大后，1:1 旁出现「适应」 |
+| `25_develop_3_dark` / `26_develop_3_bright` | 冲洗③，暗 / 亮两张假照片，曝光补偿下一行显示「偏暗」/「偏亮，高光有溢出」 |
+| `27_develop_4_grain_off` | 冲洗④，颗粒关闭，强度灰掉并写明原因 |
+| `37_adjust_light_moved` | 调整·光线，曝光 +0.6、对比度 +15，滑杆旁出现 ↺ |
+| `41_border_date_rebate` | 边框，135 片边 + 日期印在帧间，横纵向边距灰掉并写明原因 |
 | `40_border` | 边框（画廊白边） |
 | `50_crop` | 构图 |
 | `60_settings` | 设置页 |
