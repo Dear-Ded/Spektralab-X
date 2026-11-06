@@ -65,6 +65,23 @@ class Screenshots {
         shot("01_editor_empty")
     }
 
+    @Test fun editorBusy() {
+        editor(Fake.ui().copy(ready = false, busy = "正在准备引擎…", source = null, image = null, before = null,
+            filmCards = emptyMap(), canUndo = false))
+        shot("02_editor_busy")
+    }
+
+    /** The launch intro about 700 ms in: glow up, strip developed, leak mid-sweep (LaunchIntro.kt). */
+    @Test fun launchIntro() {
+        content { LaunchIntro(ready = false, onDone = {}) }
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(7) {
+            compose.mainClock.advanceTimeBy(100)
+            main.idleFor(java.time.Duration.ofMillis(100))
+        }
+        compose.onRoot().captureRoboImage("$OUT/03_launch_intro.png")
+    }
+
     @Test fun editorStyleAndPanel() {
         editor(Fake.ui())
         shot("10_style")

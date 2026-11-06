@@ -51,7 +51,7 @@ import kotlin.math.sin
  *   0-500 ms    the Gemini glow rises behind the strip (Aura, slowEffects)
  *   0-450 ms    the spectrum finishes its wipe if the splash cut it short
  *   60-600 ms   the sprockets pull one frame to the left (defaultSpatial)
- *   120-900 ms  a violet-to-rose light leak sweeps once across (slowSpatial)
+ *   120-900 ms  a blue light leak with a warm edge sweeps once across (slowSpatial)
  *   200-520 ms  "Spektralab-X" fades in and rises 8 dp under the strip
  *
  * It never holds the app up: it leaves when the engine is ready, no sooner
@@ -79,10 +79,7 @@ internal fun launchIntroWanted(context: Context, intent: Intent?): Boolean =
 
 // The launcher foreground's geometry (ic_launcher_foreground.xml, a 108-unit viewport).
 private const val PITCH = 10.56f
-private val SPECTRUM = listOf(
-    0f to Color(0xFF7B3FE4), 0.2f to Color(0xFF3A6CF0), 0.38f to Color(0xFF2FC2B0),
-    0.55f to Color(0xFFF2D24A), 0.75f to Color(0xFFF08A2E), 1f to Color(0xFFE0383A),
-)
+private val SPECTRUM = AuraColors.spectrum
 
 /**
  * The intro over the first screen. [ready] is the engine's readiness;
@@ -158,8 +155,8 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                 drawRect(
                     Brush.linearGradient(
                         0f to Color.Transparent,
-                        0.4f to AuraColors.Violet.copy(alpha = a),
-                        0.6f to AuraColors.Rose.copy(alpha = a),
+                        0.4f to AuraColors.Blue.copy(alpha = a),
+                        0.6f to AuraColors.Yellow.copy(alpha = a * 0.6f),
                         1f to Color.Transparent,
                         start = Offset(c - diag * 0.25f, 0f), end = Offset(c + diag * 0.25f, 0f),
                     ),
