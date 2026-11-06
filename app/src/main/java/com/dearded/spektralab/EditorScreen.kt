@@ -799,7 +799,7 @@ private fun Controls(
                                     val d = Edit()
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Spacer(Modifier.weight(1f))
-                                    StepReset(enabled, what = "曝光与放大", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
+                                    StepReset(enabled, what = "曝光", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
                                         e.yShift != 0.0 || e.mShift != 0.0) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
@@ -858,7 +858,7 @@ private fun Controls(
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Spacer(Modifier.weight(1f))
-                                    StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects() || e.extraEffectsTuned(d)) {
+                                    StepReset(enabled, what = "效果", changed = e.effects() != fx.effects() || e.extraEffectsTuned(d)) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
