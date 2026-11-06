@@ -472,7 +472,7 @@ internal fun StyleStrip(
         // A step is chosen only while the strength sits exactly on it.
         val k = strengthOf(s.id)
         val steps = listOf("轻" to 0.4, "中" to 0.7, "重" to 1.0)
-        Segmented(steps.map { it.first }, steps.indexOfFirst { kotlin.math.abs(k - it.second) < 0.005 },
+        StepRow(null, steps.map { it.first }, steps.indexOfFirst { kotlin.math.abs(k - it.second) < 0.005 },
             enabled && current != null) { i ->
             view.tick()
             strengths[s.id] = steps[i].second

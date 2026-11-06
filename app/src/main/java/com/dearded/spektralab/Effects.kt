@@ -29,22 +29,12 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     val expandAll = rememberExpandAll()
     var more by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(expandAll) }
 
-    Toggle("颗粒", e.grainActive, enabled) { onChange(e.copy(grainActive = it)) }
-    LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag,
-        disabledReason = "") {
-        onChange(e.copy(grainAmount = it))
-    }
-    Toggle("光晕（Halation）", e.halationActive, enabled) { onChange(e.copy(halationActive = it)) }
-    LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
-        disabledReason = "") {
-        onChange(e.copy(halationAmount = it))
-    }
-    Toggle("相纸眩光", e.glareActive, enabled) { onChange(e.copy(glareActive = it)) }
-    // Upstream's 0..30 (RFC-034): the paper's own veil is 1, and nothing under ~4 is visible.
-    LabeledSlider("眩光强度", e.glareAmount, 0.0, 30.0, 1.0, enabled && e.glareActive, "%.1f", onDrag = onDrag,
-        disabledReason = "") {
-        onChange(e.copy(glareAmount = it))
-    }
+    // ui2_colorfulcam.md 1: four stops per effect in reach; 关 is the old switch. The
+    // continuous strengths are behind 更多参数, and a strength between stops chooses none.
+    // Stop values are first guesses, to be tuned against real prints.
+    EffectStops("颗粒", e.grainActive, e.grainAmount, GRAIN_STOPS, enabled) { on, k -> onChange(e.copy(grainActive = on, grainAmount = k)) }
+    EffectStops("光晕", e.halationActive, e.halationAmount, HALATION_STOPS, enabled) { on, k -> onChange(e.copy(halationActive = on, halationAmount = k)) }
+    EffectStops("相纸眩光", e.glareActive, e.glareAmount, GLARE_STOPS, enabled) { on, k -> onChange(e.copy(glareActive = on, glareAmount = k)) }
 
     val tuned = e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
         e.unsharpAmount != fxd.unsharpAmount || e.unsharpSigma != fxd.unsharpSigma || e.couplersAmount != 1.0 ||
@@ -52,7 +42,7 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
         e.lensBlurUm != fxd.lensBlurUm || e.noAntihalation != fxd.noAntihalation || e.cameraFilter != fxd.cameraFilter ||
         e.preflash != fxd.preflash || e.labLevels != fxd.labLevels
     MoreRow(open = more, edited = tuned) { more = !more }
-    if (!more) Hint(moreSummary("12 项",
+    if (!more) Hint(moreSummary("15 项",
         "负片反差" to e.negativeGamma.takeIf { it != fxd.negativeGamma }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
         "高光能量" to e.highlightBoostEv.takeIf { it != fxd.highlightBoostEv }?.let { String.format(java.util.Locale.ROOT, "%.1f EV", it) },
         "柔化" to e.lensBlurUm.takeIf { it != fxd.lensBlurUm }?.let { String.format(java.util.Locale.ROOT, "%.0f µm", it) },
@@ -68,6 +58,19 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
         "色彩分离" to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
     ))
     Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
+        LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag,
+            disabledReason = "") {
+            onChange(e.copy(grainAmount = it))
+        }
+        LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
+            disabledReason = "") {
+            onChange(e.copy(halationAmount = it))
+        }
+        // Upstream's 0..30 (RFC-034): the paper's own veil is 1, and nothing under ~4 is visible.
+        LabeledSlider("眩光强度", e.glareAmount, 0.0, 30.0, 1.0, enabled && e.glareActive, "%.1f", onDrag = onDrag,
+            disabledReason = "") {
+            onChange(e.copy(glareAmount = it))
+        }
         LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
             disabledReason = "") {
             onChange(e.copy(grainArea = it))
@@ -173,3 +176,18 @@ private fun Toggle(label: String, checked: Boolean, enabled: Boolean, reason: St
 
 @Composable
 private fun Note(text: String) = Hint(text, Modifier.padding(bottom = 4.dp))
+
+/** 轻 / 中 / 强 per effect; 中 is the film's own strength (1). */
+private val GRAIN_STOPS = listOf(0.5, 1.0, 1.6)
+private val HALATION_STOPS = listOf(0.5, 1.0, 2.0)
+/** Glare: the paper's own veil is 1, and under ~4 it hardly shows (RFC-034). */
+private val GLARE_STOPS = listOf(1.0, 4.0, 10.0)
+
+@Composable
+private fun EffectStops(label: String, on: Boolean, amount: Double, stops: List<Double>, enabled: Boolean,
+                        onPick: (Boolean, Double) -> Unit) {
+    val chosen = if (!on) 0 else stops.indexOfFirst { kotlin.math.abs(amount - it) < 0.005 }.let { if (it < 0) -1 else it + 1 }
+    StepRow(label, listOf("关", "轻", "中", "强"), chosen, enabled) { i ->
+        if (i == 0) onPick(false, amount) else onPick(true, stops[i - 1])
+    }
+}

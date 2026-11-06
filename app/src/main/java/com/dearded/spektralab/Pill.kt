@@ -285,6 +285,21 @@ internal fun Segmented(
 }
 
 /**
+ * Named stops over a continuous value (关 / 轻 / 中 / 强 for an effect, 轻 / 中 / 重 for a
+ * style's strength; ui2_colorfulcam.md 1, ui2_icecream.md 6.3). The stop the value sits on
+ * is chosen; a value between stops (set on the slider) chooses none.
+ */
+@Composable
+internal fun StepRow(label: String?, names: List<String>, chosen: Int, enabled: Boolean, onPick: (Int) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        if (label != null) Text(label, style = MaterialTheme.typography.bodyMedium,
+            color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
+            modifier = Modifier.padding(bottom = 6.dp))
+        Segmented(names, chosen, enabled) { onPick(it) }
+    }
+}
+
+/**
  * A switch that is the whole row (UI2.md 7.2 point 7): the name and an
  * optional second line on the left, the switch on the right, 56 dp, the
  * entire row toggles. On is the near-white track with a dark thumb.
