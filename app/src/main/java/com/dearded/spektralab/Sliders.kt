@@ -131,7 +131,9 @@ internal fun LabeledSlider(
             Text(label, style = MaterialTheme.typography.bodyMedium,
                 color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.6f),
                 modifier = Modifier.weight(1f))
-            if (changed) { EditedDot(); androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp)) }
+            // The ↺ at the row's end is the changed mark (ui2_icecream.md 1); the dot is left
+            // only for a moved value that cannot be reset right now (the slider is off).
+            if (changed && !enabled) { EditedDot(); androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp)) }
             // Tap the readout to type a value (Silverphase RulerParameterRow, upstream ScrubSlider).
             Box(
                 Modifier.heightIn(min = 48.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
@@ -144,13 +146,14 @@ internal fun LabeledSlider(
                     color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
             }
             // The space is kept when hidden, so the readout does not jump as ↺ comes and goes.
-            Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+            // A visible reset for double-tap (UI2.md 3.3): 48 dp, in white 92 % so it reads as "moved".
+            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                 if (changed && enabled) {
                     Box(
-                        Modifier.size(32.dp).clip(CircleShape).clickable { reset() }
+                        Modifier.size(48.dp).clip(CircleShape).clickable(role = androidx.compose.ui.semantics.Role.Button) { reset() }
                             .semantics { contentDescription = "重置$label" },
                         contentAlignment = Alignment.Center,
-                    ) { Text("↺", fontSize = 18.sp, color = Palette.OnSurfaceSoft) }
+                    ) { Text("↺", fontSize = 18.sp, color = Palette.OnSurface) }
                 }
             }
         }
@@ -303,3 +306,23 @@ private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =
  * overlays fade, leaving the photo and the slider. The editor provides it.
  */
 val LocalSliderDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean) -> Unit> { {} }
+
+/**
+ * 欠曝 / 正常 / 过曝 from the print on screen (ui2_icecream.md 6.6): the mean of the
+ * luminance bins, with clipping deciding first. Rough on purpose: it says which way to
+ * look, it does not meter. Bins are encoded values (Histogram), so the mean of a
+ * well-exposed print sits around the middle.
+ */
+internal fun exposureVerdict(h: Histogram): String {
+    if (h.clippedHigh > 0.05f && h.clippedHigh > h.clippedLow) return "偏亮，高光有溢出"
+    if (h.clippedLow > 0.10f && h.clippedLow > h.clippedHigh) return "偏暗，暗部有溢出"
+    var n = 0L; var sum = 0.0
+    h.y.forEachIndexed { i, c -> n += c; sum += c * (i + 0.5) }
+    if (n == 0L) return "正常"
+    val mean = sum / n / Histogram.BINS
+    return when {
+        mean < 0.28 -> "偏暗"
+        mean > 0.68 -> "偏亮"
+        else -> "正常"
+    }
+}

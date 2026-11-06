@@ -92,7 +92,8 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
             ) {
                 Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,
                     style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 8.dp))
-                TextButton(onClick = onClose) { Text("关闭", color = Color.White) }
+                // Back to the fitted photo: 适应 / 1:1 as a visible pair (ui2_icecream.md 6.9).
+                TextButton(onClick = onClose) { Text("适应", color = Color.White) }
             }
         }
     }
