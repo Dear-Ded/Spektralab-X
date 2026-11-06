@@ -25,8 +25,13 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
         // A B&W negative's intermediate comes out one flat grey on this engine
         // (docs/PARITY.md 8), so it has no 相纸「无」either.
         val di = e.digitalIntermediate && film(e.film)?.let { !it.positive && !it.bw } != false
-        return if (mono == e.monoPrint && edge == e.edgeText && di == e.digitalIntermediate) e
-               else e.copy(monoPrint = mono, edgeText = edge, digitalIntermediate = di)
+        // 胶片「无」 renders the decoded photo past the pipeline, so neither the film edge nor the
+        // date back can be drawn: an edit (an old sidecar too) never carries them into 无.
+        val edgeOn = e.filmEdge && !e.noFilm
+        val dateOn = e.dateImprint && !e.noFilm
+        return if (mono == e.monoPrint && edge == e.edgeText && di == e.digitalIntermediate &&
+                   edgeOn == e.filmEdge && dateOn == e.dateImprint) e
+               else e.copy(monoPrint = mono, edgeText = edge, digitalIntermediate = di, filmEdge = edgeOn, dateImprint = dateOn)
     }
 
     companion object {
