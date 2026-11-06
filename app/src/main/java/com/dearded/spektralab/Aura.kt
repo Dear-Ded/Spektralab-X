@@ -153,7 +153,7 @@ fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Backg
 @Composable
 fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Background, reach: Float = AURORA_REACH) {
     val shader = remember { if (Build.VERSION.SDK_INT >= 33) Aurora.create() else null }
-    if (shader != null) AuroraBand(modifier, shader, strength, ground, reach) else RadialAura(modifier, strength, ground)
+    if (shader != null && Build.VERSION.SDK_INT >= 33) AuroraBand(modifier, shader, strength, ground, reach) else RadialAura(modifier, strength, ground)
 }
 
 /**
