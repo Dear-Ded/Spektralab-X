@@ -174,7 +174,7 @@ private fun ExportButton(onRoll: () -> Unit, onContactSheet: () -> Unit) {
     Box {
         var menu by remember { mutableStateOf(false) }
         Box(
-            Modifier.size(64.dp).clip(CircleShape).background(Palette.Accent)
+            Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
                 .clickable(role = androidx.compose.ui.semantics.Role.Button) { menu = true }
                 .semantics { contentDescription = "导出" },
             contentAlignment = Alignment.Center,

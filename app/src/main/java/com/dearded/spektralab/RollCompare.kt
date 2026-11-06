@@ -100,10 +100,10 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                     val cards: List<Style?> = listOf<Style?>(null) + styles
                     itemsIndexed(cards, key = { _, s -> s?.id ?: "current" }, contentType = { _, _ -> "style" }) { i, s ->
                         val on = s?.id == chosen
-                        // UI2.md 1.2: thumbnails round 12; selected adds a 2 dp white ring and a check.
-                        val shape = RoundedCornerShape(12.dp)
+                        // Corners.kt: the card's frame l, the picture inside it m; selected adds a 2 dp white ring and a check.
+                        val shape = Corners.m
                         Column(
-                            Modifier.clip(RoundedCornerShape(14.dp)).clickable { chosen = s?.id; view.tick() }
+                            Modifier.clip(Corners.l).clickable { chosen = s?.id; view.tick() }
                                 .semantics { contentDescription = s?.name ?: "当前效果"; selected = on },
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
@@ -123,7 +123,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                                 overflow = TextOverflow.Ellipsis,
                                 fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
                                 color = if (on) Palette.OnAccent else Palette.OnSurface,
-                                modifier = if (on) Modifier.background(Palette.Accent, RoundedCornerShape(10.dp))
+                                modifier = if (on) Modifier.background(Palette.Accent, Corners.s)
                                     .padding(horizontal = 8.dp, vertical = 1.dp) else Modifier)
                             if (s != null) Text(shortFilmName(catalog.film(s.film)?.label ?: s.film), maxLines = 1,
                                 overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall,
@@ -140,7 +140,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                 Spacer(Modifier.width(8.dp))
                 val can = picked != null
                 Box(
-                    Modifier.height(64.dp).clip(RoundedCornerShape(32.dp))
+                    Modifier.height(64.dp).clip(Corners.full)
                         .background(if (can) Palette.Accent else Palette.PanelHigh)
                         .clickable(enabled = can, role = Role.Button) {
                             val s = picked ?: return@clickable

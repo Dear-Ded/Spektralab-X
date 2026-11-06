@@ -224,7 +224,7 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
 @Composable
 private fun RollCard(roll: Roll, onClick: () -> Unit) {
     Surface(
-        color = Palette.Panel, shape = RoundedCornerShape(16.dp),
+        color = Palette.Panel, shape = Corners.l,
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
             .semantics { contentDescription = "${roll.title}，${roll.frames.size} 张，${roll.edgeLine}" },
     ) {
@@ -243,7 +243,7 @@ private fun RollCard(roll: Roll, onClick: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 for (f in roll.frames.take(MAX_PREVIEW)) {
                     val thumb by rememberThumbnail(f, px)
-                    Box(Modifier.size(cell).clip(RoundedCornerShape(8.dp)).background(Palette.PanelHigh)) {
+                    Box(Modifier.size(cell).clip(Corners.s).background(Palette.PanelHigh)) {
                         thumb?.let { b ->
                             val image = remember(b) { b.asImageBitmap() }
                             Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
