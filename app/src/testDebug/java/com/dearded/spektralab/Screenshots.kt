@@ -284,14 +284,13 @@ class Screenshots {
         val style = Style.ALL.first { it.id == "lab_daily" }
         // The strip reads each style's strength from its prefs: 0.7 is 中.
         compose.activity.getSharedPreferences(STYLE_STRENGTH_PREFS, 0).edit().putFloat(style.id, 0.7f).commit()
-        val edit = style.atStrength(0.7).applyTo(ui.edit, ui.catalog)!!
+        // The same float the strip reads back (0.7f is 0.69999998 as a Double), or the style is not "applied".
+        val edit = style.atStrength(0.7f.toDouble()).applyTo(ui.edit, ui.catalog)!!
         editor(ui.copy(edit = edit))
         tallPanel()
-        // A tap on the applied style opens its strength.
-        // A real touch: the card's press scale and click run as on the phone.
+        // A tap on the applied style opens its strength. A real touch: the card's press scale and click run as on the phone.
         compose.onAllNodes(hasText(style.name) and hasClickAction()).onFirst().performTouchInput { click(Offset(centerX, height * 0.3f)) }
         compose.mainClock.advanceTimeBy(1200)
-        println("SHOTDBG strength steps: " + compose.onAllNodes(hasText("轻")).fetchSemanticsNodes().size)
         shot("14_style_strength")
     }
 
