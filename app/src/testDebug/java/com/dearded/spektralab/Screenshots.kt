@@ -288,10 +288,10 @@ class Screenshots {
         editor(ui.copy(edit = edit))
         tallPanel()
         // A tap on the applied style opens its strength.
-        compose.onAllNodes(hasText(style.name) and hasClickAction()).fetchSemanticsNodes().forEach {
-            println("SHOTDBG style node ${it.boundsInRoot} ${it.config}")
-        }
-        tap(style.name)
+        // A real touch: the card's press scale and click run as on the phone.
+        compose.onAllNodes(hasText(style.name) and hasClickAction()).onFirst().performTouchInput { click(Offset(centerX, height * 0.3f)) }
+        compose.mainClock.advanceTimeBy(1200)
+        println("SHOTDBG strength steps: " + compose.onAllNodes(hasText("轻")).fetchSemanticsNodes().size)
         shot("14_style_strength")
     }
 
@@ -350,11 +350,11 @@ class Screenshots {
     private fun swipeUntil(text: String) {
         repeat(10) {
             val h = compose.onRoot().fetchSemanticsNode().size.height
-            val top = compose.onAllNodes(hasText(text)).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.top
-            println("SHOTDBG swipeUntil $text top=$top h=$h")
-            if (top != null && top in 0f..h * 0.75f) return
+            // A node scrolled out of the panel is clipped to an empty rect at the top: not shown.
+            val b = compose.onAllNodes(hasText(text)).fetchSemanticsNodes().firstOrNull()?.boundsInRoot
+            if (b != null && b.height > 0f && b.top > 0f && b.top < h * 0.75f) return
             compose.onRoot().performTouchInput {
-                swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.45f), durationMillis = 400)
+                swipe(Offset(centerX, height * 0.85f), Offset(centerX, height * 0.4f), durationMillis = 400)
             }
             compose.mainClock.advanceTimeBy(800)
         }
