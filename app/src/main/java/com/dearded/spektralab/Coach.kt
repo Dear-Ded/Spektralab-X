@@ -192,7 +192,7 @@ private fun CoachMark(step: CoachStep, target: Rect, index: Int, onNext: () -> U
                 .offset { IntOffset(x.roundToInt(), y.roundToInt()) }
                 .onSizeChanged { bubble = it }
                 .widthIn(max = 280.dp)
-                .background(Palette.PanelHighest, RoundedCornerShape(14.dp))
+                .background(Palette.PanelHighest, Corners.m)
                 .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)
                 .semantics { liveRegion = LiveRegionMode.Polite },
         ) {
