@@ -11,8 +11,8 @@ FG = (240, 236, 228)
 DIM = (150, 146, 138)
 AMBER = (232, 162, 74)
 EDGE_INK = (232, 162, 74)
-# Aura.kt AuraColors.spectrum (the launcher strip): Gemini blue, light blue, red, yellow, green, teal.
-SPECTRUM = [(49, 134, 255), (116, 155, 255), (252, 65, 61), (251, 188, 4), (0, 185, 92), (36, 162, 202)]
+# Aura.kt AuraColors.spectrum (the launcher strip): Gemini blue, teal, green, yellow, red.
+SPECTRUM = [(49, 134, 255), (36, 162, 202), (0, 185, 92), (251, 188, 4), (252, 65, 61)]
 
 def font(name, size):
     for n in name:
