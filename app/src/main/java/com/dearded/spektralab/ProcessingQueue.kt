@@ -102,7 +102,7 @@ data class ProcessingJob(
 
     val label get() = when {
         sheet -> "印样 · $sheetFrames 张"
-        extreme -> "极致渲染 · 全分辨率"
+        extreme -> "全分辨率导出"
         format == ExportFormat.TIFF -> "16 位 TIFF"
         format == ExportFormat.HEIF -> "HEIF · 全尺寸"
         size == ExportSize.SHARE -> "JPEG · 分享尺寸"
@@ -725,7 +725,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor(render = true, extreme = job.extreme)
-            step(if (job.extreme) "极致冲洗（全分辨率）" else "冲洗", 0.25f)
+            step(if (job.extreme) "全分辨率冲洗" else "冲洗", 0.25f)
             val icc = File(ready.dir, "io/sRGB.icc").absolutePath
             when (job.format) {
                 ExportFormat.TIFF -> {
