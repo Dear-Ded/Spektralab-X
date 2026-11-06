@@ -466,9 +466,19 @@ internal fun StyleStrip(
     val last = remember { arrayOfNulls<Style>(1) }
     if (current != null) last[0] = current
     val shown = current ?: last[0]
-    Expandable(open = current != null) {
+    Expandable(open = current != null, verticalArrangement = Arrangement.spacedBy(RowGap)) {
         val s = shown ?: return@Expandable
-        LabeledSlider("强度 · ${s.name}", strengthOf(s.id) * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
+        // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
+        // A step is chosen only while the strength sits exactly on it.
+        val k = strengthOf(s.id)
+        val steps = listOf("轻" to 0.4, "中" to 0.7, "重" to 1.0)
+        Segmented(steps.map { it.first }, steps.indexOfFirst { kotlin.math.abs(k - it.second) < 0.005 },
+            enabled && current != null) { i ->
+            view.tick()
+            strengths[s.id] = steps[i].second
+            pick(s, steps[i].second)
+        }
+        LabeledSlider("强度 · ${s.name}", k * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
             strengths[s.id] = k
             pick(s, k)
