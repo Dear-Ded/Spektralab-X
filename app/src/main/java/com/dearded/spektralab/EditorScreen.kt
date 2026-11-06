@@ -1121,11 +1121,11 @@ private fun Controls(
                                     vm.update(e.copy(dateWithData = it))
                                 }
                             }
-                            Hint(when {
-                                    e.dateDataText.isBlank() -> "这张照片没有快门、光圈或焦距信息，数据后背无内容。"
-                                    !e.filmEdge -> "数据后背和帧间日期需要打开胶片边框。"
-                                    else -> "拍摄参数：${e.dateDataText}"
-                                })
+                            // The switch above already says why it is off (no data, no film edge);
+                            // this line only shows what will print (shots_review_3).
+                            if (e.dateDataText.isNotBlank() && e.filmEdge) Hint("拍摄参数：${e.dateDataText}")
+                            // 数据后背 has no switch to carry the reason, so it is said here once.
+                            else if (e.dateStyle == "data" && e.dateDataText.isBlank()) Hint("这张照片没有快门、光圈或焦距信息，数据后背无内容。")
                             // A RAW without lens or exposure data: the user picks the
                             // same-shot JPEG (one URI through the picker, no permission).
                             // Registered unconditionally, so a result survives recreation.
