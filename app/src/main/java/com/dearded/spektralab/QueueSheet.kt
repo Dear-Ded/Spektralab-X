@@ -2,7 +2,6 @@ package com.dearded.spektralab
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -40,8 +38,8 @@ import androidx.compose.ui.unit.sp
 /**
  * 正在处理: every export, running first, with progress and the time left.
  * A sheet rather than a screen, so the photo being edited stays in view.
- * (ui-screens_research.md 3) One summary card on top says when it will all
- * be done, the way Google Photos' backup banner gives one clear ETA; the jobs
+ * (ui-screens_research.md 3) One status row on top says how long the queue
+ * has left, the way Google Photos' backup banner gives one clear ETA; the jobs
  * follow in two groups, each row marked by shape as well as words: a ring
  * waiting, an arc filling while it runs, a tick done, a bang failed.
  */
@@ -60,7 +58,7 @@ fun QueueSheet(
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding()) {
             PanelHeader(
                 title = "正在处理",
-                hint = "可以切到后台，进度会显示在通知和灵动岛里。若被系统中断，下次打开应用会自动继续。",
+                hint = "可以切到后台，进度在实时通知里。",
             )
             Spacer(Modifier.height(RowGap))
             Summary(active, saved = done.count { it.state == JobState.DONE },
@@ -84,48 +82,42 @@ fun QueueSheet(
     }
 }
 
-/** The time left in large tabular figures, what is running under it, one bar for the whole queue. */
+/**
+ * One plain status row over the list: how many and how long, then the bar for
+ * the whole queue. No card and no glow: the bar already says it is working
+ * (ui_ai_flavor_audit.md 11).
+ */
 @Composable
 private fun Summary(active: List<ProcessingJob>, saved: Int, failed: Int) {
     val finished = saved + failed
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Palette.PanelHigh),
-    ) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-            if (active.isEmpty()) {
-                // Only what was saved counts as done; a failure is named, never folded in.
-                Text(if (failed > 0) "有 $failed 张没有完成" else if (saved > 0) "全部完成" else "没有进行中的任务",
-                    style = MaterialTheme.typography.titleLarge, color = Palette.OnSurface)
-                Hint(when {
-                    failed > 0 -> "在下面点“重试”；" + if (saved > 0) "另外 $saved 张已保存到相册" else "原因写在每一行里"
-                    saved > 0 -> "$saved 张已保存到相册"
-                    else -> "导出的照片会在这里排队"
-                })
-            } else {
-                val left = ProcessingQueue.remainingSeconds(active)
-                Text("还需约", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
-                Text(
-                    ProcessingQueue.formatEta(left),
-                    style = Readout.copy(fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Medium),
-                    color = Palette.OnSurface,
-                )
-                val running = active.firstOrNull { it.state == JobState.RUNNING }
-                Hint(
-                    "${active.size} 张" + (running?.let { " · 正在处理「${it.name}」" } ?: " · 排队中"),
-                )
-                Spacer(Modifier.height(10.dp))
-                // The whole queue, counting a running job by its own progress.
-                val total = active.size + finished
-                val doneShare = if (total == 0) 0f else (finished + active.sumOf { it.progress.toDouble() }.toFloat()) / total
-                LinearProgressIndicator(
-                    progress = { doneShare.coerceIn(0f, 1f) },
-                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
-                    color = Palette.Accent, trackColor = Palette.Panel, drawStopIndicator = {},
-                )
+    Column(Modifier.fillMaxWidth()) {
+        if (active.isEmpty()) {
+            // Only what was saved counts as done; a failure is named, never folded in.
+            Text(
+                when {
+                    failed > 0 -> "$failed 张没有完成" + if (saved > 0) " · $saved 张已保存" else ""
+                    saved > 0 -> "全部完成 · $saved 张已保存"
+                    else -> "没有进行中的任务"
+                },
+                style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
+            )
+        } else {
+            val left = ProcessingQueue.formatEta(ProcessingQueue.remainingSeconds(active))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("${active.size} 张", style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
+                    modifier = Modifier.weight(1f))
+                Text("还需约 $left", style = Readout, color = Palette.OnSurfaceSoft)
             }
+            Spacer(Modifier.height(8.dp))
+            // The whole queue, counting a running job by its own progress.
+            val total = active.size + finished
+            val doneShare = if (total == 0) 0f else (finished + active.sumOf { it.progress.toDouble() }.toFloat()) / total
+            LinearProgressIndicator(
+                progress = { doneShare.coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                color = Palette.Accent, trackColor = Palette.PanelHigh, drawStopIndicator = {},
+            )
         }
-        // Working: the Aura's sliding glow along the card's foot (UI2.md 1.1, the processing bar).
-        if (active.isNotEmpty()) AuraBar()
     }
 }
 
