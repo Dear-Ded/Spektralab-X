@@ -43,9 +43,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -135,8 +138,23 @@ fun SelectPill(
 /** A sideways-scrolling row of pills, 8 dp apart (UI2.md 1.3). */
 @Composable
 internal fun PillRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    // shots_review_1 S2: an end that has more beyond it fades out, so the row reads as scrollable.
+    val scroll = rememberScrollState()
     Row(
-        modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier.fillMaxWidth()
+            .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                val w = 40.dp.toPx()
+                fun fade(from: Float, to: Float) = drawRect(
+                    androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Black, Color.Transparent), from, to),
+                    topLeft = Offset(minOf(from, to), 0f), size = androidx.compose.ui.geometry.Size(w, size.height),
+                    blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                )
+                if (scroll.canScrollForward) fade(size.width - w, size.width)
+                if (scroll.canScrollBackward) fade(w, 0f)
+            }
+            .horizontalScroll(scroll),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
@@ -171,8 +189,24 @@ internal fun PanelHeader(
                 QuietButton(resetLabel, enabled = enabled, onClick = onReset)
             }
         }
-        if (hint.isNotBlank()) Hint(hint)
+        if (hint.isNotBlank()) FoldHint(hint)
     }
+}
+
+/**
+ * A panel's explanation on one line (shots_review_1 S1): the controls get the height, not
+ * the prose. When the line is cut it ends in … and a tap opens the whole text.
+ */
+@Composable
+internal fun FoldHint(text: String, modifier: Modifier = Modifier) {
+    var open by remember(text) { mutableStateOf(false) }
+    var cut by remember(text) { mutableStateOf(false) }
+    Text(
+        text, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+        maxLines = if (open) Int.MAX_VALUE else 1, overflow = TextOverflow.Ellipsis,
+        onTextLayout = { if (!open) cut = it.hasVisualOverflow },
+        modifier = modifier.then(if (cut || open) Modifier.clickable(role = Role.Button) { open = !open } else Modifier),
+    )
 }
 
 /** One line of plain explanation (UI2.md 2.6): 12 sp, white 64 %. */

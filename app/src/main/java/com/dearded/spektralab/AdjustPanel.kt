@@ -61,8 +61,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val changedCount = edited.count { it }
     PanelHeader(
         title = "调整",
-        summary = if (changedCount == 0) "作用在冲好的照片上" else "已改 $changedCount 段",
-        hint = "像扫描后再微调；拖动即时生效，不重新冲洗。",
+        summary = if (changedCount == 0) "冲好之后微调，不重新冲洗" else "已改 $changedCount 段",
     )
     PillRow {
         // 无 first: no adjustments, the print (or the photo) as it is.
@@ -73,7 +72,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Hint(SEGMENT_HINTS[seg], Modifier.weight(1f))
+        FoldHint(SEGMENT_HINTS[seg], Modifier.weight(1f))
         if (edited[seg]) QuietButton("重置${segments[seg]}", enabled = enabled) { resetSegment(seg) }
     }
 
@@ -204,12 +203,12 @@ internal fun resetAdjustSegment(l: Look, i: Int): Look {
 
 /** One line per 调整 segment: what it changes, in plain words (UI2.md 2.6). */
 private val SEGMENT_HINTS = listOf(
-    "明暗：整体曝光、反差，以及高光和阴影各自的亮度。",
-    "冷暖和浓淡：色温、色调、饱和度。",
-    "单独调某一种颜色，或给阴影、中间调、高光分别染色。",
-    "按住点拖动；空白处上下滑会滚动页面。双击点删除。",
-    "左右是色彩浓淡，上下是色调明暗；双击回到这款风格的默认点。",
-    "褪色和暗角，像老照片的质感。",
+    "整体明暗、反差，高光和阴影。",
+    "冷暖、色调和浓淡。",
+    "单调一种颜色，或给明暗分区染色。",
+    "按住点拖动，双击点删除；空白处上下滑滚动页面。",
+    "左右是浓淡，上下是明暗；双击回到默认点。",
+    "褪色和暗角，老照片的质感。",
 )
 
 @Composable

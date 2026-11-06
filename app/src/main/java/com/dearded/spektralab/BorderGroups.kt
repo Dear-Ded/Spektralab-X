@@ -46,6 +46,7 @@ internal object BorderGroups {
     fun inGroup(g: Int): List<BorderPreset> = Borders.PRESETS.filter { it.id != "none" && groupOf(it.id) == g }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 internal fun BorderPicker(
     current: String, enabled: Boolean,
@@ -60,7 +61,8 @@ internal fun BorderPicker(
             SelectPill(selected = group == i, onClick = { group = i }, label = { Text("$name $count") })
         }
     }
-    PillRow {
+    // shots_review_1 S1: every style of the group in view, row after row, not one sideways line.
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Borders.byId("none")?.let { none ->
             SelectPill(selected = current == "none", onClick = { onPick(none) }, label = { Text(none.label) }, enabled = enabled)
         }

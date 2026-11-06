@@ -340,17 +340,19 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
+                    if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                    // shots_review_1 P1: the empty page is the whole screen.
+                    if (!ui.hasImage) return@Column
                     // The handle follows the finger 1:1; on release the panel springs to the
                     // nearest of its three heights, a fling carrying it one further.
                     // UI2.md 3.1: the height lives in an Animatable read only in the layout
                     // phase below, so a drag frame re-measures the panel and recomposes nothing.
-                    val heights = listOf(96.dp, boxHeight * 0.42f, boxHeight * 0.75f)
+                    val heights = listOf(96.dp, boxHeight * 0.55f, boxHeight * 0.75f)
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val anchors = remember(heights, density) { with(density) { heights.map { it.toPx() } } }
                     val panelPx = remember { androidx.compose.animation.core.Animatable(anchors[panelLevel]) }
@@ -736,7 +738,7 @@ private fun Controls(
                             PanelHeader(
                                 title = "风格",
                                 summary = if (e.noFilm) "原图" else ui.catalog.film(e.film)?.label.orEmpty(),
-                                hint = "点一下风格出片，再点一下调强度。想自己从胶卷开始调，去「冲洗」。",
+                                hint = "点一下出片，再点一下调强度。",
                             )
                         StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
@@ -765,11 +767,11 @@ private fun Controls(
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             // 胶片「无」: the steps after the film have nothing to develop; they keep their settings.
                             val enabled = enabled && !(e.noFilm && step > 0)
-                            if (e.noFilm && step > 0) Hint("胶片是「无」：相纸、曝光与放大、胶片效果都不起作用。设置会保留，选一款胶片就恢复。")
+                            if (e.noFilm && step > 0) FoldHint("胶片是「无」，这一步不起作用；选一款胶片就恢复。")
                             when (step) {
                                 0 -> {
-                                    PanelHint("先选胶卷：它决定颜色、反差和颗粒的底子。")
                                 FilmStrip(ui, enabled, onNone = vm::pickNoFilm) { vm.pickFilm(it) }
+                                PanelHint("胶卷决定颜色、反差和颗粒；长按卡片可收藏。")
                                 GroupLabel("画幅")
                                 // One set, one track (UI2.md 7.2 point 8); a size not in the list selects nothing.
                                 Segmented(
@@ -781,25 +783,27 @@ private fun Controls(
                                     NextStep("相纸") { step = 1 }
                                 }
                                 1 -> {
-                                    PanelHint("相纸决定反差和色调，就像放大时换一盒相纸。「无」不经过相纸。")
+                                    PanelHint("相纸决定反差和色调；「无」不经过相纸。")
                                 PaperStrip(ui, enabled) { vm.update(it) }
                                     NextStep("曝光与放大") { step = 2 }
                                 }
                                 2 -> {
-                                    PanelHint("拍摄曝光是按快门时的曝光；放大曝光和黄、品红滤镜是暗房里印相纸时的调整。")
                                     val d = Edit()
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                        FoldHint("拍摄曝光在按快门时，放大曝光和滤镜在印相时。", Modifier.weight(1f))
                                     StepReset(enabled, what = "曝光与放大", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
                                         e.yShift != 0.0 || e.mShift != 0.0) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
                                     }
-                                SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
+                                    }
                                 LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(exposureEv = it))
                                 }
                                 LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
+                                SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
                                 // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
                                 val expandAll = rememberExpandAll()
                                 var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
@@ -833,16 +837,18 @@ private fun Controls(
                                     NextStep("胶片效果") { step = 3 }
                                 }
                                 else -> {
-                                    PanelHint("颗粒、光晕、眩光这些是胶片和相纸自带的质感，每一项都能单独开关和调强度。")
                                     val d = Edit()
                                     val fx = d.copy(film = e.film, paper = e.paper)
                                     fun Edit.effects() = listOf(grainActive, grainAmount, grainArea, grainLayered, halationActive,
                                         halationAmount, scatterAmount, glareActive, glareAmount, unsharpAmount, unsharpSigma, couplersAmount)
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                        FoldHint("胶片和相纸自带的质感，每项可单独开关。", Modifier.weight(1f))
                                     StepReset(enabled, what = "胶片效果", changed = e.effects() != fx.effects()) {
                                         vm.update(e.copy(grainActive = d.grainActive, grainAmount = d.grainAmount, grainArea = d.grainArea,
                                             grainLayered = d.grainLayered, halationActive = d.halationActive, halationAmount = d.halationAmount,
                                             scatterAmount = d.scatterAmount, glareActive = d.glareActive, glareAmount = d.glareAmount,
                                             unsharpAmount = d.unsharpAmount, unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount))
+                                    }
                                     }
                                     // 无 first (tools/work/no_film_research.md 4): no grain, halation, glare or sharpening.
                                     Segmented(options = listOf("无", "胶片自带"), selected = if (e.effectsNone) 0 else 1, enabled = enabled) { i ->
@@ -867,7 +873,7 @@ private fun Controls(
                                     if (e.frame.perf != null) "齿孔" else null,
                                     if (e.dateImprint) "日期" else null,
                                 ).joinToString(" · "),
-                                hint = "先选类别和款式；选好后，下面是这一款的设置。",
+                                hint = "先选类别和款式，设置在下面。",
                             )
                         BorderPicker(e.borderId, enabled && src != null, noFilm = e.noFilm) { p ->
                             if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
@@ -1123,7 +1129,7 @@ private fun Controls(
                                     if (e.quarterTurns % 4 != 0) "转 ${e.quarterTurns % 4 * 90}°" else null,
                                     if (e.flipH) "翻转" else null,
                                 ).joinToString(" · "),
-                                hint = "选画面比例，裁剪居中；旋转和裁剪在冲洗之前完成。",
+                                hint = "选比例，裁剪居中，在冲洗之前完成。",
                             )
                         val src = ui.source
                         // With the film edge on, the crop must stay the gate's shape in the new orientation.
@@ -1178,7 +1184,7 @@ private fun Controls(
 
 /** One line under a panel's title: what this step is for, in plain words (UI2.md 2.6). */
 @Composable
-private fun PanelHint(text: String) = Hint(text, Modifier.padding(bottom = 4.dp))
+private fun PanelHint(text: String) = FoldHint(text)
 
 /** The darkroom order (UI2.md 2.3): film, paper, exposure and enlarging, the film's own effects. */
 private val DEVELOP_STEPS = listOf("① 胶卷", "② 相纸", "③ 曝光与放大", "④ 胶片效果")
@@ -1202,9 +1208,7 @@ private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onS
 @Composable
 private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一项", onReset: () -> Unit) {
     if (!changed) return
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        QuietButton("重置$what", enabled = enabled, onClick = onReset)
-    }
+    QuietButton("重置$what", enabled = enabled, onClick = onReset)
 }
 
 /** The step's last row: the next step as a quiet pill on the right, after a group's worth of space. */
@@ -1285,7 +1289,6 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, on
         RECENT -> recents
         else -> ui.catalog.films.filter { kindOf(it) == kind }
     }
-    if (kind != FAV && favs.isEmpty()) Hint("长按卡片可以收藏。")
     val view = androidx.compose.ui.platform.LocalView.current
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
     // The current film is brought into view when the strip appears or the film
@@ -1310,7 +1313,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, on
         // 无 leads the strip and is a new photo's default (tools/work/no_film_research.md).
         item(key = "_none") {
             val original = remember(ui.before) { ui.before?.asImageBitmap() }
-            NoneCard(selected = ui.edit.noFilm, original = original, enabled = enabled) {
+            NoneCard(selected = ui.edit.noFilm, original = original, enabled = enabled, size = 88.dp) {
                 if (!ui.edit.noFilm) { view.tick(); onNone() }
             }
         }
@@ -1326,7 +1329,7 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, on
                 title = film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
                 subtitle = FilmNotes.line(film),
                 enabled = enabled,
-                placeholder = film.label,
+                placeholder = film.label, size = 88.dp,
                 starred = picks.isFavourite(film.id),
                 onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
             ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
@@ -1345,9 +1348,11 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     var naming by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) { vm.loadPresets() }
+    // shots_review_1 P2: saving is 我的 → + 存为风格 now; presets made before stay reachable here.
+    if (ui.presets.isEmpty()) return
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box {
-            TonalButton(if (ui.presets.isEmpty()) "还没有预设" else "套用预设（${ui.presets.size}）",
+            TonalButton("套用旧预设（${ui.presets.size}）",
                 enabled = enabled && ui.presets.isNotEmpty()) { menu = true }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 for (p in ui.presets) {
@@ -1361,7 +1366,6 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                 }
             }
         }
-        QuietButton("存为预设", enabled = enabled) { naming = true }
     }
     if (naming) {
         var name by remember { mutableStateOf("") }
