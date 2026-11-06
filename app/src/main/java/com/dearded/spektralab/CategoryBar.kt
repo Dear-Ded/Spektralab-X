@@ -63,8 +63,8 @@ fun CategoryBar(
         verticalAlignment = Alignment.CenterVertically) {
         Row(
             Modifier.weight(1f).height(64.dp)
-                .background(Palette.Panel, RoundedCornerShape(32.dp))
-                .border(1.dp, Palette.OutlineSoft, RoundedCornerShape(32.dp))
+                .background(Palette.Panel, Corners.full)
+                .border(1.dp, Palette.OutlineSoft, Corners.full)
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -81,10 +81,9 @@ fun CategoryBar(
                 )
                 val fill by animateColorAsState(
                     if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
-                val corner by animateDpAsState(if (on) 28.dp else 16.dp, Motion.fastSpatial(), label = "corner")
                 Column(
                     Modifier.weight(1f).fillMaxHeight()
-                        .background(fill, RoundedCornerShape(corner))
+                        .background(fill, Corners.full)
                         .selectable(
                             selected = on, role = Role.Tab,
                             interactionSource = remember { MutableInteractionSource() }, indication = null,

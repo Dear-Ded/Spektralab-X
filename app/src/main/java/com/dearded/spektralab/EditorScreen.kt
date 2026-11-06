@@ -621,7 +621,7 @@ private fun Preview(
                 histogram?.let { h ->
                     // Grey luminance only: no colour over the photo while judging it (UI2.md 1.1).
                     MonoHistogram(h, Modifier.width(160.dp).height(80.dp)
-                        .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.5f)))
+                        .clip(Corners.s).background(Color.Black.copy(alpha = 0.5f)))
                     if (h.clippedLow > 0.005f || h.clippedHigh > 0.005f) {
                         Text(
                             String.format(Locale.ROOT, "暗部溢出 %.1f%% · 高光溢出 %.1f%%", h.clippedLow * 100, h.clippedHigh * 100),
@@ -638,7 +638,7 @@ private fun Preview(
                 color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome)
-                    .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f))
+                    .clip(Corners.s).background(Color.Black.copy(alpha = 0.45f))
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
@@ -688,7 +688,7 @@ private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = tr
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "chip")
     Box(
         Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(8.dp))   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
+            .clip(Corners.s)   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
             .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
             .clickable(enabled = enabled, interactionSource = press,
                 indication = androidx.compose.material3.ripple(), onClick = onClick)
@@ -1228,7 +1228,7 @@ private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一
 private fun NextStep(name: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = GroupGap - RowGap), horizontalArrangement = Arrangement.End) {
         QuietButton("下一步：$name", onClick = onClick,
-            modifier = Modifier.background(Palette.Panel, RoundedCornerShape(12.dp)))
+            modifier = Modifier.background(Palette.Panel, Corners.m))
     }
 }
 

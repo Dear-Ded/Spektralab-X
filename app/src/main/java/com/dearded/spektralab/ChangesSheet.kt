@@ -139,7 +139,7 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
             if (changes.isEmpty()) Hint("没有改动", Modifier.padding(bottom = 24.dp))
             for (c in changes) {
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(Corners.m)
                         .clickable(role = Role.Button) { onGo(c) },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
