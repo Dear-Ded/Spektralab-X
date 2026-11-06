@@ -66,15 +66,23 @@ data class Style(
     val look: Look = Look.NEUTRAL,
     /** What the style imitates, for a "灵感来自 …" subtitle. Display only; never applied or saved. */
     val inspiredBy: String = "",
+    /**
+     * The file named no film (a Layer 2-only XMP or .cube, or a style saved from a 无
+     * photo): [film] is only the photo's leftover stock, so the photo's own 无 and
+     * 相纸「无」 stay as they are (bughunt_main 2).
+     */
+    val keepFilmState: Boolean = false,
 ) {
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
         val stock = catalog.film(film) ?: return null
         // A style is a film on a paper: 无 off, the paper chosen. Coming from 效果「无」
         // it develops with the scanner's own sharpening, as every style was tuned with.
-        val base = edit.copy(film = film, scanFilm = stock.positive, noFilm = false, digitalIntermediate = false,
-            unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
-            paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
+        val base = if (keepFilmState) edit.copy(film = film,
+                paper = if (catalog.paper(paper) != null) paper else edit.paper)
+            else edit.copy(film = film, scanFilm = stock.positive, noFilm = false, digitalIntermediate = false,
+                unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
+                paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
         return catalog.normalize(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
             yShift = (yCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
@@ -478,7 +486,8 @@ internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJ
     val look = SpkLook(
         name = name.take(60), category = MINE_GROUP,
         engine = SpkEngine(
-            film = edit.film, paper = edit.paper, exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+            film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
+            exposureEv = edit.exposureEv, printExposure = edit.printExposure,
             yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
             formatMm = edit.filmFormatMm,
             grain = if (edit.grainActive) edit.grainAmount else 0.0,

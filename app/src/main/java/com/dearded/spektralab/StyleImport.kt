@@ -329,5 +329,6 @@ fun SpkLook.toStyle(id: String, edit: Edit, lutId: String): Style {
         look = layer2.copy(lut = lutId, lutStrength = if (lutId.isEmpty()) 1.0 else lut?.strength ?: 1.0),
         inspiredBy = source?.note?.takeIf { it.isNotBlank() }
             ?: author.takeIf { it.isNotBlank() }?.let { "作者 $it" } ?: "导入的风格",
+        keepFilmState = e.film == null,
     )
 }
