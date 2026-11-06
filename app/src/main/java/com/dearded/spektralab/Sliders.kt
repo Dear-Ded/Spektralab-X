@@ -306,3 +306,23 @@ private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =
  * overlays fade, leaving the photo and the slider. The editor provides it.
  */
 val LocalSliderDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean) -> Unit> { {} }
+
+/**
+ * 欠曝 / 正常 / 过曝 from the print on screen (ui2_icecream.md 6.6): the mean of the
+ * luminance bins, with clipping deciding first. Rough on purpose: it says which way to
+ * look, it does not meter. Bins are encoded values (Histogram), so the mean of a
+ * well-exposed print sits around the middle.
+ */
+internal fun exposureVerdict(h: Histogram): String {
+    if (h.clippedHigh > 0.05f && h.clippedHigh > h.clippedLow) return "偏亮，高光有溢出"
+    if (h.clippedLow > 0.10f && h.clippedLow > h.clippedHigh) return "偏暗，暗部有溢出"
+    var n = 0L; var sum = 0.0
+    h.y.forEachIndexed { i, c -> n += c; sum += c * (i + 0.5) }
+    if (n == 0L) return "正常"
+    val mean = sum / n / Histogram.BINS
+    return when {
+        mean < 0.28 -> "偏暗"
+        mean > 0.68 -> "偏亮"
+        else -> "正常"
+    }
+}

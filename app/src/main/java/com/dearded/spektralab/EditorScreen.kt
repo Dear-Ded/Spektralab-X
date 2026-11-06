@@ -810,6 +810,14 @@ private fun Controls(
                                 LabeledSlider("曝光补偿", e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(exposureEv = it))
                                 }
+                                // ui2_icecream.md 6.6: a grey word from the print's histogram, never a colour.
+                                val shown = ui.image
+                                val exposureWord by androidx.compose.runtime.produceState<String?>(null, shown) {
+                                    value = shown?.let { b ->
+                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(b) }
+                                    }?.let(::exposureVerdict)
+                                }
+                                exposureWord?.let { Hint("画面：$it") }
                                 LabeledSlider("放大曝光", e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
