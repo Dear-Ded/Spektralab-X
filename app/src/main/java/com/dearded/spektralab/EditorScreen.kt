@@ -635,7 +635,7 @@ private fun Preview(
                 color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).chrome(chrome)
-                    .clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.45f))
+                    .clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f))
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
@@ -685,7 +685,7 @@ private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = tr
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "chip")
     Box(
         Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(50))
+            .clip(RoundedCornerShape(8.dp))   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
             .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
             .clickable(enabled = enabled, interactionSource = press,
                 indication = androidx.compose.material3.ripple(), onClick = onClick)
@@ -790,7 +790,7 @@ private fun Controls(
                                 }
                                 1 -> {
                                 PaperStrip(ui, enabled) { vm.update(it) }
-                                    NextStep("曝光与放大") { step = 2 }
+                                    NextStep("曝光") { step = 2 }
                                 }
                                 2 -> {
                                     val d = Edit()
@@ -846,7 +846,7 @@ private fun Controls(
                                         WhiteBalance(s, ui.hasImage && !ui.exporting) { k, t -> vm.setWhiteBalance(k, t) }
                                     }
                                 }
-                                    NextStep("胶片效果") { step = 3 }
+                                    NextStep("效果") { step = 3 }
                                 }
                                 else -> {
                                     val d = Edit()
@@ -1204,12 +1204,9 @@ private val DEVELOP_STEPS = listOf("胶卷", "相纸", "曝光", "效果")
 @Composable
 private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
     val view = androidx.compose.ui.platform.LocalView.current
-    PillRow(Modifier.padding(bottom = 4.dp)) {
-        DEVELOP_STEPS.forEachIndexed { i, label ->
-            SelectPill(selected = step == i, onClick = { if (step != i) { view.tick(); onStep(i) } },
-                label = { Text(label) }, enabled = enabled, edited = edited.getOrElse(i) { false })
-        }
-    }
+    // ui_ai_flavor_audit 9: four equal segments, all on one row; order is the darkroom's.
+    Segmented(DEVELOP_STEPS, step, enabled, Modifier.padding(bottom = 4.dp),
+        edited = { edited.getOrElse(it) { false } }) { i -> view.tick(); onStep(i) }
 }
 
 /**
@@ -1228,7 +1225,7 @@ private fun StepReset(enabled: Boolean, changed: Boolean, what: String = "这一
 private fun NextStep(name: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = GroupGap - RowGap), horizontalArrangement = Arrangement.End) {
         QuietButton("下一步：$name", onClick = onClick,
-            modifier = Modifier.background(Palette.Panel, RoundedCornerShape(24.dp)))
+            modifier = Modifier.background(Palette.Panel, RoundedCornerShape(12.dp)))
     }
 }
 
