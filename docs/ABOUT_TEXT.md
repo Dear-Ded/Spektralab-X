@@ -15,7 +15,7 @@
 版本 {version}（{code}）
 
 **关于本项目**
-光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前处于快速迭代的 Alpha 阶段。**这不是 SpektraLab 官方版本**，与 SpektraLab 的作者和所有者无关联，未获其背书。
+光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前是 Alpha 版。**这不是 SpektraLab 官方版本**，与 SpektraLab 的作者和所有者无关联，未获其背书。
 作者：Spektralab-X 贡献者
 源码：https://github.com/Dear-Ded/Spektralab-X
 
@@ -28,8 +28,8 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
 
 **本应用永久免费**
-官方安装包只在 GitHub Releases 发布，不收取任何费用。欢迎把安装包转发到社区、社群、论坛，无需授权，注明源码地址即可。如果你是付费买到的，那不是官方版本，请申请退款，并到上面的地址下载官方版。
-应用里可以直接更新（设置 → 更新）：只向本仓库的 GitHub Releases 检查和下载，校验 SHA-256 和签名证书后才安装。除了检查更新不联网，照片不离开手机。
+官方安装包只在 GitHub Releases 发布，不收费。转发安装包无需授权，注明源码地址即可。付费买到的不是官方版本，可以申请退款。
+应用内更新只从本仓库的 GitHub Releases 下载，SHA-256 和签名证书都对上才安装。除了检查更新不联网，照片不离开手机。
 官方签名证书 SHA-256：
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [复制] · 校验方法：github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md
@@ -41,8 +41,8 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab
 胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm
 胶片建模基于 spektrafilm（film modeling powered by spektrafilm）
-RAW 解码：LibRaw（LGPL-2.1）；极致渲染 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
-本应用是非官方版本，与 SpektraLab 的作者和所有者、小米公司均无关联，未获其背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。
+RAW 解码：LibRaw（LGPL-2.1）；全分辨率导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
+SpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与小米公司无关联。
 
 ## English
 
@@ -50,7 +50,7 @@ RAW 解码：LibRaw（LGPL-2.1）；极致渲染 JPEG：libjpeg-turbo（BSD-3-Cl
 Version {version} ({code})
 
 **About**
-Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha and changing quickly. **This is not an official SpektraLab build**, and it is not affiliated with or endorsed by the authors or owners of SpektraLab.
+Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in alpha. **This is not an official SpektraLab build**, and it is not affiliated with or endorsed by the authors or owners of SpektraLab.
 Author: Spektralab-X contributors
 Source: https://github.com/Dear-Ded/Spektralab-X
 
@@ -63,8 +63,8 @@ Spektralab-X stands on the shoulders of giants: it is built on JamesQiu2005's Sp
 If it helps you develop a photo you love, a star is the best encouragement you could give.
 
 **This app is free, forever**
-Official APKs are published only on GitHub Releases and cost nothing. You are welcome to share the APK in communities, groups and forums; no permission is needed, just include the source address. If you paid for this copy, it is not the official build: ask for a refund and download the official one from the address above.
-Updates can be installed from inside the app (Settings → Updates): it checks and downloads only from this repository's GitHub Releases and installs only after the SHA-256 and signing certificate match. Apart from update checks it never goes online, and photos never leave the phone.
+Official APKs are published only on GitHub Releases and cost nothing. Share the APK freely; just include the source address. A copy you paid for is not the official build, and you can ask for a refund.
+In-app updates download only from this repository's GitHub Releases and install only when the SHA-256 and signing certificate match. Apart from update checks the app never goes online, and photos never leave the phone.
 Official signing certificate SHA-256:
 `CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3`
 [Copy] · How to verify: github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md
@@ -76,8 +76,8 @@ This app is released under GPL-3.0: you may use, modify and redistribute it. If 
 Rendering engine: SpektraLab (GPL-3.0) · github.com/JamesQiu2005/SpektraLab
 Film process model, film and paper data: spektrafilm by Andrea Volpato (GPL-3.0 / CC BY-SA 4.0) · github.com/andreavolpato/spektrafilm
 Film modeling powered by spektrafilm
-RAW decoding: LibRaw (LGPL-2.1); 极致渲染 JPEG: libjpeg-turbo (BSD-3-Clause / IJG); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
-Unofficial: not affiliated with or endorsed by the authors and owners of SpektraLab, or by Xiaomi. SpektraLab™ and its icon are trademarks of their owner (registration pending).
+RAW decoding: LibRaw (LGPL-2.1); full-resolution export JPEG: libjpeg-turbo (BSD-3-Clause / IJG); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
+SpektraLab™ and its icon are trademarks of their owner (registration pending). Not affiliated with Xiaomi.
 
 ## 字符串资源 / String resources
 
