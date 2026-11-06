@@ -36,7 +36,9 @@ grep -q 'SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON' "$B/CMakeCache.txt" && openmp="-fopen
 lib="$(grep '^SPEKTRALAB_LIBRAW_SOURCE:' "$B/CMakeCache.txt" | cut -d= -f2-)"
 [[ -f "$lib/libraw/libraw.h" ]] || { echo "build.sh: no LibRaw source in $B/CMakeCache.txt" >&2; exit 2; }
 c++ -std=c++20 -O2 $openmp \
-    -I"$SRC" -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/src/core" -I"$UP/engine/host" \n    -I"$UP/engine/third_party/stb" -I"$lib" \n    "$SRC/spk_android.cpp" "$SRC/output_transform.cpp" "$SRC/input_transform.cpp" "$SRC/layer2.cpp" "$SRC/resize.cpp" \
+    -I"$SRC" -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/src/core" -I"$UP/engine/host" \
+    -I"$UP/engine/third_party/stb" -I"$lib" \
+    "$SRC/spk_android.cpp" "$SRC/output_transform.cpp" "$SRC/input_transform.cpp" "$SRC/layer2.cpp" "$SRC/resize.cpp" \
     -Wl,--start-group "$E/libspektralab_engine.a" "$E/libspektralab_core.a" "$E/libspk_image_io.a" \
     "$E/libspk_libraw.a" "$E/libspk_volk.a" -Wl,--end-group \
     -lpthread -ldl -o "$SRC/spk_android"
