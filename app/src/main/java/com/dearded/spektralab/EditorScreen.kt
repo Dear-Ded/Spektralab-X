@@ -215,7 +215,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
                             DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text("极致渲染（全分辨率 · 后台）") }, onClick = {
+                            DropdownMenuItem(text = { Text("全分辨率导出（后台）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }

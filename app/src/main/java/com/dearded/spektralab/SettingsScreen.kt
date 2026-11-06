@@ -72,9 +72,9 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CancellationException
 
 private val WORKING_EDGES = listOf(
-    2048 to "2048 px（最快）",
+    2048 to "2048 px",
     3072 to "3072 px",
-    4096 to "4096 px（推荐）",
+    4096 to "4096 px（默认）",
     6144 to "6144 px",
     0 to "原始尺寸",
 )
@@ -82,7 +82,7 @@ private val WORKING_EDGES = listOf(
 /** 照片四周's names, keyed as Theme.kt SURROUNDS. */
 private val SURROUND_LABELS = mapOf("dark" to "深灰（默认）", "grey18" to "18% 灰", "black" to "黑", "white" to "白")
 
-private val HIGHLIGHT_STOPS = listOf(0f to "关（推荐）", 1f to "1 档", 2f to "2 档")
+private val HIGHLIGHT_STOPS = listOf(0f to "关（默认）", 1f to "1 档", 2f to "2 档")
 
 /**
  * 设置 (ui-screens_research.md 2): a full page over the editor, not a sheet,
@@ -140,7 +140,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 add {
                     SettingRow(
                         "默认展开全部参数", expandAll, true,
-                        note = "冲洗和调整的每一步直接显示“更多参数”，和桌面版一样全。关着时先看常用的两三项。",
+                        note = "冲洗和调整直接显示全部参数。",
                     ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
                 }
                 // ui-visual's key (Theme.kt SURROUND_KEY / SURROUNDS); the editor follows it while it changes.
@@ -148,7 +148,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     var surround by remember { mutableStateOf(prefs.getString(SURROUND_KEY, "dark") ?: "dark") }
                     ChoiceRow(
                         "照片四周",
-                        "编辑时照片外面的颜色，不进导出。判断颜色用 18% 灰最准。",
+                        "判断颜色用 18% 灰。",
                         value = SURROUND_LABELS[surround] ?: SURROUND_LABELS.getValue("dark"),
                     ) {
                         PillRow {
@@ -176,12 +176,11 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     val motion = remember { motionAllowed() }
                     SettingRow(
                         "启动动画", intro && motion, motion,
-                        note = "从桌面打开时，胶片条和光晕先出现，引擎准备好就进入；点一下可以跳过。",
                         disabledReason = "系统已关闭动画，启动动画不会播放。",
                     ) { intro = it; prefs.edit().putBoolean(LAUNCH_INTRO, it).apply() }
                 }
                 if (coach != null) add {
-                    ActionRow("重新查看引导", "回到编辑器后，五个入口的提示会再出现一次。") { coach.replay(); onClose() }
+                    ActionRow("重新查看引导", "回到编辑器时再显示一次。") { coach.replay(); onClose() }
                 }
             })
 
@@ -190,7 +189,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 {
                     ChoiceRow(
                         "工作尺寸（长边）",
-                        "打开照片时先缩到这个尺寸再处理，导出也是这个尺寸。越大越慢、越占内存。",
+                        "预览和导出都用这个尺寸，越大越慢。",
                         value = WORKING_EDGES.firstOrNull { it.first == ui.workingEdge }?.second ?: "${ui.workingEdge} px",
                     ) {
                         PillRow {
@@ -204,13 +203,13 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 {
                     SettingRow(
                         "广色域导出（Display P3）", ui.wideGamut, true,
-                        note = "JPEG 按 P3 冲印并嵌入色彩配置，反转片和电影拷贝的饱和色不会被截掉。TIFF 始终是 sRGB。",
+                        note = "TIFF 始终是 sRGB。",
                     ) { vm.setWideGamut(it) }
                 },
                 {
                     ChoiceRow(
                         "手机照片高光恢复",
-                        "关时照片按原样交给引擎，和桌面版一致。开启后中灰以上的高光会展开，让胶片自己处理；更亮更浓，可能偏离原版色彩。",
+                        "展开手机照片中灰以上的高光，结果更亮更浓，和桌面版不同。",
                         value = HIGHLIGHT_STOPS.firstOrNull { it.first == ui.highlightStops }?.second ?: "${ui.highlightStops} 档",
                     ) {
                         Segmented(
@@ -221,7 +220,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 },
                 {
                     var on by remember { mutableStateOf(LocationSetting.enabled(context)) }
-                    SettingRow("导出保留拍摄位置", on, true, note = "关着时导出的照片不带 GPS 位置。") {
+                    SettingRow("导出保留拍摄位置", on, true) {
                         on = it; LocationSetting.set(context, it)
                     }
                 },
@@ -238,8 +237,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     Column {
                         SettingRow("自动检查更新", auto, true,
                             note = "只连 GitHub 上本项目的发布页，不上传任何内容。") { auto = it; Updater.setAutoCheck(context, it) }
-                        SettingRow("Wi-Fi 下自动下载新版本", wifi, auto,
-                            note = "安装包核对校验和与签名后才安装。") { wifi = it; Updater.setWifiDownload(context, it) }
+                        SettingRow("Wi-Fi 下自动下载新版本", wifi, auto) { wifi = it; Updater.setWifiDownload(context, it) }
                     }
                 },
                 {
@@ -369,7 +367,7 @@ private fun NewPhotoStocks(ui: UiState, vm: EditorViewModel) {
         ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper,
     ).joinToString(" · ")
     var picking by remember { mutableStateOf<String?>(null) }
-    ChoiceRow("新照片的胶片和相纸", "「无」：胶片、相纸、效果、调整和边框都不加。只用于没有保存过编辑的照片；编辑过的照片按它自己的设置打开。", value) {
+    ChoiceRow("新照片的胶片和相纸", "只对没编辑过的照片生效。", value) {
         Segmented(options = listOf("无", "记住上次用的", "固定为"),
             selected = when (mode) { EditorViewModel.NEW_NONE -> 0; EditorViewModel.NEW_REMEMBER -> 1; else -> 2 }) { i ->
             if (i == 0) vm.setNewPhotoNone()

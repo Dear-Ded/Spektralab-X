@@ -149,7 +149,7 @@ fun ImportHost(vm: EditorViewModel) {
             val left = if (state.left > 0) "后面还有 ${state.left} 个" else ""
             when {
                 state.busy -> {
-                    PanelHeader("正在读取", summary = left, hint = "大文件和 HaldCLUT 图片要几秒。")
+                    PanelHeader("正在读取", summary = left)
                     // The working bar, never a spinner over the photo (UI2.md 1.1).
                     AuraBar(Modifier.padding(vertical = RowGap))
                 }
@@ -164,11 +164,10 @@ fun ImportHost(vm: EditorViewModel) {
                 pending != null && pending.kind == ImportKind.STYLE -> {
                     PanelHeader(
                         "导入风格", summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
-                        hint = if (before != null) "已经套在当前照片上，下滑这张面板可以看全图。" else "打开一张照片后可以预览和调强度。",
+                        hint = if (before != null) "已套用到当前照片。" else "打开一张照片后可以预览和调强度。",
                     )
                     OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
                         label = { Text("名称") }, modifier = Modifier.fillMaxWidth())
-                    GroupLabel("放进哪个分类")
                     // The categories already in use first, so a batch lands in one place; a new name below.
                     val known by library.styles.all.collectAsState()
                     val categories = remember(known) { known.map { it.category }.filter { it.isNotBlank() }.distinct() }
@@ -254,7 +253,7 @@ private fun ReportList(report: ImportReport) {
     val mapped = report.items.size - items.size
     Spacer(Modifier.height(RowGap))
     // One line says how it went; the item list is behind a row, so the sheet stays short (UI2.md 2.4).
-    Text(if (items.isEmpty()) "全部转换（$mapped 项）" else "${items.size} 项没能原样转换，另有 $mapped 项已对应",
+    Text(if (items.isEmpty()) "已转换 $mapped 项" else "${items.size} 项没能原样转换，另有 $mapped 项已对应",
         style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
     if (items.isEmpty()) return
     var open by remember(report) { mutableStateOf(false) }
@@ -305,10 +304,8 @@ fun UserLibrarySection(vm: EditorViewModel) {
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri> ->
         ImportRequests.add(uris)
     }
-
-    Text("我的风格", style = MaterialTheme.typography.labelLarge)
     Text(
-        "导入 .spklook、.cube、HaldCLUT 图片、Lightroom 预设（.xmp / .dng）、spektrafilm 预设和胶片数据（.json）、富士配方（.txt）。",
+        "支持 .spklook、.cube、Lightroom 预设等。",
         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
