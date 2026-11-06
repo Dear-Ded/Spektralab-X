@@ -232,7 +232,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         LocalEditorNav provides nav) {
     Scaffold(
         modifier = Modifier.highRefresh(dragging),
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SwipeNotice(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
         topBar = {
             TopAppBar(
