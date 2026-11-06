@@ -312,7 +312,7 @@ class Screenshots {
     private fun developExposure(image: Bitmap, name: String) {
         editor(Fake.ui().copy(image = image))
         tap("冲洗")
-        tap("③ 曝光与放大")
+        tap("曝光")
         // The 偏暗 / 偏亮 line comes from a histogram worked out on Dispatchers.Default.
         waitReal(3000)
         shot(name)
@@ -322,7 +322,7 @@ class Screenshots {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.copy(grainActive = false)))
         tap("冲洗")
-        tap("④ 胶片效果")
+        tap("效果")
         tallPanel()
         shot("27_develop_4_grain_off")
     }
