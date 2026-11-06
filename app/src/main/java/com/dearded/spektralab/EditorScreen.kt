@@ -1106,10 +1106,11 @@ private fun Controls(
                             LabeledSlider("横向边距", e.dateInsetX, 0.0, 30.0, 3.0, enabled && onPicture, "%.1f mm", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(dateInsetX = it))
                             }
-                            LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled && onPicture, "%.1f mm", onDrag = vm::setInteracting,
-                                disabledReason = if (enabled && !onPicture) "边距只在印在画面时有用。" else "") {
+                            LabeledSlider("纵向边距", e.dateInsetY, 0.0, 30.0, 2.4, enabled && onPicture, "%.1f mm", onDrag = vm::setInteracting) {
                                 vm.update(e.copy(dateInsetY = it))
                             }
+                            // One reason for both margins, under the pair (shots_review_3).
+                            if (enabled && !onPicture) Hint("边距只在印在画面时有用。")
                             if (e.dateStyle != "data") {
                                 SwitchRow("同时印拍摄参数", e.dateWithData, enabled && e.filmEdge && e.dateDataText.isNotBlank(), reason = when {
                                     !enabled -> ""
