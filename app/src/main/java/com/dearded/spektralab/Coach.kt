@@ -65,10 +65,10 @@ import kotlin.math.roundToInt
  * faded out by immersive mode simply has no hint until it is back.
  */
 enum class CoachStep(val text: String) {
-    STYLE("点风格出片，再点一下调强度"),
+    STYLE("点风格套用，再点一次调强度"),
     HOLD("按住照片看原图"),
     RESET("双击滑杆归零"),
-    SAVE("做好了在这里保存"),
+    SAVE("导出到相册"),
 }
 
 class CoachState(context: Context) {
@@ -198,10 +198,10 @@ private fun CoachMark(step: CoachStep, target: Rect, index: Int, onNext: () -> U
         ) {
             Text(step.text, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurface)
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Text("$index / ${CoachStep.entries.size} · 轻点任意处继续",
+                Text("$index/${CoachStep.entries.size}",
                     style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
                 Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onSkip) { Text("跳过全部", color = Palette.Accent) }
+                TextButton(onClick = onSkip) { Text("跳过", color = Palette.OnSurface) }
             }
         }
     }
