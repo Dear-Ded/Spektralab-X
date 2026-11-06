@@ -390,6 +390,10 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                 .pointerInput(anchors) {
                                     val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
                                     var at = 0f
+                                    // bughunt_main 5: new anchors restart this block mid-drag, and a cancelled
+                                    // coroutine never calls onDragCancel; the finally lets go of the panel
+                                    // (and the 120 Hz vote) and springs it back to a height.
+                                    try {
                                     detectVerticalDragGestures(
                                         onDragStart = {
                                             handleDown = true
@@ -414,6 +418,9 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                         at = (at - dy).coerceIn(anchors.first(), anchors.last())
                                         val now = at
                                         panelScope.launch { panelPx.snapTo(now) }
+                                    }
+                                    } finally {
+                                        if (handleDown) { handleDown = false; settleKey++ }
                                     }
                                 }
                                 .semantics {
