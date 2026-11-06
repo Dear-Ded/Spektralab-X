@@ -28,9 +28,11 @@ import kotlin.math.sin
 /*
  * The colour-drifting glow behind waiting screens, after the Gemini app as it
  * looks since the 2025 rebrand (tools/work/ui-motion_gemini_glow.md): a blue
- * haze rising from the bottom edge, with Google's red, yellow and green only
- * as small accents low down that drift through it and settle back to blue.
- * No violet field: the old blue-violet-rose read as "AI purple".
+ * haze rising from the bottom edge, with teal, green and a little yellow as
+ * small accents low down that drift through it, as Gemini's thinking glow
+ * goes blue -> cyan -> green. No purple in any frame: red never touches blue
+ * (blue and red mix to violet whatever the blend mode), so red stays out of
+ * the glow and sits next to yellow only, in the spectrum band.
  *
  * Only where there is no print to judge -- engine start, opening a photo,
  * the empty editor. Never behind a photo being edited: a moving colour
@@ -43,19 +45,17 @@ import kotlin.math.sin
 object AuraColors {
     // Gemini's 2025 spark stops (the Commons SVG), sampled against frames of the app.
     val Blue = Color(0xFF3186FF)
-    val LightBlue = Color(0xFF749BFF)
     val Teal = Color(0xFF24A2CA)
     val Red = Color(0xFFFC413D)
     val Yellow = Color(0xFFFBBC04)
     val Green = Color(0xFF00B95C)
 
     /**
-     * One loop, weighted as Gemini shows it: blue about half the way round,
-     * the three accents a short stretch each, back to blue through teal.
+     * The accents' loop: teal to green to yellow and back the same way, so it
+     * never passes through red or a blue-red mix.
      */
     private val stops = listOf(
-        0.00f to Blue, 0.30f to Blue, 0.40f to LightBlue, 0.50f to Red,
-        0.60f to Yellow, 0.72f to Green, 0.84f to Teal, 1.00f to Blue,
+        0.00f to Teal, 0.40f to Green, 0.65f to Yellow, 0.85f to Green, 1.00f to Teal,
     )
 
     /** Position [t] (any real) along the loop above. */
@@ -69,10 +69,13 @@ object AuraColors {
         return Blue
     }
 
-    /** The launcher strip's spectrum and the splash's: the same colours as a left-to-right band. */
+    /** The launcher strip's spectrum and the splash's, in rainbow order so red only meets yellow. */
     val spectrum = listOf(
-        0.00f to Blue, 0.30f to LightBlue, 0.48f to Red, 0.66f to Yellow, 0.84f to Green, 1.00f to Teal,
+        0.00f to Blue, 0.25f to Teal, 0.50f to Green, 0.72f to Yellow, 1.00f to Red,
     )
+
+    /** The working bar: the spectrum there and back, so its repeat never joins red to blue. */
+    val bar = listOf(Blue, Teal, Green, Yellow, Red, Yellow, Green, Teal, Blue)
 }
 
 /** One circle: where it rests (fractions of the box), how far and how fast it drifts. */
@@ -173,8 +176,7 @@ fun AuraBar(modifier: Modifier = Modifier) {
             val x = span * 2f * (clock?.value ?: 0f)
             drawRect(
                 Brush.linearGradient(
-                    listOf(AuraColors.Blue, AuraColors.LightBlue, AuraColors.Red, AuraColors.Yellow,
-                        AuraColors.Green, AuraColors.Teal, AuraColors.Blue),
+                    AuraColors.bar,
                     start = Offset(x - span, 0f), end = Offset(x + span, 0f),
                     tileMode = TileMode.Repeated,
                 ),
