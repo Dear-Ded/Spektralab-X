@@ -36,6 +36,8 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
 
 /**
  * PNGs of the editor and the light table as the phone draws them (docs/SCREENSHOTS.md),
@@ -73,6 +75,21 @@ class Screenshots {
         editor(Fake.ui().copy(ready = false, busy = "正在准备引擎…", source = null, image = null, before = null,
             filmCards = emptyMap(), canUndo = false))
         shot("02_editor_busy")
+    }
+
+    /** The name mid-flip (about 450 ms in) and settled (1100 ms), SplitFlap.kt. */
+    @Test fun launchNameFlip() {
+        content { LaunchIntro(ready = false, onDone = {}) }
+        val main = shadowOf(Looper.getMainLooper())
+        repeat(9) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        compose.onRoot().captureRoboImage("$OUT/04_launch_name_flip.png")
+        repeat(13) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        compose.onRoot().captureRoboImage("$OUT/05_launch_name_settled.png")
+    }
+
+    @Test fun aboutHeader() {
+        content { androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.padding(20.dp)) { AboutSection() } }
+        shot("61_about")
     }
 
     /** The launch intro about 700 ms in: glow up, strip developed, leak mid-sweep (LaunchIntro.kt). */

@@ -51,7 +51,7 @@ import kotlin.math.sin
  *   0-500 ms    the Gemini glow rises behind the strip (Aura, slowEffects)
  *   0-450 ms    the spectrum finishes its wipe if the splash cut it short
  *   60-600 ms   the sprockets pull one frame to the left (defaultSpatial)
- *   200-520 ms  "Spektralab-X" fades in under the strip, in place
+ *   200-900 ms  "Spektralab-X" lands on split-flap tiles under the strip, in place
  *
  * No light-leak sweep and no rising wordmark: decoration that says nothing
  * (tools/work/ui_ai_flavor_audit.md 10).
@@ -65,6 +65,10 @@ import kotlin.math.sin
 
 /** The 启动动画 setting, default on. */
 internal const val LAUNCH_INTRO = "launch_intro"
+
+/** The name the intro flaps in, and when it starts (ms after the first frame). */
+private const val NAME = "Spektralab-X"
+private const val NAME_DELAY_MS = 200L
 
 /** Where the system splash drew its icon, and how far its wipe had got, handed over by MainActivity. */
 internal object LaunchIcon {
@@ -98,17 +102,16 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
     val glow = remember { Animatable(0f) }
     val wipe = remember { Animatable(LaunchIcon.wipe.coerceIn(0f, 1f)) }
     val pull = remember { Animatable(0f) }
-    val word = remember { Animatable(0f) }
     val shown = remember { Animatable(1f) }
 
     LaunchedEffect(Unit) {
         launch { glow.animateTo(1f, Motion.slowEffects()) }
         launch { wipe.animateTo(1f, Motion.defaultEffects()) }
         launch { delay(60); pull.animateTo(1f, Motion.defaultSpatial()) }
-        launch { delay(200); word.animateTo(1f, Motion.fastEffects()) }
-        // Exit at clamp(engine ready, 600 ms, 1.6 s).
+        // Exit at clamp(engine ready, the name settled, 1.6 s), never before 600 ms.
         withTimeoutOrNull(1600) { snapshotFlow { isReady }.first { it } }
-        val wait = 600 - (SystemClock.uptimeMillis() - start)
+        val settled = maxOf(600L, NAME_DELAY_MS + splitFlapMs(NAME)).coerceAtMost(1600L)
+        val wait = settled - (SystemClock.uptimeMillis() - start)
         if (wait > 0) delay(wait)
         leaving = true
     }
@@ -165,12 +168,17 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                 }
             }
         }
-        // The wordmark under the strip, fading in where it stays (no rise: ui_ai_flavor_audit.md 10).
+        // The name under the strip on split-flap tiles (SplitFlap.kt), in place, no rise. It
+        // starts at 200 ms and has settled by about 900; a tap shows it settled at once. One
+        // light tick when the last letter lands, nothing per flip.
         val r = LaunchIcon.rect
-        Text(
-            "Spektralab-X",
+        val haptic = rememberHaptic()
+        SplitFlapText(
+            NAME,
             style = MaterialTheme.typography.headlineSmall,
-            color = Palette.OnSurface,
+            startDelayMs = NAME_DELAY_MS,
+            skip = quick,
+            onLanded = { haptic(HapticEvent.Tick) },
             modifier = Modifier
                 .align(if (r == null) Alignment.Center else Alignment.TopCenter)
                 .layout { m, c ->
@@ -183,7 +191,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                         pl.place(0, y)
                     }
                 }
-                .graphicsLayer { alpha = word.value },
         )
     }
 }

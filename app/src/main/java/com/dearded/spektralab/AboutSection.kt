@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +62,10 @@ internal fun AboutSection() {
     val open = { url: String -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
     Column {
         Text("关于", style = MaterialTheme.typography.labelLarge)
+        // The name on split-flap tiles (SplitFlap.kt); settled at once when 启动动画 is off.
+        val flips = remember(context) { context.getSharedPreferences("settings", 0).getBoolean(LAUNCH_INTRO, true) }
+        SplitFlapText("Spektralab-X", style = MaterialTheme.typography.titleLarge, play = flips,
+            modifier = Modifier.padding(vertical = 8.dp))
         Text("Spektralab-X · 版本 ${BuildConfig.VERSION_NAME}（${BuildConfig.VERSION_CODE}）",
             style = MaterialTheme.typography.bodySmall)
         TextButton(onClick = { open(SOURCE) }) { Text("源码：github.com/Dear-Ded/Spektralab-X") }
