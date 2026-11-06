@@ -288,6 +288,9 @@ class Screenshots {
         editor(ui.copy(edit = edit))
         tallPanel()
         // A tap on the applied style opens its strength.
+        compose.onAllNodes(hasText(style.name) and hasClickAction()).fetchSemanticsNodes().forEach {
+            println("SHOTDBG style node ${it.boundsInRoot} ${it.config}")
+        }
         tap(style.name)
         shot("14_style_strength")
     }
@@ -348,6 +351,7 @@ class Screenshots {
         repeat(10) {
             val h = compose.onRoot().fetchSemanticsNode().size.height
             val top = compose.onAllNodes(hasText(text)).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.top
+            println("SHOTDBG swipeUntil $text top=$top h=$h")
             if (top != null && top in 0f..h * 0.75f) return
             compose.onRoot().performTouchInput {
                 swipe(Offset(centerX, height * 0.9f), Offset(centerX, height * 0.45f), durationMillis = 400)
