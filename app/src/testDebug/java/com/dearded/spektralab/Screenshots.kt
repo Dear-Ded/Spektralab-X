@@ -271,7 +271,7 @@ class Screenshots {
 
     // --- helpers ------------------------------------------------------------------
 
-    private fun content(body: @Composable () -> Unit) = compose.setContent { SpektraTheme { body() } }
+    private fun content(body: @Composable () -> Unit) = compose.setContent { androidx.compose.runtime.CompositionLocalProvider(LocalCpuGlow provides true) { SpektraTheme { body() } } }
 
     private fun editor(ui: UiState) {
         val vm = editorVm(ui)
