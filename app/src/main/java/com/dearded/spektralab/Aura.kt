@@ -26,47 +26,71 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /*
- * The colour-drifting glow behind waiting screens, after the Gemini app
- * (design.google, "Gemini AI visual design"): soft circles of blue, violet
- * and rose that drift, breathe and trade colours on a near-black ground,
- * dense at the centre and dissolving at the tail, sharp nowhere.
+ * The colour-drifting glow behind waiting screens, after the Gemini app as it
+ * looks since the 2025 rebrand (tools/work/ui-motion_gemini_glow.md): a blue
+ * haze rising from the bottom edge, with Google's red, yellow and green only
+ * as small accents low down that drift through it and settle back to blue.
+ * No violet field: the old blue-violet-rose read as "AI purple".
  *
  * Only where there is no print to judge -- engine start, opening a photo,
  * the empty editor. Never behind a photo being edited: a moving colour
  * field next to a print skews how its colour reads.
  *
  * Plain radial gradients on a Canvas, so it runs on API 29 without a
- * RuntimeShader; four circles a frame cost next to nothing. With system
- * animations off it holds still.
+ * RuntimeShader; a handful of circles a frame cost next to nothing. With
+ * system animations off it holds still.
  */
 object AuraColors {
-    // The three stops of the Gemini spark gradient.
-    val Blue = Color(0xFF4796E3)
-    val Violet = Color(0xFF9177C7)
-    val Rose = Color(0xFFCA6673)
-    val cycle = listOf(Blue, Violet, Rose)
+    // Gemini's 2025 spark stops (the Commons SVG), sampled against frames of the app.
+    val Blue = Color(0xFF3186FF)
+    val LightBlue = Color(0xFF749BFF)
+    val Teal = Color(0xFF24A2CA)
+    val Red = Color(0xFFFC413D)
+    val Yellow = Color(0xFFFBBC04)
+    val Green = Color(0xFF00B95C)
 
-    /** Position [t] (any real) along the blue -> violet -> rose -> blue loop. */
+    /**
+     * One loop, weighted as Gemini shows it: blue about half the way round,
+     * the three accents a short stretch each, back to blue through teal.
+     */
+    private val stops = listOf(
+        0.00f to Blue, 0.30f to Blue, 0.40f to LightBlue, 0.50f to Red,
+        0.60f to Yellow, 0.72f to Green, 0.84f to Teal, 1.00f to Blue,
+    )
+
+    /** Position [t] (any real) along the loop above. */
     fun at(t: Float): Color {
-        val n = cycle.size
-        val x = ((t % 1f) + 1f) % 1f * n
-        val i = x.toInt() % n
-        return lerp(cycle[i], cycle[(i + 1) % n], x - x.toInt())
+        val x = ((t % 1f) + 1f) % 1f
+        for (i in 0 until stops.size - 1) {
+            val (a, ca) = stops[i]
+            val (b, cb) = stops[i + 1]
+            if (x <= b) return lerp(ca, cb, if (b > a) (x - a) / (b - a) else 0f)
+        }
+        return Blue
     }
+
+    /** The launcher strip's spectrum and the splash's: the same colours as a left-to-right band. */
+    val spectrum = listOf(
+        0.00f to Blue, 0.30f to LightBlue, 0.48f to Red, 0.66f to Yellow, 0.84f to Green, 1.00f to Teal,
+    )
 }
 
 /** One circle: where it rests (fractions of the box), how far and how fast it drifts. */
 private class Blob(
     val x: Float, val y: Float, val r: Float,
-    val dx: Float, val dy: Float, val kx: Int, val ky: Int, val phase: Float, val hue: Float,
+    val dx: Float, val dy: Float, val kx: Int, val ky: Int, val phase: Float,
+    /** Where on the colour loop it starts; null keeps it blue for good. */
+    val hue: Float?, val weight: Float = 1f,
 )
 
-// Weighted to the lower half, as Gemini's glow rises from the bottom edge.
+// Gemini's rest state is one blue haze from the bottom edge; the accents are
+// smaller and dimmer, low down, and only pass through on their way round.
 private val Blobs = listOf(
-    Blob(0.20f, 0.78f, 0.75f, 0.16f, 0.06f, 1, 2, 0.0f, 0.00f),
-    Blob(0.80f, 0.70f, 0.70f, 0.14f, 0.08f, 2, 1, 1.7f, 0.33f),
-    Blob(0.50f, 0.95f, 0.85f, 0.20f, 0.04f, 1, 1, 3.1f, 0.66f),
-    Blob(0.55f, 0.40f, 0.55f, 0.18f, 0.10f, 1, 2, 4.4f, 0.50f),
+    Blob(0.50f, 1.02f, 0.80f, 0.10f, 0.04f, 1, 1, 0.0f, null),
+    Blob(0.15f, 0.92f, 0.60f, 0.12f, 0.05f, 1, 2, 1.7f, null, 0.8f),
+    Blob(0.85f, 0.90f, 0.55f, 0.12f, 0.06f, 2, 1, 3.1f, null, 0.8f),
+    Blob(0.30f, 0.96f, 0.32f, 0.18f, 0.04f, 1, 1, 4.4f, 0.45f, 0.55f),
+    Blob(0.72f, 0.98f, 0.30f, 0.16f, 0.05f, 1, 2, 2.2f, 0.65f, 0.55f),
 )
 
 /** True unless the user turned animations off (developer options or accessibility). */
@@ -114,8 +138,8 @@ fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Back
             )
             // Breathe: the radius swells and settles twice a period.
             val r = span * b.r * (0.92f + 0.08f * sin(2f * a + b.phase))
-            val colour = AuraColors.at(b.hue + t)
-            val alpha = 0.55f * strength()
+            val colour = b.hue?.let { AuraColors.at(it + t) } ?: AuraColors.Blue
+            val alpha = 0.55f * b.weight * strength()
             drawCircle(
                 brush = Brush.radialGradient(
                     0f to colour.copy(alpha = alpha),
@@ -132,8 +156,8 @@ fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Back
 }
 
 /**
- * The thin working bar along the top of the preview: the same three
- * colours sliding past, in place of an indeterminate progress line.
+ * The thin working bar along the top of the preview: the glow's colours
+ * sliding past, in place of an indeterminate progress line.
  */
 @Composable
 fun AuraBar(modifier: Modifier = Modifier) {
@@ -149,7 +173,8 @@ fun AuraBar(modifier: Modifier = Modifier) {
             val x = span * 2f * (clock?.value ?: 0f)
             drawRect(
                 Brush.linearGradient(
-                    listOf(AuraColors.Blue, AuraColors.Violet, AuraColors.Rose, AuraColors.Blue),
+                    listOf(AuraColors.Blue, AuraColors.LightBlue, AuraColors.Red, AuraColors.Yellow,
+                        AuraColors.Green, AuraColors.Teal, AuraColors.Blue),
                     start = Offset(x - span, 0f), end = Offset(x + span, 0f),
                     tileMode = TileMode.Repeated,
                 ),

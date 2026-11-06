@@ -231,7 +231,8 @@ public:
             m.stamps.resize(count);
             for (size_t k = 0; k < count; ++k) {
                 const float* s = &v[at + 5 * k];
-                m.stamps[k] = {s[0], s[1], clampf(s[2], 1e-4f, 1.0f), clampf(s[3], 0.001f, 1.0f), clampf(s[4], -1.0f, 1.0f)};
+                // x, y kept to -2..3 like the gradient ends, so Grid's float-to-int cell index stays defined.
+                m.stamps[k] = {clampf(s[0], -2.0f, 3.0f), clampf(s[1], -2.0f, 3.0f), clampf(s[2], 1e-4f, 1.0f), clampf(s[3], 0.001f, 1.0f), clampf(s[4], -1.0f, 1.0f)};
             }
             at += 5 * count;
             out->masks_.push_back(std::move(m));

@@ -127,7 +127,8 @@ data class EditMask(
                     val s = BrushStamp(a.optDouble(i, 0.0), a.optDouble(i + 1, 0.0),
                         a.optDouble(i + 2, 0.05).coerceIn(1e-4, 1.0), a.optDouble(i + 3, 0.5).coerceIn(0.0, 1.0),
                         kotlin.math.abs(f).coerceIn(0.0, 1.0), erase = f < 0)
-                    if (listOf(s.x, s.y, s.radius, s.softness, s.flow).all { it.isFinite() }) stamps += s
+                    if (listOf(s.x, s.y, s.radius, s.softness, s.flow).all { it.isFinite() })
+                        stamps += s.copy(x = s.x.coerceIn(-2.0, 3.0), y = s.y.coerceIn(-2.0, 3.0))
                     i += 5
                 }
             }

@@ -48,6 +48,11 @@ fun AppScreens(editor: EditorViewModel) {
 
     // The 正在处理 sheet lives in the editor (the notification asks for it).
     LaunchedEffect(showQueue) { if (showQueue) screen = Screen.EDITOR }
+    // A photo shared or opened from another app lands in the editor: show it there, and
+    // back no longer returns to the table, whose frame it did not come from (bughunt_main.md 4).
+    LaunchedEffect(editor) {
+        editor.externalOpens.collect { fromTable = false; screen = Screen.EDITOR }
+    }
 
     LaunchedEffect(link) {
         val l = link ?: return@LaunchedEffect
@@ -179,7 +184,8 @@ private fun TablePages(
     }
     SharedTransitionLayout(Modifier.fillMaxSize()) {
         val shared = this
-        CompositionLocalProvider(LocalSharedScope provides shared) {
+        // The pages draw on Palette ground without a Surface: give them light ink, or bare Text and Icons fall back to black.
+        CompositionLocalProvider(LocalSharedScope provides shared, androidx.compose.material3.LocalContentColor provides Palette.OnSurface) {
             rememberTransition(state, label = "table").AnimatedContent(
                 modifier = Modifier.fillMaxSize(),
                 transitionSpec = {

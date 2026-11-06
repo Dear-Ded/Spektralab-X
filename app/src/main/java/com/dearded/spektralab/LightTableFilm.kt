@@ -56,6 +56,11 @@ object FilmThumbs {
 
     private const val IDLE_MS = 1500L
     private const val HOT_HEADROOM = 0.85f
+    /** Same as ExportPacer.WAIT_MS (private there): how long an export waits for the phone to cool. */
+    private const val SHEET_WAIT_MS = 30_000L
+    /** The contact-sheet job whose wait budget is being spent, and when it started; worker loop only. */
+    private var sheetWaitId = -1L
+    private var sheetWaitSince = 0L
     private const val DISK_CAP = 64L shl 20
 
     /** What a film thumbnail shows: the film's colour and the frame's geometry, never the border or date. */
@@ -130,11 +135,20 @@ object FilmThumbs {
     private suspend fun waitForIdle(host: EngineHost) {
         while (true) {
             val now = android.os.SystemClock.uptimeMillis()
+            val jobs = host.queue.jobs.value
             val busy = now - host.lastInteraction < IDLE_MS ||
                 // A running contact sheet is waiting on these very thumbnails.
-                host.queue.jobs.value.any { it.state == JobState.RUNNING && !it.sheet } ||
+                jobs.any { it.state == JobState.RUNNING && !it.sheet } ||
                 host.thermal.headroom() > HOT_HEADROOM
             if (!busy) return
+            // A running contact sheet holds the one-at-a-time queue behind it. It gets one
+            // budget of SHEET_WAIT_MS for a cool, quiet phone, as an ordinary export does;
+            // once spent, its remaining thumbnails go on without waiting.
+            val sheet = jobs.firstOrNull { it.state == JobState.RUNNING && it.sheet }
+            if (sheet != null) {
+                if (sheet.id != sheetWaitId) { sheetWaitId = sheet.id; sheetWaitSince = now }
+                if (now - sheetWaitSince >= SHEET_WAIT_MS) return
+            }
             delay(250)
         }
     }

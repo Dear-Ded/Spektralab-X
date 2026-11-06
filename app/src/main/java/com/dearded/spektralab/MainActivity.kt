@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
         if (uris.isEmpty()) return
         // A photo opens in the editor; anything else is a style or film to import (StyleImport.kt).
         val type = intent?.type ?: uris.firstOrNull()?.let(contentResolver::getType)
-        if (type?.startsWith("image/") == true && !isHaldName(uris.first())) viewModel.open(uris.first())
+        if (type?.startsWith("image/") == true && !isHaldName(uris.first())) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
         else ImportRequests.add(uris)
     }
 

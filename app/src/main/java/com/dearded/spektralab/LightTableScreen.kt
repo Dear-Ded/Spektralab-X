@@ -200,20 +200,21 @@ internal fun TableHead(
 ) {
     Row(
         Modifier.fillMaxWidth()
-            .background(Brush.verticalGradient(listOf(Palette.Background, Palette.Background.copy(alpha = 0.92f), Color.Transparent)))
+            // Solid behind the text, fading only below it, so frames scrolled under never reach the title.
+            .background(Brush.verticalGradient(0f to Palette.Background, 0.85f to Palette.Background.copy(alpha = 0.96f), 1f to Color.Transparent))
             .statusBarsPadding()
             .height(HeadHeight)
             .padding(end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-            if (selecting) Icon(Icons.Default.Close, contentDescription = "取消选择")
-            else Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel)
+            if (selecting) Icon(Icons.Default.Close, contentDescription = "取消选择", tint = Palette.OnSurface)
+            else Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = Palette.OnSurface)
         }
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 titleLeading()
-                Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1,
+                Text(title, style = MaterialTheme.typography.titleMedium, color = Palette.OnSurface, maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             if (subtitle.isNotEmpty()) {
