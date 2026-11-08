@@ -1,0 +1,58 @@
+{
+  "date_utc": "2026-11-08",
+  "co_created_by": "GPT (OpenAI)",
+  "repository": "Dear-Ded/Spektralab-X",
+  "source_commit": "66bae00d5b5ebd49863997124332c0a8d7fe2b56",
+  "version": "0.1.19-alpha",
+  "publish": 0,
+  "workflows": {
+    "android": {
+      "run_id": 42467813871,
+      "attempt": 2,
+      "job_id": 128691887144,
+      "conclusion": "success",
+      "release_job": "skipped",
+      "build": "BUILD SUCCESSFUL in 4m 1s",
+      "native_regressions": "strict and default modes passed",
+      "jni_load_alignment": 16384,
+      "androidx_path_load_alignment": 16384,
+      "zipalign_page_size_kib": 16,
+      "zipalign": "success",
+      "artifact_id": 13612701762,
+      "initial_failure": "HTTP 504 downloading the pinned libjpeg-turbo release; all patches had applied"
+    },
+    "screenshots": {
+      "run_id": 42467813877,
+      "attempt": 1,
+      "job_id": 128691288752,
+      "conclusion": "success",
+      "tests": ["Screenshots", "PhotoGeometryTest"],
+      "build": "BUILD SUCCESSFUL in 2m 19s"
+    },
+    "engine_gpu": {
+      "run_id": 42467813880,
+      "attempt": 3,
+      "job_id": 128692380795,
+      "conclusion": "success",
+      "device": "llvmpipe (LLVM 20.1.2, 256 bits)",
+      "advertised_storage_range_bytes": 134217728,
+      "strict_limits": true,
+      "fir_cases": 368,
+      "float32_values_compared": 74180082,
+      "fir_byte_identical": true,
+      "exact_scratch_and_small_pool_limits": "verified",
+      "probe_lifetime_cases": 9,
+      "probe_lifetime_result": "passed",
+      "real_probe_smoke_verified_bytes": 4096,
+      "artifact_id": 13612532484,
+      "artifact_sha256": "fe7ce568b004453da92b28487f5a15b7e17075a11ce2f527bd4876e96347b97d",
+      "initial_failures": "First two attempts encountered HTTP 504 fetching pinned libjpeg-turbo; no source or dependency version changes were needed"
+    }
+  },
+  "limits": [
+    "GitHub GPU runner is software Vulkan, not an Android physical device",
+    "The 24 MP large-buffer experiment ran separately on AOIDC with the existing CPU Vulkan capacity extension",
+    "Unchanged output bytes are same-device scheduling regression results, not cross-GPU byte identity",
+    "The APK is a CI artifact; this change did not create a release or version tag"
+  ]
+}

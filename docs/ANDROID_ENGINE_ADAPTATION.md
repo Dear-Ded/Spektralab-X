@@ -275,3 +275,19 @@ F16、ICC、HDR 与 RAW 模式的后续适配见 [ANDROID_INPUT_PRECISION.md](AN
 
 递归模糊末端条件、sigma=3 的 PSF 跳变、完整管线外存执行及 Adreno/Mali/Immortalis 长时间
 真机导出仍未完成；这批调度优化没有替换这些成像算法或修改材料数据。
+
+### GitHub 独立验收
+
+源码 `66bae00` 的三条 CI 已全部通过：Android `42467813871`（第 2 次尝试），
+截图/解码 `42467813877`，GPU `42467813880`（第 3 次尝试）。前两条失败构建均停在
+固定 `libjpeg-turbo` 下载的 HTTP 504；所有补丁已应用，只重跑失败任务即可通过，未更换依赖版本。
+
+GPU runner 为 Ubuntu 24.04、llvmpipe LLVM 20.1.2，与 AOIDC 的 LLVM 15.0.7 不同。
+在公布的 128 MiB SSBO 限额下，368 案例、74,180,082 个 float32 值逐字节一致；
+9 项 probe 生命周期与 4 KiB 实际 smoke 也通过。这里分别比较每个设备上的旧/新调度，
+没有将两个驱动的渲染输出互相比较后声称跨设备一致。
+
+Android CI 完整 APK、Release 单测、两种原生编译模式的数值回归、两份库的 16 KB LOAD 对齐
+及 APK `zipalign -P 16` 均通过。`VERSION=0.1.19-alpha publish=0`，release job 跳过。
+运行号、源码提交、artifact 和原始结果摘录见
+[CI 验证记录](validation/android-engine-product-ci-2026-11-08.json)。
