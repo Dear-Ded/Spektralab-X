@@ -103,7 +103,7 @@ jobs:
             echo "::warning::KEYSTORE_B64 is not set; this build is signed with a throwaway debug key"
           fi
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Build
         env:
