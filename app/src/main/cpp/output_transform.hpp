@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "spektrafilm/spk_engine.h"
+#include "layer2.hpp"
 
 namespace spk::android {
 
@@ -64,5 +65,22 @@ void pack_rgba8(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t 
 // The same into RGBA16 with a row stride of `w` pixels (TIFF).
 void pack_rgba16(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
                  std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf);
+
+// One immutable full-frame geometry, with only the requested output rows in
+// memory. Called concurrently by TIFF workers; each supplies its own storage.
+class Rgba16Rows {
+public:
+    Rgba16Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
+               const Layer2* look, const OutputTransform* xf);
+    void pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out) const;
+
+private:
+    const uint16_t* src_;
+    size_t stride_;
+    uint32_t w_, h_;
+    const Layer2* look_;
+    const OutputTransform* xf_;
+    Layer2::Frame frame_;
+};
 
 }  // namespace spk::android

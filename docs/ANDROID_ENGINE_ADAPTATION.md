@@ -152,3 +152,37 @@ HDR = (linearSDR + epsilonSdr) * exp2(L) - epsilonHdr
 后续验收应至少包含：同输入的整图/条带逐字节比较、IIR 接缝、颗粒空间频谱、
 峰值内存与单次 GPU 提交时间、取消和设备丢失恢复，以及真实 Android GPU 的大图长时间
 导出。在达到这些条件前，本项目仍不能声称完成“任意大图、桌面全部效果、全设备逐字节一致”。
+
+## 5. 第二批：曲线、条带输出和上游算法复核
+
+第二批从 `cdc7274` 继续，只修改源码、测试和记录，版本保持 `0.1.19-alpha`。
+共创继续署名 GPT（OpenAI，AI 助手）。
+
+`ToneCurve` 将每条曲线的差分、斜率与单调性限制计算一次，再采样 256 点；保持旧 double
+表达式和 float 转换。补丁 `0018` 让 `Blur::fir_radius` 与卷积核构建器共用半径函数，
+不再为查询 halo 而计算、归一化并丢弃整个核。
+
+TIFF 导出改为 `Rgba16Rows` 按 32 行条带转换，工作线程各持有自己的转换缓存，保留全图坐标、
+蒙版与灰尘几何、输出变换、16 位量化和原编码布局。JNI 不再建立完整的调整后 RGBA16 副本。
+编码失败和异常路径关闭文件并清理失败文件。完整引擎结果仍驻留，因此只完成了输出端的流式化。
+
+| 第二批验证 | 结果 |
+|---|---|
+| 严格 / 默认原生回归 | 两种模式各 355 组缩放、4,100 组 HDR、状态失败注入及缓存测试通过 |
+| 曲线字节 | 两种模式及 ASan/UBSan 各 1,787 条曲线、1,148,285 个 double/float 采样相同 |
+| 半径查询 | 两种模式及 ASan/UBSan 各 3,600 个舍入边界相同，查询在拒绝分配时成功，非正 sigma identity 正常 |
+| 条带输出 | 严格、默认与 ASan/UBSan 各 162 组合 × 5 种行高；RGB16 与完整 TIFF 相同；provider 分配失败正确返回 |
+| 实际胶片 | 重新链接宿主引擎和 Android 共用处理代码；10 用例、50 文件与原基线逐字节相同，RAW 准备哈希也相同 |
+| Android | 含 `0018` 的 arm64 Release 原生库构建通过；本批未重新执行 APK 单元测试、16 KB 检查或真机测试 |
+| TIFF 内存 | 4097 × 3073 独立进程峰值 RSS 312,696 → 221,044 KiB，约下降 29.3%；文件 36,575,160 字节且摘要相同 |
+
+这些新测试在同一台 x86_64 云主机、llvmpipe 软件 Vulkan 上执行。第二台云主机当前受服务冷却限制，
+本批没有把第一批的跨云复证算作自己的结果。
+完整胶片比较见 [`validation/android-engine-depth-render-2026-11-08.json`](validation/android-engine-depth-render-2026-11-08.json)，
+数值与内存记录见 [`validation/android-engine-depth-2026-11-08.json`](validation/android-engine-depth-2026-11-08.json)。
+
+对上游继续复核后，还发现递归模糊末端状态引起显著的左右翻转不对称，且 FIR/IIR 在 sigma=3
+的切换处有核宽度跳变。已加入真实 Vulkan 诊断和独立的 Triggs/Sdika CPU 修正候选；
+120 组候选相对显式延拓参考的最坏误差为 `4.42701431069e-11`，五种分段长度保持相同扫描字节。
+这些会改变旧输出的算法修正尚未替换产品 shader，详细模型、原始数据和适配条件见
+[`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)。

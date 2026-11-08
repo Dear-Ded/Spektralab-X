@@ -1,0 +1,50 @@
+Compute FIR halo demand without constructing and normalizing a kernel.
+
+Co-created with GPT (OpenAI), 2026-11-08.
+The strip planner asks for radii, but the old helper allocated a Vec and
+evaluated every Gaussian tap just to discard it. Share the original radius
+expression with the numerical kernel builder, preserving its rounding.
+Nonpositive sigma still denotes the identity kernel, before any allocation.
+
+diff --git a/engine/src/core/numeric.hpp b/engine/src/core/numeric.hpp
+--- a/engine/src/core/numeric.hpp
++++ b/engine/src/core/numeric.hpp
+@@ -81,1 +81,3 @@
++// The same radius without allocating/evaluating the kernel; sigma <= 0 is identity.
++size_t gaussian_kernel_radius(double sigma, double truncate);
+ size_t gaussian_kernel_1d(double sigma, double truncate, Vec& out);
+diff --git a/engine/src/core/numeric.cpp b/engine/src/core/numeric.cpp
+--- a/engine/src/core/numeric.cpp
++++ b/engine/src/core/numeric.cpp
+@@ -83,2 +83,7 @@
++size_t gaussian_kernel_radius(double sigma, double truncate) {
++    if (sigma <= 0.0) return 0;
++    return size_t(truncate * sigma + 0.5);
++}
++
+ size_t gaussian_kernel_1d(double sigma, double truncate, Vec& out) {
+-    const size_t radius = size_t(truncate * sigma + 0.5);
++    const size_t radius = gaussian_kernel_radius(sigma, truncate);
+diff --git a/engine/src/pipeline/blur.cpp b/engine/src/pipeline/blur.cpp
+--- a/engine/src/pipeline/blur.cpp
++++ b/engine/src/pipeline/blur.cpp
+@@ -160,7 +160,3 @@
+-    // Asked of the kernel builder itself rather than recomputed: this function
+-    // exists so the executor knows how many rows of context to copy, and the
+-    // one thing it must not do is round `truncate * sigma + 0.5` differently
+-    // from the kernel that will read them.
+-    Vec ignored;
+-    return uint32_t(gaussian_kernel_1d(sigma, truncate, ignored));
++    // Share the kernel builder's exact radius policy, without its tap allocation.
++    return uint32_t(gaussian_kernel_radius(sigma, truncate));
+ }
+diff --git a/engine/src/pipeline/blur.hpp b/engine/src/pipeline/blur.hpp
+--- a/engine/src/pipeline/blur.hpp
++++ b/engine/src/pipeline/blur.hpp
+@@ -89,4 +89,3 @@
+-    // `gaussian_kernel_1d` for it rather than by repeating `truncate * sigma +
+-    // 0.5` here, because a second copy of that rounding is exactly how a halo
+-    // comes out a row short.
++    // `gaussian_kernel_radius`, shared with the kernel builder, rather than
++    // allocating a kernel or maintaining a second copy of its rounding.
+     static bool is_fir(double sigma) { return sigma > 0.0 && sigma < kSmallSigmaMax; }

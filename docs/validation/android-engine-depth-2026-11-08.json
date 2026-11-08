@@ -1,0 +1,109 @@
+{
+  "date": "2026-11-08",
+  "co_creator": "GPT (OpenAI, AI assistant)",
+  "source_base": "cdc7274a0ca81a6821fe1b0ec8dc51c9039233f4",
+  "upstream_commit": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "engine_patches": "0001 through 0018, applied in filename order with --fuzz=0 to a clean pinned archive",
+  "version": "0.1.19-alpha",
+  "environment": {
+    "architecture": "x86_64",
+    "compiler": "GCC 11.4.0, Ubuntu 22.04",
+    "gpu": "llvmpipe (LLVM 15.0.7, 256 bits)",
+    "glslang": "11.8.0",
+    "scope": "One Linux cloud host; native library cross-compilation for Android arm64; no physical Android GPU execution"
+  },
+  "numerical_regressions": {
+    "strict": {
+      "flags": "-std=c++20 -O2 -pthread -ffp-contract=off",
+      "resize_cases": 355,
+      "gainmap_scalar_cases": 4100,
+      "curve_count": 1787,
+      "curve_double_and_float_sample_locations": 1148285,
+      "filter_radius_boundaries": 3600,
+      "setup_cache_concurrent_reads": 4000,
+      "look_failure_injection": "passed",
+      "gainmap_bilinear_gamma_order": "passed",
+      "radius_allocation_refusal": "passed",
+      "nonpositive_sigma_identity": "passed",
+      "all_passed": true
+    },
+    "default": {
+      "flags": "-std=c++20 -O2 -pthread; compiler-default contraction, no fast math",
+      "resize_cases": 355,
+      "same_other_cases_as_strict": true,
+      "all_passed": true
+    },
+    "asan_ubsan": {
+      "flags": "strict flags plus -g -fsanitize=address,undefined -fno-omit-frame-pointer",
+      "resize_cases": 350,
+      "same_other_cases_as_strict": true,
+      "all_passed": true,
+      "sanitizer_reports": 0
+    },
+    "strict_binary_sha256": {
+      "engine_adaptation": "dd28db153421af77e1d94a062556d6edb7873f8589e0e1d165697dff37a7fe87",
+      "curve_regression": "078dc523da7d1c4774a29bd545aade2f9beceab5312fcee35c35d71fba5618b1",
+      "filter_radius": "cce5c452c833253eed6b49933f81551a4b6b79be4abfd50049b4f752c0474506"
+    }
+  },
+  "output_rows": {
+    "modes_passed": ["strict", "default", "asan_ubsan"],
+    "combinations_per_mode": 162,
+    "row_heights_per_combination": 5,
+    "row_heights": ["1", "3", "32", "65", "full image height"],
+    "coverage": ["padded source stride", "sRGB", "Display P3", "display and export", "exact on and off", "curves", "vignette", "linear, radial and brush masks", "dust", "immutable source"],
+    "rgb16_bytes_equal": true,
+    "complete_tiff_bytes_equal": true,
+    "row_provider_allocation_failure": "returned false, incomplete file has no final directory",
+    "strict_binary_sha256": "1617da8131948d74431fd965d3b8e677a3aa4e246c1f0d63e7857832cb026e84"
+  },
+  "tiff_memory": {
+    "width": 4097,
+    "height": 3073,
+    "isolated_processes": true,
+    "full_peak_rss_kib": 312696,
+    "rows_peak_rss_kib": 221044,
+    "full_output_bytes": 36575160,
+    "rows_output_bytes": 36575160,
+    "full_output_fnv1a": "61a9d138a65b675c",
+    "rows_output_fnv1a": "61a9d138a65b675c",
+    "scope": "Test process includes engine and reading encoded output for digest; not Android App peak PSS or full-pipeline streaming"
+  },
+  "render": {
+    "evidence": "android-engine-depth-render-2026-11-08.json",
+    "cases": 10,
+    "files": 50,
+    "all_bytes_equal": true,
+    "raw_preparation_bytes_equal": true,
+    "scope": "Same-driver Linux native regression; random effects use deterministic fresh-process seeds"
+  },
+  "android": {
+    "task": ":app:externalNativeBuildRelease",
+    "architecture": "arm64-v8a",
+    "result": "BUILD SUCCESSFUL in 39s",
+    "apk_unit_tests_rerun_in_this_batch": false,
+    "elf_zip_alignment_rerun_in_this_batch": false,
+    "physical_device_tested": false
+  },
+  "research": {
+    "gpu_boundary_csv": "android-engine-blur-boundary-2026-11-08.csv",
+    "gpu_kernel_csv": "android-engine-blur-kernel-2026-11-08.csv",
+    "gpu_diagnostic_binary_sha256": "d6590b6e650913336dbd287de9e0afacf6a6b4d27cf5fd5fd470fe5ea46e234c",
+    "iir_reference_csv": "android-engine-iir-reference-2026-11-08.csv",
+    "iir_reference_binary_sha256": "de21fd4ef4ebc1d78ede1bd00391ab383eb3f83a4a63401a9fd1afac64e202cd",
+    "iir_candidate_cases": 120,
+    "iir_candidate_worst_tail_max_abs": 4.42701431069e-11,
+    "iir_candidate_worst_reversal_max_abs": 1.02308161942e-10,
+    "iir_candidate_chunk_sizes": [1, 2, 7, 32, 257],
+    "iir_candidate_chunk_bytes_equal": true,
+    "iir_candidate_scope": "Research CPU double scan and long-double boundary conversion, independently checked against explicit extended-tail recursion; no production shader replacement or GPU streaming"
+  },
+  "limitations": [
+    "Second cloud host unavailable during this batch due to service cooldown; no second-host confirmation claimed",
+    "Complete source, negative and output planes are still materialized",
+    "The strip planner still does not enforce a complete live-byte budget",
+    "The storage probe timeout lifetime issue remains unfixed",
+    "Upstream IIR terminal-state and approximation findings are documented; production math remains compatible",
+    "No claim of bit identity across different GPU implementations or full-resolution physical Android validation"
+  ]
+}

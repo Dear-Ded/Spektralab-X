@@ -32,7 +32,7 @@ constexpr uint64_t kMaxOffset = std::numeric_limits<uint32_t>::max();
 // Rows [y0, y1) as little-endian RGB16 through the horizontal predictor
 // (tag 317 = 2: each sample minus the same channel's left neighbour, mod
 // 2^16), then deflated into one zlib stream (compression 8, Adobe Deflate).
-bool deflate_strip(const uint16_t* rgba, uint32_t width, uint32_t y0, uint32_t y1, uint32_t stride_px,
+bool deflate_strip(const uint16_t* rgba, uint32_t width, uint32_t y0, uint32_t y1, size_t stride_px,
                    std::vector<uint8_t>& raw, std::vector<uint8_t>& out) {
     raw.resize(size_t(width) * 6 * (y1 - y0));
     uint8_t* dst = raw.data();
@@ -61,13 +61,13 @@ bool deflate_strip(const uint16_t* rgba, uint32_t width, uint32_t y0, uint32_t y
 // The directory goes last because the strips' compressed sizes are known
 // only once written; the header's pointer to it is patched at the end. A file
 // cut off anywhere therefore has no directory (MediaSaver.checkTiff).
-bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_t height,
-                  uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+bool write_tiff16(std::FILE* file, uint32_t width, uint32_t height,
+                  const std::vector<uint8_t>& icc, const TiffRowSource& source, std::string& error) {
     if (!file) { error = "no file to write the TIFF to"; return false; }
-    if (!rgba || !width || !height || row_stride_px < width) {
+    if (!source || !width || !height) {
         error = "invalid image for TIFF export"; return false;
     }
-    const uint32_t strips = (height + kRowsPerStrip - 1) / kRowsPerStrip;
+    const uint32_t strips = (height - 1) / kRowsPerStrip + 1;
     std::vector<uint32_t> offsets(strips), counts(strips);
 
     const uint8_t header[8] = {'I', 'I', 42, 0, 0, 0, 0, 0};   // directory offset patched below
@@ -77,14 +77,17 @@ bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_
     // A batch of strips compressed at once, one per thread, written in order.
     const uint32_t workers = std::clamp(std::thread::hardware_concurrency(), 1u, 4u);
     std::vector<std::vector<uint8_t>> raw(workers), packed(workers);
+    std::vector<std::vector<uint16_t>> converted(workers);
     for (uint32_t first = 0; first < strips; first += workers) {
         const uint32_t n = std::min(workers, strips - first);
         std::vector<char> ok(n, 0);
         auto job = [&](uint32_t k) {
             const uint32_t y0 = (first + k) * kRowsPerStrip;
-            const uint32_t y1 = std::min(height, y0 + kRowsPerStrip);
+            const uint32_t count = std::min(kRowsPerStrip, height - y0);
             try {
-                ok[k] = deflate_strip(rgba, width, y0, y1, row_stride_px, raw[k], packed[k]) ? 1 : 0;
+                const auto view = source(y0, count, converted[k]);
+                ok[k] = view.rgba && view.stride_px >= width &&
+                        deflate_strip(view.rgba, width, 0, count, view.stride_px, raw[k], packed[k]);
             } catch (...) {
                 ok[k] = 0;   // bad_alloc in a thread would otherwise terminate the app
             }
@@ -97,7 +100,7 @@ bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_
         job(0);
         for (auto& t : threads) t.join();
         for (uint32_t k = 0; k < n; ++k) {
-            if (!ok[k]) { error = "deflate failed (out of memory?)"; return false; }
+            if (!ok[k]) { error = "row conversion or deflate failed (out of memory?)"; return false; }
             if (pos + packed[k].size() > kMaxOffset) { error = "image exceeds the classic TIFF 4 GiB limit"; return false; }
             offsets[first + k] = uint32_t(pos);
             counts[first + k] = uint32_t(packed[k].size());
@@ -170,15 +173,36 @@ bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_
     return true;
 }
 
-bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width, uint32_t height,
-                  uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+bool write_tiff16(const std::string& path, uint32_t width, uint32_t height,
+                  const std::vector<uint8_t>& icc, const TiffRowSource& source, std::string& error) {
     std::FILE* file = std::fopen(path.c_str(), "wb");
     if (!file) { error = "cannot create " + path; return false; }
-    if (!write_tiff16(file, rgba, width, height, row_stride_px, icc, error)) {
+    bool ok;
+    try { ok = write_tiff16(file, width, height, icc, source, error); }
+    catch (...) { std::fclose(file); std::remove(path.c_str()); throw; }
+    if (!ok) {
         std::fclose(file); std::remove(path.c_str()); error += ": " + path; return false;
     }
     if (std::fclose(file) != 0) { std::remove(path.c_str()); error = "close failed: " + path; return false; }
     return true;
+}
+
+bool write_tiff16(std::FILE* file, const uint16_t* rgba, uint32_t width, uint32_t height,
+                  uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+    if (!rgba || row_stride_px < width) { error = "invalid image for TIFF export"; return false; }
+    return write_tiff16(file, width, height, icc,
+        [&](uint32_t y0, uint32_t, std::vector<uint16_t>&) {
+            return TiffRowView{rgba + size_t(y0) * row_stride_px * 4, row_stride_px};
+        }, error);
+}
+
+bool write_tiff16(const std::string& path, const uint16_t* rgba, uint32_t width, uint32_t height,
+                  uint32_t row_stride_px, const std::vector<uint8_t>& icc, std::string& error) {
+    if (!rgba || row_stride_px < width) { error = "invalid image for TIFF export"; return false; }
+    return write_tiff16(path, width, height, icc,
+        [&](uint32_t y0, uint32_t, std::vector<uint16_t>&) {
+            return TiffRowView{rgba + size_t(y0) * row_stride_px * 4, row_stride_px};
+        }, error);
 }
 
 }  // namespace spk::android

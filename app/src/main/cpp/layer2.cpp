@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "layer2_local.hpp"
+#include "tone_curve.hpp"
 
 namespace spk::android {
 namespace {
@@ -46,29 +47,6 @@ float hue_to_rgb(float p, float q, float t) {
     return p;
 }
 
-// Fritsch-Carlson monotone cubic, upstream's view_process.cpp `curve()`
-// line for line (shared there with CurveMath.swift), so a curve samples to
-// the same table as upstream's grade.
-double curve(const std::vector<std::array<double, 2>>& p, double x) {
-    const size_t n = p.size();
-    if (x <= p.front()[0]) return p.front()[1];
-    if (x >= p.back()[0]) return p.back()[1];
-    std::vector<double> d(n - 1), m(n);
-    for (size_t i = 0; i + 1 < n; ++i) d[i] = (p[i + 1][1] - p[i][1]) / std::max(p[i + 1][0] - p[i][0], 1e-6);
-    m[0] = d[0]; m[n - 1] = d[n - 2];
-    for (size_t i = 1; i + 1 < n; ++i) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
-    for (size_t i = 0; i + 1 < n; ++i)
-        if (d[i] != 0) {
-            const double a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
-            if (s > 9) { const double t = 3 / std::sqrt(s); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
-        }
-    size_t i = 0;
-    while (i < n - 2 && x > p[i + 1][0]) ++i;
-    const double h = std::max(p[i + 1][0] - p[i][0], 1e-6), t = (x - p[i][0]) / h, t2 = t * t, t3 = t2 * t;
-    return std::clamp((2 * t3 - 3 * t2 + 1) * p[i][1] + (t3 - 2 * t2 + t) * h * m[i] +
-                      (-2 * t3 + 3 * t2) * p[i + 1][1] + (t3 - t2) * h * m[i + 1], 0.0, 1.0);
-}
-
 // The kCurves tail as upstream's table: five rows of 256, row-major. Empty
 // when the tail is missing or malformed, or all five curves are identity
 // (upstream's `curvesActive`). The points arrive as floats, not upstream's
@@ -94,7 +72,8 @@ std::vector<float> curve_table(const std::vector<float>& v) {
             p = {{0, 0}, {1, 1}};
         }
         if (p.size() != 2 || p[0] != std::array<double, 2>{0, 0} || p[1] != std::array<double, 2>{1, 1}) active = true;
-        for (int x = 0; x < 256; ++x) table[row * 256 + x] = float(curve(p, double(x) / 255));
+        const ToneCurve curve(p);
+        for (int x = 0; x < 256; ++x) table[row * 256 + x] = float(curve.at(double(x) / 255));
     }
     if (!active) return {};
     return table;

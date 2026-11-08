@@ -15,11 +15,17 @@ app="$repo/app/src/main/cpp"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/engine_adaptation.cpp" \
     "$repo/tools/native/resize_reference.cpp" "$app/resize.cpp" "$app/layer2.cpp" -o "$build/engine_adaptation"
 "$build/engine_adaptation" "$@"
+"$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/curve_regression.cpp" -o "$build/curve_regression"
+"$build/curve_regression"
 if [[ -n "${UP:-}" ]]; then
     core="$UP/engine/src/core"
     "$cxx" "${flags[@]}" -I"$core" -I"$UP/engine/third_party" \
         "$repo/tools/native/setup_cache_lifetime.cpp" "$core/setup_cache.cpp" "$core/blob.cpp" \
         -o "$build/setup_cache_lifetime"
     "$build/setup_cache_lifetime"
+    "$cxx" "${flags[@]}" -ffunction-sections -fdata-sections -I"$UP/engine/src" -I"$core" \
+        "$repo/tools/native/filter_radius.cpp" "$UP/engine/src/pipeline/blur.cpp" "$core/numeric.cpp" \
+        -Wl,--gc-sections -o "$build/filter_radius"
+    "$build/filter_radius"
 fi
 printf 'native tests passed (%s)\n' "$build"

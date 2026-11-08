@@ -23,6 +23,10 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0015-vulkan-pipeline-cache.patch` | `gpu/vulkan_gpu.cpp` | 上游每次启动都把约 49 条计算管线重新编译一遍（`vkCreateComputePipelines` 传 `VK_NULL_HANDLE`）。补丁建一个 `VkPipelineCache`，宿主用 `SPEKTRAFILM_VULKAN_PIPELINE_CACHE` 指定文件时跨启动保存。文件头带 GPU 名、厂商/设备号、驱动版本、`pipelineCacheUUID`、长度和 FNV-1a 哈希，任何一项不符或文件损坏就丢弃、从空缓存开始；先写临时文件再改名。应用把它放在 `cacheDir/vk-pipelines-<versionCode>.bin`，旧版本的文件启动时删掉（`EngineHost.kt`）。缓存只保存驱动对同一份 SPIR-V 的编译结果，输出逐字节不变。 |
 | `0016-setup-cache-shared-lut.patch` | `core/setup_cache.hpp`、`core/setup_cache.cpp`、`pipeline/pipeline.cpp` | 缓存曾返回 `vector` 元素的裸指针，解锁后上传或拷贝 LUT 时，另一会话的 LRU 轮换、插入、淘汰会让指针指向另一张表或失效。改为共享、不可变的 LUT 载荷，调用方在上传和拷贝结束前持有所有权。缓存仍保留 4 项；读取者尚未结束的旧载荷延后释放。数值计算不变。GPT（OpenAI，AI 助手）参与共创。 |
 | `0017-setup-cache-complete-gamut-key.patch` | `core/setup_cache.cpp` | 输入色域压缩的算法名和三个 `%.17g` 参数曾一起写入 64 字节缓冲，尾部截断会把不同设置误当成同一张 LUT。逐个追加完整参数；默认设置的键不变，数值计算不变。回归覆盖仅相差一个 double 步长、旧键相同的参数。GPT（OpenAI，AI 助手）参与共创。 |
+| `0018-fir-demand-without-kernel-allocation.patch` | `core/numeric.{hpp,cpp}`、`pipeline/blur.{hpp,cpp}` | 卷积核和 halo 查询共用半径舍入函数，省去查询时的整条数组分配、指数和归一化。正 sigma 的核和半径保持相同；非正 sigma 在无符号转换前返回 identity。3,600 个边界与拒绝分配测试通过，不改变 FIR/IIR 阈值或光学参数。GPT（OpenAI，AI 助手）参与共创。 |
+
+本轮上游递归边界与核近似的独立复核见
+[`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 
 ## LibRaw 补丁
 

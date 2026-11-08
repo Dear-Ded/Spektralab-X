@@ -1112,23 +1112,19 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
         if (!render(s, tier, result.r)) return JNI_FALSE;
         std::string error = blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px);
         if (!error.empty()) { fail("export check: " + error); return JNI_FALSE; }
-        // The engine's pixels are its own; the conversion and Layer 2 go on a copy.
-        const uint16_t* pixels = result.r.rgba16;
-        size_t stride = result.r.row_stride_px;
-        std::vector<uint16_t> adjusted;
-        if (const auto* xf = s->xf()) {
-            // The file carries the sRGB profile, so the pixels must be sRGB.
-            if (xf->target() != "sRGB") { fail("TIFF: the session's output is not sRGB"); return JNI_FALSE; }
-            spk::android::pack_rgba16(result.r.rgba16, stride, result.r.width, result.r.height, adjusted,
-                                      s->active_look(), *xf);
-            pixels = adjusted.data();
-            stride = result.r.width;
-        } else if (const auto* look = s->active_look()) {
-            adjusted.assign(result.r.rgba16, result.r.rgba16 + size_t(result.r.row_stride_px) * result.r.height * 4);
-            spk::android::apply_rgba16_in_place(*look, adjusted.data(), result.r.row_stride_px,
-                                                result.r.width, result.r.height);
-            pixels = adjusted.data();
-        }
+        const auto* xf = s->xf();
+        if (xf && xf->target() != "sRGB") { fail("TIFF: the session's output is not sRGB"); return JNI_FALSE; }
+        const auto* look = s->active_look();
+        // Retain full-frame mask/dust geometry, but convert only the encoder's
+        // next strips. The engine's result stays immutable through the write.
+        const spk::android::Rgba16Rows rows(result.r.rgba16, result.r.row_stride_px,
+                                            result.r.width, result.r.height, look, xf);
+        const spk::android::TiffRowSource source = [&](uint32_t y0, uint32_t count, std::vector<uint16_t>& scratch) {
+            if (!look && !xf) return spk::android::TiffRowView{
+                result.r.rgba16 + size_t(y0) * result.r.row_stride_px * 4, result.r.row_stride_px};
+            rows.pack(y0, count, scratch);
+            return spk::android::TiffRowView{scratch.data(), result.r.width};
+        };
         if (fd >= 0) {
             // A dup, so fclose leaves the caller's ParcelFileDescriptor to close its own.
             const int own = dup(fd);
@@ -1138,13 +1134,13 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
                 fail("TIFF: cannot open the gallery entry for writing");
                 return JNI_FALSE;
             }
-            const bool ok = spk::android::write_tiff16(file, pixels, result.r.width, result.r.height, stride, icc, error);
-            if (std::fclose(file) != 0 && ok) { fail("TIFF: close failed"); return JNI_FALSE; }
+            std::unique_ptr<std::FILE, decltype(&std::fclose)> owned(file, &std::fclose);
+            const bool ok = spk::android::write_tiff16(file, result.r.width, result.r.height, icc, source, error);
+            if (std::fclose(owned.release()) != 0 && ok) { fail("TIFF: close failed"); return JNI_FALSE; }
             if (!ok) { fail("TIFF: " + error); return JNI_FALSE; }
             return JNI_TRUE;
         }
-        if (!spk::android::write_tiff16(path, pixels, result.r.width, result.r.height,
-                                        stride, icc, error)) {
+        if (!spk::android::write_tiff16(path, result.r.width, result.r.height, icc, source, error)) {
             fail("TIFF: " + error);
             return JNI_FALSE;
         }

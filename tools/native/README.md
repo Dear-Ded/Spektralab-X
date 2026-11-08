@@ -32,6 +32,48 @@ directory; otherwise a fresh temporary directory is used and printed. Omitting
   Check LRU rotation, eviction, cache destruction, 4000 concurrent reads and
   distinct gamut knees whose old 64-byte keys collided. This checks ownership
   and keying, not the spectral integrator.
+- `curve_regression.cpp` freezes the cdc7274 per-sample slope preparation and
+  compares 1,148,285 double/float samples with the prepared production curve.
+- `filter_radius.cpp` links the actual `Blur::fir_radius` and numerical kernel,
+  checks 3,600 rounding-boundary cases and refuses allocations during demand
+  queries. It also checks the nonpositive-sigma identity path.
+
+The output tests additionally need a host engine build, zlib and the generated
+`upstream_output_math.inc` from `tools/parity/build.sh`. They use the actual
+output transform. Compare 162 combinations of size, stride, look, local masks,
+dust, sRGB/P3, display/export and exact mode across five strip heights, then
+compare complete TIFF bytes and inject a failing row provider:
+
+```bash
+UP=/path/to/upstream B=/path/to/build MATH_DIR=/path/to/parity/sources \
+  bash tools/native/run_output.sh
+UP=/path/to/upstream B=/path/to/build MATH_DIR=/path/to/parity/sources \
+  STRICT=0 bash tools/native/run_output.sh
+UP=/path/to/upstream B=/path/to/build MATH_DIR=/path/to/parity/sources \
+  SANITIZE=1 bash tools/native/run_output.sh
+```
+
+Keep `BUILD_DIR` to run `output_rows RESOURCES --memory-full` and
+`output_rows RESOURCES --memory-rows` in separate processes. These include
+reading encoded output for a digest, and do not measure Android App PSS.
+
+Two research harnesses investigate upstream algorithm limits separately from
+byte-preserving production regressions:
+
+```bash
+UP=/path/to/upstream B=/path/to/build bash tools/native/run_blur_study.sh
+UP=/path/to/upstream B=/path/to/build bash tools/native/run_blur_study.sh --kernel
+UP=/path/to/upstream bash tools/native/run_iir_reference.sh
+```
+
+`blur_boundary.cpp` exercises the actual Vulkan blur and reports reversal and
+constant-extension diagnostics, plus interior sample counts (`nan` if empty).
+Its kernel mode measures a central impulse against a normalized discrete
+Gaussian; it does not grade photographs. `iir_boundary_reference.cpp` is a CPU
+candidate for the Triggs/Sdika boundary conversion, tested against explicit
+long-double tail continuation. Carrying state across five chunk sizes preserves
+double scan bytes. This does not implement GPU streaming or change the product
+boundary rule. See [the algorithm study](../../docs/ENGINE_ALGORITHM_RESEARCH.md).
 
 For isolated RSS measurements, run these in separate processes after building:
 

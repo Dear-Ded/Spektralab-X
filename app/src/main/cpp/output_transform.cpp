@@ -4,6 +4,8 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <thread>
 
 #include "core/json.hpp"
@@ -181,6 +183,44 @@ void pack_rgba16(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t
         d[1] = uint16_t(std::lround(saturate(c[1]) * 65535.0f));
         d[2] = uint16_t(std::lround(saturate(c[2]) * 65535.0f));
     });
+}
+
+Rgba16Rows::Rgba16Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
+                       const Layer2* look, const OutputTransform* xf)
+    : src_(src), stride_(stride_px), w_(w), h_(h), look_(look), xf_(xf) {
+    if (!src || !w || !h || stride_px < w ||
+        stride_px > std::numeric_limits<size_t>::max() / h / 4 / sizeof(uint16_t))
+        throw std::invalid_argument("invalid RGBA16 row source");
+    frame_ = look ? look->frame(w, h) : Layer2::Frame{};
+}
+
+void Rgba16Rows::pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out) const {
+    if (y0 > h_ || count > h_ - y0) throw std::out_of_range("RGBA16 row range");
+    out.assign(size_t(w_) * count * 4, 65535);
+    const float iw = 1.0f / std::max(1u, w_), ih = 1.0f / std::max(1u, h_);
+    for (uint32_t y = y0; y < y0 + count; ++y) {
+        const uint16_t* s = src_ + size_t(y) * stride_ * 4;
+        uint16_t* d = out.data() + size_t(y - y0) * w_ * 4;
+        const float v = (y + 0.5f) * ih;
+        for (uint32_t x = 0; x < w_; ++x) {
+            float c[3];
+            if (look_) {
+                c[0] = s[4 * x] / 65535.0f; c[1] = s[4 * x + 1] / 65535.0f; c[2] = s[4 * x + 2] / 65535.0f;
+                look_->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v, frame_);
+                if (xf_) {
+                    uint16_t q[3];
+                    for (int k = 0; k < 3; ++k) q[k] = uint16_t(std::floor(saturate(c[k]) * 65535.0f + 0.5f));
+                    xf_->apply16(q, c);
+                }
+            } else if (xf_) {
+                xf_->apply16(s + 4 * x, c);
+            } else {
+                std::copy_n(s + 4 * x, 4, d + 4 * x);
+                continue;
+            }
+            for (int k = 0; k < 3; ++k) d[4 * x + k] = uint16_t(std::lround(saturate(c[k]) * 65535.0f));
+        }
+    }
 }
 
 }  // namespace spk::android
