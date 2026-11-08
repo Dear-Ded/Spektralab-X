@@ -1,0 +1,62 @@
+ThermalHeadroomSampler isolated JVM validation
+Date: 2026-11-08
+Host: AOIDC, Linux x86_64
+Remote directory: /data/work/gpt-engine-impl-20261108/thermal-standalone
+Original raw log: /data/work/gpt-engine-impl-20261108/thermal-standalone/run.log
+Local raw log: D:/AGI/GPT/other/spektralab-backend-research/render-results/aoidc/thermal-standalone/run.log
+
+Scope: compiled the current pure Kotlin sampler and its JUnit tests in an
+independent directory. No Gradle project, app build, JNI build, APK, device
+thermal service or image pipeline was executed by this test.
+
+Compiler: org.jetbrains.kotlin.cli.jvm.K2JVMCompiler 2.0.21
+Compiler options: -no-stdlib -no-reflect -jvm-target 17
+Runtime dependencies: kotlin-stdlib 2.0.21, JUnit 4.13.2, Hamcrest Core 1.3
+Launcher: org.junit.runner.JUnitCore
+Test class: com.dearded.spektralab.ThermalHeadroomSamplerTest
+
+Source SHA-256, matched between local and remote files:
+caa29f560cdb0764c386409725781b8e7118512a429e0d38c24c66551787c50d  app/src/main/java/com/dearded/spektralab/ThermalHeadroomSampler.kt
+a7f23fe0b9084ef03a0ae2ebb7d20faf5de90dbe89a17eadad797d5967e83f3a  app/src/test/java/com/dearded/spektralab/ThermalHeadroomSamplerTest.kt
+
+Covered tests:
+firstSampleAtZeroAndTenSecondBoundary
+failedSamplesExpireInsteadOfKeepingStaleHeadroomForever
+slowOrFailedQueryIsNotResubmittedUntilTenSecondsAfterCompletion
+rejectedExecutorDoesNotLeaveSamplingPermanentlyInFlight
+simultaneousCallersQueueOnlyOneQuery
+
+Raw execution output:
+openjdk version "17.0.20.1" 2026-08-18
+OpenJDK Runtime Environment (build 17.0.20.1+1-1-22.04-Ubuntu)
+OpenJDK 64-Bit Server VM (build 17.0.20.1+1-1-22.04-Ubuntu, mixed mode, sharing)
+JUnit version 4.13.2
+.....
+Time: 0.039
+
+OK (5 tests)
+
+caa29f560cdb0764c386409725781b8e7118512a429e0d38c24c66551787c50d  ThermalHeadroomSampler.kt
+a7f23fe0b9084ef03a0ae2ebb7d20faf5de90dbe89a17eadad797d5967e83f3a  ThermalHeadroomSamplerTest.kt
+
+Call-site inspection (2026-11-08):
+ExportPacer.kt:61 uses headroom >= threshold; NaN does not enter thermal wait.
+ExportPacer.kt:73 uses editing || headroom >= threshold; NaN does not enable
+thermal efficiency preference, while editing still enables that preference.
+EditorViewModel.kt:607 uses interacting || headroom > threshold; NaN does not
+hold the preview, while interaction still holds it.
+LightTableFilm.kt:142 adds headroom > threshold to independent busy reasons;
+NaN does not hold thumbnails, while interaction/queue activity still can.
+These are direct Float comparisons, not sorting or Float.compareTo calls.
+This preserves operation when the platform does not provide a usable sample;
+it is not a claim that an unavailable reading means the device is cool.
+
+Official basis, checked 2026-11-08:
+https://developer.android.com/games/optimize/adpf/thermal
+Page updated 2026-02-26; device-limitations guidance recommends at least ten
+seconds between queries and avoiding queries from multiple threads.
+https://developer.android.com/reference/android/os/PowerManager#getThermalHeadroom(int)
+The argument is forecast seconds; 1.0 is the severe-throttling threshold.
+The API reference describes a roughly one-second useful sampling cadence;
+the implementation deliberately follows the stricter ten-second device
+compatibility guidance. NaN means unavailable, never a confirmed cool state.

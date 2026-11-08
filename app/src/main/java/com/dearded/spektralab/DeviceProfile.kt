@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.SystemClock
 import org.json.JSONObject
+import java.util.concurrent.Executors
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -118,23 +119,35 @@ object DeviceProfile {
 }
 
 /**
- * PowerManager's forecast of how close the SoC is to throttling, 10 s ahead:
- * 1.0 means throttling now, 0 means unknown (API < 30, or a HAL that does not
- * report it). The API answers NaN when asked more than once a second, so the
- * last real reading is kept for 1.5 s.
+ * PowerManager's forecast 10 s ahead; 1.0 is the severe-throttling threshold.
+ * Android recommends one querying thread and at least 10 s between samples:
+ * https://developer.android.com/games/optimize/adpf/thermal
+ * Calls return immediately. NaN denotes unavailable or expired headroom.
  */
-class ThermalMonitor(private val context: Context) {
-    @Volatile private var value = 0f
-    @Volatile private var at = 0L
+class ThermalMonitor(context: Context) {
+    private val app = context.applicationContext
+    private val sampler = ThermalHeadroomSampler(
+        clock = SystemClock::elapsedRealtime,
+        executor = queryThread,
+        query = {
+            if (Build.VERSION.SDK_INT >= 30) {
+                app.getSystemService(PowerManager::class.java)?.getThermalHeadroom(10) ?: Float.NaN
+            } else Float.NaN
+        },
+    )
+
+    init {
+        if (Build.VERSION.SDK_INT >= 30) sampler.headroom()
+    }
 
     fun headroom(): Float {
-        if (Build.VERSION.SDK_INT < 30) return 0f
-        val now = SystemClock.elapsedRealtime()
-        if (at != 0L && now - at < 1500) return value
-        val pm = context.getSystemService(PowerManager::class.java) ?: return 0f
-        val h = runCatching { pm.getThermalHeadroom(10) }.getOrDefault(Float.NaN)
-        at = now
-        if (!h.isNaN()) value = h
-        return value
+        if (Build.VERSION.SDK_INT < 30) return Float.NaN
+        return sampler.headroom()
+    }
+
+    private companion object {
+        val queryThread = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "spektralab-thermal").apply { isDaemon = true }
+        }
     }
 }

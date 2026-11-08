@@ -1,0 +1,2 @@
+device: llvmpipe (LLVM 15.0.7, 256 bits)
+FIR rows: 370 cases; 218240088 float32 values byte-identical; exact scratch and small-request pool limits verified

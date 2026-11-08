@@ -146,8 +146,9 @@ HDR = (linearSDR + epsilonSdr) * exp2(L) - epsilonHdr
 | 调度与资源回收 | fence 完成后才复用或销毁缓冲；取消后保留在飞资源至完成，不能直接删逐节点 flush 来“提速” |
 | 流式输出 | TIFF/JPEG 按行输出，避免最终打包又重建整帧；预览可继续用现有小图路径 |
 
-还需修复存储探测器的超时生命周期：`VK_TIMEOUT` 不能当作 GPU 已停止运行，清理不能
-销毁仍被提交使用的缓冲、命令池和 fence。本轮未修改这条探测路径。
+存储探测器的超时生命周期已在第三批修复：`VK_TIMEOUT` 不能当作 GPU 已停止运行，
+清理保留在飞缓冲、命令池和 fence，确认完成或设备丢失后再销毁。同步清理仍可能超过
+两秒诊断期限，细节见 [GPU_PROBE_LIFETIME.md](GPU_PROBE_LIFETIME.md)。
 
 后续验收应至少包含：同输入的整图/条带逐字节比较、IIR 接缝、颗粒空间频谱、
 峰值内存与单次 GPU 提交时间、取消和设备丢失恢复，以及真实 Android GPU 的大图长时间
@@ -191,3 +192,86 @@ GitHub Ubuntu 24.04 的独立 runner 另行通过严格 / 默认原生数值测�
 120 组候选相对显式延拓参考的最坏误差为 `4.42701431069e-11`，五种分段长度保持相同扫描字节。
 这些会改变旧输出的算法修正尚未替换产品 shader，详细模型、原始数据和适配条件见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)。
+
+## 6. 第三批：FIR 存储调度与实际产品预算
+
+第三批继续只改源码、测试及证据，`VERSION` 保持 `0.1.19-alpha`，共创署名 GPT（OpenAI）。
+
+### 行带 FIR 与小请求内存池
+
+补丁 `0019` 对大于 16 MiB 的普通 Vulkan FIR 平面启用行带中间存储。
+输入和输出仍完整驻留，纵向写入至多 8 MiB（或至少一行）的 scratch；横向只读取同一行，
+按原全局位置写回。保留两个 float32 存储边界与运算顺序，每带完成后再复用 scratch。
+已有 consume-input 的两平面复用不改，小图继续用原来的两次 dispatch。
+
+scratch 的精确容量分类随池块保留，普通请求不能把它借作更小缓冲；相同容量可以复用。
+补丁 `0020` 另对小于 64 KiB 的普通请求设 `max(2 * request, 4 KiB)` 的复用容量上限，
+修复常量借到整个闲置图像平面的内存放大。大请求仍使用已有复用策略。
+
+`tools/native/fir_rows.cpp` 用冻结的原 GPU 两遍卷积作比较，覆盖单点、单行、单列、
+核半径大于尺寸、HDR 负值、不同通道半径、reflect/mirror、正负及零累加权重。
+产品路径还覆盖横竖图、65537 × 33、1000003 × 2，以及 6001 × 4001。
+独立内存池检查覆盖小常量、bounded 释放后的 4 MiB 普通请求、普通块提升为 bounded、
+相同容量复用，避免测试被其他小块或小请求策略遮蔽。
+
+| 条件 | 结果 |
+|---|---|
+| 严格 Vulkan 限额、最终测试源码 | 368 用例，74,180,082 个 float32 值逐字节相同；不放宽 `maxStorageBufferRange` |
+| `--large` 扩展容量实验 | 370 用例，218,240,088 个 float32 值逐字节相同 |
+| 2049 × 1025 活跃缓冲容量 | 100,811,040 → 83,993,088 字节 |
+| 6001 × 4001 活跃缓冲容量 | 1,152,480,288 → 872,713,908 字节，减少 279,766,380 字节 |
+| 小请求与 scratch 池容量 | 小请求上限、精确容量、释放后分类和相同容量复用均通过 |
+| 实际胶片回归 | 最终引擎与 Android 共用处理代码重新链接，10 案例 × 5 输出全部逐字节相同；RAW 准备哈希也相同 |
+| Android 编译与测试 | 最终补丁的 arm64 Release 原生构建通过，19 项 Release 单测及 3 项实际解码测试通过 |
+
+以上为同一 AOIDC 云主机上的 llvmpipe 软件 Vulkan。容量指标是测试中同时活跃的 GPU buffer
+逻辑容量，不是整个 App RSS、驱动真实分配峰值或手机节省比例。两种比较均保留一份独立
+accumulator 输入，即使该组合没有启用累加。计时包含同步、读回、池清理且与其他构建有重叠，
+不用于宣传固定提速。行带可以花更多时间来节省存储。
+
+`--large` 依赖引擎在 CPU Vulkan 上既有的容量探测扩展；严格限额的独立运行不包含该 24 MP
+案例。完整输入、输出依旧受各自 SSBO 范围限制，因此不能据此声称严格 128 MiB 的 Android
+设备已能处理该尺寸。CI 的 `engine-gpu` 明确设置 `SPEKTRAFILM_VULKAN_STRICT_LIMITS=1`。
+
+原始记录：
+[大图 CSV](validation/android-engine-fir-rows-2026-11-08.csv)、
+[大图日志](validation/android-engine-fir-rows-2026-11-08.txt)、
+[严格限额 CSV](validation/android-engine-fir-strict-2026-11-08.csv)、
+[严格限额日志](validation/android-engine-fir-strict-2026-11-08.txt)。
+最终胶片逐文件摘要见
+[完整比较](validation/android-engine-product-render-2026-11-08.json)，
+安卓原生集成构建见 [构建日志](validation/android-engine-product-build-2026-11-08.txt)，
+解码集成测试见 [解码日志](validation/android-photo-geometry-2026-11-08.txt)。
+
+### 原照片尺寸与导出预算
+
+`SourceLoader` 保留解码器报告的、已处理 EXIF 方向的原图尺寸；`Photo` 将其传给普通及
+Ultra HDR 的 JNI open，native session 不再把缩小后的工作图误记为原图。6000 × 4000 的照片
+按 3072 长边导入后，工作图是 3072 × 2048，原尺寸仍是 24 MP。极致导出按原图重开时，
+内存预测、任务像素数与并发控制因此使用真实原尺寸。此更改是预算元数据，不改变引擎输入像素、
+物理像素 pitch、胶片参数或色彩公式。
+
+解码后的后备缩放同时检查长边和面积上限，移除原先只在面积超过 5% 后才缩小的分支。
+`PhotoGeometryTest` 使用真正的 Android 图像解码路径（Robolectric native graphics，API 34），
+三项 JPEG 测试全部通过：原尺寸保留、EXIF 90° 旋转后的两套尺寸，以及面积/长边共同限制。
+这不代表 OEM HEIF、增益图或 Android 真机 JNI 已完成验收。
+
+### 热调度和探测生命周期
+
+按 Android Thermal 指南，热余量改为单线程异步采样，完成后至少隔 10 秒才排下一次；
+并发调用最多排一个任务，失败和 executor 拒绝也限频。最近有效值保留至多 30 秒，过期返回
+NaN。调用方仅用于调度阈值，NaN 不触发主动降效。诊断文案明确这是未来 10 秒预测，
+1.0 为 severe 阈值。5 项限频、并发、失败与失效测试通过，完整 Release 单测共 19 项通过。
+
+存储探测器把提交和完成分开，timeout 保留整个在飞资源图；fence 或 device-idle 完成后才释放。
+提交返回 `DEVICE_LOST` 同样先走完成清理，不能把成功提交的生命周期误作成功等待。
+9 种生产方法生命周期回归与 4 KiB 实际 Vulkan smoke 通过。异常 idle 无法确认完成时保留资源，
+同步清理可能等待较久；没有注入真实 GPU 挂起或真机设备丢失。
+
+热采样证据见 [thermal 日志](validation/android-thermal-sampler-2026-11-08.txt)，
+探测修复与限制见 [GPU_PROBE_LIFETIME.md](GPU_PROBE_LIFETIME.md)。
+外部方法研究见 [ENGINE_SCHEDULING_REFERENCES.md](ENGINE_SCHEDULING_REFERENCES.md)，
+F16、ICC、HDR 与 RAW 模式的后续适配见 [ANDROID_INPUT_PRECISION.md](ANDROID_INPUT_PRECISION.md)。
+
+递归模糊末端条件、sigma=3 的 PSF 跳变、完整管线外存执行及 Adreno/Mali/Immortalis 长时间
+真机导出仍未完成；这批调度优化没有替换这些成像算法或修改材料数据。

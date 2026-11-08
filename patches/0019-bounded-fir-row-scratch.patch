@@ -1,0 +1,179 @@
+Bound the separable FIR intermediate without changing the convolution.
+
+Co-created with GPT (OpenAI), 2026-11-08.
+Vulkan previews/exports above 16 MiB retain the full input and output but
+store vertical results in at most 8 MiB (or one row). Horizontal filtering
+needs only that same row; reflection uses the original canvas, and both
+float32 passes keep their tap/accumulation order. The consuming path keeps
+its existing two-plane reuse. Small live previews keep the two dispatches.
+An exact-capacity pooled allocation prevents a small band from borrowing
+an idle full-frame buffer. Bounded blocks only serve equal-sized requests,
+so later small constants cannot retain them. This is not a full-pipeline
+streaming executor.
+
+diff --git a/engine/src/gpu/gpu.hpp b/engine/src/gpu/gpu.hpp
+--- a/engine/src/gpu/gpu.hpp
++++ b/engine/src/gpu/gpu.hpp
+@@ -246,2 +246,7 @@
+     virtual BufferRef alloc(size_t bytes, std::string& error) = 0;
++    // Scratch with exact logical capacity, never an oversized pool hand-out.
++    // Backends without bounded pooling can use an independently owned buffer.
++    virtual BufferRef alloc_bounded(size_t bytes, std::string& error) {
++        return alloc_persistent(bytes, error);
++    }
+     virtual BufferRef alloc_zeroed(size_t bytes, std::string& error) = 0;
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -51,4 +51,5 @@
+     VkMemoryPropertyFlags memory_flags = 0;
+     int refs = 1;
+     bool persistent = false;
++    bool bounded = false; // Preserve scratch capacity across pool borrowers.
+ };
+@@ -78,2 +78,3 @@
+     {"spk_sep_fir_acc", 6, kWorkgroup},
++    {"spk_sep_fir_rows", 6, kWorkgroup},
+     {"spk_iir_df_acc", 7, kWorkgroup},
+@@ -623,2 +624,5 @@
+     BufferRef alloc(size_t bytes, std::string& error) override { return allocate(bytes, false, error); }
++    BufferRef alloc_bounded(size_t bytes, std::string& error) override {
++        return allocate(bytes, false, error, true);
++    }
+     BufferRef alloc_zeroed(size_t bytes, std::string& error) override {
+@@ -1204,2 +1208,3 @@
+-    BufferRef allocate(size_t bytes, bool persistent, std::string& error) {
++    BufferRef allocate(size_t bytes, bool persistent, std::string& error,
++                       bool bounded = false) {
+         if (bytes == 0 || bytes > std::numeric_limits<VkDeviceSize>::max()) {
+@@ -1222,2 +1227,3 @@
+                 if (!b->persistent && b->refs == 0 && b->bytes >= bytes &&
++                    (!(bounded || b->bounded) || b->bytes == bytes) &&
+                     b->bytes - bytes <= std::max(bytes, size_t(64) << 20) &&
+@@ -1228,4 +1235,5 @@
+                 best->refs = 1;
+                 best->requested_bytes = bytes;
++                best->bounded = best->bounded || bounded;
+                 ++audit_.reuses;
+                 audit_.reuse_bytes_requested += bytes;
+@@ -1243,4 +1251,5 @@
+         b->requested_bytes = bytes;
+         b->persistent = persistent;
++        b->bounded = bounded;
+         bool memory_pressure = false;
+         if (!create_buffer(*b, error, false, false, &memory_pressure)) {
+diff --git a/engine/src/pipeline/blur.cpp b/engine/src/pipeline/blur.cpp
+--- a/engine/src/pipeline/blur.cpp
++++ b/engine/src/pipeline/blur.cpp
+@@ -60,4 +60,37 @@
+     // The reference runs vertical then horizontal, and the fused multiply-add
+     // rides on the second pass.
++#if defined(SPK_VULKAN_BACKEND)
++    // Horizontal FIR reads one complete row of vertical results. A row band
++    // therefore needs no copied halo: vertical reads the original full image,
++    // and horizontal reflects in its full width. Do not overwrite the source;
++    // the following band still reads its neighbouring original rows.
++    constexpr size_t kScratchBytes = size_t(8) << 20;
++    constexpr size_t kBandedAbove = size_t(16) << 20;
++    if (!consume_input && img.bytes() > kBandedAbove) {
++        if (!alloc_like(img, out, error)) return false;
++        const size_t row_bytes = size_t(img.w) * img.c * sizeof(float);
++        const uint32_t rows = uint32_t(std::min(size_t(img.h),
++            std::max(size_t(1), kScratchBytes / row_bytes)));
++        gpu::BufferRef scratch = gpu_->alloc_bounded(row_bytes * rows, error);
++        if (!scratch) return false;
++        for (uint32_t y = 0; y < img.h; y += rows) {
++            const uint32_t count = std::min(rows, img.h - y);
++            const size_t n = size_t(count) * img.w;
++            const uint32_t meta_v[8] = {img.h, img.w, uint32_t(R), 0, 0, 0, y, count};
++            const uint32_t meta_h[8] = {img.h, img.w, uint32_t(R), 1, acc ? 1u : 0u, 0, y, count};
++            if (!gpu_->dispatch("spk_sep_fir_rows",
++                                {gpu::Arg::buf(img.buf), gpu::Arg::buf(w),
++                                 gpu::Arg::buf(acc ? acc->buf : img.buf), gpu::Arg::buf(wt_buf),
++                                 gpu::Arg::inline_bytes(meta_v, 8), gpu::Arg::buf(scratch)}, n, error) ||
++                !gpu_->dispatch("spk_sep_fir_rows",
++                                {gpu::Arg::buf(scratch), gpu::Arg::buf(w),
++                                 gpu::Arg::buf(acc ? acc->buf : img.buf), gpu::Arg::buf(wt_buf),
++                                 gpu::Arg::inline_bytes(meta_h, 8), gpu::Arg::buf(out.buf)}, n, error)) return false;
++            // Reusing scratch is legal only after its horizontal reader ends.
++            if (!gpu_->flush(error)) return false;
++        }
++        return true;
++    }
++#endif
+     Image tmp;
+     if (!alloc_like(img, tmp, error)) return false;
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -140,1 +140,1 @@
+-            spk_affine3 spk_tc_b spk_lut2d_cubic spk_sep_fir_acc spk_iir_df_acc
++            spk_affine3 spk_tc_b spk_lut2d_cubic spk_sep_fir_acc spk_sep_fir_rows spk_iir_df_acc
+diff --git a/engine/src/shaders/vulkan/spk_sep_fir_rows.comp b/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+new file mode 100644
+--- /dev/null
++++ b/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+@@ -0,0 +1,63 @@
++#version 450
++// Co-created with GPT (OpenAI). The same two float32 FIR passes as
++// spk_sep_fir_acc, with only their address mapping changed for row scratch.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
++layout(local_size_x = 256) in;
++layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } image_data;
++layout(set = 0, binding = 1, std430) readonly buffer Weights { float value[]; } weights;
++layout(set = 0, binding = 2, std430) readonly buffer Accumulator { float value[]; } accumulator;
++layout(set = 0, binding = 3, std430) readonly buffer MixWeights { float value[]; } mix_weights;
++layout(set = 0, binding = 4, std430) readonly buffer Meta { uint value[]; } meta;
++layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; } output_data;
++
++uint spk_global_index() {
++    return (gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base);
++}
++
++int reflect_index(int index, int length) {
++    uint folded = index < 0 ? uint(-(index + 1)) : uint(index);
++    uint period = 2u * uint(length);
++    uint j = folded % period;
++    return int(j >= uint(length) ? period - 1u - j : j);
++}
++
++int mirror_index(int index, int length) {
++    if (length <= 1) return 0;
++    uint folded = index < 0 ? uint(-(index + 1)) + 1u : uint(index);
++    uint period = 2u * uint(length - 1);
++    uint j = folded % period;
++    return int(j >= uint(length) ? period - j : j);
++}
++
++void main() {
++    uint pixel = spk_global_index();
++    uint height = meta.value[0], width = meta.value[1];
++    if (pixel >= meta.value[7] * width) return;
++    int radius = int(meta.value[2]);
++    uint axis = meta.value[3], accumulate = meta.value[4], mirror = meta.value[5];
++    uint y = pixel / width, x = pixel % width;
++    int length = axis == 0u ? int(height) : int(width);
++    int base = axis == 0u ? int(y + meta.value[6]) : int(x);
++    uint taps = uint(2 * radius + 1);
++    vec3 sum = vec3(0.0);
++    for (int k = -radius; k <= radius; ++k) {
++        int j = mirror != 0u ? mirror_index(base + k, length)
++                             : reflect_index(base + k, length);
++        uint source = axis == 0u ? uint(j) * width + x : y * width + uint(j);
++        uint tap = uint(k + radius);
++        vec3 sample_value = vec3(image_data.value[3 * source],
++                                 image_data.value[3 * source + 1],
++                                 image_data.value[3 * source + 2]);
++        vec3 weight = vec3(weights.value[tap], weights.value[taps + tap],
++                           weights.value[2 * taps + tap]);
++        sum += sample_value * weight;
++    }
++    uint dest = axis == 0u ? pixel : pixel + meta.value[6] * width;
++    if (accumulate != 0u)
++        sum = vec3(accumulator.value[3 * dest], accumulator.value[3 * dest + 1],
++                   accumulator.value[3 * dest + 2])
++              + sum * vec3(mix_weights.value[0], mix_weights.value[1], mix_weights.value[2]);
++    output_data.value[3 * dest] = sum.x;
++    output_data.value[3 * dest + 1] = sum.y;
++    output_data.value[3 * dest + 2] = sum.z;
++}

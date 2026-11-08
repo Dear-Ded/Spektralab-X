@@ -6,7 +6,11 @@ import android.graphics.Bitmap
  * A decoded phone photo: the SDR picture in [space] ("sRGB" or "Display P3"),
  * and, for an Ultra HDR file on Android 14+, its gain map and metadata.
  */
-class Photo(val bitmap: Bitmap, val space: String, val gain: Bitmap? = null, val gainMeta: FloatArray? = null) {
+class Photo(
+    val bitmap: Bitmap, val space: String, val gain: Bitmap? = null, val gainMeta: FloatArray? = null,
+    /** Original dimensions after EXIF orientation, before the working-size decode. */
+    val sourceWidth: Int = bitmap.width, val sourceHeight: Int = bitmap.height,
+) {
     val hdr get() = gain != null && gainMeta != null
 
     fun recycle() {
@@ -33,10 +37,12 @@ fun openPhotoSession(engine: Long, photo: Photo, highlightStops: Float, params: 
     try {
         val opening = params(INPUT_SPACE, true)
         if (photo.hdr && highlightStops > 0f) {
-            val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, photo.space, opening)
+            val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, photo.space, opening,
+                photo.sourceWidth, photo.sourceHeight)
             if (h != 0L) return OpenedPhoto(h, true)
         }
-        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, photo.space, opening, highlightStops), highlightStops > 0f)
+        return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, photo.space, opening, highlightStops,
+            photo.sourceWidth, photo.sourceHeight), highlightStops > 0f)
     } finally {
         photo.recycle()
     }

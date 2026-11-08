@@ -928,7 +928,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             appendLine("${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (${android.os.Build.DEVICE}) · " +
                 "Android ${android.os.Build.VERSION.RELEASE} / API ${android.os.Build.VERSION.SDK_INT}")
             appendLine("SoC: ${if (android.os.Build.VERSION.SDK_INT >= 31) android.os.Build.SOC_MODEL else "?"}")
-            appendLine("Thermal headroom: ${"%.2f".format(Locale.ROOT, thermalHeadroom())} (1.0 = throttling)")
+            appendLine("Thermal headroom (10s forecast): ${"%.2f".format(Locale.ROOT, thermalHeadroom())} (1.0 = severe threshold; NaN = unavailable)")
             appendLine("RAM: total ${mem.totalMem shr 20} MB, available ${mem.availMem shr 20} MB, low=${mem.lowMemory}")
             appendLine("Java heap: max ${rt.maxMemory() shr 20} MB, used ${(rt.totalMemory() - rt.freeMemory()) shr 20} MB")
             appendLine("Native heap: ${android.os.Debug.getNativeHeapAllocatedSize() shr 20} MB")

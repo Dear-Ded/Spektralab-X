@@ -36,6 +36,32 @@ TIFF 工作线程各自持有条带缓存，完成转换、水平 predictor 和 
 独立进程测试的峰值 RSS 为 312,696 → 221,044 KiB，约下降 29.3%；完整 TIFF 相同。
 这是云端测试程序的进程峰值，不能直接推算手机 App 的同等降幅。
 
+### FIR 中间平面改为受控行带
+
+补丁 `0019` 吸收了生产者/消费者分开安排计算与存储的思路，但没有引入新运行库。
+在 Vulkan 普通 FIR 的输入平面超过 16 MiB 时，纵向卷积仍读完整原图，仅把当前行带写入
+临时缓冲；横向卷积只读取这些完整行，然后写到完整输出的对应位置。临时缓冲的逻辑载荷
+不超过 8 MiB，若一行更大则至少保留一行。纵向不复制 halo，横向也不改变画布宽度。
+
+两个 float32 存储边界、tap 顺序、reflect/mirror、混合通道及累加表达式均保留。
+每一行带的横向读取完成后才复用 scratch。小图和已有 consume-input 两平面路径不变。
+这完成了 FIR 临时平面的分块，没有将完整 source/output 变成外存或解除单 SSBO 上限。
+
+`alloc_bounded` 为 scratch 使用精确容量，并在池中保留这个分类；它不能在释放后被更小的
+普通请求占用。另一个实测问题是普通 12 字节常量可占用 18,855,936 字节空闲块。
+补丁 `0020` 仅对小于 64 KiB 的请求限制复用容量为 `max(2 * request, 4 KiB)`，
+保留大图分配的原复用策略。前者防止分块优化被池容量抵消，后者防止已有微小常量长期占用图像平面。
+
+严格设备限额下，368 个 GPU 用例、74,180,082 个 float32 值与原两遍算法逐字节相同。
+另一次 `--large` 扩展实验包含 6001 × 4001，总计 370 个用例、218,240,088 个值相同；
+此大图实验使用 Linux CPU Vulkan 的既有容量探测扩展，不是严格 128 MiB SSBO 设备的能力证明。
+完整实验条件和内存数值见 [ANDROID_ENGINE_ADAPTATION.md](ANDROID_ENGINE_ADAPTATION.md)。
+
+外部方法的选择、不能直接替换的原因及原始出处见
+[ENGINE_SCHEDULING_REFERENCES.md](ENGINE_SCHEDULING_REFERENCES.md)。
+输入高位深、实际色彩空间与 RAW 解码模式的后续方案见
+[ANDROID_INPUT_PRECISION.md](ANDROID_INPUT_PRECISION.md)。
+
 ## 2. 递归模糊的末端条件存在缺陷
 
 真实 Vulkan 着色器 `spk_iir_df_acc.comp` 使用 Young–van Vliet 三阶正反向递归。

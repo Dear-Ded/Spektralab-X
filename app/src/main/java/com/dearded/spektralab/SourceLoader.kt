@@ -111,8 +111,12 @@ class SourceLoader(private val context: Context) {
     fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Photo {
         val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
         var space = "sRGB"
+        var sourceWidth = 0
+        var sourceHeight = 0
         val source = ImageDecoder.createSource(context.contentResolver, uri)
         val decoded = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+            sourceWidth = info.size.width
+            sourceHeight = info.size.height
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.setTargetColorSpace(
                 if (wideSource(info.colorSpace)) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
@@ -124,18 +128,18 @@ class SourceLoader(private val context: Context) {
         // normalised position, so the base's final size does not matter.
         val gain = if (android.os.Build.VERSION.SDK_INT >= 34) GainmapReader.read(decoded) else null
         // setTargetSize is a hint some decoders ignore (seen with DNG and very
-        // large HEIC in another port), so the pixel cap is enforced here too.
+        // large HEIC in another port), so enforce both working-size limits.
         var out = decoded
-        if (maxPixels > 0 && out.width.toLong() * out.height > maxPixels * 21 / 20) {
-            val s = sqrt(maxPixels.toDouble() / (out.width.toDouble() * out.height))
+        val s = fitScale(out.width, out.height, edge, maxPixels)
+        if (s < 1.0) {
             val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
             if (scaled !== out) out.recycle()
             out = scaled
         }
-        if (out.config == Bitmap.Config.ARGB_8888) return Photo(out, space, gain?.first, gain?.second)
+        if (out.config == Bitmap.Config.ARGB_8888) return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
         val copy = out.copy(Bitmap.Config.ARGB_8888, false)
         out.recycle()
-        return Photo(copy ?: throw EngineException("无法转换图像格式"), space, gain?.first, gain?.second)
+        return Photo(copy ?: throw EngineException("无法转换图像格式"), space, gain?.first, gain?.second, sourceWidth, sourceHeight)
     }
 
     companion object {

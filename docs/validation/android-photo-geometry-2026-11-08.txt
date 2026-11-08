@@ -1,0 +1,55 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:processDebugUnitTestManifest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:compileDebugKotlin
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/AboutSection.kt:60:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:450:25 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:315:25 Condition is always 'true'.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1092:57 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/EngineHost.kt:155:45 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:66:40 Condition is always 'false'.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:71:25 Condition is always 'true'.
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:255:37 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:processDebugJavaRes
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///data/work/gpt-engine-impl-20261108/repo/app/src/testDebug/java/com/dearded/spektralab/Screenshots.kt:540:28 Unchecked cast of 'kotlin.Any!' to 'android.util.LruCache<kotlin.String, android.graphics.Bitmap>'.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+
+BUILD SUCCESSFUL in 2m 58s
+31 actionable tasks: 16 executed, 15 from cache

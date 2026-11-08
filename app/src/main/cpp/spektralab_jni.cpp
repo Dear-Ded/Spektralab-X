@@ -730,7 +730,7 @@ struct HighlightExpand {
 // [params_j] must say so. `headroom_stops` > 0 also expands the highlights
 // (HighlightExpand) in the photo's own primaries first.
 JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring space_j,
-                          jstring params_j, jfloat headroom_stops) {
+                          jstring params_j, jfloat headroom_stops, jint source_width, jint source_height) {
     try {
         AndroidBitmapInfo info{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
@@ -778,8 +778,8 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
                                        info.width, info.height, params));
         if (!session) return 0;
         make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
-        session->source_width = info.width;
-        session->source_height = info.height;
+        session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
+        session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
@@ -803,7 +803,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
 // base's primaries for linear ProPhoto (input_transform.hpp), as openBitmap's
 // pixels do; [params_j] must say linear ProPhoto.
 JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jobject gain,
-                             jfloatArray meta_j, jstring space_j, jstring params_j) {
+                             jfloatArray meta_j, jstring space_j, jstring params_j, jint source_width, jint source_height) {
     try {
         AndroidBitmapInfo info{}, ginfo{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
@@ -884,8 +884,8 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
                                        info.width, info.height, params));
         if (!session) return 0;
         make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
-        session->source_width = info.width;
-        session->source_height = info.height;
+        session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
+        session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {

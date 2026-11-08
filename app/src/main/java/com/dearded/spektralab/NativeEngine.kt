@@ -45,7 +45,10 @@ object NativeEngine {
      * input_cctf_decoding false. [headroomStops] > 0 undoes the phone's
      * highlight shoulder so encoded white lands that many stops above 1.0.
      */
-    external fun openBitmap(engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float): Long
+    external fun openBitmap(
+        engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float,
+        sourceWidth: Int = 0, sourceHeight: Int = 0,
+    ): Long
 
     /**
      * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888, in [space])
@@ -53,7 +56,10 @@ object NativeEngine {
      * at full boost, then converted to linear ProPhoto. [meta] is ratioMin,
      * ratioMax, gamma, epsilonSdr, epsilonHdr, 3 each. [paramsJson] as for openBitmap.
      */
-    external fun openBitmapHdr(engine: Long, bitmap: Bitmap, gain: Bitmap, meta: FloatArray, space: String, paramsJson: String): Long
+    external fun openBitmapHdr(
+        engine: Long, bitmap: Bitmap, gain: Bitmap, meta: FloatArray, space: String, paramsJson: String,
+        sourceWidth: Int = 0, sourceHeight: Int = 0,
+    ): Long
 
     /** A small sRGB thumbnail of the frame before any film was applied. */
     external fun beforeBitmap(session: Long): Bitmap?

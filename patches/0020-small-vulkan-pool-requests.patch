@@ -1,0 +1,15 @@
+Prevent tiny constants from retaining idle image-sized Vulkan buffers.
+
+Co-created with GPT (OpenAI), 2026-11-08.
+The previous 64 MiB reuse slack could assign a 16 MiB image plane to a
+12-byte constant. For requests below 64 KiB, cap pool capacity at twice
+the request or 4 KiB, whichever is larger. Leave larger image allocation
+reuse unchanged. This changes storage policy, not shader arithmetic.
+
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -1228,2 +1228,3 @@
+                 if (!b->persistent && b->refs == 0 && b->bytes >= bytes &&
++                    (bytes >= (size_t(64) << 10) || b->bytes <= std::max(bytes * 2, size_t(4) << 10)) &&
+                     (!(bounded || b->bounded) || b->bytes == bytes) &&

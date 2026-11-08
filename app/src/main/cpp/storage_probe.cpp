@@ -29,7 +29,7 @@ namespace spk::android {
 namespace {
 
 constexpr uint32_t kCanaries = 32;
-constexpr uint64_t kTimeoutNs = 2'000'000'000ull;   // under Adreno's 2 s GPU watchdog
+constexpr uint64_t kTimeoutNs = 2'000'000'000ull;   // diagnostic deadline, not a completion guarantee
 
 // Every entry point through vkGetInstanceProcAddr / vkGetDeviceProcAddr, so
 // volk's process-wide table (the engine's) is never touched.
@@ -52,7 +52,7 @@ struct Fn {
     SPK_FN(vkCmdBindPipeline) SPK_FN(vkCmdBindDescriptorSets) SPK_FN(vkCmdPushConstants)
     SPK_FN(vkCmdDispatch) SPK_FN(vkCmdPipelineBarrier) SPK_FN(vkCmdFillBuffer) SPK_FN(vkCmdCopyBuffer)
     SPK_FN(vkQueueSubmit) SPK_FN(vkCreateFence) SPK_FN(vkDestroyFence) SPK_FN(vkWaitForFences)
-    SPK_FN(vkResetFences)
+    SPK_FN(vkResetFences) SPK_FN(vkDeviceWaitIdle)
 #undef SPK_FN
 };
 
@@ -100,6 +100,7 @@ public:
 
     // A fresh device per candidate: one that a probe lost is not reused.
     bool open_device() {
+        if (device_) return say("previous probe device has not been closed");
         const float priority = 1.0f;
         VkDeviceQueueCreateInfo q{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
         q.queueFamilyIndex = family_;
@@ -124,24 +125,31 @@ public:
         SPK_D(vkCmdBindPipeline) SPK_D(vkCmdBindDescriptorSets) SPK_D(vkCmdPushConstants)
         SPK_D(vkCmdDispatch) SPK_D(vkCmdPipelineBarrier) SPK_D(vkCmdFillBuffer) SPK_D(vkCmdCopyBuffer)
         SPK_D(vkQueueSubmit) SPK_D(vkCreateFence) SPK_D(vkDestroyFence) SPK_D(vkWaitForFences)
-        SPK_D(vkResetFences)
+        SPK_D(vkResetFences) SPK_D(vkDeviceWaitIdle)
 #undef SPK_D
         f_.vkGetDeviceQueue(device_, family_, 0, &queue_);
         return build_pipeline();
     }
 
     // One candidate. False when the canaries did not all land (or anything
-    // failed on the way); `lost` when the device must not be used again.
+    // failed on the way); `lost` means Vulkan actually reported device loss.
     bool test(VkDeviceSize bytes, bool& lost) {
         lost = false;
-        Buffer big, res, host;
-        const bool ok = run(bytes, big, res, host, lost);
-        release(big); release(res); release(host);
-        return ok;
+        return run(bytes, big_, res_, host_, lost);
     }
 
-    void close_device() {
-        if (!device_) return;
+    bool close_device() {
+        if (!device_) return true;
+        if (pending_) {
+            // A fence timeout (or another wait error) leaves submitted work
+            // alive. Keep every referenced object until completion or actual
+            // device loss. This cleanup can outlast the diagnostic deadline.
+            const VkResult r = f_.vkDeviceWaitIdle(device_);
+            if (r != VK_SUCCESS && r != VK_ERROR_DEVICE_LOST)
+                return say("probe cleanup still pending (VkResult " + std::to_string(int(r)) + ")");
+            pending_ = false;
+        }
+        release(big_); release(res_); release(host_);
         if (fence_) f_.vkDestroyFence(device_, fence_, nullptr);
         if (pool_) f_.vkDestroyCommandPool(device_, pool_, nullptr);
         if (descriptors_) f_.vkDestroyDescriptorPool(device_, descriptors_, nullptr);
@@ -151,13 +159,16 @@ public:
         f_.vkDestroyDevice(device_, nullptr);
         device_ = VK_NULL_HANDLE; fence_ = VK_NULL_HANDLE; pool_ = VK_NULL_HANDLE; descriptors_ = VK_NULL_HANDLE;
         pipeline_ = VK_NULL_HANDLE; layout_ = VK_NULL_HANDLE; set_layout_ = VK_NULL_HANDLE; command_ = VK_NULL_HANDLE;
+        return true;
     }
 
 private:
     bool say(const std::string& m) { log_ += (log_.empty() ? "" : "; ") + m; return false; }
 
     void teardown() {
-        close_device();
+        // An unresolved wait error cannot justify freeing in-flight objects or
+        // their parent instance. Leave this exceptional graph to process exit.
+        if (!close_device()) return;
         if (instance_) f_.vkDestroyInstance(instance_, nullptr);
         instance_ = VK_NULL_HANDLE;
     }
@@ -321,15 +332,7 @@ private:
         f_.vkEndCommandBuffer(cb);
 
         f_.vkResetFences(device_, 1, &fence_);
-        VkSubmitInfo submit{VK_STRUCTURE_TYPE_SUBMIT_INFO};
-        submit.commandBufferCount = 1;
-        submit.pCommandBuffers = &cb;
-        VkResult r = f_.vkQueueSubmit(queue_, 1, &submit, fence_);
-        if (r == VK_SUCCESS) r = f_.vkWaitForFences(device_, 1, &fence_, VK_TRUE, kTimeoutNs);
-        if (r != VK_SUCCESS) {
-            lost = true;
-            return say(std::to_string(bytes >> 20) + " MiB: submit failed (VkResult " + std::to_string(int(r)) + ")");
-        }
+        if (!submit_candidate(bytes, lost)) return false;
         const auto* shader = static_cast<const uint32_t*>(res.mapped);
         const auto* copied = static_cast<const uint32_t*>(host.mapped);
         for (uint32_t k = 0; k < kCanaries; ++k) {
@@ -343,6 +346,28 @@ private:
         return true;
     }
 
+    bool submit_candidate(VkDeviceSize bytes, bool& lost) {
+        VkSubmitInfo submit{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        submit.commandBufferCount = 1;
+        submit.pCommandBuffers = &command_;
+        VkResult r = f_.vkQueueSubmit(queue_, 1, &submit, fence_);
+        const char* operation = "submit";
+        // For command-buffer lifetime, DEVICE_LOST is treated like a
+        // successful submit, not a successful wait. Settle it in close_device.
+        pending_ = r == VK_SUCCESS || r == VK_ERROR_DEVICE_LOST;
+        if (r == VK_SUCCESS) {
+            operation = "fence wait";
+            r = f_.vkWaitForFences(device_, 1, &fence_, VK_TRUE, kTimeoutNs);
+            if (r == VK_SUCCESS || r == VK_ERROR_DEVICE_LOST) pending_ = false;
+        }
+        lost = r == VK_ERROR_DEVICE_LOST;
+        if (r != VK_SUCCESS)
+            return say(std::to_string(bytes >> 20) + " MiB: " + operation +
+                       " failed (VkResult " + std::to_string(int(r)) + ")");
+        return true;
+    }
+
+    friend struct ProbeLifetimeTest;
     std::string& log_;
     Fn f_;
     VkInstance instance_ = VK_NULL_HANDLE;
@@ -359,6 +384,8 @@ private:
     VkCommandPool pool_ = VK_NULL_HANDLE;
     VkCommandBuffer command_ = VK_NULL_HANDLE;
     VkFence fence_ = VK_NULL_HANDLE;
+    Buffer big_, res_, host_;
+    bool pending_ = false;
 };
 
 }  // namespace

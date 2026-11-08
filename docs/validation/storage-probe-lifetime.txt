@@ -1,0 +1,24 @@
+2026-11-08T09:21:57Z
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
++ set -euo pipefail
++++ dirname /data/work/gpt-probe-lifetime-20261108/tools/native/run_probe_lifetime.sh
+++ cd /data/work/gpt-probe-lifetime-20261108/tools/native/../..
+++ pwd
++ repo=/data/work/gpt-probe-lifetime-20261108
++ UP=/data/work/gpt-engine-impl-20261108/upstream
++ build=/data/work/gpt-probe-lifetime-20261108/build
++ mkdir -p /data/work/gpt-probe-lifetime-20261108/build
++ c++ -std=c++20 -O2 -I/data/work/gpt-engine-impl-20261108/upstream/engine/third_party/volk -I/data/work/gpt-engine-impl-20261108/upstream/build/deps/Vulkan-Headers/include /data/work/gpt-probe-lifetime-20261108/tools/native/storage_probe_lifetime.cpp /data/work/gpt-engine-impl-20261108/upstream/engine/third_party/volk/volk.c -ldl -o /data/work/gpt-probe-lifetime-20261108/build/storage_probe_lifetime
++ /data/work/gpt-probe-lifetime-20261108/build/storage_probe_lifetime
+PASS normal-completion
+PASS timeout-then-complete
+PASS timeout-then-device-lost
+PASS wait-error-then-complete
+PASS wait-device-lost
+PASS submit-error
+PASS submit-device-lost
+PASS unresolved-then-complete
+PASS unresolved-destructor-retains-instance
+4 KiB Vulkan smoke: verified=4096; advertised 128 MiB, verified 0 MiB
+b93d13b126dc191f60fe256133bb8753edf6c66038611c81dc93b347a87b74a1  /data/work/gpt-probe-lifetime-20261108/app/src/main/cpp/storage_probe.cpp
+5b176bc1bd096a1669681f5596f76a562039272a403d849e2065ae269e089264  /data/work/gpt-probe-lifetime-20261108/tools/native/storage_probe_lifetime.cpp
