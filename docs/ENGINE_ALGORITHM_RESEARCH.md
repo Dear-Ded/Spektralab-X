@@ -140,6 +140,8 @@ sigma 0.5 的离散采样宽度本来就不等于连续高斯的 sigma，不能�
 
 本轮环境为 x86_64、GCC 11.4、Linux llvmpipe（LLVM 15.0.7）。编译 Android arm64 与真机执行是两种不同证据。
 第二批尚无第二台云机或 Android 真机复证，不能宣称任意设备逐位相同。
+GitHub 的独立 Ubuntu 24.04 runner 已通过严格 / 默认数值测试、完整 APK、单元测试、16 KB 对齐及截图构建；
+它没有执行这里的 GPU 诊断，不能代替第二个 GPU 环境的算法复证。
 汇总及渲染哈希见 [适配记录](ANDROID_ENGINE_ADAPTATION.md)。
 
 研究来源：

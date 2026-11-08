@@ -173,13 +173,18 @@ TIFF 导出改为 `Rgba16Rows` 按 32 行条带转换，工作线程各持有自
 | 半径查询 | 两种模式及 ASan/UBSan 各 3,600 个舍入边界相同，查询在拒绝分配时成功，非正 sigma identity 正常 |
 | 条带输出 | 严格、默认与 ASan/UBSan 各 162 组合 × 5 种行高；RGB16 与完整 TIFF 相同；provider 分配失败正确返回 |
 | 实际胶片 | 重新链接宿主引擎和 Android 共用处理代码；10 用例、50 文件与原基线逐字节相同，RAW 准备哈希也相同 |
-| Android | 含 `0018` 的 arm64 Release 原生库构建通过；本批未重新执行 APK 单元测试、16 KB 检查或真机测试 |
+| Android | 含 `0018` 的 arm64 Release 原生库构建通过；GitHub 完整 APK、单元测试、16 KB ELF/ZIP 检查与截图 CI 均通过；未执行真机测试 |
 | TIFF 内存 | 4097 × 3073 独立进程峰值 RSS 312,696 → 221,044 KiB，约下降 29.3%；文件 36,575,160 字节且摘要相同 |
 
 这些新测试在同一台 x86_64 云主机、llvmpipe 软件 Vulkan 上执行。第二台云主机当前受服务冷却限制，
 本批没有把第一批的跨云复证算作自己的结果。
+GitHub Ubuntu 24.04 的独立 runner 另行通过严格 / 默认原生数值测试和 APK 集成构建，但没有运行胶片 GPU 回归。
 完整胶片比较见 [`validation/android-engine-depth-render-2026-11-08.json`](validation/android-engine-depth-render-2026-11-08.json)，
 数值与内存记录见 [`validation/android-engine-depth-2026-11-08.json`](validation/android-engine-depth-2026-11-08.json)。
+
+源码提交 `528d4c2` 的 Android CI 为 `42464217204`（第 2 次尝试），截图 CI 为 `42464217277`。
+首次构建在所有补丁应用成功后，下载固定 `libjpeg-turbo` 依赖时遇到 HTTP 504；只重跑失败任务后通过。
+`VERSION=0.1.19-alpha publish=0`，没有更新版本或发布 Release。
 
 对上游继续复核后，还发现递归模糊末端状态引起显著的左右翻转不对称，且 FIR/IIR 在 sigma=3
 的切换处有核宽度跳变。已加入真实 Vulkan 诊断和独立的 Triggs/Sdika CPU 修正候选；

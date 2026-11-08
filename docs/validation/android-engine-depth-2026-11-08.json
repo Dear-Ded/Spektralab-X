@@ -81,9 +81,24 @@
     "task": ":app:externalNativeBuildRelease",
     "architecture": "arm64-v8a",
     "result": "BUILD SUCCESSFUL in 39s",
-    "apk_unit_tests_rerun_in_this_batch": false,
-    "elf_zip_alignment_rerun_in_this_batch": false,
+    "apk_unit_tests_rerun_in_this_batch": true,
+    "elf_zip_alignment_rerun_in_this_batch": true,
     "physical_device_tested": false
+  },
+  "github_ci": {
+    "source_commit": "528d4c29bc3cc9a865863f297a7fd94c556a4af0",
+    "android_run": 42464217204,
+    "android_attempt": 2,
+    "android_result": "success",
+    "android_build_tasks": [":app:assembleRelease", ":app:testReleaseUnitTest"],
+    "native_strict_and_default_regressions": "passed on GitHub Ubuntu 24.04 runner",
+    "minimum_load_alignment_bytes": 16384,
+    "zipalign_16kb": "Verification successful",
+    "screenshots_run": 42464217277,
+    "screenshots_result": "success",
+    "publish": 0,
+    "release_job": "skipped",
+    "first_android_attempt": "All patches applied successfully; fixed libjpeg-turbo dependency download returned HTTP 504. Retrying the failed workflow succeeded without source changes."
   },
   "research": {
     "gpu_boundary_csv": "android-engine-blur-boundary-2026-11-08.csv",
