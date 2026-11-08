@@ -59,7 +59,7 @@ import kotlin.math.sin
  * It never holds the app up: it leaves when the engine is ready, no sooner
  * than 600 ms (no flicker) and no later than 1.6 s, and a tap after 150 ms
  * skips it. It only runs for a launcher start, with system animations on and
- * the 启动动画 setting on. No sound, no haptics. No photo is on screen yet,
+ * the 启动动画 setting on. No sound; one tick when the title settles. No photo is on screen yet,
  * so the colour here breaks no rule about judging a print.
  */
 

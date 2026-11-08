@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -80,15 +81,17 @@ fun SplitFlapText(
 ) {
     val total = splitFlapMs(text).toFloat()
     val moving = play && remember { motionAllowed() }
-    val clock = remember { Animatable(if (moving) 0f else total) }
+    val clock = remember(text, moving) { Animatable(if (moving && !skip) 0f else total) }
     val landed by rememberUpdatedState(onLanded)
-    LaunchedEffect(moving) {
-        if (!moving) return@LaunchedEffect
+    LaunchedEffect(clock, skip, startDelayMs) {
+        if (!moving || skip) {
+            clock.snapTo(total)
+            return@LaunchedEffect
+        }
         delay(startDelayMs)
         clock.animateTo(total, tween(total.toInt(), easing = LinearEasing))
-        if (!skip) landed()
+        landed()
     }
-    LaunchedEffect(skip) { if (skip) clock.snapTo(total) }
 
     val ink = style.copy(fontFamily = UiMono, fontWeight = FontWeight.Medium, color = Palette.OnSurface)
     val measurer = rememberTextMeasurer()
@@ -97,15 +100,18 @@ fun SplitFlapText(
     val cell = remember(ink, density) { measurer.measure("M", ink) }
     val tileW = with(density) { cell.size.width.toDp() } + 6.dp
     val tileH = with(density) { cell.size.height.toDp() } + 8.dp
-    Row(
-        modifier.clearAndSetSemantics { contentDescription = text },
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        text.forEachIndexed { i, c ->
-            val seq = remember(text, i) { sequenceFor(c, i) }
-            val glyphs = remember(seq, ink) { seq.map { measurer.measure(it.toString(), ink) } }
-            FlapTile(glyphs, Modifier.size(tileW, tileH)) {
-                ((clock.value - i * STAGGER_MS) / FLIP_MS).coerceIn(0f, FLIPS.toFloat())
+    BoxWithConstraints(modifier.clearAndSetSemantics { contentDescription = text }) {
+        // Preserve readable system font sizes when the tiles would run off a narrow screen.
+        val width = tileW * text.length + 2.dp * (text.length - 1).coerceAtLeast(0)
+        if (width > maxWidth) {
+            androidx.compose.material3.Text(text, style = ink)
+        } else Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            text.forEachIndexed { i, c ->
+                val seq = remember(text, i) { sequenceFor(c, i) }
+                val glyphs = remember(seq, ink) { seq.map { measurer.measure(it.toString(), ink) } }
+                FlapTile(glyphs, Modifier.size(tileW, tileH)) {
+                    ((clock.value - i * STAGGER_MS) / FLIP_MS).coerceIn(0f, FLIPS.toFloat())
+                }
             }
         }
     }
@@ -130,7 +136,7 @@ private fun FlapTile(glyphs: List<TextLayoutResult>, modifier: Modifier, progres
         Canvas(Modifier.matchParentSize()) {
             val p = progress()
             val k = floor(p).toInt().coerceIn(0, last)
-            val next = (k + 1).coerceAtMost(last)
+            val next = if (p == k.toFloat()) k else (k + 1).coerceAtMost(last)
             val mid = size.height / 2f
             clipRect(bottom = mid) { glyph(glyphs[next]) }
             clipRect(top = mid) { glyph(glyphs[k]) }

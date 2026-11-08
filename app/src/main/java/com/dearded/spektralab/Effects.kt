@@ -36,13 +36,17 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     EffectStops("光晕", e.halationActive, e.halationAmount, HALATION_STOPS, enabled) { on, k -> onChange(e.copy(halationActive = on, halationAmount = k)) }
     EffectStops("相纸眩光", e.glareActive, e.glareAmount, GLARE_STOPS, enabled) { on, k -> onChange(e.copy(glareActive = on, glareAmount = k)) }
 
-    val tuned = e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
+    val tuned = e.grainAmount != fxd.grainAmount || e.halationAmount != fxd.halationAmount ||
+        e.glareAmount != fxd.glareAmount || e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
         e.unsharpAmount != fxd.unsharpAmount || e.unsharpSigma != fxd.unsharpSigma || e.couplersAmount != 1.0 ||
         e.negativeGamma != fxd.negativeGamma || e.highlightBoostEv != fxd.highlightBoostEv ||
         e.lensBlurUm != fxd.lensBlurUm || e.noAntihalation != fxd.noAntihalation || e.cameraFilter != fxd.cameraFilter ||
         e.preflash != fxd.preflash || e.labLevels != fxd.labLevels
     MoreRow(open = more, edited = tuned) { more = !more }
     if (!more) Hint(moreSummary("15 项",
+        "颗粒强度" to e.grainAmount.takeIf { e.grainActive && it != fxd.grainAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "光晕强度" to e.halationAmount.takeIf { e.halationActive && it != fxd.halationAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        "眩光强度" to e.glareAmount.takeIf { e.glareActive && it != fxd.glareAmount }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
         "负片反差" to e.negativeGamma.takeIf { it != fxd.negativeGamma }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
         "高光能量" to e.highlightBoostEv.takeIf { it != fxd.highlightBoostEv }?.let { String.format(java.util.Locale.ROOT, "%.1f EV", it) },
         "柔化" to e.lensBlurUm.takeIf { it != fxd.lensBlurUm }?.let { String.format(java.util.Locale.ROOT, "%.0f µm", it) },
@@ -187,7 +191,7 @@ private val GLARE_STOPS = listOf(1.0, 4.0, 10.0)
 private fun EffectStops(label: String, on: Boolean, amount: Double, stops: List<Double>, enabled: Boolean,
                         onPick: (Boolean, Double) -> Unit) {
     val chosen = if (!on) 0 else stops.indexOfFirst { kotlin.math.abs(amount - it) < 0.005 }.let { if (it < 0) -1 else it + 1 }
-    StepRow(label, listOf("关", "轻", "中", "强"), chosen, enabled) { i ->
+    StepRow(if (chosen < 0) "$label · 自定义" else label, listOf("关", "轻", "中", "强"), chosen, enabled) { i ->
         if (i == 0) onPick(false, amount) else onPick(true, stops[i - 1])
     }
 }

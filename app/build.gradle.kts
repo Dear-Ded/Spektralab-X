@@ -6,12 +6,12 @@ plugins {
 
 // Upstream SpektraLab checkout made by scripts/fetch-upstream.sh.
 val upstream: String = System.getenv("SPK_UPSTREAM") ?: rootProject.file("upstream").absolutePath
-// VERSION holds "major.minor.patch[-label]" (0.1.3-alpha). Bump the patch for
-// every release; the versionCode is derived from it so updates always install.
+// Display version and Android update order are independent. Increment
+// VERSION_CODE for every release, including changes to the prerelease label.
 val appVersion: String = rootProject.file("VERSION").readText().trim()
-val appVersionCode: Int = Regex("""^(\d+)\.(\d+)\.(\d+)""").find(appVersion)
-    ?.destructured?.let { (a, b, c) -> a.toInt() * 10000 + b.toInt() * 100 + c.toInt() }
-    ?: error("VERSION '$appVersion' is not major.minor.patch")
+val appVersionCode: Int = rootProject.file("VERSION_CODE").readText().trim()
+    .toIntOrNull()?.takeIf { it in 1..2_100_000_000 }
+    ?: error("VERSION_CODE must be an integer in 1..2100000000")
 val keystorePath: String? = System.getenv("SPK_KEYSTORE")?.takeIf { file(it).isFile }
 
 android {

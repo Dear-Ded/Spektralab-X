@@ -71,11 +71,11 @@
 <details><summary>技术细节（硬核区，可跳过）</summary> 精确、无梗的改动清单 </details>
 ```
 
-版本标题保持 `## x.y.z-alpha · 日期`，小标题用 `###`：`scripts/release-notes.sh` 按 `## 版本号` 截取，到下一个 `##` 为止，正文里不能出现 `##` 标题。没有内容的小节删掉，不要硬凑。
+版本标题保持 `## x.y.z[-阶段] · 日期`，例如 `## 0.1.19-beta · 2026-11-08`，版本号必须与根目录 `VERSION` 一致。小标题用 `###`：`scripts/release-notes.sh` 按 `## 版本号` 截取，到下一个 `##` 为止，正文里不能出现 `##` 标题。没有内容的小节删掉，不要硬凑。
 
 ## 商店短说明
 
-`fastlane/metadata/android/*/changelogs/<versionCode>.txt` 有 500 字符上限。用省流那句话开头，再补一两句同样画风的话，挑最重要的说，不列清单。未验证的声明照样要写。
+`fastlane/metadata/android/*/changelogs/<versionCode>.txt` 有 500 字符上限。文件名里的内部版本码读取根目录 `VERSION_CODE`，每次发布都递增，不从显示版本推导；中英文各新增一份，保留历史文件。用省流那句话开头，再补一两句同样画风的话，挑最重要的说，不列清单。未验证的声明照样要写。
 
 ## 英文
 

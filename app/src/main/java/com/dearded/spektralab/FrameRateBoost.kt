@@ -38,6 +38,7 @@ object FrameRateBoost {
     private var lastY = 0f
     private var moving = false
     private var boosted: WeakReference<Window>? = null
+    private var previousRefreshRate = 0f
     private val idle = Runnable { release() }
 
     /** Main thread, every touch event of [activity]'s window. */
@@ -45,9 +46,15 @@ object FrameRateBoost {
         if (Build.VERSION.SDK_INT < 35) return
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                release()
                 downX = ev.x; downY = ev.y; lastX = ev.x; lastY = ev.y; moving = false
             }
             MotionEvent.ACTION_MOVE -> {
+                // A continuing drag must yield if power or thermal limits change.
+                if (!allowed(activity)) {
+                    release()
+                    return
+                }
                 if (ev.x == lastX && ev.y == lastY) return
                 lastX = ev.x; lastY = ev.y
                 if (!moving) {
@@ -57,7 +64,7 @@ object FrameRateBoost {
                 }
                 val decor = activity.window.decorView
                 decor.removeCallbacks(idle)
-                if (boosted?.get() == null && allowed(activity)) boost(activity.window)
+                if (boosted?.get() == null) boost(activity.window)
                 if (boosted != null) decor.postDelayed(idle, IDLE_MS)
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -70,10 +77,19 @@ object FrameRateBoost {
 
     private fun allowed(activity: Activity): Boolean {
         val pm = activity.getSystemService(PowerManager::class.java) ?: return false
-        if (pm.isPowerSaveMode) return false
-        if (pm.currentThermalStatus >= PowerManager.THERMAL_STATUS_SEVERE) return false
         val host = (activity.application as? SpektraLabApp)?.host
-        return host == null || host.thermal.headroom() <= HOT_HEADROOM
+        return permitted(pm.isPowerSaveMode, pm.currentThermalStatus, host?.thermal?.headroom() ?: Float.NaN)
+    }
+
+    internal fun permitted(powerSave: Boolean, thermalStatus: Int, headroom: Float): Boolean =
+        !powerSave && thermalStatus < PowerManager.THERMAL_STATUS_SEVERE &&
+            // The asynchronous sampler reports NaN until a usable sample arrives.
+            (!headroom.isFinite() || headroom <= HOT_HEADROOM)
+
+    /** A stopped activity may never receive the gesture's final UP or CANCEL. */
+    fun onStop(activity: Activity) {
+        moving = false
+        if (boosted?.get() === activity.window) release()
     }
 
     private fun boost(window: Window) {
@@ -86,18 +102,19 @@ object FrameRateBoost {
             // Already at the top rate: nothing to ask for, nothing to undo.
             return
         }
+        previousRefreshRate = window.attributes.preferredRefreshRate
         window.attributes = window.attributes.also { it.preferredRefreshRate = top }
         boosted = WeakReference(window)
     }
 
-    /** Back to no preference; safe to call when nothing is held. */
+    /** Restore the window's previous preference; safe when nothing is held. */
     private fun release() {
         val window = boosted?.get()
         boosted = null
         if (window == null) return
         window.decorView.removeCallbacks(idle)
-        if (window.attributes.preferredRefreshRate != 0f) {
-            window.attributes = window.attributes.also { it.preferredRefreshRate = 0f }
+        if (window.attributes.preferredRefreshRate != previousRefreshRate) {
+            window.attributes = window.attributes.also { it.preferredRefreshRate = previousRefreshRate }
         }
     }
 }

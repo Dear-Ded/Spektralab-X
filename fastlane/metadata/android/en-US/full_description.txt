@@ -15,6 +15,6 @@ It is not a filter: the photo is exposed spectrally onto a physical film model, 
 Free, no ads, no in-app purchases. Online only to check for updates; no data collection, and photos never leave the phone. Open source (GPL-3.0); the official build is free and published only on GitHub Releases.
 
 <b>Status</b>
-Alpha, under rapid development, not yet tested on real devices at scale; community feedback is needed. Built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). Once the Xiaomi-tuned version is stable for daily use, separate projects are planned for a general Android version, Windows and iOS.
+Beta, under rapid development, not yet tested on real devices at scale; community feedback is needed. Built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). Once the Xiaomi-tuned version is stable for daily use, separate projects are planned for a general Android version, Windows and iOS.
 
 <i>The interface is Simplified Chinese only for now.</i>
