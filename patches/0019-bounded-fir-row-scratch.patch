@@ -28,8 +28,8 @@ diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
 @@ -51,4 +51,5 @@
      VkMemoryPropertyFlags memory_flags = 0;
      int refs = 1;
-     bool persistent = false;
 +    bool bounded = false; // Preserve scratch capacity across pool borrowers.
+     bool persistent = false;
  };
 @@ -78,2 +78,3 @@
      {"spk_sep_fir_acc", 6, kWorkgroup},
