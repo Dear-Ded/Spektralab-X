@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
+#include <stdexcept>
 #include <thread>
 
 namespace spk::android {
@@ -33,61 +35,83 @@ std::vector<Taps> area_taps(uint32_t n, uint32_t nn) {
     return out;
 }
 
-// Rows a thread could not be created for run on the caller: unwinding a
+// Workers a thread could not be created for run on the caller: unwinding a
 // vector of joinable threads would be std::terminate.
-void parallel_rows(uint32_t rows, const std::function<void(uint32_t, uint32_t)>& body) {
-    if (rows == 0) return;
-    const uint32_t workers = std::max(1u, std::min(8u, std::thread::hardware_concurrency()));
-    const uint32_t chunk = (rows + workers - 1) / workers;
+void parallel_workers(uint32_t workers, const std::function<void(uint32_t)>& body) {
     std::vector<std::thread> threads;
-    uint32_t spawned_to = std::min(rows, chunk);
+    uint32_t spawned_to = 1;
     try {
-        threads.reserve(workers);
-        for (uint32_t start = chunk; start < rows; start += chunk) {
-            const uint32_t end = std::min(rows, start + chunk);
-            threads.emplace_back(body, start, end);
-            spawned_to = end;
+        threads.reserve(workers - 1);
+        for (uint32_t worker = 1; worker < workers; ++worker) {
+            threads.emplace_back(body, worker);
+            spawned_to = worker + 1;
         }
     } catch (...) {
     }
-    body(0, std::min(rows, chunk));
-    if (spawned_to < rows) body(spawned_to, rows);
+    body(0);
+    for (uint32_t worker = spawned_to; worker < workers; ++worker) body(worker);
     for (auto& t : threads) t.join();
+}
+
+size_t rgb_count(uint32_t w, uint32_t h) {
+    if (!w || !h || uint64_t(w) * h > std::numeric_limits<size_t>::max() / 3)
+        throw std::invalid_argument("resize: invalid image dimensions");
+    return size_t(w) * h * 3;
 }
 
 }  // namespace
 
 void resize_area_rgb(const std::vector<float>& src, uint32_t w, uint32_t h,
                      uint32_t nw, uint32_t nh, std::vector<float>& dst) {
+    const size_t source_count = rgb_count(w, h), dest_count = rgb_count(nw, nh);
+    if (nw > w || nh > h || src.size() != source_count)
+        throw std::invalid_argument("resize: expected a packed RGB image and a downscale");
+    if (&src == &dst) {
+        std::vector<float> result;
+        resize_area_rgb(src, w, h, nw, nh, result);
+        dst = std::move(result);
+        return;
+    }
     const auto xt = area_taps(w, nw);
     const auto yt = area_taps(h, nh);
-    std::vector<float> mid(size_t(nw) * h * 3);
-    parallel_rows(h, [&](uint32_t y0, uint32_t y1) {
+    const uint32_t workers = std::min(nh, std::max(1u, std::min(8u, std::thread::hardware_concurrency())));
+    constexpr uint32_t cache_rows = 4;
+    const size_t row_size = size_t(nw) * 3;
+    // Allocate before starting any worker: bad_alloc must unwind on the caller.
+    if (row_size > std::numeric_limits<size_t>::max() / (cache_rows * workers))
+        throw std::length_error("resize: row cache too large");
+    std::vector<float> cache(row_size * cache_rows * workers);
+    dst.assign(dest_count, 0.0f);
+    parallel_workers(workers, [&](uint32_t worker) {
+        const uint32_t y0 = uint32_t(uint64_t(nh) * worker / workers);
+        const uint32_t y1 = uint32_t(uint64_t(nh) * (worker + 1) / workers);
+        uint32_t tags[cache_rows];
+        std::fill_n(tags, cache_rows, std::numeric_limits<uint32_t>::max());
+        float* scratch = cache.data() + row_size * cache_rows * worker;
         for (uint32_t y = y0; y < y1; ++y) {
-            const float* row = src.data() + size_t(y) * w * 3;
-            float* out = mid.data() + size_t(y) * nw * 3;
-            for (uint32_t x = 0; x < nw; ++x) {
-                float acc[3] = {0, 0, 0};
-                const Taps& t = xt[x];
-                for (size_t k = 0; k < t.weights.size(); ++k) {
-                    const float* p = row + size_t(t.first + k) * 3;
-                    acc[0] += t.weights[k] * p[0];
-                    acc[1] += t.weights[k] * p[1];
-                    acc[2] += t.weights[k] * p[2];
-                }
-                out[3 * x] = acc[0]; out[3 * x + 1] = acc[1]; out[3 * x + 2] = acc[2];
-            }
-        }
-    });
-    dst.assign(size_t(nw) * nh * 3, 0.0f);
-    parallel_rows(nh, [&](uint32_t y0, uint32_t y1) {
-        for (uint32_t y = y0; y < y1; ++y) {
-            float* out = dst.data() + size_t(y) * nw * 3;
+            float* out = dst.data() + size_t(y) * row_size;
             const Taps& t = yt[y];
             for (size_t k = 0; k < t.weights.size(); ++k) {
-                const float* row = mid.data() + size_t(t.first + k) * nw * 3;
+                const uint32_t iy = t.first + uint32_t(k), slot = iy % cache_rows;
+                float* row = scratch + slot * row_size;
+                if (tags[slot] != iy) {
+                    const float* input = src.data() + size_t(iy) * w * 3;
+                    for (uint32_t x = 0; x < nw; ++x) {
+                        float acc[3] = {0, 0, 0};
+                        const Taps& tx = xt[x];
+                        for (size_t j = 0; j < tx.weights.size(); ++j) {
+                            const float* p = input + size_t(tx.first + j) * 3;
+                            acc[0] += tx.weights[j] * p[0];
+                            acc[1] += tx.weights[j] * p[1];
+                            acc[2] += tx.weights[j] * p[2];
+                        }
+                        row[3 * x] = acc[0]; row[3 * x + 1] = acc[1]; row[3 * x + 2] = acc[2];
+                    }
+                    tags[slot] = iy;
+                }
                 const float wk = t.weights[k];
-                for (size_t i = 0; i < size_t(nw) * 3; ++i) out[i] += wk * row[i];
+                // Keep the original k-major accumulation, including zero taps.
+                for (size_t i = 0; i < row_size; ++i) out[i] += wk * row[i];
             }
         }
     });

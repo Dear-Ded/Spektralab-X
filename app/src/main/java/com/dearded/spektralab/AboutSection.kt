@@ -35,7 +35,8 @@ private const val CERT =
 private val BLOCKS = listOf(
     "关于本项目" to "光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，" +
         "由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前是 Alpha 版。" +
-        "这不是 SpektraLab 官方版本，与 SpektraLab 的作者和所有者无关联，未获其背书。\n作者：Spektralab-X 贡献者",
+        "这不是 SpektraLab 官方版本，与 SpektraLab 的作者和所有者无关联，未获其背书。\n作者：Spektralab-X 贡献者\n" +
+        "引擎适配共创：GPT（OpenAI，AI 助手）",
     "项目初心" to "胶片真正迷人的，从来不只是色彩和画质，而是拍摄本身：按下快门时的不确定，等待冲洗时的期待，失手时的遗憾，" +
         "还有出片那一刻的惊喜。\n希望 Spektralab-X 能把你带回拍摄的过程里，让你重新爱上每一次按下快门的瞬间。",
     "写在前面" to "Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab 与 Andrea Volpato 的 spektrafilm 开发。" +

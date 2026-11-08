@@ -238,16 +238,19 @@ class StyleImports(private val context: Context) {
 
     /**
      * Engine thread: sends [look]'s colour table to [handle] when its table or
-     * strength differs from [previous]'s (null: always). A missing table clears it.
+     * strength differs from [previous]'s (null: always). A requested but missing
+     * table, or a native refusal, fails instead of rendering a different style.
      */
     fun applyLut(handle: Long, look: Look, previous: Look?) {
         if (handle == 0L) return
         val r = look.resolved()
         val p = previous?.resolved()
         if (p != null && p.lut == r.lut && (r.lut.isEmpty() || p.lutStrength == r.lutStrength)) return
-        val table = r.lut.takeIf { it.isNotEmpty() && r.lutStrength > 0 }?.let(luts::load)
-        if (table == null) NativeEngine.setLut(handle, null, 0, 0f)
+        val id = r.lut.takeIf { it.isNotEmpty() && r.lutStrength > 0 }
+        val table = id?.let { luts.load(it) ?: throw EngineException("风格的 LUT 文件缺失或损坏，请重新导入风格") }
+        val accepted = if (table == null) NativeEngine.setLut(handle, null, 0, 0f)
         else NativeEngine.setLut(handle, table.data, table.size, r.lutStrength.toFloat())
+        if (!accepted) throw EngineException("应用 LUT 失败：${NativeEngine.lastError()}")
     }
 
     // --- exporting -------------------------------------------------------------

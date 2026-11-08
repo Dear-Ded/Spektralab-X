@@ -57,6 +57,11 @@ jobs:
       - name: Fetch upstream
         run: bash scripts/fetch-upstream.sh upstream
 
+      - name: Native adaptation regressions
+        run: |
+          UP="$PWD/upstream" bash tools/native/run.sh --large
+          UP="$PWD/upstream" STRICT=0 bash tools/native/run.sh --large
+
       - name: Stage engine assets
         run: bash scripts/stage-assets.sh upstream
 

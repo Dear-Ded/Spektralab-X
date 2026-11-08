@@ -1,0 +1,92 @@
+SetupCache: retain immutable LUT ownership across LRU changes.
+
+Co-created with GPT (OpenAI), 2026-11-08.
+The old pointer named an element in a rotating/reallocating vector. A second
+session could rotate, reallocate or evict it while a pipeline uploaded/copied
+the LUT after releasing the cache mutex. Give each caller shared immutable
+ownership through that upload/copy. Numerical builders, keys and values do
+not change. Retained payloads are released when their last reader finishes.
+
+diff --git a/engine/src/core/setup_cache.hpp b/engine/src/core/setup_cache.hpp
+--- a/engine/src/core/setup_cache.hpp
++++ b/engine/src/core/setup_cache.hpp
+@@ -32,6 +32,7 @@
+ #pragma once
++#include <memory>
+ #include <mutex>
+ #include <string>
+ #include <unordered_map>
+ #include <vector>
+
+@@ -55,12 +56,12 @@ public:
+-    // The spectral upsampling LUT. `out` points into the cache and stays
+-    // valid until this cache is destroyed.
++    // The spectral upsampling LUT. Each reader owns the immutable payload,
++    // including across LRU rotations/eviction and cache destruction.
+     bool tc_lut(const Colour& colour, const Blob& blob, const Profile& film,
+                 const SettingsParams& settings, const GamutCompressSpec& compress,
+-                const Vec& sensitivity, const Vec*& out, size_t& side, std::string& error);
++                const Vec& sensitivity, std::shared_ptr<const Vec>& out, size_t& side, std::string& error);
+
+     // For `capabilities`, and for anyone wondering whether a slider was slow
+     // because of a miss.
+     struct Stats { size_t cam16_entries = 0, lut_entries = 0, hits = 0, misses = 0; };
+     Stats stats() const;
+
+ private:
+@@ -73,6 +74,6 @@ private:
+     struct LutEntry {
+         std::string key;
+-        Vec lut;
++        std::shared_ptr<const Vec> lut;
+         size_t side = 0;
+     };
+
+diff --git a/engine/src/core/setup_cache.cpp b/engine/src/core/setup_cache.cpp
+--- a/engine/src/core/setup_cache.cpp
++++ b/engine/src/core/setup_cache.cpp
+@@ -91,7 +91,7 @@ bool SetupCache::tc_lut(const Colour& colour, const Blob& blob, const Profile& film,
+                         const SettingsParams& settings, const GamutCompressSpec& compress,
+-                        const Vec& sensitivity, const Vec*& out, size_t& side,
++                        const Vec& sensitivity, std::shared_ptr<const Vec>& out, size_t& side,
+                         std::string& error) {
+     const std::string key = tc_lut_key(film, settings, compress, sensitivity);
+     std::lock_guard<std::mutex> guard(lock_);
+     for (size_t i = 0; i < luts_.size(); ++i) {
+         if (luts_[i].key != key) continue;
+@@ -100,7 +100,7 @@ bool SetupCache::tc_lut(const Colour& colour, const Blob& blob, const Profile& film,
+         if (i != 0) std::rotate(luts_.begin(), luts_.begin() + long(i), luts_.begin() + long(i) + 1);
+-        out = &luts_.front().lut;
++        out = luts_.front().lut;
+         side = luts_.front().side;
+         return true;
+     }
+     ++misses_;
+     LutEntry entry;
+@@ -108,10 +108,12 @@ bool SetupCache::tc_lut(const Colour& colour, const Blob& blob, const Profile& film,
+     entry.key = key;
++    auto lut = std::make_shared<Vec>();
+     if (!build_tc_lut(colour, blob, film, settings, compress, sensitivity,
+-                      entry.lut, entry.side, error)) return false;
++                      *lut, entry.side, error)) return false;
++    entry.lut = std::move(lut);
+     luts_.insert(luts_.begin(), std::move(entry));
+     if (luts_.size() > kMaxLuts) luts_.pop_back();
+-    out = &luts_.front().lut;
++    out = luts_.front().lut;
+     side = luts_.front().side;
+     return true;
+ }
+
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -206,7 +206,7 @@ bool Pipeline::build(std::string& error) {
+     {
+-        const Vec* lut = nullptr;
++        std::shared_ptr<const Vec> lut;
+         size_t side = 0;
+         if (!cache_->tc_lut(*colour_, *blob_, film, params_.settings,
+                             params_.io.input_gamut_compress, film_sensitivity_, lut, side, error))
+             return false;
+         baked_.tc_lut_side = side;

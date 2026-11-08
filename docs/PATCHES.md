@@ -21,6 +21,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0013-reprint-reuses-print-constants.patch` | `pipeline/pipeline.cpp`、`pipeline/pipeline.hpp` | 每次印放都重算放大机常数（中灰探针、预闪偏移、三次常驻上传），开了黑白场还要从 GPU 读回三张扫描表。这些量在同一个管线里只会被 live 参数改动（其余改动都会重建管线），所以 `apply_live_delta` 把它们标记为过期，未过期时直接复用；扫描表在 build 时按与 `upload_persistent_f32` 相同的 float 截断保留主机副本，不再读回。输出逐字节不变。 |
 | `0014-inline-args-mapped-ring.patch` | `gpu/vulkan_gpu.cpp` | 每个 `inline_bytes` 小参数（元数据、矩阵、LUT 范围）原来都要经暂存缓冲上传，单独一次提交加队列等待。补丁建一块 64 KiB 常驻映射的主机可见存储缓冲，在 dispatch 锁内把小参数拷进去并按 `minStorageBufferOffsetAlignment` 对齐绑定；装不下、没有合适内存类型或设 `SPEKTRAFILM_VULKAN_INLINE_RING=0` 时走原路径。着色器读到的字节不变，输出逐字节不变。 |
 | `0015-vulkan-pipeline-cache.patch` | `gpu/vulkan_gpu.cpp` | 上游每次启动都把约 49 条计算管线重新编译一遍（`vkCreateComputePipelines` 传 `VK_NULL_HANDLE`）。补丁建一个 `VkPipelineCache`，宿主用 `SPEKTRAFILM_VULKAN_PIPELINE_CACHE` 指定文件时跨启动保存。文件头带 GPU 名、厂商/设备号、驱动版本、`pipelineCacheUUID`、长度和 FNV-1a 哈希，任何一项不符或文件损坏就丢弃、从空缓存开始；先写临时文件再改名。应用把它放在 `cacheDir/vk-pipelines-<versionCode>.bin`，旧版本的文件启动时删掉（`EngineHost.kt`）。缓存只保存驱动对同一份 SPIR-V 的编译结果，输出逐字节不变。 |
+| `0016-setup-cache-shared-lut.patch` | `core/setup_cache.hpp`、`core/setup_cache.cpp`、`pipeline/pipeline.cpp` | 缓存曾返回 `vector` 元素的裸指针，解锁后上传或拷贝 LUT 时，另一会话的 LRU 轮换、插入、淘汰会让指针指向另一张表或失效。改为共享、不可变的 LUT 载荷，调用方在上传和拷贝结束前持有所有权。缓存仍保留 4 项；读取者尚未结束的旧载荷延后释放。数值计算不变。GPT（OpenAI，AI 助手）参与共创。 |
+| `0017-setup-cache-complete-gamut-key.patch` | `core/setup_cache.cpp` | 输入色域压缩的算法名和三个 `%.17g` 参数曾一起写入 64 字节缓冲，尾部截断会把不同设置误当成同一张 LUT。逐个追加完整参数；默认设置的键不变，数值计算不变。回归覆盖仅相差一个 double 步长、旧键相同的参数。GPT（OpenAI，AI 助手）参与共创。 |
 
 ## LibRaw 补丁
 

@@ -70,7 +70,7 @@ object FilmThumbs {
     private fun sizeFor(px: Int) = if (px <= 256) 256 else 512
 
     private fun keyOf(frame: Frame, edit: Edit, px: Int): String {
-        val text = "${frame.id}|$px|${edit.toJson()}|${edit.look.toJson()}"
+        val text = "lut-v2|${frame.id}|$px|${edit.toJson()}|${edit.look.toJson()}"
         return MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).take(12).joinToString("") { "%02x".format(it) }
     }
 
@@ -177,8 +177,11 @@ object FilmThumbs {
             val h = opened.handle
             if (h == 0L) return@withContext null
             try {
-                NativeEngine.setOutput(h, DisplayColor.space, false)
-                if (!edit.look.neutral) NativeEngine.setLook(h, edit.look.values())
+                if (!NativeEngine.setOutput(h, DisplayColor.space, false))
+                    throw EngineException("缩略图输出设置失败：${NativeEngine.lastError()}")
+                UserLibrary.get(app).applyLut(h, edit.look, null)
+                if (!NativeEngine.setLook(h, if (edit.look.neutral) null else edit.look.values()))
+                    throw EngineException("缩略图调整失败：${NativeEngine.lastError()}")
                 NativeEngine.renderBitmap(h, "full")?.also(DisplayColor::tag)
             } finally {
                 NativeEngine.release(h)

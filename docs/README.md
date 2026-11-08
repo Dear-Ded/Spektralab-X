@@ -36,6 +36,7 @@ Most documents are in Chinese; those marked EN have English.
 | [贡献指南 / CONTRIBUTING](../CONTRIBUTING.md) | 编译、改引擎、提交规范、转载与二次开发 · EN |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 模块划分、线程模型、渲染档位、内存预算、生命周期 |
 | [PATCHES.md](PATCHES.md) | 对上游引擎的补丁和写新补丁的流程 · EN |
+| [ANDROID_ENGINE_ADAPTATION.md](ANDROID_ENGINE_ADAPTATION.md) | 安卓引擎适配：已实现的数值、缓存、HDR、导出修复，云端验证和完整分块渲染的剩余工作；GPT 共创记录 |
 | [SAMPLES.md](SAMPLES.md) | README 样片的来源、参数和复现方法 · EN |
 | [WORKSTREAMS.md](WORKSTREAMS.md) | 并行开发分工：每条线的分支、负责文件、当前任务和会话管理 |
 

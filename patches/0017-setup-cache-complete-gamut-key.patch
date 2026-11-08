@@ -1,0 +1,27 @@
+SetupCache: do not truncate the input-gamut compression cache key.
+
+Co-created with GPT (OpenAI), 2026-11-08.
+Three %.17g doubles and the algorithm need more than 64 bytes. Formatting
+them into one fixed buffer could merge distinct compression settings into
+one LUT entry. Append the algorithm and each complete double separately.
+Numerical builders are unchanged; default settings retain the same key.
+
+diff --git a/engine/src/core/setup_cache.cpp b/engine/src/core/setup_cache.cpp
+--- a/engine/src/core/setup_cache.cpp
++++ b/engine/src/core/setup_cache.cpp
+@@ -38,9 +38,12 @@ std::string tc_lut_key(const Profile& film, const SettingsParams& settings,
+     key += buf;
+     if (compress.active) {
+-        std::snprintf(buf, sizeof buf, "|c%s,%.17g,%.17g,%.17g", compress.algorithm.c_str(),
+-                      compress.knee[0], compress.knee[1], compress.knee[2]);
+-        key += buf;
++        key += "|c";
++        key += compress.algorithm;
++        for (double knee : compress.knee) {
++            std::snprintf(buf, sizeof buf, ",%.17g", knee);
++            key += buf;
++        }
+     } else {
+         key += "|c0";
+     }
+     // The window and surface parameters come from the profile, and a profile

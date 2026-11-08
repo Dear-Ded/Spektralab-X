@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "io/raw_decoder.hpp"
+#include "gainmap.hpp"
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
@@ -33,6 +34,7 @@
 #include "jpeg444.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
+#include "look_state.hpp"
 #include "output_transform.hpp"
 #include "passthrough.hpp"
 #include "input_transform.hpp"
@@ -69,18 +71,8 @@ struct Session {
     uint32_t small_w = 0, small_h = 0;
     // Layer 2, the adjustments to the finished print (layer2.hpp). Applied while
     // a display or export render is packed; film cards show the film alone.
-    std::unique_ptr<spk::android::Layer2> look;
-    const spk::android::Layer2* active_look() const { return look && !look->identity() ? look.get() : nullptr; }
-    // The user LUT (lut3d.hpp) and its strength, kept here so setLook, which
-    // rebuilds `look` on every slider move, re-attaches it without a resend.
-    std::shared_ptr<const spk::android::ColourTable> lut;
-    float lut_strength = 1;
-    std::vector<float> look_values;   // the last setLook array, so setLut can rebuild `look`
-    void rebuild_look() {
-        auto l = std::make_unique<spk::android::Layer2>(look_values);
-        if (lut) l->set_lut(lut, lut_strength);
-        if (l->identity()) look.reset(); else look = std::move(l);
-    }
+    spk::android::LookState look;
+    const spk::android::Layer2* active_look() const { return look.active(); }
     // The last display render, kept so an adjustment re-packs it (repack)
     // instead of re-running the engine. One tier only: at the preview tier it
     // is ~70 MB, and the next render or release frees it.
@@ -807,7 +799,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
 // the real highlight range instead of a clipped 1.0. `meta_j` is the Gainmap
 // API's ratioMin[3], ratioMax[3], gamma[3], epsilonSdr[3], epsilonHdr[3]
 // (linear ratios). The gain map is usually a quarter of the size; it is
-// sampled bilinearly in log-boost space. The recovered light then leaves the
+// sampled bilinearly in code space, before applying gamma. The recovered light leaves the
 // base's primaries for linear ProPhoto (input_transform.hpp), as openBitmap's
 // pixels do; [params_j] must say linear ProPhoto.
 JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jobject gain,
@@ -815,6 +807,7 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
     try {
         AndroidBitmapInfo info{}, ginfo{};
         if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            !info.width || !info.height ||
             info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) { fail("image must be an ARGB_8888 bitmap"); return 0; }
         if (!gain || AndroidBitmap_getInfo(env, gain, &ginfo) != ANDROID_BITMAP_RESULT_SUCCESS ||
             !ginfo.width || !ginfo.height ||
@@ -826,19 +819,12 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
         env->GetFloatArrayRegion(meta_j, 0, 15, meta);
         const std::string params = str(env, params_j);
 
-        // Per channel, a log2-boost table over the 256 gain codes.
         const uint32_t gc = ginfo.format == ANDROID_BITMAP_FORMAT_A_8 ? 1 : 3;
-        float boost[3][256];
-        float eps_sdr[3], eps_hdr[3];
+        spk::android::GainmapChannel channels[3];
         for (int c = 0; c < 3; ++c) {
-            const float lo = std::log2(std::max(1e-6f, meta[c]));
-            const float hi = std::log2(std::max(1e-6f, meta[3 + c]));
-            const float gamma = meta[6 + c] > 0 ? meta[6 + c] : 1.0f;
-            eps_sdr[c] = meta[9 + c];
-            eps_hdr[c] = meta[12 + c];
-            for (int v = 0; v < 256; ++v) {
-                const float gp = std::pow(v / 255.0f, 1.0f / gamma);
-                boost[c][v] = lo * (1 - gp) + hi * gp;
+            if (!spk::android::GainmapChannel::make(meta[c], meta[3 + c], meta[6 + c],
+                                                    meta[9 + c], meta[12 + c], channels[c])) {
+                fail("invalid gain map metadata"); return 0;
             }
         }
         const spk::android::InputTransform xf(str(env, space_j));
@@ -880,11 +866,11 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
                             if (a != 255 && a != 0) code = std::min(255u, (code * 255u + a / 2) / a);
                             const int gch = gc == 1 ? 0 : c;
                             const auto at = [&](uint32_t gx, uint32_t gy) {
-                                return boost[c][g[(size_t(gy) * gw + gx) * gc + gch]];
+                                return g[(size_t(gy) * gw + gx) * gc + gch];
                             };
-                            const float lb = (at(x0g, y0g) * (1 - tx) + at(x1g, y0g) * tx) * (1 - ty) +
-                                             (at(x0g, y1g) * (1 - tx) + at(x1g, y1g) * tx) * ty;
-                            const float v = (xf.decode(uint8_t(code), c) + eps_sdr[c]) * std::exp2(lb) - eps_hdr[c];
+                            const float sample = spk::android::gainmap_bilinear(
+                                at(x0g, y0g), at(x1g, y0g), at(x0g, y1g), at(x1g, y1g), tx, ty);
+                            const float v = channels[c].recover(xf.decode(uint8_t(code), c), sample);
                             dst[3 * x + c] = std::isfinite(v) ? std::max(0.0f, v) : 0.0f;
                         }
                         xf.to_prophoto(dst + 3 * x);
@@ -1222,45 +1208,55 @@ JNI_FN(jboolean, lastWasDeviceLost)(JNIEnv*, jobject) {
 
 // Layer 2 for this session's display and export renders (Look.kt's array;
 // null or all-neutral clears it). Cheap: no render, the next pack uses it.
-JNI_FN(void, setLook)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j) {
+JNI_FN(jboolean, setLook)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j) {
     auto* s = reinterpret_cast<Session*>(handle);
-    if (!s) return;
+    if (!s) { fail("setLook: no session"); return JNI_FALSE; }
     try {
         std::vector<float> v(values_j ? size_t(env->GetArrayLength(values_j)) : 0);
         if (!v.empty()) env->GetFloatArrayRegion(values_j, 0, jsize(v.size()), v.data());
-        s->look_values = std::move(v);
-        s->rebuild_look();
+        if (env->ExceptionCheck()) { env->ExceptionClear(); fail("setLook: cannot read values"); return JNI_FALSE; }
+        s->look.set_values(std::move(v));
+        return JNI_TRUE;
+    } catch (const std::bad_alloc&) {
+        fail("setLook: out of memory");
+    } catch (const std::exception& e) {
+        fail(std::string("setLook: ") + e.what());
     } catch (...) {
-        s->look.reset();
+        fail("setLook: unknown failure");
     }
+    return JNI_FALSE;
 }
 
 // The user LUT for this session (lut3d.hpp): side^3 RGB floats over encoded
 // ProPhoto, red fastest, already baked by CubeLut.kt; mixed in at `strength`
-// before every Layer 2 slider. Null, a bad size or strength 0 clears it.
-// Cheap like setLook: the next pack uses it. False when the table was refused.
+// before every Layer 2 slider. Null or strength 0 clears it.
+// False preserves the previous state; lastError explains the refusal.
 JNI_FN(jboolean, setLut)(JNIEnv* env, jobject, jlong handle, jfloatArray values_j, jint side, jfloat strength) {
     auto* s = reinterpret_cast<Session*>(handle);
-    if (!s) return JNI_FALSE;
-    bool ok = true;
+    if (!s) { fail("setLut: no session"); return JNI_FALSE; }
     try {
-        if (!values_j || !(strength > 0)) {
-            s->lut.reset();
-        } else {
-            std::vector<float> v(size_t(env->GetArrayLength(values_j)));
+        if (!std::isfinite(strength)) { fail("setLut: strength must be finite"); return JNI_FALSE; }
+        std::shared_ptr<const spk::android::ColourTable> lut;
+        if (values_j && strength > 0) {
+            if (side < 2 || side > spk::android::Lut3d::kMaxSide ||
+                env->GetArrayLength(values_j) != side * side * side * 3) {
+                fail("setLut: the table was refused (side or length)"); return JNI_FALSE;
+            }
+            std::vector<float> v(size_t(side) * side * side * 3);
             if (!v.empty()) env->GetFloatArrayRegion(values_j, 0, jsize(v.size()), v.data());
-            s->lut = spk::android::Lut3d::make(std::move(v), side);
-            ok = s->lut != nullptr;
+            if (env->ExceptionCheck()) { env->ExceptionClear(); fail("setLut: cannot read table"); return JNI_FALSE; }
+            lut = spk::android::Lut3d::make(std::move(v), side);
         }
-        s->lut_strength = std::isfinite(strength) ? std::min(1.0f, std::max(0.0f, float(strength))) : 0.0f;
-        s->rebuild_look();
+        s->look.set_lut(std::move(lut), std::clamp(float(strength), 0.0f, 1.0f));
+        return JNI_TRUE;
+    } catch (const std::bad_alloc&) {
+        fail("setLut: out of memory");
+    } catch (const std::exception& e) {
+        fail(std::string("setLut: ") + e.what());
     } catch (...) {
-        s->lut.reset();
-        s->look.reset();
-        ok = false;
+        fail("setLut: unknown failure");
     }
-    if (!ok) fail("setLut: the table was refused (side or length)");
-    return ok ? JNI_TRUE : JNI_FALSE;
+    return JNI_FALSE;
 }
 
 // The last display render again, through the current look: what an

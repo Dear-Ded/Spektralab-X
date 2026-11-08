@@ -687,7 +687,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun applyLook(look: Look) {
         if (look == appliedLook || session == 0L) return
         UserLibrary.get(app).applyLut(session, look, appliedLook)
-        NativeEngine.setLook(session, if (look.neutral) null else look.values())
+        if (!NativeEngine.setLook(session, if (look.neutral) null else look.values()))
+            throw EngineException("应用调整失败：${NativeEngine.lastError()}")
         appliedLook = look
     }
 

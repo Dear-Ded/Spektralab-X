@@ -92,14 +92,14 @@ object NativeEngine {
 
     external fun release(session: Long)
 
-    /** Layer 2 for the session's display and export packs (Look.values()); null clears it. */
-    external fun setLook(session: Long, values: FloatArray?)
+    /** Layer 2 for display/export (Look.values()); null clears it. False preserves the old look. */
+    external fun setLook(session: Long, values: FloatArray?): Boolean
 
     /**
      * The user LUT (lut3d.hpp): [side]^3 RGB over encoded ProPhoto, red fastest,
      * as CubeLut.kt's LutBake makes it; mixed in at [strength] 0..1 before every
      * Layer 2 slider and kept across setLook. Null or strength 0 clears it;
-     * false when the table was refused.
+     * false preserves the old state; read lastError on this thread.
      */
     external fun setLut(session: Long, values: FloatArray?, side: Int, strength: Float): Boolean
 

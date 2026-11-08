@@ -679,41 +679,51 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val wide = job.wideGamut && job.format == ExportFormat.JPEG
         val outSpace = if (wide) "Display P3" else "sRGB"
         yieldToEditor()
-        val handle: Long = if (job.raw) {
-            // LibRaw reads a path: the kept copy itself, or the URI's descriptor
-            // (/proc/self/fd), falling back to a cache copy (SourceLoader.rawInput).
-            // Assigned inside the IO hop, so a cancel as it returns still closes it.
-            var input: RawInput? = null
-            try {
-                if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
-                val path = local?.absolutePath ?: input!!.path
-                step("解码 RAW", 0.12f)
-                // trimMemory is engine-wide (EngineThread); the session is the export's own.
-                withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
-                withContext(ExportThread.dispatcher) {
-                    val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
-                    val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
-                    if (h == 0L) engineFailure(engine, "打开失败")
-                    synchronized(handleLock) { runningHandle = h }
-                    h
-                }
-            } finally {
-                input?.close()
-            }
-        } else {
-            step("解码照片", 0.10f)
-            val photo = withContext(Dispatchers.IO) { loader.decodePhoto(uri, job.workingEdge, maxPixels) }
-            withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
-            withContext(ExportThread.dispatcher) {
-                val h = openPhotoSession(engine, photo, job.highlightStops) { space, linear ->
-                    Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
-                }.handle
-                if (h == 0L) engineFailure(engine, "打开失败")
-                synchronized(handleLock) { runningHandle = h }
-                h
-            }
-        }
+        // Own the handle before returning from the native dispatcher. A cancelled
+        // withContext may discard its return value after native open succeeded.
+        var handle = 0L
         try {
+            if (job.raw) {
+                // LibRaw reads a path: the kept copy itself, or the URI's descriptor
+                // (/proc/self/fd), falling back to a cache copy (SourceLoader.rawInput).
+                // Assigned inside the IO hop, so a cancel as it returns still closes it.
+                var input: RawInput? = null
+                try {
+                    if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
+                    val path = local?.absolutePath ?: input!!.path
+                    step("解码 RAW", 0.12f)
+                    // trimMemory is engine-wide (EngineThread); the session is the export's own.
+                    withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+                    withContext(ExportThread.dispatcher) {
+                        val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
+                        val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
+                        if (h == 0L) engineFailure(engine, "打开失败")
+                        handle = h
+                        synchronized(handleLock) { runningHandle = h }
+                    }
+                } finally {
+                    input?.close()
+                }
+            } else {
+                step("解码照片", 0.10f)
+                var photo: Photo? = null
+                try {
+                    withContext(Dispatchers.IO) { photo = loader.decodePhoto(uri, job.workingEdge, maxPixels) }
+                    withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
+                    withContext(ExportThread.dispatcher) {
+                        val opening = photo!!
+                        photo = null // openPhotoSession now owns and recycles the bitmaps.
+                        val h = openPhotoSession(engine, opening, job.highlightStops) { space, linear ->
+                            Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
+                        }.handle
+                        if (h == 0L) engineFailure(engine, "打开失败")
+                        handle = h
+                        synchronized(handleLock) { runningHandle = h }
+                    }
+                } finally {
+                    photo?.recycle()
+                }
+            }
             // The file's own space, through the CAM16 export path (upstream's export
             // transform, lightness shoulder off). TIFF carries the sRGB profile.
             withContext(ExportThread.dispatcher) {
@@ -721,7 +731,11 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
             // Layer 2 rides on the job's own session: every pack below goes through it.
             Look.fromJson(job.lookJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) }).let { look ->
-                if (!look.neutral) withContext(ExportThread.dispatcher) { NativeEngine.setLook(handle, look.values()) }
+                withContext(ExportThread.dispatcher) {
+                    UserLibrary.get(app).applyLut(handle, look, null)
+                    if (!NativeEngine.setLook(handle, if (look.neutral) null else look.values()))
+                        engineFailure(engine, "应用调整失败")
+                }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor(render = true, extreme = job.extreme)
@@ -822,7 +836,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         } finally {
             withContext(NonCancellable + ExportThread.dispatcher) {
                 synchronized(handleLock) {
-                    NativeEngine.release(handle)
+                    if (handle != 0L) NativeEngine.release(handle)
                     runningHandle = 0L
                 }
             }
