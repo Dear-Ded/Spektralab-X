@@ -92,6 +92,13 @@ rendering is reported as `black_auto_not_applied`; only None's no-adjustment
 behavior is implemented. PCHIP interpolation is not the Adobe SDK spline. These
 limits remain explicit rather than being called full DNG rendering support.
 
+Exposure here is a scene-linear gain before the curve. It does not reproduce the
+SDK's highlight-preserving negative-exposure ramp or its per-channel clipping
+before RGB tone. Profile tone points are evaluated in linear ProPhoto before the
+final transfer encoding; a darkening embedded curve is not replaced merely
+because its result is darker. Explicit standard mode on a non-DNG RAW uses the
+generic fallback; the feature is not limited to DNG files.
+
 Public reproducibility records:
 
 - `tools/native/validation/dng-render-metadata-20261109/README.md`
