@@ -300,7 +300,7 @@ void Rgba16Rows::pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out, c
 
 Rgba8Rows::Rgba8Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
                      const Layer2* look, const OutputTransform* xf)
-    : src_(src), stride_(stride_px), w_(w), h_(h), look_(look), xf_(xf) {
+    : src_(src), stride_(stride_px), w_(w), h_(h), source_rows_(h), look_(look), xf_(xf) {
     if (!src || !w || !h || stride_px < w ||
         stride_px > std::numeric_limits<size_t>::max() / h / 4 / sizeof(uint16_t) ||
         !xf || !xf->ready()) throw std::invalid_argument("invalid JPEG RGBA16 row source");
@@ -309,20 +309,30 @@ Rgba8Rows::Rgba8Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t
 
 Rgba8Rows::Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
                      const Layer2* look, const OutputTransform* xf)
-    : float_src_(src), stride_(stride_px), w_(w), h_(h), look_(look), xf_(xf) {
+    : Rgba8Rows(src, stride_px, w, h, 0, h, look, xf) {}
+
+Rgba8Rows::Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+                     uint32_t source_y0, uint32_t source_rows, const Layer2* look, const OutputTransform* xf,
+                     const Layer2::Frame* frame)
+    : float_src_(src), stride_(stride_px), w_(w), h_(h), source_y0_(source_y0),
+      source_rows_(source_rows), look_(look), xf_(xf) {
     validate_float_source(src, stride_px, w, h, xf);
-    frame_ = look ? look->frame(w, h) : Layer2::Frame{};
+    if (!source_rows || source_y0 > h || source_rows > h - source_y0)
+        throw std::invalid_argument("invalid JPEG float strip range");
+    frame_ = frame ? *frame : look ? look->frame(w, h) : Layer2::Frame{};
 }
 
 void Rgba8Rows::pack(uint32_t y0, uint32_t count, std::vector<uint8_t>& out, const OutputCancel& cancel) const {
     cancel.check();
     if (y0 > h_ || count > h_ - y0) throw std::out_of_range("RGBA8 row range");
+    if (y0 < source_y0_ || y0 - source_y0_ > source_rows_ || count > source_rows_ - (y0 - source_y0_))
+        throw std::out_of_range("RGBA8 source strip range");
     out.resize(size_t(w_) * count * 4);
     const float iw = 1.0f / w_, ih = 1.0f / h_;
     for (uint32_t y = y0; y < y0 + count; ++y) {
         cancel.check();
         const uint16_t* s = src_ ? src_ + size_t(y) * stride_ * 4 : nullptr;
-        const float* f = float_src_ ? float_src_ + size_t(y) * stride_ * 3 : nullptr;
+        const float* f = float_src_ ? float_src_ + size_t(y - source_y0_) * stride_ * 3 : nullptr;
         uint8_t* d = out.data() + size_t(y - y0) * w_ * 4;
         const float v = (y + 0.5f) * ih;
         for (uint32_t x = 0; x < w_; ++x) {

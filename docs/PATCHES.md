@@ -45,6 +45,7 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0031-view-output-cancellation.patch` | `pipeline/engine.cpp`、`pipeline/view.hpp`、`pipeline/view_process.cpp` | 在 noFilm encode flush、几何/缩放完成、float CPU 读回分配前后检查取消；已提交 GPU 工作完成后才退出。Android generation token 继续贯穿 CPU 行转换、Bitmap/repack、JPEG/TIFF；所有 worker 汇合后才抛出，成功打包后才替换旧缓存。IBX 两编译模式聚焦测试及旧 JPEG/noFilm 回归通过，不能抢占在途 dispatch、读回或 codec 内部阶段。GPT（OpenAI）共创。 |
 | `0032-dng-as-shot-white-xy.patch` | 新 `io/dng_white_xy.hpp`、`io/raw_camera.hpp`、`io/raw_decoder.{hpp,cpp}` | 与 LibRaw 0021 配套，将已知 xy 经 Robertson 和完整校准端点插值派生源白平衡；支持 FM/Bradford，源元数据不被 custom WB 替换。只扩展 WhiteXY-only 主 profile 三通道路径；既有 ASN 输出回归保持字节一致。详见 [实现与限制](DNG_WHITE_XY_2026-11-09.md)。GPT（OpenAI）共创。 |
 | `0033-integer-view-readback-cancellation.patch` | `pipeline/view_process.cpp` | 为整数 view 增加最终 GPU 打包前、完成后、CPU 分配前和读回后的安全取消边界；Android DI adapter 传入同一 generation token，旧无输出变换的 look/直接打包按行轮询并在 worker 汇合后报告。实际 noFilm 整数/DI 分别 10/9 个边界及恢复对照通过；不能抢占在途 GPU 工作。GPT（OpenAI）共创。 |
+| `0034-nofilm-float-row-readback.patch` | `pipeline/view.hpp`、`pipeline/view_process.cpp` | 内部 noFilm float view 可同步交付最多 32 行，Android 4:4:4 JPEG 直接调色并写入匿名 spool，省去整幅 CPU float 结果。沿用全图坐标、原数值与坏帧采样检查，false/throw/cancel 失败时不交付 JPEG；预览、胶片/DI 和 TIFF 保留原路径。内部 C++ Request 布局变化，消费者需同步重编；不代表完整 RAW 分块或全程峰值下降。见 [实现与验证](NOFILM_ROW_READBACK_2026-11-09.md)。GPT（OpenAI）共创。 |
 
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。

@@ -1,0 +1,65 @@
+Bounded no-film float readback through a synchronous borrowed-row sink.
+Existing vector results and film/DI requests retain their original path.
+Co-created with GPT (OpenAI), 2026-11-09.
+
+diff --git a/engine/src/pipeline/view.hpp b/engine/src/pipeline/view.hpp
+index 073e895..04dc7f6 100644
+--- a/engine/src/pipeline/view.hpp
++++ b/engine/src/pipeline/view.hpp
+@@ -12,6 +12,11 @@
+ #include "spektrafilm/spk_engine.h"
+ 
+ namespace spk::view {
++// Synchronous, borrowed RGB float rows in complete output-frame coordinates.
++// The session lock is held: sinks must not re-enter the session. False/throw
++// fails the render; already consumed rows belong to the caller's transaction.
++using FloatRowSink = std::function<bool(uint32_t width, uint32_t height,
++    uint32_t y0, uint32_t rows, const float* rgb, std::string& error)>;
+ struct Request {
+     std::string tier = "full";
+     Json adjustments = Json::object();
+@@ -34,6 +39,7 @@ struct Request {
+     // Internal Android boundary: encoded ProPhoto RGB before grade/UNORM16.
+     // Requires no_film, disabled adjustments and no output conversion/proof.
+     bool ungraded_float = false;
++    FloatRowSink float_rows; // optional bounded readback; ungraded_float only
+     // Optional, nonthrowing host poll. Called only between completed GPU work.
+     // An empty callback preserves existing view/export behaviour.
+     std::function<bool()> cancelled;
+diff --git a/engine/src/pipeline/view_process.cpp b/engine/src/pipeline/view_process.cpp
+index 2439b05..d6e9e36 100644
+--- a/engine/src/pipeline/view_process.cpp
++++ b/engine/src/pipeline/view_process.cpp
+@@ -68,6 +68,7 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+             return false;
+         };
+         if(cancelled())return false;
++        if(req.float_rows&&!req.ungraded_float){error="view: float rows require ungraded float";return false;}
+         if(!print.valid()||(print.c!=2&&print.c!=3)){error="view: expected device RGBA16 or encoded RGB float input";return false;}
+         if(print.c==3&&di_lut){error="view: DI lookup requires packed negative codes";return false;}
+         if(req.output_channels!=3&&req.output_channels!=4){error="view: output_channels must be 3 or 4";return false;}
+@@ -137,6 +138,24 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+             result.file_width=w;result.file_height=h;
+             const auto read=Clock::now();
+             if(cancelled())return false;
++            if(req.float_rows){
++                constexpr uint32_t strip_rows=32;
++                std::vector<float> rows(size_t(w)*std::min(strip_rows,h)*3);
++                for(uint32_t y=0;y<h;y+=strip_rows){
++                    if(cancelled())return false;
++                    const uint32_t count=std::min(strip_rows,h-y);
++                    if(!gpu->read(current.buf.get(),size_t(y)*w*3*sizeof(float),rows.data(),
++                                  size_t(count)*w*3*sizeof(float),error))return false;
++                    if(cancelled())return false;
++                    if(!req.float_rows(w,h,y,count,rows.data(),error)){
++                        if(error.empty())error="view: float row sink failed";
++                        return false;
++                    }
++                }
++                if(cancelled())return false;
++                result.readback_ms=ms(read);
++                return true;
++            }
+             result.float_pixels.resize(current.elements());
+             if(!gpu->read(current.buf.get(),0,result.float_pixels.data(),current.bytes(),error))return false;
+             if(cancelled())return false;

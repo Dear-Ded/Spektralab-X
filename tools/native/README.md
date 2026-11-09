@@ -482,3 +482,19 @@ helpers and runs these seven tests independently. This checks ordering and
 cleanup contracts; actual JNI, UI, installed-session memory, ordinary previews
 and small contact-sheet thumbnails are outside the test. See
 [IBX logs](validation/transient-lease-20261109/).
+
+## No-film float row readback
+
+`run_nofilm_rows.sh` requires patch 0034 and matching rebuilt engine archives.
+It compares full-vector and borrowed-row float/packed bytes across geometry and
+grading, and checks sink failure, exception, cancellation and recovery.
+`run_float_frame_check.sh` checks the shared full/strip sampled-frame validator;
+set `SANITIZE=1` for ASan/UBSan. `measure_nofilm_rows.py` runs both export paths
+in separate child executables and records sampled RSS and observed kernel HWM.
+Use the `synthetic` input for public evidence; camera files and derived outputs
+stay private. The JPEG probe omits ICC, while production JNI requires a profile.
+
+Only no-film `exportJpeg444` consumes this row sink. Other exports and the
+preview cache are unchanged. A lower float readback allocation does not imply
+a lower whole-process peak or bounded RAW decoding. See
+[the implementation and reproduction steps](../../docs/NOFILM_ROW_READBACK_2026-11-09.md).

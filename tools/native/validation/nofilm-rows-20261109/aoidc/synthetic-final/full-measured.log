@@ -1,0 +1,17 @@
+before_engine VmHWM:	    2308 kB peak_kib=14324
+before_engine VmRSS:	    2308 kB peak_kib=14324
+after_engine VmHWM:	  879760 kB peak_kib=879760
+after_engine VmRSS:	   79816 kB peak_kib=879760
+startup VmHWM:	  879760 kB peak_kib=879760
+startup VmRSS:	   79816 kB peak_kib=879760
+decoded VmHWM:	  879760 kB peak_kib=879760
+decoded VmRSS:	  227244 kB peak_kib=879760
+opened VmHWM:	  879760 kB peak_kib=879760
+opened VmRSS:	  302648 kB peak_kib=879760
+full_float VmHWM:	  879760 kB peak_kib=879760
+full_float VmRSS:	  663892 kB peak_kib=879760
+spooled VmHWM:	  879760 kB peak_kib=879760
+spooled VmRSS:	  517216 kB peak_kib=879760
+encoded VmHWM:	  879760 kB peak_kib=879760
+encoded VmRSS:	  517716 kB peak_kib=879760
+mode=full width=4096 height=3072 float_payload_bytes=150994944 jpeg_bytes=26016921

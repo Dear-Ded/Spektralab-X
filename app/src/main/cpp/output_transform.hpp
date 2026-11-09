@@ -104,6 +104,11 @@ public:
               const Layer2* look, const OutputTransform* xf);
     Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
               const Layer2* look, const OutputTransform* xf);
+    // Borrowed strip storage, retaining complete-frame grade/mask coordinates.
+    // A supplied frame must belong to this look and complete output dimensions.
+    Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+              uint32_t source_y0, uint32_t source_rows, const Layer2* look, const OutputTransform* xf,
+              const Layer2::Frame* frame = nullptr);
     void pack(uint32_t y0, uint32_t count, std::vector<uint8_t>& out, const OutputCancel& cancel = {}) const;
 
 private:
@@ -111,6 +116,7 @@ private:
     const float* float_src_ = nullptr;
     size_t stride_;
     uint32_t w_, h_;
+    uint32_t source_y0_ = 0, source_rows_ = 0;
     const Layer2* look_;
     const OutputTransform* xf_;
     Layer2::Frame frame_;

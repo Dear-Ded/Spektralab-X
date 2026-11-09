@@ -1,0 +1,22 @@
+{
+  "method": "5ms /proc child VmRSS and VmHWM polling after exe identity check; no inherited ru_maxrss.",
+  "cases": [
+    {
+      "mode": "full",
+      "sampled_peak_rss_kib": 867564,
+      "observed_kernel_vm_hwm_kib": 867564,
+      "samples": 862,
+      "elapsed_seconds": 4.5708883489714935,
+      "jpeg_sha256": "036e12de7b302243dd01fd39ce22cacc9b75f32d1c7cbec68736682adff9fce0"
+    },
+    {
+      "mode": "rows",
+      "sampled_peak_rss_kib": 867616,
+      "observed_kernel_vm_hwm_kib": 867616,
+      "samples": 833,
+      "elapsed_seconds": 4.38254754000809,
+      "jpeg_sha256": "036e12de7b302243dd01fd39ce22cacc9b75f32d1c7cbec68736682adff9fce0"
+    }
+  ],
+  "rss_reduction_kib": -52
+}

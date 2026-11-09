@@ -171,4 +171,32 @@ inline bool render_view_float(spk_session* session, const std::string& tier,
     return true;
 }
 
+// Export-only borrowed rows; the sink owns its output transaction and must not
+// re-enter this session. The callback never retains a complete CPU float frame.
+inline bool render_view_float_rows(spk_session* session, const std::string& tier,
+                                   spk_result& out, const spk::view::FloatRowSink& sink,
+                                   std::string& error, const OutputCancel& cancel = {}) {
+    std::memset(&out, 0, sizeof out);
+    cancel.check();
+    if (!sink) { error = "no film: missing float row sink"; return false; }
+    spk::view::Request request;
+    if (!view_request(session, tier, true, request, error)) return false;
+    request.ungraded_float = true;
+    request.rgba16 = false;
+    request.output_channels = 3;
+    request.float_rows = sink;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
+    spk::view::Result result;
+    if (!spk::view::render(session, request, result, error)) return false;
+    cancel.check();
+    if (!result.width || !result.height || !result.float_pixels.empty()) {
+        error = "view returned invalid float rows"; return false;
+    }
+    out.width = result.width;
+    out.height = result.height;
+    out.row_stride_px = result.width;
+    out.elapsed_ms = result.print_ms + result.post_ms + result.readback_ms;
+    return true;
+}
+
 }  // namespace spk::android

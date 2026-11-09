@@ -37,6 +37,7 @@
 #include "storage_probe.hpp"
 #include "jpeg444.hpp"
 #include "rgba8_spool.hpp"
+#include "float_frame_check.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
 #include "look_state.hpp"
@@ -509,19 +510,9 @@ std::string blank_frame(const uint16_t* rgba, uint32_t width, uint32_t height, s
 // before grading rather than mistaking recoverable highlights for flat white.
 std::string blank_float_frame(const std::vector<float>& rgb, const spk_result& r) {
     if (!r.width || !r.height || rgb.size() != size_t(r.width) * r.height * 3) return "no float pixels";
-    const uint32_t sx = std::max(1u, r.width / 256), sy = std::max(1u, r.height / 256);
-    float lo[3] = {INFINITY, INFINITY, INFINITY}, hi[3] = {-INFINITY, -INFINITY, -INFINITY};
-    for (uint32_t y = 0; y < r.height; y += sy)
-        for (uint32_t x = 0; x < r.width; x += sx)
-            for (int c = 0; c < 3; ++c) {
-                const float v = rgb[(size_t(y) * r.width + x) * 3 + c];
-                if (!std::isfinite(v)) return "non-finite float pixels";
-                lo[c] = std::min(lo[c], v); hi[c] = std::max(hi[c], v);
-            }
-    constexpr float flat = 16.0f / 65535.0f;
-    if (hi[0] - lo[0] <= flat && hi[1] - lo[1] <= flat && hi[2] - lo[2] <= flat)
-        return "the float frame is one solid colour";
-    return {};
+    spk::android::FloatFrameCheck check;
+    check.append(rgb.data(), r.width, r.width, r.height, 0, r.height);
+    return check.finish();
 }
 
 std::string blank_result(const ResultGuard& result) {
@@ -1138,8 +1129,8 @@ JNI_FN(jobject, exportBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     return nullptr;
 }
 
-// Full-frame engine result, bounded output conversion. The packed width/height
-// lets Kotlin write EXIF/check the actual file without allocating a Bitmap.
+// Bounded readback for no-film, bounded output conversion for every path.
+// Packed width/height lets Kotlin write EXIF/check the file without a Bitmap.
 JNI_FN(jlong, exportJpeg444)(JNIEnv* env, jobject, jlong handle, jstring path_j,
                             jstring tier_j, jint quality, jbyteArray icc_j) {
     auto* s = reinterpret_cast<Session*>(handle);
@@ -1161,7 +1152,40 @@ JNI_FN(jlong, exportJpeg444)(JNIEnv* env, jobject, jlong handle, jstring path_j,
         uint32_t width = 0, height = 0;
         std::unique_ptr<spk::android::Rgba8Spool> spool;
         std::string error;
-        {
+        if (s->view.no_film) {
+            spk::android::FloatFrameCheck check;
+            const auto* look = s->active_look();
+            spk::android::Layer2::Frame frame;
+            std::vector<uint8_t> scratch;
+            const auto sink = [&](uint32_t w, uint32_t h, uint32_t y0, uint32_t count,
+                                  const float* rgb, std::string& sink_error) {
+                check_cancelled();
+                if (!check.append(rgb, w, w, h, y0, count)) {
+                    sink_error = "export check: " + check.finish();
+                    return false;
+                }
+                if (!spool) {
+                    width = w; height = h;
+                    spool = spk::android::Rgba8Spool::create(path, width, height);
+                    if (look) frame = look->frame(width, height);
+                }
+                const spk::android::Rgba8Rows rows(rgb, w, w, h, y0, count, look, xf, &frame);
+                rows.pack(y0, count, scratch, cancel);
+                spool->append(scratch);
+                return true;
+            };
+            ResultGuard shape;
+            if (!spk::android::render_view_float_rows(s->session, str(env, tier_j), shape.r,
+                                                      sink, error, cancel)) {
+                fail("JPEG: " + error); return 0;
+            }
+            error = check.finish();
+            if (!error.empty()) { fail("export check: " + error); return 0; }
+            if (shape.r.width != width || shape.r.height != height) {
+                fail("JPEG: inconsistent render dimensions"); return 0;
+            }
+            spool->seal();
+        } else {
             ResultGuard result;
             if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return 0;
             error = blank_result(result);
