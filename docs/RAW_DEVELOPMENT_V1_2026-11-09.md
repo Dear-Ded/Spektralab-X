@@ -104,6 +104,7 @@ Public reproducibility records:
 - `tools/native/validation/dng-render-metadata-20261109/README.md`
 - `tools/native/validation/raw-development-20261109/README.md`
 - `tools/native/validation/raw-development-integration-20261109/README.md`
+- `tools/native/validation/output-gamut-review-20261109/README.md`
 
 Private originals, rendered comparisons, float buffers and per-image measurements
 are deliberately kept outside the repository.
