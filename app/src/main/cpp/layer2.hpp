@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "output_cancel.hpp"
 
 namespace spk::android {
 
@@ -33,11 +34,15 @@ enum LookIndex : int {
     kHsl = 26,               // 8 bands x (hue, saturation, luminance)
     kLookSize = 50,
     // Optional tail: the five tone curves in upstream's row order (rgb, luma,
-    // red, green, blue), each a point count n (2..256) then n (x, y) pairs.
+    // red, green, blue), each a point count n (2..256) then n (x, y) pairs,
+    // or kSampledCurveRow followed by kCurveSamples values in [0, 1].
     // Missing rows are identity; a malformed tail drops all five.
     kCurves = 50,
     // After all five rows, optionally: masks and dust (layer2_local.hpp).
 };
+
+inline constexpr int kCurveSamples = 256;
+inline constexpr float kSampledCurveRow = -256.0f;
 
 // A colour table applied before everything else in Layer 2 (a user LUT,
 // lut3d.hpp): encoded ProPhoto 0..1 in and out. An interface so this file
@@ -70,12 +75,16 @@ public:
     void apply(float& r, float& g, float& b, float u, float v) const { apply(r, g, b, u, v, Frame{}); }
     // The same with `f`, this look's frame(w, h) for the frame (u, v) is in;
     // without it masks and dust are skipped.
-    void apply(float& r, float& g, float& b, float u, float v, const Frame& f) const;
+    // Unquantised no-film input uses the original tone equations; the old
+    // RGBA16 path retains its lookup tables and exposure arithmetic.
+    void apply(float& r, float& g, float& b, float u, float v, const Frame& f,
+               bool unquantised = false) const;
 
 private:
     bool identity_ = true;
     float wb_[3] = {1, 1, 1};
     float exposure_gain_ = 1;   // in the encoded domain: (2^ev)^(1/2.2)
+    float linear_exposure_gain_ = 1;
     float contrast_ = 0, brightness_ = 0, saturation_ = 1, vibrance_ = 0;
     float highlights_ = 0, shadows_ = 0, black_ = 0, white_ = 0, fade_ = 0;
     float vignette_ = 0, vignette_mid_ = 0.5f;
@@ -93,7 +102,8 @@ private:
 // RGBA16 rows to RGBA8 (display, JPEG) or back into RGBA16 (TIFF), through
 // `look`, on up to eight threads.
 void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_px,
-                     uint32_t w, uint32_t h, uint8_t* out, size_t out_stride);
+                     uint32_t w, uint32_t h, uint8_t* out, size_t out_stride,
+                     const OutputCancel& cancel = {});
 void apply_rgba16_in_place(const Layer2& look, uint16_t* px, size_t stride_px, uint32_t w, uint32_t h);
 
 }  // namespace spk::android

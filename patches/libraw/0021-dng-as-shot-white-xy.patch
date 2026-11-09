@@ -1,0 +1,114 @@
+diff --git a/libraw/libraw_const.h b/libraw/libraw_const.h
+index 81b8a55..8eef3fc 100644
+--- a/libraw/libraw_const.h
++++ b/libraw/libraw_const.h
+@@ -132,7 +132,10 @@ enum LibRaw_dngfields_marks
+   LIBRAW_DNGFM_LINEARRESPONSELIMIT = 1 << 14,
+   LIBRAW_DNGFM_USERCROP = 1 << 15,
+   LIBRAW_DNGFM_OPCODE1 = 1 << 16,
+-  LIBRAW_DNGFM_OPCODE3 = 1 << 17
++  LIBRAW_DNGFM_OPCODE3 = 1 << 17,
++  LIBRAW_DNGFM_ASSHOTWHITEXY = 1 << 18,
++  LIBRAW_DNGFM_CAMERACALIBRATIONSIGNATURE = 1 << 19,
++  LIBRAW_DNGFM_PROFILECALIBRATIONSIGNATURE = 1 << 20
+ };
+ 
+ enum LibRaw_As_Shot_WB_Applied_codes
+diff --git a/libraw/libraw_types.h b/libraw/libraw_types.h
+index b9105fa..d421284 100644
+--- a/libraw/libraw_types.h
++++ b/libraw/libraw_types.h
+@@ -267,6 +267,10 @@ typedef unsigned long long UINT64;
+     float baseline_exposure;
+     float LinearResponseLimit;
+ 	libraw_dng_rawopcode_t rawopcodes[3];
++    double asshotwhitexy[2];
++    char camera_calibration_signature[256];
++    char profile_calibration_signature[256];
++    unsigned calibration_signature_invalid;
+   } libraw_dng_levels_t;
+ 
+   typedef struct
+diff --git a/src/metadata/identify.cpp b/src/metadata/identify.cpp
+index 726dc3b..58fbb1f 100644
+--- a/src/metadata/identify.cpp
++++ b/src/metadata/identify.cpp
+@@ -1538,11 +1538,36 @@ void LibRaw::identify_process_dng_fields()
+ 				imgdata.color.dng_levels.rawopcodes[i].data = tiff_ifd[iifd].dng_levels.rawopcodes[i].data;
+ 			}
+ 
++            sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ASSHOTWHITEXY);
++            if (sidx >= 0)
++            {
++                COPYARR(imgdata.color.dng_levels.asshotwhitexy,
++                        tiff_ifd[sidx].dng_levels.asshotwhitexy);
++                imgdata.color.dng_levels.parsedfields |= LIBRAW_DNGFM_ASSHOTWHITEXY;
++            }
++            const unsigned signature_bits[2] = {
++                LIBRAW_DNGFM_CAMERACALIBRATIONSIGNATURE,
++                LIBRAW_DNGFM_PROFILECALIBRATIONSIGNATURE};
++            for (int signature_index = 0; signature_index < 2; ++signature_index)
++            {
++                sidx = IFDLEVELINDEX(iifd, signature_bits[signature_index]);
++                if (sidx < 0) continue;
++                if (signature_index == 0)
++                    COPYARR(imgdata.color.dng_levels.camera_calibration_signature,
++                            tiff_ifd[sidx].dng_levels.camera_calibration_signature);
++                else
++                    COPYARR(imgdata.color.dng_levels.profile_calibration_signature,
++                            tiff_ifd[sidx].dng_levels.profile_calibration_signature);
++                imgdata.color.dng_levels.calibration_signature_invalid |=
++                    tiff_ifd[sidx].dng_levels.calibration_signature_invalid & (1u << signature_index);
++                imgdata.color.dng_levels.parsedfields |= signature_bits[signature_index];
++            }
+ 			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_ASSHOTNEUTRAL);
+ 			if (sidx >= 0)
+ 			{
+ 				COPYARR(imgdata.color.dng_levels.asshotneutral,
+ 					tiff_ifd[sidx].dng_levels.asshotneutral);
++                imgdata.color.dng_levels.parsedfields |= LIBRAW_DNGFM_ASSHOTNEUTRAL;
+ 				if (imgdata.color.dng_levels.asshotneutral[0])
+ 				{
+ 					cam_mul[3] = 0;
+diff --git a/src/metadata/tiff.cpp b/src/metadata/tiff.cpp
+index 4212d4b..3df0bb0 100644
+--- a/src/metadata/tiff.cpp
++++ b/src/metadata/tiff.cpp
+@@ -1524,11 +1524,37 @@ int LibRaw::parse_tiff_ifd(INT64 base)
+ 	  }
+       break;
+     case 0xc629: /* 50729, AsShotWhiteXY */
++      if (type != 5 || len != 2)
++        break;
++      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_ASSHOTWHITEXY;
+       xyz[0] = getreal(type);
+       xyz[1] = getreal(type);
++      tiff_ifd[ifd].dng_levels.asshotwhitexy[0] = xyz[0];
++      tiff_ifd[ifd].dng_levels.asshotwhitexy[1] = xyz[1];
+       xyz[2] = 1 - xyz[0] - xyz[1];
+       FORC3 xyz[c] /= LibRaw_constants::d65_white[c];
+       break;
++    case 0xc6f3: /* CameraCalibrationSignature */
++    case 0xc6f4: /* ProfileCalibrationSignature */
++    {
++      libraw_dng_levels_t &levels = tiff_ifd[ifd].dng_levels;
++      const bool camera = tag == 0xc6f3;
++      const unsigned invalid_bit = camera ? 1u : 2u;
++      char *signature = camera ? levels.camera_calibration_signature
++                               : levels.profile_calibration_signature;
++      levels.parsedfields |= camera ? LIBRAW_DNGFM_CAMERACALIBRATIONSIGNATURE
++                                    : LIBRAW_DNGFM_PROFILECALIBRATIONSIGNATURE;
++      memset(signature, 0, 256);
++      levels.calibration_signature_invalid &= ~invalid_bit;
++      if ((type != 1 && type != 2) || len < 1 || len > 256 ||
++          fread(signature, 1, len, ifp) != len || signature[len - 1] != 0 ||
++          memchr(signature, 0, len - 1) != 0)
++      {
++        signature[0] = 0;
++        levels.calibration_signature_invalid |= invalid_bit;
++      }
++      break;
++    }
+     case 0xc62a: /* DNG: 50730 BaselineExposure */
+       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BASELINEEXPOSURE;
+       tiff_ifd[ifd].dng_levels.baseline_exposure = getrealf(type);

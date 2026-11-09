@@ -116,6 +116,8 @@ dependencies {
     // Installs src/main/baseline-prof.txt on sideloaded installs (no Play to deliver it); see that file.
     implementation("androidx.profileinstaller:profileinstaller:1.4.0")
     testImplementation("junit:junit:4.13.2")
+    // Execute the real sidecar/style JSON contract on the release JVM test path.
+    testImplementation("org.json:json:20240303")
     // Screenshots (app/src/testDebug, docs/SCREENSHOTS.md): debug unit tests only, so the
     // release build and its unit tests never see them.
     testDebugImplementation(composeBom)

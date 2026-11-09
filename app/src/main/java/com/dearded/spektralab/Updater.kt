@@ -324,11 +324,12 @@ class UpdateReceiver : BroadcastReceiver() {
 
 /**
  * Orders release versions: "0.1.19-alpha" > "0.1.18-alpha"; for the same
- * numbers, alpha < beta < rc < no suffix. A leading "v" is ignored.
+ * numbers, alpha < beta < rc < no suffix, then compare the stage's numeric
+ * components (beta < beta2 == beta.2 < beta10). Ignore leading "v" and build metadata.
  */
 internal fun compareVersions(a: String, b: String): Int {
     fun split(v: String): Pair<List<Int>, String> {
-        val s = v.trim().removePrefix("v")
+        val s = v.trim().removePrefix("v").substringBefore('+')
         val dash = s.indexOf('-')
         val num = if (dash < 0) s else s.substring(0, dash)
         val suffix = if (dash < 0) "" else s.substring(dash + 1)
@@ -346,5 +347,18 @@ internal fun compareVersions(a: String, b: String): Int {
         val d = na.getOrElse(i) { 0 }.compareTo(nb.getOrElse(i) { 0 })
         if (d != 0) return d
     }
-    return rank(sa).compareTo(rank(sb))
+    val stageOrder = rank(sa).compareTo(rank(sb))
+    if (stageOrder != 0) return stageOrder
+    fun stageNumbers(s: String): List<Int> {
+        val match = Regex("^(?:alpha|beta|rc)(?:[.-]?(\\d+(?:\\.\\d+)*))?$").matchEntire(s)
+        val numbers = match?.groupValues?.get(1).orEmpty()
+        return if (numbers.isEmpty()) emptyList() else numbers.split('.').map { it.toIntOrNull() ?: 0 }
+    }
+    val qa = stageNumbers(sa)
+    val qb = stageNumbers(sb)
+    for (i in 0 until maxOf(qa.size, qb.size)) {
+        val d = qa.getOrElse(i) { 0 }.compareTo(qb.getOrElse(i) { 0 })
+        if (d != 0) return d
+    }
+    return 0
 }

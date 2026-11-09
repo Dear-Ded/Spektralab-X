@@ -67,6 +67,8 @@ class EngineHost(private val app: Application) {
     val pacer by lazy { ExportPacer(app, this) }
     /** The 正在处理 list. Process-wide, so it outlives every editor. */
     val queue: ProcessingQueue by lazy { ProcessingQueue(app, this) }
+    /** Keep candidate decode/replacement from overlapping an export session. */
+    internal val transientSessions = TransientSessionLease()
     /** Uptime of the last slider move or edit; background jobs wait for a quiet moment. */
     @Volatile var lastInteraction = 0L
 

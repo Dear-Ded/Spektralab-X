@@ -1,0 +1,85 @@
+diff --git a/engine/src/pipeline/engine.cpp b/engine/src/pipeline/engine.cpp
+index d7fb948..547cce8 100644
+--- a/engine/src/pipeline/engine.cpp
++++ b/engine/src/pipeline/engine.cpp
+@@ -1812,6 +1812,7 @@ bool spk::view::render(spk_session* session, const Request& request, Result& res
+                        std::string& error) {
+     result = Result{};
+     if (!session) { error = "view: session is null"; return false; }
++    if (request.cancelled && request.cancelled()) { error = "render cancelled"; return false; }
+     if (!resume(session, error)) return false;
+     const Tier* tier = find_tier(request.tier.c_str());
+     if (!tier) { error = "view: unknown tier"; return false; }
+@@ -1867,6 +1868,7 @@ bool spk::view::render(spk_session* session, const Request& request, Result& res
+         const uint32_t meta[] = {uint32_t(source.pixels()), 1}; // ProPhoto OETF
+         if (!gpu->dispatch("spk_cctf_encode_matrix", {gpu::Arg::buf(source.buf), gpu::Arg::inline_bytes(identity, 9),
+                 gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(packed_print.buf)}, source.pixels(), error) || !gpu->flush(error)) return false;
++        if (request.cancelled && request.cancelled()) { error = "render cancelled"; return false; }
+     } else if (!result.print_cached) {
+         session->pipeline->set_source_shape(source.w, source.h, session->source.w, session->source.h);
+         Image negative, rgb;
+diff --git a/engine/src/pipeline/view.hpp b/engine/src/pipeline/view.hpp
+index 8ae0af1..073e895 100644
+--- a/engine/src/pipeline/view.hpp
++++ b/engine/src/pipeline/view.hpp
+@@ -5,6 +5,7 @@
+ #include <cstddef>
+ #include <array>
+ #include <cstdint>
++#include <functional>
+ #include <string>
+ #include <vector>
+ #include "json.hpp"
+@@ -33,6 +34,9 @@ struct Request {
+     // Internal Android boundary: encoded ProPhoto RGB before grade/UNORM16.
+     // Requires no_film, disabled adjustments and no output conversion/proof.
+     bool ungraded_float = false;
++    // Optional, nonthrowing host poll. Called only between completed GPU work.
++    // An empty callback preserves existing view/export behaviour.
++    std::function<bool()> cancelled;
+ };
+ struct Result {
+     uint32_t width = 0, height = 0, source_width = 0, source_height = 0;
+diff --git a/engine/src/pipeline/view_process.cpp b/engine/src/pipeline/view_process.cpp
+index a152e43..17bcfc0 100644
+--- a/engine/src/pipeline/view_process.cpp
++++ b/engine/src/pipeline/view_process.cpp
+@@ -63,6 +63,11 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+              const gpu::BufferRef& di_lut,uint32_t di_lut_size,Image* device_output) {
+     const auto started=Clock::now();
+     try {
++        const auto cancelled=[&] {
++            if(req.cancelled&&req.cancelled()){error="render cancelled";return true;}
++            return false;
++        };
++        if(cancelled())return false;
+         if(!print.valid()||(print.c!=2&&print.c!=3)){error="view: expected device RGBA16 or encoded RGB float input";return false;}
+         if(print.c==3&&di_lut){error="view: DI lookup requires packed negative codes";return false;}
+         if(req.output_channels!=3&&req.output_channels!=4){error="view: output_channels must be 3 or 4";return false;}
+@@ -115,21 +120,26 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+             // Args borrow raw pointers; end their scope and release the curve
+             // table only after the dispatch that uses them has completed.
+         }
++        if(cancelled())return false;
+         bool geometry=x!=0||y!=0||cw!=1||ch!=1||angle!=0||turns!=0||flips!=0;
+         if(geometry){float p[]={float(x+cw/2),float(y+ch/2),float(cw),float(ch),float(std::cos(angle)),float(std::sin(angle)),float(print.h)/print.w};
+             if(!resample(gpu,current,w,h,p,turns,flips,error))return false;}
++        if(cancelled())return false;
+         uint32_t edge=std::max(w,h);
+         if(req.long_edge&&req.long_edge<edge){double s=double(req.long_edge)/edge;w=std::max(1u,uint32_t(std::lround(w*s)));h=std::max(1u,uint32_t(std::lround(h*s)));
+             const float p[]={.5f,.5f,1,1,1,0,float(current.h)/current.w};
+             if(!resample(gpu,current,w,h,p,0,0,error))return false;}
++        if(cancelled())return false;
+         if(req.ungraded_float){
+             if(!gpu->trim_idle_for_phase(current.bytes(),0,error))return false;
+             result.post_ms=ms(started);
+             result.width=w;result.height=h;result.source_width=print.w;result.source_height=print.h;
+             result.file_width=w;result.file_height=h;
+             const auto read=Clock::now();
++            if(cancelled())return false;
+             result.float_pixels.resize(current.elements());
+             if(!gpu->read(current.buf.get(),0,result.float_pixels.data(),current.bytes(),error))return false;
++            if(cancelled())return false;
+             result.readback_ms=ms(read);
+             return true;
+         }

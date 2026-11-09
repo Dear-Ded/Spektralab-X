@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-09",
+  "validation_stage": "pre-beta2 source investigation; historical version and outcomes retained",
+  "co_creator": "GPT (OpenAI)",
+  "upstream_commit": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "app_version": "0.1.19-beta",
+  "version_code": 120,
+  "source_fix_published": false,
+  "visual_reference": "Lightroom or normal in-camera colour; equivalence not established",
+  "metadata_regression": {
+    "settings_per_file": 15,
+    "matched": 53,
+    "outside_camera_positive_response_range": 7,
+    "maximum_kelvin_error": 0.0175583,
+    "maximum_tint_error": 0.000022021,
+    "full_pixel_decode": false,
+    "files": [
+      {
+        "name": "IMG_20230420_152059.dng",
+        "model": "Xiaomi 13 Ultra",
+        "sha256": "0c65be622a5a0f2e9ca6fd3f3d1e68436115df807ff5eb2553d7727fce5da982",
+        "matched": 14,
+        "outside_camera_range": 1
+      },
+      {
+        "name": "IMG_20230420_115647.dng",
+        "model": "Xiaomi 13 Ultra",
+        "sha256": "94184d94ace7cfd3fc698e6ad6bac53a45342db5989d49d213a4b1660ebcc362",
+        "matched": 14,
+        "outside_camera_range": 1
+      },
+      {
+        "name": "Xiaomi_-_Mi_9_Lite_-_16bit_(4:3).dng",
+        "model": "Xiaomi Mi 9 Lite",
+        "sha256": "5d443fe71ec4372804587079e3fa8f46a6612f709008e7fc4ebe34be00206c4b",
+        "matched": 12,
+        "outside_camera_range": 3
+      },
+      {
+        "name": "Apple_-_iPhone_12_Pro_-_8bit_(4:3).DNG",
+        "model": "Apple iPhone 12 Pro",
+        "sha256": "e91e77a4533ed7cce551d83330676ea5c47dd5e55fb38adda7819366afdbdfc2",
+        "matched": 13,
+        "outside_camera_range": 2
+      }
+    ]
+  },
+  "pixel_decode_regression": {
+    "mode": "compatible",
+    "settings_kelvin_tint": [[2850, 0], [4000, -150], [6500, -150], [12000, 0]],
+    "cases": 8,
+    "passed": 8,
+    "all_rgb_and_output_matrices_finite": true,
+    "maximum_kelvin_error": 0.017558301,
+    "maximum_tint_error": 0.000022021,
+    "files": [
+      {
+        "name": "IMG_20230420_152059.dng",
+        "output_size": [3072, 4096],
+        "forward_matrix_cases": 4,
+        "maximum_output_matrix_error": 0
+      },
+      {
+        "name": "Apple_-_iPhone_12_Pro_-_8bit_(4:3).DNG",
+        "output_size": [3024, 4032],
+        "legacy_conversion_cases": 4,
+        "fallback_reason": "No ForwardMatrix tags"
+      }
+    ],
+    "visual_colour_accuracy_measured": false
+  },
+  "additional_headroom_probe": {
+    "name": "IMG_20230420_152059.dng",
+    "target_kelvin_tint": [4000, -150],
+    "actual_kelvin_tint": [4000.000307633, -149.999997141],
+    "forward_matrix_applied": true,
+    "maximum_output_matrix_error": 0,
+    "nonfinite_pixel_count": 0,
+    "passed": true
+  },
+  "builds": {
+    "native_strict": "passed",
+    "native_default": "passed",
+    "host_spk_image_io": "passed",
+    "android_assembleRelease": "passed",
+    "android_testReleaseUnitTest": "up-to-date; 19 existing JVM tests, zero failures or errors"
+  },
+  "patch_application": {
+    "patches": ["0021", "0022", "0023"],
+    "independent_clean_base": true,
+    "gnu_patch_fuzz": 0,
+    "result_compared_to_built_source": "five affected engine files byte-identical after LF-normalized application"
+  },
+  "limitations": [
+    "User's own Pro-mode RAW and UltraRAW variants have not been tested on device",
+    "Nonidentity CameraCalibration retains the legacy conversion without profile/calibration signatures",
+    "Complete Adobe profile tables and tone rendering are not implemented by this fix",
+    "AsShotWhiteXY-only Pixel DNG support and no-film UNORM16 highlight clipping remain separate issues"
+  ]
+}

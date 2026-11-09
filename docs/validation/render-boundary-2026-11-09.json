@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-09",
+  "validation_stage": "pre-beta2 boundary investigation; historical failures retained; editor recovery later repaired during beta2 preparation",
+  "co_creator": "GPT (OpenAI)",
+  "upstream_commit": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "app_version": "0.1.19-beta",
+  "version_code": 120,
+  "committed": false,
+  "pushed": false,
+  "published": false,
+  "brightness_fix": {
+    "old_implementation_fails_new_regression": true,
+    "legal_control_and_threshold_cases_passed": 64,
+    "in_range_float32_samples_compared": 458759,
+    "in_range_bytes_unchanged": true,
+    "comparison_scope": "same compiler and libm, not a cross-platform hash guarantee",
+    "actual_render_comparisons": 24,
+    "actual_render_environment": "same Linux host: upstream Vulkan and Android C++ adaptation",
+    "maximum_rgb16_errors": {
+      "no_film_brightness": {"before": 4509, "after": 1},
+      "di_brightness": {"before": 1532, "after": 2},
+      "film_brightness": {"before": 0, "after": 0},
+      "neutral_srgb_p3_display_export": {"after_at_most": 1}
+    },
+    "selected_swatch": {
+      "encoded_prophoto_input": [1, 0, 0],
+      "exposure_ev": 3,
+      "brightness": 50,
+      "saturation": -100,
+      "upstream_rgb16": [27368, 27368, 27368],
+      "old_android_rgb16": [22859, 22859, 22859],
+      "fixed_android_rgb16": [27368, 27368, 27368]
+    }
+  },
+  "custom_wb_without_source_fix": {
+    "patch": "0024-raw-custom-without-as-shot.patch",
+    "missing_source_fixture": {
+      "name": "Xiaomi_-_Yi.RAW",
+      "sha256": "04aad34d8c3e2892fab76a9ef01b53c51eddddc98256f477eae1f2e607a50974",
+      "selected_kelvin_tint": [6500, 0],
+      "compatible_output_size": [2304, 1728],
+      "headroom_output_size": [4608, 3456],
+      "actual_decodes_passed": 2,
+      "source_wb_valid_flag": false,
+      "source_wb_all_zero": true,
+      "selected_wb_ratios_match": true,
+      "all_pixels_and_output_matrices_finite": true,
+      "default_decodes_still_rejected": 2
+    },
+    "valid_source_control_decodes_passed": 2,
+    "valid_source_metadata_retained": true,
+    "invalid_custom_rejections_with_unchanged_output": 8,
+    "total_rejection_atomicity_checks_passed": 10,
+    "existing_metadata_settings_rechecked": 60,
+    "metadata_settings_matched": 53,
+    "metadata_settings_explicitly_outside_camera_range": 7,
+    "existing_actual_compatible_decodes_rechecked": 8,
+    "existing_metadata_and_decode_reports_unchanged": true,
+    "total_actual_decodes_passed": 12,
+    "old_new_pixel_memcmp_performed": false,
+    "normal_android_default_open_support_added": false
+  },
+  "known_unresolved": [
+    {
+      "issue": "no-film intermediate UNORM16 loses recoverable highlight colour",
+      "evidence": "actual same-host render comparison",
+      "linear_prophoto_input": [4, 2, 0.8],
+      "exposure_ev": -3,
+      "upstream_rgb16": [55012, 37430, 22498],
+      "android_rgb16": [25467, 25467, 22498]
+    },
+    {
+      "issue": "no-film clamps negative components before they contribute to luma",
+      "evidence": "actual same-host render comparison",
+      "linear_prophoto_input": [-0.01, 0.18, 0.18],
+      "exposure_ev": 0,
+      "saturation": -100,
+      "upstream_rgb16": [17674, 17674, 17674],
+      "android_rgb16": [19904, 19904, 19904]
+    },
+    {
+      "issue": "valid WhiteXY-only Pixel 8 Pro DNG rejected by default decode",
+      "evidence": "actual production decode rejection before pixel processing",
+      "fixture_sha256": "45420c595401547cca950ae58d552bc82b32d31ce1d58c082df33004016197f5",
+      "as_shot_white_xy": [0.322046, 0.326646],
+      "automatic_white_balance_fallback_observed": false
+    },
+    {
+      "issue": "editor clears its image before reporting rejected custom WB",
+      "native_rejection_evidence": "both public Xiaomi 13 Ultra samples at 2000 K / tint +150",
+      "ui_consequence_evidence": "code tracing only",
+      "physical_device_ui_tested": false
+    },
+    {
+      "issue": "BaselineExposure not included in current default-render policy",
+      "pixel_4a_ev": 0.9,
+      "iphone_12_pro_ev": -0.3022167683,
+      "both_xiaomi_13_ultra_samples_ev": 0,
+      "demonstrated_cause_of_xiaomi_grey_report": false
+    },
+    {
+      "issue": "existing brightness LUT near-black approximation",
+      "brightness": 50,
+      "input_code": 9,
+      "direct_formula_code": 114,
+      "current_lut_code": 79,
+      "changed_by_this_fix": false
+    }
+  ],
+  "builds": {
+    "host_spk_image_io_with_new_metadata_layout": "passed",
+    "raw_threads_recompiled_without_file_fixture": "policy checks passed; no pixel-thread comparison claimed",
+    "native_strict_after_0024": "passed, 350 resize shapes/patterns and all numerical suites",
+    "native_default_after_brightness_fix": "passed",
+    "android_native_rebuild_and_assembleRelease_after_0024": "passed, 28 seconds",
+    "android_testReleaseUnitTest": "up-to-date, unchanged JVM tests",
+    "windows_only_raw_render": "source-reviewed; not compiled"
+  },
+  "patch_0024_application": {
+    "independent_clean_four_file_base": true,
+    "gnu_patch_fuzz": 0,
+    "built_source_sha256": {
+      "engine/src/io/raw_decoder.cpp": "c5eec3717d0506d0cfa19b1c08e742389850860cc42340306fb5974097f745b0",
+      "engine/src/io/raw_decoder.hpp": "92263d05d4ca6559b7bcbb9942ccc3459e6b648af37325e26d595259b5e506a7",
+      "engine/tests/raw_threads.cpp": "dbc93d8adbebc625e7a9256c934df6a617a2b6c249e82b91465155dcdcc89f85",
+      "engine/tools/raw_render.cpp": "0a1126f8234f6aac941206c3379c83449465456d6d273a9088b06d50ba53367d"
+    },
+    "all_four_files_match_clean_application": true
+  },
+  "limitations": [
+    "No physical Android GPU or UI validation in this follow-up",
+    "User's own Pro-mode RAW and UltraRAW files remain unavailable",
+    "No real single-illuminant DNG in the inspected fixture collection",
+    "Full Lightroom or camera-profile appearance equivalence is not established"
+  ]
+}

@@ -216,11 +216,15 @@ int main(int argc, char** argv) {
     spk_session* s = spk_open(engine, &img, opening.c_str(), nullptr);
     if (!s) { std::fprintf(stderr, "open: %s\n", spk_last_error(engine)); return 1; }
     spk_result r{};
+    std::vector<float> float_rgb;
     // SPK_TIER picks the tier (view_export.py renders "live", the editor's screen); default "full".
     const char* tier_env = std::getenv("SPK_TIER");
     const char* tier = tier_env && *tier_env ? tier_env : "full";
     if (flags.no_film || flags.di()) {
-        if (!spk::android::render_view(s, tier, flags.no_film, r, err)) {
+        const bool ok = flags.no_film
+            ? spk::android::render_view_float(s, tier, r, float_rgb, err)
+            : spk::android::render_view(s, tier, false, r, err);
+        if (!ok) {
             std::fprintf(stderr, "render view: %s\n", err.c_str());
             return 1;
         }
@@ -229,22 +233,33 @@ int main(int argc, char** argv) {
         return 1;
     }
     {
-        const auto print = drop_alpha(r.rgba16, r.row_stride_px, r.width, r.height);
+        std::vector<uint16_t> print;
+        if (!float_rgb.empty()) {
+            if (!write_rgb(out + "/print_float.rgb", r.width, r.height, 32, float_rgb.data())) return 1;
+            print.resize(float_rgb.size());
+            for (size_t i = 0; i < print.size(); ++i)
+                print[i] = uint16_t(std::floor(std::clamp(float_rgb[i], 0.0f, 1.0f) * 65535.0f + 0.5f));
+        } else print = drop_alpha(r.rgba16, r.row_stride_px, r.width, r.height);
         if (!write_rgb(out + "/print.rgb", r.width, r.height, 16, print.data())) return 1;
     }
     for (const auto& [target, tag] : {std::pair{"sRGB", "srgb"}, std::pair{"Display P3", "p3"}}) {
         spk::android::OutputTransform xf;
         if (!xf.fetch(engine, target, true, err)) { std::fprintf(stderr, "transform: %s\n", err.c_str()); return 1; }
         std::vector<uint16_t> file;
-        spk::android::pack_rgba16(r.rgba16, r.row_stride_px, r.width, r.height, file, look.get(), xf);
+        if (float_rgb.empty())
+            spk::android::pack_rgba16(r.rgba16, r.row_stride_px, r.width, r.height, file, look.get(), xf);
+        else spk::android::pack_float_rgba16(float_rgb.data(), r.row_stride_px, r.width, r.height, file, look.get(), xf);
         const auto e = drop_alpha(file.data(), r.width, r.width, r.height);
         if (!write_rgb(out + "/export_" + tag + ".rgb", r.width, r.height, 16, e.data())) return 1;
 
         spk::android::OutputTransform view;
         if (!view.fetch(engine, target, false, err)) { std::fprintf(stderr, "transform: %s\n", err.c_str()); return 1; }
         std::vector<uint8_t> screen(size_t(r.width) * r.height * 4);
-        spk::android::pack_rgba8(r.rgba16, r.row_stride_px, r.width, r.height, screen.data(), size_t(r.width) * 4,
-                                 look.get(), view);
+        if (float_rgb.empty())
+            spk::android::pack_rgba8(r.rgba16, r.row_stride_px, r.width, r.height, screen.data(), size_t(r.width) * 4,
+                                     look.get(), view);
+        else spk::android::pack_float_rgba8(float_rgb.data(), r.row_stride_px, r.width, r.height, screen.data(), size_t(r.width) * 4,
+                                          look.get(), view);
         const auto v = drop_alpha(screen.data(), r.width, r.width, r.height);
         if (!write_rgb(out + "/view_" + tag + ".rgb", r.width, r.height, 8, v.data())) return 1;
     }

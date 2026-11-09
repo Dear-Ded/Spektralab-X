@@ -205,17 +205,17 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             Text("保存")
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
+                            DropdownMenuItem(text = { Text("JPEG · 工作尺寸") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
                             })
-                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
+                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边不超过 3400）") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
                             })
-                            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
+                            DropdownMenuItem(text = { Text("16 位 TIFF · 工作尺寸") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
-                            if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text("全分辨率导出（后台）") }, onClick = {
+                            if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 工作尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
+                            DropdownMenuItem(text = { Text("高质量导出（受设备上限限制）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }
@@ -760,7 +760,7 @@ private fun Controls(
                             val stepEdited = listOf(
                                 !e.noFilm || e.filmFormatMm != d.filmFormatMm,
                                 !e.noFilm && !e.paperNone(positive),
-                                !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                                !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                                 !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma ||
                                     e.extraEffectsTuned(d),
@@ -799,8 +799,9 @@ private fun Controls(
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Spacer(Modifier.weight(1f))
                                     StepReset(enabled, what = "曝光", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
-                                        e.yShift != 0.0 || e.mShift != 0.0) {
+                                        e.yShift != 0.0 || e.mShift != 0.0 || !e.sceneCurve.isIdentity) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
+                                            sceneCurve = SceneCurve.IDENTITY,
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
                                     }
                                     }
@@ -819,6 +820,19 @@ private fun Controls(
                                     vm.update(e.copy(printExposure = it))
                                 }
                                 SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
+                                if (!e.noFilm) {
+                                    GroupLabel("胶片前曲线")
+                                    Hint("横轴为胶片曝光，纵轴为映射后的曝光：−8 至 +8 EV，中点为中灰。")
+                                    CurveEditor(e.sceneCurve.display, null, enabled,
+                                        includeLuma = true, editable = !e.sceneCurve.isSampled,
+                                        onDrag = vm::setInteracting) { curves ->
+                                        vm.update(e.copy(sceneCurve = SceneCurve.fromControls(curves)))
+                                    }
+                                    if (!e.sceneCurve.isIdentity) TextButton(enabled = enabled,
+                                        onClick = { vm.update(e.copy(sceneCurve = SceneCurve.IDENTITY)) }) {
+                                        Text(if (e.sceneCurve.isSampled) "重置采样曲线并开始编辑" else "重置所有通道")
+                                    }
+                                }
                                 // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
                                 val expandAll = rememberExpandAll()
                                 var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
@@ -1184,7 +1198,7 @@ private fun Controls(
             val entryEdited = listOf(
                 false,
                 e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
-                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 ||
+                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity ||
                     e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                 e.look != Look.NEUTRAL,
                 e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,

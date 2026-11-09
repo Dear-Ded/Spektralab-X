@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-09",
+  "host": "IBX",
+  "compiler": "GCC 14.2.0 (Debian 14.2.0-19)",
+  "upstream_patch": "patches/0031-view-output-cancellation.patch",
+  "engine_build": "passed",
+  "focused": {
+    "strict": "passed",
+    "default": "passed",
+    "no_film_cancel_stages_per_mode": 8,
+    "recovery_renders_equal_baseline_per_mode": 8,
+    "stages_cancelled_before_cpu_float_readback_allocation_per_mode": 7,
+    "parallel_conversion_pixels": 4199425,
+    "strict_integer_pixels_written_before_cancel_return": 303178,
+    "strict_float_pixels_written_before_cancel_return": 323663,
+    "default_integer_pixels_written_before_cancel_return": 307275,
+    "default_float_pixels_written_before_cancel_return": 294984,
+    "output_stable_after_parallel_cancel_return": true,
+    "uncancelled_full_and_strip_rgba8_rgba16_exact_parity": true,
+    "tiff_worker_join_partial_file_cleanup_and_cancel_classification": "passed",
+    "uncancelled_complete_tiff_file_parity": "passed"
+  },
+  "existing_regressions": {
+    "jpeg_strict_cases": 48,
+    "jpeg_complete_file_comparisons": 384,
+    "jpeg_frozen_old_writer_baseline": true,
+    "jpeg_cleanup": "passed",
+    "no_film_strict_matrix_cases": 120,
+    "no_film_matrix_max_error_rgba16": 1,
+    "no_film_matrix_max_error_rgba8": 1,
+    "no_film_tiff_row_comparisons": 780,
+    "no_film_repack_comparisons": 60,
+    "no_film_geometry_and_invalid_requests": "passed"
+  },
+  "cache_preservation": {
+    "basis": "source inspection of JNI renderReuse/Session::keep",
+    "existing_integer_and_float_caches_replaced_only_after_successful_packing": true,
+    "no_early_old_cache_eviction": true
+  },
+  "scope": [
+    "GPU cancellation is polled only before work or after completed flush/readback boundaries; an in-flight dispatch/readback is not preempted.",
+    "Parallel CPU conversion workers poll per row without throwing; cancellation is reported after all workers join.",
+    "TIFF compression of a strip already handed to zlib remains non-preemptible; JNI preserves cancellation classification after writer/close.",
+    "Legacy integer look-only packing without an output transform retains whole-conversion cancellation granularity.",
+    "Android Bitmap/JNI runtime and physical phone GPU cancellation are not covered by these host tests.",
+    "No peak-RSS reduction measurement or claim is made in this round."
+  ],
+  "logs": ["engine-build.log", "strict.log", "default.log", "jpeg-strict.log", "nofilm-strict.log"]
+}

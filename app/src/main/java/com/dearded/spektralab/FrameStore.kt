@@ -91,6 +91,7 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
             .put("frame", edit.frame.toJson())
             .put("borderId", edit.borderId)
             .put("look", edit.look.toJson())
+            .put("sceneCurve", edit.sceneCurve.toJson())
             .put("edgeRealName", edit.edgeRealName)
             .put("dateOrder", edit.dateOrder)
             .put("dateWithData", edit.dateWithData))
@@ -111,6 +112,7 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
                 frame = FrameSpec.fromJson(app.optJSONObject("frame")),
                 borderId = app.optString("borderId", "none"),
                 look = Look.fromJson(app.optJSONObject("look")),
+                sceneCurve = SceneCurve.fromJson(app.opt("sceneCurve")),
                 edgeRealName = app.optBoolean("edgeRealName", true),
                 dateOrder = app.optString("dateOrder", "japan"),
                 dateWithData = app.optBoolean("dateWithData", false),
@@ -350,7 +352,7 @@ fun pasteLook(target: Sidecar, frame: Frame, from: CopiedLook, groups: Set<LookG
         noFilm = s.noFilm, digitalIntermediate = s.digitalIntermediate,
         printExposure = s.printExposure, yShift = s.yShift, mShift = s.mShift,
     )
-    if (LookGroup.EXPOSURE in groups) e = e.copy(autoExposure = s.autoExposure, aeMethod = s.aeMethod, exposureEv = s.exposureEv)
+    if (LookGroup.EXPOSURE in groups) e = e.copy(autoExposure = s.autoExposure, aeMethod = s.aeMethod, exposureEv = s.exposureEv, sceneCurve = s.sceneCurve)
     if (LookGroup.WHITE_BALANCE in groups && frame.raw) { wbK = from.wbK; wbTint = from.wbTint }
     if (LookGroup.EFFECTS in groups) e = e.copy(
         grainActive = s.grainActive, grainAmount = s.grainAmount,

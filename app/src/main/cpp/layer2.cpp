@@ -47,10 +47,16 @@ float hue_to_rgb(float p, float q, float t) {
     return p;
 }
 
+bool valid_sampled_row(const std::vector<float>& v, size_t at) {
+    if (v.size() - at < size_t(kCurveSamples)) return false;
+    return std::all_of(v.begin() + at, v.begin() + at + kCurveSamples,
+                       [](float x) { return std::isfinite(x) && x >= 0 && x <= 1; });
+}
+
 // The kCurves tail as upstream's table: five rows of 256, row-major. Empty
-// when the tail is missing or malformed, or all five curves are identity
-// (upstream's `curvesActive`). The points arrive as floats, not upstream's
-// JSON doubles; the difference is under 1e-7, far below a 16-bit count.
+// when the tail is missing or malformed, or all five curves are identity.
+// Rows whose Double control points collapse in Float arrive already sampled
+// at the same 256 positions; ordinary control-point rows retain their math.
 std::vector<float> curve_table(const std::vector<float>& v) {
     std::vector<float> table(5 * 256);
     std::vector<std::array<double, 2>> p;
@@ -60,6 +66,13 @@ std::vector<float> curve_table(const std::vector<float>& v) {
         p.clear();
         if (at < v.size()) {
             const float n = v[at++];
+            if (n == kSampledCurveRow) {
+                if (!valid_sampled_row(v, at)) return {};
+                std::copy_n(v.begin() + at, kCurveSamples, table.begin() + row * kCurveSamples);
+                at += kCurveSamples;
+                active = true;
+                continue;
+            }
             if (!(n >= 2 && n <= 256) || n != std::floor(n) || at + 2 * size_t(n) > v.size()) return {};
             for (int i = 0; i < int(n); ++i, at += 2) {
                 const double x = v[at], y = v[at + 1];
@@ -86,6 +99,11 @@ size_t curves_end(const std::vector<float>& v) {
     for (int row = 0; row < 5; ++row) {
         if (at >= v.size()) return 0;
         const float n = v[at++];
+        if (n == kSampledCurveRow) {
+            if (!valid_sampled_row(v, at)) return 0;
+            at += kCurveSamples;
+            continue;
+        }
         if (!(n >= 2 && n <= 256) || n != std::floor(n) || at + 2 * size_t(n) > v.size()) return 0;
         at += 2 * size_t(n);
     }
@@ -140,6 +158,7 @@ Layer2::Layer2(const std::vector<float>& v) {
     wb_[0] = 1 + 0.18f * t; wb_[1] = 1 - 0.12f * g; wb_[2] = 1 - 0.18f * t;
     // pow(pow(c, 2.2) * 2^ev, 1/2.2) is c * 2^(ev/2.2): the same, without two pows a pixel.
     exposure_gain_ = std::pow(2.0f, at(kExposure) / 2.2f);
+    linear_exposure_gain_ = float(std::pow(2.0, double(at(kExposure))));
     contrast_ = at(kContrast) / 100;
     brightness_ = at(kBrightness) / 100;
     saturation_ = 1 + at(kSaturation) / 100;
@@ -176,7 +195,7 @@ void Layer2::set_lut(std::shared_ptr<const ColourTable> lut, float strength) {
     lut_strength_ = lut_ ? s : 0;
 }
 
-void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& f) const {
+void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& f, bool unquantised) const {
     if (lut_) {
         float lr = r, lg = g, lb = b;
         lut_->apply(lr, lg, lb);
@@ -184,13 +203,24 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& 
         if (identity_) return;   // the table alone: the sliders are all neutral
     }
     float c[3] = {r * wb_[0], g * wb_[1], b * wb_[2]};
-    for (float& x : c) x = std::max(0.0f, x) * exposure_gain_;
+    if (exposure_gain_ != 1.0f) {
+        for (float& x : c) {
+            if (unquantised) x = std::pow(std::pow(std::max(0.0f, x), 2.2f) * linear_exposure_gain_, 1.0f / 2.2f);
+            else x = std::max(0.0f, x) * exposure_gain_;
+        }
+    }
     if (contrast_ != 0) {
         const float k = 1 + contrast_ * 1.2f;
         for (float& x : c) x = (x - kMidGrey) * k + kMidGrey;
     }
     if (!bright_lut_.empty()) {
         for (float& x : c) {
+            // Exposure/contrast can exceed the table domain; later tone or
+            // saturation controls can still return that light below white.
+            if (unquantised || x > 2.0f) {
+                x = std::pow(std::max(0.0f, x), 1.0f / (1.0f + brightness_ * 0.8f));
+                continue;
+            }
             const float p = std::min(2.0f, std::max(0.0f, x)) * 2048.0f;
             const int i = std::min(4095, int(p));
             x = bright_lut_[i] + (bright_lut_[i + 1] - bright_lut_[i]) * (p - i);
@@ -265,7 +295,7 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& 
         }
     }
     // Upstream's step 8: masks after the global adjustments and curves, before the vignette.
-    if (local_ && f.placed) local_->masks(*f.placed, c, u, v);
+    if (local_ && f.placed) local_->masks(*f.placed, c, u, v, unquantised);
     if (fade_ != 0) for (float& x : c) x = fade_ + saturate(x) * (1 - fade_);
     if (vignette_ != 0) {
         const float px = (u - 0.5f) * 2, py = (v - 0.5f) * 2;
@@ -283,11 +313,14 @@ Layer2::Frame Layer2::frame(uint32_t w, uint32_t h) const {
 }
 
 void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_px,
-                     uint32_t w, uint32_t h, uint8_t* out, size_t out_stride) {
+                     uint32_t w, uint32_t h, uint8_t* out, size_t out_stride,
+                     const OutputCancel& cancel) {
+    cancel.check();
     const Layer2::Frame frame = look.frame(w, h);
     const float iw = 1.0f / std::max(1u, w), ih = 1.0f / std::max(1u, h);
     rows(h, uint64_t(w) * h, [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
+            if (cancel.cancelled()) return;
             const uint16_t* s = src + size_t(y) * src_stride_px * 4;
             uint8_t* d = out + size_t(y) * out_stride;
             const float v = (y + 0.5f) * ih;
@@ -301,6 +334,7 @@ void pack_rgba8_look(const Layer2& look, const uint16_t* src, size_t src_stride_
             }
         }
     });
+    cancel.check();
 }
 
 void apply_rgba16_in_place(const Layer2& look, uint16_t* px, size_t stride_px, uint32_t w, uint32_t h) {

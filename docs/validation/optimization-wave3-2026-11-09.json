@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-09",
+  "co_created_by": "GPT (OpenAI), AI assistant",
+  "repository": "Dear-Ded/Spektralab-X",
+  "public_base": "6aff78e9d1b7ac0e137526b36781271561ef95f8",
+  "status": "Scoped source verification complete; user authorized pushing confirmed source. No APK, tag or release.",
+  "version_changed_in_this_wave": false,
+  "source_hashes": "../../tools/native/validation/wave3-20261109/source-hashes.json",
+  "cancellation": {
+    "implementation": [
+      "Engine 0033 adds safe boundaries around integer view final packing, flush, CPU allocation and readback",
+      "Android integer/DI adapter passes the request-local generation token",
+      "Legacy look/direct packing polls per row; joined workers finish before cancellation is reported"
+    ],
+    "aoidc": {
+      "compiler": "GCC 11.4.0",
+      "focused_adapter_modes": ["strict", "default"],
+      "float_no_film_boundaries_per_mode": 8,
+      "float_before_cpu_allocation_per_mode": 7,
+      "integer_no_film_boundaries_per_mode": 10,
+      "integer_before_cpu_allocation_per_mode": 9,
+      "real_di_boundaries_per_mode": 9,
+      "real_di_before_cpu_allocation_per_mode": 8,
+      "all_recovery_outputs_equal_baseline": true,
+      "integer_adapter_uncancelled_parity_and_precancel": true,
+      "legacy_look_reference_and_active_cancel_join": true,
+      "parallel_conversion_pixels_per_input_type": 4199425,
+      "input_types": ["RGBA16", "float RGB"],
+      "full_strip_rgba8_rgba16_parity": true,
+      "tiff_harness_cleanup_classification_and_file_parity": true,
+      "logs": [
+        "../../tools/native/validation/wave3-20261109/wave3-cancel-final.log",
+        "../../tools/native/validation/wave3-20261109/wave3-cancel-final-default.log"
+      ]
+    },
+    "ibx": {
+      "compiler": "GCC 14.2.0",
+      "focused_adapter_modes": ["strict", "default"],
+      "float_no_film_boundaries_per_mode": 8,
+      "integer_no_film_boundaries_per_mode": 10,
+      "real_di_included": false,
+      "legacy_look_and_parallel_conversion": "passed",
+      "evidence": "../../tools/native/validation/integer-cancel-20261109/"
+    },
+    "no_film_regression": {
+      "cases": 120,
+      "maximum_rgba16_difference": 2,
+      "maximum_rgba8_difference": 1,
+      "tiff_rows": 780,
+      "repack_comparisons": 60,
+      "geometry_and_invalid_request_checks": 6,
+      "log": "../../tools/native/validation/wave3-20261109/wave3-nofilm.log"
+    }
+  },
+  "spool_disk": {
+    "extent": "width * height * 4 bytes; fallocate mode 0 on the anonymous spool fd",
+    "fallback": "Only ENOSYS/EOPNOTSUPP; fstatvfs block comparison without multiplication overflow",
+    "incomplete_seal_remains_rejected": true,
+    "real_requested_bytes": 28324,
+    "real_allocated_block_bytes": 28672,
+    "ibx_modes": ["strict", "default", "ASan/UBSan with LeakSanitizer"],
+    "sanitizer_scope": "The complete small header-only fixture; no engine or codec archive",
+    "jpeg_cases": 48,
+    "complete_jpeg_file_comparisons": 384,
+    "evidence": "../../tools/native/validation/spool-disk-20261109/result.json"
+  },
+  "transient_sessions": {
+    "production_files": ["EngineHost.kt", "EditorViewModel.kt", "ProcessingQueue.kt", "TransientSessionLease.kt"],
+    "scope": "One new editor candidate transaction or export native lifetime at a time",
+    "wait_is_cancellable_outside_native_dispatchers": true,
+    "candidate_cleanup_and_retirement_before_unlock": true,
+    "export_admission_recovery_and_native_cleanup_inside_lease": true,
+    "rss_baseline_reset_learning_and_diagnostic_inside_lease": true,
+    "ibx_independent_jvm": {
+      "java": "21",
+      "kotlin": "2.0.21",
+      "coroutines": "1.9.0",
+      "junit": "4.13.2",
+      "tests": 7,
+      "failures": 0,
+      "evidence": "../../tools/native/validation/transient-lease-20261109/"
+    },
+    "is_full_byte_budget": false
+  },
+  "float_dng": {
+    "production_decoder_changed": false,
+    "legal_format_float32_fixture_cases": 6,
+    "default_and_preserved_unpack_calls": 12,
+    "production_compatible_headroom_calls": 12,
+    "neighboring_float_input_gap": 1.4901161193847656e-8,
+    "default_integer_output_gap": 0,
+    "same_roi_output_ratio_when_distant_max_changes_2_to_4": 0.5,
+    "preserved_float_dcraw_process_status": -4,
+    "contract": "../DNG_FLOAT_PRECISION_2026-11-09.md",
+    "evidence": "../../tools/native/validation/wave3-20261109/float-precision/fixtures/results.json",
+    "isolated_linear_raw_prototype": {
+      "production_entry_enabled": false,
+      "host": "AOIDC, existing patched LibRaw archive; standalone probe only",
+      "cases": 26,
+      "accepted": 17,
+      "explicitly_rejected": 9,
+      "legacy_wb_expected_failures": 3,
+      "fixed_absolute_tolerance": 0.000002,
+      "maximum_absolute_error": 4.76837158203125e-7,
+      "unchanged_area_byte_equal_components": 8064,
+      "scaled_neutral_output_byte_equal": true,
+      "all_eight_orientations": true,
+      "independent_reference": "Python Gaussian inverse, stored rational ASN/black and normalized ForwardMatrix; no C++ matrix consumption",
+      "correction": "Use original rational AsShotNeutral before matrix preparation, avoiding duplicate range adjustment after per-plane normalization",
+      "payload_bytes_per_pixel": 24,
+      "payload_is_not_total_rss": true,
+      "evidence": "../../tools/native/validation/wave3-20261109/float-linear/README.md"
+    }
+  },
+  "patch_replay": {
+    "pin": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+    "engine_patches": 33,
+    "engine_patched_files_sha_equal": 92,
+    "libraw_patches": 15,
+    "libraw_patched_files_sha_equal": 22,
+    "gnu_patch_zero_fuzz": true,
+    "android_libraw_sources_sha_equal": true,
+    "evidence": "../../tools/native/validation/wave3-20261109/wave3-replay/result.json",
+    "historical_junit_inside_replay_record": "66 tests UP-TO-DATE before the new lease sources; superseded by the final Android record below"
+  },
+  "android": {
+    "host": "AOIDC Linux x86_64",
+    "ndk": "27.2.12479018",
+    "compiler": "Clang 18.0.3",
+    "target": "arm64-v8a, API 29",
+    "command": ":app:testReleaseUnitTest :app:compileReleaseKotlin :app:externalNativeBuildRelease",
+    "result": "BUILD SUCCESSFUL in 48s; 8 tasks executed, 28 up-to-date",
+    "final_app_and_harness_source_files_sha_equal": 136,
+    "source_manifest": "../../tools/native/validation/wave3-20261109/wave3-app-source.sha256",
+    "native_library_sha256": "72f5b6a5c1222bb53efaa434e6a33c49b1659aeee44f8b7026146ab60539fc22",
+    "native_cmake_build_directory": "3e2p1y2g; SPK_UPSTREAM points to the wave3 patched tree",
+    "jvm": {
+      "task_state": "executed",
+      "suites": 10,
+      "tests": 73,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "log": "../../tools/native/validation/wave3-20261109/wave3-android-final.log",
+    "junit_reports": "../../tools/native/validation/wave3-20261109/junit/",
+    "confirmed_push_snapshot": {
+      "source_tree_before_evidence_append": "b906de2a6e949400e82d4139bf4f97ff3898012a",
+      "source_archive_sha256": "97ac55713f03f67bf0554d87dec2dbec5bf5a91b0a0b3f1392fdf73264fadf99",
+      "version": "0.1.19-beta",
+      "version_code": 120,
+      "command": ":app:testReleaseUnitTest :app:compileReleaseKotlin :app:externalNativeBuildRelease",
+      "result": "BUILD SUCCESSFUL in 1m 6s; 13 tasks executed, 6 from cache, 17 up-to-date",
+      "tests_task_executed": true,
+      "suites": 10,
+      "tests": 73,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "native_library_sha256_unchanged": true,
+      "log": "../../tools/native/validation/wave3-20261109/wave3-confirmed-build.log",
+      "junit_reports": "../../tools/native/validation/wave3-20261109/junit-confirmed/",
+      "scope": "Exact staged source including unchanged public version files; subsequent changes only append evidence/documentation. Release workflow, version bump and fastlane notes remain local."
+    }
+  },
+  "limits": [
+    "No physical Android GPU, ART/JNI execution, mobile memory/thermal/cancellation acceptance or user Xiaomi 13 Ultra RAW/UltraRAW visual comparison.",
+    "Legacy JNI direct packing and cancellation during an active malloc/readback copy are source-reviewed and compiled, not runtime-exercised.",
+    "Host strict/default modes apply to the harness and adapter; they are not two rebuilt engine/shader configurations or cross-GPU byte-equivalence claims.",
+    "Already submitted GPU operations, active codec strip compression and JPEG internal second pass are not preempted.",
+    "Spool reservation occurs after rendering and covers only its RGBA8 extent. JPEG, EXIF and gallery space are separate; fallback space is only a snapshot.",
+    "The lease excludes installed old sessions/caches, normal preview/card rendering and contact-sheet thumbnail native work; it is not a single-task memory guarantee.",
+    "RSS learning is still a process heuristic, not OS admission or a complete allocator budget.",
+    "Float LinearRaw work is an isolated prototype; Bayer float demosaic, original selected-IFD metadata, crop/opcodes/gain/profile and output policies are not production-complete.",
+    "No full external-memory source/negative/print pipeline or new phone speed/peak-memory claim."
+  ]
+}

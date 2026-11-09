@@ -2,6 +2,12 @@
 
 本仓库不改动上游源码本身。上游 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 在 CI 里按固定提交下载（见 [`scripts/fetch-upstream.sh`](../scripts/fetch-upstream.sh)），然后按文件名顺序打上 [`patches/`](../patches/) 里的补丁。补丁集合的哈希写进上游目录的标记文件和 CI 缓存键，改动补丁会自动重新解压。
 
+2026-11-09 深审：0029 已补齐 Android 分批 dispatch 的 push-constant base，新回归能使旧 shader 失败；30 个补丁在干净 pin 上 `--fuzz=0` 应用，91 个文件与实际测试引擎一致。最新验证与尚未解决的内存/取消/完整分块边界见 [深审记录](ENGINE_DEEP_REVIEW_2026-11-09.md)。
+
+后续第二批：32 个引擎补丁和 15 个 LibRaw overlay 在干净 pin 上 `--fuzz=0` 重放通过，92/22 个文件与生产候选哈希一致，Android LibRaw 副本也一致。0031 改为标准 U3；LibRaw 0016 的过时上下文对齐此前 0002，代码保持相同。见 [第二批证据](validation/optimization-wave2-2026-11-09.json)。
+
+第三批增加 0033，33 个引擎补丁和 15 个 LibRaw overlay 已再次零 fuzz 重放，92/22 个文件与候选源码哈希一致。该批同时补齐整数 view 取消和 JPEG 外存磁盘预留；浮点 DNG 实验未接入默认解码。见 [第三批证据](validation/optimization-wave3-2026-11-09.json)。
+
 All changes to the upstream engine live here as unified diffs, applied in name order on top of the pinned upstream commit.
 
 | 补丁 | 改动文件 | 解决的问题 |
@@ -24,6 +30,21 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0016-setup-cache-shared-lut.patch` | `core/setup_cache.hpp`、`core/setup_cache.cpp`、`pipeline/pipeline.cpp` | 缓存曾返回 `vector` 元素的裸指针，解锁后上传或拷贝 LUT 时，另一会话的 LRU 轮换、插入、淘汰会让指针指向另一张表或失效。改为共享、不可变的 LUT 载荷，调用方在上传和拷贝结束前持有所有权。缓存仍保留 4 项；读取者尚未结束的旧载荷延后释放。数值计算不变。GPT（OpenAI，AI 助手）参与共创。 |
 | `0017-setup-cache-complete-gamut-key.patch` | `core/setup_cache.cpp` | 输入色域压缩的算法名和三个 `%.17g` 参数曾一起写入 64 字节缓冲，尾部截断会把不同设置误当成同一张 LUT。逐个追加完整参数；默认设置的键不变，数值计算不变。回归覆盖仅相差一个 double 步长、旧键相同的参数。GPT（OpenAI，AI 助手）参与共创。 |
 | `0018-fir-demand-without-kernel-allocation.patch` | `core/numeric.{hpp,cpp}`、`pipeline/blur.{hpp,cpp}` | 卷积核和 halo 查询共用半径舍入函数，省去查询时的整条数组分配、指数和归一化。正 sigma 的核和半径保持相同；非正 sigma 在无符号转换前返回 identity。3,600 个边界与拒绝分配测试通过，不改变 FIR/IIR 阈值或光学参数。GPT（OpenAI，AI 助手）参与共创。 |
+| `0019-bounded-fir-row-scratch.patch` | `gpu/gpu.hpp`、`gpu/vulkan_gpu.cpp`、`pipeline/blur.cpp` | 普通 FIR 的纵向中间结果按行暂存，供后续横向卷积读取；两个方向仍以相同顺序累加，减少大图活跃 GPU 缓冲容量，保留原 float32 算法。已在上一版 beta 发布。 |
+| `0020-small-vulkan-pool-requests.patch` | `gpu/vulkan_gpu.cpp` | 小请求不复用容量过大的空闲缓冲，减少预览占用；大图和持久缓冲仍走各自的容量约束。已在上一版 beta 发布。 |
+| `0021-dng-forward-matrix.patch` | `io/raw_camera.hpp`、`io/raw_decoder.cpp` | 支持有效 DNG ForwardMatrix，经 XYZ D50 转到线性 ProPhoto，去除已应用相对白平衡；缺失 FM 或未能核实校准签名时保留兼容转换。详见 RAW 验证记录。 |
+| `0022-raw-white-balance-temperature.patch` | `host/white_balance.cpp` | 修正 Robertson 表 325 mired 处 u 值，避免约 3000 K 附近色温偏移。 |
+| `0023-raw-explicit-white-temperature.patch` | `io/raw_camera.hpp`、`io/raw_decoder.{hpp,cpp}` | 将已知用户色温传入两种解码模式，明确选择双光源矩阵插值，避免反求中性点的多解导致目标偏移；保留旧入口与默认流程。 |
+| `0024-raw-custom-without-as-shot.patch` | `io/raw_decoder.{hpp,cpp}`、`tests/raw_threads.cpp`、`tools/raw_render.cpp` | 有效 custom WB 不再要求未使用的源 WB；源元数据缺失时数组为零、标志为 false，默认解码仍拒绝。内部 C++ 布局变化要求消费者同步重编。 |
+| `0025-vulkan-device-lost-preparation-guards.patch` | `gpu/vulkan_gpu.cpp`、`pipeline/pipeline.cpp`、Vulkan 测试与 CMake | 选择性跟进上游 Windows_Linux 的失效设备准备阶段保护，保留 Android 参数环、缓冲池、条带等补丁；锁后再检查，清理仍可用。注入失效后两种参数环模式各 16 入口检查。 |
+| `0026-cam16-hoist-table-invariants.patch` | `core/cam16.cpp` | 吸收 Mac 主线 CAM16 的常量外提，减少色域表二分中的重复计算；保持运行时 float64 表生成、公开入口和串行调度，不引入预烘焙跨平台表。 |
+| `0027-di-precompute-channel-curves.patch` | `core/digital_intermediate.cpp` | 只预拆 FilmHost 的各通道曲线，减少反复分配与复制，保持原插值、DIR 算序与完整 DI 拟合；不带入 minilab 或 log-positive 提前返回通路。 |
+| `0028-vulkan-pointwise-fusions.patch` | `pipeline/pipeline.cpp`、Vulkan shader/registry、CMake 与测试 hook | 将 main Metal 的 DIR subtract+curve 和 XYZ→RGB+CAM16 两处融合转译到 Vulkan，保留分离核与原表达式顺序。默认关闭，只有 `SPK_VULKAN_FUSION=on` 显式启用；unset/off/其他值仍走旧核。同一 Linux llvmpipe 上 494 例、1,490,286 个有效 float32 值逐位一致，含完整渲染与分块尾部；不代表手机或跨 GPU 等价，也不列为默认手机提速。 |
+| `0029-scene-curve-vulkan.patch` | `core/params.{hpp,cpp}`、`pipeline/scene_latitude.cpp`、`pipeline/pipeline.{hpp,cpp}`、Metal/Vulkan shader、Vulkan registry 与 CMake | 接入胶片前 SHOOT 层五行 `scene_curve`（rgb/luma/r/g/b），在测光中灰附近 -8..+8 stops 上依次处理 luma、RGB 与分通道曲线。空字符串精确旁路；显式恒等采样表不承诺逐位旁路。Android 编辑器、sidecar、风格导入导出、复制/重置和缓存失效已接入；无胶片时暂停但保留该编辑。 |
+| `0030-nofilm-float-grade-boundary.patch` | `pipeline/engine.cpp`、`pipeline/view.hpp`、`pipeline/view_process.cpp` | 增加内部未调色 float view 结果，让 Android 无胶片路径先完成 CPU Layer2，再量化和输出变换，避免负值/HDR 在 RGBA16 边界提前丢失。公开 C `spk_result` ABI 不变；胶片/DI 保留旧路径。适配层缓存整图 RGB float（12 B/px），不是外存分块；几何/缩放仍先于 Android 调色，不能宣称任意非线性调色与上游先调色再缩放逐位等价。 |
+| `0031-view-output-cancellation.patch` | `pipeline/engine.cpp`、`pipeline/view.hpp`、`pipeline/view_process.cpp` | 在 noFilm encode flush、几何/缩放完成、float CPU 读回分配前后检查取消；已提交 GPU 工作完成后才退出。Android generation token 继续贯穿 CPU 行转换、Bitmap/repack、JPEG/TIFF；所有 worker 汇合后才抛出，成功打包后才替换旧缓存。IBX 两编译模式聚焦测试及旧 JPEG/noFilm 回归通过，不能抢占在途 dispatch、读回或 codec 内部阶段。GPT（OpenAI）共创。 |
+| `0032-dng-as-shot-white-xy.patch` | 新 `io/dng_white_xy.hpp`、`io/raw_camera.hpp`、`io/raw_decoder.{hpp,cpp}` | 与 LibRaw 0021 配套，将已知 xy 经 Robertson 和完整校准端点插值派生源白平衡；支持 FM/Bradford，源元数据不被 custom WB 替换。只扩展 WhiteXY-only 主 profile 三通道路径；既有 ASN 输出回归保持字节一致。详见 [实现与限制](DNG_WHITE_XY_2026-11-09.md)。GPT（OpenAI）共创。 |
+| `0033-integer-view-readback-cancellation.patch` | `pipeline/view_process.cpp` | 为整数 view 增加最终 GPU 打包前、完成后、CPU 分配前和读回后的安全取消边界；Android DI adapter 传入同一 generation token，旧无输出变换的 look/直接打包按行轮询并在 worker 汇合后报告。实际 noFilm 整数/DI 分别 10/9 个边界及恢复对照通过；不能抢占在途 GPU 工作。GPT（OpenAI）共创。 |
 
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
@@ -41,6 +62,14 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0017-normalize-model-orig-on-stack` | LibRaw #876（1a8fd32，0.22.3） | `GetNormalizedModel()` 的 `orig` 是函数静态变量，编辑和导出两个线程同时打开 RAW 时可能串用对方的机型名、色彩矩阵和白电平。改成局部变量。单线程输出不变。 |
 | `0018-lossy-dng-curve-init` | LibRaw #862（62f7098，0.22.3） | 有损（JPEG）DNG 带 OpcodeList2 但没有 PolynomialMap 时，`lossy_dng_load_raw` 的色调表没初始化，栈里的内容会进像素。改成先填默认曲线，再由 opcode 覆盖。只影响有损 DNG（LinearRaw）；补丁 0006 的 GainMap 只处理拜耳 DNG，两者不重叠。 |
 | `0019-sony-arw6` | 上游 SpektraLab b5467e8（PR #60）的 `third_party/libraw-arw6` 覆盖层，内含 LibRaw master 的 ARW6 解码器 | 0.22.2 解不了索尼 A7 V（ILCE-7M5）的有损压缩 ARW（Compressed / Compressed HQ，TIFF 压缩 32766）。上游以整文件覆盖的方式叠加；这里改成相对 0.22.2 加本目录补丁的差异，内容与上游覆盖层一致。新增 `sony_arw6.cpp`，其余只加 A7 V 的识别、裁切、色彩矩阵和黑白电平。`LibRaw::version()` 仍为 0.22.2；其他文件解码不变。 |
+| `0020-crx-signed-quantizer-index` | LibRaw 0.22.3，`cf02d66eb5c19d4e46df7aee0582e47a4918509a` 的四处索引保护 | CRX 的 signed qParam 与 Golomb QP 可产生负余数；按维护版规则夹到首个表项，避免负索引。保留非负值算序，不声称修完极端移位边界。464 个 sanitizer 案例及五张真实 RAW 的十对输出验证见 [记录](../tools/native/validation/libraw-maintenance-20261109/result.json)。GPT（OpenAI）共创。 |
+| `0021-dng-as-shot-white-xy` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保存 AsShotWhiteXY、完整有界校准签名与 parsed flags，按 selected RAW IFD/IFD0 回退传递，供引擎 0032 使用。超出 255 内容字节或 NUL 格式不支持时明确标记，不截断比较；不新增 Camera Profile IFD 选择。内部结构布局改变，头文件和整个 LibRaw archive 必须同步重编。GPT（OpenAI）共创。 |
+
+`crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
+该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。
+
+0016 源自第三方的算法改动保持不变，当前仅更新其上下文以适配此前 0002 的一次性余弦表初始化。
+原上下文引用已经删除的 `if (!cs[0])` 两行，依赖 GNU 默认 fuzz；重排后全套可按零 fuzz 重放，最终源码哈希不变。
 
 ## 写一个新补丁
 

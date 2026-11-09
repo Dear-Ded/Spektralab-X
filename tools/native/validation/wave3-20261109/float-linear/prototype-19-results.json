@@ -1,0 +1,738 @@
+{
+  "summary": {
+    "cases": 19,
+    "accepted": 11,
+    "rejected": 8,
+    "passed": true,
+    "maximum_absolute_error": 1.1920928955078125e-07,
+    "identical_area_component_count": 8064,
+    "max2_max4_identical_area_byte_equal": true,
+    "adjacent": [
+      {
+        "case": "max2",
+        "adjacent_output_gap": 2.9802322387695312e-08
+      },
+      {
+        "case": "fractional",
+        "adjacent_output_gap": 1.4901161193847656e-08
+      },
+      {
+        "case": "per-plane-black",
+        "adjacent_output_gap": 2.2351741790771484e-08
+      }
+    ],
+    "expected_failure_count": 1,
+    "raw_plane_plus_output_bytes_per_pixel": 24
+  },
+  "results": [
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "max2",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": null,
+        "sha256": "a34828ea214f95aa081cf49d5995509c1b616e9e730f02662198e4c61cd97286"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "max4",
+        "maximum": 4,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": null,
+        "sha256": "27af2ce450d80037862b855c80eaa31ba9ac6e9d6351e43e5da7867cf3645a4d"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 5.960464477539063e-08,
+      "case": {
+        "name": "fractional",
+        "maximum": 2,
+        "black": [
+          0.25,
+          0.25,
+          0.25
+        ],
+        "white": [
+          4,
+          4,
+          4
+        ],
+        "orientation": 1,
+        "invalid": null,
+        "sha256": "679c490aed3ac4e17a4bb0992cdc2013ff56bd6f7239d5f1d64023a1414758a1"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 5.960464477539063e-08,
+      "case": {
+        "name": "per-plane-black",
+        "maximum": 2,
+        "black": [
+          0.25,
+          0.375,
+          0.125
+        ],
+        "white": [
+          4,
+          4,
+          4
+        ],
+        "orientation": 1,
+        "invalid": null,
+        "sha256": "53a3bcd48069d28af3f869bf7977b62e240aaa0de6be520359f0f081a158fc1c"
+      }
+    },
+    {
+      "ok": false,
+      "error": "nonuniform WhiteLevel unsupported: LibRaw source WB adjustment requires independent handling",
+      "case": {
+        "name": "unsupported-per-plane-white",
+        "maximum": 2,
+        "black": [
+          0.25,
+          0.375,
+          0.125
+        ],
+        "white": [
+          4,
+          3,
+          2
+        ],
+        "orientation": 1,
+        "invalid": "per-plane-white",
+        "sha256": "3f208f44dff7909926eaa91c9ed680da4f2c7e838678e6db360bfbb9142cae99"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-2",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 2,
+        "invalid": null,
+        "sha256": "27eeeec35e022b4eb8123ccb3b1588d6635e431a7ad4d72c481f3a2aaf65bcc0"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-3",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 3,
+        "invalid": null,
+        "sha256": "beb2215c5ec403c0e4ce031e38d3e7719542754057689d97d0bcc1f086581375"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 64,
+      "height": 48,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-4",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 4,
+        "invalid": null,
+        "sha256": "1b5ba78f13135ec0ffcf1c483a028b6b354b86901d22ca61f3157981b30007cb"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 48,
+      "height": 64,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-5",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 5,
+        "invalid": null,
+        "sha256": "4ddf0445752012b3c273cb0ee1df5cdb87f9d53cc31338ed74d44f3093808ff0"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 48,
+      "height": 64,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-6",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 6,
+        "invalid": null,
+        "sha256": "0e519520358a06d9b4d20ea1d9f230fdde708629b9e2537c74d4c09edec20935"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 48,
+      "height": 64,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-7",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 7,
+        "invalid": null,
+        "sha256": "3247b062cc8ddf46613a8f3a12e3197e32c85ad4bd2261ec637db9e6bc8e8554"
+      }
+    },
+    {
+      "ok": true,
+      "diagnostic_outside_supported_domain": false,
+      "width": 48,
+      "height": 64,
+      "input_float_bytes": 36864,
+      "output_float_bytes": 36864,
+      "raw_plane_plus_output_bytes_per_pixel": 24,
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "case": {
+        "name": "orientation-8",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 8,
+        "invalid": null,
+        "sha256": "a7ffe17f9ae5752655b60cd64e952250cc845257c523143c0d3b208cf13c0141"
+      }
+    },
+    {
+      "ok": false,
+      "error": "unsupported crop/opcode/profile or other tag",
+      "case": {
+        "name": "unsupported-crop",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "crop",
+        "sha256": "592b2e71c07d8e12da12d2e3ef373de394ca6619f24be11b3c5d9200f4aa19ec"
+      }
+    },
+    {
+      "ok": false,
+      "error": "unsupported crop/opcode/profile or other tag",
+      "case": {
+        "name": "unsupported-opcode",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "opcode",
+        "sha256": "878a4946f5b60121702ad7895218d3518e1c3211a6c2f709e6c97de6cf53fa57"
+      }
+    },
+    {
+      "ok": false,
+      "error": "unsupported crop/opcode/profile or other tag",
+      "case": {
+        "name": "unsupported-profile",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "profile",
+        "sha256": "5a53653bc2cf366bb36a6452026dc3b610fc0e67d614ddb7096e8ce5ce4d411e"
+      }
+    },
+    {
+      "ok": false,
+      "error": "experiment requires ForwardMatrix1",
+      "case": {
+        "name": "unsupported-no-fm",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "no-fm",
+        "sha256": "4017c25a268ddac667634c81da2c3a78504cb57f51cca09ff06bb6eb6425c941"
+      }
+    },
+    {
+      "ok": false,
+      "error": "experiment requires constant black",
+      "case": {
+        "name": "unsupported-repeat",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "repeat",
+        "sha256": "cff649f6d0f83a028df4ce8e0b1c33f5f3a805f73f52d0f8006539d5c91b1100"
+      }
+    },
+    {
+      "ok": false,
+      "error": "invalid black/white range",
+      "case": {
+        "name": "unsupported-white",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "white",
+        "sha256": "7399c04d7f9d539e51c990b1110a74dab00258479cd5f98a9574eed276bcb6f5"
+      }
+    },
+    {
+      "ok": false,
+      "error": "nonfinite sample unsupported",
+      "case": {
+        "name": "unsupported-nonfinite",
+        "maximum": 2,
+        "black": [
+          0,
+          0,
+          0
+        ],
+        "white": [
+          1,
+          1,
+          1
+        ],
+        "orientation": 1,
+        "invalid": "nonfinite",
+        "sha256": "0cc122c125b7a4e1f61aa1c8ae232a2fbbf27a9e37a2cfc279939f3283081e1c"
+      }
+    }
+  ],
+  "expected_failures": [
+    {
+      "case": "unsupported-per-plane-white",
+      "maximum_absolute_error": 0.5313475131988525,
+      "diagnostic": {
+        "ok": true,
+        "diagnostic_outside_supported_domain": true,
+        "width": 64,
+        "height": 48,
+        "input_float_bytes": 36864,
+        "output_float_bytes": 36864,
+        "raw_plane_plus_output_bytes_per_pixel": 24,
+        "source_wb": [
+          1.4999999552965178,
+          1,
+          2
+        ],
+        "post_wb_matrix": [
+          0.8884832262992859,
+          0.07237186282873154,
+          0.039144884794950485,
+          0,
+          -0.07855895161628723,
+          1.0242592096328735,
+          0.0542997382581234,
+          0,
+          0.06059063598513603,
+          0.12118127942085266,
+          0.8182280659675598,
+          0
+        ]
+      },
+      "dependency": "LibRaw open.cpp folds per-plane white/black delta into cam_mul"
+    }
+  ]
+}

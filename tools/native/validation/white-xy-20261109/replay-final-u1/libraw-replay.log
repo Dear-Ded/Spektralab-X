@@ -1,0 +1,52 @@
+0001-openmp-wavelet-denoise-size.patch
+patching file src/postprocessing/postprocessing_aux.cpp
+0002-ljpeg-idct-table-once.patch
+patching file src/decoders/decoders_dcraw.cpp
+0003-xtrans-serial-tiles.patch
+patching file src/demosaic/xtrans_demosaic.cpp
+0010-newsubfiletype-unsigned.patch
+patching file libraw/libraw_internal.h
+patching file src/metadata/tiff.cpp
+0011-ljpeg-zero-category.patch
+patching file src/decoders/decoders_dcraw.cpp
+0012-bound-tiff-metadata-allocations.patch
+patching file libraw/libraw_const.h
+patching file libraw/libraw_internal.h
+patching file src/utils/utils_libraw.cpp
+patching file src/metadata/tiff.cpp
+0013-bound-lossless-jpeg-work.patch
+patching file src/decoders/decoders_dcraw.cpp
+Hunk #1 succeeded at 559 (offset 1 line).
+patching file src/decoders/dng.cpp
+0014-bound-dng-tile-streams.patch
+patching file src/decoders/dng.cpp
+patching file src/decoders/decoders_libraw_dcrdefs.cpp
+patching file src/decoders/fp_dng.cpp
+Hunk #1 succeeded at 283 (offset 1 line).
+0015-bound-ljpeg-segments.patch
+patching file src/decoders/decoders_dcraw.cpp
+0016-harden-ljpeg-idct.patch
+patching file src/decoders/decoders_dcraw.cpp
+0017-normalize-model-orig-on-stack.patch
+patching file src/metadata/normalize_model.cpp
+0018-lossy-dng-curve-init.patch
+patching file src/decoders/dng.cpp
+0019-sony-arw6.patch
+patching file internal/libraw_internal_funcs.h
+patching file src/decoders/sony_arw6.cpp
+patching file src/metadata/identify.cpp
+patching file src/metadata/normalize_model.cpp
+patching file src/metadata/sony.cpp
+patching file src/metadata/tiff.cpp
+patching file src/tables/cameralist.cpp
+patching file src/tables/colordata.cpp
+patching file src/utils/decoder_info.cpp
+patching file src/utils/open.cpp
+patching file internal/libraw_cameraids.h
+0020-crx-signed-quantizer-index.patch
+patching file src/decoders/crx.cpp
+0021-dng-as-shot-white-xy.patch
+patching file libraw/libraw_const.h
+patching file libraw/libraw_types.h
+patching file src/metadata/identify.cpp
+patching file src/metadata/tiff.cpp

@@ -1,0 +1,1 @@
+JPEG_MEMORY mode=rows input=float startup_peak_rss_kib=879000 lifetime_peak_rss_kib=879000 stage_start_rss_kib=80104 stage_peak_rss_kib=228268 conversion_bytes=524416 file_bytes=10329310 fnv1a=9dab12e107beae95

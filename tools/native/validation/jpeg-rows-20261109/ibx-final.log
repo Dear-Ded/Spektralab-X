@@ -1,0 +1,27 @@
+FILE strict-v3.log
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+FILE default-v3.log
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+FILE memory-strict-full-v3.log
+JPEG_MEMORY mode=full input=rgba16 startup_peak_rss_kib=868124 lifetime_peak_rss_kib=868124 stage_start_rss_kib=70176 stage_peak_rss_kib=217524 conversion_bytes=50360324 file_bytes=8220293 fnv1a=878c34fc8cfdc26a
+FILE memory-strict-rows-v3.log
+JPEG_MEMORY mode=rows input=rgba16 startup_peak_rss_kib=868524 lifetime_peak_rss_kib=868524 stage_start_rss_kib=70168 stage_peak_rss_kib=168800 conversion_bytes=524416 file_bytes=8220293 fnv1a=878c34fc8cfdc26a
+FILE memory-strict-full-float-v3.log
+JPEG_MEMORY mode=full input=float startup_peak_rss_kib=868440 lifetime_peak_rss_kib=868440 stage_start_rss_kib=70148 stage_peak_rss_kib=266592 conversion_bytes=50360324 file_bytes=10329310 fnv1a=9dab12e107beae95
+FILE memory-strict-rows-float-v3.log
+JPEG_MEMORY mode=rows input=float startup_peak_rss_kib=868720 lifetime_peak_rss_kib=868720 stage_start_rss_kib=70348 stage_peak_rss_kib=218260 conversion_bytes=524416 file_bytes=10329310 fnv1a=9dab12e107beae95
+FILE memory-default-full-v3.log
+JPEG_MEMORY mode=full input=rgba16 startup_peak_rss_kib=868588 lifetime_peak_rss_kib=868588 stage_start_rss_kib=70292 stage_peak_rss_kib=217788 conversion_bytes=50360324 file_bytes=8220293 fnv1a=878c34fc8cfdc26a
+FILE memory-default-rows-v3.log
+JPEG_MEMORY mode=rows input=rgba16 startup_peak_rss_kib=868676 lifetime_peak_rss_kib=868676 stage_start_rss_kib=70172 stage_peak_rss_kib=168764 conversion_bytes=524416 file_bytes=8220293 fnv1a=878c34fc8cfdc26a
+FILE memory-default-full-float-v3.log
+JPEG_MEMORY mode=full input=float startup_peak_rss_kib=868332 lifetime_peak_rss_kib=868332 stage_start_rss_kib=70288 stage_peak_rss_kib=266624 conversion_bytes=50360324 file_bytes=10329310 fnv1a=9dab12e107beae95
+FILE memory-default-rows-float-v3.log
+JPEG_MEMORY mode=rows input=float startup_peak_rss_kib=868476 lifetime_peak_rss_kib=868476 stage_start_rss_kib=70240 stage_peak_rss_kib=217864 conversion_bytes=524416 file_bytes=10329310 fnv1a=9dab12e107beae95
+5d820534e36ffd3c5a6c87a87e4ad02d44e05da440bf79d9a8e3488130e40a8a  tools/native/jpeg_rows.cpp
+744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a  app/src/main/cpp/jpeg444.cpp
+d72120cdc9058030eff4be26a2db40f64bae3c91b351b6fbc95a5e5793717a99  app/src/main/cpp/output_transform.cpp
+40d908a438852330591bddaaa22d955b42261134a262bf9347a243a124db01ae  app/src/main/cpp/rgba8_spool.hpp
+b1c720d6422a84423d07c819c3321b79c04cc63d5ec8b2a9d5af95be90f6cdc2  jpeg444-before-stream.cpp
+
+[exit 0 ]

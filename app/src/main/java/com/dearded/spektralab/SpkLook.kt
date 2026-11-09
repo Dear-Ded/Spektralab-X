@@ -38,6 +38,7 @@ data class SpkEngine(
     val film: String? = null,
     val paper: String? = null,
     val exposureEv: Double? = null,
+    val sceneCurve: SceneCurve? = null,
     val printExposure: Double? = null,
     val yCc: Double? = null,
     val mCc: Double? = null,
@@ -104,7 +105,7 @@ data class SpkLook(
         const val THUMB_ENTRY = "thumb.jpg"
 
         private val TOP = setOf("format", "version", "name", "author", "license", "category", "engine", "layer2", "lut", "source")
-        private val ENGINE = setOf("film", "paper", "exposure_ev", "print_exposure", "y_cc", "m_cc", "format_mm", "grain", "halation", "glare")
+        private val ENGINE = setOf("film", "paper", "exposure_ev", "scene_curve", "print_exposure", "y_cc", "m_cc", "format_mm", "grain", "halation", "glare")
         private val LAYER2 = setOf("temperature", "tint", "exposure", "contrast", "brightness", "saturation", "vibrance",
             "highlights", "shadows", "black_point", "white_point", "fade", "vignette", "vignette_mid", "wheels", "hsl", "curves")
         private val WHEELS = listOf("global", "shadows", "midtones", "highlights")
@@ -162,6 +163,9 @@ data class SpkLook(
             return SpkEngine(
                 film = stock("film"), paper = stock("paper"),
                 exposureEv = r.opt(e, "exposure_ev", "engine", -4.0, 4.0),
+                sceneCurve = if (!e.has("scene_curve") || e.isNull("scene_curve")) null else try {
+                    SceneCurve.fromJson(e.get("scene_curve"))
+                } catch (_: Exception) { throw ImportException("engine.scene_curve 不是有效的胶片前曲线") },
                 printExposure = r.opt(e, "print_exposure", "engine", 0.2, 3.0),
                 yCc = r.opt(e, "y_cc", "engine", -Edit.FILTER_SHIFT_CC, Edit.FILTER_SHIFT_CC),
                 mCc = r.opt(e, "m_cc", "engine", -Edit.FILTER_SHIFT_CC, Edit.FILTER_SHIFT_CC),
@@ -231,6 +235,7 @@ data class SpkLook(
             e.film?.let { put("film", it) }
             e.paper?.let { put("paper", it) }
             e.exposureEv?.let { put("exposure_ev", it) }
+            e.sceneCurve?.let { put("scene_curve", it.toJson()) }
             e.printExposure?.let { put("print_exposure", it) }
             e.yCc?.let { put("y_cc", it) }
             e.mCc?.let { put("m_cc", it) }
@@ -314,7 +319,8 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
 
     companion object {
         const val MAX_FILE = 16L shl 20
-        const val MAX_LOOK = 256L shl 10
+        // A native curve allows 1 MiB, up to 2 MiB after JSON whitespace escaping.
+        const val MAX_LOOK = 3L shl 20
         const val MAX_LUT = 12L shl 20
         const val MAX_THUMB = 2L shl 20
         const val MAX_ENTRIES = 16

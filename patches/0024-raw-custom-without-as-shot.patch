@@ -1,0 +1,102 @@
+Allow validated caller-selected RAW white balance when the source lacks a
+usable as-shot white. Keep default decoding strict and report the missing
+source value explicitly; never substitute the selected WB into its metadata.
+
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 3f4f24d..6e0a1cf 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -142,21 +142,29 @@ void configure_compatible(libraw_output_params_t& params) {
+ }
+ 
+ bool capture_source_metadata(const LibRaw& raw, RawMetadata& metadata,
+-                             std::string& error) {
++                             bool require_as_shot, std::string& error) {
+     const auto& data = raw.imgdata;
+     // raw2image_start() restores this saved copy before postprocessing; rawpy
+     // reads its source WB and white-level metadata from the same structure.
+     const auto& color = data.rawdata.color;
+     const auto& sizes = data.sizes;
++    bool valid_camera_wb = true;
+     for (unsigned c = 0; c < 4; ++c) {
+         const float wb = color.cam_mul[c];
+         // LibRaw falls back to auto WB when red <= 1e-5, even if the value
+         // is positive. Do not report that fallback as camera/as-shot WB.
+-        if (!std::isfinite(wb) || (c < 3 && wb <= 0.00001f)) {
+-            error = "RAW metadata: valid camera/as-shot RGB white balance is required";
+-            return false;
+-        }
+-        metadata.camera_whitebalance[c] = wb;
++        valid_camera_wb &= std::isfinite(wb) && (c >= 3 || wb > 0.00001f);
++    }
++    if (require_as_shot && !valid_camera_wb) {
++        error = "RAW metadata: valid camera/as-shot RGB white balance is required";
++        return false;
++    }
++    metadata.camera_whitebalance_valid = valid_camera_wb;
++    metadata.camera_whitebalance.fill(0.0f);
++    if (valid_camera_wb)
++        std::copy(std::begin(color.cam_mul), std::end(color.cam_mul),
++                  metadata.camera_whitebalance.begin());
++    for (unsigned c = 0; c < 4; ++c) {
+         const std::uint64_t black = std::uint64_t(color.black) + color.cblack[c];
+         if (black > std::numeric_limits<std::uint32_t>::max()) {
+             error = "RAW metadata: black level overflow";
+@@ -365,7 +373,7 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         }
+         // Lens shading from the DNG's OpcodeList2 (phones), before any processing.
+         detail::apply_dng_gain_maps(*raw);
+-        if (!capture_source_metadata(*raw, decoded.metadata, error)) return false;
++        if (!capture_source_metadata(*raw, decoded.metadata, user_mul == nullptr, error)) return false;
+         if (const char* name = raw->unpack_function_name()) decoded.metadata.decoder_name = name;
+ 
+         start = Clock::now();
+@@ -508,7 +516,7 @@ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<f
+         }
+         // Lens shading from the DNG's OpcodeList2 (phones), before any processing.
+         detail::apply_dng_gain_maps(*raw);
+-        if (!capture_source_metadata(*raw, decoded.metadata, error) ||
++        if (!capture_source_metadata(*raw, decoded.metadata, user_mul == nullptr, error) ||
+             !supported_headroom_source(*raw, error)) return false;
+         if (const char* name = raw->unpack_function_name()) decoded.metadata.decoder_name = name;
+ 
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index f237ca2..ba091a2 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -53,6 +53,9 @@ struct RawMetadata {
+     std::string make, model, decoder_name;
+     RawSourceSizes sizes_before_postprocess;
+     int raw_flip = 0;
++    // The source's camera/as-shot WB, never replaced by caller-selected WB.
++    // Missing or invalid source WB is represented by false and all zeros.
++    bool camera_whitebalance_valid = false;
+     std::array<float, 4> camera_whitebalance{};
+     // scale_colors() replaces daylight pre_mul with the selected WB and
+     // normalises it. These are the multipliers after that processing step.
+diff --git a/engine/tests/raw_threads.cpp b/engine/tests/raw_threads.cpp
+index ee4911c..421ed67 100644
+--- a/engine/tests/raw_threads.cpp
++++ b/engine/tests/raw_threads.cpp
+@@ -98,7 +98,8 @@ void thread_contract() {
+ }
+ 
+ void same_metadata(const spk::io::RawMetadata& a, const spk::io::RawMetadata& b) {
+-    require(a.camera_whitebalance == b.camera_whitebalance && a.post_scale_pre_mul == b.post_scale_pre_mul &&
++    require(a.camera_whitebalance_valid == b.camera_whitebalance_valid &&
++            a.camera_whitebalance == b.camera_whitebalance && a.post_scale_pre_mul == b.post_scale_pre_mul &&
+             a.rgb_cam == b.rgb_cam && a.camera_to_output == b.camera_to_output && a.raw_flip == b.raw_flip &&
+             a.black_level_per_channel == b.black_level_per_channel && a.black_pattern == b.black_pattern &&
+             a.white_level == b.white_level && a.process_warnings == b.process_warnings &&
+diff --git a/engine/tools/raw_render.cpp b/engine/tools/raw_render.cpp
+index d81b12e..2051224 100644
+--- a/engine/tools/raw_render.cpp
++++ b/engine/tools/raw_render.cpp
+@@ -215,6 +215,7 @@ int run(int argc,wchar_t** argv) {
+     decode.set("camera_wb_requested",Json(true));
+     decode.set("process_warnings",Json(double(decoded.metadata.process_warnings)));
+     auto array=[](const auto& values) { Json a=Json::array();for(auto value:values) a.push(Json(double(value)));return a; };
++    decode.set("camera_whitebalance_valid",Json(decoded.metadata.camera_whitebalance_valid));
+     decode.set("camera_whitebalance",array(decoded.metadata.camera_whitebalance));
+     if(headroom) decode.set("camera_to_output",array(decoded.metadata.camera_to_output));
+     decode.set("post_scale_pre_mul",array(decoded.metadata.post_scale_pre_mul));

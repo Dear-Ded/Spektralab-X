@@ -1,0 +1,7 @@
+17ee866717969026d8c055b521d6697675c7562bbbb290b1e4592505cba22c21  /data/work/gpt-engine-impl-20261108/upstream/engine/src/core/params.cpp
+ecfe8003fc6cfdd07327cbf18889776b5e784817517b861842605db3aa0d66c6  /data/work/gpt-engine-impl-20261108/upstream/engine/src/pipeline/scene_latitude.cpp
+a22cae280df1a1c53f06f1a8286ab4a1eddbfefa0e032d6f9f1903249cf65a8e  /data/work/gpt-engine-impl-20261108/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+0d3a085aa93bcf072b6cb658a4257be8fe39d695e66446ca1d0ff4ee94430c04  /data/work/gpt-engine-impl-20261108/build-host/engine/libspektralab_engine.a
+acef3e25b5e045cc0425222ecaf0164fd1e31b4f55923287ba6dc7b73546f9a3  /data/work/gpt-engine-impl-20261108/build-host/engine/libspektralab_core.a
+parser PASS valid=4 malformed=12 wrong_type=1 legacy_fields=1
+FAIL: scene curve changed with dispatch mode cap=1 in_place=0

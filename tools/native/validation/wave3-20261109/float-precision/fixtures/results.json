@@ -1,0 +1,1204 @@
+{
+  "summary": {
+    "cases": 6,
+    "passed": true,
+    "comparisons": [
+      {
+        "linear": false,
+        "policy": "compatible",
+        "identical_input_roi": 0.18000000715255737,
+        "a_roi": [
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983
+        ],
+        "b_roi": [
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492
+        ],
+        "b_over_a": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "linear": true,
+        "policy": "compatible",
+        "identical_input_roi": 0.18000000715255737,
+        "a_roi": [
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983
+        ],
+        "b_roi": [
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492
+        ],
+        "b_over_a": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    ],
+    "preserved_process_statuses": [
+      -4,
+      -4,
+      -4,
+      -4,
+      -4,
+      -4
+    ]
+  },
+  "results": [
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 2,
+        "fnorm": 8191.5,
+        "values": [
+          0,
+          0,
+          1474,
+          1474,
+          4095,
+          8191,
+          8192,
+          16383
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 1,
+        "black_after": 0,
+        "fmaximum": 2,
+        "fnorm": 0,
+        "values": [
+          -0.125,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1.000100016593933,
+          2
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983
+        ],
+        "values_rgb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.49996185302734375,
+          0.49996185302734375,
+          0.49996185302734375,
+          0.5000228881835938,
+          0.5000228881835938,
+          0.5000228881835938,
+          1,
+          1,
+          1
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "bayer-max2-black0",
+        "linear": false,
+        "black": 0,
+        "white": 1,
+        "values": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          2.0
+        ],
+        "sha256": "550e9afbb3a221b75eb81e58d429c6dfa650d40f644f49c5859fb4269100e3f6"
+      },
+      "reference": {
+        "multiplier": 8191.5,
+        "quantized": [
+          0,
+          0,
+          1474,
+          1474,
+          4095,
+          8191,
+          8192,
+          16383
+        ],
+        "restored_storage_values": [
+          0.0,
+          0.0,
+          0.17994262345113837,
+          0.17994262345113837,
+          0.4999084416773485,
+          0.9999389611182323,
+          1.0000610388817677,
+          2.0
+        ],
+        "max_storage_error": 0.125,
+        "max_nonnegative_storage_error": 9.15583226515082e-05,
+        "fixed_metadata_linear": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          2.0
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1,
+          1
+        ],
+        "adjacent_input_gap": 1.4901161193847656e-08,
+        "adjacent_quantized_gap": 0
+      }
+    },
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 4,
+        "fnorm": 4095.75,
+        "values": [
+          0,
+          0,
+          737,
+          737,
+          2047,
+          4095,
+          4096,
+          16383
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 1,
+        "black_after": 0,
+        "fmaximum": 4,
+        "fnorm": 0,
+        "values": [
+          -0.125,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1.000100016593933,
+          4
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492
+        ],
+        "values_rgb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.12494087219238281,
+          0.12494087219238281,
+          0.12494087219238281,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.2500038146972656,
+          0.2500038146972656,
+          0.2500038146972656,
+          1,
+          1,
+          1
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "bayer-max4-black0",
+        "linear": false,
+        "black": 0,
+        "white": 1,
+        "values": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          4.0
+        ],
+        "sha256": "800d4fadcfbeb339397c27f1e8112add63cdc490288a415ff32b1e73a861a723"
+      },
+      "reference": {
+        "multiplier": 4095.75,
+        "quantized": [
+          0,
+          0,
+          737,
+          737,
+          2047,
+          4095,
+          4096,
+          16383
+        ],
+        "restored_storage_values": [
+          0.0,
+          0.0,
+          0.17994262345113837,
+          0.17994262345113837,
+          0.4997863639138131,
+          0.999816883354697,
+          1.0000610388817677,
+          4.0
+        ],
+        "max_storage_error": 0.125,
+        "max_nonnegative_storage_error": 0.000213636086186908,
+        "fixed_metadata_linear": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          4.0
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1,
+          1
+        ],
+        "adjacent_input_gap": 1.4901161193847656e-08,
+        "adjacent_quantized_gap": 0
+      }
+    },
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 2,
+        "fnorm": 8191.5,
+        "values": [
+          0,
+          0,
+          1474,
+          1474,
+          4095,
+          8191,
+          8192,
+          16383
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 1,
+        "black_after": 0,
+        "fmaximum": 2,
+        "fnorm": 0,
+        "values": [
+          -0.125,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1.000100016593933,
+          2
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983
+        ],
+        "values_rgb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.08996719121932983,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.49996185302734375,
+          0.49996185302734375,
+          0.49996185302734375,
+          0.5000228881835938,
+          0.5000228881835938,
+          0.5000228881835938,
+          1,
+          1,
+          1
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "linear-max2-black0",
+        "linear": true,
+        "black": 0,
+        "white": 1,
+        "values": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          2.0
+        ],
+        "sha256": "7e8b5ea1a20e52c6b50dfe51477c4a5e7d55d566f2af354833d4c240a5c99594"
+      },
+      "reference": {
+        "multiplier": 8191.5,
+        "quantized": [
+          0,
+          0,
+          1474,
+          1474,
+          4095,
+          8191,
+          8192,
+          16383
+        ],
+        "restored_storage_values": [
+          0.0,
+          0.0,
+          0.17994262345113837,
+          0.17994262345113837,
+          0.4999084416773485,
+          0.9999389611182323,
+          1.0000610388817677,
+          2.0
+        ],
+        "max_storage_error": 0.125,
+        "max_nonnegative_storage_error": 9.15583226515082e-05,
+        "fixed_metadata_linear": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          2.0
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1,
+          1
+        ],
+        "adjacent_input_gap": 1.4901161193847656e-08,
+        "adjacent_quantized_gap": 0
+      }
+    },
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 4,
+        "fnorm": 4095.75,
+        "values": [
+          0,
+          0,
+          737,
+          737,
+          2047,
+          4095,
+          4096,
+          16383
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 1,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 1,
+        "black_after": 0,
+        "fmaximum": 4,
+        "fnorm": 0,
+        "values": [
+          -0.125,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1.000100016593933,
+          4
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492
+        ],
+        "values_rgb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.04498359560966492,
+          0.12494087219238281,
+          0.12494087219238281,
+          0.12494087219238281,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.24994277954101562,
+          0.2500038146972656,
+          0.2500038146972656,
+          0.2500038146972656,
+          1,
+          1,
+          1
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "linear-max4-black0",
+        "linear": true,
+        "black": 0,
+        "white": 1,
+        "values": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          4.0
+        ],
+        "sha256": "e0eb4d9bd43fbc4af69804c3ceda61ceca8dc3c38619220979486292471e0792"
+      },
+      "reference": {
+        "multiplier": 4095.75,
+        "quantized": [
+          0,
+          0,
+          737,
+          737,
+          2047,
+          4095,
+          4096,
+          16383
+        ],
+        "restored_storage_values": [
+          0.0,
+          0.0,
+          0.17994262345113837,
+          0.17994262345113837,
+          0.4997863639138131,
+          0.999816883354697,
+          1.0000610388817677,
+          4.0
+        ],
+        "max_storage_error": 0.125,
+        "max_nonnegative_storage_error": 0.000213636086186908,
+        "fixed_metadata_linear": [
+          -0.125,
+          0.0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1.0,
+          1.000100016593933,
+          4.0
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.18000000715255737,
+          0.18000002205371857,
+          0.5,
+          1,
+          1,
+          1
+        ],
+        "adjacent_input_gap": 1.4901161193847656e-08,
+        "adjacent_quantized_gap": 0
+      }
+    },
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 4,
+        "black_before": 0,
+        "dng_fblack_before": 0.25,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 2.25,
+        "fnorm": 4095.75,
+        "values": [
+          511,
+          1023,
+          1761,
+          1761,
+          3071,
+          5119,
+          5120,
+          9215
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 4,
+        "black_before": 0,
+        "dng_fblack_before": 0.25,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "white_after": 4,
+        "black_after": 0,
+        "fmaximum": 2.25,
+        "fnorm": 0,
+        "values": [
+          0.125,
+          0.25,
+          0.4300000071525574,
+          0.4300000071525574,
+          0.75,
+          1.25,
+          1.250100016593933,
+          2.25
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.10748454928398118,
+          0.10748454928398118,
+          0.10748454928398118
+        ],
+        "values_rgb": [
+          0.031189441680908203,
+          0.031189441680908203,
+          0.031189441680908203,
+          0.062439918518066406,
+          0.062439918518066406,
+          0.062439918518066406,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.18744182586669922,
+          0.18744182586669922,
+          0.18744182586669922,
+          0.31244373321533203,
+          0.31244373321533203,
+          0.31244373321533203,
+          0.31250476837158203,
+          0.31250476837158203,
+          0.31250476837158203,
+          0.5624628067016602,
+          0.5624628067016602,
+          0.5624628067016602
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "bayer-max2-black0.25",
+        "linear": false,
+        "black": 0.25,
+        "white": 4,
+        "values": [
+          0.125,
+          0.25,
+          0.4300000071525574,
+          0.4300000071525574,
+          0.75,
+          1.25,
+          1.250100016593933,
+          2.25
+        ],
+        "sha256": "90459f084d49a8f2ae0884b7177ad87a92f44c4c9e6ee22c572d01b5d607a32d"
+      },
+      "reference": {
+        "multiplier": 4095.75,
+        "quantized": [
+          511,
+          1023,
+          1761,
+          1761,
+          3071,
+          5119,
+          5120,
+          9215
+        ],
+        "restored_storage_values": [
+          0.12476347433315021,
+          0.24977110419337117,
+          0.4299578831715803,
+          0.4299578831715803,
+          0.7498016236342551,
+          1.249832143075139,
+          1.2500762986022096,
+          2.2498931819569066
+        ],
+        "max_storage_error": 0.00023652566684978504,
+        "max_nonnegative_storage_error": 0.00023652566684978504,
+        "fixed_metadata_linear": [
+          -0.03333333333333333,
+          0.0,
+          0.048000001907348634,
+          0.048000001907348634,
+          0.13333333333333333,
+          0.26666666666666666,
+          0.26669333775838217,
+          0.5333333333333333
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.048000001907348634,
+          0.048000001907348634,
+          0.13333333333333333,
+          0.26666666666666666,
+          0.26669333775838217,
+          0.5333333333333333
+        ],
+        "adjacent_input_gap": 0.0,
+        "adjacent_quantized_gap": 0
+      }
+    },
+    {
+      "default_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 0,
+        "white_before": 4,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 16383,
+        "black_after": 0,
+        "fmaximum": 2.25,
+        "fnorm": 4095.75,
+        "values": [
+          511,
+          1023,
+          1761,
+          1761,
+          3071,
+          5119,
+          5120,
+          9215
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -999
+      },
+      "preserved_unpack": {
+        "open": 0,
+        "unpack": 0,
+        "floating_file": 1,
+        "have_float": 1,
+        "white_before": 4,
+        "black_before": 0,
+        "dng_fblack_before": 0,
+        "cblack_before": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "white_after": 4,
+        "black_after": 0,
+        "fmaximum": 2.25,
+        "fnorm": 0,
+        "values": [
+          0.125,
+          0.25,
+          0.4300000071525574,
+          0.4300000071525574,
+          0.75,
+          1.25,
+          1.250100016593933,
+          2.25
+        ],
+        "decoder": "uncompressed_fp_dng_load_raw()",
+        "preserved_process_status": -4
+      },
+      "compatible": {
+        "ok": 1,
+        "unchanged": 0,
+        "finite": 1,
+        "width": 64,
+        "height": 48,
+        "source_white": 16383,
+        "roi": [
+          0.10748454928398118,
+          0.10748454928398118,
+          0.10748454928398118
+        ],
+        "values_rgb": [
+          0.031189441680908203,
+          0.031189441680908203,
+          0.031189441680908203,
+          0.062439918518066406,
+          0.062439918518066406,
+          0.062439918518066406,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.10748454928398132,
+          0.18744182586669922,
+          0.18744182586669922,
+          0.18744182586669922,
+          0.31244373321533203,
+          0.31244373321533203,
+          0.31244373321533203,
+          0.31250476837158203,
+          0.31250476837158203,
+          0.31250476837158203,
+          0.5624628067016602,
+          0.5624628067016602,
+          0.5624628067016602
+        ],
+        "error": ""
+      },
+      "headroom": {
+        "ok": 0,
+        "unchanged": 1,
+        "finite": 1,
+        "width": 7,
+        "height": 11,
+        "source_white": 0,
+        "roi": [
+          0,
+          0,
+          0
+        ],
+        "values_rgb": [],
+        "error": "RAW headroom: only conventional three-colour Bayer RAW with unapplied as-shot WB and square pixels is supported; use compatible16 for this source"
+      },
+      "case": {
+        "name": "linear-max2-black0.25",
+        "linear": true,
+        "black": 0.25,
+        "white": 4,
+        "values": [
+          0.125,
+          0.25,
+          0.4300000071525574,
+          0.4300000071525574,
+          0.75,
+          1.25,
+          1.250100016593933,
+          2.25
+        ],
+        "sha256": "404ad4b6b75b27f8f887b61d219134c4b309c822c133b165d194005c6f7191af"
+      },
+      "reference": {
+        "multiplier": 4095.75,
+        "quantized": [
+          511,
+          1023,
+          1761,
+          1761,
+          3071,
+          5119,
+          5120,
+          9215
+        ],
+        "restored_storage_values": [
+          0.12476347433315021,
+          0.24977110419337117,
+          0.4299578831715803,
+          0.4299578831715803,
+          0.7498016236342551,
+          1.249832143075139,
+          1.2500762986022096,
+          2.2498931819569066
+        ],
+        "max_storage_error": 0.00023652566684978504,
+        "max_nonnegative_storage_error": 0.00023652566684978504,
+        "fixed_metadata_linear": [
+          -0.03333333333333333,
+          0.0,
+          0.048000001907348634,
+          0.048000001907348634,
+          0.13333333333333333,
+          0.26666666666666666,
+          0.26669333775838217,
+          0.5333333333333333
+        ],
+        "clipped_linear": [
+          0,
+          0,
+          0.048000001907348634,
+          0.048000001907348634,
+          0.13333333333333333,
+          0.26666666666666666,
+          0.26669333775838217,
+          0.5333333333333333
+        ],
+        "adjacent_input_gap": 0.0,
+        "adjacent_quantized_gap": 0
+      }
+    }
+  ]
+}

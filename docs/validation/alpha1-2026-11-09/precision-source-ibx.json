@@ -1,0 +1,18 @@
+{
+  "engine/CMakeLists.txt": "4c9ee2aedfe21f7800ef674f5893f9a586b8f24a2021e1840f4f97da13789e2d",
+  "engine/src/core/params.cpp": "17ee866717969026d8c055b521d6697675c7562bbbb290b1e4592505cba22c21",
+  "engine/src/core/params.hpp": "3c68a01336fd63377eedd5faf063620091807a73466a429fe001c233e8c1d8e5",
+  "engine/src/gpu/vulkan_gpu.cpp": "c59f13964811fd8fd3ec90d9b368f08bad887e69650af0ee1eeae5ec66f565ad",
+  "engine/src/pipeline/engine.cpp": "1c7c0e04ae1112b3a4e313350df547a7df421bd844ea501f072e6cdb46da750c",
+  "engine/src/pipeline/pipeline.cpp": "ff7a484656b84f20b8cdca1f39a1079dca33b17afc027a17bfae2ed41a2e62a1",
+  "engine/src/pipeline/pipeline.hpp": "ae87e170fbaaf63b73a7ecdf09cb40341a21396b1291a9d93df5387afc0c38d6",
+  "engine/src/pipeline/scene_latitude.cpp": "ecfe8003fc6cfdd07327cbf18889776b5e784817517b861842605db3aa0d66c6",
+  "engine/src/pipeline/view.hpp": "3ed918b68757e14bf09d4ac491978e266b5e75f04f8884cc13dcbbf5e01118a4",
+  "engine/src/pipeline/view_process.cpp": "0e6cbf43f82fd3494706978a90088e9a23ff4e81197aef70eceadf70f39cd470",
+  "engine/src/shaders/scene_latitude.metal": "6821bc4d77f3c2193b8ec590a28a1c141e3e05f7627f95d5f96ec3bbc940db48",
+  "engine/src/shaders/vulkan/spk_cam16ucs_body.glsl": "d0beb0dee91872f4ffb8f39c283affb719501d6e3ec620be46a41d90d9653f82",
+  "engine/src/shaders/vulkan/spk_dir_finish.comp": "56e981c383d11896043bc1782509a0a0d63dd405b7241f3540ed9edb9e943363",
+  "engine/src/shaders/vulkan/spk_scene_curve.comp": "0055e5785a65e567dc65d36b874fc673b42bc78606e2b2339643cfdbd4636871",
+  "engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp": "4bd725719c053a71c6ae3b5dc6c978e41edf803aa6a97a10f1648a7f52446337",
+  "engine/tests/vulkan_test_hooks.hpp": "84494384d9056e1476868b7b81d4525718761d605d9c52fde459fc74dc74f84a"
+}

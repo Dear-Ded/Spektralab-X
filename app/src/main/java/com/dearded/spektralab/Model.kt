@@ -95,6 +95,7 @@ data class Edit(
      *  left unsent the engine meters "center_weighted", an arithmetic mean a bright sky drags up. */
     val aeMethod: String = "balanced",
     val exposureEv: Double = 0.0,
+    val sceneCurve: SceneCurve = SceneCurve.IDENTITY,
     val filmFormatMm: Double = 36.0,
     val printExposure: Double = 1.0,
     val yShift: Double = 0.0,
@@ -270,6 +271,7 @@ data class Edit(
          * direct scan, which the engine refuses for a slide.
          */
         private val EXTRA_FIELDS: List<Pair<String, (Edit) -> Any>> = listOf(
+            "scene_curve" to { e: Edit -> e.sceneCurve.wire },
             "preflash_exposure" to { e: Edit -> e.preflash.coerceIn(0.0, 1.0) },
             "density_curve_gamma" to { e: Edit -> e.negativeGamma.coerceIn(0.2, 4.0) },
             "halation_boost_ev" to { e: Edit -> e.highlightBoostEv.coerceIn(0.0, 8.0) },
@@ -353,6 +355,7 @@ data class Edit(
             autoExposure = p.optBoolean("auto_exposure", fallback.autoExposure),
             aeMethod = p.optString("auto_exposure_method", fallback.aeMethod),
             exposureEv = p.optDouble("exposure_compensation_ev", fallback.exposureEv),
+            sceneCurve = if (p.has("scene_curve")) SceneCurve.fromWire(p.getString("scene_curve"), fallback.sceneCurve) else fallback.sceneCurve,
             filmFormatMm = p.optDouble("film_format_mm", fallback.filmFormatMm),
             printExposure = p.optDouble("print_exposure", fallback.printExposure),
             yShift = p.optDouble("y_filter_shift", fallback.yShift),

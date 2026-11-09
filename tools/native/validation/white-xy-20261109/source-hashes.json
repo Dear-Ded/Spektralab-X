@@ -1,0 +1,154 @@
+[
+  {
+    "path": "app/src/main/cpp/output_cancel.hpp",
+    "sha256": "ec0c15c5d9cd05028b80389d64053389b846b307f0e4c37542e696cd41ff8f0f"
+  },
+  {
+    "path": "app/src/main/cpp/output_transform.cpp",
+    "sha256": "eb7685667c62aa2f8e0c8d5cfb5ee4cc6f6f362e206be9d59496792246b3bf5e"
+  },
+  {
+    "path": "app/src/main/cpp/output_transform.hpp",
+    "sha256": "d98341b662f0ce126550d08d6cc108c9d36f8532565ea8e9c870b7542dc384a5"
+  },
+  {
+    "path": "app/src/main/cpp/passthrough.hpp",
+    "sha256": "e22f163f12aa9e6b6920027bb46de1ec2145dcffd8a89b6df2513343e22c0ebd"
+  },
+  {
+    "path": "app/src/main/cpp/spektralab_jni.cpp",
+    "sha256": "377567b5a0c45f1e639dabfec8e0b95a2dbe438f04a10fdad51c9bab139b6a32"
+  },
+  {
+    "path": "docs/validation/optimization-wave2-2026-11-09.json",
+    "sha256": "d5fcb0541d2d87a22b0271b91afc141891a78afe73bd51f1555b065fc89c2027"
+  },
+  {
+    "path": "patches/0031-view-output-cancellation.patch",
+    "sha256": "496c6e90a23a61ddeb9ea24b31db670a4d4a1bef06c37dfda08e077b5bde4a31"
+  },
+  {
+    "path": "patches/0032-dng-as-shot-white-xy.patch",
+    "sha256": "a471396998a330d32d22244bb80c35466e58b8698930f2f6653ffab2ee275791"
+  },
+  {
+    "path": "patches/libraw/0016-harden-ljpeg-idct.patch",
+    "sha256": "0f1db1f35236906a4af5845d169028bde16d8c0f824d90a9b51304908f4d870f"
+  },
+  {
+    "path": "patches/libraw/0021-dng-as-shot-white-xy.patch",
+    "sha256": "7721c943c88a743322d39dfb7a238b0e2457fe1dcdd6226d243433669c285f74"
+  },
+  {
+    "path": "tools/native/dng_whitexy_fixtures.py",
+    "sha256": "ab8d2979166c7800281301bf3811da9c8e4e22d6c7e24ffbaa683a1f29e81b00"
+  },
+  {
+    "path": "tools/native/dng_whitexy_samples.py",
+    "sha256": "6c736025f2861ec085f791577df8a4385d1261b645faa18b3d1cc0cddbb95540"
+  },
+  {
+    "path": "tools/native/dng_whitexy.cpp",
+    "sha256": "0bc4f832cea65060ae3e2c90dfad70f421b6ff72c381a590b91818c0353a29ad"
+  },
+  {
+    "path": "tools/native/output_cancellation.cpp",
+    "sha256": "056ef2bddd226cce1962d86b33a6a19b8f23ff7ee36e23874738c075bb969688"
+  },
+  {
+    "path": "tools/native/raw_custom_white_balance.cpp",
+    "sha256": "3390a50fa1436f1b724ec52cf2b119304aef5b9e00998e615b3c41c22ebfe666"
+  },
+  {
+    "path": "tools/native/run_dng_whitexy.sh",
+    "sha256": "0f590718eb6bb923dc732ebca1f2eb9f2199b963c8a6dced4864cedede188dda"
+  },
+  {
+    "path": "tools/native/run_output_cancellation.sh",
+    "sha256": "0c466ed08c6aa60f425692bcc815096d1b9158d0fe5fd372d634ba0fd712abdb"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/android-final-u1.log",
+    "sha256": "fecfc0de00ced6edbdaf9b3887e9a0c9f768997e3dde07b1ed8e76866d84daaa"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/android-final.log",
+    "sha256": "fecfc0de00ced6edbdaf9b3887e9a0c9f768997e3dde07b1ed8e76866d84daaa"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/android-integration.log",
+    "sha256": "1a383a37ee9d484f4fe0d836bf4bae61b97f0b845067eec71c1d8ebb2cbccf89"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/baseline.log",
+    "sha256": "2bdc103360976fb2f62d12fbe509e61be6ef8707f756bbd88d888a60ef5948ed"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/baseline/fixtures/manifest.json",
+    "sha256": "f9cbff3b14a6121c415ad36e0254ee95045bfeec249ad01e1fc17657ac7c9a26"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/baseline/fixtures/results.json",
+    "sha256": "2b8c82e472e04d1bb1231ae1985a388347cf71e419a434730d864e535a023657"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/compiled-inputs.sha256",
+    "sha256": "805e247986f956b456678bfa6520b7c6bc2b9473d2c1b5d3b41c67accc3e18b9"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/custom-wb.log",
+    "sha256": "fc83c29b43b5d91371b587a48277dc3e786660732b8cfb2ee8de64a064c5df0c"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/environment.log",
+    "sha256": "cfd15341e97fa2efaf27d11d7e43217ab351f5af9416fc7f411a0c0be82b278d"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/README.md",
+    "sha256": "b17047e1fd0745beefb7ed1668f1297b53adfdfa9e0213816a0fe7c1ade2ff05"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/replay-final-u1/engine-replay.log",
+    "sha256": "139b17eba3ce3b40a3dafc454e891205e3afed138865997a9c3dc6b84820e246"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/replay-final-u1/libraw-replay.log",
+    "sha256": "24d6653629a42a4a015e89894146b778d153aeefe7f8061869a070286e0784d5"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/replay-final-u1/result.json",
+    "sha256": "0712a82f4f77be010d96729abe74121bd86abe3da3ce3d1e9cc4c58a1c0128fa"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/samples.log",
+    "sha256": "e7c2f5a082ca1def33721aef9a58add66dc38a3ce87160b8224b200fd2fefe02"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/samples/results.json",
+    "sha256": "dfb1cd91aaf4587573341504a36a248f22c153154f460260d8ca57aff25896cb"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/white-xy-matrix.log",
+    "sha256": "89980517c497d590960c03b9a28d6678fb523e4a4b7c2c0caf9d2550980b8260"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/white-xy/fixtures/control-comparison.json",
+    "sha256": "3f187b467b96a8c0a2f824209da9ef65c52be6e8b644805296f8bc5c47c5db15"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/white-xy/fixtures/manifest.json",
+    "sha256": "c10d61e564fb3edf79bb81c9560373a9fed7c16e7ceea60b69488ea4c24f4c1e"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/white-xy/fixtures/results.json",
+    "sha256": "4eb9e36f6c2e6ee29e2339df1d809da3b1d173e51d41de3ffe2192311ec369be"
+  },
+  {
+    "path": "tools/native/validation/white-xy-20261109/whitexy.log",
+    "sha256": "8c676ffd4e53136032af021e0df4ae3ea24df76ee221047548ed6b3519392c6f"
+  },
+  {
+    "path": "tools/native/verify_wave2_sources.py",
+    "sha256": "d25dc9c17155a8c43eb84e849754b11dd3e3668d6210ff7bce5a5d37e1e7e9bd"
+  }
+]

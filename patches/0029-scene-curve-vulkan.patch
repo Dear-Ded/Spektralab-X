@@ -1,0 +1,313 @@
+Add an opt-in scene curve before spectral film upsampling.
+
+Selective adaptation of main d4b8145f6f9bdade15cda014776e99521adf0b5f:
+https://github.com/JamesQiu2005/SpektraLab/blob/d4b8145f6f9bdade15cda014776e99521adf0b5f/engine/src/pipeline/scene_latitude.cpp
+https://github.com/JamesQiu2005/SpektraLab/blob/d4b8145f6f9bdade15cda014776e99521adf0b5f/engine/src/shaders/scene_latitude.metal
+
+Keep the legacy exposure_baseline_ev and Scene Latitude APIs. Empty curve
+text skips the new node completely. Non-empty tables are SHOOT edits with
+five rows (rgb/luma/r/g/b), evaluated on +/-8 film-exposure stops. Preserve
+the original auto-meter -> placement -> curve -> upsample -> exposure order.
+Port the same gain algorithm to Vulkan with precise arithmetic and Android's
+push-constant base for chunked 1D dispatch. Limit mobile input to 4096 samples per row and 1 MiB text, and
+reject incomplete CSV, nonfinite values and embedded NUL.
+The companion 0030 patch clears the scene curve in medium_probe_params so
+the independent film/paper reference probe does not inherit an image edit.
+Co-created with GPT (OpenAI), 2026-11-09.
+
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+index 304083d..47fa6cd 100644
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -145,7 +145,7 @@ if(SPEKTRALAB_PORTABLE_BACKEND)
+             spk_lognormal_field spk_rng_probe spk_mul spk_glare_add
+             spk_reduce_max spk_boost spk_highlight_headroom spk_bw_correct spk_edr spk_cctf_decode
+             spk_zoom_bilinear_mirror spk_geometry_resample_df
+-            spk_lut3d_trilinear spk_di_normalise spk_di_encode spk_scene_latitude
++            spk_lut3d_trilinear spk_di_normalise spk_di_encode spk_scene_latitude spk_scene_curve
+             spk_overscan_canvas spk_overscan_add_mask spk_overscan_film_present spk_overscan_light
+             CACHE INTERNAL "")
+         set(vulkan_spirv)
+diff --git a/engine/src/core/params.cpp b/engine/src/core/params.cpp
+index e9ccfd0..c38bd00 100644
+--- a/engine/src/core/params.cpp
++++ b/engine/src/core/params.cpp
+@@ -4,6 +4,7 @@
+ #include "halation_psf.hpp"
+ 
+ #include <cmath>
++#include <cstdlib>
+ #include <cstring>
+ #include <fstream>
+ #include <sstream>
+@@ -197,6 +198,7 @@ const SchemaField kFields[] = {
+     {"scene_latitude_b_highlight_room", "camera.scene_latitude.b_highlight_room", F, SHOOT, true, 0.0, 24.0, false},
+     {"scene_latitude_b_shadow_knee",    "camera.scene_latitude.b_shadow_knee",    F, SHOOT, true, -24.0, 24.0, false},
+     {"scene_latitude_b_shadow_room",    "camera.scene_latitude.b_shadow_room",    F, SHOOT, true, 0.0, 24.0, false},
++    {"scene_curve",              "camera.scene_curve",                    S, SHOOT, false, 0, 0, false},
+     // The CC a unit of `y_filter_shift` / `m_filter_shift` is. Native-only:
+     // the two shifts are the oracle's fields and keep its -1..1, which on a
+     // pack of ~55/65 CC is a twentieth of a stop end to end. Default 1, so a
+@@ -332,6 +334,7 @@ std::string* str_slot(Params& p, const std::string& path) {
+     if (path == "camera.auto_exposure_method") return &p.camera.auto_exposure_method;
+     if (path == "camera.filter") return &p.camera.filter;
+     if (path == "camera.scene_latitude.norm") return &p.camera.scene_latitude.norm;
++    if (path == "camera.scene_curve") return &p.camera.scene_curve;
+     if (path == "print_render.contrast_mask.scheme") return &p.print_render.contrast_mask.scheme;
+     if (path == "film_render.overscan.format") return &p.film_render.overscan.format;
+     if (path == "film_render.overscan.mode") return &p.film_render.overscan.mode;
+@@ -385,6 +388,40 @@ bool is_known_scene_latitude_norm(const std::string& norm) {
+     return norm == "power" || norm == "y" || norm == "max";
+ }
+ 
++bool parse_scene_curve(const std::string& text, std::vector<float>& table, size_t& n, std::string& error) {
++    table.clear();
++    n = 0;
++    if (text.empty()) return true;
++    const auto reject = [&](const char* why) {
++        table.clear();
++        error = why;
++        return false;
++    };
++    if (text.size() > 1024 * 1024 || text.find('\0') != std::string::npos)
++        return reject("'scene_curve' is too long or contains a NUL byte");
++    const char* p = text.c_str();
++    while (*p) {
++        char* end = nullptr;
++        const double v = std::strtod(p, &end);
++        if (end == p || !std::isfinite(v) || v < 0.0 || v > 1.0)
++            return reject("'scene_curve' must be comma-separated numbers in 0..1");
++        if (table.size() == kSceneCurveRows * kSceneCurveMaxSamples)
++            return reject("'scene_curve' supports at most 4096 samples per row");
++        table.push_back(float(v));
++        p = end;
++        if (*p == ',') {
++            ++p;
++            if (!*p) return reject("'scene_curve' must not end with a comma");
++        } else if (*p) {
++            return reject("'scene_curve' must be comma-separated numbers in 0..1");
++        }
++    }
++    if (table.size() % kSceneCurveRows != 0 || table.size() / kSceneCurveRows < 2)
++        return reject("'scene_curve' must hold five rows of at least two samples (rgb, luma, r, g, b)");
++    n = table.size() / kSceneCurveRows;
++    return true;
++}
++
+ bool is_known_camera_filter(const std::string& name) {
+     if (name.empty()) return true;
+     for (const CameraFilter& f : kCameraFilters) if (name == f.name) return true;
+@@ -466,6 +503,11 @@ bool validate_delta(const Json& delta, std::string& error, std::string& param) {
+             param = kv.first;
+             return false;
+         }
++        if (kv.first == "scene_curve") {
++            std::vector<float> table;
++            size_t n = 0;
++            if (!parse_scene_curve(v.as_string(), table, n, error)) { param = kv.first; return false; }
++        }
+         if (kv.first == "scene_latitude_norm" && !is_known_scene_latitude_norm(v.as_string())) {
+             error = "'scene_latitude_norm' = '" + v.as_string() +
+                     "' is not a norm (power, y, max)";
+diff --git a/engine/src/core/params.hpp b/engine/src/core/params.hpp
+index feebd96..8a2d35c 100644
+--- a/engine/src/core/params.hpp
++++ b/engine/src/core/params.hpp
+@@ -316,6 +316,14 @@ struct SceneLatitudeParams {
+ bool is_known_scene_latitude_norm(const std::string& norm);
+ bool is_known_camera_filter(const std::string& name);
+ 
++// Film-input curve, after scene placement and before spectral upsample.
++// Five rows (rgb, luma, r, g, b), each sampled uniformly over +/-8 stops
++// about metered mid-grey. Empty text is a structural bypass.
++constexpr double kSceneCurveStops = 8.0;
++constexpr size_t kSceneCurveRows = 5;
++constexpr size_t kSceneCurveMaxSamples = 4096;
++bool parse_scene_curve(const std::string& text, std::vector<float>& table, size_t& n, std::string& error);
++
+ struct CameraParams {
+     double exposure_compensation_ev = 0.0;
+     double exposure_baseline_ev = 0.0; // Frozen meter, applied before scene placement when AE is off.
+@@ -335,6 +343,7 @@ struct CameraParams {
+     std::string filter;
+     DiffusionFilterParams diffusion_filter;
+     SceneLatitudeParams scene_latitude;
++    std::string scene_curve;
+ };
+ 
+ struct EnlargerParams {
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index bc5e530..14f941e 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -120,6 +120,7 @@ constexpr KernelSpec kKernels[] = {
+     {"spk_di_normalise", 5, kWorkgroup},
+     {"spk_di_encode", 4, kWorkgroup},
+     {"spk_scene_latitude", 4, kWorkgroup},
++    {"spk_scene_curve", 5, kWorkgroup},
+     {"spk_overscan_canvas", 4, kWorkgroup},
+     {"spk_overscan_add_mask", 4, kWorkgroup},
+     {"spk_overscan_film_present", 4, kWorkgroup},
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+index 0446f92..a7139f6 100644
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -466,6 +466,7 @@ bool Pipeline::build(const Params& params, std::string& error) {
+     node_count_ += (params_.camera.auto_exposure || params_.camera.exposure_baseline_ev != 0) ? 1 : 0;
+     node_count_ += 1;                                                    // crop_rescale
+     node_count_ += scene_latitude_wanted() ? 1 : 0;                      // RFC-023
++    node_count_ += scene_curve_wanted() ? 1 : 0;
+     node_count_ += 1;                                                    // upsample
+     node_count_ += 1;                                                    // exposure
+     node_count_ += 1;                                                    // boost
+@@ -1962,6 +1963,7 @@ bool Pipeline::film_scale_and_expose(Chain in, Chain& out, std::string& error) {
+     // spectral reconstruction exactly (§12.2), and this is the band-able
+     // stage, so the node strips with it.
+     if (scene_latitude_wanted()) { SPK_NODE(advance_if_ok(node_scene_latitude(cur, next, error), cur, next)); }
++    if (scene_curve_wanted()) { SPK_NODE(advance_if_ok(node_scene_curve(cur, next, error), cur, next)); }
+     SPK_NODE(advance_if_ok(node_upsample(cur, next, error), cur, next));
+     SPK_NODE(advance_if_ok(node_exposure(cur, next, error), cur, next));
+     // Spectral reconstruction leaves two- and one-channel scratch planes.
+diff --git a/engine/src/pipeline/pipeline.hpp b/engine/src/pipeline/pipeline.hpp
+index b37a22d..1cffbae 100644
+--- a/engine/src/pipeline/pipeline.hpp
++++ b/engine/src/pipeline/pipeline.hpp
+@@ -693,6 +693,8 @@ private:
+     // RFC-023's Scene Latitude Mapping (`scene_latitude.cpp`): pointwise,
+     // before `node_upsample`, and not dispatched at all while it is off.
+     bool scene_latitude_wanted() const;
++    bool scene_curve_wanted() const;
++    bool node_scene_curve(const Image& in, Image& out, std::string& error);
+     bool node_scene_latitude(const Image& in, Image& out, std::string& error);
+ 
+     // RFC-024's virtual contrast mask (`contrast_mask.cpp`). `prepare` runs
+diff --git a/engine/src/pipeline/scene_latitude.cpp b/engine/src/pipeline/scene_latitude.cpp
+index 62d4f4b..d42bcaf 100644
+--- a/engine/src/pipeline/scene_latitude.cpp
++++ b/engine/src/pipeline/scene_latitude.cpp
+@@ -68,6 +68,30 @@ bool Pipeline::node_scene_latitude(const Image& in, Image& out, std::string& err
+                           in.pixels(), error);
+ }
+ 
++bool Pipeline::scene_curve_wanted() const {
++    return !params_.camera.scene_curve.empty() && !params_.debug.lut_mode;
++}
++
++bool Pipeline::node_scene_curve(const Image& in, Image& out, std::string& error) {
++    Timer t(this, "filming.expose.scene_curve");
++    std::vector<float> table;
++    size_t n = 0;
++    if (!parse_scene_curve(params_.camera.scene_curve, table, n, error)) return false;
++    // Read the table at E + film EV, without moving exposure across the
++    // spectral reconstruction. The existing node_exposure still applies EV.
++    const float p[7] = {float(n), float(kSceneCurveStops), float(slm::kMidgray),
++                       float(rgb_to_xyz_ae_.m[1][0]), float(rgb_to_xyz_ae_.m[1][1]),
++                       float(rgb_to_xyz_ae_.m[1][2]), float(params_.camera.exposure_compensation_ev)};
++    gpu::BufferRef p_buf = gpu_->upload(p, sizeof p, error);
++    gpu::BufferRef t_buf = gpu_->upload(table.data(), table.size() * sizeof(float), error);
++    if (!p_buf || !t_buf || !alloc_like(in, out, error)) return false;
++    const uint32_t count[1] = {uint32_t(in.pixels())};
++    return gpu_->dispatch("spk_scene_curve",
++                          {gpu::Arg::buf(in.buf), gpu::Arg::buf(p_buf), gpu::Arg::buf(t_buf),
++                           gpu::Arg::inline_bytes(count, 1), gpu::Arg::buf(out.buf)},
++                          in.pixels(), error);
++}
++
+ bool Pipeline::scene_latitude_sample(const Image& in, double ev, std::vector<double>& E,
+                                      std::string& error, const double* region) {
+     // The node's own upstream nodes, as `measure_meter_evs` runs them: the
+diff --git a/engine/src/shaders/scene_latitude.metal b/engine/src/shaders/scene_latitude.metal
+index e523a73..fc9ac91 100644
+--- a/engine/src/shaders/scene_latitude.metal
++++ b/engine/src/shaders/scene_latitude.metal
+@@ -83,3 +83,42 @@ kernel void spk_scene_latitude(device const float* rgb [[buffer(0)]],
+     out[3u * i + 1u] = g * k;
+     out[3u * i + 2u] = b * k;
+ }
++
++// main d4b8145 Decode curve: gain on stops around metered mid-grey.
++// Read at E + film EV; node_exposure still applies the final exposure gain.
++inline float scene_curve_gain(float v, device const float* t, uint row, uint n, float S, float n_ref, float c) {
++    if (!(v > 0.0f) || !isfinite(v)) return 1.0f;
++    float E = log2(v / n_ref) + c;
++    float u = clamp((E + S) / (2.0f * S), 0.0f, 1.0f);
++    float x = u * float(n - 1u);
++    uint i = min(uint(x), n - 2u);
++    float f = x - float(i);
++    device const float* r = t + row * n;
++    float y = mix(r[i], r[i + 1u], f);
++    float d = 2.0f * S * (y - u);
++    return clamp(exp2(d), exp2(-30.0f), exp2(30.0f));
++}
++
++kernel void spk_scene_curve(device const float* rgb [[buffer(0)]],
++                            device const float* p [[buffer(1)]],
++                            device const float* t [[buffer(2)]],
++                            device const uint* count [[buffer(3)]],
++                            device float* out [[buffer(4)]],
++                            uint3 thread_position_in_grid [[thread_position_in_grid]]) {
++    uint i = thread_position_in_grid.x;
++    if (i >= count[0]) return;
++    uint n = uint(p[0]);
++    float S = p[1], n_ref = p[2], ec = p[6];
++    float3 c = float3(rgb[3u * i], rgb[3u * i + 1u], rgb[3u * i + 2u]);
++    float y = p[3] * max(c.r, 0.0f) + p[4] * max(c.g, 0.0f) + p[5] * max(c.b, 0.0f);
++    c *= scene_curve_gain(y, t, 1u, n, S, n_ref, ec);
++    c = float3(c.r * scene_curve_gain(c.r, t, 0u, n, S, n_ref, ec),
++               c.g * scene_curve_gain(c.g, t, 0u, n, S, n_ref, ec),
++               c.b * scene_curve_gain(c.b, t, 0u, n, S, n_ref, ec));
++    c = float3(c.r * scene_curve_gain(c.r, t, 2u, n, S, n_ref, ec),
++               c.g * scene_curve_gain(c.g, t, 3u, n, S, n_ref, ec),
++               c.b * scene_curve_gain(c.b, t, 4u, n, S, n_ref, ec));
++    out[3u * i] = c.r;
++    out[3u * i + 1u] = c.g;
++    out[3u * i + 2u] = c.b;
++}
+diff --git a/engine/src/shaders/vulkan/spk_scene_curve.comp b/engine/src/shaders/vulkan/spk_scene_curve.comp
+new file mode 100644
+index 0000000..8f4d962
+--- /dev/null
++++ b/engine/src/shaders/vulkan/spk_scene_curve.comp
+@@ -0,0 +1,42 @@
++#version 450
++
++// From main d4b8145 scene_latitude.metal. The table changes positive gains,
++// not the signal's sign. Luma, RGB, then individual channel rows, in order.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
++layout(local_size_x = 256) in;
++layout(set = 0, binding = 0, std430) readonly buffer Input { float v[]; } rgb;
++layout(set = 0, binding = 1, std430) readonly buffer Parameters { float v[]; } p;
++layout(set = 0, binding = 2, std430) readonly buffer Table { float v[]; } t;
++layout(set = 0, binding = 3, std430) readonly buffer Count { uint v[]; } count;
++layout(set = 0, binding = 4, std430) writeonly buffer Output { float v[]; } dst;
++
++float gain(float v, uint row, uint n, float S, float ref, float ev) {
++    if (!(v > 0.0) || isnan(v) || isinf(v)) return 1.0;
++    precise float E = log2(v / ref) + ev;
++    precise float u = clamp((E + S) / (2.0 * S), 0.0, 1.0);
++    precise float x = u * float(n - 1u);
++    uint i = min(uint(x), n - 2u);
++    precise float f = x - float(i);
++    precise float y = mix(t.v[row * n + i], t.v[row * n + i + 1u], f);
++    precise float d = 2.0 * S * (y - u);
++    return clamp(exp2(d), exp2(-30.0), exp2(30.0));
++}
++
++void main() {
++    uint i = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x + spk_pc.base;
++    if (i >= count.v[0]) return;
++    uint n = uint(p.v[0]);
++    float S = p.v[1], ref = p.v[2], ev = p.v[6];
++    precise vec3 c = vec3(rgb.v[3u * i], rgb.v[3u * i + 1u], rgb.v[3u * i + 2u]);
++    precise float y = p.v[3] * max(c.r, 0.0) + p.v[4] * max(c.g, 0.0) + p.v[5] * max(c.b, 0.0);
++    c *= gain(y, 1u, n, S, ref, ev);
++    c = vec3(c.r * gain(c.r, 0u, n, S, ref, ev),
++             c.g * gain(c.g, 0u, n, S, ref, ev),
++             c.b * gain(c.b, 0u, n, S, ref, ev));
++    c = vec3(c.r * gain(c.r, 2u, n, S, ref, ev),
++             c.g * gain(c.g, 3u, n, S, ref, ev),
++             c.b * gain(c.b, 4u, n, S, ref, ev));
++    dst.v[3u * i] = c.r;
++    dst.v[3u * i + 1u] = c.g;
++    dst.v[3u * i + 2u] = c.b;
++}

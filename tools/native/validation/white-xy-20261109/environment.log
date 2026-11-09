@@ -1,0 +1,7 @@
+Linux 5.15.0-30-generic x86_64 GNU/Linux
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+Target: x86_64-unknown-linux-gnu
+fe169f330b55cb8f0ffcd9be960583a58b0b3f0342723ab833b8634991811175  /data/work/gpt-engine-impl-20261108/repo/app/build/intermediates/cxx/RelWithDebInfo/3e2p1y2g/obj/arm64-v8a/libspektralab_jni.so
+beec9827e81e9614fde7830ca1a9cecf5668e974ce0d75c90d53b123fad81b17  /data/work/gpt-optimize-wave2-20261109/build-host/engine/libspk_image_io.a
+0328bacbe21e7c732a628330c90722d60da8915cf4d334c1e00788e857521d5a  /data/work/gpt-optimize-wave2-20261109/build-host/engine/libspk_libraw.a

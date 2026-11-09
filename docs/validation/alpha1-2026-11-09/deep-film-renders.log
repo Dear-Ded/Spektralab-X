@@ -1,0 +1,11 @@
+lake_portra: exact=True
+lake_velvia: exact=True
+lake_cine2383: exact=True
+lake_trix: exact=True
+fruit_portra: exact=True
+fruit_velvia: exact=True
+fruit_cine2383: exact=True
+fruit_trix: exact=True
+fruit_velvia_curves: exact=True
+fruit_portra_full_effects: exact=True
+render regression: 10 cases, all five output planes byte-identical

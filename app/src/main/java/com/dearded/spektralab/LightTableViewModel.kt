@@ -362,7 +362,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     private fun jobFor(f: Frame, car: Sidecar, format: ExportFormat, size: ExportSize, ui: UiState): ProcessingJob {
         val edit = ui.catalog.normalize(car.edit)
         // The size it will be processed at: the working edge and pixel cap, as the editor opens it.
-        val (w, h) = if (f.dimsKnown) f.width to f.height else ui.workingEdge to ui.workingEdge * 3 / 4
+        val (w, h) = if (f.dimsKnown) f.width to f.height else 0 to 0
         val s = SourceLoader.fitScale(w, h, ui.workingEdge, ui.maxPixels)
         val ow = w * s
         val oh = h * s
@@ -374,7 +374,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             editJson = edit.toJson().toString(), wbK = car.wbK, wbTint = car.wbTint,
             lookJson = if (edit.look.neutral) "" else edit.look.toJson().toString(),
             format = format, size = size, workingEdge = ui.workingEdge, maxPixels = ui.maxPixels,
-            outPixels = outPixels,
+            outPixels = outPixels, workingPixels = if (f.dimsKnown) px else 0,
             frameJson = if (edit.frame.isNone) "" else edit.frame.toJson().toString(),
             filmLabel = if (edit.noFilm) "" else ui.catalog.film(edit.film)?.label ?: "",
             wideGamut = ui.wideGamut, highlightStops = ui.highlightStops,

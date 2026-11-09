@@ -72,6 +72,8 @@ data class Style(
      * 相纸「无」 stay as they are (bughunt_main 2).
      */
     val keepFilmState: Boolean = false,
+    /** Missing from older styles: preserve the photo's film-input curve. */
+    val sceneCurve: SceneCurve? = null,
 ) {
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
@@ -85,6 +87,7 @@ data class Style(
                 paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
         return catalog.normalize(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
+            sceneCurve = sceneCurve ?: edit.sceneCurve,
             yShift = (yCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             mShift = (mCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             filmFormatMm = formatMm,
@@ -109,6 +112,7 @@ data class Style(
     fun toSpkLook() = SpkLook(
         name = name, category = group,
         engine = SpkEngine(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
+            sceneCurve = sceneCurve,
             yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
         layer2 = look.copy(lut = "", lutStrength = 1.0),
         source = SpkSource("style", id, inspiredBy),
@@ -499,6 +503,7 @@ internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJ
         engine = SpkEngine(
             film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
             exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+            sceneCurve = edit.sceneCurve,
             yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
             formatMm = edit.filmFormatMm,
             grain = if (edit.grainActive) edit.grainAmount else 0.0,

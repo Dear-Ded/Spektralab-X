@@ -1,0 +1,33 @@
+diff --git a/engine/src/pipeline/view_process.cpp b/engine/src/pipeline/view_process.cpp
+index 17bcfc0..2439b05 100644
+--- a/engine/src/pipeline/view_process.cpp
++++ b/engine/src/pipeline/view_process.cpp
+@@ -195,6 +195,7 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+             result.moved_pixels=counts[0];result.clipped_pixels=counts[1];result.outside_pixels=counts[2];
+             output_channels=4;bits=8;
+         }
++        if(cancelled())return false;
+         const size_t bytes=size_t(w)*h*output_channels*(bits/8);
+         // Vulkan storage writes and buffer copies operate on complete words.
+         // RGB8/RGB16 can have a partial final word; only its live bytes escape.
+@@ -203,6 +204,7 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+         uint32_t pm[]={w*h,encode_mode,bits,output_channels,0};
+         const size_t jobs=output_channels==3?padded_bytes/4:size_t(w)*h;
+         if(!gpu->dispatch("spk_view_pack",{Arg::buf(current.buf),Arg::inline_bytes(pm,5),Arg::buf(packed),Arg::buf(stats)},jobs,error)||!gpu->flush(error))return false;
++        if(cancelled())return false;
+         // Only the packed result is needed from here. Drop the final float
+         // plane before allocating its CPU output; the pool may reuse it, while
+         // device_output keeps ownership of packed without a readback.
+@@ -216,8 +218,11 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+         // unused scratch. Small previews retain their normal warm pool.
+         if(!gpu->trim_idle_for_phase(finished_float_bytes,0,error))return false;
+         result.post_ms=ms(started);
+-        auto read=Clock::now();result.pixels.resize(padded_bytes);
++        const auto read=Clock::now();
++        if(cancelled())return false;
++        result.pixels.resize(padded_bytes);
+         if(!gpu->read(packed.get(),0,result.pixels.data(),padded_bytes,error))return false;
++        if(cancelled())return false;
+         result.pixels.resize(bytes);
+         result.readback_ms=ms(read);result.width=w;result.height=h;result.source_width=print.w;result.source_height=print.h;
+         return true;

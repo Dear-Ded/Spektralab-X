@@ -5,23 +5,24 @@
 //
 //   no_film  胶片「无」, upstream's Sidecar.noFilm. The session's decoded
 //            source (linear ProPhoto, as every session here is opened) encoded
-//            as ProPhoto and quantised at the same 16-bit boundary a print
-//            leaves at. Crop, quarter turns and flip come with the request,
+//            as ProPhoto float RGB until Android's grade boundary. Crop,
+//            quarter turns and flip come with the request,
 //            since the engine's own geometry runs inside the film stages.
 //   di       相纸「无」on a negative: the Digital Intermediate (RFC-028). The
 //            print stage writes Cineon codes; the view reads them through
 //            upstream's DI view table (resources/DI, spk_view_grade_di) back
 //            into encoded ProPhoto, as the Mac and desktop canvases show it.
 //
-// Both are asked for in encoded ProPhoto RGBA16 with the view's own Layer 2
-// off, so the result is what spk_reprint returns for a print: everything after
-// (layer2.cpp, output_transform.cpp, repack, TIFF) is unchanged. Header-only,
-// so the build needs no new source file.
+// The view's own Layer 2 is off. DI retains the original RGBA16 path; no-film
+// editing uses float RGB so negative exposure can recover RAW highlights.
 #pragma once
 
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <utility>
+#include "output_cancel.hpp"
 
 #include "json.hpp"
 #include "pipeline/view.hpp"
@@ -80,10 +81,8 @@ inline std::string with_app_keys(const std::string& reply, const ViewFlags& flag
 // a malloc'd CPU copy that spk_result_free std::free's (vulkan_gpu.cpp,
 // Gpu::release_texture_static), and rgba16 points at it; this result is
 // allocated the same way.
-inline bool render_view(spk_session* session, const std::string& tier, bool no_film,
-                        spk_result& out, std::string& error) {
-    std::memset(&out, 0, sizeof out);
-    spk::view::Request request;
+inline bool view_request(spk_session* session, const std::string& tier, bool no_film,
+                         spk::view::Request& request, std::string& error) {
     request.tier = tier;
     request.adjustments = spk::Json::object();
     request.adjustments.set("enabled", spk::Json(false));
@@ -113,8 +112,19 @@ inline bool render_view(spk_session* session, const std::string& tier, bool no_f
         request.geometry.set("flipH", spk::Json(p.at("geometry_flip_h").as_bool(false)));
         request.geometry.set("flipV", spk::Json(p.at("geometry_flip_v").as_bool(false)));
     }
+    return true;
+}
+
+inline bool render_view(spk_session* session, const std::string& tier, bool no_film,
+                        spk_result& out, std::string& error, const OutputCancel& cancel = {}) {
+    cancel.check();
+    std::memset(&out, 0, sizeof out);
+    spk::view::Request request;
+    if (!view_request(session, tier, no_film, request, error)) return false;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
     spk::view::Result result;
     if (!spk::view::render(session, request, result, error)) return false;
+    cancel.check();
     const size_t bytes = size_t(result.width) * result.height * 4 * sizeof(uint16_t);
     if (!result.width || !result.height || result.pixels.size() != bytes) {
         error = "view returned no pixels"; return false;
@@ -122,12 +132,42 @@ inline bool render_view(spk_session* session, const std::string& tier, bool no_f
     void* pixels = std::malloc(bytes);
     if (!pixels) { error = "cannot allocate the view's pixels"; return false; }
     std::memcpy(pixels, result.pixels.data(), bytes);
+    if (cancel.cancelled()) {
+        std::free(pixels);
+        cancel.check();
+    }
     out.texture = pixels;
     out.rgba16 = static_cast<const uint16_t*>(pixels);
     out.width = result.width;
     out.height = result.height;
     out.row_stride_px = result.width;
     out.elapsed_ms = result.print_ms + result.post_ms + result.readback_ms;
+    return true;
+}
+
+// Shape/timing use the C result; float ownership stays in its own vector.
+// No float allocation is ever disguised as the public rgba16/texture payload.
+inline bool render_view_float(spk_session* session, const std::string& tier,
+                              spk_result& out, std::vector<float>& rgb, std::string& error,
+                              const OutputCancel& cancel = {}) {
+    std::memset(&out, 0, sizeof out);
+    rgb.clear();
+    spk::view::Request request;
+    if (!view_request(session, tier, true, request, error)) return false;
+    request.ungraded_float = true;
+    request.rgba16 = false;
+    request.output_channels = 3;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
+    spk::view::Result result;
+    if (!spk::view::render(session, request, result, error)) return false;
+    if (!result.width || !result.height || result.float_pixels.size() != size_t(result.width) * result.height * 3) {
+        error = "view returned no float pixels"; return false;
+    }
+    out.width = result.width;
+    out.height = result.height;
+    out.row_stride_px = result.width;
+    out.elapsed_ms = result.print_ms + result.post_ms + result.readback_ms;
+    rgb = std::move(result.float_pixels);
     return true;
 }
 

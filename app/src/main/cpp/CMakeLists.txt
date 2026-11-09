@@ -42,7 +42,7 @@ set(spk_libraw "${CMAKE_BINARY_DIR}/LibRaw-0.22.2-spk")
 file(GLOB spk_libraw_patches "${CMAKE_CURRENT_LIST_DIR}/../../../../patches/libraw/*.patch")
 list(SORT spk_libraw_patches)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${spk_libraw_patches})
-set(spk_libraw_stamp "")
+set(spk_libraw_stamp "crx-source-lf-v1\n")
 foreach(p IN LISTS spk_libraw_patches)
     file(SHA256 "${p}" h)
     string(APPEND spk_libraw_stamp "${h}\n")
@@ -58,6 +58,11 @@ if(NOT spk_libraw_have STREQUAL spk_libraw_stamp)
     file(MAKE_DIRECTORY "${spk_libraw}")
     file(COPY "${spk_libraw_pristine}/src" "${spk_libraw_pristine}/libraw" "${spk_libraw_pristine}/internal"
          "${spk_libraw_pristine}/LICENSE.LGPL" "${spk_libraw_pristine}/COPYRIGHT" DESTINATION "${spk_libraw}")
+    # The pinned archive stores crx.cpp as CRLF. Normalise this copy before
+    # applying its LF maintenance patch; the pristine dependency stays intact.
+    file(READ "${spk_libraw}/src/decoders/crx.cpp" spk_crx)
+    string(REPLACE "\r\n" "\n" spk_crx "${spk_crx}")
+    file(WRITE "${spk_libraw}/src/decoders/crx.cpp" "${spk_crx}")
     foreach(p IN LISTS spk_libraw_patches)
         execute_process(COMMAND "${SPK_PATCH}" -p1 --forward --batch -i "${p}"
             WORKING_DIRECTORY "${spk_libraw}" RESULT_VARIABLE rc OUTPUT_VARIABLE out ERROR_VARIABLE out)
@@ -81,7 +86,7 @@ target_compile_definitions(spk_libraw PUBLIC
     LIBRAW_MAX_TILE_STREAM_COUNT=131072)
 
 # white_balance.cpp is upstream's desktop-host Temperature/Tint (Robertson
-# isotherms, LibRaw's camera matrix), compiled here unmodified.
+# isotherms, LibRaw's camera matrix), with the RAW adaptation patches applied.
 # Upstream's output transform arithmetic (engine/host/output.cpp: the transfer
 # functions and the CAM16-UCS gamut compression), taken verbatim from the pinned
 # tree at configure time so the phone converts exactly as the desktop does.

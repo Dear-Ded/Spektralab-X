@@ -23,6 +23,7 @@
 
 #include "spektrafilm/spk_engine.h"
 #include "layer2.hpp"
+#include "output_cancel.hpp"
 
 namespace spk::android {
 
@@ -61,10 +62,20 @@ private:
 
 // Engine RGBA16 (encoded ProPhoto) -> Layer 2 (optional) -> `xf` -> RGBA8.
 void pack_rgba8(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf);
+                uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf,
+                const OutputCancel& cancel = {});
 // The same into RGBA16 with a row stride of `w` pixels (TIFF).
 void pack_rgba16(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                 std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf);
+                 std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf,
+                 const OutputCancel& cancel = {});
+
+// No-film encoded ProPhoto RGB: grade first, quantise once, then convert.
+void pack_float_rgba8(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
+                      uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf,
+                      const OutputCancel& cancel = {});
+void pack_float_rgba16(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
+                       std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf,
+                       const OutputCancel& cancel = {});
 
 // One immutable full-frame geometry, with only the requested output rows in
 // memory. Called concurrently by TIFF workers; each supplies its own storage.
@@ -72,10 +83,32 @@ class Rgba16Rows {
 public:
     Rgba16Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
                const Layer2* look, const OutputTransform* xf);
-    void pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out) const;
+    Rgba16Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+               const Layer2* look, const OutputTransform* xf);
+    void pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out, const OutputCancel& cancel = {}) const;
 
 private:
-    const uint16_t* src_;
+    const uint16_t* src_ = nullptr;
+    const float* float_src_ = nullptr;
+    size_t stride_;
+    uint32_t w_, h_;
+    const Layer2* look_;
+    const OutputTransform* xf_;
+    Layer2::Frame frame_;
+};
+
+// JPEG conversion with full-frame mask/texture coordinates and bounded rows.
+class Rgba8Rows {
+public:
+    Rgba8Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
+              const Layer2* look, const OutputTransform* xf);
+    Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+              const Layer2* look, const OutputTransform* xf);
+    void pack(uint32_t y0, uint32_t count, std::vector<uint8_t>& out, const OutputCancel& cancel = {}) const;
+
+private:
+    const uint16_t* src_ = nullptr;
+    const float* float_src_ = nullptr;
     size_t stride_;
     uint32_t w_, h_;
     const Layer2* look_;

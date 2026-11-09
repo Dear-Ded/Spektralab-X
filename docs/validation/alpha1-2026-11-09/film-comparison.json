@@ -1,0 +1,589 @@
+{
+  "baseline_manifest_sha256": "39a2167b34ea6384dfa7f6501581c994d0191eb53c2aa9650604bc1b07257c0e",
+  "candidate_binary_sha256": "079b2776aed7da16c14a5a438e92c313bd7917a20891c2be13520304086dc907",
+  "cases": {
+    "lake_portra": {
+      "all_exact": true,
+      "seconds": 16.912165333982557,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "43b027b6305a8ea4ee185bfb2ee8c6fdccb32805d9c452d869f9149d012f8acb",
+          "after_sha256": "43b027b6305a8ea4ee185bfb2ee8c6fdccb32805d9c452d869f9149d012f8acb"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "54ca8214feee0be8e9ef33a27fe48c4ceba8070e3c0748ff507a145e61f12797",
+          "after_sha256": "54ca8214feee0be8e9ef33a27fe48c4ceba8070e3c0748ff507a145e61f12797"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "2af60ae8609e99ffdb1e4c2180139a166b66bc5f485dafe7c51b369481a6d1a0",
+          "after_sha256": "2af60ae8609e99ffdb1e4c2180139a166b66bc5f485dafe7c51b369481a6d1a0"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "7e8670a3c424aa396aeba7ee0a74c792a95cea7daa8add34eec084d399272249",
+          "after_sha256": "7e8670a3c424aa396aeba7ee0a74c792a95cea7daa8add34eec084d399272249"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "ff60e67f441cddaa316bbdb2b37b52663e527d26f85813a9298262bdb0ef0806",
+          "after_sha256": "ff60e67f441cddaa316bbdb2b37b52663e527d26f85813a9298262bdb0ef0806"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "lake_velvia": {
+      "all_exact": true,
+      "seconds": 13.258937219972722,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "827ba53015df4569781238462612e61d29beaca241ca1d88475a695db6696a77",
+          "after_sha256": "827ba53015df4569781238462612e61d29beaca241ca1d88475a695db6696a77"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "e53adeaef76d8aabe51f48a560857191d11b8f62e96977a6e230a236146c5598",
+          "after_sha256": "e53adeaef76d8aabe51f48a560857191d11b8f62e96977a6e230a236146c5598"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "cbac86ea5d0ef9b81195966b4894e28505ad0f2833215fd40a2b7d65dd150c3a",
+          "after_sha256": "cbac86ea5d0ef9b81195966b4894e28505ad0f2833215fd40a2b7d65dd150c3a"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "c0e3b250b9825ab4dec0353c0c3f67a7773df491da160feb94b8e1bf42e291e4",
+          "after_sha256": "c0e3b250b9825ab4dec0353c0c3f67a7773df491da160feb94b8e1bf42e291e4"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "e27e614ad718bbc0b27f8968dea142d1428ce3042bc94555c978d8ed01c99f32",
+          "after_sha256": "e27e614ad718bbc0b27f8968dea142d1428ce3042bc94555c978d8ed01c99f32"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "lake_cine2383": {
+      "all_exact": true,
+      "seconds": 16.35948730300879,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "ba3b7bb57bf12664d0c8b21179d19590b0686679918cce728fa1283fd245078f",
+          "after_sha256": "ba3b7bb57bf12664d0c8b21179d19590b0686679918cce728fa1283fd245078f"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "71f6c71cbae8ca4ec4b268f138f68f06ba9bcd94f77fe03d9c00033b12b909ff",
+          "after_sha256": "71f6c71cbae8ca4ec4b268f138f68f06ba9bcd94f77fe03d9c00033b12b909ff"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "09bbbb76f804387563c67e778d295c119b391fa61cf6034fb6b374fec5c3d8a9",
+          "after_sha256": "09bbbb76f804387563c67e778d295c119b391fa61cf6034fb6b374fec5c3d8a9"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "a4973d1ef627f0f13f7b5eae5a0b365d8b7a7661cc04ae37bffa497cd074fcd1",
+          "after_sha256": "a4973d1ef627f0f13f7b5eae5a0b365d8b7a7661cc04ae37bffa497cd074fcd1"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "570ad029e3106b1df8258dbefe910c3ee6a48856523ea5544860854f81db0ce6",
+          "after_sha256": "570ad029e3106b1df8258dbefe910c3ee6a48856523ea5544860854f81db0ce6"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "lake_trix": {
+      "all_exact": true,
+      "seconds": 16.85080871800892,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "209bd95dc351cf56881bbc88d1303ed2aa926e480e7e6a2231bbacbb3d7e1986",
+          "after_sha256": "209bd95dc351cf56881bbc88d1303ed2aa926e480e7e6a2231bbacbb3d7e1986"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "5974539562398836a4871aac4cd20a7989e6d507f582bafb8b035a0b740561b2",
+          "after_sha256": "5974539562398836a4871aac4cd20a7989e6d507f582bafb8b035a0b740561b2"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 16,
+          "bytes_including_header": 9440262,
+          "first_different_byte": null,
+          "before_sha256": "4a9872e066f71aeb86497f0d16d78285c42dfdb10ace6fb40df71ee347aa7a0e",
+          "after_sha256": "4a9872e066f71aeb86497f0d16d78285c42dfdb10ace6fb40df71ee347aa7a0e"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "a39eb2d39b01b892cb4f07110d07064359cf142cbd4a98fbd2e73e72e7afb1ec",
+          "after_sha256": "a39eb2d39b01b892cb4f07110d07064359cf142cbd4a98fbd2e73e72e7afb1ec"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1535,
+          "height": 1025,
+          "bits": 8,
+          "bytes_including_header": 4720137,
+          "first_different_byte": null,
+          "before_sha256": "bf91dd9f609486c042e36f0527a16fadee01c0d4efb987ccdafcaedb54a8fe2a",
+          "after_sha256": "bf91dd9f609486c042e36f0527a16fadee01c0d4efb987ccdafcaedb54a8fe2a"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_portra": {
+      "all_exact": true,
+      "seconds": 16.80690925498493,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "d883b2b6f67cc8a05115f8a81835ca40a010b4bfea89516e624218084488dbc2",
+          "after_sha256": "d883b2b6f67cc8a05115f8a81835ca40a010b4bfea89516e624218084488dbc2"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "17575cd77d0b5c56b24c30972e373efd0ac9ea30e35e17208c1585b368d078f9",
+          "after_sha256": "17575cd77d0b5c56b24c30972e373efd0ac9ea30e35e17208c1585b368d078f9"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "18cfbec9c275760e8a7456d851c5bfe4c588473b7f15d9c46f31e94c2beab7b7",
+          "after_sha256": "18cfbec9c275760e8a7456d851c5bfe4c588473b7f15d9c46f31e94c2beab7b7"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "ad91e22c71cecf5a99f69b34856b3c7a811f6997b8c5289042ddab01a743051e",
+          "after_sha256": "ad91e22c71cecf5a99f69b34856b3c7a811f6997b8c5289042ddab01a743051e"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "e8d4e837b79f8942ecfcc719d9da62cc17e6f38394829b9ea21075e02a6ee5cd",
+          "after_sha256": "e8d4e837b79f8942ecfcc719d9da62cc17e6f38394829b9ea21075e02a6ee5cd"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_velvia": {
+      "all_exact": true,
+      "seconds": 13.158143127977382,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "c102c19db320d9bb245a812321b2091e0f716f6aed51c283ff27abd38719ff6e",
+          "after_sha256": "c102c19db320d9bb245a812321b2091e0f716f6aed51c283ff27abd38719ff6e"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "96001c2cf8c3ce90a43bfd1182542be441b5818e6c1456550e5a5989b6d3b8c9",
+          "after_sha256": "96001c2cf8c3ce90a43bfd1182542be441b5818e6c1456550e5a5989b6d3b8c9"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "e04fd0ccc23712c8802378917d1053664ffa77ad1ee9c27c2bd6a4f20dd14dec",
+          "after_sha256": "e04fd0ccc23712c8802378917d1053664ffa77ad1ee9c27c2bd6a4f20dd14dec"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "c7960c259de64ede2c6edf90c09257ffb6100df4981e87add5cefd6b3cefdbd9",
+          "after_sha256": "c7960c259de64ede2c6edf90c09257ffb6100df4981e87add5cefd6b3cefdbd9"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "8e3a53ea53d3e09fa5e2b2b9472eb8672bacda94b16a8c658be2d0eba2100d26",
+          "after_sha256": "8e3a53ea53d3e09fa5e2b2b9472eb8672bacda94b16a8c658be2d0eba2100d26"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_cine2383": {
+      "all_exact": true,
+      "seconds": 16.72122353798477,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "80b1fc53f43a547e14cfa271087171db130a529dd2d366e0a17f9473f9bbcb15",
+          "after_sha256": "80b1fc53f43a547e14cfa271087171db130a529dd2d366e0a17f9473f9bbcb15"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "06150a3fb2175ad6acb309056671632419f3ad3afb1a59fea2195995ece24433",
+          "after_sha256": "06150a3fb2175ad6acb309056671632419f3ad3afb1a59fea2195995ece24433"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "25235fce57a6a639ab377d36846e61d928bcded5fae077acc127964fa965fee5",
+          "after_sha256": "25235fce57a6a639ab377d36846e61d928bcded5fae077acc127964fa965fee5"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "931504f52f97abc54d58cddad9cc9028ce469c2e9c382c6138ad0a5ef39947cf",
+          "after_sha256": "931504f52f97abc54d58cddad9cc9028ce469c2e9c382c6138ad0a5ef39947cf"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "182855453eff956eb97be668ab4a7ec50e6568359678226e5c7746d0062636ee",
+          "after_sha256": "182855453eff956eb97be668ab4a7ec50e6568359678226e5c7746d0062636ee"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_trix": {
+      "all_exact": true,
+      "seconds": 17.009226562047843,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "066e7087dcf53dfb070d6f4c6bfd5ff75626e5c48ea0452bea07db1563a1fc02",
+          "after_sha256": "066e7087dcf53dfb070d6f4c6bfd5ff75626e5c48ea0452bea07db1563a1fc02"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "d2a0268be758e8ce6763e5a2802cc831f1836e1a9c97907c0b14adca26c895ac",
+          "after_sha256": "d2a0268be758e8ce6763e5a2802cc831f1836e1a9c97907c0b14adca26c895ac"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "21c05e2c6b85333dcf00b9421e3e4837eb1bb4496f69678fcc93bea97e10ad7d",
+          "after_sha256": "21c05e2c6b85333dcf00b9421e3e4837eb1bb4496f69678fcc93bea97e10ad7d"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "359c65ea6f4ab47c1f524a1ca27fa8e58d2ec20b61e04b4824eeec16e9082166",
+          "after_sha256": "359c65ea6f4ab47c1f524a1ca27fa8e58d2ec20b61e04b4824eeec16e9082166"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "adc43b7a82feaad527f453a5c24646776bf960cc2b40a6ba10fc84112ad94a13",
+          "after_sha256": "adc43b7a82feaad527f453a5c24646776bf960cc2b40a6ba10fc84112ad94a13"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_velvia_curves": {
+      "all_exact": true,
+      "seconds": 14.074006101000123,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "c102c19db320d9bb245a812321b2091e0f716f6aed51c283ff27abd38719ff6e",
+          "after_sha256": "c102c19db320d9bb245a812321b2091e0f716f6aed51c283ff27abd38719ff6e"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "657893bfba1e685227194ec03ccf2d3b6710d1af0ec8e7eb2cba82a821a97a04",
+          "after_sha256": "657893bfba1e685227194ec03ccf2d3b6710d1af0ec8e7eb2cba82a821a97a04"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "f2130bf645b0dfba7d34980884df0e968b55762463b3b4001a59876d2a9661b9",
+          "after_sha256": "f2130bf645b0dfba7d34980884df0e968b55762463b3b4001a59876d2a9661b9"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "77544d25465d125a70a31638659893bc72b6b550800e371894b09dc9e21defda",
+          "after_sha256": "77544d25465d125a70a31638659893bc72b6b550800e371894b09dc9e21defda"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "7eabd2b6d24b4a308976c58889b38f87ceaf671ed5c0f269911a99e15fa2d534",
+          "after_sha256": "7eabd2b6d24b4a308976c58889b38f87ceaf671ed5c0f269911a99e15fa2d534"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": false
+    },
+    "fruit_portra_full_effects": {
+      "all_exact": true,
+      "seconds": 19.78427931200713,
+      "files": {
+        "print.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "fc0e705e9ae804b49dbbb0d71040a2bd54f342f6b423c415002040b973327c86",
+          "after_sha256": "fc0e705e9ae804b49dbbb0d71040a2bd54f342f6b423c415002040b973327c86"
+        },
+        "export_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "206fedbe35e5d0561860461dbeaa771461f6a1857434aa69b0326a96c446cef6",
+          "after_sha256": "206fedbe35e5d0561860461dbeaa771461f6a1857434aa69b0326a96c446cef6"
+        },
+        "export_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 16,
+          "bytes_including_header": 9427980,
+          "first_different_byte": null,
+          "before_sha256": "d61545b6ca03d0d975fe6815507eede070409cb8cd124fcdd9d0dbe6c72083ad",
+          "after_sha256": "d61545b6ca03d0d975fe6815507eede070409cb8cd124fcdd9d0dbe6c72083ad"
+        },
+        "view_srgb.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "9d1d49a89a36da1818a8b5a892cbe72a495c893cd1480af679b557351b533baf",
+          "after_sha256": "9d1d49a89a36da1818a8b5a892cbe72a495c893cd1480af679b557351b533baf"
+        },
+        "view_p3.rgb": {
+          "exact": true,
+          "width": 1536,
+          "height": 1023,
+          "bits": 8,
+          "bytes_including_header": 4713996,
+          "first_different_byte": null,
+          "before_sha256": "eea16581afe877598d44cc4c93c06773e6daf71f8bc32e2fe4b4c846c61ff7f1",
+          "after_sha256": "eea16581afe877598d44cc4c93c06773e6daf71f8bc32e2fe4b4c846c61ff7f1"
+        }
+      },
+      "fresh_process_seed": true,
+      "stochastic_effects": true
+    }
+  },
+  "raw_preparation": {},
+  "all_exact": true,
+  "scope": "same-driver Linux native chain; not execution on an Android phone"
+}

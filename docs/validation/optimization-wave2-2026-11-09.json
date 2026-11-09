@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-09",
+  "co_created_by": "GPT (OpenAI), AI assistant",
+  "repository": "Dear-Ded/Spektralab-X",
+  "public_base": "6aff78e9d1b7ac0e137526b36781271561ef95f8",
+  "status": "Source implementation and scoped verification complete; no APK, commit, push, tag or release",
+  "version_changed_in_this_wave": false,
+  "roadmap": "../ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md",
+  "source_hashes": "../../tools/native/validation/white-xy-20261109/source-hashes.json",
+  "white_xy": {
+    "implementation": [
+      "LibRaw 0021 retains AsShotWhiteXY and bounded complete calibration signatures with explicit invalid states",
+      "Engine 0032 derives source WB from known xy, Robertson temperature and complete calibrated endpoint interpolation",
+      "ForwardMatrix and Bradford fallback use the current main profile; custom WB does not overwrite source provenance"
+    ],
+    "contract": "../DNG_WHITE_XY_2026-11-09.md",
+    "host": "AOIDC Linux x86_64, GCC 11.4.0",
+    "production_archives": "spk_libraw and spk_image_io fully rebuilt together after internal LibRaw layout change",
+    "fixtures": {
+      "cases": 25,
+      "candidate_decode_calls": 98,
+      "includes_expected_rejections": true,
+      "independent_reference": "Python Robertson, calibrated endpoint product, neutral, partial-pivot Gaussian inverse, ForwardMatrix and Bradford output matrix",
+      "default_output_matrix_comparisons": 37,
+      "fixed_matrix_absolute_tolerance": 0.00001,
+      "maximum_matrix_absolute_error": 8.946387675123901e-8,
+      "per_pixel_neutral_rgb_spread_limit": 0.0003,
+      "baseline_control_byte_equal_pairs": 6,
+      "evidence": "../../tools/native/validation/white-xy-20261109/white-xy/fixtures/"
+    },
+    "real_as_shot_neutral": {
+      "files": 6,
+      "cameras": "Four public Xiaomi samples, Pixel 4a and iPhone 12 Pro",
+      "policy": "compatible, half-size budget",
+      "default_and_custom_float_byte_equal_pairs": 12,
+      "evidence": "../../tools/native/validation/white-xy-20261109/samples/results.json"
+    },
+    "real_white_xy": {
+      "file": "Google_-_Pixel_8_Pro_-_16bit_(4:3).dng",
+      "sha256": "45420c595401547cca950ae58d552bc82b32d31ce1d58c082df33004016197f5",
+      "xy": [0.322046, 0.326646],
+      "camera_calibration_is_non_identity": true,
+      "successful_cases": 4,
+      "policies": ["compatible", "headroom"],
+      "modes": ["default", "custom"],
+      "previous_default_rejections": 2,
+      "finite_output_and_source_provenance": true
+    },
+    "custom_wb_regression": {
+      "invalid_rejection_and_output_preservation_checks": 8,
+      "missing_source_default_rejections": 2,
+      "missing_source_actual_custom_decodes": 2,
+      "valid_white_xy_custom_decode": 1,
+      "evidence": "../../tools/native/validation/white-xy-20261109/custom-wb.log"
+    }
+  },
+  "cancellation": {
+    "implementation": "Engine 0031 and Android request-local generation token; worker polling followed by join before reporting cancellation",
+    "host": "IBX Linux x86_64, GCC 14.2.0",
+    "focused_modes": ["strict", "default"],
+    "real_no_film_cancel_boundaries_per_mode": 8,
+    "recovery_renders_equal_baseline_per_mode": 8,
+    "boundaries_before_cpu_float_readback_allocation_per_mode": 7,
+    "parallel_conversion_pixels_per_input_type": 4199425,
+    "parallel_conversion_input_types": ["RGBA16", "float RGB"],
+    "parallel_output_stable_after_cancel_return": true,
+    "full_and_strip_rgba8_rgba16_parity": true,
+    "tiff_scope": "Native harness verifies worker joining, partial cleanup, post-writer cancellation classification pattern and complete-file parity; JNI export_tiff is source-reviewed and compiled, not runtime-exercised",
+    "cache_scope": "Source inspection confirms old last/last_float replaced only after successful packing; no Android runtime assertion",
+    "existing_strict_regressions": {
+      "jpeg_cases": 48,
+      "complete_jpeg_file_comparisons": 384,
+      "no_film_cases": 120,
+      "tiff_row_comparisons": 780,
+      "repack_comparisons": 60
+    },
+    "evidence": "../../tools/native/validation/output-cancellation-20261109/result.json"
+  },
+  "patch_replay": {
+    "pin": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+    "archive_bytes": 48699777,
+    "archive_sha256": "52ef254ffa7c70484a411c269f3f837f75d5a215ed7332d5fdab267317408f05",
+    "engine_patches": 32,
+    "engine_patched_files_sha_equal": 92,
+    "libraw_patches": 15,
+    "libraw_patched_files_sha_equal": 22,
+    "gnu_patch_zero_fuzz": true,
+    "android_libraw_sources_sha_equal": true,
+    "context_maintenance": "0031 regenerated with standard U3 context; old LibRaw 0016 rebased with standard U1 context after 0002. Compiled source bytes unchanged.",
+    "evidence": "../../tools/native/validation/white-xy-20261109/replay-final-u1/result.json"
+  },
+  "android": {
+    "host": "AOIDC Linux x86_64",
+    "ndk": "27.2.12479018",
+    "compiler": "Clang 18.0.3",
+    "target": "arm64-v8a, API 29",
+    "final_command": ":app:externalNativeBuildRelease",
+    "final_result": "BUILD SUCCESSFUL in 57s; 3 actionable tasks executed",
+    "native_library_format": "ELF 64-bit, ARM aarch64, dynamically linked",
+    "native_library_sha256": "fe169f330b55cb8f0ffcd9be960583a58b0b3f0342723ab833b8634991811175",
+    "jvm": {
+      "task_state": "UP-TO-DATE; not rerun in this wave",
+      "existing_report_suites": 9,
+      "existing_report_tests": 66,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "evidence": "../../tools/native/validation/white-xy-20261109/android-final-u1.log"
+  },
+  "limits": [
+    "No physical Android GPU, ART/JNI runtime, device memory, thermal or cancellation acceptance test.",
+    "No user-owned Xiaomi 13 Ultra professional RAW/UltraRAW or Lightroom side-by-side visual validation.",
+    "WhiteXY supports the current main profile and tested three-channel matrix paths, not full Camera Profile IFD/ExtraCameraProfiles or four-channel support.",
+    "Signatures are limited to 255 content bytes plus NUL; longer valid signatures are unsupported rather than declared corrupt.",
+    "Float-DNG early integer conversion, fractional/spatial black levels, BaselineExposure and profile tone/lookup policies remain unchanged.",
+    "Already submitted GPU operations, active codec strip compression and JPEG internal second pass are not preempted.",
+    "Legacy integer look-only packing retains whole-conversion cancellation granularity.",
+    "No unified stage memory lease, full external-memory rendering or new peak-RSS reduction claim in this wave."
+  ]
+}

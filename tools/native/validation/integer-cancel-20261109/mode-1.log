@@ -1,0 +1,8 @@
+view PASS float=1 stages=8 recovered=8 cpu_readback_avoided=7
+view PASS float=0 stages=10 recovered=10 cpu_readback_avoided=9
+legacy look PASS parity/pre-cancel/active-cancel joined written=5155
+cpu PASS float=0 written_pixels=315469 total=4199425
+cpu PASS float=1 written_pixels=352342 total=4199425
+cpu parity PASS float/integer full/strip rgba8/rgba16
+TIFF PASS cancelled_cleanup joined_workers cancel_classification complete_file_parity
+output cancellation PASS

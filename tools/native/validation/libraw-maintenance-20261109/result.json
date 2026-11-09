@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-09",
+  "co_created_by": "GPT (OpenAI), AI assistant",
+  "scope": "LibRaw 0.22.2 plus existing overlay; four CRX signed-remainder index guards from 0.22.3",
+  "upstream_snapshot": "cf02d66eb5c19d4e46df7aee0582e47a4918509a",
+  "patch": "patches/libraw/0020-crx-signed-quantizer-index.patch",
+  "experiment_root": "/data/work/gpt-maintenance-20261109",
+  "host": "AOIDC Linux x86_64; GCC; OMP_NUM_THREADS=2",
+  "source": "Read-only copy of /data/work/codex-android-adaptation-20261108/libraw-spk",
+  "source_reachability": [
+    "crxUpdateQparam decodes a signed delta; a unary 01 changes initial 0 to -1",
+    "crxDecodeGolombTop decodes signed -5; crxReadImageHeaders adds 4 to produce QP -1",
+    "Production spk_libraw includes crx.cpp; Canon EOS R5 fixture reports crxLoadRaw()"
+  ],
+  "red": {
+    "legacy": "UBSan index -5 at crx.cpp:1115; exit 1",
+    "level1": "UBSan index -5 at crx.cpp:2072; exit 1",
+    "level2": "UBSan index -5 at crx.cpp:2058; exit 1",
+    "level3": "UBSan index -5 at crx.cpp:2038; exit 1"
+  },
+  "green": {
+    "cases": 464,
+    "signed_bitstream_checks": 2,
+    "legacy_q_range": [-35, 35],
+    "qstep_q_range": [-35, 95],
+    "qstep_levels": [1, 2, 3],
+    "sanitizers": "ASan + UBSan, no recovery; vptr excluded because standalone translation-unit probe has no complete LibRaw RTTI",
+    "allocator": "Probe uses LIBRAW_NO_CR3_MEMPOOL; file regression uses production mempool"
+  },
+  "file_regression": {
+    "method": "Copy existing production static archive; rebuild only patched crx.cpp with the same production flags; replace archive member; link and run both complete LibRaw clients",
+    "production_flags": "-O3 -DNDEBUG -fPIC -w -fopenmp -DLIBRAW_NODLL -DSPEKTRALAB_RAW_OPENMP=1 -DSPK_VULKAN_BACKEND=1",
+    "fixtures": [
+      "IMG_20230420_114715.dng",
+      "IMG_20230420_115647.dng",
+      "IMG_20230420_152059.dng",
+      "IMG_20230420_153127.dng",
+      "Canon_-_EOS_R5_-_RAW,_1.6_crop,_dual-pixel_(3:2).CR3"
+    ],
+    "checked": "cmp of unpacked Bayer buffer and half-size camera-WB RGB16 bitmap; 10 of 10 output pairs byte identical",
+    "logs": "files-final.log contains input/output SHA256 and decoder/dimensions"
+  },
+  "limits": [
+    "No malformed whole CR3 fixture or fuzz campaign; negative cases are actual decoder-helper tests",
+    "No claim to fix remaining CRX extreme quantizer shift/overflow cases",
+    "No whole-library clean rebuild; complete existing library linked with patched translation unit",
+    "No Android runtime/device test in this subtask",
+    "Experiment normalizes CRX source CRLF to LF before GNU patch; production integration must handle the same line-ending boundary"
+  ]
+}

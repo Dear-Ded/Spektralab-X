@@ -1,0 +1,186 @@
+0001-iir-chunked-launches.patch
+patching file engine/src/pipeline/blur.cpp
+patching file engine/src/shaders/vulkan/spk_iir_df_acc.comp
+0002-dispatch-chunks-under-2-24.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+patching file engine/src/shaders/vulkan/spk_affine3.comp
+patching file engine/src/shaders/vulkan/spk_boost.comp
+patching file engine/src/shaders/vulkan/spk_bw_correct.comp
+patching file engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+patching file engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+patching file engine/src/shaders/vulkan/spk_cctf_decode.comp
+patching file engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+patching file engine/src/shaders/vulkan/spk_couplers_correction.comp
+patching file engine/src/shaders/vulkan/spk_curves.comp
+patching file engine/src/shaders/vulkan/spk_di_encode.comp
+patching file engine/src/shaders/vulkan/spk_di_normalise.comp
+patching file engine/src/shaders/vulkan/spk_edr.comp
+patching file engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+patching file engine/src/shaders/vulkan/spk_glare_add.comp
+patching file engine/src/shaders/vulkan/spk_grain_layer_one.comp
+patching file engine/src/shaders/vulkan/spk_grain_layers.comp
+patching file engine/src/shaders/vulkan/spk_grain_simple.comp
+patching file engine/src/shaders/vulkan/spk_highlight_headroom.comp
+patching file engine/src/shaders/vulkan/spk_iir_df_acc.comp
+patching file engine/src/shaders/vulkan/spk_lincomb3.comp
+patching file engine/src/shaders/vulkan/spk_log10_guarded.comp
+patching file engine/src/shaders/vulkan/spk_lognormal_field.comp
+patching file engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+patching file engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+patching file engine/src/shaders/vulkan/spk_math_probe.comp
+patching file engine/src/shaders/vulkan/spk_matmul3.comp
+patching file engine/src/shaders/vulkan/spk_mul.comp
+patching file engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+patching file engine/src/shaders/vulkan/spk_overscan_body.glsl
+patching file engine/src/shaders/vulkan/spk_overscan_canvas.comp
+patching file engine/src/shaders/vulkan/spk_overscan_film_present.comp
+patching file engine/src/shaders/vulkan/spk_overscan_light.comp
+patching file engine/src/shaders/vulkan/spk_print_exposure.comp
+patching file engine/src/shaders/vulkan/spk_reduce_max.comp
+patching file engine/src/shaders/vulkan/spk_rng_probe.comp
+patching file engine/src/shaders/vulkan/spk_scene_latitude.comp
+patching file engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+patching file engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+patching file engine/src/shaders/vulkan/spk_split_probe.comp
+patching file engine/src/shaders/vulkan/spk_stride_sample.comp
+patching file engine/src/shaders/vulkan/spk_take_rgb.comp
+patching file engine/src/shaders/vulkan/spk_tc_b.comp
+patching file engine/src/shaders/vulkan/spk_to_rgba16.comp
+patching file engine/src/shaders/vulkan/spk_view_cam16.comp
+patching file engine/src/shaders/vulkan/spk_view_geometry.comp
+patching file engine/src/shaders/vulkan/spk_view_grade.comp
+patching file engine/src/shaders/vulkan/spk_view_grade_body.glsl
+patching file engine/src/shaders/vulkan/spk_view_grade_di.comp
+patching file engine/src/shaders/vulkan/spk_view_grade_float.comp
+patching file engine/src/shaders/vulkan/spk_view_pack.comp
+patching file engine/src/shaders/vulkan/spk_view_pair.comp
+patching file engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+0003-raw-half-size-budget.patch
+patching file engine/src/io/raw_decoder.cpp
+patching file engine/src/io/raw_decoder.hpp
+0004-dng-dual-illuminant-matrix.patch
+patching file engine/src/io/raw_camera.hpp
+patching file engine/src/io/raw_decoder.cpp
+0005-lock-print-lut-caches.patch
+patching file engine/src/core/print_lut.cpp
+patching file engine/src/core/print_lut.hpp
+patching file engine/src/pipeline/engine.cpp
+0006-dng-opcode-gain-map.patch
+patching file engine/src/io/dng_gain_map.hpp
+patching file engine/src/io/raw_decoder.cpp
+0007-grain-size-and-unsharp-on-the-wire.patch
+patching file engine/src/core/params.cpp
+patching file engine/tests/parity_schema.py
+0008-latch-device-lost.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0009-dng-opcode-list-3.patch
+patching file engine/CMakeLists.txt
+patching file engine/src/io/dng_opcode_list3.hpp
+patching file engine/src/io/raw_camera.hpp
+patching file engine/tests/dng_opcode_list3.cpp
+0010-storage-range-by-requested-size.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0011-atomic-cancel-flag.patch
+patching file engine/src/pipeline/pipeline.hpp
+0012-persistent-descriptor-pool.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0013-reprint-reuses-print-constants.patch
+patching file engine/src/pipeline/pipeline.cpp
+patching file engine/src/pipeline/pipeline.hpp
+0014-inline-args-mapped-ring.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0015-vulkan-pipeline-cache.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0016-setup-cache-shared-lut.patch
+patching file engine/src/core/setup_cache.hpp
+Hunk #1 succeeded at 28 (offset -4 lines).
+Hunk #2 succeeded at 52 (offset -4 lines).
+Hunk #3 succeeded at 69 (offset -5 lines).
+patching file engine/src/core/setup_cache.cpp
+Hunk #1 succeeded at 76 (offset -15 lines).
+Hunk #2 succeeded at 84 (offset -16 lines).
+Hunk #3 succeeded at 91 (offset -17 lines).
+patching file engine/src/pipeline/pipeline.cpp
+0017-setup-cache-complete-gamut-key.patch
+patching file engine/src/core/setup_cache.cpp
+0018-fir-demand-without-kernel-allocation.patch
+patching file engine/src/core/numeric.hpp
+Hunk #1 succeeded at 82 (offset 1 line).
+patching file engine/src/core/numeric.cpp
+Hunk #1 succeeded at 78 (offset -5 lines).
+patching file engine/src/pipeline/blur.cpp
+Hunk #1 succeeded at 172 (offset 12 lines).
+patching file engine/src/pipeline/blur.hpp
+Hunk #1 succeeded at 85 (offset -4 lines).
+0019-bounded-fir-row-scratch.patch
+patching file engine/src/gpu/gpu.hpp
+patching file engine/src/gpu/vulkan_gpu.cpp
+Hunk #6 succeeded at 1233 (offset -2 lines).
+Hunk #7 succeeded at 1249 (offset -2 lines).
+patching file engine/src/pipeline/blur.cpp
+patching file engine/CMakeLists.txt
+Hunk #1 succeeded at 138 (offset -2 lines).
+patching file engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+0020-small-vulkan-pool-requests.patch
+patching file engine/src/gpu/vulkan_gpu.cpp
+0021-dng-forward-matrix.patch
+patching file engine/src/io/dng_forward_matrix.hpp
+patching file engine/src/io/raw_camera.hpp
+patching file engine/src/io/raw_decoder.cpp
+0022-raw-white-balance-temperature.patch
+patching file engine/host/white_balance.cpp
+Hunk #1 succeeded at 23 (offset -3 lines).
+0023-raw-explicit-white-temperature.patch
+patching file engine/src/io/raw_decoder.hpp
+patching file engine/src/io/raw_decoder.cpp
+0024-raw-custom-without-as-shot.patch
+patching file engine/src/io/raw_decoder.cpp
+patching file engine/src/io/raw_decoder.hpp
+patching file engine/tests/raw_threads.cpp
+patching file engine/tools/raw_render.cpp
+0025-vulkan-device-lost-preparation-guards.patch
+patching file engine/CMakeLists.txt
+patching file engine/src/gpu/vulkan_gpu.cpp
+patching file engine/src/pipeline/pipeline.cpp
+patching file engine/tests/gpu_vulkan_device_lost.cpp
+patching file engine/tests/vulkan_test_hooks.hpp
+0026-cam16-hoist-table-invariants.patch
+patching file engine/src/core/cam16.cpp
+0027-di-precompute-channel-curves.patch
+patching file engine/src/core/digital_intermediate.cpp
+0028-vulkan-pointwise-fusions.patch
+patching file engine/CMakeLists.txt
+patching file engine/src/gpu/vulkan_gpu.cpp
+patching file engine/src/pipeline/pipeline.cpp
+patching file engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+patching file engine/src/shaders/vulkan/spk_dir_finish.comp
+patching file engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+patching file engine/tests/vulkan_test_hooks.hpp
+0029-scene-curve-vulkan.patch
+patching file engine/CMakeLists.txt
+patching file engine/src/core/params.cpp
+patching file engine/src/core/params.hpp
+patching file engine/src/gpu/vulkan_gpu.cpp
+Hunk #1 succeeded at 123 (offset 3 lines).
+patching file engine/src/pipeline/pipeline.cpp
+Hunk #1 succeeded at 475 (offset 9 lines).
+Hunk #2 succeeded at 1982 (offset 19 lines).
+patching file engine/src/pipeline/pipeline.hpp
+patching file engine/src/pipeline/scene_latitude.cpp
+patching file engine/src/shaders/scene_latitude.metal
+patching file engine/src/shaders/vulkan/spk_scene_curve.comp
+0030-nofilm-float-grade-boundary.patch
+patching file engine/src/pipeline/engine.cpp
+patching file engine/src/pipeline/view.hpp
+patching file engine/src/pipeline/view_process.cpp
+0031-view-output-cancellation.patch
+patching file engine/src/pipeline/engine.cpp
+patching file engine/src/pipeline/view.hpp
+patching file engine/src/pipeline/view_process.cpp
+0032-dng-as-shot-white-xy.patch
+patching file engine/src/io/dng_white_xy.hpp
+patching file engine/src/io/raw_camera.hpp
+patching file engine/src/io/raw_decoder.cpp
+patching file engine/src/io/raw_decoder.hpp
+0033-integer-view-readback-cancellation.patch
+patching file engine/src/pipeline/view_process.cpp

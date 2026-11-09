@@ -87,6 +87,13 @@ object NativeEngine {
      */
     external fun writeJpeg444(bitmap: Bitmap, path: String, quality: Int, icc: ByteArray?): Boolean
 
+    /**
+     * Render/check/convert/encode without a full output Bitmap. Returns actual
+     * width in the upper 32 bits and height in the lower 32 bits, or 0 on failure.
+     * [icc] must describe the session's selected output space.
+     */
+    external fun exportJpeg444(session: Long, path: String, tier: String, quality: Int, icc: ByteArray): Long
+
     /** Renders [tier] into [reuse] when it is the same size, else into a new bitmap; null on failure. */
     external fun renderReuse(session: Long, tier: String, reuse: Bitmap?): Bitmap?
 

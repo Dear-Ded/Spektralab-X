@@ -52,7 +52,7 @@ data class CurvePoint(val x: Double, val y: Double)
  * cubic as upstream (view_process.cpp `curve()`, CurveMath.swift) and
  * layer2.cpp, so what the editor draws is what the print gets.
  */
-data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS) {
+data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS, val linear: Boolean = false) {
     val isIdentity get() = points == IDENTITY_POINTS
 
     fun evaluate(x: Double): Double {
@@ -61,6 +61,13 @@ data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS) {
         if (n < 2) return x
         if (x <= p[0].x) return p[0].y
         if (x >= p[n - 1].x) return p[n - 1].y
+        if (linear) {
+            val found = p.binarySearch { it.x.compareTo(x) }
+            if (found >= 0) return p[found].y
+            val i = (-found - 2).coerceIn(0, n - 2)
+            val t = (x - p[i].x) / (p[i + 1].x - p[i].x)
+            return p[i].y + (p[i + 1].y - p[i].y) * t
+        }
         val d = DoubleArray(n - 1) { (p[it + 1].y - p[it].y) / max(p[it + 1].x - p[it].x, 1e-6) }
         val m = DoubleArray(n)
         m[0] = d[0]; m[n - 1] = d[n - 2]
@@ -79,6 +86,8 @@ data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS) {
     /** [q] added in x order; returns the curve and the new point's index. */
     fun insert(q: CurvePoint): Pair<Curve, Int> {
         val c = CurvePoint(q.x.coerceIn(0.0, 1.0), q.y.coerceIn(0.0, 1.0))
+        points.indexOfFirst { it.x == c.x }.takeIf { it >= 0 }?.let { return this to it }
+        if (points.size >= 256) return this to points.indices.minBy { abs(points[it].x - c.x) }
         val i = points.indexOfFirst { it.x > c.x }.let { if (it < 0) points.size else it }
         return Curve(points.toMutableList().also { it.add(i, c) }) to i
     }
@@ -91,8 +100,10 @@ data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS) {
             0 -> x = 0.0
             points.size - 1 -> x = 1.0
             else -> {
-                val lo = points[i - 1].x + 0.01; val hi = points[i + 1].x - 0.01
-                x = x.coerceIn(min(lo, hi), max(lo, hi))
+                val gap = min(0.01, (points[i + 1].x - points[i - 1].x) / 4)
+                val lo = max(Math.nextUp(points[i - 1].x), points[i - 1].x + gap)
+                val hi = min(Math.nextDown(points[i + 1].x), points[i + 1].x - gap)
+                x = if (lo <= hi) x.coerceIn(lo, hi) else points[i].x
             }
         }
         return Curve(points.toMutableList().also { it[i] = CurvePoint(x, q.y.coerceIn(0.0, 1.0)) })
@@ -103,7 +114,20 @@ data class Curve(val points: List<CurvePoint> = IDENTITY_POINTS) {
 
     fun toJson(): JSONArray = JSONArray().also { a -> points.forEach { a.put(JSONArray().put(it.x).put(it.y)) } }
 
+    /** Keep ordinary rows unchanged; sample in Double when Float would merge two x coordinates. */
+    internal fun appendWire(out: MutableList<Float>) {
+        if ((1 until points.size).any { points[it - 1].x.toFloat() >= points[it].x.toFloat() }) {
+            out += SAMPLED_ROW
+            repeat(WIRE_SAMPLES) { out += evaluate(it.toDouble() / (WIRE_SAMPLES - 1)).toFloat() }
+        } else {
+            out += points.size.toFloat()
+            for (p in points) { out += p.x.toFloat(); out += p.y.toFloat() }
+        }
+    }
+
     companion object {
+        internal const val WIRE_SAMPLES = 256
+        internal const val SAMPLED_ROW = -256f
         val IDENTITY_POINTS = listOf(CurvePoint(0.0, 0.0), CurvePoint(1.0, 1.0))
         val IDENTITY = Curve()
 
@@ -138,14 +162,11 @@ data class CurveSet(
         0 -> copy(rgb = c); 1 -> copy(luma = c); 2 -> copy(red = c); 3 -> copy(green = c); else -> copy(blue = c)
     }
 
-    /** layer2.hpp's kCurves tail: per row, the point count then the (x, y) pairs. Empty when all are identity. */
+    /** layer2.hpp's kCurves tail: control points or a sampled row. Empty when all are identity. */
     fun tail(): FloatArray {
         if (isIdentity) return FloatArray(0)
         val out = ArrayList<Float>()
-        for (c in rows) {
-            out += c.points.size.toFloat()
-            for (p in c.points) { out += p.x.toFloat(); out += p.y.toFloat() }
-        }
+        for (c in rows) c.appendWire(out)
         return out.toFloatArray()
     }
 
@@ -184,11 +205,13 @@ private val CHANNELS = listOf(
 @Composable
 internal fun CurveEditor(
     curves: CurveSet, image: Bitmap?, enabled: Boolean,
+    includeLuma: Boolean = false, editable: Boolean = true,
     onDrag: (Boolean) -> Unit, onChange: (CurveSet) -> Unit,
 ) {
+    val channels = if (includeLuma) listOf(CHANNELS[0], Triple(1, "明度", Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
     val view = LocalView.current
     var channel by remember { mutableIntStateOf(0) }
-    val row = CHANNELS[channel].first
+    val row = channels[channel].first
     val curve = curves[row]
     val curvesLatest by rememberUpdatedState(curves)
     val onChangeLatest by rememberUpdatedState(onChange)
@@ -200,25 +223,25 @@ internal fun CurveEditor(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        CHANNELS.forEachIndexed { i, (r, label, _) ->
+        channels.forEachIndexed { i, (r, label, _) ->
             SelectPill(selected = channel == i, onClick = { channel = i }, enabled = enabled,
                 label = { Text(if (curves[r].isIdentity) label else "$label·") })
         }
         androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
         TextButton(onClick = { view.tick(strong = true); onChange(curves.with(row, Curve.IDENTITY)) },
-            enabled = enabled && !curve.isIdentity) { Text("重置") }
+            enabled = enabled && editable && !curve.isIdentity) { Text("重置") }
     }
 
-    val color = CHANNELS[channel].third
+    val color = channels[channel].third
     Canvas(
         Modifier.fillMaxWidth().height(124.dp).padding(vertical = 6.dp).systemGestureExclusion()
             .semantics {
-                contentDescription = "${CHANNELS[channel].second} 曲线，${curve.points.size} 个控制点"
-                if (enabled && !curve.isIdentity)
+                contentDescription = "${channels[channel].second} 曲线，${curve.points.size} 个${if (editable) "控制点" else "采样点"}"
+                if (enabled && editable && !curve.isIdentity)
                     customActions = listOf(CustomAccessibilityAction("重置") { onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)); true })
             }
-            .pointerInput(enabled, row) {
-                if (!enabled) return@pointerInput
+            .pointerInput(enabled, editable, row) {
+                if (!enabled || !editable) return@pointerInput
                 val hit = 24.dp.toPx()
                 var lastTap = 0L
                 var lastTapIndex = -1
@@ -251,6 +274,7 @@ internal fun CurveEditor(
                             if (!grabbed && abs(d.y) > abs(d.x)) return@awaitEachGesture
                             moved = true
                             if (!grabbed) {
+                                if (c.points.size >= 16) break
                                 // Dragging from an empty spot: a new point there, at the curve's own height.
                                 val q = toUnit(down.position)
                                 val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
@@ -310,7 +334,7 @@ internal fun CurveEditor(
         drawLine(Palette.Outline, Offset(0f, h), Offset(w, 0f), 1.dp.toPx(),
             pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
         fun curvePath(c: Curve) = Path().apply {
-            val steps = 128
+            val steps = if (c.linear) c.points.size - 1 else 128
             for (s in 0..steps) {
                 val x = s.toDouble() / steps
                 val px = (x * w).toFloat(); val py = ((1 - c.evaluate(x)) * h).toFloat()
@@ -318,18 +342,19 @@ internal fun CurveEditor(
             }
         }
         // The other channels, faint, so a colour cast stays in view.
-        for ((r, _, col) in CHANNELS) if (r != row && !curves[r].isIdentity)
+        for ((r, _, col) in channels) if (r != row && !curves[r].isIdentity)
             drawPath(curvePath(curves[r]), col.copy(alpha = 0.35f), style = Stroke(1.5.dp.toPx()))
         val stroke = if (enabled) color else Palette.Outline
         drawPath(curvePath(curve), stroke, style = Stroke(2.dp.toPx()))
-        curve.points.forEachIndexed { i, p ->
+        if (editable) curve.points.forEachIndexed { i, p ->
             val o = Offset((p.x * w).toFloat(), ((1 - p.y) * h).toFloat())
             drawCircle(stroke, if (i == active) 8.dp.toPx() else 6.dp.toPx(), o)
             drawCircle(Palette.Panel, if (i == active) 5.dp.toPx() else 3.5.dp.toPx(), o)
         }
     }
     Text(
-        "轻点添加控制点，拖动调整，双击控制点删除。直方图是当前画面。",
+        if (!editable) "导入的采样曲线按原样保留；重置后可编辑控制点。"
+        else "轻点添加控制点，拖动调整，双击控制点删除。" + if (image != null) "直方图是当前画面。" else "",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

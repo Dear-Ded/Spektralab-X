@@ -1,0 +1,7 @@
+0c65be622a5a0f2e9ca6fd3f3d1e68436115df807ff5eb2553d7727fce5da982  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_152059.dng
+{"sensor":[8192,6144],"oriented_source":[6144,8192],"half_size_requested":true,"decoded":[3072,4096],"working":[2304,3072],"output":[2304,3072],"jpeg_bytes":5283404,"encoder":"production libjpeg-turbo 444 q98"}
+{"sensor":[8192,6144],"oriented_source":[6144,8192],"half_size_requested":true,"decoded":[3072,4096],"working":[2508,3344],"output":[2508,3344],"jpeg_bytes":6053358,"encoder":"production libjpeg-turbo 444 q98"}
+94184d94ace7cfd3fc698e6ad6bac53a45342db5989d49d213a4b1660ebcc362  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_115647.dng
+{"sensor":[4096,3072],"oriented_source":[3072,4096],"half_size_requested":false,"decoded":[3072,4096],"working":[2304,3072],"output":[2304,3072],"jpeg_bytes":3909585,"encoder":"production libjpeg-turbo 444 q98"}
+{"sensor":[4096,3072],"oriented_source":[3072,4096],"half_size_requested":false,"decoded":[3072,4096],"working":[2508,3344],"output":[2508,3344],"jpeg_bytes":4478584,"encoder":"production libjpeg-turbo 444 q98"}
+RAW_JPEG_DIMENSIONS_PASS

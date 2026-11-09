@@ -15,10 +15,20 @@ app="$repo/app/src/main/cpp"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/engine_adaptation.cpp" \
     "$repo/tools/native/resize_reference.cpp" "$app/resize.cpp" "$app/layer2.cpp" -o "$build/engine_adaptation"
 "$build/engine_adaptation" "$@"
+"$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/brightness_range.cpp" \
+    "$app/layer2.cpp" -o "$build/brightness_range"
+"$build/brightness_range"
+"$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/local_tone.cpp" \
+    "$app/layer2.cpp" -o "$build/local_tone"
+"$build/local_tone"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/curve_regression.cpp" -o "$build/curve_regression"
 "$build/curve_regression"
+BUILD_DIR="$build/curve-wire" bash "$repo/tools/native/run_curve_wire.sh"
 if [[ -n "${UP:-}" ]]; then
     core="$UP/engine/src/core"
+    "$cxx" "${flags[@]}" -I"$UP/engine/src" "$repo/tools/native/dng_forward_matrix.cpp" \
+        -o "$build/dng_forward_matrix"
+    "$build/dng_forward_matrix"
     "$cxx" "${flags[@]}" -I"$core" -I"$UP/engine/third_party" \
         "$repo/tools/native/setup_cache_lifetime.cpp" "$core/setup_cache.cpp" "$core/blob.cpp" \
         -o "$build/setup_cache_lifetime"

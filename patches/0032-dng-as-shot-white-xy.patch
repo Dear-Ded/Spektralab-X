@@ -1,0 +1,277 @@
+diff --git a/engine/src/io/dng_white_xy.hpp b/engine/src/io/dng_white_xy.hpp
+new file mode 100644
+index 0000000..56510fb
+--- /dev/null
++++ b/engine/src/io/dng_white_xy.hpp
+@@ -0,0 +1,95 @@
++#pragma once
++// Co-created with GPT (OpenAI). DNG SDK SetWhiteXY for the explicit-xy path.
++#include "dng_forward_matrix.hpp"
++
++namespace spk::io::detail::dng_white_xy {
++using namespace dng_forward;
++
++inline bool valid(double x, double y) {
++    return std::isfinite(x) && std::isfinite(y) && x > 0 && y > 0 && x + y < 1;
++}
++
++// Robertson isotemperature lines, shared numerically with host/white_balance.cpp.
++// Keep this path independent of host linkage and of the legacy neutral solver.
++inline double temperature(double x, double y) {
++    struct Line { double r, u, v, t; };
++    constexpr Line table[] = {
++        {0,.18006,.26352,-.24341},{10,.18066,.26589,-.25479},
++        {20,.18133,.26846,-.26876},{30,.18208,.27119,-.28539},
++        {40,.18293,.27407,-.30470},{50,.18388,.27709,-.32675},
++        {60,.18494,.28021,-.35156},{70,.18611,.28342,-.37915},
++        {80,.18740,.28668,-.40955},{90,.18880,.28997,-.44278},
++        {100,.19032,.29326,-.47888},{125,.19462,.30141,-.58204},
++        {150,.19962,.30921,-.70471},{175,.20525,.31647,-.84901},
++        {200,.21142,.32312,-1.0182},{225,.21807,.32909,-1.2168},
++        {250,.22511,.33439,-1.4512},{275,.23247,.33904,-1.7298},
++        {300,.24010,.34308,-2.0637},{325,.24792,.34655,-2.4681},
++        {350,.25591,.34951,-2.9641},{375,.26400,.35200,-3.5814},
++        {400,.27218,.35407,-4.3633},{425,.28039,.35577,-5.3762},
++        {450,.28863,.35714,-6.7262},{475,.29685,.35823,-8.5955},
++        {500,.30505,.35907,-11.324},{525,.31320,.35968,-15.628},
++        {550,.32129,.36011,-23.325},{575,.32931,.36038,-40.770},
++        {600,.33724,.36051,-116.45}
++    };
++    const double u = 2*x/(1.5-x+6*y), v = 3*y/(1.5-x+6*y);
++    double previous = 0;
++    for (int i=1;i<=30;++i) {
++        double distance = (v-table[i].v-(u-table[i].u)*table[i].t) /
++                          std::sqrt(1+table[i].t*table[i].t);
++        if (distance<=0 || i==30) {
++            distance = std::max(0.,-distance);
++            const double weight=i==1 ? 0. : distance/(previous+distance);
++            return 1e6/(table[i-1].r*weight+table[i].r*(1-weight));
++        }
++        previous=distance;
++    }
++    return 0;
++}
++
++inline bool prepare(const Profile& profile, double x, double y, Prepared& result) {
++    if (!valid(x,y)) return false;
++    const double kelvin=temperature(x,y);
++    if (!(kelvin>0) || !std::isfinite(kelvin)) return false;
++    Prepared calibration;
++    if (!dng_forward::prepare(profile,Vector{1,1,1},calibration,kelvin)) return false;
++    Vector neutral=multiply(calibration.camera_from_xyz,Vector{x/y,1,(1-x-y)/y});
++    const double maximum=*std::max_element(neutral.begin(),neutral.end());
++    if (!(maximum>0) || !std::isfinite(maximum)) return false;
++    for (double& value:neutral) {
++        if (!std::isfinite(value)) return false;
++        value=std::clamp(value/maximum,.001,1.);
++    }
++    return dng_forward::prepare(profile,neutral,result,kelvin);
++}
++
++// Without ForwardMatrix the SDK adapts XYZ using linear Bradford, and scales
++// so the selected camera white reaches PCS white at first-channel saturation.
++inline bool complete_without_forward(Prepared& prepared, double x, double y) {
++    if (prepared.has_forward) return true;
++    if (!valid(x,y)) return false;
++    constexpr Matrix bradford{.8951,.2664,-.1614,-.7502,1.7135,.0367,.0389,-.0685,1.0296};
++    Matrix inverse_bradford{}, inverse_camera{};
++    if (!inverse(bradford,inverse_bradford) || !inverse(prepared.camera_from_xyz,inverse_camera)) return false;
++    const Vector xyz{x/y,1,(1-x-y)/y};
++    Matrix ratio{};
++    // Compute the SDK's forward D50-to-source adaptation and invert the
++    // complete PCS-to-camera transform, including its saturation scale.
++    const Vector pcs_lms=multiply(bradford,white);
++    const Vector shot_lms=multiply(bradford,xyz);
++    for(int i=0;i<3;++i) {
++        const double a=std::max(0.,pcs_lms[i]),b=std::max(0.,shot_lms[i]);
++        ratio[i*3+i]=std::clamp(a>0 ? b/a : 10.,.1,10.);
++    }
++    const Matrix pcs_to_camera=multiply(prepared.camera_from_xyz,
++        multiply(multiply(inverse_bradford,ratio),bradford));
++    const Vector response=multiply(pcs_to_camera,white);
++    const double scale=*std::max_element(response.begin(),response.end());
++    Matrix adaptation{};
++    if (!(scale>0) || !std::isfinite(scale) || !inverse(pcs_to_camera,adaptation)) return false;
++    for(double& value:adaptation)value*=scale;
++    if(!finite(adaptation))return false;
++    prepared.camera_to_pcs=adaptation;
++    prepared.has_forward=true;
++    return true;
++}
++} // namespace spk::io::detail::dng_white_xy
+diff --git a/engine/src/io/raw_camera.hpp b/engine/src/io/raw_camera.hpp
+index 3bb7fd5..e5baeba 100644
+--- a/engine/src/io/raw_camera.hpp
++++ b/engine/src/io/raw_camera.hpp
+@@ -2,9 +2,11 @@
+ #include <libraw/libraw.h>
+ #include "dng_opcode_list3.hpp"
+ #include "dng_forward_matrix.hpp"
++#include "dng_white_xy.hpp"
+ #include <array>
+ #include <cmath>
+ #include <cstring>
++#include <string>
+ 
+ namespace spk::io::detail {
+ // LibRaw 0.22.2 lacks this model. Values verified against RawSpeed's
+@@ -26,6 +28,8 @@ public:
+     // Correlated colour temperature the DNG matrices were interpolated to,
+     // or 0 when LibRaw's own single matrix was kept.
+     double dng_matrix_k = 0.0;
++    bool dng_white_xy_derived = false;
++    std::string dng_white_xy_error;
+ 
+     // Called after LibRaw has applied WB, just before its output conversion.
+     // This keeps both compatible16 and headroom paths on the same transform.
+@@ -51,11 +55,20 @@ public:
+         auto& col = imgdata.color;
+         forward_ = {};
+         dng_matrix_k = 0.0;
++        dng_white_xy_derived = false;
++        dng_white_xy_error.clear();
+         if (selected_kelvin != 0 && (!(selected_kelvin > 0) || !std::isfinite(selected_kelvin))) return false;
+         if (!imgdata.idata.dng_version || imgdata.idata.colors != 3 ||
+             !imgdata.params.use_camera_matrix ||
+             libraw_internal_data.internal_output_params.raw_color)
+             return false;
++        // Only the newly supported WhiteXY-only source takes this path.
++        // Existing AsShotNeutral/default/custom processing retains its order.
++        if ((col.dng_levels.parsedfields & LIBRAW_DNGFM_ASSHOTWHITEXY) &&
++            !(col.dng_levels.parsedfields & LIBRAW_DNGFM_ASSHOTNEUTRAL)) {
++            if (interpolate_dng_white_xy(user_mul, selected_kelvin)) return true;
++            if (!user_mul) return false;
++        }
+         dng_forward::Profile profile;
+         bool safe_calibration = true;
+         for (int s=0;s<2;++s) {
+@@ -180,6 +193,70 @@ protected:
+     }
+ 
+ private:
++    bool interpolate_dng_white_xy(const std::array<float, 4>* user_mul, double selected_kelvin) {
++        auto& col=imgdata.color;
++        const auto& levels=col.dng_levels;
++        dng_white_xy_error="RAW metadata: unsupported or invalid DNG AsShotWhiteXY calibration";
++        if (levels.calibration_signature_invalid) return false;
++        dng_forward::Profile profile;
++        const bool calibrated=std::strcmp(levels.camera_calibration_signature,
++                                          levels.profile_calibration_signature)==0;
++        for(int s=0;s<2;++s) {
++            auto& slot=profile.slots[s];
++            slot.kelvin=illuminant_k(col.dng_color[s].illuminant);
++            bool missing=true;
++            for(int r=0;r<3;++r)for(int c=0;c<3;++c) {
++                slot.color[r*3+c]=col.dng_color[s].colormatrix[r][c];
++                slot.forward[r*3+c]=col.dng_color[s].forwardmatrix[r][c];
++                missing &= col.dng_color[s].calibration[r][c]==0;
++            }
++            for(int r=0;r<3;++r)for(int c=0;c<3;++c)
++                slot.calibration[r*3+c]=calibrated&&!missing ?
++                    col.dng_color[s].calibration[r][c] : double(r==c);
++        }
++        for(int c=0;c<3;++c) {
++            const double a=levels.analogbalance[c];
++            profile.analog[c]=a==0 ? 1. : a;
++        }
++        dng_forward::Prepared source;
++        if(!dng_white_xy::prepare(profile,levels.asshotwhitexy[0],levels.asshotwhitexy[1],source)) return false;
++        for(int c=0;c<3;++c)col.cam_mul[c]=float(1/source.neutral[c]);
++        col.cam_mul[3]=col.cam_mul[1];
++        dng_white_xy_derived=true;
++        dng_forward::Prepared selected=source;
++        double x=levels.asshotwhitexy[0],y=levels.asshotwhitexy[1];
++        if(user_mul || selected_kelvin>0) {
++            dng_forward::Vector neutral=source.neutral;
++            if(user_mul)for(int c=0;c<3;++c) {
++                const double wb=(*user_mul)[c];
++                if(!(wb>0)||!std::isfinite(wb))return false;
++                neutral[c]=1/wb;
++            }
++            if(!dng_forward::prepare(profile,neutral,selected,selected_kelvin))return false;
++            dng_forward::Matrix inv{};
++            if(!dng_forward::inverse(selected.camera_from_xyz,inv))return false;
++            const auto xyz=dng_forward::multiply(inv,selected.neutral);
++            const double sum=xyz[0]+xyz[1]+xyz[2];
++            if(!(sum>0)||!std::isfinite(sum))return false;
++            x=xyz[0]/sum;y=xyz[1]/sum;
++        }
++        if(!dng_white_xy::complete_without_forward(selected,x,y))return false;
++        double camera[4][3]={};
++        for(int r=0;r<3;++r)for(int c=0;c<3;++c)
++            camera[r][c]=selected.camera_from_xyz[r*3+c];
++        float pre[4],rgb[3][4]={};
++        std::memcpy(pre,col.pre_mul,sizeof pre);
++        cam_xyz_coeff(rgb,camera);
++        std::memcpy(col.pre_mul,pre,sizeof pre);
++        std::memcpy(col.rgb_cam,rgb,sizeof rgb);
++        for(int r=0;r<3;++r)for(int c=0;c<3;++c)
++            col.cam_xyz[r][c]=float(camera[r][c]);
++        forward_=selected;
++        dng_matrix_k=selected.kelvin;
++        dng_white_xy_error.clear();
++        return true;
++    }
++
+     dng_forward::Prepared forward_;
+     // OpcodeList3 on the demosaiced camera RGB, just before convert_to_rgb().
+     // Fuji's rotated layout and non-square pixels are not the image the
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 6e0a1cf..71b0ed2 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -141,7 +141,7 @@ void configure_compatible(libraw_output_params_t& params) {
+     params.camera_profile = nullptr;
+ }
+ 
+-bool capture_source_metadata(const LibRaw& raw, RawMetadata& metadata,
++bool capture_source_metadata(const detail::CameraLibRaw& raw, RawMetadata& metadata,
+                              bool require_as_shot, std::string& error) {
+     const auto& data = raw.imgdata;
+     // raw2image_start() restores this saved copy before postprocessing; rawpy
+@@ -160,6 +160,10 @@ bool capture_source_metadata(const LibRaw& raw, RawMetadata& metadata,
+         return false;
+     }
+     metadata.camera_whitebalance_valid = valid_camera_wb;
++    metadata.camera_whitebalance_from_xy = raw.dng_white_xy_derived;
++    if (color.dng_levels.parsedfields & LIBRAW_DNGFM_ASSHOTWHITEXY)
++        std::copy(std::begin(color.dng_levels.asshotwhitexy),std::end(color.dng_levels.asshotwhitexy),
++                  metadata.camera_white_xy.begin());
+     metadata.camera_whitebalance.fill(0.0f);
+     if (valid_camera_wb)
+         std::copy(std::begin(color.cam_mul), std::end(color.cam_mul),
+@@ -356,6 +360,10 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
+         raw->interpolate_dng_matrix(user_mul, white_temperature);
++        if (!user_mul && !raw->dng_white_xy_error.empty()) {
++            error=raw->dng_white_xy_error;
++            return false;
++        }
+         {
+             const auto& s = raw->imgdata.sizes;
+             if (t_half_size_budget && raw->imgdata.idata.filters > 1000 &&
+@@ -505,6 +513,10 @@ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<f
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
+         raw->interpolate_dng_matrix(user_mul, white_temperature);
++        if (!user_mul && !raw->dng_white_xy_error.empty()) {
++            error=raw->dng_white_xy_error;
++            return false;
++        }
+ 
+         start = Clock::now();
+         const int unpack_status = raw->unpack();
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index ba091a2..26d54ba 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -57,6 +57,8 @@ struct RawMetadata {
+     // Missing or invalid source WB is represented by false and all zeros.
+     bool camera_whitebalance_valid = false;
+     std::array<float, 4> camera_whitebalance{};
++    bool camera_whitebalance_from_xy = false;
++    std::array<double, 2> camera_white_xy{};
+     // scale_colors() replaces daylight pre_mul with the selected WB and
+     // normalises it. These are the multipliers after that processing step.
+     std::array<float, 4> post_scale_pre_mul{};

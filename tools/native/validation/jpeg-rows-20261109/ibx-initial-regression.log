@@ -1,0 +1,4 @@
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+
+[exit 0 ]
