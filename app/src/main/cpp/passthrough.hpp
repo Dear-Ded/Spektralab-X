@@ -18,11 +18,13 @@
 #pragma once
 
 #include <cstdlib>
+#include <cmath>
 #include <cstring>
 #include <string>
 #include <vector>
 #include <utility>
 #include "output_cancel.hpp"
+#include "raw_development.hpp"
 
 #include "json.hpp"
 #include "pipeline/view.hpp"
@@ -33,46 +35,75 @@ namespace spk::android {
 // The app-side key carrying 胶片「无」(Edit.noFilm). Never sent to the engine,
 // which refuses a parameter it does not know.
 constexpr const char* kNoFilmKey = "x_no_film";
+constexpr const char* kRawDevelopmentKey = "x_raw_development";
+constexpr const char* kRawAutoExposureKey = "x_raw_auto_exposure";
+constexpr const char* kRawExposureKey = "x_raw_exposure_ev";
 
 // What the JNI needs to know about a session's params to pick its render.
 struct ViewFlags {
     bool no_film = false;
     bool di_switch = false;   // digital_intermediate, as last sent
     bool scan = false;        // scan_film, as last sent; it wins over the DI
+    RawDevelopmentOptions raw_development{false, true, 0.0f};
     // The app clears digital_intermediate on a slide (Catalog.normalize), so
     // the switch and scan_film alone say whether the engine prints a DI.
     bool di() const { return di_switch && !scan; }
 };
 
-// Takes kNoFilmKey off `json` (an open's params or a set_params delta) and
-// notes it and the DI switches in `flags`. `json` is rewritten only when the
-// key is there; the rewrite is the engine's own Json, whose numbers round-trip
-// at 17 digits, so what the engine reads is the same either way.
+// Remove app keys before the physical engine sees params. Validation commits
+// flags and JSON together. The engine Json round-trips numbers at 17 digits.
 inline bool take_app_keys(std::string& json, ViewFlags& flags, std::string& error) {
     if (json.find(kNoFilmKey) == std::string::npos &&
+        json.find(kRawDevelopmentKey) == std::string::npos &&
+        json.find(kRawAutoExposureKey) == std::string::npos &&
+        json.find(kRawExposureKey) == std::string::npos &&
         json.find("digital_intermediate") == std::string::npos &&
         json.find("scan_film") == std::string::npos) return true;
     spk::Json parsed;
     if (!spk::Json::parse(json, parsed, error)) return false;
     if (!parsed.is_object()) { error = "params must be an object"; return false; }
+    ViewFlags next = flags;
     const spk::Json& di = parsed.at("digital_intermediate");
-    if (di.is_bool()) flags.di_switch = di.as_bool();
+    if (di.is_bool()) next.di_switch = di.as_bool();
     const spk::Json& scan = parsed.at("scan_film");
-    if (scan.is_bool()) flags.scan = scan.as_bool();
-    if (!parsed.has(kNoFilmKey)) return true;
-    flags.no_film = parsed.at(kNoFilmKey).as_bool(false);
+    if (scan.is_bool()) next.scan = scan.as_bool();
+    if (parsed.has(kNoFilmKey)) next.no_film = parsed.at(kNoFilmKey).as_bool(false);
+    if (parsed.has(kRawDevelopmentKey)) {
+        const auto& value = parsed.at(kRawDevelopmentKey);
+        if (!value.is_string() || (value.as_string() != "neutral" && value.as_string() != "standard_v1")) {
+            error = "RAW development must be neutral or standard_v1"; return false;
+        }
+        next.raw_development.enabled = value.as_string() == "standard_v1";
+    }
+    if (parsed.has(kRawAutoExposureKey)) {
+        const auto& value = parsed.at(kRawAutoExposureKey);
+        if (!value.is_bool()) { error = "RAW auto exposure must be a boolean"; return false; }
+        next.raw_development.auto_exposure = value.as_bool();
+    }
+    if (parsed.has(kRawExposureKey)) {
+        const auto& value = parsed.at(kRawExposureKey);
+        const double ev = value.as_double();
+        if (!value.is_number() || !std::isfinite(ev) || ev < -8.0 || ev > 8.0) {
+            error = "RAW exposure must be finite and within -8 to 8 EV"; return false;
+        }
+        next.raw_development.exposure_ev = float(ev);
+    }
     spk::Json rest = spk::Json::object();
     for (const auto& kv : parsed.fields())
-        if (kv.first != kNoFilmKey) rest.set(kv.first, kv.second);
+        if (kv.first != kNoFilmKey && kv.first != kRawDevelopmentKey &&
+            kv.first != kRawAutoExposureKey && kv.first != kRawExposureKey) rest.set(kv.first, kv.second);
     json = rest.dump();
+    flags = next;
     return true;
 }
 
-// `reply` (spk_get_params JSON) with kNoFilmKey added, so Edit.fromParams
-// reads the session's 无 back.
+// Echo application state alongside spk_get_params for saved-edit roundtrips.
 inline std::string with_app_keys(const std::string& reply, const ViewFlags& flags) {
     if (reply.size() < 2 || reply.front() != '{') return reply;
-    const std::string field = std::string("\"") + kNoFilmKey + "\":" + (flags.no_film ? "true" : "false");
+    const std::string field = std::string("\"") + kNoFilmKey + "\":" + (flags.no_film ? "true" : "false") +
+        ",\"" + kRawDevelopmentKey + "\":\"" + (flags.raw_development.enabled ? "standard_v1" : "neutral") + "\"" +
+        ",\"" + kRawAutoExposureKey + "\":" + (flags.raw_development.auto_exposure ? "true" : "false") +
+        ",\"" + kRawExposureKey + "\":" + spk::Json(double(flags.raw_development.exposure_ev)).dump();
     return "{" + field + (reply.size() > 2 ? "," : "") + reply.substr(1);
 }
 

@@ -25,7 +25,7 @@ flags=(-std=c++20 -O2 -pthread)
 [[ "${SANITIZE:-0}" == 0 ]] || flags+=(-g -fsanitize=address,undefined -fno-omit-frame-pointer)
 "${CXX:-c++}" "${flags[@]}" -I"$src" -I"$build" -I"$up/engine/include" \
     -I"$up/engine/src" -I"$up/engine/src/core" \
-    "$repo/tools/native/nofilm_float.cpp" "$src/output_transform.cpp" "$src/layer2.cpp" \
+    "$repo/tools/native/nofilm_float.cpp" "$src/output_transform.cpp" "$src/raw_development.cpp" "$src/layer2.cpp" \
     -Wl,--start-group "$e/libspektralab_engine.a" "$e/libspektralab_core.a" \
     "$e/libspk_volk.a" -Wl,--end-group -ldl -o "$build/nofilm_float"
 export SPEKTRAFILM_VULKAN_STRICT_LIMITS=1

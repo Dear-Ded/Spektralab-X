@@ -12,7 +12,7 @@ flags=(-std=c++20 -O2 -pthread)
 app="$repo/app/src/main/cpp"
 "${CXX:-c++}" "${flags[@]}" -I"$app" -I"$math" -I"$up/engine/include" \
     -I"$up/engine/src" -I"$up/engine/src/core" \
-    "$repo/tools/native/output_cancellation.cpp" "$app/output_transform.cpp" "$app/layer2.cpp" "$app/tiff16.cpp" \
+    "$repo/tools/native/output_cancellation.cpp" "$app/output_transform.cpp" "$app/raw_development.cpp" "$app/layer2.cpp" "$app/tiff16.cpp" \
     -Wl,--start-group "$b/engine/libspektralab_engine.a" "$b/engine/libspektralab_core.a" \
     "$b/engine/libspk_volk.a" -Wl,--end-group -ldl -lz -o "$build/output_cancellation"
 export SPEKTRAFILM_VULKAN_STRICT_LIMITS=1

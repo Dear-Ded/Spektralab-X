@@ -1,4 +1,5 @@
 #include "output_transform.hpp"
+#include "raw_development.hpp"
 
 #include <algorithm>
 #include <array>
@@ -149,7 +150,8 @@ void finish_float(float c[3], const OutputTransform& xf) {
 
 template <typename Write>
 void convert_float(const float* src, size_t stride, uint32_t w, uint32_t h,
-                   const Layer2* look, const OutputTransform& xf, const OutputCancel& cancel, Write&& write) {
+                   const Layer2* look, const OutputTransform& xf, const OutputCancel& cancel,
+                   const RawDevelopment* development, Write&& write) {
     cancel.check();
     validate_float_source(src, stride, w, h, &xf);
     const Layer2::Frame frame = look ? look->frame(w, h) : Layer2::Frame{};
@@ -160,6 +162,7 @@ void convert_float(const float* src, size_t stride, uint32_t w, uint32_t h,
             const float* s = src + size_t(y) * stride * 3;
             for (uint32_t x = 0; x < w; ++x) {
                 float c[3] = {s[3 * x], s[3 * x + 1], s[3 * x + 2]};
+                if (development) development->apply_encoded_prophoto(c);
                 if (look) look->apply(c[0], c[1], c[2], (x + 0.5f) * iw, (y + 0.5f) * ih, frame, true);
                 finish_float(c, xf);
                 write(y, x, c);
@@ -236,8 +239,9 @@ Rgba16Rows::Rgba16Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32
 }
 
 void pack_float_rgba8(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                      uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf, const OutputCancel& cancel) {
-    convert_float(src, src_stride_px, w, h, look, xf, cancel, [&](uint32_t y, uint32_t x, const float c[3]) {
+                      uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf,
+                      const OutputCancel& cancel, const RawDevelopment* development) {
+    convert_float(src, src_stride_px, w, h, look, xf, cancel, development, [&](uint32_t y, uint32_t x, const float c[3]) {
         uint8_t* d = out + size_t(y) * out_stride + 4 * size_t(x);
         for (int k = 0; k < 3; ++k) d[k] = uint8_t(std::lround(saturate(c[k]) * 255.0f));
         d[3] = 255;
@@ -245,19 +249,20 @@ void pack_float_rgba8(const float* src, size_t src_stride_px, uint32_t w, uint32
 }
 
 void pack_float_rgba16(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                       std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf, const OutputCancel& cancel) {
+                       std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf,
+                       const OutputCancel& cancel, const RawDevelopment* development) {
     cancel.check();
     validate_float_source(src, src_stride_px, w, h, &xf);
     out.assign(size_t(w) * h * 4, 65535);
-    convert_float(src, src_stride_px, w, h, look, xf, cancel, [&](uint32_t y, uint32_t x, const float c[3]) {
+    convert_float(src, src_stride_px, w, h, look, xf, cancel, development, [&](uint32_t y, uint32_t x, const float c[3]) {
         uint16_t* d = out.data() + (size_t(y) * w + x) * 4;
         for (int k = 0; k < 3; ++k) d[k] = uint16_t(std::lround(saturate(c[k]) * 65535.0f));
     });
 }
 
 Rgba16Rows::Rgba16Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
-                       const Layer2* look, const OutputTransform* xf)
-    : float_src_(src), stride_(stride_px), w_(w), h_(h), look_(look), xf_(xf) {
+                       const Layer2* look, const OutputTransform* xf, const RawDevelopment* development)
+    : float_src_(src), stride_(stride_px), w_(w), h_(h), look_(look), xf_(xf), development_(development) {
     validate_float_source(src, stride_px, w, h, xf);
     frame_ = look ? look->frame(w, h) : Layer2::Frame{};
 }
@@ -277,6 +282,7 @@ void Rgba16Rows::pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out, c
             float c[3];
             if (f) {
                 c[0] = f[3 * x]; c[1] = f[3 * x + 1]; c[2] = f[3 * x + 2];
+                if (development_) development_->apply_encoded_prophoto(c);
                 if (look_) look_->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v, frame_, true);
                 finish_float(c, *xf_);
             } else if (look_) {
@@ -308,14 +314,14 @@ Rgba8Rows::Rgba8Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t
 }
 
 Rgba8Rows::Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
-                     const Layer2* look, const OutputTransform* xf)
-    : Rgba8Rows(src, stride_px, w, h, 0, h, look, xf) {}
+                     const Layer2* look, const OutputTransform* xf, const RawDevelopment* development)
+    : Rgba8Rows(src, stride_px, w, h, 0, h, look, xf, nullptr, development) {}
 
 Rgba8Rows::Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
                      uint32_t source_y0, uint32_t source_rows, const Layer2* look, const OutputTransform* xf,
-                     const Layer2::Frame* frame)
+                     const Layer2::Frame* frame, const RawDevelopment* development)
     : float_src_(src), stride_(stride_px), w_(w), h_(h), source_y0_(source_y0),
-      source_rows_(source_rows), look_(look), xf_(xf) {
+      source_rows_(source_rows), look_(look), xf_(xf), development_(development) {
     validate_float_source(src, stride_px, w, h, xf);
     if (!source_rows || source_y0 > h || source_rows > h - source_y0)
         throw std::invalid_argument("invalid JPEG float strip range");
@@ -339,6 +345,7 @@ void Rgba8Rows::pack(uint32_t y0, uint32_t count, std::vector<uint8_t>& out, con
             float c[3];
             if (f) {
                 c[0] = f[3 * x]; c[1] = f[3 * x + 1]; c[2] = f[3 * x + 2];
+                if (development_) development_->apply_encoded_prophoto(c);
                 if (look_) look_->apply(c[0], c[1], c[2], (x + 0.5f) * iw, v, frame_, true);
                 finish_float(c, *xf_);
             } else if (look_) {

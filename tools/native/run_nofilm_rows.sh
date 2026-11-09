@@ -18,7 +18,7 @@ else
     flags+=(-DSPK_ROWS_RAW=0)
 fi
 "${CXX:-c++}" "${flags[@]}" -I"$app" -I"$math" -I"$up/engine/include" -I"$up/engine/src" -I"$up/engine/src/core" \
-    -I"$jpeg/include" "$repo/tools/native/nofilm_rows.cpp" "$app/output_transform.cpp" "$app/layer2.cpp" "$app/jpeg444.cpp" \
+    -I"$jpeg/include" "$repo/tools/native/nofilm_rows.cpp" "$app/output_transform.cpp" "$app/raw_development.cpp" "$app/layer2.cpp" "$app/jpeg444.cpp" \
     -Wl,--start-group "$b/engine/libspektralab_engine.a" "$b/engine/libspektralab_core.a" \
     "${raw[@]}" "$b/engine/libspk_volk.a" "$jpeg/lib/libjpeg.a" \
     -Wl,--end-group -ldl -o "$build/nofilm_rows"

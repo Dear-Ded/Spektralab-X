@@ -775,6 +775,24 @@ private fun Controls(
                                 ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
+                            if (e.noFilm && ui.source?.kind == "raw") {
+                                GroupLabel("RAW 显影")
+                                Segmented(options = listOf("线性显示", "标准显色（实验）"),
+                                    selected = if (e.rawDevelopment == RawDevelopmentMode.NEUTRAL) 0 else 1,
+                                    enabled = enabled) { i ->
+                                    vm.update(e.copy(rawDevelopment = if (i == 0) RawDevelopmentMode.NEUTRAL else RawDevelopmentMode.STANDARD_V1))
+                                }
+                                if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) {
+                                    SwitchRow("RAW 自动曝光", e.rawAutoExposure, enabled) { vm.update(e.copy(rawAutoExposure = it)) }
+                                    LabeledSlider("RAW 曝光", e.rawExposureEv, -8.0, 8.0, 0.0, enabled, "%+.2f EV", onDrag = vm::setInteracting) {
+                                        vm.update(e.copy(rawExposureEv = it))
+                                    }
+                                    Hint("先调曝光，再应用相机内嵌曲线或标准曲线。实验显色不等同相机直出；按住对比仍显示线性原片。")
+                                    TextButton(enabled = enabled, onClick = {
+                                        vm.update(e.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0))
+                                    }) { Text("重置 RAW 显影") }
+                                }
+                            }
                             // 胶片「无」: the steps after the film have nothing to develop; they keep their settings.
                             val enabled = enabled && !(e.noFilm && step > 0)
                             if (e.noFilm && step > 0) FoldHint("没有选胶卷，这一步不起作用。")
@@ -1198,7 +1216,7 @@ private fun Controls(
             val entryEdited = listOf(
                 false,
                 e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
-                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity ||
+                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.rawDevelopmentChanged ||
                     e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                 e.look != Look.NEUTRAL,
                 e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,

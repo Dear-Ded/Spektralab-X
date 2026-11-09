@@ -1,0 +1,20 @@
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+73aa2a17cbb06ed2cb7a0ebf9b57a9623fb205c31a863bedee7ea7b4f1e326f1  app/src/main/cpp/output_transform.hpp
+6d26eae44e032894e09940d1636279e6166552d3ae0b2a94ff91883188036610  app/src/main/cpp/output_transform.cpp
+0fd2b1547ebfe651384b9cddd78bc84e49f146673ba79ce7ec93b4e348331cba  app/src/main/cpp/raw_development.hpp
+e155030d8817c1743b8d9cefb333410e186d17ec5412a7ea462059f3ffd20a33  app/src/main/cpp/raw_development.cpp
+c4dab1a6ccff4d66e08e59e6bab67f2539c765401d23768c7a97172c9129b17c  app/src/main/cpp/layer2.hpp
+cb0cd44600c08896897f3881bc6300ef9eb281a256cd4ce62c73739b7d4eb8b8  app/src/main/cpp/layer2.cpp
+ee701b9acba4886d6e9b9f3f57d0ed397295ce36d69f1ba3fb9005fe533a3579  app/src/main/cpp/layer2_local.hpp
+7c0c937fbc359b6f4f088594d4c7aa8dd5b227be35f97000166d9d26909ea813  app/src/main/cpp/tone_curve.hpp
+ec0c15c5d9cd05028b80389d64053389b846b307f0e4c37542e696cd41ff8f0f  app/src/main/cpp/output_cancel.hpp
+894c691ac0a76ee537c9a4ea4cd88629e1ec3ef445945a534237c20336ee5368  tools/native/raw_development_output.cpp
+a416865d1da1d42c46d8ac51a93504ff289b42934a64096df4a6141993b4d2fc  tools/native/run_raw_development_output.sh
+37fe7d047b624cc3e62b2ad8372724f0b09540d02eafca4d014f0e4dc65d112d  /data/work/gpt-optimize-wave2-20261109/wave3-nofilm/upstream_output_math.inc
+1180d5bd609e833e530589b76e9f4785b20c8f4ec857fd24bb14e8dd74e378b8  /data/work/gpt-optimize-wave2-20261109/build-host/engine/libspektralab_engine.a
+acef3e25b5e045cc0425222ecaf0164fd1e31b4f55923287ba6dc7b73546f9a3  /data/work/gpt-optimize-wave2-20261109/build-host/engine/libspektralab_core.a
+5d9bbb69a3bde97f0fe63a4140d8251186a6d77bbb5dd6cfb940861fb8facdad  /data/work/gpt-optimize-wave2-20261109/build-host/engine/libspk_volk.a

@@ -21,7 +21,7 @@ else
 fi
 "${CXX:-c++}" "${flags[@]}" "${extra[@]}" -I"$app" -I"$MATH_DIR" -I"$UP/engine/include" -I"$UP/engine/src" \
     -I"$JPEG_DIR/include" "$repo/tools/native/jpeg_rows.cpp" "$app/jpeg444.cpp" \
-    "$app/output_transform.cpp" "$app/layer2.cpp" \
+    "$app/output_transform.cpp" "$app/raw_development.cpp" "$app/layer2.cpp" \
     -Wl,--start-group "$B/engine/libspektralab_engine.a" "$B/engine/libspektralab_core.a" \
     "$B/engine/libspk_volk.a" "$JPEG_DIR/lib/libjpeg.a" -Wl,--end-group -ldl -o "$build/jpeg_rows"
 "$build/jpeg_rows" "$B/engine/resources" "$build" "$@"

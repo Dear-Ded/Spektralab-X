@@ -352,7 +352,10 @@ fun pasteLook(target: Sidecar, frame: Frame, from: CopiedLook, groups: Set<LookG
         noFilm = s.noFilm, digitalIntermediate = s.digitalIntermediate,
         printExposure = s.printExposure, yShift = s.yShift, mShift = s.mShift,
     )
-    if (LookGroup.EXPOSURE in groups) e = e.copy(autoExposure = s.autoExposure, aeMethod = s.aeMethod, exposureEv = s.exposureEv, sceneCurve = s.sceneCurve)
+    if (LookGroup.EXPOSURE in groups) e = e.copy(autoExposure = s.autoExposure, aeMethod = s.aeMethod, exposureEv = s.exposureEv, sceneCurve = s.sceneCurve).let {
+        if (frame.raw) it.copy(rawDevelopment = s.rawDevelopment, rawAutoExposure = s.rawAutoExposure,
+            rawExposureEv = s.rawExposureEv) else it
+    }
     if (LookGroup.WHITE_BALANCE in groups && frame.raw) { wbK = from.wbK; wbTint = from.wbTint }
     if (LookGroup.EFFECTS in groups) e = e.copy(
         grainActive = s.grainActive, grainAmount = s.grainAmount,

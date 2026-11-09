@@ -18,6 +18,37 @@ using namespace spk::android;
 void check(bool ok, const std::string& message) {
     if (!ok) throw std::runtime_error(message);
 }
+void app_keys() {
+    ViewFlags flags;
+    check(!flags.raw_development.enabled && flags.raw_development.auto_exposure, "old records must stay neutral");
+    std::string error, params = R"({"x_no_film":true,"x_raw_development":"standard_v1","x_raw_auto_exposure":false,"x_raw_exposure_ev":-2.25,"auto_exposure":true})";
+    check(take_app_keys(params, flags, error), error);
+    spk::Json engine_params;
+    check(spk::Json::parse(params, engine_params, error), error);
+    check(engine_params.fields().size() == 1 && engine_params.at("auto_exposure").as_bool(), "app keys leaked to physical engine");
+    check(flags.no_film && flags.raw_development.enabled && !flags.raw_development.auto_exposure &&
+        flags.raw_development.exposure_ev == -2.25f, "RAW intent was lost");
+    const auto original = flags;
+    for (const char* invalid : {R"({"x_no_film":false,"x_raw_development":"future"})",
+            R"({"x_raw_auto_exposure":1})", R"({"x_raw_exposure_ev":"2"})",
+            R"({"x_raw_exposure_ev":8.001})", R"({"x_raw_exposure_ev":-8.001})"}) {
+        std::string bad = invalid;
+        check(!take_app_keys(bad, flags, error), "malformed RAW option accepted");
+        check(flags.no_film == original.no_film && flags.raw_development.enabled == original.raw_development.enabled &&
+            flags.raw_development.auto_exposure == original.raw_development.auto_exposure &&
+            flags.raw_development.exposure_ev == original.raw_development.exposure_ev, "failed parse mutated active intent");
+        check(bad == invalid, "failed parse rewrote delta");
+    }
+    auto reply = with_app_keys("{}", flags);
+    ViewFlags roundtrip;
+    check(take_app_keys(reply, roundtrip, error), error);
+    check(reply == "{}" && roundtrip.raw_development.enabled && roundtrip.raw_development.exposure_ev == -2.25f,
+        "RAW get/set parameters do not roundtrip");
+    params = R"({"x_raw_development":"neutral","x_raw_auto_exposure":true,"x_raw_exposure_ev":0})";
+    check(take_app_keys(params, flags, error) && !flags.raw_development.enabled && flags.raw_development.auto_exposure &&
+        flags.raw_development.exposure_ev == 0.0f, "neutral reset failed");
+    std::cout << "RAW app-key validation and persistence PASS\n";
+}
 struct LookCase {
     std::vector<float> values = std::vector<float>(kLookSize, 0);
     spk::Json adjustments = spk::Json::object();
@@ -257,6 +288,7 @@ void geometry(spk_engine* engine) {
 }
 int main(int argc, char** argv) {
     try {
+        app_keys();
         check(argc >= 2, "resources required");
         std::unique_ptr<spk_engine, decltype(&spk_engine_destroy)> engine(spk_engine_create(argv[1], nullptr), spk_engine_destroy);
         check(bool(engine), spk_last_error(nullptr));

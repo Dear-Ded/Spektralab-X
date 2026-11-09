@@ -305,6 +305,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // and RAW alike ("balanced", a log average that a bright sky barely moves).
             val carried = _ui.value.catalog.normalize(if (wb != null) requested else requested.copy(
                 autoExposure = true,
+                rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0,
                 quarterTurns = 0, flipH = false,
                 cropX = 0.0, cropY = 0.0, cropW = 1.0, cropH = 1.0, cropAspect = 0.0,
                 filmEdge = false,
@@ -380,6 +381,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                             .filter { s -> s.isNotBlank() }.joinToString(" "),
                         asShotK = info.optDouble("asShotK", 0.0), asShotTint = info.optDouble("asShotTint", 0.0),
                         wbK = info.optDouble("wbK", 0.0), wbTint = info.optDouble("wbTint", 0.0),
+                        rawStatsBinned = info.optBoolean("rawStatsBinned", false),
                     ),
                 )
             var retired = 0L
@@ -505,12 +507,22 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
                 detail = if (edit == it.edit) it.detail else null)
         }
+        // A fast neutral open may have binned the sensor. Reopen that source
+        // before enabling development so its global meter matches full export.
+        val src = _ui.value.source
+        val uri = lastUri
+        if (src?.kind == "raw" && src.rawStatsBinned && uri != null &&
+            edit.rawDevelopment == RawDevelopmentMode.STANDARD_V1) {
+            cancelStalePreview()
+            launchOpen(uri, wb = src.wbK to src.wbTint)
+            return
+        }
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
         // Only the look moved: the print is the same, so re-pack it (a few ms)
         // instead of developing again. Anything else renders, look included.
-        val lookOnly = !wasOverridden && edit.copy(look = current.look) == current && edit.look != current.look
-        if (lookOnly && _ui.value.image != null) { if (render) repacks.trySend(Unit); return }
+        val outputOnly = !wasOverridden && edit != current && edit.sameRenderInputAs(current)
+        if (outputOnly && _ui.value.image != null) { if (render) repacks.trySend(Unit); return }
         cancelStalePreview()
         if (render) renders.trySend(Unit)
     }
@@ -733,7 +745,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 withContext(EngineThread.dispatcher) {
                     if (session == 0L || _ui.value.busy != null) return@withContext null
                     renderedSession = session
-                    applyLook((override ?: wanted).look)
+                    val target = override ?: wanted
+                    // A preceding film/geometry edit may still be waiting for a
+                    // render. Its old cache cannot be repacked as the new input.
+                    if (!target.sameRenderInputAs(applied)) return@withContext null
+                    applyWanted()?.let { throw EngineException("参数无效：$it") }
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
                     val bitmap = NativeEngine.repack(session, reuse)?.also(DisplayColor::tag)
                     if (bitmap == null && reuse != null) synchronized(pool) { spare[tier] = reuse }

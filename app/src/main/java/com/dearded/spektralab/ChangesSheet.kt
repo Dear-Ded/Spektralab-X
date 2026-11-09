@@ -55,6 +55,10 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     val out = mutableListOf<Change>()
     // A new photo opens on 无 (Edit.NONE): a film, a paper or the film's effects are each a change.
     val positive = catalog.film(e.film)?.positive == true
+    if (e.rawDevelopmentChanged)
+        out += Change("RAW 显影", if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) "标准显色" else "线性显示", 1, step = 0) {
+            it.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0)
+        }
     if (!e.noFilm || e.filmFormatMm != d.filmFormatMm)
         out += Change("胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
             FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {

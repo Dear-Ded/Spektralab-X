@@ -149,7 +149,7 @@ set_target_properties(spk_jpeg PROPERTIES IMPORTED_LOCATION "${spk_jpeg_lib}"
     INTERFACE_INCLUDE_DIRECTORIES "${spk_jpeg_prefix}/include")
 add_dependencies(spk_jpeg spk_jpeg_build)
 
-add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp storage_probe.cpp jpeg444.cpp resize.cpp layer2.cpp output_transform.cpp input_transform.cpp
+add_library(spektralab_jni SHARED spektralab_jni.cpp tiff16.cpp storage_probe.cpp jpeg444.cpp resize.cpp layer2.cpp output_transform.cpp raw_development.cpp input_transform.cpp
     "${SPK_UPSTREAM}/engine/host/white_balance.cpp")
 target_compile_features(spektralab_jni PRIVATE cxx_std_20)
 target_include_directories(spektralab_jni PRIVATE
