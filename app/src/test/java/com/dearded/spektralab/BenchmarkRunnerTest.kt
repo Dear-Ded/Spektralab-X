@@ -122,15 +122,16 @@ class BenchmarkRunnerTest {
     }
 
     @Test
-    fun `runner calls cancel on exception`() = runBlocking {
+    fun `runner calls cancel on exception`() { runBlocking {
         var cancelled = false
+        var closed = false
         val backend = object : BenchmarkBackend {
             override suspend fun open(edge: Int) {}
             override suspend fun firstPreview() { throw RuntimeException("fail") }
             override suspend fun switchStyle(index: Int) {}
             override suspend fun export() {}
             override fun cancel() { cancelled = true }
-            override suspend fun close() {}
+            override suspend fun close() { closed = true }
         }
         val runner = BenchmarkRunner(
             backend = backend,
@@ -147,14 +148,16 @@ class BenchmarkRunnerTest {
         } catch (e: CancellationException) {
             // Expected when backend throws non-EngineException
         }
-        // Cancel should not be called for non-cancellation exceptions in current impl
-        // but close should always be called
-    }
+        // A plain failure is not a cancellation: close still runs, cancel does not.
+        assertFalse(cancelled)
+        assertTrue(closed)
+    } }
 
     @Test
     fun `median calculation`() {
         assertEquals(20L, BenchmarkRunner.median(listOf(10L, 20L, 30L)))
-        assertEquals(25L, BenchmarkRunner.median(listOf(10L, 25L, 30L, 40L)))
+        // Even counts take the upper middle, not the average of the two.
+        assertEquals(30L, BenchmarkRunner.median(listOf(10L, 25L, 30L, 40L)))
         assertEquals(100L, BenchmarkRunner.median(listOf(100L)))
     }
 

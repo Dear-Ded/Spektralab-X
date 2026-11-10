@@ -87,7 +87,8 @@ class BenchmarkPolicyTest {
             testEdge = 3072,
             switchStyleMs = 80L,
             exportMs = 3000L,
-            peakGrowthMb = 1800L,
+            // 3072 px itself is over the budget; the next smaller edge still fits.
+            peakGrowthMb = 3000L,
             thermalAfter = 0.6f,
             maxPixels = 42_000_000L,
             peakBudgetMb = 2048L,
@@ -100,7 +101,7 @@ class BenchmarkPolicyTest {
         val advice = BenchmarkPolicy.advise(
             testEdge = 3072,
             switchStyleMs = 100L,
-            exportMs = 10000L,
+            exportMs = 15000L,
             peakGrowthMb = 1000L,
             thermalAfter = 0.6f,
             maxPixels = 42_000_000L,

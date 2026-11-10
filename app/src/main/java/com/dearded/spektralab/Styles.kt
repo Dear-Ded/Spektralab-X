@@ -1,7 +1,11 @@
 package com.dearded.spektralab
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeOut
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -432,18 +436,11 @@ private fun StyleStripContent(
             val sharedScope = LocalSharedScope.current
             val off = rememberReduceMotion()
             // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
-            // UI2.md 3.7: shared element between card and strength panel (sharedBounds).
-            val cardModifier = if (sharedScope != null && !off && on) {
-                with(sharedScope) {
-                    Modifier.sharedBounds(
-                        sharedContentState = rememberSharedContentState("style-${s.id}"),
-                        animatedVisibilityScope = this@StyleStripContent,
-                        boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
-                        resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                    )
-                }
-            } else Modifier
-            Column(Modifier.width(112.dp).then(cardModifier)) {
+            // UI2.md 3.7: the card's bounds are the shared element's start. The anchor leaves
+            // (this AnimatedVisibility) as the strength panel enters, so the two never both
+            // count as visible. No shared scope, or motion off: the card is only the column.
+            Box(Modifier.width(112.dp)) {
+            Column(Modifier.width(112.dp)) {
                 ThumbCard(
                     selected = on,
                     image = bitmap,
@@ -462,6 +459,20 @@ private fun StyleStripContent(
                         }
                     }
                 )
+            }
+            if (sharedScope != null && !off && on) {
+                AnimatedVisibility(
+                    visible = open != s.id,
+                    modifier = Modifier.matchParentSize(),
+                    enter = EnterTransition.None,
+                    exit = fadeOut(spring(dampingRatio = 1f, stiffness = 380f)),
+                    label = "style-card-bounds",
+                ) {
+                    CompositionLocalProvider(LocalNavScope provides this) {
+                        Box(Modifier.fillMaxSize().styleSharedBounds("style-${s.id}"))
+                    }
+                }
+            }
             }
         }
     }
@@ -503,22 +514,15 @@ private fun StyleStripContent(
     val last = remember { arrayOfNulls<Style>(1) }
     if (current != null) last[0] = current
     val shown = current ?: last[0]
-    val sharedScope = LocalSharedScope.current
-    val off = rememberReduceMotion()
     // UI2.md 3.7: shared element between card and strength panel (sharedBounds).
-    val panelModifier = if (sharedScope != null && !off && current != null) {
-        with(sharedScope) {
-            Modifier.sharedBounds(
-                sharedContentState = rememberSharedContentState("style-${current.id}"),
-                animatedVisibilityScope = this@StyleStripContent,
-                boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
-                resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
-            )
-        }
-    } else Modifier
-    Box(panelModifier) {
+    // Expandable publishes its AnimatedVisibilityScope; without one, or with motion
+    // off, styleSharedBounds is a no-op and the panel only expands in place.
     Expandable(open = current != null, verticalArrangement = Arrangement.spacedBy(RowGap)) {
         val s = shown ?: return@Expandable
+        Column(
+            Modifier.styleSharedBounds("style-${s.id}"),
+            verticalArrangement = Arrangement.spacedBy(RowGap),
+        ) {
         // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
         // A step is chosen only while the strength sits exactly on it.
         val k = strengthOf(s.id)
@@ -534,7 +538,29 @@ private fun StyleStripContent(
             strengths[s.id] = k
             pick(s, k)
         }
+        }
     }
+}
+
+/**
+ * Shared bounds for the style card and its strength panel (UI2.md 3.7).
+ * Reads the [AnimatedVisibilityScope] published by the enclosing
+ * [AnimatedVisibility] ([LocalNavScope]); with no shared layout, no visibility
+ * scope, or motion off, the receiver is unchanged.
+ */
+@Composable
+private fun Modifier.styleSharedBounds(key: Any): Modifier {
+    val shared = LocalSharedScope.current
+    val page = LocalNavScope.current
+    val off = rememberReduceMotion()
+    if (shared == null || page == null || off) return this
+    return with(shared) {
+        this@styleSharedBounds.sharedBounds(
+            sharedContentState = rememberSharedContentState(key),
+            animatedVisibilityScope = page,
+            boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
+            resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
+        )
     }
 }
 
