@@ -166,7 +166,7 @@ object JobNotifier {
             .put("tickerPic", pic)
             .put("aodTitle", "冲洗 $pct%")
             .put("baseInfo", JSONObject().put("type", 1).put("title", title).put("content", text))
-            .put("progressInfo", JSONObject().put("progress", pct).put("colorProgress", "#E8A24A"))
+            .put("progressInfo", JSONObject().put("progress", pct).put("colorProgress", "#F2F2F2"))
             .put("param_island", JSONObject()
                 .put("islandProperty", 1)
                 .put("bigIslandArea", JSONObject().put("imageTextInfoLeft", JSONObject()
