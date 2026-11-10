@@ -50,6 +50,8 @@ data class ProcessingJob(
     val wbTint: Double,
     val format: ExportFormat,
     val size: ExportSize,
+    /** TIFF 导出的色彩空间（仅 format == TIFF 时有效，默认 sRGB 保持向后兼容） */
+    val tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB,
     val workingEdge: Int,
     val maxPixels: Long,
     /** The output's pixel count, for the time estimate. */
@@ -105,7 +107,7 @@ data class ProcessingJob(
     val label get() = when {
         sheet -> "印样 · $name"
         extreme -> "高质量导出"
-        format == ExportFormat.TIFF -> "16 位 TIFF"
+        format == ExportFormat.TIFF -> "16 位 TIFF · ${tiffColorSpace.displayName}"
         format == ExportFormat.HEIF -> "HEIF · 工作尺寸"
         size == ExportSize.SHARE -> "JPEG · 分享尺寸"
         else -> "JPEG · 工作尺寸"
@@ -114,6 +116,7 @@ data class ProcessingJob(
     fun toJson(): JSONObject = JSONObject()
         .put("id", id).put("uri", uri).put("name", name).put("raw", raw).put("edit", editJson)
         .put("wbK", wbK).put("wbTint", wbTint).put("format", format.name).put("size", size.name)
+        .put("tiffSpace", tiffColorSpace.name)
         .put("edge", workingEdge).put("maxPixels", maxPixels).put("outPixels", outPixels)
         .put("frame", frameJson).put("filmLabel", filmLabel).put("wide", wideGamut).put("hl", highlightStops.toDouble()).put("look", lookJson)
         .put("state", state.name).put("message", message).put("attempts", attempts)
@@ -129,6 +132,7 @@ data class ProcessingJob(
                 raw = o.optBoolean("raw"), editJson = o.getString("edit"),
                 wbK = o.optDouble("wbK", 0.0), wbTint = o.optDouble("wbTint", 0.0),
                 format = ExportFormat.valueOf(o.getString("format")), size = ExportSize.valueOf(o.getString("size")),
+                tiffColorSpace = runCatching { TiffColorSpace.valueOf(o.optString("tiffSpace", "SRGB")) }.getOrDefault(TiffColorSpace.SRGB),
                 workingEdge = o.optInt("edge"), maxPixels = o.optLong("maxPixels"), outPixels = o.optLong("outPixels"),
                 frameJson = o.optString("frame"), filmLabel = o.optString("filmLabel"),
                 wideGamut = o.optBoolean("wide"),
@@ -779,7 +783,6 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor(render = true, extreme = job.extreme)
             step(if (job.extreme) "高质量冲洗" else "冲洗", 0.25f)
-            val icc = File(ready.dir, "io/sRGB.icc").absolutePath
             when (job.format) {
                 ExportFormat.TIFF -> {
                     // Rendered straight into a pending entry (the gallery hides it), so
@@ -788,13 +791,46 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     val target = withContext(Dispatchers.IO) { MediaSaver.create(app, name, "image/tiff") }
                     markPending(job.id, target)
                     try {
+                        // 根据目标色彩空间准备 ICC 配置文件路径和目标空间名称
+                        val (iccPath, targetSpace) = when (job.tiffColorSpace) {
+                            TiffColorSpace.SRGB -> {
+                                val icc = File(ready.dir, "io/sRGB.icc").absolutePath
+                                icc to "sRGB"
+                            }
+                            TiffColorSpace.DISPLAY_P3 -> {
+                                // Display P3: 运行时从系统提取，保存临时文件供 native 读取
+                                val p3Icc = displayP3Icc()
+                                if (p3Icc == null || p3Icc.isEmpty()) {
+                                    // Fallback: 尝试从引擎资源读取（未来可能添加）
+                                    val fallback = File(ready.dir, "io/Display_P3.icc")
+                                    if (fallback.isFile) {
+                                        fallback.absolutePath to "Display P3"
+                                    } else {
+                                        throw EngineException("Display P3 ICC 配置文件不可用")
+                                    }
+                                } else {
+                                    val tmpIcc = File(app.cacheDir, "export_p3.icc")
+                                    tmpIcc.writeBytes(p3Icc)
+                                    tmpIcc.absolutePath to "Display P3"
+                                }
+                            }
+                            TiffColorSpace.PROPHOTO -> {
+                                // ProPhoto: 生成标准 ROMM RGB ICC
+                                val prophotoIcc = IccProfile.generateProPhotoRgb()
+                                val tmpIcc = File(app.cacheDir, "export_prophoto.icc")
+                                tmpIcc.writeBytes(prophotoIcc)
+                                tmpIcc.absolutePath to "ProPhoto RGB"
+                            }
+                        }
+
                         withContext(Dispatchers.IO) {
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
                                 rendering(job) {
                                     withContext(ExportThread.dispatcher) {
-                                        if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                        if (!NativeEngine.exportTiffFd(handle, it.fd, iccPath, targetSpace, job.size.tier))
+                                            engineFailure(engine, "导出失败")
                                     }
                                 }
                             }

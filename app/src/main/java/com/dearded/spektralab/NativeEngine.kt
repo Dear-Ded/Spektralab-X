@@ -132,6 +132,12 @@ object NativeEngine {
     /** [exportTiff] into an open writable descriptor (a pending MediaStore entry); the caller closes it. */
     external fun exportTiffFd(session: Long, fd: Int, iccPath: String, tier: String): Boolean
 
+    /**
+     * TIFF 导出到文件描述符，支持指定目标色彩空间。
+     * @param targetSpace 目标色彩空间："sRGB", "Display P3", 或 "ProPhoto RGB"
+     */
+    external fun exportTiffFd(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean
+
     external fun release(session: Long)
 
     /** Layer 2 for display/export (Look.values()); null clears it. False preserves the old look. */
