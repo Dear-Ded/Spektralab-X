@@ -1,0 +1,22 @@
+0.2.00-alpha-1 Update:
+
+**RAW Color Correction**
+- Fixed DNG color matrix and white balance processing
+- Neutral color default rendering, no automatic exposure or saturation boost
+
+**Film & Print**
+- Fixed highlight inversion artifacts
+- Paper mode selection now correctly applies print characteristics
+- Pre-film scene curve support
+
+**Stability**
+- RAW loading can be cancelled
+- State correctly preserved after failure or cancellation
+- Reduced memory footprint
+
+**Export**
+- JPEG chroma subsampling now matches desktop version (re-exporting old photos will produce different results)
+
+**Note**
+- This release has not been tested on device
+- External-plane chunking, compare-view alignment, export enhancements, and benchmark tools are in progress
