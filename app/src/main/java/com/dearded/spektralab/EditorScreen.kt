@@ -1481,7 +1481,7 @@ private fun FramedImage(
         Image(bitmap = bitmap, contentDescription = null, contentScale = ContentScale.Fit, modifier = modifier)
         return
     }
-    val android = remember(bitmap) { bitmap.asAndroidBitmap() }
+    val androidBitmap = remember(bitmap) { bitmap.asAndroidBitmap() }
     androidx.compose.foundation.Canvas(modifier) {
         val l = frame.layout(bitmap.width, bitmap.height)
         val k = minOf(size.width / l.width, size.height / l.height)
@@ -1492,11 +1492,11 @@ private fun FramedImage(
             n.save(); n.translate(ox, oy); n.scale(k, k)
             if (showDecoration) {
                 // Full card: paper or blur, strips, print, hairline, text.
-                FrameSpec.drawCard(n, frame, l, android, caption)
+                FrameSpec.drawCard(n, frame, l, androidBitmap, caption)
             } else {
                 // Compare mode: draw only the photo itself, aligned to where it would be with the frame.
                 // The photo rect within the card is at (l.x, l.y).
-                n.drawBitmap(android, null,
+                n.drawBitmap(androidBitmap, null,
                     android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
                         (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat()),
                     android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
