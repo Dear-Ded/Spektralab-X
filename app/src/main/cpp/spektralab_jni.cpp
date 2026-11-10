@@ -1521,7 +1521,8 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
 
 // Renders `tier` and writes the RGB16 TIFF to `path`, or, when `fd` >= 0, to
 // that descriptor (a pending MediaStore entry, so nothing is copied twice).
-static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring tier_j) {
+// `target` specifies the output color space: "sRGB", "Display P3", or "ProPhoto RGB".
+static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring target_j, jstring tier_j) {
     if (!s) { fail("no session"); return JNI_FALSE; }
     const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
@@ -1529,16 +1530,28 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
         std::vector<uint8_t> icc;
         const std::string icc_path = str(env, icc_j);
         std::ifstream file(icc_path, std::ios::binary);
-        if (icc_path.empty() || !file) { fail("TIFF: sRGB profile missing from engine resources"); return JNI_FALSE; }
+        if (icc_path.empty() || !file) { fail("TIFF: ICC profile missing from engine resources"); return JNI_FALSE; }
         icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-        if (icc.empty()) { fail("TIFF: sRGB profile is empty"); return JNI_FALSE; }
+        if (icc.empty()) { fail("TIFF: ICC profile is empty"); return JNI_FALSE; }
+
+        const std::string target = target_j ? str(env, target_j) : std::string("sRGB");
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
+
+        // Set output transform to target color space for export
+        if (!s->set_output(target, true)) {
+            fail("TIFF: cannot set output to " + target);
+            return JNI_FALSE;
+        }
+
         ResultGuard result;
         if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
         std::string error = blank_result(result);
         if (!error.empty()) { fail("export check: " + error); return JNI_FALSE; }
         const auto* xf = s->xf();
-        if (xf && xf->target() != "sRGB") { fail("TIFF: the session's output is not sRGB"); return JNI_FALSE; }
+        if (!xf || xf->target() != target) {
+            fail("TIFF: the session's output is not " + target);
+            return JNI_FALSE;
+        }
         const auto* look = s->active_look();
         // Retain full-frame mask/dust geometry, but convert only the encoder's
         // next strips. The engine's result stays immutable through the write.
@@ -1591,13 +1604,19 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
 }
 
 JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
-    return export_tiff(env, reinterpret_cast<Session*>(handle), str(env, path_j), -1, icc_j, tier_j);
+    return export_tiff(env, reinterpret_cast<Session*>(handle), str(env, path_j), -1, icc_j, nullptr, tier_j);
 }
 
 // exportTiff into an open, writable descriptor; the caller keeps and closes it.
 JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring tier_j) {
     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
-    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, tier_j);
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, nullptr, tier_j);
+}
+
+// exportTiffFd with target color space selection (new in export-pro)
+JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring target_j, jstring tier_j) {
+    if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, target_j, tier_j);
 }
 
 // Safe from another thread while a render is in flight on the engine thread:

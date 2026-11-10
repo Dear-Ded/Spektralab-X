@@ -126,16 +126,16 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         queuedExport?.invoke()
         queuedExport = null
     }
-    fun exportWithNotice(format: ExportFormat, size: ExportSize) {
+    fun exportWithNotice(format: ExportFormat, size: ExportSize, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
         savedAt = System.currentTimeMillis()
         val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         if (missing) {
-            queuedExport = { vm.export(format, size) }
+            queuedExport = { vm.export(format, size, tiffColorSpace) }
             notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            vm.export(format, size)
+            vm.export(format, size, tiffColorSpace)
         }
     }
 
@@ -216,8 +216,15 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                     enabled = !ui.loadingDetail && ui.busy == null,
                                     onClick = { exportMenu = false; vm.loadExportProof(target) })
                             }
-                            DropdownMenuItem(text = { Text("16 位 TIFF · 工作尺寸") }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
+                            // TIFF 导出：三种色彩空间选项
+                            DropdownMenuItem(text = { Text("16 位 TIFF · sRGB") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · Display P3") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · ProPhoto RGB") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
                             })
                             if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 工作尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
                             DropdownMenuItem(text = { Text("高质量导出（受设备上限限制）") }, onClick = {

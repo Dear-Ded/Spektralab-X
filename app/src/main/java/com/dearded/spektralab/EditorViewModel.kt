@@ -35,6 +35,13 @@ enum class ExportFormat { JPEG, TIFF, HEIF }
 /** "full" is the working size; "preview" is the engine's 3400 px tier, for sharing. */
 enum class ExportSize(val tier: String) { FULL("full"), SHARE("preview") }
 
+/** TIFF 导出的色彩空间选项，决定输出转换和嵌入的 ICC 配置文件 */
+enum class TiffColorSpace(val displayName: String, val targetName: String) {
+    SRGB("sRGB", "sRGB"),
+    DISPLAY_P3("Display P3", "Display P3"),
+    PROPHOTO("ProPhoto RGB", "ProPhoto RGB")
+}
+
 data class UiState(
     val ready: Boolean = false,
     val busy: String? = "正在准备引擎…",
@@ -983,7 +990,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * open the next photo, or leave the app. Progress and the remaining time are
      * in 正在处理 and in the notification (on HyperOS, the island).
      */
-    fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL) {
+    fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
         clearOverride(render = true)
         val state = _ui.value
         val src = state.source ?: return
@@ -1003,7 +1010,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             id = host.queue.nextId(), uri = uri.toString(), name = src.name, raw = src.kind == "raw",
             editJson = state.edit.toJson().toString(), wbK = src.wbK, wbTint = src.wbTint,
             lookJson = if (state.edit.look.neutral) "" else state.edit.look.toJson().toString(),
-            format = format, size = size, workingEdge = state.workingEdge, maxPixels = state.maxPixels,
+            format = format, size = size, tiffColorSpace = tiffColorSpace,
+            workingEdge = state.workingEdge, maxPixels = state.maxPixels,
             outPixels = outPixels, workingPixels = workingPixels,
             frameJson = if (state.edit.frame.isNone) "" else state.edit.frame.toJson().toString(),
             filmLabel = if (state.edit.noFilm) "" else state.catalog.film(state.edit.film)?.label ?: "",
