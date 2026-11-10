@@ -86,3 +86,16 @@
 边界：这是 llvmpipe CPU 设备，不是 Adreno/Mali，不能换算手机 RSS，也没有热状态测量。GPU 链由一把互斥锁串行，多 worker 只重叠外存读写，未测速度。输入输出 plane 在外存，页缓存没有单独记账。该链没有接入 Pipeline，不含 `node_edr`，没有覆盖 DI 或融合 kernel 路径。
 
 下一步：把这条链接入 `run_stages_striped` 的 Pointwise run 以替换整幅 `plane_out`，再扩到整个 Pointwise run（见第 8 节）。
+
+## 10. 第二阶段实测结果（2026-11-10）
+
+补丁 0040 新增 `engine/src/pipeline/bounded_print_run.hpp`：带 halo 的默认打印 run（xyz→rgb、CAM16、unsharp、CCTF）外存执行。run 的垂直 halo 是各阶段半径之和。每个带读取窗口 `[y0-halo, y0+rows+halo)` 并在 plane 边缘截断，内部依次执行四个阶段，只把中心 `rows` 行写回外存。unsharp 直接复用 `Blur::gaussian` 和 `Blur::lincomb`，与 `node_unsharp` 调用相同的 FIR 和 lincomb kernel，不是手抄实现。引擎里没有调用点，默认渲染不变。验证程序是 `tools/native/bounded_print_run.cpp`，入口 `tools/native/run_bounded_print_run.sh`。全部为合成像素。
+
+环境：与第一阶段相同（AOIDC，GCC 11.4，llvmpipe，pin a46627d 加 0001-0040 补丁，严格 128 MiB）。
+
+- 逐字节一致：2251 个用例、75,470,400 个 float32 值，与测试里独立写出的整幅四阶段基线（含 unsharp）memcmp 相同。覆盖 3 个输出色彩空间、5 种 unsharp (sigma, amount) 配置（包括关闭、halo=0、halo=2、halo=5）、尺寸 1×1 至 255×131、带高 1/3/32/65/整高、正序/逆序/乱序、1 与 4 个 worker。另有 288 个 halo 与带高选择边界检查（窗口不超过存储范围与字节预算）。
+- 严格范围：4097×3073 整幅窗口被拒绝（spk_matmul3: buffer exceeds maxStorageBufferRange）。分块在同一范围下通过：sigma=0.7、amount=0.7 时 halo=2、405 行、8 带、最大窗口 20,108,076 B。另一带高（97 行、32 带、逆序单 worker）的结果与它逐字节相同。
+
+边界：同第一阶段，llvmpipe CPU 设备，不是 Adreno/Mali，不能换算手机。GPU 链由一把互斥锁串行。未测峰值内存降幅（第一阶段已证实从 801 MB 降到 178 MB）。该链只覆盖默认打印 run 且 scanner、overscan、EDR、DI、融合均关闭时才走外存路径；默认的 `unsharp_mask = {0.7, 0.7}` 会生效并带 2 行 halo。未接入 Pipeline。
+
+下一步：把它接入 `run_stages_striped` 的 Pointwise run（第 8 节第 1 项），扩到整个 Pointwise run，再处理全局统计、IIR、颗粒与行输出（第 8 节第 2-6 项）。
