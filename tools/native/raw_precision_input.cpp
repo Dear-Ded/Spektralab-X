@@ -1,5 +1,6 @@
 // Co-created with GPT (OpenAI). Production dispatcher parity and atomicity probe.
 #include "raw_precision_input.hpp"
+#include "raw_white_balance.hpp"
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -65,10 +66,23 @@ int main(int argc, char** argv) {
     using namespace spk::android;
     if (argc < 3) return 2;
     bool custom = false, bad_plan = false, wrong_wb = false;
+    bool explicit_mul = false, temperature_controls = false;
+    std::array<float,4> custom_mul{2,1,1.5,1};
+    double temperature = 0, tint = 0;
     int cancel_at = 0;
     for (int i = 3; i < argc; ++i) {
         const std::string option = argv[i];
-        if (option == "--custom") custom = true;
+        if (option == "--custom") { custom = true; explicit_mul = true; temperature = 6500; }
+        else if (option == "--wb" && i + 4 < argc) {
+            for (float& value : custom_mul) value = std::stof(argv[++i]);
+            custom = true; explicit_mul = true;
+        }
+        else if (option == "--temperature" && i + 1 < argc) {
+            temperature = std::stod(argv[++i]); custom = true; temperature_controls = true;
+        }
+        else if (option == "--tint" && i + 1 < argc) {
+            tint = std::stod(argv[++i]); custom = true; temperature_controls = true;
+        }
         else if (option == "--bad-plan") bad_plan = true;
         else if (option == "--wrong-wb") wrong_wb = true;
         else if (option == "--cancel" && i + 1 < argc) cancel_at = std::stoi(argv[++i]);
@@ -80,6 +94,26 @@ int main(int argc, char** argv) {
     std::vector<unsigned char> snapshot(sizeof(raw->imgdata));
     std::memcpy(snapshot.data(), &raw->imgdata, snapshot.size());
     auto plan = inspect_raw_precision(argv[1], *raw, custom);
+    const bool raw_unchanged = std::memcmp(snapshot.data(), &raw->imgdata, snapshot.size()) == 0;
+    if (temperature_controls && !explicit_mul) {
+        // Follow the real JNI calibration/controls boundary, while the Python
+        // test derives expected WB independently from literal CIE uv entries.
+        if (plan.mode == "float_linear_v1") {
+            for (unsigned c = 0; c < 3; ++c) raw->imgdata.color.cam_mul[c] = float(1 / plan.source.neutral[c]);
+            raw->imgdata.color.cam_mul[3] = raw->imgdata.color.cam_mul[1];
+        }
+        raw->interpolate_dng_matrix(nullptr);
+        std::string control_error;
+        if (!raw_multipliers_for(*raw,temperature,tint,custom_mul,control_error)) {
+            std::cout << std::boolalpha << "{\"open_status\":0,\"ok\":false,\"control_rejected\":true,\"mode\":";
+            string(plan.mode);
+            std::cout << ",\"raw_unchanged\":" << raw_unchanged
+                << ",\"unchanged\":true,\"float_metadata_unchanged\":true,\"error\":";
+            string(control_error);
+            std::cout << "}\n";
+            return 0;
+        }
+    }
     if (bad_plan) plan.mode = "invalid-test-plan";
     spk::io::DecodedRaw output;
     output.width = 77; output.height = 88; output.rgb = {-9,-3,5};
@@ -87,9 +121,7 @@ int main(int argc, char** argv) {
     const auto previous = output;
     FloatDngMetadata source{77,88,8,{1,2,3},{4,5,6},{7,8,9}};
     const auto previous_source = source;
-    const std::array<float,4> custom_mul{2,1,1.5,1};
     const auto* user_mul = custom || wrong_wb ? &custom_mul : nullptr;
-    const double temperature = user_mul ? 6500 : 0;
     std::string error;
     bool ok = false, cancelled = false;
     int polls = 0;
@@ -100,13 +132,12 @@ int main(int argc, char** argv) {
     const bool unchanged = output.width == previous.width && output.height == previous.height &&
         same_pixels(output.rgb,previous.rgb) && same(output.metadata,previous.metadata) && output.timings.total_ms == -1;
     const bool source_unchanged = same(source,previous_source);
-    const bool raw_unchanged = std::memcmp(snapshot.data(), &raw->imgdata, snapshot.size()) == 0;
     bool exact_pixels = false, exact_metadata = false, reference_ok = false;
     std::string reference_error;
     if (!cancel_at && !bad_plan && !wrong_wb) {
         if (plan.mode == "float_linear_v1") {
             FloatDngLinear reference;
-            reference_ok = decode_float_linear_dng(argv[1],raw_float_linear_limits,reference,reference_error);
+            reference_ok = decode_float_linear_dng(argv[1],raw_float_linear_limits,user_mul,temperature,reference,reference_error);
             exact_pixels = reference_ok == ok && (!ok || (output.width == reference.width && output.height == reference.height &&
                 same_pixels(output.rgb,reference.rgb)));
             if (ok) {
@@ -150,6 +181,9 @@ int main(int argc, char** argv) {
         << ",\"raw_flip\":" << output.metadata.raw_flip << ",\"error\":"; string(error);
     std::cout << ",\"float_black\":"; array(source.black);
     std::cout << ",\"float_white\":"; array(source.white);
+    std::cout << ",\"selected_wb\":"; array(custom_mul);
+    std::cout << ",\"camera_wb\":"; array(output.metadata.camera_whitebalance);
+    std::cout << ",\"applied_wb\":"; array(output.metadata.post_scale_pre_mul);
     std::cout << "}\n";
     return raw_unchanged && (ok || (unchanged && source_unchanged)) ? 0 : 4;
 }

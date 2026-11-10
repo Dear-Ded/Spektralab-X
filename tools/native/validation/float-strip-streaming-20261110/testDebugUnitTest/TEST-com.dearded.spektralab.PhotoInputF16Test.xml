@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.PhotoInputF16Test" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-10T04:00:56.480Z" hostname="ser858255664526" time="0.178">
+  <properties/>
+  <testcase name="gainmapAndEightBitRoutesRemainCompatible" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.024"/>
+  <testcase name="alphaModesUseActualBitmapState" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.022"/>
+  <testcase name="unsupportedF16TransferRecyclesOwnedPixels" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.022"/>
+  <testcase name="adjacentP3HalfCodesSurviveWithoutEightBitQuantization" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.024"/>
+  <testcase name="ineligibleHeaderKeepsLegacyEightBitConversion" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.022"/>
+  <testcase name="scaledF16RetainsPrecisionAndActualP3Tag" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.023"/>
+  <testcase name="headerEligibilityExcludesLinearAndHdrTransfers" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.019"/>
+  <testcase name="adjacentSrgbHalfCodesSurviveWithoutEightBitQuantization" classname="com.dearded.spektralab.PhotoInputF16Test" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

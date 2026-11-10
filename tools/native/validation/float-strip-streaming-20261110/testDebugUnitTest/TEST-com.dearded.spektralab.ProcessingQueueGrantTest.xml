@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ProcessingQueueGrantTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-10T04:00:56.765Z" hostname="ser858255664526" time="2.448">
+  <properties/>
+  <testcase name="unrelatedEditorGrantDoesNotRetainFinishedSource" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="1.811"/>
+  <testcase name="tableRemovalAfterQueueFinishesKeepsEditorGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.062"/>
+  <testcase name="finishedJobAloneDoesNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.037"/>
+  <testcase name="failedAndCancelledJobsKeepTheirSourceForRetry" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.037"/>
+  <testcase name="tableRemovalReleasesGrantWhenPreviouslyQueuedJobHasFinished" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.038"/>
+  <testcase name="tableRemovalAfterEditorMovesReleasesFinalGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.044"/>
+  <testcase name="anotherPendingJobKeepsGrantUntilItFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.044"/>
+  <testcase name="tableImportKeepsGrantWhenQueueCleanupRunsBeforeCommit" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.175"/>
+  <testcase name="removedJobsDoNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.038"/>
+  <testcase name="editorKeepsGrantWithoutStaleQueueOwnership" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.042"/>
+  <testcase name="tableRemovalReadsPendingJobPublishedAfterProviderWasCreated" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.079"/>
+  <testcase name="tableKeepsGrantAndCanReleaseItAfterQueueFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

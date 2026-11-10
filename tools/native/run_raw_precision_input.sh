@@ -12,7 +12,7 @@ if grep -q 'SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON' "$b/CMakeCache.txt"; then flags+=(
 if [[ "${SANITIZE:-0}" == 1 ]]; then
     flags+=(-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-pie -no-pie)
 fi
-"${CXX:-c++}" "${flags[@]}" -I"$repo/app/src/main/cpp" -I"$up/engine/src" -I"$lib" \
-    "$repo/tools/native/raw_precision_input.cpp" -Wl,--start-group \
+"${CXX:-c++}" "${flags[@]}" -I"$repo/app/src/main/cpp" -I"$up/engine/src" -I"$up/engine/host" -I"$lib" \
+    "$repo/tools/native/raw_precision_input.cpp" "$up/engine/host/white_balance.cpp" -Wl,--start-group \
     "$b/engine/libspk_image_io.a" "$b/engine/libspk_libraw.a" -Wl,--end-group -ldl -o "$build/raw_precision_input"
 python3 "$repo/tools/native/raw_precision_input_fixtures.py" "$build/fixtures" --probe "$build/raw_precision_input" "$@"

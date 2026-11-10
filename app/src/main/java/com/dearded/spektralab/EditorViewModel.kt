@@ -333,12 +333,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     withContext(Dispatchers.IO) { input = loader.rawInput(uri, name) }
                     val path = input!!.path
                     _ui.update { it.copy(busy = "正在解码 RAW…") }
-                    withContext(EngineThread.dispatcher) {
-                        val params = Edit.openingParams(look, inputSpace = INPUT_SPACE, linear = true).toString()
-                        val h = NativeEngine.openRaw(engine, path, edge, maxPixels, params, wbK, wbTint)
-                        if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
-                        candidate.own(h)
-                        h
+                    withRawOpenCancellation { cancellation ->
+                        withContext(EngineThread.dispatcher) {
+                            val params = Edit.openingParams(look, inputSpace = INPUT_SPACE, linear = true).toString()
+                            val h = NativeEngine.openRawCancellableV1(engine, path, edge, maxPixels, params, wbK, wbTint, cancellation)
+                            if (h == 0L) {
+                                if (NativeEngine.lastWasCancelled()) throw kotlinx.coroutines.CancellationException("RAW open cancelled")
+                                throw EngineException("打开失败：${NativeEngine.lastError()}")
+                            }
+                            candidate.own(h)
+                            h
+                        }
                     }
                 } finally {
                     input?.close()

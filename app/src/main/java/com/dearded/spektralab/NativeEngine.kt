@@ -38,6 +38,17 @@ object NativeEngine {
         temperatureK: Double, tint: Double,
     ): Long
 
+    /** RAW-open tokens may be signalled on any thread; release only after open returns. */
+    external fun createRawOpenCancellation(): Long
+    external fun cancelRawOpen(cancellation: Long)
+    external fun releaseRawOpenCancellation(cancellation: Long)
+
+    /** [openRaw] with cooperative cancellation before a session exists. */
+    external fun openRawCancellableV1(
+        engine: Long, path: String, maxEdge: Int, maxPixels: Long, paramsJson: String,
+        temperatureK: Double, tint: Double, cancellation: Long,
+    ): Long
+
     /**
      * Opens a session on an ARGB_8888 bitmap in [space] ("sRGB" or "Display P3").
      * The pixels are converted to linear ProPhoto natively, as upstream's host

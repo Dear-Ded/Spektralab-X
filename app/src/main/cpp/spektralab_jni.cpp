@@ -66,6 +66,17 @@ namespace {
 constexpr const char* kTag = "SpektralabX";
 thread_local std::string t_error;
 
+// Separate from Session: cancellation must also cover decoding before spk_open.
+// Kotlin joins the flag writer and waits for open to return before deleting it.
+struct RawOpenCancellation {
+    std::atomic<bool> cancelled{false};
+};
+
+struct RawHalfSizeBudget {
+    explicit RawHalfSizeBudget(uint64_t value) { spk::io::set_raw_half_size_budget(value); }
+    ~RawHalfSizeBudget() { spk::io::set_raw_half_size_budget(0); }
+};
+
 struct Session {
     spk_engine* engine = nullptr;
     spk_session* session = nullptr;
@@ -331,20 +342,23 @@ Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, ui
     spk::android::ViewFlags view;
     std::string bad;
     if (!spk::android::take_app_keys(params, view, bad)) { fail("open image: " + bad); return nullptr; }
-    const spk_image input{rgb.data(), w, h, 3};
-    char* reply = nullptr;
-    spk_session* s = spk_open(engine, &input, params.c_str(), &reply);
-    if (reply) spk_string_free(reply);
-    if (!s) { fail(engine_error("open image")); return nullptr; }
-    auto* session = new Session();
-    session_opened(engine);
-    session->engine = engine;
-    session->session = s;
+    // Allocate and initialise the wrapper before opening GPU resources. Keep
+    // the engine handle owned until registration succeeds, including on OOM.
+    auto session = std::make_unique<Session>();
     session->width = w;
     session->height = h;
     session->prophoto = renders_prophoto(params);
     session->view = view;
-    return session;
+    const spk_image input{rgb.data(), w, h, 3};
+    char* reply = nullptr;
+    using NativeSessionPtr = std::unique_ptr<spk_session, decltype(&spk_session_release)>;
+    NativeSessionPtr opened(spk_open(engine, &input, params.c_str(), &reply), &spk_session_release);
+    if (reply) spk_string_free(reply);
+    if (!opened) { fail(engine_error("open image")); return nullptr; }
+    session_opened(engine);
+    session->engine = engine;
+    session->session = opened.release();
+    return session.release();
 }
 
 // RGBA16 rows (engine-encoded sRGB) to RGBA8, split across up to four
@@ -695,9 +709,11 @@ JNI_FN(jstring, capabilities)(JNIEnv* env, jobject, jlong engine) {
     return jstr(env, caps ? caps : "{}");
 }
 
-JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
-                       jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint) {
+static jlong open_raw(JNIEnv* env, jlong engine_handle, jstring path_j, jint max_edge,
+                      jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint,
+                      const spk::android::FloatDngCancel& cancelled) {
     try {
+        spk::android::float_dng_detail::check_cancel(cancelled);
         auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
         const std::string path = str(env, path_j);
         // Half-size decode (2x2 binning) only when the binned frame still covers
@@ -718,8 +734,10 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         {
             auto probe = std::make_unique<spk::io::detail::CameraLibRaw>();
             probe->imgdata.params.use_camera_matrix = 1;
-            if (probe->open_file(path.c_str()) == LIBRAW_SUCCESS) {
-                precision = spk::android::inspect_raw_precision(path, *probe, custom_wb);
+            const int opened = probe->open_file(path.c_str());
+            spk::android::float_dng_detail::check_cancel(cancelled);
+            if (opened == LIBRAW_SUCCESS) {
+                precision = spk::android::inspect_raw_precision(path, *probe, custom_wb, cancelled);
                 if (precision.mode == "float_linear_v1") {
                     // The precise path normalizes each original plane once. Its
                     // illuminant must not reuse LibRaw's integer-range-adjusted WB.
@@ -744,6 +762,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
                 fail("white balance: cannot read the RAW metadata"); return 0;
             }
         }
+        spk::android::float_dng_detail::check_cancel(cancelled);
         std::string opening = str(env, params_j), checked = opening;
         spk::android::ViewFlags opening_view;
         if (!spk::android::take_app_keys(checked, opening_view, error)) { fail("open RAW: " + error); return 0; }
@@ -758,19 +777,23 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         if (opening_view.no_film && opening_view.raw_development.enabled) binned = false;
         if (precision.mode == "float_linear_v1") binned = false;
         // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
-        spk::io::set_raw_half_size_budget(binned ? 1 : 0);
         configure_raw_threads();
         spk::io::DecodedRaw decoded;
         spk::android::FloatDngMetadata float_source;
-        const bool ok = spk::android::decode_raw_precision(path, precision, custom_wb ? &mul : nullptr,
-            custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source);
-        spk::io::set_raw_half_size_budget(0);
+        bool ok;
+        {
+            RawHalfSizeBudget budget(binned ? 1 : 0);
+            ok = spk::android::decode_raw_precision(path, precision, custom_wb ? &mul : nullptr,
+                custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source, cancelled);
+        }
+        spk::android::float_dng_detail::check_cancel(cancelled);
         if (!ok) { fail("RAW decode: " + error); return 0; }
         const auto raw_metadata = development_metadata(decoded.metadata.dng_render);
         spk::android::RawDevelopmentStats raw_stats;
         const bool raw_stats_ready = spk::android::prepare_raw_development_stats(
             opening_view.raw_development, opening_view.no_film, decoded.rgb.data(),
             decoded.width, decoded.width, decoded.height, raw_stats);
+        spk::android::float_dng_detail::check_cancel(cancelled);
         auto development_options = opening_view.raw_development;
         development_options.enabled = development_options.enabled && opening_view.no_film;
         auto development = spk::android::RawDevelopment::build(raw_metadata, raw_stats, development_options);
@@ -784,7 +807,11 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         } else {
             rgb.swap(decoded.rgb);
         }
+        spk::android::float_dng_detail::check_cancel(cancelled);
         SessionPtr session(open_pixels(engine, rgb, w, h, opening));
+        // open_pixels completes its native work before a cancelled candidate is
+        // destroyed; never throw from an in-flight GPU callback.
+        spk::android::float_dng_detail::check_cancel(cancelled);
         if (!session) return 0;
         session->raw_metadata = raw_metadata;
         session->raw_stats = raw_stats;
@@ -810,7 +837,10 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->as_shot_tint = as_shot_tint;
         session->wb_k = custom_wb ? double(temperature_k) : 0;
         session->wb_tint = custom_wb ? double(tint) : 0;
+        spk::android::float_dng_detail::check_cancel(cancelled);
         return reinterpret_cast<jlong>(session.release());
+    } catch (const spk::android::FloatDngCancelled&) {
+        fail("RAW open cancelled");
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the RAW file; choose a smaller working size");
     } catch (const std::exception& e) {
@@ -819,6 +849,34 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         fail("open RAW: unknown failure");
     }
     return 0;
+}
+
+JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
+                       jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint) {
+    return open_raw(env, engine_handle, path_j, max_edge, max_pixels, params_j, temperature_k, tint, {});
+}
+
+JNI_FN(jlong, createRawOpenCancellation)(JNIEnv*, jobject) {
+    try { return reinterpret_cast<jlong>(new RawOpenCancellation); }
+    catch (...) { fail("cannot allocate RAW cancellation token"); return 0; }
+}
+
+JNI_FN(void, cancelRawOpen)(JNIEnv*, jobject, jlong cancellation) {
+    auto* token = reinterpret_cast<RawOpenCancellation*>(cancellation);
+    if (token) token->cancelled.store(true, std::memory_order_relaxed);
+}
+
+JNI_FN(void, releaseRawOpenCancellation)(JNIEnv*, jobject, jlong cancellation) {
+    delete reinterpret_cast<RawOpenCancellation*>(cancellation);
+}
+
+JNI_FN(jlong, openRawCancellableV1)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
+                                  jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint,
+                                  jlong cancellation) {
+    auto* token = reinterpret_cast<RawOpenCancellation*>(cancellation);
+    if (!token) { fail("RAW open requires a cancellation token"); return 0; }
+    return open_raw(env, engine_handle, path_j, max_edge, max_pixels, params_j, temperature_k, tint,
+                    [token] { return token->cancelled.load(std::memory_order_relaxed); });
 }
 
 // Undoes the highlight shoulder of a phone's tone curve, for a JPEG that has no
@@ -1573,7 +1631,7 @@ JNI_FN(jlong, trimMemory)(JNIEnv*, jobject, jlong engine) {
 
 // True when the last failure on this thread was a cancellation.
 JNI_FN(jboolean, lastWasCancelled)(JNIEnv*, jobject) {
-    return t_error.find("render cancelled") != std::string::npos ? JNI_TRUE : JNI_FALSE;
+    return t_error.find("render cancelled") != std::string::npos || t_error == "RAW open cancelled" ? JNI_TRUE : JNI_FALSE;
 }
 
 // True when the last failure on this thread means the GPU device is lost:

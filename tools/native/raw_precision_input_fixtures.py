@@ -76,10 +76,11 @@ def main():
     row, _ = run(args.folder / (cfa['name'] + '.dng'))
     assert row['ok'] and row['mode'] == 'float_legacy_quantized' and 'camera layout' in row['note'], row
     fallback_count += 1
+    custom_float_count = 0
     for name in ('max2', 'per-plane-white', 'orientation-8'):
         row, _ = run(args.folder / (name + '.dng'), '--custom')
-        assert row['ok'] and row['mode'] == 'float_legacy_quantized' and 'custom white balance' in row['note'], row
-        fallback_count += 1
+        assert row['ok'] and row['mode'] == 'float_linear_v1' and not row['note'], row
+        custom_float_count += 1
 
     bad, _ = original.fixture(args.folder, 'supported-bad-sample', invalid='nonfinite')
     row, _ = run(args.folder / (bad['name'] + '.dng'))
@@ -116,15 +117,15 @@ def main():
         assert row['cancelled'] and not row['ok'] and row['unchanged'] and row['float_metadata_unchanged'], (stop, row)
     for path in (integer_cases[0], args.folder / 'fallback-crop.dng'):
         success, _ = run(path)
-        assert success['polls'] == 2, success
-        for stop in (1, 2):
+        assert success['polls'] >= 2, success
+        for stop in sorted({1, success['polls'] // 2, success['polls']}):
             row, _ = run(path, '--cancel', stop)
             assert row['cancelled'] and not row['ok'] and row['unchanged'] and row['float_metadata_unchanged'], row
             cancellation_count += 1
     for option in ('--bad-plan', '--wrong-wb'):
         row, _ = run(baseline, option)
         assert not row['ok'] and not row['cancelled'] and row['error'], row
-    summary = dict(passed=True, float_cases=len(float_cases), fallback_cases=fallback_count,
+    summary = dict(passed=True, float_cases=len(float_cases), custom_float_cases=custom_float_count, fallback_cases=fallback_count,
                    integer_cases=len(integer_cases) * 2, cancellation_cases=cancellation_count,
                    maximum_absolute_error=max(errors), independent_absolute_tolerance=2e-6,
                    helper_pixels_byte_equal=True, legacy_pixels_byte_equal=True, legacy_metadata_equal=True,

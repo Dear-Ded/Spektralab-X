@@ -29,10 +29,6 @@ inline RawPrecisionPlan inspect_raw_precision(const std::filesystem::path& path,
                                            plan.source, plan.note, cancelled);
     if (plan.support == FloatDngSupport::NotFloat) {
         plan.mode = "integer_compatible16";
-    } else if (custom_wb) {
-        plan.mode = "float_legacy_quantized";
-        if (!plan.note.empty()) plan.note += "; ";
-        plan.note += "float LinearRaw v1 does not support custom white balance; legacy float conversion quantizes to integer";
     } else if (plan.support == FloatDngSupport::Supported) {
         plan.mode = "float_linear_v1";
         const auto& s = opened.imgdata.sizes;
@@ -50,7 +46,8 @@ inline RawPrecisionPlan inspect_raw_precision(const std::filesystem::path& path,
 // original rational black/white values must not be truncated into RawMetadata's
 // legacy integer fields. Callers expose mode/note from the corresponding plan.
 // Cancellation throws FloatDngCancelled for both policies. The compatibility
-// decoder has no mid-decode callback; its result is checked before publication.
+// decoder's progress callback is passed through and its result is checked again
+// before publication.
 inline bool decode_raw_precision(const std::filesystem::path& path, const RawPrecisionPlan& plan,
                                  const std::array<float, 4>* user_mul, double white_temperature,
                                  io::DecodedRaw& out, std::string& error,
@@ -65,17 +62,18 @@ inline bool decode_raw_precision(const std::filesystem::path& path, const RawPre
         if (plan.mode == "integer_compatible16" || plan.mode == "float_legacy_quantized") {
             float_dng_detail::require((plan.mode == "integer_compatible16") ==
                                       (plan.support == FloatDngSupport::NotFloat), "invalid RAW precision plan");
-            if (!io::decode_raw_compatible(path, user_mul, candidate, error, white_temperature)) return false;
+            if (!io::decode_raw_compatible(path, user_mul, candidate, error, white_temperature, cancelled)) return false;
             float_dng_detail::check_cancel(cancelled);
             out = std::move(candidate);
             return true;
         }
-        float_dng_detail::require(plan.mode == "float_linear_v1" && plan.support == FloatDngSupport::Supported &&
-                                  !user_mul && white_temperature == 0, "invalid float LinearRaw precision plan");
+        float_dng_detail::require(plan.mode == "float_linear_v1" && plan.support == FloatDngSupport::Supported,
+                                  "invalid float LinearRaw precision plan");
         const auto start = std::chrono::steady_clock::now();
         io::RawDecodeThreadScope thread_scope;
         FloatDngLinear linear;
-        if (!decode_float_linear_dng(path, raw_float_linear_limits, linear, error, cancelled)) return false;
+        if (!decode_float_linear_dng(path, raw_float_linear_limits, user_mul, white_temperature,
+                                    linear, error, cancelled)) return false;
         const auto& source = linear.source;
         const auto& expected = plan.source;
         float_dng_detail::require(source.width == expected.width && source.height == expected.height &&
@@ -122,6 +120,8 @@ inline bool decode_raw_precision(const std::filesystem::path& path, const RawPre
         out = std::move(candidate);
         if (float_source) *float_source = source;
         return true;
+    } catch (const io::RawDecodeCancelled&) {
+        throw FloatDngCancelled();
     } catch (const FloatDngCancelled&) {
         throw;
     } catch (const std::exception& failure) {

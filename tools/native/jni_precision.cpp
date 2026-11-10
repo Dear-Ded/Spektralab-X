@@ -53,6 +53,7 @@ static void require(bool condition, const char* message) {
     if (!condition) throw std::runtime_error(std::string(message) + ": " + t_error);
 }
 
+#ifndef SPK_JNI_PLATFORM_SHIM_ONLY
 int main(int argc, char** argv) {
     try {
         require(argc == 4, "resources, temp directory, supported float DNG required");
@@ -136,3 +137,4 @@ int main(int argc, char** argv) {
         return 1;
     }
 }
+#endif

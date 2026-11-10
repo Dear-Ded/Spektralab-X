@@ -31,15 +31,20 @@ F16 入口显式处理 opaque、premultiplied、straight alpha，拒绝非法布
 | `rgba8_gainmap` | 原有 gain-map 重建入口 |
 | `integer_compatible16` | 原有整数 RAW 兼容解码 |
 | `float_linear_v1` | 严格子集浮点 LinearRaw；另记录原始黑、白和 ASN |
-| `float_legacy_quantized` | 不支持的浮点布局或自定义 WB，继续使用旧量化解码，并记录原因 |
+| `float_legacy_quantized` | 不支持的浮点布局继续使用旧量化解码，并记录原因 |
 
 已经判定支持的浮点文件若解码失败，直接返回失败，不暗中改走整数路径。
 不能打开的普通 RAW 仍返回原解码错误，不误报为空的浮点计划。
-选择自定义 WB、压缩 float、float Bayer、WhiteXY、复杂裁剪/opcode/profile 等仍可能走量化兼容；
+压缩 float、float Bayer、WhiteXY、复杂裁剪/opcode/profile 等仍可能走量化兼容；
 这不是已解决的高精度范围。既有原型的失败记录和旧数值证据继续保留。
 
-浮点子集上限为 16,777,216 像素、输入加输出浮点 payload 共 402,653,184 B（384 MiB）。
-这不是进程内存总预算：LibRaw、解码 scratch、engine/GPU 和旧编辑会话仍需单独记账。
+后续源码更新已让受支持子集的自定义 WB 保留 `float_linear_v1`，并接通 Android 到
+LibRaw 的协作取消。上面的首批验证数字是历史快照；后续行为和最终验证见
+[RAW 精度、取消与内存适配](RAW_PRECISION_CANCELLATION_2026-11-10.md)。
+
+浮点子集上限为 16,777,216 像素，保留输入加输出浮点 payload 共 402,653,184 B（384 MiB）
+的保守准入值。后续已改为按行直接读取已验证的未压缩 strip，消除 LibRaw 的整图浮点输入分配，
+但没有扩大该准入值。这不是进程内存总预算：LibRaw、解码 scratch、engine/GPU 和旧编辑会话仍需单独记账。
 F16 位图与 RGB float 也仍是整图驻留，不能描述为完整分块渲染或保证手机不 OOM。
 
 ## 已完成的验证
@@ -58,7 +63,7 @@ F16 位图与 RGB float 也仍是整图驻留，不能描述为完整分块渲�
 ## 仍未完成
 
 真实手机的 OEM 高位深解码、Adreno/Mali 驱动、内存峰值和热状态没有本批运行验收。
-浮点 helper/dispatcher 支持取消，但 Android `openRaw` 尚未接入中途取消回调，旧 decoder 也不能中途抢占。
+Android 已接通协作取消；阻塞 I/O 和没有进度回调的单次操作仍需返回后响应，详见后续记录。
 通用 float Bayer/压缩与复杂 DNG 元数据、完整字节预算和外存分块仍需继续实现。
 相机 JPEG 包含相机的显影选择，本批不宣称与相机 JPEG 或 Lightroom 完全一致，
 也不把源代码和云端合成验证称为手机灰片问题已经全部验收。

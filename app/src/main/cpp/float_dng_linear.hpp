@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -21,8 +22,8 @@ namespace spk::android {
 
 struct FloatDngLimits {
     std::uint64_t max_pixels = 0;
-    // Input float3 plus output float3 payload only. The caller must separately
-    // admit LibRaw metadata/scratch and concurrent editor storage into its RSS budget.
+    // Conservative historical input+output payload admission, retained even
+    // when rows avoid a complete input float3. This is not a process RSS budget.
     std::uint64_t max_float_payload_bytes = 0;
 };
 
@@ -76,8 +77,13 @@ struct Tag {
     std::vector<unsigned char> data;
 };
 
+struct StripInput {
+    std::ifstream file;
+    std::uint64_t offset = 0;
+};
+
 inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatDngLimits& limits,
-                                 const FloatDngCancel& cancelled) {
+                                 const FloatDngCancel& cancelled, StripInput* input = nullptr) {
     require(limits.max_pixels && limits.max_float_payload_bytes, "float DNG requires explicit payload limits");
     check_cancel(cancelled);
     std::ifstream file(path, std::ios::binary);
@@ -210,6 +216,10 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     const double maximum = *std::max_element(m.neutral.begin(), m.neutral.end());
     for (double v : m.neutral) require(v / maximum >= .001, "float DNG neutral outside supported FM domain");
     check_cancel(cancelled);
+    if (input) {
+        input->offset = begin_pixels;
+        input->file = std::move(file);
+    }
     return m;
 }
 
@@ -250,19 +260,33 @@ inline FloatDngSupport inspect_float_linear_dng(const std::filesystem::path& pat
     }
 }
 
-// Custom WB and extra highlight recovery are not part of this API. Unsupported
-// float input may retain the outer dispatcher's explicitly labelled legacy
+// Custom WB uses the same normalized-camera domain as original AsShotNeutral:
+// positive relative RGB multipliers, before any per-plane black/white scaling.
+// A nonzero temperature must accompany custom WB and selects its calibration.
+// Unsupported float input may retain the outer dispatcher's explicitly labelled legacy
 // quantized route; never describe that fallback as preserving float precision.
 // No LibRaw global/default option is changed. Failure preserves result; a
 // cancelled request throws FloatDngCancelled instead of suggesting a fallback.
 inline bool decode_float_linear_dng(const std::filesystem::path& path, const FloatDngLimits& limits,
+                                    const std::array<float, 4>* user_mul, double white_temperature,
                                     FloatDngLinear& result, std::string& error,
                                     const FloatDngCancel& cancelled = {}) {
     using namespace float_dng_detail;
     error.clear();
     try {
+        require(std::isfinite(white_temperature) && (white_temperature == 0 ||
+                (user_mul && white_temperature >= 1700 && white_temperature <= 50000)),
+                "invalid float DNG white temperature");
+        if (user_mul) {
+            for (float value : *user_mul)
+                require(value > 0 && std::isfinite(value), "invalid float DNG custom white balance");
+            const double maximum = *std::max_element(user_mul->begin(), user_mul->begin() + 3);
+            for (unsigned c = 0; c < 3; ++c)
+                require((*user_mul)[c] / maximum >= .001, "float DNG custom white balance outside supported FM domain");
+        }
         FloatDngLinear candidate;
-        candidate.source = metadata(path, limits, cancelled);
+        StripInput input;
+        candidate.source = metadata(path, limits, cancelled, &input);
         const auto& m = candidate.source;
         auto raw = std::make_unique<io::detail::CameraLibRaw>();
         Progress progress{cancelled};
@@ -282,11 +306,12 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
         for (unsigned c = 0; c < 3; ++c)
             candidate.camera_whitebalance[c] = raw->imgdata.color.cam_mul[c] = float(1 / m.neutral[c]);
         candidate.camera_whitebalance[3] = raw->imgdata.color.cam_mul[3] = raw->imgdata.color.cam_mul[1];
-        require(raw->interpolate_dng_matrix(nullptr), "float DNG prepared matrix unavailable");
-        const double minimum = *std::min_element(candidate.camera_whitebalance.begin(), candidate.camera_whitebalance.begin() + 3);
+        require(raw->interpolate_dng_matrix(user_mul, white_temperature), "float DNG prepared matrix unavailable");
+        const auto& selected_whitebalance = user_mul ? *user_mul : candidate.camera_whitebalance;
+        const double minimum = *std::min_element(selected_whitebalance.begin(), selected_whitebalance.begin() + 3);
         require(minimum > 0 && std::isfinite(minimum), "invalid float DNG source WB");
         for (unsigned c = 0; c < 3; ++c)
-            candidate.applied_whitebalance[c] = raw->imgdata.color.pre_mul[c] = float(candidate.camera_whitebalance[c] / minimum);
+            candidate.applied_whitebalance[c] = raw->imgdata.color.pre_mul[c] = float(selected_whitebalance[c] / minimum);
         candidate.applied_whitebalance[3] = raw->imgdata.color.pre_mul[3] = raw->imgdata.color.pre_mul[1];
         float matrix[3][4];
         for (auto& row : matrix) for (float& value : row) value = std::numeric_limits<float>::quiet_NaN();
@@ -298,24 +323,32 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
         for (unsigned r = 0; r < 3; ++r) for (unsigned c = 0; c < 3; ++c)
             candidate.camera_from_xyz[r * 3 + c] = raw->imgdata.color.cam_xyz[r][c];
         check_cancel(cancelled);
-        const int unpacked = raw->unpack();
-        check_cancel(cancelled);
-        if (progress.stopped) throw FloatDngCancelled();
-        require(unpacked == LIBRAW_SUCCESS && raw->error_count() == 0, "float DNG unpack failed");
         const auto& data = raw->imgdata;
-        require(data.rawdata.float3_image && !data.rawdata.raw_image &&
-                data.sizes.raw_width == m.width && data.sizes.raw_height == m.height &&
+        require(raw->error_count() == 0, "float DNG metadata read failed");
+        require(data.sizes.raw_width == m.width && data.sizes.raw_height == m.height &&
                 data.sizes.width == m.width && data.sizes.height == m.height &&
                 data.sizes.top_margin == 0 && data.sizes.left_margin == 0 && data.sizes.pixel_aspect == 1,
-                "unsupported float DNG unpacked geometry");
+                "unsupported float DNG source geometry");
+        require(raw->unpack_function_name() &&
+                std::string(raw->unpack_function_name()) == "uncompressed_fp_dng_load_raw()",
+                "unsupported float DNG decoder");
         candidate.width = m.orientation >= 5 ? m.height : m.width;
         candidate.height = m.orientation >= 5 ? m.width : m.height;
         candidate.make = data.idata.make; candidate.model = data.idata.model;
         if (const char* name = raw->unpack_function_name()) candidate.decoder_name = name;
         check_cancel(cancelled);
         candidate.rgb.resize(std::size_t(m.width) * m.height * 3);
+        // The validated v1 strip is LE float32 chunky RGB without a predictor.
+        // LibRaw's matching unpacker only copies these words and scans fmaximum;
+        // the scene-linear path does not use that maximum or convertFloatToInt.
+        static_assert(sizeof(float) == 4 && std::numeric_limits<float>::is_iec559);
+        std::vector<unsigned char> row(std::size_t(m.width) * 12);
+        input.file.seekg(std::streamoff(input.offset));
+        require(bool(input.file), "float DNG strip seek failed");
         for (unsigned y = 0; y < m.height; ++y) {
             check_cancel(cancelled);
+            input.file.read(reinterpret_cast<char*>(row.data()), std::streamsize(row.size()));
+            require(bool(input.file), "float DNG strip row read failed");
             for (unsigned x = 0; x < m.width; ++x) {
                 unsigned dx = x, dy = y;
                 switch (m.orientation) {
@@ -329,7 +362,10 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
                 }
                 std::array<double, 3> balanced{};
                 for (unsigned c = 0; c < 3; ++c) {
-                    const double sample = data.rawdata.float3_image[std::size_t(y) * m.width + x][c];
+                    const auto bits = dword(row.data() + std::size_t(x) * 12 + c * 4);
+                    float stored;
+                    std::memcpy(&stored, &bits, sizeof stored);
+                    const double sample = stored;
                     require(std::isfinite(sample), "nonfinite float DNG sample");
                     balanced[c] = (sample - m.black[c]) / (m.white[c] - m.black[c]) * candidate.applied_whitebalance[c];
                 }
@@ -351,5 +387,12 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
         error = std::string("float LinearRaw: ") + failure.what();
         return false;
     }
+}
+
+// Preserve the original as-shot API and arithmetic for existing callers.
+inline bool decode_float_linear_dng(const std::filesystem::path& path, const FloatDngLimits& limits,
+                                    FloatDngLinear& result, std::string& error,
+                                    const FloatDngCancel& cancelled = {}) {
+    return decode_float_linear_dng(path, limits, nullptr, 0, result, error, cancelled);
 }
 } // namespace spk::android

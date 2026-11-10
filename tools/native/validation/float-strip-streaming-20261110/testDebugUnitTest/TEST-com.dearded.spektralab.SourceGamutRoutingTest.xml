@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.SourceGamutRoutingTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-10T04:00:59.386Z" hostname="ser858255664526" time="0.222">
+  <properties/>
+  <testcase name="sourceVertexOrderDoesNotChangeContainment" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.023"/>
+  <testcase name="differentWhiteIsComparedAfterAdaptation" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.021"/>
+  <testcase name="customP3ProfileDoesNotDependOnNamedIdentity" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.023"/>
+  <testcase name="toleranceAcceptsRoundingButNotMeaningfulOverhang" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.026"/>
+  <testcase name="establishedTargetsKeepTheirRoutes" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.027"/>
+  <testcase name="adaptedSrgbMatrixKeepsItsOriginalGamut" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.03"/>
+  <testcase name="insideAndBoundaryTrianglesStaySrgb" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.026"/>
+  <testcase name="smallTriangleWithRedOutsideSrgbUsesP3" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.023"/>
+  <testcase name="invalidAndNonRgbInputsHaveNoWiderGamutClaim" classname="com.dearded.spektralab.SourceGamutRoutingTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

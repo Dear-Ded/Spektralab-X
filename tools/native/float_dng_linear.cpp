@@ -31,11 +31,19 @@ int main(int argc, char** argv) {
     FloatDngLimits limits{16777216, 24ULL * 16777216};
     int cancel_inspect = 0, cancel_decode = 0;
     bool throwing_cancel = false;
+    std::array<float,4> selected_wb{};
+    bool custom_wb = false;
+    double temperature = 0;
     std::string open_path = argv[1];
     for (int i = 3; i < argc; ++i) {
         const std::string option = argv[i];
         if (option == "--throw-cancel") throwing_cancel = true;
+        else if (option == "--wb" && i + 4 < argc) {
+            for (float& value : selected_wb) value = std::stof(argv[++i]);
+            custom_wb = true;
+        }
         else if (i + 1 >= argc) return 2;
+        else if (option == "--temperature") temperature = std::stod(argv[++i]);
         else if (option == "--open-source") open_path = argv[++i];
         else if (option == "--cancel-inspect") cancel_inspect = std::stoi(argv[++i]);
         else if (option == "--cancel-decode") cancel_decode = std::stoi(argv[++i]);
@@ -72,7 +80,7 @@ int main(int argc, char** argv) {
         support = inspect_float_linear_dng(argv[1], *raw, limits, inspected, error,
             [&] { return poll(inspect_polls, cancel_inspect); });
         if (support == FloatDngSupport::Supported) {
-            ok = decode_float_linear_dng(argv[1], limits, result, error,
+            ok = decode_float_linear_dng(argv[1], limits, custom_wb ? &selected_wb : nullptr, temperature, result, error,
                 [&] { return poll(decode_polls, cancel_decode); });
         }
     } catch (const FloatDngCancelled& failure) {
@@ -105,6 +113,7 @@ int main(int argc, char** argv) {
         std::cout << ",\"source_black\":"; array(result.source.black);
         std::cout << ",\"source_white\":"; array(result.source.white);
         std::cout << ",\"source_neutral\":"; array(result.source.neutral);
+        std::cout << ",\"camera_wb\":"; array(result.camera_whitebalance);
         std::cout << ",\"source_wb\":"; array(result.applied_whitebalance);
         std::cout << ",\"post_wb_matrix\":"; array(result.camera_to_prophoto);
     }

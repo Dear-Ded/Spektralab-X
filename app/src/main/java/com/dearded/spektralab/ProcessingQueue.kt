@@ -731,12 +731,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     step("解码 RAW", 0.12f)
                     // trimMemory is engine-wide (EngineThread); the session is the export's own.
                     withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
-                    withContext(ExportThread.dispatcher) {
-                        val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
-                        val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
-                        if (h == 0L) engineFailure(engine, "打开失败")
-                        handle = h
-                        synchronized(handleLock) { runningHandle = h }
+                    withRawOpenCancellation { cancellation ->
+                        withContext(ExportThread.dispatcher) {
+                            val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
+                            val h = NativeEngine.openRawCancellableV1(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint, cancellation)
+                            if (h == 0L) engineFailure(engine, "打开失败")
+                            handle = h
+                            synchronized(handleLock) { runningHandle = h }
+                        }
                     }
                 } finally {
                     input?.close()
