@@ -506,3 +506,13 @@ Only no-film `exportJpeg444` consumes this row sink. Other exports and the
 preview cache are unchanged. A lower float readback allocation does not imply
 a lower whole-process peak or bounded RAW decoding. See
 [the implementation and reproduction steps](../../docs/NOFILM_ROW_READBACK_2026-11-09.md).
+
+## Bounded external-plane point chain
+
+```bash
+UP=/path/to/upstream B=/path/to/build RESOURCES_DIR=/path/to/build/engine/resources \
+  BUILD_DIR=/path/to/bpc bash tools/native/run_bounded_point_chain.sh
+MEMORY=1 UP=... B=... RESOURCES_DIR=... BUILD_DIR=... bash tools/native/run_bounded_point_chain.sh
+```
+
+Requires patch 0039. It compares banded external-plane execution of the pointwise print_linear chain (xyz to RGB, CAM16 gamut, CCTF) with an independent whole-frame run byte for byte across band heights, band orders and worker counts, and checks that a 4097x3073 plane is refused by a strict 128 MiB range while bands pass. `MEMORY=1` adds separate-process VmHWM runs. Synthetic data, host llvmpipe only; not a phone measurement and not wired into the render pipeline. See [the design](../../docs/ENGINE_EXTERNAL_PLANE_DESIGN_2026-11-10.md).

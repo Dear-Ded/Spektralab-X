@@ -1,0 +1,215 @@
+Bounded external-plane execution of the pointwise print_linear chain (phase one).
+Off by default; nothing in the engine calls it.
+Co-created with Claude (Anthropic), 2026-11-10.
+
+diff --git a/engine/src/pipeline/bounded_point_chain.hpp b/engine/src/pipeline/bounded_point_chain.hpp
+new file mode 100644
+--- /dev/null
++++ b/engine/src/pipeline/bounded_point_chain.hpp
+@@ -0,0 +1,206 @@
++// bounded_point_chain.hpp -- bounded external-plane execution of the pointwise
++// print_linear chain (xyz_to_rgb -> gamut_compress -> cctf). Patch 0039.
++// Co-created with Claude (Anthropic), 2026-11-10. See NOTICE for project terms.
++//
++// Phase one of the external-plane work: same kernels, same argument order and
++// same float32 storage as the Pipeline nodes node_xyz_to_rgb, node_gamut_compress
++// and node_cctf. Only the planes differ: input and output live in anonymous
++// files, and each GPU buffer holds one band of rows. All row numbers are
++// global plane rows; the three kernels are pointwise (index = thread + base),
++// so a band's pixels see exactly the inputs they see in a whole-frame run.
++// Off by default: nothing in the engine calls this header.
++#pragma once
++
++#include <algorithm>
++#include <atomic>
++#include <cerrno>
++#include <cstdint>
++#include <cstdlib>
++#include <fcntl.h>
++#include <mutex>
++#include <random>
++#include <stdexcept>
++#include <string>
++#include <thread>
++#include <unistd.h>
++#include <vector>
++
++#include "gpu/gpu.hpp"
++#include "strip.hpp"
++
++namespace spk {
++
++// A float32 plane (w x h x c, tightly packed) backed by an unlinked file.
++// Reads and writes are positional, so concurrent bands never share a cursor.
++class ExternalPlane {
++public:
++    ExternalPlane(const std::string& dir, uint32_t w, uint32_t h, uint32_t c) : w_(w), h_(h), c_(c) {
++        if (!w || !h || !c) throw std::invalid_argument("empty external plane");
++        const std::string name = dir + "/spk-plane-XXXXXX";
++        std::vector<char> pattern(name.begin(), name.end());
++        pattern.push_back('\0');
++        fd_ = mkstemp(pattern.data());
++        if (fd_ < 0) throw std::runtime_error("cannot create external plane");
++        unlink(pattern.data());
++        if (posix_fallocate(fd_, 0, off_t(bytes())) != 0) {
++            close(fd_);
++            fd_ = -1;
++            throw std::runtime_error("cannot reserve external plane space");
++        }
++    }
++    ~ExternalPlane() { if (fd_ >= 0) close(fd_); }
++    ExternalPlane(const ExternalPlane&) = delete;
++    ExternalPlane& operator=(const ExternalPlane&) = delete;
++
++    uint32_t width() const { return w_; }
++    uint32_t height() const { return h_; }
++    uint32_t channels() const { return c_; }
++    uint64_t row_bytes() const { return uint64_t(w_) * c_ * sizeof(float); }
++    uint64_t bytes() const { return row_bytes() * h_; }
++
++    void write_rows(uint32_t y0, uint32_t rows, const float* data) { io(true, y0, rows, const_cast<float*>(data)); }
++    void read_rows(uint32_t y0, uint32_t rows, float* out) const { io(false, y0, rows, out); }
++
++private:
++    void io(bool write, uint32_t y0, uint32_t rows, float* data) const {
++        if (y0 > h_ || rows > h_ - y0) throw std::out_of_range("external plane rows");
++        char* p = reinterpret_cast<char*>(data);
++        size_t left = size_t(rows * row_bytes());
++        off_t off = off_t(y0 * row_bytes());
++        while (left) {
++            const ssize_t n = write ? pwrite(fd_, p, left, off) : pread(fd_, p, left, off);
++            if (n < 0 && errno == EINTR) continue;
++            if (n <= 0) throw std::runtime_error("external plane io failed");
++            p += n; off += n; left -= size_t(n);
++        }
++    }
++    int fd_ = -1;
++    uint32_t w_, h_, c_;
++};
++
++// Frame-level constants, uploaded once and shared by every band. Built by the
++// caller exactly as Pipeline builds baked_.xyz_to_rgb, cam16_* and output_matrix.
++struct PointChainTables {
++    gpu::BufferRef xyz_to_rgb, m2x, m2r, cmax, k, output_matrix;
++    uint32_t cam16_nl = 0, cam16_nh = 0, cctf_mode = 4;
++    bool cam16_lightness = false, gamut_compress = true, cctf = true;
++};
++
++enum class BandOrder { Forward, Reverse, Shuffled };
++
++struct PointChainStats {
++    uint32_t bands = 0;
++    uint32_t band_rows = 0;
++    uint64_t max_band_bytes = 0;   // one band's float32 plane
++};
++
++// The only place a band height is chosen. A band keeps three same-size planes
++// alive (upload, intermediate, result), so the live set is 3 band planes and a
++// single plane must also fit one storage-buffer range.
++inline uint32_t choose_band_rows(uint32_t plane_h, uint32_t w, uint64_t range_bytes,
++                                 uint64_t budget_bytes, uint32_t requested_rows) {
++    const uint64_t row = uint64_t(w) * 3 * sizeof(float);
++    uint64_t cap = std::min<uint64_t>(range_bytes, budget_bytes / 3) / row;
++    if (cap == 0) cap = 1;
++    uint64_t rows = requested_rows ? requested_rows : plane_h;
++    rows = std::min<uint64_t>({rows, uint64_t(plane_h), cap});
++    return uint32_t(std::max<uint64_t>(rows, 1));
++}
++
++// One band through the three pointwise nodes. Dispatch arguments mirror
++// Pipeline::node_xyz_to_rgb, node_gamut_compress and node_cctf.
++inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const float* in, uint32_t w,
++                             uint32_t rows, float* out, std::string& error) {
++    const size_t pixels = size_t(w) * rows, floats = pixels * 3, bytes = floats * sizeof(float);
++    gpu::BufferRef cur = gpu->upload(in, bytes, error);
++    if (!cur) return false;
++    const uint32_t n[1] = {uint32_t(pixels)};
++    {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(t.xyz_to_rgb),
++                           gpu::Arg::inline_bytes(n, 1), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    if (t.gamut_compress) {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        const uint32_t meta[4] = {uint32_t(pixels), t.cam16_nl, t.cam16_nh, t.cam16_lightness ? 1u : 0u};
++        if (!gpu->dispatch("spk_cam16ucs_compress", {gpu::Arg::buf(cur), gpu::Arg::buf(t.m2x),
++                           gpu::Arg::buf(t.m2r), gpu::Arg::buf(t.cmax), gpu::Arg::buf(t.k),
++                           gpu::Arg::inline_bytes(meta, 4), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    if (t.cctf) {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        const uint32_t meta[2] = {uint32_t(pixels), t.cctf_mode};
++        if (!gpu->dispatch("spk_cctf_encode_matrix", {gpu::Arg::buf(cur), gpu::Arg::buf(t.output_matrix),
++                           gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    return gpu->read(cur.get(), 0, out, bytes, error);
++}
++
++// Producer/consumer over bands: workers read a band from `in`, run the GPU
++// chain (serialised by one mutex, since Gpu dispatch batches share a queue)
++// and write the band to `out` at its global rows. File I/O runs in parallel.
++inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const ExternalPlane& in,
++                            ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
++                            PointChainStats* stats, std::string& error) {
++    if (in.channels() != 3 || out.channels() != 3 || in.width() != out.width() || in.height() != out.height()) {
++        error = "external planes must be matching RGB float32";
++        return false;
++    }
++    if (band_rows == 0) { error = "band height must be positive"; return false; }
++    std::vector<StripSpan> spans;
++    for (uint32_t y = 0; y < in.height(); y += band_rows)
++        spans.push_back({y, std::min(band_rows, in.height() - y)});
++    if (order == BandOrder::Reverse) std::reverse(spans.begin(), spans.end());
++    if (order == BandOrder::Shuffled) std::shuffle(spans.begin(), spans.end(), std::mt19937(12345));
++
++    std::atomic<size_t> next{0};
++    std::atomic<bool> failed{false};
++    std::mutex gpu_mutex, error_mutex;
++    auto work = [&]() {
++        std::vector<float> src, dst;
++        for (;;) {
++            const size_t i = next.fetch_add(1);
++            if (i >= spans.size() || failed.load()) return;
++            const StripSpan s = spans[i];
++            try {
++                src.resize(size_t(s.rows) * in.width() * 3);
++                dst.resize(src.size());
++                in.read_rows(s.y0, s.rows, src.data());
++                std::string band_error;
++                bool ok;
++                {
++                    std::lock_guard<std::mutex> guard(gpu_mutex);
++                    ok = point_chain_band(gpu, t, src.data(), in.width(), s.rows, dst.data(), band_error);
++                }
++                if (!ok) throw std::runtime_error(band_error);
++                out.write_rows(s.y0, s.rows, dst.data());
++            } catch (const std::exception& e) {
++                std::lock_guard<std::mutex> guard(error_mutex);
++                if (!failed.exchange(true)) error = e.what();
++                return;
++            }
++        }
++    };
++    const unsigned n_workers = std::max(1u, workers);
++    std::vector<std::thread> threads;
++    for (unsigned i = 1; i < n_workers; ++i) threads.emplace_back(work);
++    work();
++    for (auto& th : threads) th.join();
++    if (stats) {
++        stats->bands = uint32_t(spans.size());
++        stats->band_rows = band_rows;
++        stats->max_band_bytes = uint64_t(band_rows) * in.width() * 3 * sizeof(float);
++    }
++    return !failed.load();
++}
++
++}  // namespace spk
