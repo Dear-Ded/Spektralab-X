@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExifLocationTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-10T03:28:27.689Z" hostname="ser858255664526" time="0.046">
+  <properties/>
+  <testcase name="missingRefOrCoordinateGivesNothing" classname="com.dearded.spektralab.ExifLocationTest" time="0.007"/>
+  <testcase name="redactedZerosGiveNothing" classname="com.dearded.spektralab.ExifLocationTest" time="0.002"/>
+  <testcase name="outOfRangeGivesNothing" classname="com.dearded.spektralab.ExifLocationTest" time="0.002"/>
+  <testcase name="degreesRejectsMalformed" classname="com.dearded.spektralab.ExifLocationTest" time="0.001"/>
+  <testcase name="dropsEverythingButLocationTags" classname="com.dearded.spektralab.ExifLocationTest" time="0.0"/>
+  <testcase name="keepsARealLocation" classname="com.dearded.spektralab.ExifLocationTest" time="0.0"/>
+  <testcase name="degreesFromRationals" classname="com.dearded.spektralab.ExifLocationTest" time="0.003"/>
+  <testcase name="encodeDecodeRoundTrip" classname="com.dearded.spektralab.ExifLocationTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -51,6 +51,17 @@ object NativeEngine {
     ): Long
 
     /**
+     * Version 1 high precision SDR input: software RGBA_F16 in encoded sRGB/P3.
+     * Unpremultiplied codes must be finite and in [0,1]; no PQ/HLG or gain map.
+     * [alphaMode] is 0 (opaque), 1 (premultiplied) or 2 (straight).
+     * Stride and format are read from the actual native bitmap; params as above.
+     */
+    external fun openBitmapF16V1(
+        engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float,
+        alphaMode: Int, sourceWidth: Int = 0, sourceHeight: Int = 0,
+    ): Long
+
+    /**
      * Opens an Ultra HDR photo: [bitmap] (the SDR base, ARGB_8888, in [space])
      * recovered with its gain map [gain] (ALPHA_8 or ARGB_8888) to linear light
      * at full boost, then converted to linear ProPhoto. [meta] is ratioMin,

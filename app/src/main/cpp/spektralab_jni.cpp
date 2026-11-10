@@ -18,9 +18,11 @@
 #include <exception>
 #include <fstream>
 #include <iterator>
+#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <sstream>
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
@@ -31,6 +33,7 @@
 #include "io/raw_camera.hpp"
 #include "raw_white_balance.hpp"
 #include "raw_development.hpp"
+#include "raw_precision_input.hpp"
 #include "gainmap.hpp"
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
@@ -45,6 +48,7 @@
 #include "output_transform.hpp"
 #include "passthrough.hpp"
 #include "input_transform.hpp"
+#include "bitmap_f16.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -69,6 +73,8 @@ struct Session {
     uint32_t width = 0, height = 0;
     uint32_t source_width = 0, source_height = 0;
     std::string make, model, kind;
+    std::string input_precision, input_precision_note;
+    spk::android::FloatDngMetadata float_source;
     // RAW only: the illuminant the camera recorded, and the one decoded with (0 = as shot).
     double as_shot_k = 0, as_shot_tint = 0, wb_k = 0, wb_tint = 0;
     spk::android::RawDevelopmentMetadata raw_metadata;
@@ -706,10 +712,21 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         std::array<float, 4> mul{};
         const bool custom_wb = temperature_k > 0;
         std::string error;
+        spk::android::RawPrecisionPlan precision;
+        precision.mode = "integer_compatible16";
+        precision.custom_whitebalance = custom_wb;
         {
             auto probe = std::make_unique<spk::io::detail::CameraLibRaw>();
             probe->imgdata.params.use_camera_matrix = 1;
             if (probe->open_file(path.c_str()) == LIBRAW_SUCCESS) {
+                precision = spk::android::inspect_raw_precision(path, *probe, custom_wb);
+                if (precision.mode == "float_linear_v1") {
+                    // The precise path normalizes each original plane once. Its
+                    // illuminant must not reuse LibRaw's integer-range-adjusted WB.
+                    for (int c = 0; c < 3; ++c)
+                        probe->imgdata.color.cam_mul[c] = float(1.0 / precision.source.neutral[c]);
+                    probe->imgdata.color.cam_mul[3] = probe->imgdata.color.cam_mul[1];
+                }
                 // DNG ColorMatrix tags can exist while LibRaw's cam_xyz is empty.
                 // Use the decoder's calibration before deriving temperature/tint.
                 probe->interpolate_dng_matrix(nullptr);
@@ -739,12 +756,14 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         // Standard development meters the complete unbinned source, independent
         // of preview/export working size. Neutral keeps its existing fast decode.
         if (opening_view.no_film && opening_view.raw_development.enabled) binned = false;
+        if (precision.mode == "float_linear_v1") binned = false;
         // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
         spk::io::set_raw_half_size_budget(binned ? 1 : 0);
         configure_raw_threads();
         spk::io::DecodedRaw decoded;
-        const bool ok = spk::io::decode_raw_compatible(path, custom_wb ? &mul : nullptr, decoded, error,
-                                                     custom_wb ? double(temperature_k) : 0.0);
+        spk::android::FloatDngMetadata float_source;
+        const bool ok = spk::android::decode_raw_precision(path, precision, custom_wb ? &mul : nullptr,
+            custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source);
         spk::io::set_raw_half_size_budget(0);
         if (!ok) { fail("RAW decode: " + error); return 0; }
         const auto raw_metadata = development_metadata(decoded.metadata.dng_render);
@@ -784,6 +803,9 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->make = decoded.metadata.make;
         session->model = decoded.metadata.model;
         session->kind = "raw";
+        session->input_precision = precision.mode;
+        session->input_precision_note = precision.note;
+        if (precision.mode == "float_linear_v1") session->float_source = float_source;
         session->as_shot_k = as_shot_k;
         session->as_shot_tint = as_shot_tint;
         session->wb_k = custom_wb ? double(temperature_k) : 0;
@@ -880,6 +902,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
         session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
+        session->input_precision = "rgba8_sdr";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the image");
@@ -887,6 +910,72 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         fail(std::string("open image: ") + e.what());
     } catch (...) {
         fail("open image: unknown failure");
+    }
+    return 0;
+}
+
+// V1 deliberately leaves the established eight-bit/gain-map paths unchanged.
+JNI_FN(jlong, openBitmapF16V1)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring space_j,
+                               jstring params_j, jfloat headroom_stops, jint alpha_mode,
+                               jint source_width, jint source_height) {
+    try {
+        AndroidBitmapInfo info{};
+        if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            info.format != ANDROID_BITMAP_FORMAT_RGBA_F16) {
+            fail("F16 V1 requires a software RGBA_F16 bitmap"); return 0;
+        }
+        const spk::android::F16LayoutV1 layout(info.width, info.height, info.stride, int(alpha_mode));
+        const std::string space = str(env, space_j);
+        if (space != "sRGB" && space != "Display P3") {
+            fail("unsupported F16 V1 SDR color encoding"); return 0;
+        }
+        const std::string params = str(env, params_j);
+        const spk::android::InputTransform xf(space);
+        const HighlightExpand expand(std::isfinite(headroom_stops) ? std::clamp(float(headroom_stops), 0.0f, 3.0f) : 0.0f);
+        std::vector<float> rgb(layout.rgb_values);
+        std::atomic<bool> valid{true};
+        {
+            PixelLock lock(env, bitmap);
+            if (!lock.ok) { fail("cannot lock F16 bitmap pixels"); return 0; }
+            const uint64_t px = uint64_t(info.width) * info.height;
+            const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
+            const auto* base = static_cast<const uint8_t*>(lock.pixels);
+            run_rows(info.height, workers, [&](uint32_t y0, uint32_t y1) {
+                for (uint32_t y = y0; y < y1 && valid.load(std::memory_order_relaxed); ++y) {
+                    const auto* row = base + size_t(y) * info.stride;
+                    float* dst = rgb.data() + size_t(y) * info.width * 3;
+                    for (uint32_t x = 0; x < info.width; ++x) {
+                        float c[3];
+                        if (!spk::android::decode_f16_sdr_pixel_v1(row + size_t(x) * 8, layout.alpha, c)) {
+                            valid.store(false, std::memory_order_relaxed);
+                            return;
+                        }
+                        for (int channel = 0; channel < 3; ++channel) c[channel] = xf.decode(c[channel], channel);
+                        if (expand.active()) expand.apply(c[0], c[1], c[2]);
+                        xf.to_prophoto(c);
+                        for (int channel = 0; channel < 3; ++channel) dst[3 * x + channel] = c[channel];
+                    }
+                }
+            });
+        }
+        if (!valid.load(std::memory_order_relaxed)) {
+            fail("F16 V1 requires finite SDR codes in [0,1]; extended-range/HDR input is unsupported"); return 0;
+        }
+        SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
+                                       info.width, info.height, params));
+        if (!session) return 0;
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
+        session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
+        session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
+        session->kind = "bitmap";
+        session->input_precision = "f16_sdr_v1";
+        return reinterpret_cast<jlong>(session.release());
+    } catch (const std::bad_alloc&) {
+        fail("out of memory while opening the F16 image");
+    } catch (const std::exception& e) {
+        fail(std::string("open F16 image: ") + e.what());
+    } catch (...) {
+        fail("open F16 image: unknown failure");
     }
     return 0;
 }
@@ -986,6 +1075,7 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
         session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
         session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
+        session->input_precision = "rgba8_gainmap";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the HDR image");
@@ -1080,12 +1170,25 @@ JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return jstr(env, "{}");
     try {
-        const auto num = [](double v) { return std::to_string(std::isfinite(v) ? v : 0.0); };
+        const auto num = [](double v) {
+            std::ostringstream text;
+            text.imbue(std::locale::classic());
+            text << std::setprecision(std::numeric_limits<double>::max_digits10) << (std::isfinite(v) ? v : 0.0);
+            return text.str();
+        };
+        const auto triple = [&](const std::array<double, 3>& values) {
+            return "[" + num(values[0]) + "," + num(values[1]) + "," + num(values[2]) + "]";
+        };
         std::string out = "{\"width\":" + std::to_string(s->width) + ",\"height\":" + std::to_string(s->height) +
             ",\"sourceWidth\":" + std::to_string(s->source_width) +
             ",\"sourceHeight\":" + std::to_string(s->source_height) +
             ",\"kind\":\"" + s->kind + "\",\"make\":\"" + json_escape(utf8_clean(s->make)) +
             "\",\"model\":\"" + json_escape(utf8_clean(s->model)) + "\"" +
+            ",\"inputPrecision\":\"" + json_escape(s->input_precision) + "\"" +
+            ",\"inputPrecisionNote\":\"" + json_escape(s->input_precision_note) + "\"" +
+            ",\"rawFloatSource\":" + (s->input_precision == "float_linear_v1" ?
+                "{\"black\":" + triple(s->float_source.black) + ",\"white\":" + triple(s->float_source.white) +
+                ",\"neutral\":" + triple(s->float_source.neutral) + "}" : "null") +
             ",\"asShotK\":" + num(s->as_shot_k) + ",\"asShotTint\":" + num(s->as_shot_tint) +
             ",\"wbK\":" + num(s->wb_k) + ",\"wbTint\":" + num(s->wb_tint) +
             ",\"rawStatsBinned\":" + (s->raw_stats_binned ? "true" : "false") +

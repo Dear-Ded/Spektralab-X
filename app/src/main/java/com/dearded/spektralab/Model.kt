@@ -654,4 +654,6 @@ data class SourceInfo(
     val wbTint: Double = 0.0,
     val rawStatsBinned: Boolean = false,
     val rawStatsReady: Boolean = false,
+    val inputPrecision: String = "",
+    val inputPrecisionNote: String = "",
 )

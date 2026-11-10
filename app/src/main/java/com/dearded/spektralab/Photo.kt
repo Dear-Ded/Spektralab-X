@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 
 /**
  * A decoded phone photo: the SDR picture in [space] ("sRGB" or "Display P3"),
+ * stored as RGBA_F16 when its encoded SDR precision can be kept, otherwise ARGB_8888,
  * and, for an Ultra HDR file on Android 14+, its gain map and metadata.
  */
 class Photo(
@@ -12,11 +13,22 @@ class Photo(
     val sourceWidth: Int = bitmap.width, val sourceHeight: Int = bitmap.height,
 ) {
     val hdr get() = gain != null && gainMeta != null
+    val highPrecisionSdr get() = bitmap.config == Bitmap.Config.RGBA_F16
+    /** Native F16 v1 alpha contract: opaque, premultiplied, or straight. */
+    internal val alphaMode get() = if (!bitmap.hasAlpha()) 0 else if (bitmap.isPremultiplied) 1 else 2
 
     fun recycle() {
         bitmap.recycle()
         gain?.recycle()
     }
+}
+
+internal enum class PhotoInputRoute { RGBA8, F16_SDR_V1, GAINMAP }
+
+internal fun Photo.inputRoute(highlightStops: Float): PhotoInputRoute = when {
+    hdr && highlightStops > 0f -> PhotoInputRoute.GAINMAP
+    highPrecisionSdr -> PhotoInputRoute.F16_SDR_V1
+    else -> PhotoInputRoute.RGBA8
 }
 
 /** The handle and whether highlights were recovered (gain map or highlight stops). */
@@ -36,10 +48,15 @@ data class OpenedPhoto(val handle: Long, val linear: Boolean)
 fun openPhotoSession(engine: Long, photo: Photo, highlightStops: Float, params: (String, Boolean) -> String): OpenedPhoto {
     try {
         val opening = params(INPUT_SPACE, true)
-        if (photo.hdr && highlightStops > 0f) {
+        val route = photo.inputRoute(highlightStops)
+        if (route == PhotoInputRoute.GAINMAP) {
             val h = NativeEngine.openBitmapHdr(engine, photo.bitmap, photo.gain!!, photo.gainMeta!!, photo.space, opening,
                 photo.sourceWidth, photo.sourceHeight)
             if (h != 0L) return OpenedPhoto(h, true)
+        }
+        if (route == PhotoInputRoute.F16_SDR_V1) {
+            return OpenedPhoto(NativeEngine.openBitmapF16V1(engine, photo.bitmap, photo.space, opening,
+                highlightStops, photo.alphaMode, photo.sourceWidth, photo.sourceHeight), highlightStops > 0f)
         }
         return OpenedPhoto(NativeEngine.openBitmap(engine, photo.bitmap, photo.space, opening, highlightStops,
             photo.sourceWidth, photo.sourceHeight), highlightStops > 0f)

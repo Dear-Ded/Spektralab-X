@@ -1,0 +1,3 @@
+   235: 00000000001d3eb4  2996 FUNC    GLOBAL DEFAULT    14 Java_com_dearded_spektralab_NativeEngine_openBitmapF16V1
+   240: 00000000001c2a24  6364 FUNC    GLOBAL DEFAULT    14 Java_com_dearded_spektralab_NativeEngine_openRaw
+native bytes=30001136 modified=2026-11-10 03:33:31.080054788 +0000

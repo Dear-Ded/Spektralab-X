@@ -10,7 +10,7 @@
 | 1. 解码维护 | 保留 0.22.2 与 Android overlay，选择性回移植 CRX signed qParam 索引修复；分别研究非有限 metadata 与 Panasonic 移位，避免仅照抄标题 | 真实 decoder 边界的旧版失败/新版通过、sanitizer、合法 RAW 输出对照、补丁重放及 NDK 编译。不能将局部索引修复说成修完所有 decoder 边界 | CRX 四处最小修复与本轮验证完成；其他维护项待评估 |
 | 2. 工作源预算 | 将 working 面积与 SHARE 输出面积分开；未知 RAW 尺寸也必须经过准入，旧任务兼容保守估计；峰值学习不混入不确定面积 | 真实尺寸/限制的独立拟合参考、旧任务缺字段回退、未知和连续降档、JVM与 Android 源码编译。不是完整物理内存保证 | 已实现；8 项专项测试及全量 66 项 JVM 通过 |
 | 3. 有界输出 | 无纸框极致 JPEG 先按 32 行转换并写匿名 RGBA8 外存文件，释放整图渲染结果，再 scanline 编码；避免额外整图 Bitmap，保留全帧坐标、原量化和编码参数 | full-pack 与多种行带高度的 RGBA8 及完整 JPEG 字节一致；sRGB/P3、float/RGBA16、局部蒙版/纹理；失败时清理未完成文件 | 已实现并通过两云验证；仅输出转换有界，编码系数、源图和 GPU 中间结果仍驻留 |
-| 4. RAW 数值合同 | 建立 float DNG、小数 BlackLevel、非均匀多通道重复黑电平的合法合成 fixture；记录矩阵、白平衡、WhiteLevel、原始数域；补齐 AsShotWhiteXY 与 BaselineExposure 的参考合同。再决定真正 float demosaic/转换入口或明确限制 | 独立 DNG 数学参考；不同最大值不暗中改变同一像素刻度；负值/HDR/邻近浮点样本；真实 Pixel/GCam/Samsung 与 Lightroom对照 | WhiteXY 已落地；已实证默认 float 早期量化及最大值依赖，并建立隔离 LinearRaw 参考原型；原始元数据/WB 合同及完整产品入口仍待实施 |
+| 4. RAW 数值合同 | 建立 float DNG、小数 BlackLevel、非均匀多通道重复黑电平的合法合成 fixture；记录矩阵、白平衡、WhiteLevel、原始数域；补齐 AsShotWhiteXY 与 BaselineExposure 的参考合同。再决定真正 float demosaic/转换入口或明确限制 | 独立 DNG 数学参考；不同最大值不暗中改变同一像素刻度；负值/HDR/邻近浮点样本；真实 Pixel/GCam/Samsung 与 Lightroom对照 | WhiteXY 已落地；2026-11-10 严格子集 float LinearRaw 已接入正式 JNI，恢复原始 ASN 并保留浮点。其他浮点格式/custom WB 仍走有诊断的整数兼容；完整 float Bayer、配置文件与手机外观验收未完成 |
 | 5. 统一阶段准入与取消 | EngineHost 分配前登记 source、decode scratch、candidate、新旧 float cache、输出/纸框；共享阶段 lease；取消贯穿 view、readback、行转换及编码 | 并发旧编辑/新候选/导出下的预算、失败原子性、取消清理；分开记录 CPU RSS、平台记账和 GPU 逻辑容量。已提交 GPU 工作完成后才释放 | float/整数 view、DI、legacy look 取消已补齐；新增候选与导出生命周期 lease，避免两者重叠。尚非完整字节预算，旧会话/缓存、普通预览和小型缩略 native 不受此 lease 限制 |
 | 6. 完整外存分块 | 为 source/negative/print 引入有界 plane，先点运算，再 FIR halo，后 IIR 跨块递归状态与全局统计；逐链替换全帧 SSBO | 多个块宽/高对同一全尺寸参考逐阶段比字节；全局 RNG/物理胶片坐标、边界、算序、量化点保持一致；真实 Adreno/Mali 驱动与热状态验证 | 待实施；dispatch 拆批不等于解除 SSBO 容量限制 |
 
@@ -81,4 +81,6 @@ Camera Profile IFD/ExtraCameraProfiles 选择尚未加入；float RAW 早期量�
 - 共享生命周期 lease 在 native dispatcher 外可取消等待，完整候选事务、旧句柄退役、导出重试与 native finally 都先于解锁。fitToMemory、RSS baseline/reset、峰值学习和最终诊断在已取得 lease 的窗口内执行，避免等待候选期间的峰值污染。独立测试不构成 Android 并发内存验收。
 - 6 个 float32 DNG 实证提前整数化使邻接值合并、负值丢失，远处条带最大值从 2 改 4 时相同区域的生产 compatible 输出减半。禁用转换后 dcraw_process 不接受 float 存储；不能仅清除一个选项。LinearRaw 隔离原型继续核验原始 ASN、per-plane 黑白和矩阵合同，不接入默认路径。
 
-下一阶段仍需完整阶段字节预算、原始选定 IFD 元数据归档、完整外存 plane，以及用户 RAW 和手机 GPU 对照。
+上述第三批描述的是当时状态。2026-11-10 已把有界 LinearRaw 精度子集接入正式入口，并保留原始小数黑白/ASN 诊断；详见 [输入精度集成](INPUT_PRECISION_INTEGRATION_2026-11-10.md)。同批保留 decoder 已提供的合规 F16 SDR，并将宽色域面积判断改为白点适配后的边界判断。
+
+下一阶段仍需完整阶段字节预算、通用原始选定 IFD 元数据归档、float Bayer 与压缩格式、完整外存 plane，以及用户 RAW 和手机 GPU 对照。

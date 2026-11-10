@@ -2,8 +2,40 @@
 
 Co-created with GPT (OpenAI), 2026-11-09.
 
-This is an observed limitation and an isolated reference experiment, not an
-enabled production float decoder. The WhiteXY repair does not address it.
+The original 2026-11-09 investigation below records a limitation and an isolated
+reference experiment. On 2026-11-10, a strictly bounded LinearRaw subset was
+integrated into production; broader float RAW remains on the legacy quantized
+path with explicit diagnostics. The WhiteXY repair alone does not address it.
+
+## Production integration, 2026-11-10
+
+[`raw_precision_input.hpp`](../app/src/main/cpp/raw_precision_input.hpp) now
+dispatches supported single-IFD, little-endian, uncompressed chunky float32 RGB
+LinearRaw to [`float_dng_linear.hpp`](../app/src/main/cpp/float_dng_linear.hpp).
+Its strict tag allowlist requires full ActiveArea, constant rational black,
+explicit per-plane integer white, original rational ASN and a supported single
+CM/FM. It restores original ASN before matrix preparation, normalizes once,
+preserves finite signed/above-white scene-linear ProPhoto and applies orientation.
+Default RAW remains neutral; no display curve or automatic exposure is added.
+
+Source diagnostics distinguish `integer_compatible16`, `float_linear_v1` and
+`float_legacy_quantized`, with a reason for the last mode. Unsupported float
+layouts, custom WB, WhiteXY, compression, crop, opcodes and profiles retain the
+legacy decoder's openability and quantization. A supported precise decode that
+fails does not silently switch to integer. This is not a general float DNG fix.
+
+The precise path admits at most 16,777,216 pixels and 402,653,184 bytes (384 MiB)
+of combined input/output float payload. That is not total RSS admission: LibRaw,
+engine/GPU storage and an existing editor still require separate accounting.
+Helper/dispatcher cancellation is tested; Android `openRaw` does not yet supply
+a mid-decode cancellation callback.
+
+The independent reference remains fixed at `2e-6` tolerance; the maximum error
+is `4.76837158203125e-7`. Production dispatch tests additionally compare integer
+and unsupported-float compatibility outputs and metadata exactly. Original
+failed prototype measurements below are retained as history. See the
+[integration report](INPUT_PRECISION_INTEGRATION_2026-11-10.md) for final source
+validation and evidence; no phone or Lightroom appearance acceptance is claimed.
 
 ## Production result
 

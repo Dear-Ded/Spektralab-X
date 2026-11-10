@@ -388,6 +388,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         wbK = info.optDouble("wbK", 0.0), wbTint = info.optDouble("wbTint", 0.0),
                         rawStatsBinned = info.optBoolean("rawStatsBinned", false),
                         rawStatsReady = info.optBoolean("rawStatsReady", false),
+                        inputPrecision = info.optString("inputPrecision"),
+                        inputPrecisionNote = info.optString("inputPrecisionNote"),
                     ),
                 )
             var retired = 0L
@@ -1059,6 +1061,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             appendLine("Engine: ${ui.engineSummary.ifEmpty { "-" }}")
             if (src != null) appendLine("Image: ${src.kind} ${src.sourceWidth}x${src.sourceHeight} -> ${src.width}x${src.height}" +
                 (if (src.camera.isNotBlank()) " · ${src.camera}" else ""))
+            if (src != null && src.inputPrecision.isNotBlank()) appendLine("Input precision: ${src.inputPrecision}" +
+                (if (src.inputPrecisionNote.isNotBlank()) " · ${src.inputPrecisionNote}" else ""))
             appendLine("Edit: ${ui.edit.toJson()}")
             appendLine("Events:")
             host.events.snapshot().forEach { appendLine("  $it") }

@@ -56,7 +56,7 @@ class PhotoInputColorTest {
 
     @Test fun p3PixelsAndTagAreUnchanged() = unchanged(ColorSpace.Named.DISPLAY_P3, "Display P3")
 
-    @Test fun f16CopyAndRescaleRetainP3MetadataAndOwnedGainMap() {
+    @Test fun gainmapF16CopyAndRescaleKeepLegacyEightBitBaseAndOwnedGainMap() {
         val decoded = bitmap(ColorSpace.Named.DISPLAY_P3, Bitmap.Config.RGBA_F16)
         val gain = Bitmap.createBitmap(3, 2, Bitmap.Config.ALPHA_8)
         val photo = prepare(decoded, gain, edge = 9, maxPixels = 40)
