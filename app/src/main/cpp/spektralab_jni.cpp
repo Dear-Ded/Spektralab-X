@@ -137,6 +137,11 @@ struct Session {
         return &out;
     }
     const spk::android::OutputTransform* xf() { return prophoto ? transform() : nullptr; }
+    bool set_output(const std::string& target, bool fetch_now) {
+        std::string e;
+        if (fetch_now && !out.fetch(engine, target, false, e)) return false;
+        return true;
+    }
     ~Session() { spk_result_free(&last); }
 };
 
@@ -1608,12 +1613,7 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
 }
 
 // exportTiff into an open, writable descriptor; the caller keeps and closes it.
-JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring tier_j) {
-    if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
-    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, nullptr, tier_j);
-}
-
-// exportTiffFd with target color space selection (new in export-pro)
+// Supports optional target color space selection (export-pro enhancement).
 JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring target_j, jstring tier_j) {
     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
     return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, target_j, tier_j);
