@@ -1,0 +1,7628 @@
+{
+  "summary": {
+    "passed": true,
+    "default_cases": 14,
+    "default_byte_equal_to_pre_custom": 14,
+    "relative_wb_cases": 56,
+    "temperature_tint_cases": 68,
+    "production_temperature_controls_verified": false,
+    "rejected_outside_camera_controls": 0,
+    "rejected_invalid_wb": 11,
+    "custom_cancellation_cases": 3,
+    "maximum_absolute_error": 4.76837158203125e-07,
+    "maximum_error_over_bound": 0.2384185791015625,
+    "custom_error_bound": "unchanged absolute 2e-6 for default and custom WB",
+    "source_asn_preserved": true,
+    "selected_gain_scale_byte_invariant": true,
+    "explicit_as_shot_byte_equal": true,
+    "selected_wb_independent_of_source_asn": true,
+    "dispatcher_helper_byte_equal": false
+  },
+  "records": [
+    {
+      "case": "orientation-1",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-2",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-2",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-2",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-2",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-3",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-3",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-3",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-3",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-4",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-4",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-4",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-4",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-5",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-5",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-5",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-5",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-6",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-6",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-6",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-6",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-7",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-7",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-7",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-7",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-8",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-8",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-8",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-8",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "permuted-white",
+      "label": "relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.125,
+        0.25,
+        0.375
+      ],
+      "source_white": [
+        2,
+        4,
+        3
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "permuted-white",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.125,
+        0.25,
+        0.375
+      ],
+      "source_white": [
+        2,
+        4,
+        3
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "permuted-white",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.125,
+        0.25,
+        0.375
+      ],
+      "source_white": [
+        2,
+        4,
+        3
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "permuted-white",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.125,
+        0.25,
+        0.375
+      ],
+      "source_white": [
+        2,
+        4,
+        3
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "scaled-asn",
+      "label": "relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.25,
+        0.5,
+        0.375
+      ],
+      "camera_wb": [
+        4,
+        2,
+        2.6666667461395264,
+        2
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "scaled-asn",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.25,
+        0.5,
+        0.375
+      ],
+      "camera_wb": [
+        4,
+        2,
+        2.6666667461395264,
+        2
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "scaled-asn",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.25,
+        0.5,
+        0.375
+      ],
+      "camera_wb": [
+        4,
+        2,
+        2.6666667461395264,
+        2
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "scaled-asn",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.25,
+        0.5,
+        0.375
+      ],
+      "camera_wb": [
+        4,
+        2,
+        2.6666667461395264,
+        2
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "changed-asn",
+      "label": "relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.25,
+        0.625,
+        1
+      ],
+      "camera_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "changed-asn",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.25,
+        0.625,
+        1
+      ],
+      "camera_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "changed-asn",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.25,
+        0.625,
+        1
+      ],
+      "camera_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "changed-asn",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.25,
+        0.625,
+        1
+      ],
+      "camera_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "source_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "scaled-relative",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "nonunit-green",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        2,
+        1.5,
+        2
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "explicit-as-shot",
+      "maximum_absolute_error": 5.960464477539063e-08,
+      "maximum_error_over_bound": 0.029802322387695312,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-1700-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.4281736612319946,
+        6.185558319091797,
+        1.4281736612319946
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-1700-tint-0",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.3878872394561768,
+        16.13657569885254,
+        1.3878872394561768
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182281255722046,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-2500-tint--30",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1954509019851685,
+        2.915585994720459,
+        1.1954509019851685
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-2500-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1530771255493164,
+        4.3637237548828125,
+        1.1530771255493164
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-2500-tint-30",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1129738092422485,
+        8.813983917236328,
+        1.1129738092422485
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-4000-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.0613833665847778,
+        1.3638137578964233,
+        1.0613833665847778
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-4000-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.009793996810913,
+        1.5669273138046265,
+        1.009793996810913
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-4000-tint-30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.0409247875213623,
+        1,
+        1.9339773654937744,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-6500-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1935975551605225,
+        1.2265914678573608,
+        1,
+        1.2265914678573608
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-6500-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.157593846321106,
+        1.121792197227478,
+        1,
+        1.121792197227478
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-6500-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1185609102249146,
+        1.0208858251571655,
+        1,
+        1.0208858251571655
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-10000-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5237877368927002,
+        1.5768826007843018,
+        1,
+        1.5768826007843018
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-10000-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5361496210098267,
+        1.495396614074707,
+        1,
+        1.495396614074707
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-10000-tint-30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5497413873672485,
+        1.4162758588790894,
+        1,
+        1.4162758588790894
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-50000-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.007755994796753,
+        2.163447141647339,
+        1,
+        2.163447141647339
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-50000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.084725856781006,
+        2.1121768951416016,
+        1,
+        2.1121768951416016
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "orientation-1",
+      "label": "temperature-50000-tint-30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0,
+        0,
+        0
+      ],
+      "source_white": [
+        1,
+        1,
+        1
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.1703555583953857,
+        2.0618884563446045,
+        1,
+        2.0618884563446045
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-1700-tint--30",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.4281736612319946,
+        6.185558319091797,
+        1.4281736612319946
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-1700-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.3878872394561768,
+        16.13657569885254,
+        1.3878872394561768
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182281255722046,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-2500-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1954509019851685,
+        2.915585994720459,
+        1.1954509019851685
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-2500-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1530771255493164,
+        4.3637237548828125,
+        1.1530771255493164
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-2500-tint-30",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1129738092422485,
+        8.813983917236328,
+        1.1129738092422485
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-4000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.0613833665847778,
+        1.3638137578964233,
+        1.0613833665847778
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-4000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.009793996810913,
+        1.5669273138046265,
+        1.009793996810913
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-4000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.0409247875213623,
+        1,
+        1.9339773654937744,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-6500-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1935975551605225,
+        1.2265914678573608,
+        1,
+        1.2265914678573608
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-6500-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.157593846321106,
+        1.121792197227478,
+        1,
+        1.121792197227478
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-6500-tint-30",
+      "maximum_absolute_error": 5.960464477539063e-08,
+      "maximum_error_over_bound": 0.029802322387695312,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1185609102249146,
+        1.0208858251571655,
+        1,
+        1.0208858251571655
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-10000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5237877368927002,
+        1.5768826007843018,
+        1,
+        1.5768826007843018
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-10000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5361496210098267,
+        1.495396614074707,
+        1,
+        1.495396614074707
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-10000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5497413873672485,
+        1.4162758588790894,
+        1,
+        1.4162758588790894
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-50000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.007755994796753,
+        2.163447141647339,
+        1,
+        2.163447141647339
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-50000-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.084725856781006,
+        2.1121768951416016,
+        1,
+        2.1121768951416016
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white",
+      "label": "temperature-50000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.1703555583953857,
+        2.0618884563446045,
+        1,
+        2.0618884563446045
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-1700-tint--30",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.4281736612319946,
+        6.185558319091797,
+        1.4281736612319946
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-1700-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.3878872394561768,
+        16.13657569885254,
+        1.3878872394561768
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182281255722046,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-2500-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1954509019851685,
+        2.915585994720459,
+        1.1954509019851685
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-2500-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1530771255493164,
+        4.3637237548828125,
+        1.1530771255493164
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-2500-tint-30",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.1129738092422485,
+        8.813983917236328,
+        1.1129738092422485
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-4000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.0613833665847778,
+        1.3638137578964233,
+        1.0613833665847778
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-4000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1,
+        1.009793996810913,
+        1.5669273138046265,
+        1.009793996810913
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-4000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.0409247875213623,
+        1,
+        1.9339773654937744,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-6500-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1935975551605225,
+        1.2265914678573608,
+        1,
+        1.2265914678573608
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-6500-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.157593846321106,
+        1.121792197227478,
+        1,
+        1.121792197227478
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-6500-tint-30",
+      "maximum_absolute_error": 5.960464477539063e-08,
+      "maximum_error_over_bound": 0.029802322387695312,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.1185609102249146,
+        1.0208858251571655,
+        1,
+        1.0208858251571655
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-10000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5237877368927002,
+        1.5768826007843018,
+        1,
+        1.5768826007843018
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-10000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5361496210098267,
+        1.495396614074707,
+        1,
+        1.495396614074707
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-10000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        1.5497413873672485,
+        1.4162758588790894,
+        1,
+        1.4162758588790894
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-50000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.007755994796753,
+        2.163447141647339,
+        1,
+        2.163447141647339
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-50000-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.084725856781006,
+        2.1121768951416016,
+        1,
+        2.1121768951416016
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "unequal-white-turned",
+      "label": "temperature-50000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 48,
+      "height": 64,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "source_wb": [
+        2.1703555583953857,
+        2.0618884563446045,
+        1,
+        2.0618884563446045
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-1700-tint--30",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.4281736612319946,
+        6.185558319091797,
+        1.4281736612319946
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-1700-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.3878872394561768,
+        16.13657569885254,
+        1.3878872394561768
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182281255722046,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-2500-tint--30",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.1954509019851685,
+        2.915585994720459,
+        1.1954509019851685
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-2500-tint-0",
+      "maximum_absolute_error": 2.384185791015625e-07,
+      "maximum_error_over_bound": 0.11920928955078125,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.1530771255493164,
+        4.3637237548828125,
+        1.1530771255493164
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-2500-tint-30",
+      "maximum_absolute_error": 4.76837158203125e-07,
+      "maximum_error_over_bound": 0.2384185791015625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.1129738092422485,
+        8.813983917236328,
+        1.1129738092422485
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.054299741983413696,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-4000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.0613833665847778,
+        1.3638137578964233,
+        1.0613833665847778
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-4000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1,
+        1.009793996810913,
+        1.5669273138046265,
+        1.009793996810913
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.03914488106966019,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-4000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.0409247875213623,
+        1,
+        1.9339773654937744,
+        1
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-6500-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.1935975551605225,
+        1.2265914678573608,
+        1,
+        1.2265914678573608
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-6500-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.157593846321106,
+        1.121792197227478,
+        1,
+        1.121792197227478
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-6500-tint-30",
+      "maximum_absolute_error": 5.960464477539063e-08,
+      "maximum_error_over_bound": 0.029802322387695312,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.1185609102249146,
+        1.0208858251571655,
+        1,
+        1.0208858251571655
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-10000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.5237877368927002,
+        1.5768826007843018,
+        1,
+        1.5768826007843018
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-10000-tint-0",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.5361496210098267,
+        1.495396614074707,
+        1,
+        1.495396614074707
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-10000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        1.5497413873672485,
+        1.4162758588790894,
+        1,
+        1.4162758588790894
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-50000-tint--30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        2.007755994796753,
+        2.163447141647339,
+        1,
+        2.163447141647339
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-50000-tint-0",
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "maximum_error_over_bound": 0.014901161193847656,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        2.084725856781006,
+        2.1121768951416016,
+        1,
+        2.1121768951416016
+      ],
+      "post_wb_matrix": [
+        0.8884832262992859,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063598513603,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    },
+    {
+      "case": "rational-asn",
+      "label": "temperature-50000-tint-30",
+      "maximum_absolute_error": 1.1920928955078125e-07,
+      "maximum_error_over_bound": 0.059604644775390625,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": true,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": false,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 64,
+      "height": 48,
+      "error": "",
+      "source_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "source_white": [
+        4,
+        3,
+        2
+      ],
+      "source_neutral": [
+        0.333333,
+        0.875,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "source_wb": [
+        2.1703555583953857,
+        2.0618884563446045,
+        1,
+        2.0618884563446045
+      ],
+      "post_wb_matrix": [
+        0.8884832859039307,
+        0.07237185537815094,
+        0.039144884794950485,
+        0,
+        -0.07855895906686783,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127197027206,
+        0.8182280659675598,
+        0
+      ]
+    }
+  ],
+  "rejections": [
+    {
+      "options": [
+        "--temperature",
+        6500
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG white temperature"
+    },
+    {
+      "options": [
+        "--wb",
+        0,
+        1,
+        1,
+        1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG custom white balance"
+    },
+    {
+      "options": [
+        "--wb",
+        -1,
+        1,
+        1,
+        1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG custom white balance"
+    },
+    {
+      "options": [
+        "--wb",
+        "nan",
+        1,
+        1,
+        1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG custom white balance"
+    },
+    {
+      "options": [
+        "--wb",
+        "inf",
+        1,
+        1,
+        1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG custom white balance"
+    },
+    {
+      "options": [
+        "--wb",
+        1,
+        1,
+        1,
+        "nan"
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG custom white balance"
+    },
+    {
+      "options": [
+        "--wb",
+        0.0001,
+        1,
+        1,
+        1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: float DNG custom white balance outside supported FM domain"
+    },
+    {
+      "options": [
+        "--wb",
+        1,
+        1,
+        1,
+        1,
+        "--temperature",
+        -1
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG white temperature"
+    },
+    {
+      "options": [
+        "--wb",
+        1,
+        1,
+        1,
+        1,
+        "--temperature",
+        1699
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG white temperature"
+    },
+    {
+      "options": [
+        "--wb",
+        1,
+        1,
+        1,
+        1,
+        "--temperature",
+        50001
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG white temperature"
+    },
+    {
+      "options": [
+        "--wb",
+        1,
+        1,
+        1,
+        1,
+        "--temperature",
+        "nan"
+      ],
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 0,
+      "width": 77,
+      "height": 88,
+      "error": "float LinearRaw: invalid float DNG white temperature"
+    }
+  ],
+  "rejected_controls": [],
+  "cancellations": [
+    {
+      "probe": "float_dng_linear",
+      "stop": 1,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": true,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 1,
+      "width": 77,
+      "height": 88,
+      "error": "float DNG decode cancelled"
+    },
+    {
+      "probe": "float_dng_linear",
+      "stop": 35,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": true,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 35,
+      "width": 77,
+      "height": 88,
+      "error": "float DNG decode cancelled"
+    },
+    {
+      "probe": "float_dng_linear",
+      "stop": 71,
+      "open_status": 0,
+      "support": "Supported",
+      "ok": false,
+      "cancelled": true,
+      "opened_unchanged": true,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "inspect_polls": 16,
+      "decode_polls": 71,
+      "width": 77,
+      "height": 88,
+      "error": "float DNG decode cancelled"
+    }
+  ]
+}

@@ -1499,7 +1499,7 @@ private fun FramedImage(
                 val dst = android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
                     (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat())
                 val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG)
-                n.drawBitmap(android, null, dst, paint)
+                n.drawBitmap(bitmap.asAndroidBitmap(), null, dst, paint)
             }
             n.restore()
         }

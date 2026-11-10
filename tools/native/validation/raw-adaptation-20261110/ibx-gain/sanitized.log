@@ -1,0 +1,29 @@
+single-map-control: PASS applied=1 bytes=100 pixels=1900,1900,1900,1900,
+1024-complete-control: PASS applied=1 bytes=16468 pixels=1900,1900,1900,1900,
+1024-missing-final-header: PASS applied=0 bytes=16452 pixels=1000,1000,1000,1000,
+1025-missing-final-header: PASS applied=0 bytes=16468 pixels=1000,1000,1000,1000,
+1025-truncated-final-payload: PASS applied=0 bytes=16485 pixels=1000,1000,1000,1000,
+1025-complete-never-prefix-only: PASS applied=0 bytes=16564 pixels=1000,1000,1000,1000,
+max-count-missing-headers: PASS applied=0 bytes=16468 pixels=1000,1000,1000,1000,
+valid-black-pattern-control: PASS applied=1 bytes=100 pixels=1890,1880,1890,1880,
+large-column-pitch-keeps-area: PASS applied=1 bytes=100 pixels=1000,1900,1000,1900,
+large-row-pitch-keeps-first-row: PASS applied=1 bytes=100 pixels=1900,1900,1000,1000,
+boundary failures=0
+synthetic-api-black-overflow: dimensions=65536x65536 product32=0 product64=4294967296 capacity=4098
+invalid-black-pattern-safe: PASS applied=0 bytes=100 pixels=1000,1000,1000,1000,
+boundary failures=0
+valid-single: PASS file-probe: bytes=100 declared=1 applied=1 changed=1 changed_pixels=3072 black-dim=1x1
+boundary failures=0
+missing-1025-header: PASS file-probe: bytes=16468 declared=1025 applied=0 changed=0 changed_pixels=0 black-dim=1x1
+boundary failures=0
+truncated-1025-payload: PASS file-probe: bytes=16485 declared=1025 applied=0 changed=0 changed_pixels=0 black-dim=1x1
+boundary failures=0
+max-count: PASS file-probe: bytes=16468 declared=4294967295 applied=0 changed=0 changed_pixels=0 black-dim=1x1
+boundary failures=0
+max-short-repeat: PASS file-probe: bytes=100 declared=1 applied=1 changed=1 changed_pixels=3072 black-dim=1x1
+boundary failures=0
+large-column-pitch: PASS file-probe: bytes=100 declared=1 applied=1 changed=1 changed_pixels=48 black-dim=1x1
+boundary failures=0
+large-row-pitch: PASS file-probe: bytes=100 declared=1 applied=1 changed=1 changed_pixels=64 black-dim=1x1
+boundary failures=0
+file boundary failures=0

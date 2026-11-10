@@ -1,0 +1,33 @@
+compatible RAW 64x48 half=0 custom=0 PASS
+decoder: 22 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+decoder: 22 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+decoder: 21 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+PASS: 8 frozen-decoder pixel/complete-metadata comparisons and cancellation/retry suites

@@ -437,7 +437,7 @@ private fun StyleStripContent(
                 with(sharedScope) {
                     Modifier.sharedBounds(
                         sharedContentState = rememberSharedContentState("style-${s.id}"),
-                        animatedVisibilityScope = this@items,
+                        animatedVisibilityScope = this@StyleStripContent,
                         boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
                         resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
                     )
@@ -453,14 +453,15 @@ private fun StyleStripContent(
                 starred = picks.isFavourite(s.id),
                 onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
                 modifier = cardModifier,
-            ) {
-                if (on) open = if (open == s.id) null else s.id
-                else {
-                    open = null
-                    view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                    pick(s, strengthOf(s.id))
+                onClick = {
+                    if (on) open = if (open == s.id) null else s.id
+                    else {
+                        open = null
+                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                        pick(s, strengthOf(s.id))
+                    }
                 }
-            }
+            )
         }
     }
     if (naming) {

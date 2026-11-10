@@ -1,0 +1,455 @@
+{
+  "byte_identical_cases": 42,
+  "comparisons": [
+    {
+      "case": "max2.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "max4.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "max4.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "max4.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "fractional.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "fractional.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "fractional.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "per-plane.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "per-plane.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "per-plane.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "rational-neutral.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "rational-neutral.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "rational-neutral.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "nonunit-green.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "nonunit-green.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "nonunit-green.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-2.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-2.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-2.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-3.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-3.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-3.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-4.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-4.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-4.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-5.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-5.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-5.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-6.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-6.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-6.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-7.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-7.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-7.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-8.dng",
+      "options": [],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-8.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "orientation-8.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 36864
+    },
+    {
+      "case": "wide-edge-words.dng",
+      "options": [],
+      "bytes": 1572864
+    },
+    {
+      "case": "wide-edge-words.dng",
+      "options": [
+        "--wb",
+        "2",
+        "1",
+        "1.5",
+        "1",
+        "--temperature",
+        "6500"
+      ],
+      "bytes": 1572864
+    },
+    {
+      "case": "wide-edge-words.dng",
+      "options": [
+        "--wb",
+        "1.25",
+        "1",
+        ".75",
+        "1",
+        "--temperature",
+        "4000"
+      ],
+      "bytes": 1572864
+    }
+  ],
+  "memory": {
+    "old": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 300128,
+      "decode_ms": 831.095419
+    },
+    "new": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152548,
+      "decode_ms": 163.595533
+    }
+  }
+}
