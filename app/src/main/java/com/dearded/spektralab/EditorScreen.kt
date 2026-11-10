@@ -1496,10 +1496,10 @@ private fun FramedImage(
             } else {
                 // Compare mode: draw only the photo itself, aligned to where it would be with the frame.
                 // The photo rect within the card is at (l.x, l.y).
-                val dst = android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
-                    (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat())
-                val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG)
-                n.drawBitmap(bitmap.asAndroidBitmap(), null, dst, paint)
+                n.drawBitmap(android, null,
+                    android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
+                        (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat()),
+                    android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
             }
             n.restore()
         }
