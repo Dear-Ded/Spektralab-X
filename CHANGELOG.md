@@ -8,7 +8,13 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
-## 0.2.00-alpha-1 · 待发布
+## 0.2.00-alpha-2 · 2026-11-10
+
+内部安装版本码 122。接着已发布的 `0.2.00-alpha-1`，只修风格选项叠在一起。尚未在真机上点过。
+
+- 修复风格选项互相重叠：分组、卡片和强度面板改回上下排列，展开的强度面板不再盖住卡片。共享边界转场会把两者画在同一块区域，此处不再使用。
+
+## 0.2.00-alpha-1 · 2026-11-10
 
 相对已发布 `0.1.19-beta` 的源码更新。包含此前尚未发布的 beta2 修复与本轮上游引擎迁移，内部安装版本码为 121。
 
@@ -16,7 +22,6 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 
 **升级方式：** 数字版本升至 0.2，旧 beta 的更新器可以识别本版；同时修正阶段序号比较，支持后续 alpha-2、beta2、rc2 等版本。
 
-- 修复风格选项互相重叠：分组、卡片和强度面板改回上下排列，展开的强度面板不再盖住卡片。共享边界转场会把两者画在同一块区域，此处不再使用。
 - 修正手机 DNG 的色彩转换：有有效 ForwardMatrix 时按文件内嵌配置转换相机颜色，避免只反求 ColorMatrix 造成的色彩差异；不额外增加饱和度。
 - 修复部分小米 DNG 的 RAW 色温、色调读取及调整失败：元数据探针与解码器使用同一相机校准入口。
 - 支持仅含 AsShotWhiteXY 的三通道 DNG：保留原始拍摄白点，按校准签名和双光源矩阵恢复源白平衡，覆盖 ForwardMatrix 及无 FM 的转换。公开 Pixel 8 Pro 默认解码已通过；不代表完整 DNG SDK 或 Lightroom 视觉一致性。
