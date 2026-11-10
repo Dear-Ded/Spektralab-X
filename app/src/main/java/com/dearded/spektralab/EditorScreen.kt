@@ -1498,7 +1498,8 @@ private fun FramedImage(
                 // The photo rect within the card is at (l.x, l.y).
                 val dst = android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
                     (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat())
-                n.drawBitmap(android, null, dst, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
+                val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG)
+                n.drawBitmap(android, null, dst, paint)
             }
             n.restore()
         }
