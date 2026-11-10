@@ -188,10 +188,7 @@ object LocalEdits {
         val live = masks.filter { it.active }.take(MAX_MASKS)
         if (live.isEmpty() && !dust.active) return null
         val out = ArrayList<Float>()
-        for (c in curves.rows) {
-            out += c.points.size.toFloat()
-            for (p in c.points) { out += p.x.toFloat(); out += p.y.toFloat() }
-        }
+        for (c in curves.rows) c.appendWire(out)
         out += MAGIC; out += VERSION
         if (dust.active) {
             out += dust.strength.toFloat(); out += dust.count.toFloat(); out += dust.size.toFloat()

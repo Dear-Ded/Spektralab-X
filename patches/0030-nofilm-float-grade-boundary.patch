@@ -1,0 +1,112 @@
+Retain signed/HDR encoded ProPhoto RGB until Android's final grade boundary.
+
+Internal view Request/Result extension only; the public spk_result ABI stays
+unchanged. The explicit float request requires no-film, disabled adjustments,
+identity working space, RGB floats and no proof/export/device-output path.
+Reuse view geometry, then read its float plane without the grade's UNORM16
+round-trip. Android owns the vector separately for preview, cached repack and
+TIFF rows. Normal desktop/film/DI requests keep their existing path.
+Clear the opt-in 0029 scene curve from the independent medium probe.
+Co-created with GPT (OpenAI), 2026-11-09.
+
+diff --git a/engine/src/pipeline/engine.cpp b/engine/src/pipeline/engine.cpp
+index d536052..d7fb948 100644
+--- a/engine/src/pipeline/engine.cpp
++++ b/engine/src/pipeline/engine.cpp
+@@ -1822,6 +1822,11 @@ bool spk::view::render(spk_session* session, const Request& request, Result& res
+     std::lock_guard<std::mutex> guard(session->lock);
+     if (request.no_film && request.cineon) { error = "view: no_film cannot write a Digital Intermediate"; return false; }
+     const bool no_film = request.no_film;
++    if(request.ungraded_float&&(!no_film||request.cineon||request.export_intent||request.proof_long_edge||
++        request.target_space!="ProPhoto RGB"||request.rgba16||request.output_channels!=3||
++        !request.adjustments.is_object()||request.adjustments.at("enabled").as_bool(true))){
++        error="view: invalid ungraded float request";return false;
++    }
+     if (no_film && (!request.pair.is_null() || session->params.film_render.overscan.pair)) {
+         error = "view: no_film is unavailable for a half-frame pair"; return false;
+     }
+@@ -1990,7 +1995,7 @@ bool spk::view::render(spk_session* session, const Request& request, Result& res
+         MemoryEstimateTrace trace(session, request.export_intent ? "output-export" : "output-view",
+                                   "miss", packed_print, MemoryEstimateTrace::kObserveOnly);
+         trace.success = process(gpu, packed_print, final_request, transform, cmax, count, result, error, final_lut, final_lut ? 65 : 0);
+-        trace.output_payload_bytes = result.pixels.size();
++        trace.output_payload_bytes = result.pixels.size() + result.float_pixels.size() * sizeof(float);
+         if (!trace.success) return false;
+     }
+     result.print_ms += pair_print_ms; result.post_ms += pair_post_ms;
+@@ -2578,6 +2583,7 @@ Params medium_probe_params(const Params& session) {
+     p.camera.auto_exposure = false;
+     p.camera.exposure_baseline_ev = 0.0;
+     p.camera.scene_latitude.active = false;
++    p.camera.scene_curve.clear();
+     p.film_render.grain.active = false;
+     p.film_render.grain.sublayers_active = false;
+     p.film_render.halation.active = false;
+diff --git a/engine/src/pipeline/view.hpp b/engine/src/pipeline/view.hpp
+index bbe6786..8ae0af1 100644
+--- a/engine/src/pipeline/view.hpp
++++ b/engine/src/pipeline/view.hpp
+@@ -30,12 +30,16 @@ struct Request {
+     // Per-request source choice, not an engine parameter. Cineon rejects it.
+     // The resident decode is graded/cropped normally; film caches stay intact.
+     bool no_film = false;
++    // Internal Android boundary: encoded ProPhoto RGB before grade/UNORM16.
++    // Requires no_film, disabled adjustments and no output conversion/proof.
++    bool ungraded_float = false;
+ };
+ struct Result {
+     uint32_t width = 0, height = 0, source_width = 0, source_height = 0;
+     // Tightly packed RGB/RGBA, 8-bit or little-endian 16-bit as requested.
+     // No row padding or trailing GPU word padding is exposed to the caller.
+     std::vector<uint8_t> pixels;
++    std::vector<float> float_pixels; // tightly packed RGB; ungraded_float only
+     bool print_cached = false;
+     double print_ms = 0, post_ms = 0, readback_ms = 0;
+     uint32_t file_width = 0, file_height = 0;
+diff --git a/engine/src/pipeline/view_process.cpp b/engine/src/pipeline/view_process.cpp
+index e1ec154..a152e43 100644
+--- a/engine/src/pipeline/view_process.cpp
++++ b/engine/src/pipeline/view_process.cpp
+@@ -68,6 +68,11 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+         if(req.output_channels!=3&&req.output_channels!=4){error="view: output_channels must be 3 or 4";return false;}
+         if(device_output&&(!req.rgba16||req.output_channels!=4||req.proof_long_edge)){error="view: device output requires RGBA16";return false;}
+         if(!req.adjustments.is_object()||!req.geometry.is_object()){error="view: adjustments and geometry must be objects";return false;}
++        if(req.ungraded_float&&(!req.no_film||print.c!=3||di_lut||device_output||
++            req.adjustments.at("enabled").as_bool(true)||req.export_intent||req.proof_long_edge||
++            req.cineon||req.target_space!="ProPhoto RGB"||req.rgba16||req.output_channels!=3)){
++            error="view: invalid ungraded float request";return false;
++        }
+         const Json& a=req.adjustments;std::array<float,32> u{};
+         u[0]=a.at("enabled").as_bool(true)?1.f:0.f;
+         double t=number(a,"temperature",0,-100,100)/100,g=number(a,"tint",0,-100,100)/100;
+@@ -97,8 +102,10 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+         uint32_t w=std::max(1u,uint32_t(std::lround(cw*print.w))),h=std::max(1u,uint32_t(std::lround(ch*print.h)));
+         if(turns%2)std::swap(w,h);
+         // All request validation precedes any GPU operation.
+-        Image current=allocate(gpu,print.w,print.h,error);if(!current.valid())return false;
+-        {
++        Image current;
++        if(req.ungraded_float)current=print;
++        else {
++            current=allocate(gpu,print.w,print.h,error);if(!current.valid())return false;
+             auto curves=gpu->upload(table.data(),sizeof(table),error);if(!curves)return false;
+             uint32_t gm[]={uint32_t(print.pixels()),print.w,print.h,di_lut_size};
+             std::vector<Arg> grade_args={Arg::buf(print.buf),Arg::inline_bytes(u.data(),u.size()),Arg::buf(curves),Arg::inline_bytes(gm,di_lut?4:3),Arg::buf(current.buf)};
+@@ -115,6 +122,17 @@ bool process(gpu::Gpu* gpu,const Image& print,const Request& req,const Json& tra
+         if(req.long_edge&&req.long_edge<edge){double s=double(req.long_edge)/edge;w=std::max(1u,uint32_t(std::lround(w*s)));h=std::max(1u,uint32_t(std::lround(h*s)));
+             const float p[]={.5f,.5f,1,1,1,0,float(current.h)/current.w};
+             if(!resample(gpu,current,w,h,p,0,0,error))return false;}
++        if(req.ungraded_float){
++            if(!gpu->trim_idle_for_phase(current.bytes(),0,error))return false;
++            result.post_ms=ms(started);
++            result.width=w;result.height=h;result.source_width=print.w;result.source_height=print.h;
++            result.file_width=w;result.file_height=h;
++            const auto read=Clock::now();
++            result.float_pixels.resize(current.elements());
++            if(!gpu->read(current.buf.get(),0,result.float_pixels.data(),current.bytes(),error))return false;
++            result.readback_ms=ms(read);
++            return true;
++        }
+         auto stats=gpu->alloc_zeroed(12,error);if(!stats)return false;
+         uint32_t encode_mode=4;
+         auto convert=[&](const Json& transform,bool compress)->bool {

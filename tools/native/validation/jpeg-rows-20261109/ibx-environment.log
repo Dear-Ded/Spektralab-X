@@ -1,0 +1,10 @@
+Mon Nov  9 07:54:53 AM UTC 2026
+g++ (Debian 14.2.0-19) 14.2.0
+cmake version 3.31.6
+Linux x86_64
+980dd81f425082aa6d7c9e47fef27554ce7a9ffc8e2f6e863b97d263c5c50858  libjpeg-turbo-3.2.0.tgz
+364b984dac51d5e92f309d637666897f98b05593b867e45c920ea41aeed77293  input.tgz
+b1c720d6422a84423d07c819c3321b79c04cc63d5ec8b2a9d5af95be90f6cdc2  jpeg444-before-stream.cpp
+Math reference: 37fe7d047b624cc3e62b2ad8372724f0b09540d02eafca4d014f0e4dc65d112d  /data/work/engine-deepdive/scene-curve-0029/precision-tests-1/upstream_output_math.inc
+
+[exit 0 ]

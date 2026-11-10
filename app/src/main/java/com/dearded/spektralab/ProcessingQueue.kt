@@ -31,10 +31,10 @@ import kotlin.math.roundToInt
 enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 
 /** The pre-save check found a frame no photo produces ([what]: 全黑, 全白, 纯色); nothing was saved. */
-class BlankFrameException(val what: String) : Exception("导出画面异常（$what），未保存")
+class BlankFrameException(val what: String) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, "导出画面异常（$what），未保存"))
 
 /** The engine could not allocate (native heap or GPU memory); retried a size down like a Java OutOfMemoryError. */
-class OutOfMemoryException(detail: String) : Exception("内存不足：$detail")
+class OutOfMemoryException(detail: String) : Exception(ErrorCodes.format(ErrorCodes.OUT_OF_MEMORY, "内存不足：$detail"))
 
 /**
  * One export: a snapshot of the photo and its whole edit, so the editor is
@@ -50,6 +50,8 @@ data class ProcessingJob(
     val wbTint: Double,
     val format: ExportFormat,
     val size: ExportSize,
+    /** TIFF 导出的色彩空间（仅 format == TIFF 时有效，默认 sRGB 保持向后兼容） */
+    val tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB,
     val workingEdge: Int,
     val maxPixels: Long,
     /** The output's pixel count, for the time estimate. */
@@ -96,29 +98,32 @@ data class ProcessingJob(
      */
     val sheetJson: String = "",
     val sheetFrames: Int = 0,
+    /** Known opened working-source area, before SHARE or framing; 0 = unknown/legacy. */
+    val workingPixels: Long = 0,
 ) {
     val active get() = state == JobState.QUEUED || state == JobState.RUNNING
     val sheet get() = sheetJson.isNotEmpty()
 
     val label get() = when {
         sheet -> "印样 · $name"
-        extreme -> "全分辨率导出"
-        format == ExportFormat.TIFF -> "16 位 TIFF"
-        format == ExportFormat.HEIF -> "HEIF · 全尺寸"
+        extreme -> "高质量导出"
+        format == ExportFormat.TIFF -> "16 位 TIFF · ${tiffColorSpace.displayName}"
+        format == ExportFormat.HEIF -> "HEIF · 工作尺寸"
         size == ExportSize.SHARE -> "JPEG · 分享尺寸"
-        else -> "JPEG · 全尺寸"
+        else -> "JPEG · 工作尺寸"
     }
 
     fun toJson(): JSONObject = JSONObject()
         .put("id", id).put("uri", uri).put("name", name).put("raw", raw).put("edit", editJson)
         .put("wbK", wbK).put("wbTint", wbTint).put("format", format.name).put("size", size.name)
+        .put("tiffSpace", tiffColorSpace.name)
         .put("edge", workingEdge).put("maxPixels", maxPixels).put("outPixels", outPixels)
         .put("frame", frameJson).put("filmLabel", filmLabel).put("wide", wideGamut).put("hl", highlightStops.toDouble()).put("look", lookJson)
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
         .put("location", location).put("extreme", extreme)
-        .put("sheet", sheetJson).put("sheetFrames", sheetFrames)
+        .put("sheet", sheetJson).put("sheetFrames", sheetFrames).put("workingPixels", workingPixels)
 
     companion object {
         fun fromJson(o: JSONObject): ProcessingJob? = runCatching {
@@ -127,6 +132,7 @@ data class ProcessingJob(
                 raw = o.optBoolean("raw"), editJson = o.getString("edit"),
                 wbK = o.optDouble("wbK", 0.0), wbTint = o.optDouble("wbTint", 0.0),
                 format = ExportFormat.valueOf(o.getString("format")), size = ExportSize.valueOf(o.getString("size")),
+                tiffColorSpace = runCatching { TiffColorSpace.valueOf(o.optString("tiffSpace", "SRGB")) }.getOrDefault(TiffColorSpace.SRGB),
                 workingEdge = o.optInt("edge"), maxPixels = o.optLong("maxPixels"), outPixels = o.optLong("outPixels"),
                 frameJson = o.optString("frame"), filmLabel = o.optString("filmLabel"),
                 wideGamut = o.optBoolean("wide"),
@@ -138,6 +144,7 @@ data class ProcessingJob(
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
                 location = o.optString("location"), extreme = o.optBoolean("extreme"),
                 sheetJson = o.optString("sheet"), sheetFrames = o.optInt("sheetFrames"),
+                workingPixels = o.optLong("workingPixels"),
             )
         }.getOrNull()
     }
@@ -179,7 +186,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private var worker: Job? = null
     private var runner: kotlinx.coroutines.Deferred<String>? = null
     private val handleLock = Any()
-    private val grantLock = Any()
+    private val grantLock = SourceGrantLock.monitor
     @Volatile private var runningHandle = 0L
     @Volatile private var cancelRequested = -1L
     @Volatile private var pauseRequested = -1L
@@ -200,14 +207,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     fun enqueue(job: ProcessingJob) {
         // A contact sheet reads the light table's own frames (FrameStore holds their grants).
-        if (job.sheet) {
-            _jobs.update { it + job.copy(secured = true) }
+        synchronized(grantLock) {
+            _jobs.update { it + job.copy(secured = job.sheet) }
             persist()
+        }
+        if (job.sheet) {
             start()
             return
         }
-        _jobs.update { it + job.copy(secured = false) }
-        persist()
         host.scope.launch {
             val secured = withContext(Dispatchers.IO) {
                 // From the URI as the user picked it, while its grant is fresh: a
@@ -335,18 +342,18 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         }
         cancelRequested = -1L
         pauseRequested = -1L
-        val rssBefore = ProcMemory.statusKb("VmRSS")
-        val peakReset = ProcMemory.resetPeak()
+        var peakDiagnostic = "peak RSS not sampled (waiting)"
         try {
-            val deferred = host.scope.async { runRecovering(queued) { phase, frac -> set(id) { it.copy(phase = phase, progress = max(it.progress, frac)) } } }
+            val deferred = host.scope.async {
+                runRecovering(queued, sampled = { peakDiagnostic = it }) { phase, frac ->
+                    set(id) { it.copy(phase = phase, progress = max(it.progress, frac)) }
+                }
+            }
             runner = deferred
             val saved = deferred.await()
             learn(queued, (SystemClock.elapsedRealtime() - started) / 1000.0)
-            // The job as it ran: fitToMemory or a retry may have shrunk its cap.
-            // A contact sheet draws thumbnails, not a render: its peak says nothing per pixel.
-            if (!queued.sheet) learnPeak(_jobs.value.firstOrNull { it.id == id } ?: queued, rssBefore, peakReset)
             set(id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0, finishedAt = now(), message = saved, pendingUri = "") }
-            host.events.add("job $id done in ${(SystemClock.elapsedRealtime() - started) / 1000}s, ${peakText(rssBefore, peakReset)}")
+            host.events.add("job $id done in ${(SystemClock.elapsedRealtime() - started) / 1000}s, $peakDiagnostic")
         } catch (e: CancellationException) {
             when {
                 // pause() already put it back in line and wrote the list.
@@ -356,10 +363,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
         } catch (e: OutOfMemoryError) {
             set(id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(), message = "内存不足；请调小工作尺寸后重试", pendingUri = "") }
-            host.events.add("job $id failed: out of memory, ${peakText(rssBefore, peakReset)}")
+            host.events.add("job $id failed: out of memory, $peakDiagnostic")
         } catch (e: Throwable) {
             set(id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(), message = failureMessage(e), pendingUri = "") }
-            host.events.add("job $id failed: ${e.message ?: e}, ${peakText(rssBefore, peakReset)}")
+            host.events.add("job $id failed: ${e.message ?: e}, $peakDiagnostic")
         } finally {
             runner = null
             ticker.cancel()
@@ -387,8 +394,39 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
      * engine is replaced and the job tried once more a size down (the GPU
      * watchdog fires on the longest submits, which a smaller frame shortens).
      */
-    private suspend fun runRecovering(queued: ProcessingJob, step: (String, Float) -> Unit): String {
-        if (queued.sheet) return processSheet(queued, step)
+    private suspend fun runRecovering(
+        queued: ProcessingJob,
+        sampled: (String) -> Unit,
+        step: (String, Float) -> Unit,
+    ): String {
+        if (queued.sheet) {
+            val rssBefore = ProcMemory.statusKb("VmRSS")
+            val peakReset = ProcMemory.resetPeak()
+            try {
+                return processSheet(queued, step)
+            } finally {
+                // Sheets may develop small thumbnails; they are not working-source samples.
+                sampled(peakText(rssBefore, peakReset))
+            }
+        }
+        return host.transientSessions.withLease(onWaiting = { step("等待当前处理", 0.02f) }) {
+            // Waiting candidates must finish before the export's learning window starts.
+            val rssBefore = ProcMemory.statusKb("VmRSS")
+            val peakReset = ProcMemory.resetPeak()
+            try {
+                val saved = runAdmitted(queued, step)
+                // fitToMemory or recovery may have shrunk the job's working source.
+                learnPeak(_jobs.value.firstOrNull { it.id == queued.id } ?: queued, rssBefore, peakReset)
+                saved
+            } finally {
+                // Capture while still admitted, before the next candidate can allocate.
+                sampled(peakText(rssBefore, peakReset))
+            }
+        }
+    }
+
+    // Admission and retries share the lease until process has released its native session.
+    private suspend fun runAdmitted(queued: ProcessingJob, step: (String, Float) -> Unit): String {
         val job = fitToMemory(queued)
         try {
             return process(job, step)
@@ -436,9 +474,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     // --- memory tiers -----------------------------------------------------------
 
     /**
-     * What one app may hold on this phone: a share of the RAM by tier (the
-     * Android 17 memory limiter and lmkd act well before all of it is used,
-     * and a phone with less RAM has less to spare), and never more than what
+     * Queue admission heuristic, not an Android per-process allocation limit:
+     * a share of the RAM by tier, and never more than what
      * is in use now plus what is free above the low-memory threshold, minus a
      * reserve for the editor and the system.
      */
@@ -457,8 +494,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         return minOf(byTier, byFree)
     }
 
-    /** Learned from VmHWM ([learnPeak]): bytes of peak RSS per pixel rendered, above the RSS before. */
-    private fun peakBytesPerPixel(): Double = prefs.getFloat("peak_bpp", DEFAULT_PEAK_BPP).toDouble()
+    /** Peak RSS per working-source pixel. Old output-based samples are not reused. */
+    private fun peakBytesPerPixel(): Double = prefs.getFloat("working_peak_bpp", DEFAULT_PEAK_BPP).toDouble()
 
     /**
      * Shrinks [job]'s pixel cap when its predicted peak (RSS now plus pixels
@@ -470,12 +507,11 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val rssKb = ProcMemory.statusKb("VmRSS")
         if (rssKb < 0) return job
         val rss = rssKb * 1024
-        val pixels = renderedPixels(job)
+        val pixels = workingPixels(job)
         val bpp = peakBytesPerPixel()
         val budget = memoryBudgetBytes(rss)
-        if (rss + pixels * bpp <= budget) return job
-        val fit = max(MIN_TIER_PIXELS, ((budget - rss) / bpp).toLong())
-        if (fit >= pixels) return job
+        val fit = exportMemoryPixelCap(pixels, job.maxPixels, budget - rss, bpp, MIN_TIER_PIXELS)
+        if (fit == job.maxPixels) return job
         host.events.add("job ${job.id}: memory tier ${budget shr 20} MB, ${pixels / 1_000_000} MP -> ${fit / 1_000_000} MP " +
             "(${"%.0f".format(Locale.ROOT, bpp)} B/px)")
         val smaller = job.copy(maxPixels = fit, outPixels = min(job.outPixels, fit))
@@ -484,7 +520,11 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         return smaller
     }
 
-    /** The pixels a job renders: its output size, or its pixel cap when that is smaller. */
+    /** The source stays resident even when SHARE renders a smaller output. */
+    private fun workingPixels(job: ProcessingJob): Long =
+        exportWorkingArea(job.workingPixels, job.workingEdge, job.maxPixels)
+
+    /** Output estimate is still used for render pacing, independently of source residency. */
     private fun renderedPixels(job: ProcessingJob): Long =
         if (job.maxPixels > 0) min(job.outPixels, job.maxPixels) else job.outPixels
 
@@ -494,13 +534,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
      * the job; otherwise it is the process's peak, which says nothing about it.
      */
     private fun learnPeak(job: ProcessingJob, rssBeforeKb: Long, reset: Boolean) {
-        if (!reset || rssBeforeKb < 0) return
+        // An upper bound is safe for admission, but is not a measured area for learning.
+        if (!reset || rssBeforeKb < 0 || job.workingPixels <= 0) return
         val peakKb = ProcMemory.statusKb("VmHWM")
-        val pixels = renderedPixels(job)
+        val pixels = workingPixels(job)
         if (peakKb <= rssBeforeKb || pixels < 1_000_000) return
         val measured = ((peakKb - rssBeforeKb) * 1024.0 / pixels).coerceIn(20.0, 400.0)
         val next = 0.6 * peakBytesPerPixel() + 0.4 * measured
-        prefs.edit().putFloat("peak_bpp", next.toFloat()).apply()
+        prefs.edit().putFloat("working_peak_bpp", next.toFloat()).apply()
     }
 
     /**
@@ -514,11 +555,11 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         return (canvas / CANVAS_AREA).toLong()
     }
 
-    /** One working size down, and 60 % of the pixel cap. */
+    /** One working size down, and 60 % of the effective estimated pixel area. */
     private fun smaller(job: ProcessingJob): ProcessingJob {
         val edge = DeviceProfile.EDGES.filter { job.workingEdge <= 0 || it < job.workingEdge }.maxOrNull()
             ?: DeviceProfile.EDGES.first()
-        return job.copy(workingEdge = edge, maxPixels = if (job.maxPixels > 0) job.maxPixels * 6 / 10 else 0L)
+        return job.copy(workingEdge = edge, maxPixels = exportRetryPixelCap(job.maxPixels, job.outPixels))
     }
 
     /**
@@ -694,12 +735,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     step("解码 RAW", 0.12f)
                     // trimMemory is engine-wide (EngineThread); the session is the export's own.
                     withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
-                    withContext(ExportThread.dispatcher) {
-                        val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
-                        val h = NativeEngine.openRaw(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint)
-                        if (h == 0L) engineFailure(engine, "打开失败")
-                        handle = h
-                        synchronized(handleLock) { runningHandle = h }
+                    withRawOpenCancellation { cancellation ->
+                        withContext(ExportThread.dispatcher) {
+                            val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
+                            val h = NativeEngine.openRawCancellableV1(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint, cancellation)
+                            if (h == 0L) engineFailure(engine, "打开失败")
+                            handle = h
+                            synchronized(handleLock) { runningHandle = h }
+                        }
                     }
                 } finally {
                     input?.close()
@@ -739,8 +782,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor(render = true, extreme = job.extreme)
-            step(if (job.extreme) "全分辨率冲洗" else "冲洗", 0.25f)
-            val icc = File(ready.dir, "io/sRGB.icc").absolutePath
+            step(if (job.extreme) "高质量冲洗" else "冲洗", 0.25f)
             when (job.format) {
                 ExportFormat.TIFF -> {
                     // Rendered straight into a pending entry (the gallery hides it), so
@@ -749,13 +791,46 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     val target = withContext(Dispatchers.IO) { MediaSaver.create(app, name, "image/tiff") }
                     markPending(job.id, target)
                     try {
+                        // 根据目标色彩空间准备 ICC 配置文件路径和目标空间名称
+                        val (iccPath, targetSpace) = when (job.tiffColorSpace) {
+                            TiffColorSpace.SRGB -> {
+                                val icc = File(ready.dir, "io/sRGB.icc").absolutePath
+                                icc to "sRGB"
+                            }
+                            TiffColorSpace.DISPLAY_P3 -> {
+                                // Display P3: 运行时从系统提取，保存临时文件供 native 读取
+                                val p3Icc = displayP3Icc()
+                                if (p3Icc == null || p3Icc.isEmpty()) {
+                                    // Fallback: 尝试从引擎资源读取（未来可能添加）
+                                    val fallback = File(ready.dir, "io/Display_P3.icc")
+                                    if (fallback.isFile) {
+                                        fallback.absolutePath to "Display P3"
+                                    } else {
+                                        throw EngineException("Display P3 ICC 配置文件不可用")
+                                    }
+                                } else {
+                                    val tmpIcc = File(app.cacheDir, "export_p3.icc")
+                                    tmpIcc.writeBytes(p3Icc)
+                                    tmpIcc.absolutePath to "Display P3"
+                                }
+                            }
+                            TiffColorSpace.PROPHOTO -> {
+                                // ProPhoto: 生成标准 ROMM RGB ICC
+                                val prophotoIcc = IccProfile.generateProPhotoRgb()
+                                val tmpIcc = File(app.cacheDir, "export_prophoto.icc")
+                                tmpIcc.writeBytes(prophotoIcc)
+                                tmpIcc.absolutePath to "ProPhoto RGB"
+                            }
+                        }
+
                         withContext(Dispatchers.IO) {
                             val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
                                 rendering(job) {
                                     withContext(ExportThread.dispatcher) {
-                                        if (!NativeEngine.exportTiffFd(handle, it.fd, icc, job.size.tier)) engineFailure(engine, "导出失败")
+                                        if (!NativeEngine.exportTiffFd(handle, it.fd, iccPath, targetSpace, job.size.tier))
+                                            engineFailure(engine, "导出失败")
                                     }
                                 }
                             }
@@ -775,6 +850,41 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 // gallery) with its own encoder; it is always sRGB (wide is JPEG only).
                 ExportFormat.JPEG, ExportFormat.HEIF -> {
                     val heif = job.format == ExportFormat.HEIF
+                    val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
+                    val streamProfile = if (job.extreme && !heif && frame.isNone) {
+                        if (wide) displayP3Icc() else runCatching { File(ready.dir, "io/sRGB.icc").readBytes() }.getOrNull()
+                    } else null
+                    if (streamProfile != null && streamProfile.isNotEmpty()) {
+                        val name = "$stem.jpg"
+                        val part = withContext(Dispatchers.IO) {
+                            exportDir.mkdirs()
+                            File(exportDir, "$name.part")
+                        }
+                        try {
+                            val shape = rendering(job) {
+                                withContext(ExportThread.dispatcher) {
+                                    NativeEngine.exportJpeg444(handle, part.absolutePath, job.size.tier, 98, streamProfile)
+                                        .takeIf { it != 0L } ?: engineFailure(engine, "导出失败")
+                                }
+                            }
+                            val width = (shape ushr 32).toInt()
+                            val height = (shape and 0xffffffffL).toInt()
+                            step("校验", 0.90f)
+                            val description = withContext(Dispatchers.IO) {
+                                exif.applyTo(part, width, height, wide = wide)
+                                MediaSaver.checkJpeg(part, width, height)
+                                "$name · ${width}×${height} · " + String.format(Locale.ROOT, "%.2f MB", part.length() / 1_000_000.0)
+                            }
+                            step("写入相册", 0.92f)
+                            withContext(Dispatchers.IO) {
+                                MediaSaver.saveFile(app, part, name, "image/jpeg") { markPending(job.id, it) }
+                            }
+                            host.events.add("job ${job.id} saved $description (JPEG rows)")
+                            return description
+                        } finally {
+                            withContext(NonCancellable + Dispatchers.IO) { part.delete() }
+                        }
+                    }
                     val bitmap: Bitmap = rendering(job) {
                         withContext(ExportThread.dispatcher) {
                             NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
@@ -784,6 +894,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
                     step("编码", 0.88f)
                     val name = if (heif) "$stem.heic" else "$stem.jpg"
+                    var savedDescription = name
                     try {
                         // Encoded to a .part first: EXIF is written in place, and the
                         // file is checked whole before the gallery sees any of it.
@@ -792,7 +903,6 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             val part = File(exportDir, "$name.part")
                             try {
                                 // The paper frame is drawn around the print here, after the engine.
-                                val frame = FrameSpec.fromJson(job.frameJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) })
                                 val out = if (frame.isNone) bitmap else FrameSpec.render(bitmap, frame, Caption.of(exif, job.filmLabel))
                                 try {
                                     if (heif) {
@@ -810,6 +920,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                         exif.applyTo(part, out.width, out.height, wide = wide)
                                         MediaSaver.checkJpeg(part, out.width, out.height)
                                     }
+                                    savedDescription = "$name · ${out.width}×${out.height} · " +
+                                        String.format(Locale.ROOT, "%.2f MB", part.length() / 1_000_000.0)
                                 } finally {
                                     if (out !== bitmap) out.recycle()
                                 }
@@ -830,7 +942,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     } finally {
                         bitmap.recycle()
                     }
-                    return name
+                    host.events.add("job ${job.id} saved $savedDescription")
+                    return savedDescription
                 }
             }
         } finally {
@@ -857,13 +970,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uri = Uri.parse(job.uri)
         if (uri.scheme == "file") return job
         val resolver = app.contentResolver
-        val held = resolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
-        if (held || runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess) {
-            synchronized(grantLock) {
+        val persisted = synchronized(grantLock) {
+            val held = resolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
+            if (held || runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess) {
                 prefs.edit().putStringSet("grants", HashSet(prefs.getStringSet("grants", emptySet()).orEmpty()) + job.uri).apply()
-            }
-            return job.copy(persisted = true)
+                true
+            } else false
         }
+        if (persisted) return job.copy(persisted = true)
         return runCatching {
             sourcesDir.mkdirs()
             val safe = job.name.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80).ifEmpty { "source" }
@@ -950,13 +1064,19 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uris = needed.filter { it.persisted || !it.secured }.map { it.uri }.toSet()
         val held = prefs.getStringSet("grants", emptySet()).orEmpty().toSet()
         val keep = held.filter { it in uris }.toSet()
+        val editorUri = app.getSharedPreferences("settings", 0).getString("editor_grant", null)
+        val frames = FrameStore.of(app)
         for (u in held - keep) {
-            runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            // Persisted grants belong to the app, not to each take() call.
+            // Hand ownership back without leaving a stale queue reference.
+            if (u != editorUri && !frames.holds(u)) {
+                runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            }
         }
         if (keep.size != held.size) prefs.edit().putStringSet("grants", keep).apply()
     }
 
-    /** VmHWM after a job: the peak the memory limiter and lmkd judge us by. */
+    /** VmHWM is a diagnostic peak RSS; it is not the OS memory admission limit. */
     private fun peakText(rssBeforeKb: Long, reset: Boolean): String {
         val kb = ProcMemory.statusKb("VmHWM")
         if (kb < 0) return "peak RSS unknown"

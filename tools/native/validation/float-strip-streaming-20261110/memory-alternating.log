@@ -1,0 +1,18 @@
+round=1 version=old
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":300192,"decode_ms":569.769494}
+rawrss_kib=300192 elapsed_s=0.78
+round=1 version=new
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":152900,"decode_ms":541.673025}
+rawrss_kib=152900 elapsed_s=0.74
+round=2 version=new
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":152940,"decode_ms":464.365785}
+rawrss_kib=152940 elapsed_s=0.66
+round=2 version=old
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":300176,"decode_ms":613.849916}
+rawrss_kib=300176 elapsed_s=0.80
+round=3 version=old
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":300220,"decode_ms":658.323136}
+rawrss_kib=300220 elapsed_s=0.84
+round=3 version=new
+{"width":4096,"height":3072,"hash64":"230b6b1056805b83","lifetime_peak_rss_kib":153012,"decode_ms":433.807176}
+rawrss_kib=153012 elapsed_s=0.63

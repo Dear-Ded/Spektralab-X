@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-09",
+  "co_created_by": "GPT (OpenAI), AI assistant",
+  "status": "source implementation and scoped verification complete; no APK, commit, push, tag or release",
+  "repository": "Dear-Ded/Spektralab-X",
+  "public_base": "6aff78e9d1b7ac0e137526b36781271561ef95f8",
+  "version_changed_in_this_wave": false,
+  "roadmap": "../ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md",
+  "research": "../UPSTREAM_ECOSYSTEM_REVIEW_2026-11-09.md",
+  "implemented": [
+    "LibRaw 0020: four signed-remainder CRX table-index guards, retaining 0.22.2 and Android overlay",
+    "Separate reopened working source area from SHARE output area for queue admission and peak learning",
+    "Conservative unknown/legacy job bounds; unknown unlimited jobs receive finite memory cap when RSS probing succeeds",
+    "Recompute ordinary editor export working area from original source dimensions after film-edge toggles",
+    "Unframed extreme JPEG: 32-row conversion, anonymous RGBA8 disk spool, release full result before optimized-Huffman codec allocations",
+    "New JPEG path checks cancellation generation during conversion/row reads and before/after encoding"
+  ],
+  "android_source": {
+    "host": "AOIDC Linux x86_64",
+    "ndk": "27.2.12479018",
+    "compiler": "Clang 18.0.3",
+    "target": "arm64-v8a, API 29",
+    "commands": [":app:testReleaseUnitTest", ":app:externalNativeBuildRelease"],
+    "result": "BUILD SUCCESSFUL in 1m 19s",
+    "jvm": { "suites": 9, "tests": 66, "failures": 0, "errors": 0, "skipped": 0 },
+    "new_memory_tests": 8,
+    "libraw_patch_copy_stamp": "crx-source-lf-v1",
+    "new_jni_symbol_present": "Java_com_dearded_spektralab_NativeEngine_exportJpeg444",
+    "native_library_sha256": "326c078c5c09d00a222b683a95a27d775db783c693fc2a1ebe70c80f29fdee24",
+    "initial_attempt": "Failed because SPK_UPSTREAM was omitted; rerun with the existing patched checkout succeeded. No source workaround.",
+    "evidence": "../../tools/native/validation/jpeg-rows-20261109/aoidc/"
+  },
+  "jpeg_regression": {
+    "scope": "48 generated scenes per configuration, four row heights; byte comparison with frozen previous writer, direct rows and anonymous spool",
+    "frozen_writer_sha256": "b1c720d6422a84423d07c819c3321b79c04cc63d5ec8b2a9d5af95be90f6cdc2",
+    "aoidc": {
+      "compiler": "GCC 11.4.0",
+      "strict": { "cases": 48, "complete_file_comparisons": 384, "cleanup": "passed" },
+      "asan_ubsan": { "cases": 48, "complete_file_comparisons": 384, "cleanup": "passed", "leak_detection": false },
+      "sanitizer_scope": "Harness, output adapter and JPEG wrapper; existing engine and codec archives are not wholly instrumented"
+    },
+    "ibx": {
+      "compiler": "GCC 14.2.0",
+      "codec": "libjpeg-turbo 3.2.0 independently built from official source",
+      "strict": { "cases": 48, "complete_file_comparisons": 384, "cleanup": "passed" },
+      "default": { "cases": 48, "complete_file_comparisons": 384, "cleanup": "passed" },
+      "evidence": "../../tools/native/validation/jpeg-rows-20261109/ibx-results.json"
+    },
+    "coverage": ["RGBA16", "signed/HDR float RGB", "sRGB/P3 export", "local masks", "dust/vignette", "padding stride", "1/3/32/65 row heights", "70000-byte ICC split markers", "null/throwing/empty row sources", "incomplete spool"],
+    "max_regression_scratch_bytes": 25220,
+    "strict_default_scope": "Compilation of harness and adapter units; the existing engine archives and shader artifacts are shared"
+  },
+  "jpeg_memory": {
+    "dimensions": [4097, 3073],
+    "input_types": ["RGBA16", "signed/HDR float RGB"],
+    "transform": "production sRGB export, xf.fetch(engine, sRGB, true)",
+    "measurement": "Separate processes. Capture startup getrusage, reset VmHWM with clear_refs=5 after transform preparation and before source allocation, measure through conversion and encoding; read output bytes afterward.",
+    "conversion_bytes": { "full": 50360324, "rows": 524416 },
+    "aoidc_rgba16": {
+      "full": { "stage_start_rss_kib": 80404, "stage_peak_rss_kib": 227996, "startup_peak_rss_kib": 879444, "lifetime_peak_rss_kib": 879444 },
+      "rows": { "stage_start_rss_kib": 80600, "stage_peak_rss_kib": 179336, "startup_peak_rss_kib": 879432, "lifetime_peak_rss_kib": 879432 },
+      "stage_peak_reduction_kib": 48660
+    },
+    "aoidc_float": {
+      "full": { "stage_start_rss_kib": 79256, "stage_peak_rss_kib": 276016, "startup_peak_rss_kib": 878048, "lifetime_peak_rss_kib": 878048 },
+      "rows": { "stage_start_rss_kib": 80104, "stage_peak_rss_kib": 228268, "startup_peak_rss_kib": 879000, "lifetime_peak_rss_kib": 879000 },
+      "stage_peak_reduction_kib": 47748
+    },
+    "ibx_stage_peak_reductions_kib": { "strict_rgba16": 48724, "default_rgba16": 49024, "strict_float": 48332, "default_float": 48760 },
+    "same_input_output_on_both_hosts_and_all_memory_modes": {
+      "rgba16": { "file_bytes": 8220293, "complete_file_fnv1a64": "878c34fc8cfdc26a" },
+      "float": { "file_bytes": 10329310, "complete_file_fnv1a64": "9dab12e107beae95" }
+    },
+    "limit": "Output-stage reduction only. Startup still dominates lifetime peak. No phone RSS, full Android session, decoder scratch or GPU memory claim."
+  },
+  "libraw": {
+    "patch": "../../patches/libraw/0020-crx-signed-quantizer-index.patch",
+    "sanitizer_cases": 464,
+    "old_code_negative_index_failures": 4,
+    "real_files": 5,
+    "bayer_and_rgb16_byte_identical_output_pairs": 10,
+    "archive_experiment": "Existing production archive copied; only CRX rebuilt with production flags and replaced. Distinct from Android dependency rebuild.",
+    "evidence": "../../tools/native/validation/libraw-maintenance-20261109/result.json"
+  },
+  "limits": [
+    "RSS probing failure retains the original job limits; an unknown unlimited job is not guaranteed a finite cap in that case.",
+    "Temporary disk about 4 B/px plus final JPEG; no shared disk-space admission yet.",
+    "Whole source, GPU planes, no-film float cache and optimized JPEG coefficients remain; this is not complete external-memory rendering.",
+    "Paper frames, HEIF and ordinary JPEG retain their previous Bitmap paths.",
+    "JNI cancellation was compiled and reviewed, not exercised on ART. Submitted GPU work and jpeg_finish_compress second pass cannot be interrupted per strip.",
+    "No complete malformed-file fuzz campaign or fix for all CRX quantizer shifts.",
+    "Float-DNG early integer conversion, fractional/spatial black levels, WhiteXY-only defaults and BaselineExposure remain research/implementation work.",
+    "No physical Android device, user-owned Xiaomi 13 Ultra RAW/UltraRAW or complete Lightroom appearance validation.",
+    "Earlier intermediate RSS trials used display transforms or inaccurate lifetime labels; final v3 logs supersede them."
+  ]
+}

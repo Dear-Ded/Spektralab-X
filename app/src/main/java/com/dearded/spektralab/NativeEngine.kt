@@ -38,6 +38,17 @@ object NativeEngine {
         temperatureK: Double, tint: Double,
     ): Long
 
+    /** RAW-open tokens may be signalled on any thread; release only after open returns. */
+    external fun createRawOpenCancellation(): Long
+    external fun cancelRawOpen(cancellation: Long)
+    external fun releaseRawOpenCancellation(cancellation: Long)
+
+    /** [openRaw] with cooperative cancellation before a session exists. */
+    external fun openRawCancellableV1(
+        engine: Long, path: String, maxEdge: Int, maxPixels: Long, paramsJson: String,
+        temperatureK: Double, tint: Double, cancellation: Long,
+    ): Long
+
     /**
      * Opens a session on an ARGB_8888 bitmap in [space] ("sRGB" or "Display P3").
      * The pixels are converted to linear ProPhoto natively, as upstream's host
@@ -48,6 +59,17 @@ object NativeEngine {
     external fun openBitmap(
         engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float,
         sourceWidth: Int = 0, sourceHeight: Int = 0,
+    ): Long
+
+    /**
+     * Version 1 high precision SDR input: software RGBA_F16 in encoded sRGB/P3.
+     * Unpremultiplied codes must be finite and in [0,1]; no PQ/HLG or gain map.
+     * [alphaMode] is 0 (opaque), 1 (premultiplied) or 2 (straight).
+     * Stride and format are read from the actual native bitmap; params as above.
+     */
+    external fun openBitmapF16V1(
+        engine: Long, bitmap: Bitmap, space: String, paramsJson: String, headroomStops: Float,
+        alphaMode: Int, sourceWidth: Int = 0, sourceHeight: Int = 0,
     ): Long
 
     /**
@@ -75,6 +97,13 @@ object NativeEngine {
     external fun renderBitmap(session: Long, tier: String): Bitmap?
 
     /**
+     * JPEG colors at [tier], before encoding/paper composition. [target] is
+     * "sRGB" or "Display P3"; tag the returned codes with that file target,
+     * not the display space. Keeps the session's output and repack source.
+     */
+    external fun renderProofBitmap(session: Long, tier: String, target: String): Bitmap?
+
+    /**
      * [renderBitmap] for an export: null (lastError "export check: ...") when
      * the frame is flat black or white, which only a failed render produces.
      */
@@ -87,6 +116,13 @@ object NativeEngine {
      */
     external fun writeJpeg444(bitmap: Bitmap, path: String, quality: Int, icc: ByteArray?): Boolean
 
+    /**
+     * Render/check/convert/encode without a full output Bitmap. Returns actual
+     * width in the upper 32 bits and height in the lower 32 bits, or 0 on failure.
+     * [icc] must describe the session's selected output space.
+     */
+    external fun exportJpeg444(session: Long, path: String, tier: String, quality: Int, icc: ByteArray): Long
+
     /** Renders [tier] into [reuse] when it is the same size, else into a new bitmap; null on failure. */
     external fun renderReuse(session: Long, tier: String, reuse: Bitmap?): Bitmap?
 
@@ -95,6 +131,12 @@ object NativeEngine {
 
     /** [exportTiff] into an open writable descriptor (a pending MediaStore entry); the caller closes it. */
     external fun exportTiffFd(session: Long, fd: Int, iccPath: String, tier: String): Boolean
+
+    /**
+     * TIFF 导出到文件描述符，支持指定目标色彩空间。
+     * @param targetSpace 目标色彩空间："sRGB", "Display P3", 或 "ProPhoto RGB"
+     */
+    external fun exportTiffFd(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean
 
     external fun release(session: Long)
 

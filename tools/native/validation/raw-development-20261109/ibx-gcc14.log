@@ -1,0 +1,13 @@
+g++ (Debian 14.2.0-19) 14.2.0
+Copyright (C) 2024 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+0fd2b1547ebfe651384b9cddd78bc84e49f146673ba79ce7ec93b4e348331cba  raw_development.hpp
+e155030d8817c1743b8d9cefb333410e186d17ec5412a7ea462059f3ffd20a33  raw_development.cpp
+ec0c15c5d9cd05028b80389d64053389b846b307f0e4c37542e696cd41ff8f0f  output_cancel.hpp
+bb1607baaefac48c823b689ce4cfd68913440449ae016bbd791644a151e78dda  test.cpp
+raw_development: 8 groups passed (synthetic; no Android acceptance)
+raw_development: 8 groups passed (synthetic; no Android acceptance)
+
+[exit 0 ]

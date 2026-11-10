@@ -32,6 +32,8 @@
 // what the export shows. See tools/work/edit-effects_research.md.
 #pragma once
 
+#include "prophoto_exposure.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -126,6 +128,7 @@ struct Grid {
 struct Tone {
     float wb[3] = {1, 1, 1};
     float gain = 1, contrast = 0, bright = 0, bright_e = 1;
+    double linear_gain = 1, encoded_gain = 1;
     float highlights = 0, shadows = 0, black = 0, span = 1, saturation = 1;
 
     Tone() = default;
@@ -134,6 +137,8 @@ struct Tone {
         const float t = a[8] / 100, g = a[9] / 100;
         wb[0] = 1 + 0.18f * t; wb[1] = 1 - 0.12f * g; wb[2] = 1 - 0.18f * t;
         gain = std::pow(2.0f, a[0] / 2.2f);
+        linear_gain = std::exp2(double(a[0]));
+        encoded_gain = std::exp2(double(a[0]) / 1.8);
         contrast = a[1] / 100;
         bright = a[2] / 100;
         bright_e = 1.0f / (1.0f + bright * 0.8f);
@@ -144,16 +149,21 @@ struct Tone {
         span = std::max(1 - black - a[7] / 100, 0.05f);
     }
 
-    void apply(float c[3]) const {
+    void apply(float c[3], bool unquantised = false) const {
         using namespace detail;
-        for (int i = 0; i < 3; ++i) c[i] = std::max(0.0f, c[i] * wb[i]) * gain;
+        for (int i = 0; i < 3; ++i) c[i] *= wb[i];
+        if (unquantised ? linear_gain != 1.0 : gain != 1)
+            for (int i = 0; i < 3; ++i)
+                c[i] = unquantised
+                    ? expose_encoded_prophoto(c[i], linear_gain, encoded_gain)
+                    : std::max(0.0f, c[i]) * gain;
         if (contrast != 0) {
             const float k = 1 + contrast * 1.2f;
             for (int i = 0; i < 3; ++i) c[i] = (c[i] - kMidGrey) * k + kMidGrey;
         }
         if (bright != 0)
-            for (int i = 0; i < 3; ++i) c[i] = std::pow(std::min(2.0f, std::max(0.0f, c[i])), bright_e);
-        const float l = tone_position(luma(c));
+            for (int i = 0; i < 3; ++i) c[i] = std::pow(std::max(0.0f, c[i]), bright_e);
+        const float l = sat01(tone_position(luma(c)));
         if (shadows != 0) {
             const float w = (1 - l) * (1 - l);
             for (int i = 0; i < 3; ++i) c[i] += shadows * 0.25f * w * (1 - c[i]);
@@ -256,7 +266,7 @@ public:
     }
 
     // Step 8 of upstream's kernel: each mask mixes in its own tone by its coverage.
-    void masks(const Placed& p, float c[3], float u, float v) const {
+    void masks(const Placed& p, float c[3], float u, float v, bool unquantised = false) const {
         if (masks_.empty() || p.masks.size() != masks_.size()) return;
         float x, y;
         p.to_le(u, v, x, y);
@@ -264,7 +274,7 @@ public:
             const float cover = coverage(masks_[i], p.masks[i], x, y);
             if (cover > 0.0005f) {
                 float t[3] = {c[0], c[1], c[2]};
-                masks_[i].tone.apply(t);
+                masks_[i].tone.apply(t, unquantised);
                 for (int k = 0; k < 3; ++k) c[k] += (t[k] - c[k]) * cover;
             }
         }

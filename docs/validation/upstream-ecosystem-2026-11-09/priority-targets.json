@@ -1,0 +1,134 @@
+[
+  {
+    "repository": "abc123-hubish/Harmony-SpektraLab",
+    "url": "https://github.com/abc123-hubish/Harmony-SpektraLab",
+    "default_branch": "main",
+    "sha": "b08f2a3aa99bc7179e7d422935a2f90413655159",
+    "commit_time": "2026-11-05T02:02:22Z",
+    "license": null,
+    "tree_truncated": false,
+    "tree_entries": 6,
+    "commit_api": "https://api.github.com/repos/abc123-hubish/Harmony-SpektraLab/commits/b08f2a3aa99bc7179e7d422935a2f90413655159"
+  },
+  {
+    "repository": "Broksd/SpektraPLUS",
+    "url": "https://github.com/Broksd/SpektraPLUS",
+    "default_branch": "main",
+    "sha": "46fe1067a594550768aedd54330faa2b9da2daa8",
+    "commit_time": "2026-11-07T12:04:08Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 839,
+    "commit_api": "https://api.github.com/repos/Broksd/SpektraPLUS/commits/46fe1067a594550768aedd54330faa2b9da2daa8"
+  },
+  {
+    "repository": "Godoshi9/SpektraLab-CrossPlatform",
+    "url": "https://github.com/Godoshi9/SpektraLab-CrossPlatform",
+    "default_branch": "main",
+    "sha": "0084ae32b6d1822ebfa116e56b292dfaac2c4f39",
+    "commit_time": "2026-10-31T04:07:50Z",
+    "license": null,
+    "tree_truncated": false,
+    "tree_entries": 1079,
+    "commit_api": "https://api.github.com/repos/Godoshi9/SpektraLab-CrossPlatform/commits/0084ae32b6d1822ebfa116e56b292dfaac2c4f39"
+  },
+  {
+    "repository": "JamesQiu2005/SpektraLab_library",
+    "url": "https://github.com/JamesQiu2005/SpektraLab_library",
+    "default_branch": "main",
+    "sha": "f236e03b4c8eea622fd7360c4d6277ada48b180c",
+    "commit_time": "2026-11-08T13:34:25Z",
+    "license": "MIT",
+    "tree_truncated": false,
+    "tree_entries": 88,
+    "commit_api": "https://api.github.com/repos/JamesQiu2005/SpektraLab_library/commits/f236e03b4c8eea622fd7360c4d6277ada48b180c"
+  },
+  {
+    "repository": "JamesQiu2005/spektralab-engine",
+    "url": "https://github.com/JamesQiu2005/spektralab-engine",
+    "default_branch": "main",
+    "sha": "1f6cad722d0fae4d6dc569590697b718193724fc",
+    "commit_time": "2026-11-02T04:04:11Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 110,
+    "commit_api": "https://api.github.com/repos/JamesQiu2005/spektralab-engine/commits/1f6cad722d0fae4d6dc569590697b718193724fc"
+  },
+  {
+    "repository": "JohnWick996/spektralab-cpu",
+    "url": "https://github.com/JohnWick996/spektralab-cpu",
+    "default_branch": "main",
+    "sha": "be791cb606ab21d7ee7b47220171a1540d6e12ee",
+    "commit_time": "2026-11-04T16:16:10Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 831,
+    "commit_api": "https://api.github.com/repos/JohnWick996/spektralab-cpu/commits/be791cb606ab21d7ee7b47220171a1540d6e12ee"
+  },
+  {
+    "repository": "Knonoa/SpektraLabAndroid",
+    "url": "https://github.com/Knonoa/SpektraLabAndroid",
+    "default_branch": "main",
+    "sha": "6d8dd5a098e83f03e6bb67b222dc55014184c08e",
+    "commit_time": "2026-11-09T03:55:50Z",
+    "license": null,
+    "tree_truncated": false,
+    "tree_entries": 1338,
+    "commit_api": "https://api.github.com/repos/Knonoa/SpektraLabAndroid/commits/6d8dd5a098e83f03e6bb67b222dc55014184c08e"
+  },
+  {
+    "repository": "Minerchu/SpektraLab-iOS",
+    "url": "https://github.com/Minerchu/SpektraLab-iOS",
+    "default_branch": "main",
+    "sha": "716f7e124229d95b887a1bbc5bea35b295946790",
+    "commit_time": "2026-11-05T16:25:13Z",
+    "license": null,
+    "tree_truncated": false,
+    "tree_entries": 137,
+    "commit_api": "https://api.github.com/repos/Minerchu/SpektraLab-iOS/commits/716f7e124229d95b887a1bbc5bea35b295946790"
+  },
+  {
+    "repository": "NaoeRiki21/SpektraLab_Android",
+    "url": "https://github.com/NaoeRiki21/SpektraLab_Android",
+    "default_branch": "android",
+    "sha": "597588127c4f1372a14b02a871a3c71794cd6d31",
+    "commit_time": "2026-11-04T17:12:59Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 863,
+    "commit_api": "https://api.github.com/repos/NaoeRiki21/SpektraLab_Android/commits/597588127c4f1372a14b02a871a3c71794cd6d31"
+  },
+  {
+    "repository": "SAINTTaiYi/SpektraLab-Android",
+    "url": "https://github.com/SAINTTaiYi/SpektraLab-Android",
+    "default_branch": "master",
+    "sha": "08183cd4de3d910107a730e149fda9f7e8ce6254",
+    "commit_time": "2026-11-08T22:08:22Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 72,
+    "commit_api": "https://api.github.com/repos/SAINTTaiYi/SpektraLab-Android/commits/08183cd4de3d910107a730e149fda9f7e8ce6254"
+  },
+  {
+    "repository": "Shawn-SU-1/zhaoye",
+    "url": "https://github.com/Shawn-SU-1/zhaoye",
+    "default_branch": "main",
+    "sha": "fc9802af8cb98560b61df75e04c0a5ed57583d7b",
+    "commit_time": "2026-11-01T07:26:25Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 363,
+    "commit_api": "https://api.github.com/repos/Shawn-SU-1/zhaoye/commits/fc9802af8cb98560b61df75e04c0a5ed57583d7b"
+  },
+  {
+    "repository": "thetechgeekko/Spektrafilm-android",
+    "url": "https://github.com/thetechgeekko/Spektrafilm-android",
+    "default_branch": "main",
+    "sha": "0f1ddd1142a716729e636de3f73fc91e0d5fdc5e",
+    "commit_time": "2026-11-09T03:48:14Z",
+    "license": "GPL-3.0",
+    "tree_truncated": false,
+    "tree_entries": 1563,
+    "commit_api": "https://api.github.com/repos/thetechgeekko/Spektrafilm-android/commits/0f1ddd1142a716729e636de3f73fc91e0d5fdc5e"
+  }
+]

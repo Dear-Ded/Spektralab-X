@@ -110,16 +110,17 @@ class SourceLoader(private val context: Context) {
      */
     fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Photo {
         val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
-        var space = "sRGB"
         var sourceWidth = 0
         var sourceHeight = 0
+        var highPrecisionSdr = false
         val source = ImageDecoder.createSource(context.contentResolver, uri)
         val decoded = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             sourceWidth = info.size.width
             sourceHeight = info.size.height
+            highPrecisionSdr = encodedSdrSource(info.colorSpace)
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.setTargetColorSpace(
-                if (wideSource(info.colorSpace)) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
+                if (wideSource(info.colorSpace)) p3 else ColorSpace.get(ColorSpace.Named.SRGB)
             )
             val s = fitScale(info.size.width, info.size.height, edge, maxPixels)
             if (s < 1.0) decoder.setTargetSize(max(1, (info.size.width * s).toInt()), max(1, (info.size.height * s).toInt()))
@@ -127,22 +128,59 @@ class SourceLoader(private val context: Context) {
         // Taken before any rescale or copy: the gain map is sampled by
         // normalised position, so the base's final size does not matter.
         val gain = if (android.os.Build.VERSION.SDK_INT >= 34) GainmapReader.read(decoded) else null
-        // setTargetSize is a hint some decoders ignore (seen with DNG and very
-        // large HEIC in another port), so enforce both working-size limits.
-        var out = decoded
-        val s = fitScale(out.width, out.height, edge, maxPixels)
-        if (s < 1.0) {
-            val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
-            if (scaled !== out) out.recycle()
-            out = scaled
-        }
-        if (out.config == Bitmap.Config.ARGB_8888) return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
-        val copy = out.copy(Bitmap.Config.ARGB_8888, false)
-        out.recycle()
-        return Photo(copy ?: throw EngineException("无法转换图像格式"), space, gain?.first, gain?.second, sourceWidth, sourceHeight)
+        val hasGainmap = android.os.Build.VERSION.SDK_INT >= 34 && decoded.hasGainmap()
+        return preparePhoto(decoded, gain, edge, maxPixels, sourceWidth, sourceHeight,
+            highPrecisionSdr && !hasGainmap)
     }
 
     companion object {
+        /** Owns decoder pixels until a validated photo takes them, including on failure. */
+        internal fun preparePhoto(decoded: Bitmap, gain: Pair<Bitmap, FloatArray>?, edge: Int, maxPixels: Long,
+                                  sourceWidth: Int, sourceHeight: Int, highPrecisionSdr: Boolean = true): Photo {
+            var out = decoded
+            try {
+                // Enforce both limits on the actual decoder result, including providers
+                // whose decoder did not honour the requested working dimensions.
+                val s = fitScale(out.width, out.height, edge, maxPixels)
+                if (s < 1.0) {
+                    val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
+                    if (scaled !== out) out.recycle()
+                    out = scaled
+                }
+                val keepF16 = highPrecisionSdr && gain == null && out.config == Bitmap.Config.RGBA_F16
+                if (out.config != Bitmap.Config.ARGB_8888 && !keepF16) {
+                    val copy = out.copy(Bitmap.Config.ARGB_8888, false)
+                        ?: throw EngineException("无法转换图像格式")
+                    out.recycle()
+                    out = copy
+                }
+                // A requested ImageDecoder target is not a guarantee. Never label
+                // another transfer function or gamut as the engine's sRGB/P3 input.
+                val cs = out.colorSpace
+                val space = when {
+                    cs?.isSrgb == true && (!keepF16 || cs == ColorSpace.get(ColorSpace.Named.SRGB)) -> "sRGB"
+                    cs == ColorSpace.get(ColorSpace.Named.DISPLAY_P3) -> "Display P3"
+                    keepF16 && cs == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB) -> "sRGB"
+                    else -> throw EngineException("无法转换图像色彩空间：${cs?.name ?: "unknown"}")
+                }
+                return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
+            } catch (failure: Throwable) {
+                out.recycle()
+                gain?.first?.recycle()
+                throw failure
+            }
+        }
+
+        /** Header eligibility only; the prepared bitmap's actual target tag is checked separately. */
+        internal fun encodedSdrSource(space: ColorSpace?): Boolean {
+            if (space == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)) return true
+            val rgb = space as? ColorSpace.Rgb ?: return false
+            val transfer = rgb.transferParameters ?: return false
+            return transfer.g > 1.0 && (0..2).all {
+                rgb.getMinValue(it) == 0f && rgb.getMaxValue(it) == 1f
+            }
+        }
+
         val RAW_EXTENSIONS = setOf(
             "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
             "srw", "x3f", "3fr", "iiq", "erf", "kdc", "mrw", "rwl", "raw", "mos", "mef", "dcr",
@@ -167,23 +205,49 @@ class SourceLoader(private val context: Context) {
 
         /**
          * Whether a photo in [cs] should open in Display P3 rather than sRGB.
-         * Judged by primaries, not object identity: an ICC-tagged P3 JPEG or a
-         * HEIC with nclx P3 (Xiaomi) decodes to a ColorSpace.Rgb that is not
-         * the named DISPLAY_P3 instance, and was converted to sRGB before.
-         * A wider space (BT.2020 HDR HEIC, Adobe RGB, DCI-P3) also goes to P3:
-         * the engine takes only sRGB and P3, and P3 keeps more of it than sRGB.
+         * Compare gamut boundaries at the same D65 white, including small
+         * gamuts that extend beyond just one sRGB edge. P3 is the wider input
+         * target available here; this does not promise arbitrary ICC or HDR preservation.
          */
         fun wideSource(cs: ColorSpace?): Boolean {
             val rgb = cs as? ColorSpace.Rgb ?: return false
-            return gamutArea(rgb.getPrimaries()) > SRGB_AREA * 1.05
+            val adapted = runCatching {
+                val white = (ColorSpace.get(ColorSpace.Named.SRGB) as ColorSpace.Rgb).whitePoint
+                ColorSpace.adapt(rgb, white,
+                    ColorSpace.Adaptation.BRADFORD) as ColorSpace.Rgb
+            }.getOrNull() ?: return false
+            // adapt() changes the XYZ transform but retains the original primaries field.
+            val matrix = adapted.transform
+            val primaries = FloatArray(6)
+            for (c in 0..2) {
+                val sum = matrix[3 * c].toDouble() + matrix[3 * c + 1] + matrix[3 * c + 2]
+                if (!sum.isFinite() || sum <= 0.0) return false
+                primaries[2 * c] = (matrix[3 * c] / sum).toFloat()
+                primaries[2 * c + 1] = (matrix[3 * c + 1] / sum).toFloat()
+            }
+            return primariesOutsideSrgb(primaries)
         }
 
-        // The xy triangle's area of [x0, y0, x1, y1, x2, y2] primaries.
-        fun gamutArea(p: FloatArray): Double =
-            kotlin.math.abs((p[2] - p[0]).toDouble() * (p[5] - p[1]) - (p[4] - p[0]).toDouble() * (p[3] - p[1])) / 2
+        /** Finite, non-degenerate xy triangles only; both triangles must use D65. */
+        internal fun primariesOutsideSrgb(p: FloatArray): Boolean {
+            if (p.size != 6 || p.any { !it.isFinite() }) return false
+            val determinant = (p[2] - p[0]).toDouble() * (p[5] - p[1]) -
+                (p[4] - p[0]).toDouble() * (p[3] - p[1])
+            if (kotlin.math.abs(determinant) <= 1e-12) return false
+            for (c in 0..2) for (edge in 0..2) {
+                val next = (edge + 1) % 3
+                val ax = SRGB_PRIMARIES[2 * edge].toDouble()
+                val ay = SRGB_PRIMARIES[2 * edge + 1].toDouble()
+                val dx = SRGB_PRIMARIES[2 * next] - ax
+                val dy = SRGB_PRIMARIES[2 * next + 1] - ay
+                val side = dx * (p[2 * c + 1] - ay) - dy * (p[2 * c] - ax)
+                // The sRGB vertices are counterclockwise; tolerate 1e-4 xy distance.
+                if (side < -1e-4 * sqrt(dx * dx + dy * dy)) return true
+            }
+            return false
+        }
 
-        // sRGB 0.1121, Display P3 0.1520, BT.2020 0.2119.
-        private val SRGB_AREA = gamutArea(floatArrayOf(0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f))
+        private val SRGB_PRIMARIES = floatArrayOf(0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f)
 
         /** Scale that fits (w, h) inside [edge] on the long side and [maxPixels] in area; 0 = no limit. */
         fun fitScale(w: Int, h: Int, edge: Int, maxPixels: Long): Double {

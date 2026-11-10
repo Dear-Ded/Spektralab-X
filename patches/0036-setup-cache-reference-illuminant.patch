@@ -1,0 +1,13 @@
+diff --git a/engine/src/core/setup_cache.cpp b/engine/src/core/setup_cache.cpp
+--- a/engine/src/core/setup_cache.cpp
++++ b/engine/src/core/setup_cache.cpp
+@@ -30,5 +30,9 @@ std::string tc_lut_key(const Profile& film, const SettingsParams& settings,
+                        const GamutCompressSpec& compress, const Vec& sensitivity) {
+     std::string key = film.info.stock;
++    // Window normalization, the adaptation surface and compression's white
++    // axis all depend on the reference illuminant, even for the same stock.
++    key += "|i";
++    key += film.info.reference_illuminant;
+     key += '|';
+     key += digest(sensitivity.data(), sensitivity.size());
+     key += settings.apply_hanatos2025_adaptation_window ? "|w1" : "|w0";

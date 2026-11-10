@@ -7,8 +7,8 @@
 //            `display_transform`, gamut compression off);
 //   export   the same matrix, then CAM16-UCS chroma compression into the
 //            file's space with the lightness shoulder off -- the film print
-//            already applied it (engine.cpp's export branch, the Mac's
-//            ColourManagement.swift).
+//            already applied it. The late chroma knee follows the Mac's
+//            ColourManagement.swift file intent (d661b3b957ad, 2026-11-06).
 //
 // Every number comes from spk_output_transform. The per-pixel arithmetic is
 // upstream's own (engine/host/output.cpp), copied in at configure time
@@ -23,10 +23,12 @@
 
 #include "spektrafilm/spk_engine.h"
 #include "layer2.hpp"
+#include "output_cancel.hpp"
 
 namespace spk::android {
 
 class Layer2;
+class RawDevelopment;
 
 class OutputTransform {
 public:
@@ -61,10 +63,20 @@ private:
 
 // Engine RGBA16 (encoded ProPhoto) -> Layer 2 (optional) -> `xf` -> RGBA8.
 void pack_rgba8(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf);
+                uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf,
+                const OutputCancel& cancel = {});
 // The same into RGBA16 with a row stride of `w` pixels (TIFF).
 void pack_rgba16(const uint16_t* src, size_t src_stride_px, uint32_t w, uint32_t h,
-                 std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf);
+                 std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf,
+                 const OutputCancel& cancel = {});
+
+// No-film encoded ProPhoto RGB: grade first, quantise once, then convert.
+void pack_float_rgba8(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
+                      uint8_t* out, size_t out_stride, const Layer2* look, const OutputTransform& xf,
+                      const OutputCancel& cancel = {}, const RawDevelopment* development = nullptr);
+void pack_float_rgba16(const float* src, size_t src_stride_px, uint32_t w, uint32_t h,
+                       std::vector<uint16_t>& out, const Layer2* look, const OutputTransform& xf,
+                       const OutputCancel& cancel = {}, const RawDevelopment* development = nullptr);
 
 // One immutable full-frame geometry, with only the requested output rows in
 // memory. Called concurrently by TIFF workers; each supplies its own storage.
@@ -72,14 +84,44 @@ class Rgba16Rows {
 public:
     Rgba16Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
                const Layer2* look, const OutputTransform* xf);
-    void pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out) const;
+    Rgba16Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+               const Layer2* look, const OutputTransform* xf, const RawDevelopment* development = nullptr);
+    void pack(uint32_t y0, uint32_t count, std::vector<uint16_t>& out, const OutputCancel& cancel = {}) const;
 
 private:
-    const uint16_t* src_;
+    const uint16_t* src_ = nullptr;
+    const float* float_src_ = nullptr;
     size_t stride_;
     uint32_t w_, h_;
     const Layer2* look_;
     const OutputTransform* xf_;
+    const RawDevelopment* development_ = nullptr;
+    Layer2::Frame frame_;
+};
+
+// JPEG conversion with full-frame mask/texture coordinates and bounded rows.
+class Rgba8Rows {
+public:
+    Rgba8Rows(const uint16_t* src, size_t stride_px, uint32_t w, uint32_t h,
+              const Layer2* look, const OutputTransform* xf);
+    Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+              const Layer2* look, const OutputTransform* xf, const RawDevelopment* development = nullptr);
+    // Borrowed strip storage, retaining complete-frame grade/mask coordinates.
+    // A supplied frame must belong to this look and complete output dimensions.
+    Rgba8Rows(const float* src, size_t stride_px, uint32_t w, uint32_t h,
+              uint32_t source_y0, uint32_t source_rows, const Layer2* look, const OutputTransform* xf,
+              const Layer2::Frame* frame = nullptr, const RawDevelopment* development = nullptr);
+    void pack(uint32_t y0, uint32_t count, std::vector<uint8_t>& out, const OutputCancel& cancel = {}) const;
+
+private:
+    const uint16_t* src_ = nullptr;
+    const float* float_src_ = nullptr;
+    size_t stride_;
+    uint32_t w_, h_;
+    uint32_t source_y0_ = 0, source_rows_ = 0;
+    const Layer2* look_;
+    const OutputTransform* xf_;
+    const RawDevelopment* development_ = nullptr;
     Layer2::Frame frame_;
 };
 

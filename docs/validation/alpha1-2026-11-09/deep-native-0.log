@@ -1,0 +1,12 @@
+resize: 355 shapes/patterns byte-identical
+gainmap: 4100 scalar equations and bilinear/gamma order passed
+look: LUT retention and allocation-failure transactions passed
+brightness original range: 458759 float32 samples, fnv1a=8453ce96a5c26714
+brightness outside range: 64 legal-control/threshold cases passed
+local recovered channels: 6 masked HDR/signed cases passed
+local ordinary domain: 36873 RGB triplets byte-identical
+curves: 1787 curves, 1148285 double/float samples byte-identical
+DNG ForwardMatrix math: single/dual, AB+CC, explicit WB, gray/HDR, fallback passed
+setup cache: rotation, eviction, 4000 concurrent reads, complete gamut keys and cache destruction passed
+FIR: 3600 radius boundaries and kernel bytes unchanged; demand allocation-free; nonpositive sigma identity passed
+native tests passed (/data/work/gpt-alpha1-20261109/deep-native-0)

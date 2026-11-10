@@ -1,0 +1,53 @@
+{
+  "date_utc": "2026-11-09",
+  "host": "IBX",
+  "platform": "Linux x86_64",
+  "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+  "codec": "libjpeg-turbo 3.2.0, independently built static library from official tag archive",
+  "codec_archive_sha256": "980dd81f425082aa6d7c9e47fef27554ce7a9ffc8e2f6e863b97d263c5c50858",
+  "baseline_writer_sha256": "b1c720d6422a84423d07c819c3321b79c04cc63d5ec8b2a9d5af95be90f6cdc2",
+  "remote_workspace": "/data/work/engine-deepdive/jpeg-rows-20261109",
+  "engine_workspace": "/data/work/engine-deepdive/scene-curve-0029",
+  "regression": {
+    "strict": { "cases": 48, "complete_file_comparisons": 384, "max_scratch_bytes": 25220, "frozen_baseline": true, "cleanup": "passed", "exit_code": 0 },
+    "default": { "cases": 48, "complete_file_comparisons": 384, "max_scratch_bytes": 25220, "frozen_baseline": true, "cleanup": "passed", "exit_code": 0 }
+  },
+  "memory": {
+    "dimensions": [4097, 3073],
+    "separate_processes": true,
+    "stage": "after OutputTransform preparation, before source allocation, through conversion and JPEG encoding",
+    "vmhwm_reset": "/proc/self/clear_refs value 5, successful",
+    "output_transform": "production export path, xf.fetch(engine, sRGB, true)",
+    "strict_rgba16_full": { "stage_start_rss_kib": 70176, "stage_peak_rss_kib": 217524, "startup_peak_rss_kib": 868124, "lifetime_peak_rss_kib": 868124, "conversion_bytes": 50360324 },
+    "strict_rgba16_rows": { "stage_start_rss_kib": 70168, "stage_peak_rss_kib": 168800, "startup_peak_rss_kib": 868524, "lifetime_peak_rss_kib": 868524, "conversion_bytes": 524416 },
+    "strict_float_full": { "stage_start_rss_kib": 70148, "stage_peak_rss_kib": 266592, "startup_peak_rss_kib": 868440, "lifetime_peak_rss_kib": 868440, "conversion_bytes": 50360324 },
+    "strict_float_rows": { "stage_start_rss_kib": 70348, "stage_peak_rss_kib": 218260, "startup_peak_rss_kib": 868720, "lifetime_peak_rss_kib": 868720, "conversion_bytes": 524416 },
+    "default_rgba16_full": { "stage_start_rss_kib": 70292, "stage_peak_rss_kib": 217788, "startup_peak_rss_kib": 868588, "lifetime_peak_rss_kib": 868588, "conversion_bytes": 50360324 },
+    "default_rgba16_rows": { "stage_start_rss_kib": 70172, "stage_peak_rss_kib": 168764, "startup_peak_rss_kib": 868676, "lifetime_peak_rss_kib": 868676, "conversion_bytes": 524416 },
+    "default_float_full": { "stage_start_rss_kib": 70288, "stage_peak_rss_kib": 266624, "startup_peak_rss_kib": 868332, "lifetime_peak_rss_kib": 868332, "conversion_bytes": 50360324 },
+    "default_float_rows": { "stage_start_rss_kib": 70240, "stage_peak_rss_kib": 217864, "startup_peak_rss_kib": 868476, "lifetime_peak_rss_kib": 868476, "conversion_bytes": 524416 },
+    "strict_rgba16_peak_reduction_kib": 48724,
+    "default_rgba16_peak_reduction_kib": 49024,
+    "strict_float_peak_reduction_kib": 48332,
+    "default_float_peak_reduction_kib": 48760,
+    "rgba16_all_modes_file_bytes": 8220293,
+    "rgba16_all_modes_complete_file_fnv1a64": "878c34fc8cfdc26a",
+    "float_all_modes_file_bytes": 10329310,
+    "float_all_modes_complete_file_fnv1a64": "9dab12e107beae95",
+    "all_eight_exit_codes": [0, 0, 0, 0, 0, 0, 0, 0]
+  },
+  "source_sha256": {
+    "tools/native/jpeg_rows.cpp": "5d820534e36ffd3c5a6c87a87e4ad02d44e05da440bf79d9a8e3488130e40a8a",
+    "app/src/main/cpp/jpeg444.cpp": "744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a",
+    "app/src/main/cpp/output_transform.cpp": "d72120cdc9058030eff4be26a2db40f64bae3c91b351b6fbc95a5e5793717a99",
+    "app/src/main/cpp/rgba8_spool.hpp": "40d908a438852330591bddaaa22d955b42261134a262bf9347a243a124db01ae"
+  },
+  "notes": [
+    "Strict/default changes the harness, adapter and codec wrapper flags; the existing engine archives are shared.",
+    "The memory measurement covers output conversion and encoding, not RAW decode or an Android export session.",
+    "The test removes each JPEG after computing its complete-file FNV-1a hash. All final regression and memory processes returned 0.",
+    "Startup dominates lifetime peak for all eight processes; the measured improvement is in the output stage, not total process lifetime peak.",
+    "ibx-intermediate.log preserves the earlier display-transform trial. Its lifetime label was inaccurate because reset5 also resets getrusage high-water accounting; final v3 measurements capture startup before reset and combine startup/end peaks.",
+    "This is independent host CPU evidence, not Android GPU, JNI cancellation or device OOM validation."
+  ]
+}

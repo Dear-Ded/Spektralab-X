@@ -29,4 +29,15 @@ object DisplayColor {
     fun tag(bitmap: Bitmap) {
         if (space == "Display P3" && bitmap.colorSpace != p3) runCatching { bitmap.setColorSpace(p3) }
     }
+
+    /** Native packed file-target codes; setColorSpace labels, rather than converts, them. */
+    fun tagOutput(bitmap: Bitmap, target: String) {
+        val colorSpace = when (target) {
+            "sRGB" -> ColorSpace.get(ColorSpace.Named.SRGB)
+            "Display P3" -> p3
+            else -> throw IllegalArgumentException("Unsupported output color space: $target")
+        }
+        bitmap.setColorSpace(colorSpace)
+        check(bitmap.colorSpace == colorSpace) { "Output color space was not applied" }
+    }
 }

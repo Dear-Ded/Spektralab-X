@@ -1,0 +1,264 @@
+Fuse Vulkan DIR finishing and XYZ/CAM16 while retaining the separated paths.
+
+Selective adaptation of the Metal implementations in JamesQiu2005/SpektraLab
+main d4b8145f6f9bdade15cda014776e99521adf0b5f. Keep Android dispatch chunking,
+buffer lifetimes, matrix storage conventions and existing CAM16 expressions.
+Only SPK_VULKAN_FUSION=on enables both experimental fusions. Unset, off and
+unknown values retain the unchanged reference path. Mobile default remains
+off pending real-device validation; this diagnostic environment switch is
+not an Android user recovery control.
+Test-only group-X reduction exercises chunk boundaries without exceeding
+advertised buffer limits. Production dispatch limits remain unchanged.
+Co-created with GPT (OpenAI), 2026-11-09.
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+index 304083d..3aaa268 100644
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -136,9 +136,9 @@ if(SPEKTRALAB_PORTABLE_BACKEND)
+         set(SPEKTRALAB_VULKAN_KERNELS
+             spk_math_probe spk_split_probe spk_take_rgb spk_matmul3 spk_stride_sample
+             spk_affine3 spk_tc_b spk_lut2d_cubic spk_sep_fir_acc spk_sep_fir_rows spk_iir_df_acc
+-            spk_lincomb3 spk_log10_guarded spk_curves
++            spk_lincomb3 spk_log10_guarded spk_curves spk_dir_finish
+             spk_couplers_correction spk_spectral_epilogue
+-            spk_print_exposure spk_cam16ucs_compress
++            spk_print_exposure spk_cam16ucs_compress spk_xyz_cam16_compress
+             spk_cctf_encode_matrix spk_to_rgba16
+             spk_view_grade spk_view_grade_float spk_view_grade_di spk_view_geometry spk_view_pack spk_view_cam16 spk_view_pair
+             spk_grain_layers spk_grain_layer_one spk_grain_simple
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index bc5e530..ba81c46 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -56,6 +56,7 @@ struct Buffer {
+ 
+ // Test-only entry point: exercise fail-fast without provoking a GPU reset.
+ bool test_latch_device_lost(Gpu* gpu, std::string& error);
++bool test_limit_dispatch_groups_x(Gpu* gpu, uint32_t limit, std::string& error);
+ 
+ namespace {
+ 
+@@ -89,10 +90,12 @@ constexpr KernelSpec kKernels[] = {
+     {"spk_lincomb3", 6, kWorkgroup},
+     {"spk_log10_guarded", 4, kWorkgroup},
+     {"spk_curves", 6, kWorkgroup},
++    {"spk_dir_finish", 7, kWorkgroup},
+     {"spk_couplers_correction", 7, kWorkgroup},
+     {"spk_spectral_epilogue", 7, kWorkgroup},
+     {"spk_print_exposure", 4, kWorkgroup},
+     {"spk_cam16ucs_compress", 7, kWorkgroup},
++    {"spk_xyz_cam16_compress", 8, kWorkgroup},
+     {"spk_cctf_encode_matrix", 4, kWorkgroup},
+     {"spk_to_rgba16", 3, kWorkgroup},
+     {"spk_view_grade", 5, kWorkgroup},
+@@ -800,7 +803,9 @@ public:
+         // corrupt larger ones (and upstream's fold into a second group
+         // dimension starts exactly there), so the threads go out in 1D chunks,
+         // each told its first index through a push constant.
+-        const size_t max_x = properties_.limits.maxComputeWorkGroupCount[0];
++        const uint32_t test_cap = test_dispatch_groups_x_.load(std::memory_order_relaxed);
++        const size_t max_x = test_cap ? std::min(test_cap, properties_.limits.maxComputeWorkGroupCount[0])
++                                     : properties_.limits.maxComputeWorkGroupCount[0];
+         const size_t wall = (size_t(1) << 24) / spec->workgroup * spec->workgroup;
+         const size_t chunk_threads = std::min(max_x * spec->workgroup, wall);
+         if (n_threads > size_t(UINT32_MAX)) {
+@@ -1041,6 +1046,8 @@ public:
+ 
+ private:
+     friend bool ::spk::gpu::test_latch_device_lost(Gpu* gpu, std::string& error);
++    friend bool ::spk::gpu::test_limit_dispatch_groups_x(Gpu* gpu, uint32_t limit, std::string& error);
++    std::atomic<uint32_t> test_dispatch_groups_x_{0};
+ 
+     using Clock = std::chrono::steady_clock;
+     static constexpr size_t kMaxStagingBytes = size_t(64) * 1024 * 1024;
+@@ -1562,6 +1569,17 @@ bool test_latch_device_lost(Gpu* gpu, std::string& error) {
+     return true;
+ }
+ 
++bool test_limit_dispatch_groups_x(Gpu* gpu, uint32_t limit, std::string& error) {
++    auto* vulkan = dynamic_cast<VulkanGpu*>(gpu);
++    if (!vulkan) { error = "not a Vulkan backend"; return false; }
++    if (limit > vulkan->properties_.limits.maxComputeWorkGroupCount[0]) {
++        error = "test dispatch limit may only reduce the advertised limit";
++        return false;
++    }
++    vulkan->test_dispatch_groups_x_.store(limit, std::memory_order_relaxed);
++    return true;
++}
++
+ Gpu* Gpu::create_vulkan(const std::string& shader_dir, std::string& error) {
+     auto gpu = std::make_unique<VulkanGpu>(shader_dir);
+     if (!gpu->initialize(error)) return nullptr;
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+index 0446f92..c94dbe7 100644
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -49,6 +49,15 @@ uint32_t cctf_mode_for(const std::string& cs) {
+ 
+ namespace {
+ 
++bool vulkan_fusion_enabled() {
++#if defined(SPK_VULKAN_BACKEND)
++    const char* mode = std::getenv("SPK_VULKAN_FUSION");
++    return mode && std::strcmp(mode, "on") == 0;
++#else
++    return false;
++#endif
++}
++
+ constexpr double kMidgray = 0.184;
+ // RFC-015 §2.3's four intents. `s_hi` and `s_lo` are how far past mid-grey a
+ // frame may sit before the protect modes act; §2.4 would take them from the
+@@ -1327,6 +1336,16 @@ bool Pipeline::node_dir_couplers(Image cmy, Image log_raw, Image& out,
+         corr = diffused;
+     }
+ 
++    if (vulkan_fusion_enabled()) {
++        if (!alloc_like(log_raw, out, error)) return false;
++        const uint32_t meta[2] = {uint32_t(baked_.film_curve_k), uint32_t(log_raw.pixels())};
++        return gpu_->dispatch("spk_dir_finish", {
++            gpu::Arg::buf(log_raw.buf), gpu::Arg::buf(baked_.coupler_curve_x),
++            gpu::Arg::buf(baked_.coupler_curve_inv), gpu::Arg::buf(baked_.coupler_curve_y),
++            gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(out.buf), gpu::Arg::buf(corr.buf)
++        }, log_raw.pixels(), error);
++    }
++
+     double a[3], b[3];
+     fill3(a, 1.0);
+     fill3(b, -1.0);
+@@ -2098,8 +2117,26 @@ bool Pipeline::print_glare(Chain in, Chain& out, std::string& error) {
+ bool Pipeline::print_linear(Chain in, Chain& out, std::string& error) {
+     if (di_active_) { out = std::move(in); return true; }   // the DI is already its own encoded output
+     Image cur = std::move(in.cur), next;
++    if (vulkan_fusion_enabled() && params_.io.output_gamut_compress.algorithm == "cam16ucs") {
++        if (progress_ && progress_->cancelled) { error = "render cancelled"; return false; }
++        Timer timer(this, "scanning.xyz_gamut_fused");
++        if (!alloc_like(cur, next, error)) return false;
++        const uint32_t meta[4] = {uint32_t(cur.pixels()), uint32_t(baked_.cam16_nl),
++                                 uint32_t(baked_.cam16_nh), baked_.cam16_lightness ? 1u : 0u};
++        if (!gpu_->dispatch("spk_xyz_cam16_compress", {
++            gpu::Arg::buf(cur.buf), gpu::Arg::buf(baked_.cam16_m2x),
++            gpu::Arg::buf(baked_.cam16_m2r), gpu::Arg::buf(baked_.cam16_cmax),
++            gpu::Arg::buf(baked_.cam16_k), gpu::Arg::inline_bytes(meta, 4),
++            gpu::Arg::buf(next.buf), gpu::Arg::buf(baked_.xyz_to_rgb)
++        }, cur.pixels(), error)) return false;
++        cur = std::move(next);
++        if (!gpu_->flush(error)) return false;
++        // Progress still counts the two semantic nodes represented by this dispatch.
++        if (progress_) ++progress_->fired;
++    } else {
+     SPK_NODE(advance_if_ok(node_xyz_to_rgb(cur, next, error), cur, next));
+     SPK_NODE(advance_if_ok(node_gamut_compress(cur, next, error), cur, next));
++    }
+     out = std::move(in);
+     out.cur = std::move(cur);
+     return true;
+diff --git a/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl b/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+index 77b79ac..3b77f6e 100644
+--- a/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
++++ b/engine/src/shaders/vulkan/spk_cam16ucs_body.glsl
+@@ -13,6 +13,9 @@ layout(set = 0, binding = 6, std430) writeonly buffer Output { float value[]; }
+ #ifdef SPK_VIEW_STATS
+ layout(set = 0, binding = 7, std430) buffer Stats { uint value[]; } stats;
+ #endif
++#ifdef SPK_XYZ_INPUT
++layout(set = 0, binding = 7, std430) readonly buffer Conversion { float value[]; } conversion;
++#endif
+ 
+ // vulkan_gpu.cpp folds a dispatch past maxComputeWorkGroupCount[0] (65535 on
+ // lavapipe and Intel) into rows of workgroups; this is the 1D index it means.
+@@ -38,8 +41,18 @@ void main() {
+     float e_c = pow(1.64 - pow(0.29, n_value), 0.73);
+     float FL4 = pow(F_L, 0.25);
+ 
++#ifdef SPK_XYZ_INPUT
++    // Keep spk_matmul3's float expressions and transposed storage convention.
++    // Do not combine this matrix with m2x or reorder its additions.
++    float in_x = input_data.value[3u * i], in_y = input_data.value[3u * i + 1u];
++    float in_z = input_data.value[3u * i + 2u];
++    float r = in_x * conversion.value[0] + in_y * conversion.value[3] + in_z * conversion.value[6];
++    float g = in_x * conversion.value[1] + in_y * conversion.value[4] + in_z * conversion.value[7];
++    float b_input = in_x * conversion.value[2] + in_y * conversion.value[5] + in_z * conversion.value[8];
++#else
+     float r = input_data.value[3u * i], g = input_data.value[3u * i + 1u];
+     float b_input = input_data.value[3u * i + 2u];
++#endif
+     float X = m2x.value[0] * r + m2x.value[1] * g + m2x.value[2] * b_input;
+     float Y = m2x.value[3] * r + m2x.value[4] * g + m2x.value[5] * b_input;
+     float Z = m2x.value[6] * r + m2x.value[7] * g + m2x.value[8] * b_input;
+diff --git a/engine/src/shaders/vulkan/spk_dir_finish.comp b/engine/src/shaders/vulkan/spk_dir_finish.comp
+new file mode 100644
+index 0000000..a4c0d26
+--- /dev/null
++++ b/engine/src/shaders/vulkan/spk_dir_finish.comp
+@@ -0,0 +1,46 @@
++#version 450
++
++// The existing lincomb(1, -1) followed by spk_curves, without its RGB plane.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
++layout(local_size_x = 256) in;
++layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } input_data;
++layout(set = 0, binding = 1, std430) readonly buffer XAxis { float value[]; } x_axis;
++layout(set = 0, binding = 2, std430) readonly buffer InverseSteps { float value[]; } inverse_steps;
++layout(set = 0, binding = 3, std430) readonly buffer YAxis { float value[]; } y_axis;
++layout(set = 0, binding = 4, std430) readonly buffer Meta { uint value[]; } meta;
++layout(set = 0, binding = 5, std430) writeonly buffer Output { float value[]; } output_data;
++layout(set = 0, binding = 6, std430) readonly buffer Correction { float value[]; } correction;
++
++uint spk_global_index() {
++    return gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x)
++           + gl_GlobalInvocationID.x + spk_pc.base;
++}
++
++float interpolate(uint count, uint channel, float value) {
++    float x0 = x_axis.value[channel];
++    float x_last = x_axis.value[(count - 1u) * 3u + channel];
++    if (value <= x0) return y_axis.value[channel];
++    if (value >= x_last) return y_axis.value[(count - 1u) * 3u + channel];
++    uint lo = 0u, hi = count;
++    while (lo < hi) {
++        uint mid = lo + ((hi - lo) >> 1u);
++        if (x_axis.value[mid * 3u + channel] <= value) lo = mid + 1u;
++        else hi = mid;
++    }
++    uint low = lo - 1u;
++    float fraction = (value - x_axis.value[low * 3u + channel])
++                     * inverse_steps.value[low * 3u + channel];
++    float y0 = y_axis.value[low * 3u + channel];
++    float y1 = y_axis.value[(low + 1u) * 3u + channel];
++    return y0 + fraction * (y1 - y0);
++}
++
++void main() {
++    uint pixel = spk_global_index();
++    if (pixel >= meta.value[1]) return;
++    for (uint channel = 0u; channel < 3u; ++channel) {
++        uint i = 3u * pixel + channel;
++        float corrected = 1.0 * input_data.value[i] + -1.0 * correction.value[i];
++        output_data.value[i] = interpolate(meta.value[0], channel, corrected);
++    }
++}
+diff --git a/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp b/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+new file mode 100644
+index 0000000..d71fcb2
+--- /dev/null
++++ b/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+@@ -0,0 +1,5 @@
++#version 450
++#extension GL_GOOGLE_include_directive : require
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
++#define SPK_XYZ_INPUT 1
++#include "spk_cam16ucs_body.glsl"
+diff --git a/engine/tests/vulkan_test_hooks.hpp b/engine/tests/vulkan_test_hooks.hpp
+index 8e2d3a8..844bbce 100644
+--- a/engine/tests/vulkan_test_hooks.hpp
++++ b/engine/tests/vulkan_test_hooks.hpp
+@@ -17,4 +17,8 @@ namespace spk::gpu {
+ // false when `gpu` is not the Vulkan backend.
+ bool test_latch_device_lost(Gpu* gpu, std::string& error);
+ 
++// Reduce the dispatch's X group limit to exercise base-index chunks with small
++// legal buffers. Zero restores the actual device limit; larger limits fail.
++bool test_limit_dispatch_groups_x(Gpu* gpu, uint32_t limit, std::string& error);
++
+ }  // namespace spk::gpu

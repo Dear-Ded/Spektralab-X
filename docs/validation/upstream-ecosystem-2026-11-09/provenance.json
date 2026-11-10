@@ -1,0 +1,37 @@
+{
+  "author": "GPT (OpenAI)",
+  "date_zone": "Asia/Shanghai",
+  "collected_on": "2026-11-09",
+  "head_rechecked_at_utc": "2026-11-09T07:19:51Z",
+  "head_rechecked_at_local": "2026-11-09T15:19:51+08:00",
+  "network_inventory": {
+    "public_repositories": 303,
+    "source": "https://api.github.com/repos/andreavolpato/spektrafilm",
+    "observed_network_count": 303,
+    "root_direct_fork_pages": [100, 66],
+    "spektralab_direct_fork_pages": [100, 34],
+    "additional_recursive_parent_queries": [
+      "https://api.github.com/repos/vividcolour/spektrafilm-GrainOnly/forks?per_page=100&page=1",
+      "https://api.github.com/repos/evanfan005-bit/SpektraLab-Windows/forks?per_page=100&page=1",
+      "https://api.github.com/repos/LUOJW5566/SpektraLab/forks?per_page=100&page=1"
+    ],
+    "page_query": "GET /repos/{owner}/{repo}/forks?per_page=100&page=N&sort=newest",
+    "scope": "Public fork discovery only; inventory membership is not a source audit or a verified derivative claim."
+  },
+  "branches": {
+    "source": "https://api.github.com/repos/JamesQiu2005/SpektraLab/branches?per_page=100",
+    "count": 22,
+    "final_git_ls_remote_refs": ["refs/heads/main", "refs/heads/Windows_Linux", "refs/heads/windows_linux2"]
+  },
+  "priority_targets": {
+    "source": "GitHub repository metadata, default-branch commit and recursive Git tree endpoints",
+    "count": 12,
+    "scope": "Selected source files and README inspected; no external application builds or tests were executed. Harmony project had no application source."
+  },
+  "limitations": [
+    "Private, removed and detached derivatives are not exhaustively discoverable.",
+    "Search results overlap and may include unrelated repositories.",
+    "Some follow-up branch commit metadata requests hit HTTP limits; all branch names and SHAs came from one successful branches response.",
+    "Collection date is recorded; exact per-request wall times were not logged. Final HEAD recheck time is exact."
+  ]
+}

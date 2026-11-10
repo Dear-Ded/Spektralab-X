@@ -1,0 +1,68 @@
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 71b0ed2..4cae0fe 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -148,6 +148,31 @@ bool capture_source_metadata(const detail::CameraLibRaw& raw, RawMetadata& metad
+     // reads its source WB and white-level metadata from the same structure.
+     const auto& color = data.rawdata.color;
+     const auto& sizes = data.sizes;
++    const auto& levels = color.dng_levels;
++    auto& render = metadata.dng_render;
++    render.is_dng = data.idata.dng_version != 0;
++    const auto present = [&](unsigned bit) { return (levels.parsedfields & bit) != 0; };
++    const auto invalid = [&](unsigned bit) { return (levels.render_metadata_invalid & bit) != 0; };
++    render.baseline_exposure_present = present(LIBRAW_DNGFM_BASELINEEXPOSURE);
++    render.baseline_exposure_invalid = invalid(LIBRAW_DNGFM_BASELINEEXPOSURE);
++    render.baseline_exposure = levels.baseline_exposure;
++    render.baseline_exposure_offset_present = present(LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET);
++    render.baseline_exposure_offset_invalid = invalid(LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET);
++    render.baseline_exposure_offset = levels.baseline_exposure_offset;
++    render.default_black_render_present = present(LIBRAW_DNGFM_DEFAULTBLACKRENDER);
++    render.default_black_render_invalid = invalid(LIBRAW_DNGFM_DEFAULTBLACKRENDER);
++    render.default_black_render = levels.default_black_render;
++    render.profile_tone_curve_present = present(LIBRAW_DNGFM_PROFILETONECURVE);
++    render.profile_tone_curve_invalid = invalid(LIBRAW_DNGFM_PROFILETONECURVE);
++    const unsigned points = levels.profile_tone_curve_points;
++    if (points > 256) {
++        error = "RAW metadata: profile tone curve exceeds bounded storage";
++        return false;
++    }
++    for (unsigned point = 0; point < points; ++point)
++        render.profile_tone_curve.push_back({levels.profile_tone_curve[point][0], levels.profile_tone_curve[point][1]});
++    render.extra_camera_profiles = present(LIBRAW_DNGFM_EXTRACAMERAPROFILES);
++    render.profile_source_mismatch = levels.render_profile_source_mismatch != 0;
+     bool valid_camera_wb = true;
+     for (unsigned c = 0; c < 4; ++c) {
+         const float wb = color.cam_mul[c];
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index 26d54ba..823704b 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -47,7 +47,27 @@ struct RawSourceSizes {
+     double pixel_aspect = 1.0;
+ };
+ 
++// Main DNG profile rendering intent, retained without applying it to scene RGB.
++// Missing exposure fields default to zero; missing black render defaults Auto.
++// Invalid/present are distinct so a developed path cannot silently use fallback
++// for a malformed explicit tag. Extra profiles and mixed profile IFDs require
++// an explicit unsupported policy rather than combining unrelated calibration.
++struct RawDngRenderMetadata {
++    bool is_dng = false;
++    bool baseline_exposure_present = false, baseline_exposure_invalid = false;
++    double baseline_exposure = 0.0;
++    bool baseline_exposure_offset_present = false, baseline_exposure_offset_invalid = false;
++    double baseline_exposure_offset = 0.0;
++    bool default_black_render_present = false, default_black_render_invalid = false;
++    std::uint32_t default_black_render = 0;
++    bool profile_tone_curve_present = false, profile_tone_curve_invalid = false;
++    std::vector<std::array<float, 2>> profile_tone_curve;
++    bool extra_camera_profiles = false;
++    bool profile_source_mismatch = false;
++};
++
+ struct RawMetadata {
++    RawDngRenderMetadata dng_render;
+     std::string libraw_version;
+     std::uint32_t libraw_capabilities = 0;
+     std::string make, model, decoder_name;

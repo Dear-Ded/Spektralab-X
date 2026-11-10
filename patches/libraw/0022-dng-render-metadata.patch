@@ -1,0 +1,191 @@
+diff --git a/libraw/libraw_const.h b/libraw/libraw_const.h
+index 8eef3fc..7c03554 100644
+--- a/libraw/libraw_const.h
++++ b/libraw/libraw_const.h
+@@ -135,7 +135,11 @@ enum LibRaw_dngfields_marks
+   LIBRAW_DNGFM_OPCODE3 = 1 << 17,
+   LIBRAW_DNGFM_ASSHOTWHITEXY = 1 << 18,
+   LIBRAW_DNGFM_CAMERACALIBRATIONSIGNATURE = 1 << 19,
+-  LIBRAW_DNGFM_PROFILECALIBRATIONSIGNATURE = 1 << 20
++  LIBRAW_DNGFM_PROFILECALIBRATIONSIGNATURE = 1 << 20,
++  LIBRAW_DNGFM_PROFILETONECURVE = 1 << 21,
++  LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET = 1 << 22,
++  LIBRAW_DNGFM_DEFAULTBLACKRENDER = 1 << 23,
++  LIBRAW_DNGFM_EXTRACAMERAPROFILES = 1 << 24
+ };
+ 
+ enum LibRaw_As_Shot_WB_Applied_codes
+diff --git a/libraw/libraw_types.h b/libraw/libraw_types.h
+index d421284..d89d527 100644
+--- a/libraw/libraw_types.h
++++ b/libraw/libraw_types.h
+@@ -271,6 +271,13 @@ typedef unsigned long long UINT64;
+     char camera_calibration_signature[256];
+     char profile_calibration_signature[256];
+     unsigned calibration_signature_invalid;
++    /* Bounded main-profile rendering metadata; not applied to decoded pixels. */
++    float profile_tone_curve[256][2];
++    unsigned profile_tone_curve_points;
++    double baseline_exposure_offset;
++    unsigned default_black_render;
++    unsigned render_metadata_invalid;
++    unsigned render_profile_source_mismatch;
+   } libraw_dng_levels_t;
+ 
+   typedef struct
+diff --git a/src/metadata/identify.cpp b/src/metadata/identify.cpp
+index 58fbb1f..7295e1f 100644
+--- a/src/metadata/identify.cpp
++++ b/src/metadata/identify.cpp
+@@ -1520,6 +1520,50 @@ void LibRaw::identify_process_dng_fields()
+ 			if (sidx >= 0)
+ 				imgdata.color.dng_levels.baseline_exposure =
+ 				tiff_ifd[sidx].dng_levels.baseline_exposure;
++            if (sidx >= 0)
++            {
++                imgdata.color.dng_levels.parsedfields |= LIBRAW_DNGFM_BASELINEEXPOSURE;
++                imgdata.color.dng_levels.render_metadata_invalid |=
++                    tiff_ifd[sidx].dng_levels.render_metadata_invalid & LIBRAW_DNGFM_BASELINEEXPOSURE;
++            }
++
++            // Rendering tags must belong to the same main profile as its CM/FM.
++            // Extra profile IFD offsets are never followed by this bounded path.
++            int render_profile_ifd = -1;
++            for (int subset = 0; subset < 2; ++subset)
++                for (int field = 0; field < 2; ++field)
++                {
++                    const unsigned bit = field ? LIBRAW_DNGFM_FORWARDMATRIX : LIBRAW_DNGFM_COLORMATRIX;
++                    const int source = IFDCOLORINDEX(iifd, subset, bit);
++                    if (source < 0) continue;
++                    if (render_profile_ifd < 0) render_profile_ifd = source;
++                    else if (render_profile_ifd != source)
++                        imgdata.color.dng_levels.render_profile_source_mismatch = 1;
++                }
++            const unsigned render_bits[] = {LIBRAW_DNGFM_PROFILETONECURVE,
++                LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET, LIBRAW_DNGFM_DEFAULTBLACKRENDER,
++                LIBRAW_DNGFM_EXTRACAMERAPROFILES};
++            for (unsigned field = 0; field < sizeof(render_bits) / sizeof(render_bits[0]); ++field)
++            {
++                const unsigned bit = render_bits[field];
++                const int source = IFDLEVELINDEX(iifd, bit);
++                if (source < 0) continue;
++                const libraw_dng_levels_t &levels = tiff_ifd[source].dng_levels;
++                imgdata.color.dng_levels.parsedfields |= bit;
++                imgdata.color.dng_levels.render_metadata_invalid |= levels.render_metadata_invalid & bit;
++                if (bit != LIBRAW_DNGFM_EXTRACAMERAPROFILES &&
++                    (render_profile_ifd < 0 || render_profile_ifd != source))
++                    imgdata.color.dng_levels.render_profile_source_mismatch = 1;
++                if (bit == LIBRAW_DNGFM_PROFILETONECURVE)
++                {
++                    COPYARR(imgdata.color.dng_levels.profile_tone_curve, levels.profile_tone_curve);
++                    imgdata.color.dng_levels.profile_tone_curve_points = levels.profile_tone_curve_points;
++                }
++                else if (bit == LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET)
++                    imgdata.color.dng_levels.baseline_exposure_offset = levels.baseline_exposure_offset;
++                else if (bit == LIBRAW_DNGFM_DEFAULTBLACKRENDER)
++                    imgdata.color.dng_levels.default_black_render = levels.default_black_render;
++            }
+ 
+ 			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_WHITE);
+ 			if (sidx >= 0 && tiff_ifd[sidx].dng_levels.dng_whitelevel[0])
+diff --git a/src/metadata/tiff.cpp b/src/metadata/tiff.cpp
+index 3df0bb0..faa39ba 100644
+--- a/src/metadata/tiff.cpp
++++ b/src/metadata/tiff.cpp
+@@ -59,6 +59,14 @@ int LibRaw::parse_tiff_ifd(INT64 base)
+     INT64 savepos = ftell(ifp);
+     if (len > 8 && savepos + len > 2 * fsize)
+     {
++      const unsigned render_bit = tag == 0xc6fc ? LIBRAW_DNGFM_PROFILETONECURVE :
++          tag == 0xc7a5 ? LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET :
++          tag == 0xc7a6 ? LIBRAW_DNGFM_DEFAULTBLACKRENDER :
++          tag == 0xc62a ? LIBRAW_DNGFM_BASELINEEXPOSURE : 0;
++      tiff_ifd[ifd].dng_levels.parsedfields |= render_bit;
++      tiff_ifd[ifd].dng_levels.render_metadata_invalid |= render_bit;
++      if (tag == 0xc6f5)
++        tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_EXTRACAMERAPROFILES;
+       fseek(ifp, save, SEEK_SET); // Recover tiff-read position!!
+       continue;
+     }
+@@ -1557,8 +1565,81 @@ int LibRaw::parse_tiff_ifd(INT64 base)
+     }
+     case 0xc62a: /* DNG: 50730 BaselineExposure */
+       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_BASELINEEXPOSURE;
++      tiff_ifd[ifd].dng_levels.render_metadata_invalid &= ~LIBRAW_DNGFM_BASELINEEXPOSURE;
++      if (type != 10 || len != 1 || savepos < 0 || savepos > fsize - 8)
++        tiff_ifd[ifd].dng_levels.render_metadata_invalid |= LIBRAW_DNGFM_BASELINEEXPOSURE;
++      else
++      {
++        get4();
++        const int denominator = (int)get4();
++        if (!denominator)
++          tiff_ifd[ifd].dng_levels.render_metadata_invalid |= LIBRAW_DNGFM_BASELINEEXPOSURE;
++        fseek(ifp, savepos, SEEK_SET);
++      }
+       tiff_ifd[ifd].dng_levels.baseline_exposure = getrealf(type);
+       break;
++    case 0xc6fc: /* 50940 ProfileToneCurve, FLOAT x/y pairs */
++    {
++      libraw_dng_levels_t &levels = tiff_ifd[ifd].dng_levels;
++      levels.parsedfields |= LIBRAW_DNGFM_PROFILETONECURVE;
++      levels.profile_tone_curve_points = 0;
++      levels.render_metadata_invalid &= ~LIBRAW_DNGFM_PROFILETONECURVE;
++      if (type != 11 || len < 4 || len > 512 || (len & 1) ||
++          savepos < 0 || savepos > fsize - INT64(len) * 4)
++      {
++        levels.render_metadata_invalid |= LIBRAW_DNGFM_PROFILETONECURVE;
++        break;
++      }
++      for (unsigned point = 0; point < len / 2; ++point)
++      {
++        const double x = getreal(type), y = getreal(type);
++        if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1) ||
++            (point && x <= levels.profile_tone_curve[point - 1][0]))
++          levels.render_metadata_invalid |= LIBRAW_DNGFM_PROFILETONECURVE;
++        levels.profile_tone_curve[point][0] = float(x);
++        levels.profile_tone_curve[point][1] = float(y);
++      }
++      if (!(levels.render_metadata_invalid & LIBRAW_DNGFM_PROFILETONECURVE))
++        levels.profile_tone_curve_points = len / 2;
++      break;
++    }
++    case 0xc7a5: /* 51109 BaselineExposureOffset, SRATIONAL */
++    {
++      libraw_dng_levels_t &levels = tiff_ifd[ifd].dng_levels;
++      levels.parsedfields |= LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET;
++      levels.baseline_exposure_offset = 0;
++      levels.render_metadata_invalid &= ~LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET;
++      if (type != 10 || len != 1 || savepos < 0 || savepos > fsize - 8)
++        levels.render_metadata_invalid |= LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET;
++      else
++      {
++        const int numerator = (int)get4(), denominator = (int)get4();
++        if (!denominator)
++          levels.render_metadata_invalid |= LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET;
++        else
++          levels.baseline_exposure_offset = double(numerator) / denominator;
++      }
++      break;
++    }
++    case 0xc7a6: /* 51110 DefaultBlackRender, LONG Auto=0/None=1 */
++    {
++      libraw_dng_levels_t &levels = tiff_ifd[ifd].dng_levels;
++      levels.parsedfields |= LIBRAW_DNGFM_DEFAULTBLACKRENDER;
++      levels.default_black_render = 0;
++      levels.render_metadata_invalid &= ~LIBRAW_DNGFM_DEFAULTBLACKRENDER;
++      if (type != 4 || len != 1 || savepos < 0 || savepos > fsize - 4)
++        levels.render_metadata_invalid |= LIBRAW_DNGFM_DEFAULTBLACKRENDER;
++      else
++      {
++        levels.default_black_render = get4();
++        if (levels.default_black_render > 1)
++          levels.render_metadata_invalid |= LIBRAW_DNGFM_DEFAULTBLACKRENDER;
++      }
++      break;
++    }
++    case 0xc6f5: /* 50933 ExtraCameraProfiles: detect only, do not follow offsets */
++      tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_EXTRACAMERAPROFILES;
++      break;
+     case 0xc62e: /* DNG: 50734 LinearResponseLimit */
+       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_LINEARRESPONSELIMIT;
+       tiff_ifd[ifd].dng_levels.LinearResponseLimit = getrealf(type);

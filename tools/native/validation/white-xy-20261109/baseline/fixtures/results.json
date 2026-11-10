@@ -1,0 +1,3602 @@
+[
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d50-cm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3149919807910919,
+      0.02055390179157257,
+      0.16260014474391937
+    ],
+    "error": "",
+    "case": "d50-cm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d50-cm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31499946117401123,
+      0.02056095376610756,
+      0.16259407997131348
+    ],
+    "error": "",
+    "case": "d50-cm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d50-fm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3149919807910919,
+      0.02055390179157257,
+      0.16260014474391937
+    ],
+    "error": "",
+    "case": "d50-fm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d50-fm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31499946117401123,
+      0.02056095376610756,
+      0.16259407997131348
+    ],
+    "error": "",
+    "case": "d50-fm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d65-cm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "d65-cm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d65-cm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "d65-cm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d65-fm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "d65-fm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "d65-fm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "d65-fm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "warm-cm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3974059522151947,
+      0,
+      0.07269398123025894
+    ],
+    "error": "",
+    "case": "warm-cm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "warm-cm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3974337577819824,
+      -0.04538210481405258,
+      0.07268355041742325
+    ],
+    "error": "",
+    "case": "warm-cm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "warm-fm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3974059522151947,
+      0,
+      0.07269398123025894
+    ],
+    "error": "",
+    "case": "warm-fm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "warm-fm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3974337577819824,
+      -0.04538210481405258,
+      0.07268355041742325
+    ],
+    "error": "",
+    "case": "warm-fm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "tint-cm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.269001305103302,
+      0.04469367489218712,
+      0.16360723972320557
+    ],
+    "error": "",
+    "case": "tint-cm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "tint-cm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2690146267414093,
+      0.04469692334532738,
+      0.16359281539916992
+    ],
+    "error": "",
+    "case": "tint-cm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "tint-fm",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.269001305103302,
+      0.04469367489218712,
+      0.16360723972320557
+    ],
+    "error": "",
+    "case": "tint-fm",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "tint-fm",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2690146267414093,
+      0.04469692334532738,
+      0.16359281539916992
+    ],
+    "error": "",
+    "case": "tint-fm",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-match",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "signature-match",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-match",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "signature-match",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-byte",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "signature-byte",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-byte",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "signature-byte",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-different",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718242108821869,
+      0.018707560375332832,
+      0.19401846826076508
+    ],
+    "error": "",
+    "case": "signature-different",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-different",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718159854412079,
+      0.018701832741498947,
+      0.19403095543384552
+    ],
+    "error": "",
+    "case": "signature-different",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-camera_only",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718242108821869,
+      0.018707560375332832,
+      0.19401846826076508
+    ],
+    "error": "",
+    "case": "signature-camera_only",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-camera_only",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718159854412079,
+      0.018701832741498947,
+      0.19403095543384552
+    ],
+    "error": "",
+    "case": "signature-camera_only",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-profile_only",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718242108821869,
+      0.018707560375332832,
+      0.19401846826076508
+    ],
+    "error": "",
+    "case": "signature-profile_only",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "signature-profile_only",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2718159854412079,
+      0.018701832741498947,
+      0.19403095543384552
+    ],
+    "error": "",
+    "case": "signature-profile_only",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "single-0",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31158924102783203,
+      0,
+      0.19488823413848877
+    ],
+    "error": "",
+    "case": "single-0",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "single-0",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.3116060197353363,
+      -0.020679760724306107,
+      0.1949041187763214
+    ],
+    "error": "",
+    "case": "single-0",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "single-1",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.30916303396224976,
+      0,
+      0.19337758421897888
+    ],
+    "error": "",
+    "case": "single-1",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "subifd-fallback",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "subifd-fallback",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "subifd-fallback",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "subifd-fallback",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "subifd-override",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "subifd-override",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "subifd-override",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "subifd-override",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-xy",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "invalid-xy",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-xy",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "invalid-xy",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-matrix",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW compatible16: no supported three-channel camera-to-ProPhoto transform",
+    "case": "invalid-matrix",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-matrix",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW headroom: no supported three-channel camera-to-ProPhoto transform",
+    "case": "invalid-matrix",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-signature-long",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "invalid-signature-long",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-signature-long",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "invalid-signature-long",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-signature-unterminated",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "invalid-signature-unterminated",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "invalid-signature-unterminated",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "invalid-signature-unterminated",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "error": "",
+    "case": "neutral-control",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.125490203499794,
+      0.12953384220600128,
+      0.12468146532773972
+    ],
+    "error": "",
+    "case": "neutral-control",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497390806674957,
+      0.12498192489147186,
+      0.12500132620334625
+    ],
+    "error": "",
+    "case": "neutral-control",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12547391653060913,
+      0.12955912947654724,
+      0.12468638271093369
+    ],
+    "error": "",
+    "case": "neutral-control",
+    "policy": "headroom",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "missing-source",
+    "policy": "compatible",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661325931549072,
+      0.032364387065172195,
+      0.19343861937522888
+    ],
+    "error": "",
+    "case": "missing-source",
+    "policy": "compatible",
+    "mode": "custom"
+  },
+  {
+    "open": 0,
+    "ok": 0,
+    "unchanged": 1,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 7,
+    "height": 11,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0,
+      0,
+      0
+    ],
+    "error": "RAW metadata: valid camera/as-shot RGB white balance is required",
+    "case": "missing-source",
+    "policy": "headroom",
+    "mode": "default"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 0,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "source_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.2661117911338806,
+      0.032388877123594284,
+      0.1934473216533661
+    ],
+    "error": "",
+    "case": "missing-source",
+    "policy": "headroom",
+    "mode": "custom"
+  }
+]

@@ -1,6 +1,7 @@
 package com.dearded.spektralab
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -72,6 +73,8 @@ data class Style(
      * 相纸「无」 stay as they are (bughunt_main 2).
      */
     val keepFilmState: Boolean = false,
+    /** Missing from older styles: preserve the photo's film-input curve. */
+    val sceneCurve: SceneCurve? = null,
 ) {
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
@@ -85,6 +88,7 @@ data class Style(
                 paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
         return catalog.normalize(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
+            sceneCurve = sceneCurve ?: edit.sceneCurve,
             yShift = (yCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             mShift = (mCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             filmFormatMm = formatMm,
@@ -109,6 +113,7 @@ data class Style(
     fun toSpkLook() = SpkLook(
         name = name, category = group,
         engine = SpkEngine(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
+            sceneCurve = sceneCurve,
             yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
         layer2 = look.copy(lut = "", lutStrength = 1.0),
         source = SpkSource("style", id, inspiredBy),
@@ -286,6 +291,22 @@ internal fun StyleStrip(
     onNone: () -> Unit = {},
     onPick: (Style) -> Unit,
 ) {
+    // UI2.md 3.7: shared element between style card and strength panel (sharedBounds).
+    androidx.compose.animation.SharedTransitionLayout {
+        val sharedScope = this
+        androidx.compose.runtime.CompositionLocalProvider(LocalSharedScope provides sharedScope) {
+            StyleStripContent(ui, enabled, onEdit, onNone, onPick)
+        }
+    }
+}
+
+@Composable
+private fun StyleStripContent(
+    ui: UiState, enabled: Boolean,
+    onEdit: (Edit) -> Unit,
+    onNone: () -> Unit,
+    onPick: (Style) -> Unit,
+) {
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
     val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
@@ -408,7 +429,20 @@ internal fun StyleStrip(
             val on = applied(s)
             val card = ui.filmCards[s.film]
             val bitmap = remember(card) { card?.asImageBitmap() }
+            val sharedScope = LocalSharedScope.current
+            val off = rememberReduceMotion()
             // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
+            // UI2.md 3.7: shared element between card and strength panel (sharedBounds).
+            val cardModifier = if (sharedScope != null && !off && on) {
+                with(sharedScope) {
+                    Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState("style-${s.id}"),
+                        animatedVisibilityScope = this@items,
+                        boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
+                        resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    )
+                }
+            } else Modifier
             ThumbCard(
                 selected = on,
                 image = bitmap,
@@ -418,6 +452,7 @@ internal fun StyleStrip(
                 placeholder = s.name,
                 starred = picks.isFavourite(s.id),
                 onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
+                modifier = cardModifier,
             ) {
                 if (on) open = if (open == s.id) null else s.id
                 else {
@@ -466,6 +501,20 @@ internal fun StyleStrip(
     val last = remember { arrayOfNulls<Style>(1) }
     if (current != null) last[0] = current
     val shown = current ?: last[0]
+    val sharedScope = LocalSharedScope.current
+    val off = rememberReduceMotion()
+    // UI2.md 3.7: shared element between card and strength panel (sharedBounds).
+    val panelModifier = if (sharedScope != null && !off && current != null) {
+        with(sharedScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState("style-${current.id}"),
+                animatedVisibilityScope = this@StyleStripContent,
+                boundsTransform = { _, _ -> spring(dampingRatio = 0.8f, stiffness = 380f) },
+                resizeMode = androidx.compose.animation.SharedTransitionScope.ResizeMode.RemeasureToBounds,
+            )
+        }
+    } else Modifier
+    Box(panelModifier) {
     Expandable(open = current != null, verticalArrangement = Arrangement.spacedBy(RowGap)) {
         val s = shown ?: return@Expandable
         // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
@@ -484,6 +533,7 @@ internal fun StyleStrip(
             pick(s, k)
         }
     }
+    }
 }
 
 /**
@@ -499,6 +549,7 @@ internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJ
         engine = SpkEngine(
             film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
             exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+            sceneCurve = edit.sceneCurve,
             yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
             formatMm = edit.filmFormatMm,
             grain = if (edit.grainActive) edit.grainAmount else 0.0,

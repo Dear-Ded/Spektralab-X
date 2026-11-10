@@ -1,0 +1,10 @@
+41a331fb44aa148f4ff105b1e5d9df883cde16b39b4de993ee1b65eb6b395f2c  app/src/main/java/com/dearded/spektralab/SourceLoader.kt
+24f1a3e44fa72b4c4cea8946e7e8fe3da8acece4167f0a3c8a87953cdf238373  app/src/main/java/com/dearded/spektralab/LightTableFilm.kt
+c4bf855623e57e6ef903bd667d405c483fe5cec824011cb50c796aa5374ea597  app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt
+59e09d809fe381dd5eb31dd7eac22d5e401a2edefd329978cffc7a355d9608f1  app/src/main/java/com/dearded/spektralab/FrameStore.kt
+b088adf16bcacd569fe9f33c2af66092485d866b47af0b8279cb7925e01185ad  app/src/main/java/com/dearded/spektralab/SourceGrantLock.kt
+f2e66bbba4dc7c284e94e31ed20d166c19c6b749c2021232b222b70427de12f1  app/src/main/java/com/dearded/spektralab/EditorViewModel.kt
+edcfd9e240bcb9803186a0e177ec39edcf746958ea8f4e55f422c0edf3ae5ad3  app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt
+c7092198283d9236ad3b149443e5de493a13446fbb03b05e68e6a3236c2543fc  app/src/testDebug/java/com/dearded/spektralab/PhotoInputColorTest.kt
+af989d385bab7e3b5861832305061fa1348bbd95bafab6842423884b97b63949  app/src/testDebug/java/com/dearded/spektralab/FilmThumbnailColorTest.kt
+34cf00a21d20e65b8783ac5f0e39cc926f55fac90c27f779d52a1a25d766c8d1  app/src/testDebug/java/com/dearded/spektralab/ProcessingQueueGrantTest.kt

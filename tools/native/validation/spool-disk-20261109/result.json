@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-09",
+  "host": "IBX",
+  "compiler": "GCC 14.2.0",
+  "production_file": "app/src/main/cpp/rgba8_spool.hpp",
+  "production_sha256": "4c5dbd6e1493b6c2d5b77e7acf9ab488e6d5133dba1b690ca6399fdb4fac0a7c",
+  "fixture_sha256": "ca85a8dae371df14bfc8b17bbfea6164a061ad5ebf8668372c063b961e90e76b",
+  "before": {
+    "method": "linker-wrapped ENOSPC injection into production fwrite/fflush, not actual disk exhaustion",
+    "shape": [73, 97],
+    "append_failure_after_converted_rows": 64,
+    "flush_failure_after_converted_rows": 97,
+    "anonymous_file_and_fd_cleanup": "passed"
+  },
+  "after": {
+    "strict": "passed",
+    "default": "passed",
+    "asan_ubsan_with_leak_detection": "passed",
+    "sanitizer_scope": "complete small fixture and header-only spool; no engine or codec linked",
+    "injected_reservation_errors": ["ENOSPC", "EDQUOT", "EIO", "EINVAL"],
+    "eintr_retries_before_success": 2,
+    "unsupported_fallback_errors": ["ENOSYS", "EOPNOTSUPP"],
+    "fallback_cases": ["insufficient blocks", "zero f_frsize", "fstatvfs error", "exact required blocks", "maximum f_bavail without multiplication overflow"],
+    "incomplete_seal_still_rejected": true,
+    "spool_read_bytes_equal_input": true,
+    "later_append_and_flush_errors_cleaned_up": true,
+    "real_allocation_requested_bytes": 28324,
+    "real_allocated_block_bytes": 28672,
+    "anonymous_file_and_fd_cleanup": "passed",
+    "jpeg_frozen_old_writer_cases": 48,
+    "jpeg_complete_file_comparisons": 384,
+    "jpeg_cleanup": "passed"
+  },
+  "limits": [
+    "The spool is created after rendering; this change avoids wasted row conversion on known insufficient space, not the preceding render.",
+    "Successful fallocate reserves only the exact RGBA8 spool extent. JPEG output, EXIF, source caches and gallery copy have separate storage needs.",
+    "On unsupported filesystems fstatvfs is only an availability snapshot; other writers can consume the space before use.",
+    "Unknown fallback space is rejected explicitly rather than treated as guaranteed capacity.",
+    "Later I/O errors remain possible and retain cleanup handling.",
+    "No shared filesystem was filled and no physical Android runtime test was performed; Android NDK build is delegated to root."
+  ],
+  "android_declaration_source": "https://android.googlesource.com/platform/bionic/+/refs/heads/main/libc/include/fcntl.h",
+  "logs": ["result.log", "strict.log", "default.log", "sanitize.log", "jpeg-strict.log"]
+}

@@ -1,0 +1,378 @@
+{
+  "date": "2026-11-09",
+  "co_creator": "GPT (OpenAI)",
+  "scope": "Public Xiaomi 13 Ultra DNG samples, production RAW decode/JNI fit/no-film float view/output transform/jpeg444 q98, independent SOF and full Java ImageIO decode",
+  "limitations": [
+    "Not the user's own RAW or UltraRAW",
+    "No Android Bitmap.compress q95",
+    "No film, geometry, ICC/EXIF embedding, or device OOM retry execution",
+    "edge=0 still has an 8388608-pixel cap",
+    "Linux CPU Vulkan, not phone GPU"
+  ],
+  "raw_jpeg_cases": [
+    {
+      "sensor": [
+        8192,
+        6144
+      ],
+      "oriented_source": [
+        6144,
+        8192
+      ],
+      "half_size_requested": true,
+      "decoded": [
+        3072,
+        4096
+      ],
+      "working": [
+        2304,
+        3072
+      ],
+      "output": [
+        2304,
+        3072
+      ],
+      "jpeg_bytes": 5283404,
+      "encoder": "production libjpeg-turbo 444 q98",
+      "sample": "IMG_20230420_152059.dng",
+      "raw_bytes": 23050360,
+      "raw_sha256": "0c65be622a5a0f2e9ca6fd3f3d1e68436115df807ff5eb2553d7727fce5da982",
+      "working_long_edge": 3072,
+      "max_pixels": 8388608,
+      "jpeg_sof": {
+        "size": [
+          2304,
+          3072
+        ],
+        "precision_bits": 8,
+        "components": [
+          {
+            "id": 1,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 2,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 3,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          }
+        ],
+        "marker": "0xc0"
+      },
+      "java_imageio_full_decode_passed": true
+    },
+    {
+      "sensor": [
+        8192,
+        6144
+      ],
+      "oriented_source": [
+        6144,
+        8192
+      ],
+      "half_size_requested": true,
+      "decoded": [
+        3072,
+        4096
+      ],
+      "working": [
+        2508,
+        3344
+      ],
+      "output": [
+        2508,
+        3344
+      ],
+      "jpeg_bytes": 6053358,
+      "encoder": "production libjpeg-turbo 444 q98",
+      "sample": "IMG_20230420_152059.dng",
+      "raw_bytes": 23050360,
+      "raw_sha256": "0c65be622a5a0f2e9ca6fd3f3d1e68436115df807ff5eb2553d7727fce5da982",
+      "working_long_edge": 0,
+      "max_pixels": 8388608,
+      "jpeg_sof": {
+        "size": [
+          2508,
+          3344
+        ],
+        "precision_bits": 8,
+        "components": [
+          {
+            "id": 1,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 2,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 3,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          }
+        ],
+        "marker": "0xc0"
+      },
+      "java_imageio_full_decode_passed": true
+    },
+    {
+      "sensor": [
+        4096,
+        3072
+      ],
+      "oriented_source": [
+        3072,
+        4096
+      ],
+      "half_size_requested": false,
+      "decoded": [
+        3072,
+        4096
+      ],
+      "working": [
+        2304,
+        3072
+      ],
+      "output": [
+        2304,
+        3072
+      ],
+      "jpeg_bytes": 3909585,
+      "encoder": "production libjpeg-turbo 444 q98",
+      "sample": "IMG_20230420_115647.dng",
+      "raw_bytes": 8447104,
+      "raw_sha256": "94184d94ace7cfd3fc698e6ad6bac53a45342db5989d49d213a4b1660ebcc362",
+      "working_long_edge": 3072,
+      "max_pixels": 8388608,
+      "jpeg_sof": {
+        "size": [
+          2304,
+          3072
+        ],
+        "precision_bits": 8,
+        "components": [
+          {
+            "id": 1,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 2,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 3,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          }
+        ],
+        "marker": "0xc0"
+      },
+      "java_imageio_full_decode_passed": true
+    },
+    {
+      "sensor": [
+        4096,
+        3072
+      ],
+      "oriented_source": [
+        3072,
+        4096
+      ],
+      "half_size_requested": false,
+      "decoded": [
+        3072,
+        4096
+      ],
+      "working": [
+        2508,
+        3344
+      ],
+      "output": [
+        2508,
+        3344
+      ],
+      "jpeg_bytes": 4478584,
+      "encoder": "production libjpeg-turbo 444 q98",
+      "sample": "IMG_20230420_115647.dng",
+      "raw_bytes": 8447104,
+      "raw_sha256": "94184d94ace7cfd3fc698e6ad6bac53a45342db5989d49d213a4b1660ebcc362",
+      "working_long_edge": 0,
+      "max_pixels": 8388608,
+      "jpeg_sof": {
+        "size": [
+          2508,
+          3344
+        ],
+        "precision_bits": 8,
+        "components": [
+          {
+            "id": 1,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 2,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          },
+          {
+            "id": 3,
+            "horizontal_sampling": 1,
+            "vertical_sampling": 1
+          }
+        ],
+        "marker": "0xc0"
+      },
+      "java_imageio_full_decode_passed": true
+    }
+  ],
+  "jvm": {
+    "totals": {
+      "tests": 58,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "com.dearded.spektralab.CurveWireTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "ordinaryRowsKeepTheExistingWireBytes",
+          "localOrdinaryRowsAndDustKeepTheirOffsets",
+          "everyCollidingRowUsesTheFinal256SampleTable",
+          "actualLookWireKeepsMasksAfterTheSampledRows",
+          "adjacentDoublePointsRemainEditableAfterJsonRoundTrip"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.ExifFillTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "nothingToAdd",
+          "secondsApart",
+          "fillsOnlyGaps"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.ExifLocationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "missingRefOrCoordinateGivesNothing",
+          "redactedZerosGiveNothing",
+          "outOfRangeGivesNothing",
+          "degreesRejectsMalformed",
+          "dropsEverythingButLocationTags",
+          "keepsARealLocation",
+          "degreesFromRationals",
+          "encodeDecodeRoundTrip"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.ExportRetryTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "sourceAboveDeviceCapShrinksFromTheActiveCap",
+          "knownSourceWithNoCapReceivesASmallerCap",
+          "subsequentRetryShrinksFromThePreviousCap",
+          "sourceBelowDeviceCapStillShrinksWhenFirstRetryEdgeExceedsSource",
+          "retryHasNoMemoryTierFloorAndDoesNotTurnPositiveCapOff",
+          "unknownOutputRetainsCapOnlyFallback",
+          "shareOutputHintSetsCapBelowShareAreaWithoutClaimingWorkingSourceSize"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.SceneCurveTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "nativeOnlySidecarPreservesSamplesWithoutAppMetadata",
+          "resolvedEngineParamsRetainAuthoredPoints",
+          "spklookZipRetainsAuthoredPointsAndDenseImportedSamples",
+          "editorPointOperationsKeepStrictOrderingAtNarrowGaps",
+          "queueSnapshotPreservesTheActualExportTable",
+          "malformedSamplesFailInsteadOfSilentlyDroppingTheCurve",
+          "absentStyleFieldPreservesAndExplicitIdentityResets",
+          "identityBypassesAndResetHasAnExplicitDelta",
+          "importedSampleTablesNeverBecomeDefaultOrCubic",
+          "explicitDiagonalSamplesAreNotAnExactBypass",
+          "authoredSamplingIsLocaleIndependentAndKeepsAllFiveRows",
+          "exposurePasteIncludesSceneCurveButLayer2PasteDoesNot",
+          "sidecarRestoresControlPointsAndNoFilmDoesNotEraseThem",
+          "importedLargeSampleTableSurvivesUserLibrarySaveAndReload",
+          "malformedSpklookCurveIsAReportedImportFailure",
+          "changeGroupResetClearsOnlyTheSceneCurveAndExposureGroup"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.SessionCandidateTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "successfulReopenPreservesEditAndHistoryForCustomAndResetWhite",
+          "decodeFailureKeepsTheWholePreviousFrame",
+          "cancellationOnNativeReturnReleasesAnUnreturnedHandle",
+          "closingDuringCommitWaitsBeforeReleasingTheInstalledSession",
+          "cancellationDuringCommitCannotLeaveHalfPublishedState",
+          "cancellationBeforeAllocationLeavesTheOldSession",
+          "metadataFailureReleasesOnlyTheCandidate",
+          "commitFailureBeforeInstallationReleasesTheCandidate"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.ThermalHeadroomSamplerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "slowOrFailedQueryIsNotResubmittedUntilTenSecondsAfterCompletion",
+          "simultaneousCallersQueueOnlyOneQuery",
+          "rejectedExecutorDoesNotLeaveSamplingPermanentlyInFlight",
+          "firstSampleAtZeroAndTenSecondBoundary",
+          "failedSamplesExpireInsteadOfKeepingStaleHeadroomForever"
+        ]
+      },
+      {
+        "name": "com.dearded.spektralab.VersionCompareTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test_names": [
+          "engineMigrationAlpha",
+          "suffixOrder",
+          "numberedPrereleases",
+          "equal",
+          "patchBumps",
+          "dottedPrereleasesAndBuildMetadata"
+        ]
+      }
+    ]
+  }
+}

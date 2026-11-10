@@ -1,0 +1,6 @@
+view PASS stages=8 recovered=8 float_readback_avoided=7
+cpu PASS float=0 written_pixels=307275 total=4199425
+cpu PASS float=1 written_pixels=294984 total=4199425
+cpu parity PASS float/integer full/strip rgba8/rgba16
+TIFF PASS cancelled_cleanup joined_workers cancel_classification complete_file_parity
+output cancellation PASS

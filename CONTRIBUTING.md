@@ -30,7 +30,7 @@ fastlane/                应用商店描述、图标和每个版本的更新说�
 
 ## 本地编译
 
-需要 JDK 17、Android SDK 35、NDK 27.2、CMake 3.22 和 `glslangValidator`：
+需要 JDK 17、Android SDK 36、NDK 27.2、CMake 3.22 和 `glslangValidator`：
 
 ```bash
 bash scripts/fetch-upstream.sh upstream
@@ -77,7 +77,7 @@ Issues and pull requests are welcome. One independent developer maintains the pr
 
 **The most useful contribution right now is an on-device report.** The app has not been tested on real phones at scale yet, so community feedback is needed. Install the latest [pre-release](https://github.com/Dear-Ded/Spektralab-X/releases), open and export a photo, copy **Settings → Copy diagnostics** (no file names or locations) and file a [bug report](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose). Even "it opens and exports" helps. Usage questions go to [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions); security issues follow [SECURITY.md](SECURITY.md).
 
-**Building.** JDK 17, Android SDK 35, NDK 27.2, CMake 3.22 and `glslangValidator`, then the three commands above. Pushing to your own fork also works: GitHub Actions builds the APK and attaches it to the run's Artifacts.
+**Building.** JDK 17, Android SDK 36, NDK 27.2, CMake 3.22 and `glslangValidator`, then the three commands above. Pushing to your own fork also works: GitHub Actions builds the APK and attaches it to the run's Artifacts.
 
 **Changing the engine.** Never edit `upstream/` directly; it is replaced on the next fetch. Make the change there, turn it into a numbered patch in `patches/` as described in [docs/PATCHES.md](docs/PATCHES.md), and explain at the top of the patch what changed, why, and whether numeric results change.
 

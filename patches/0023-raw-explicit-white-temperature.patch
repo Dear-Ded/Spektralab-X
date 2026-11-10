@@ -1,0 +1,100 @@
+Keep a caller-selected RAW white in the decoder. Temperature/tint controls
+already know the scene white; deriving its illuminant again from camera
+multipliers can select a different root of a dual-illuminant DNG profile.
+Existing multiplier-only and as-shot entry points retain their behaviour.
+
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index 139b48b..f237ca2 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -117,6 +117,12 @@ bool decode_raw_compatible(const std::filesystem::path& source,
+ bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                            DecodedRaw& out, std::string& error);
+ 
++// An explicit white temperature selects the same DNG calibration used to
++// derive user_mul. Zero retains neutral-to-illuminant inference. A positive
++// temperature requires user_mul; it does not apply another white balance.
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                           DecodedRaw& out, std::string& error, double white_temperature);
++
+ // Experimental expanded-output policy for conventional three-colour Bayer
+ // RAW only. As-shot WB is normalised by its largest multiplier (highlight=1)
+ // before uint16 AHD demosaicing. LibRaw's actual ProPhoto matrix is evaluated
+@@ -133,5 +139,7 @@ bool decode_raw_headroom(const std::filesystem::path& source,
+ // restoration uses that actual selected WB, not the camera's as-shot value.
+ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                          DecodedRaw& out, std::string& error);
++bool decode_raw_headroom(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                         DecodedRaw& out, std::string& error, double white_temperature);
+ 
+ }  // namespace spk::io
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 181c19a..3f4f24d 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -303,6 +303,11 @@ bool decode_raw_compatible(const std::filesystem::path& source,
+ 
+ bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                            DecodedRaw& out, std::string& error) {
++    return decode_raw_compatible(source, user_mul, out, error, 0);
++}
++
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                           DecodedRaw& out, std::string& error, double white_temperature) {
+     error.clear();
+     const auto total_start = Clock::now();
+     try {
+@@ -311,6 +316,11 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+             error = "RAW open: source path is empty";
+             return false;
+         }
++        if (!std::isfinite(white_temperature) || white_temperature < 0 || (white_temperature > 0 && !user_mul)) {
++            error = "RAW process: explicit white temperature requires valid user white balance";
++            return false;
++        }
++
+         // LibRaw carries substantial metadata; keep it off the Windows stack.
+         auto raw = std::make_unique<CompatibleLibRaw>();
+         configure_compatible(raw->imgdata.params);
+@@ -337,7 +347,7 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         decoded.timings.open_ms = elapsed_ms(start);
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
+-        raw->interpolate_dng_matrix(user_mul);
++        raw->interpolate_dng_matrix(user_mul, white_temperature);
+         {
+             const auto& s = raw->imgdata.sizes;
+             if (t_half_size_budget && raw->imgdata.idata.filters > 1000 &&
+@@ -445,6 +455,11 @@ bool decode_raw_headroom(const std::filesystem::path& source,
+ 
+ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                          DecodedRaw& out, std::string& error) {
++    return decode_raw_headroom(source, user_mul, out, error, 0);
++}
++
++bool decode_raw_headroom(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                         DecodedRaw& out, std::string& error, double white_temperature) {
+     error.clear();
+     const auto total_start = Clock::now();
+     try {
+@@ -453,6 +468,11 @@ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<f
+             error = "RAW open: source path is empty";
+             return false;
+         }
++        if (!std::isfinite(white_temperature) || white_temperature < 0 || (white_temperature > 0 && !user_mul)) {
++            error = "RAW process: explicit white temperature requires valid user white balance";
++            return false;
++        }
++
+         auto raw = std::make_unique<HeadroomLibRaw>();
+         configure_compatible(raw->imgdata.params);
+         if (user_mul) {
+@@ -476,7 +496,7 @@ bool decode_raw_headroom(const std::filesystem::path& source, const std::array<f
+         decoded.timings.open_ms = elapsed_ms(start);
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
+-        raw->interpolate_dng_matrix(user_mul);
++        raw->interpolate_dng_matrix(user_mul, white_temperature);
+ 
+         start = Clock::now();
+         const int unpack_status = raw->unpack();

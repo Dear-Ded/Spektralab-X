@@ -1,0 +1,25 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.6s)
+-- Generating done (0.1s)
+-- Build files have been written to: /data/work/engine-deepdive/scene-curve-0029/build
+[1/18] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/engine-deepdive/scene-curve-0029/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[2/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+[3/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+[4/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[5/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+[6/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+[7/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[8/18] cd /data/work/engine-deepdive/scene-curve-0029/build/engine && /usr/bin/cmake -E copy_directory /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources /data/work/engine-deepdive/scene-curve-0029/build/engine/resources && /usr/bin/cmake -E copy_directory /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/profiles /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/NOTICE.md /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/fonts/LICENSE /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/third_party/stb/LICENSE /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/paper_grades.json /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/engine-deepdive/scene-curve-0029/upstream/engine/resources_product/neutral_print_filters.json /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/engine-deepdive/scene-curve-0029/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/engine-deepdive/scene-curve-0029/build/engine/resources/DI
+[9/18] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+[10/18] Linking CXX static library engine/libspektralab_core.a
+[11/18] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[12/18] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[13/18] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+[14/18] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+/data/work/engine-deepdive/scene-curve-0029/upstream/engine/src/pipeline/engine.cpp:212:58: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+  212 |         std::unique_ptr<std::FILE, decltype(&std::fclose)> file{nullptr, &std::fclose};
+      |                                                          ^
+[15/18] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[16/18] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[17/18] Linking CXX static library engine/libspektralab_engine.a

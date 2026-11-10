@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -17,27 +18,37 @@
 #include <exception>
 #include <fstream>
 #include <iterator>
+#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <sstream>
+#include <stdexcept>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "io/raw_decoder.hpp"
+#include "io/raw_camera.hpp"
+#include "raw_white_balance.hpp"
+#include "raw_development.hpp"
+#include "raw_precision_input.hpp"
 #include "gainmap.hpp"
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
 #include "tiff16.hpp"
 #include "storage_probe.hpp"
 #include "jpeg444.hpp"
+#include "rgba8_spool.hpp"
+#include "float_frame_check.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
 #include "look_state.hpp"
 #include "output_transform.hpp"
 #include "passthrough.hpp"
 #include "input_transform.hpp"
+#include "bitmap_f16.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -55,14 +66,33 @@ namespace {
 constexpr const char* kTag = "SpektralabX";
 thread_local std::string t_error;
 
+// Separate from Session: cancellation must also cover decoding before spk_open.
+// Kotlin joins the flag writer and waits for open to return before deleting it.
+struct RawOpenCancellation {
+    std::atomic<bool> cancelled{false};
+};
+
+struct RawHalfSizeBudget {
+    explicit RawHalfSizeBudget(uint64_t value) { spk::io::set_raw_half_size_budget(value); }
+    ~RawHalfSizeBudget() { spk::io::set_raw_half_size_budget(0); }
+};
+
 struct Session {
     spk_engine* engine = nullptr;
     spk_session* session = nullptr;
+    std::atomic<uint64_t> cancel_generation{0};
     uint32_t width = 0, height = 0;
     uint32_t source_width = 0, source_height = 0;
     std::string make, model, kind;
+    std::string input_precision, input_precision_note;
+    spk::android::FloatDngMetadata float_source;
     // RAW only: the illuminant the camera recorded, and the one decoded with (0 = as shot).
     double as_shot_k = 0, as_shot_tint = 0, wb_k = 0, wb_tint = 0;
+    spk::android::RawDevelopmentMetadata raw_metadata;
+    spk::android::RawDevelopmentStats raw_stats;
+    spk::android::RawDevelopment raw_development;
+    bool raw_stats_binned = false;
+    bool raw_stats_ready = false;
     std::vector<uint8_t> before;   // RGBA8, see make_before
     uint32_t before_w = 0, before_h = 0;
     // The same small frame before encoding, in the session's input space:
@@ -74,12 +104,16 @@ struct Session {
     spk::android::LookState look;
     const spk::android::Layer2* active_look() const { return look.active(); }
     // The last display render, kept so an adjustment re-packs it (repack)
-    // instead of re-running the engine. One tier only: at the preview tier it
-    // is ~70 MB, and the next render or release frees it.
+    // instead of re-running the engine. One tier only: RGBA16 uses 8 bytes per
+    // pixel; no-film RGB float uses 12. Replaced on the next successful render.
     spk_result last{};
-    void keep(spk_result& r) {
+    std::vector<float> last_float;
+    uint64_t render_revision = 0, last_revision = 0;
+    void keep(spk_result& r, std::vector<float>& rgb) {
         spk_result_free(&last);
         last = r;
+        last_float = std::move(rgb);
+        last_revision = render_revision;
         std::memset(&r, 0, sizeof r);
     }
     // The engine renders encoded ProPhoto RGB (spk_open's convention), and
@@ -91,6 +125,9 @@ struct Session {
     // 无 (passthrough.hpp): which render the params ask for, kept from the open
     // and every accepted set_params, since x_no_film never reaches the engine.
     spk::android::ViewFlags view;
+    const spk::android::RawDevelopment* development() const {
+        return kind == "raw" && view.no_film && raw_development.enabled() ? &raw_development : nullptr;
+    }
     spk::android::OutputTransform out;
     const spk::android::OutputTransform* transform() {
         if (!out.ready()) {
@@ -165,6 +202,7 @@ using SessionPtr = std::unique_ptr<Session, SessionDeleter>;
 // A render result freed on every exit (spk_result_free is a no-op once freed).
 struct ResultGuard {
     spk_result r;
+    std::vector<float> float_rgb;
     ResultGuard() { std::memset(&r, 0, sizeof r); }
     ~ResultGuard() { spk_result_free(&r); }
     ResultGuard(const ResultGuard&) = delete;
@@ -279,36 +317,66 @@ void fit(uint32_t w, uint32_t h, uint32_t max_edge, uint64_t max_pixels, uint32_
     nh = std::max<uint32_t>(1, uint32_t(std::floor(h * s)));
 }
 
+spk::android::RawDevelopmentMetadata development_metadata(const spk::io::RawDngRenderMetadata& src) {
+    spk::android::RawDevelopmentMetadata out;
+    out.baseline_exposure = src.baseline_exposure;
+    out.baseline_exposure_present = src.baseline_exposure_present;
+    out.baseline_exposure_invalid = src.baseline_exposure_invalid;
+    out.baseline_exposure_offset = src.baseline_exposure_offset;
+    out.baseline_exposure_offset_present = src.baseline_exposure_offset_present;
+    out.baseline_exposure_offset_invalid = src.baseline_exposure_offset_invalid;
+    out.default_black_render = src.default_black_render;
+    out.default_black_render_present = src.default_black_render_present;
+    out.default_black_render_invalid = src.default_black_render_invalid;
+    out.profile_tone_curve = src.profile_tone_curve;
+    out.profile_tone_curve_present = src.profile_tone_curve_present;
+    out.profile_tone_curve_invalid = src.profile_tone_curve_invalid;
+    out.extra_camera_profiles = src.extra_camera_profiles;
+    out.profile_source_mismatch = src.profile_source_mismatch;
+    return out;
+}
+
 Session* open_pixels(spk_engine* engine, std::vector<float>& rgb, uint32_t w, uint32_t h,
                      std::string params) {
     if (!engine_usable(engine)) { fail("open image: the engine was replaced after a GPU fault"); return nullptr; }
     spk::android::ViewFlags view;
     std::string bad;
     if (!spk::android::take_app_keys(params, view, bad)) { fail("open image: " + bad); return nullptr; }
-    const spk_image input{rgb.data(), w, h, 3};
-    char* reply = nullptr;
-    spk_session* s = spk_open(engine, &input, params.c_str(), &reply);
-    if (reply) spk_string_free(reply);
-    if (!s) { fail(engine_error("open image")); return nullptr; }
-    auto* session = new Session();
-    session_opened(engine);
-    session->engine = engine;
-    session->session = s;
+    // Allocate and initialise the wrapper before opening GPU resources. Keep
+    // the engine handle owned until registration succeeds, including on OOM.
+    auto session = std::make_unique<Session>();
     session->width = w;
     session->height = h;
     session->prophoto = renders_prophoto(params);
     session->view = view;
-    return session;
+    const spk_image input{rgb.data(), w, h, 3};
+    char* reply = nullptr;
+    using NativeSessionPtr = std::unique_ptr<spk_session, decltype(&spk_session_release)>;
+    NativeSessionPtr opened(spk_open(engine, &input, params.c_str(), &reply), &spk_session_release);
+    if (reply) spk_string_free(reply);
+    if (!opened) { fail(engine_error("open image")); return nullptr; }
+    session_opened(engine);
+    session->engine = engine;
+    session->session = opened.release();
+    return session.release();
 }
 
 // RGBA16 rows (engine-encoded sRGB) to RGBA8, split across up to four
 // threads: at the 3400 px tier it is ~8 M pixels, a visible slice of a drag.
 void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::android::Layer2* look = nullptr,
-                const spk::android::OutputTransform* xf = nullptr) {
-    if (xf) { spk::android::pack_rgba8(r.rgba16, r.row_stride_px, r.width, r.height, out, stride, look, *xf); return; }
-    if (look) { spk::android::pack_rgba8_look(*look, r.rgba16, r.row_stride_px, r.width, r.height, out, stride); return; }
+                const spk::android::OutputTransform* xf = nullptr, const float* rgb = nullptr,
+                const spk::android::OutputCancel& cancel = {}, const spk::android::RawDevelopment* development = nullptr) {
+    cancel.check();
+    if (rgb) {
+        if (!xf || !xf->ready()) throw std::runtime_error("no-film float output transform unavailable");
+        spk::android::pack_float_rgba8(rgb, r.row_stride_px, r.width, r.height, out, stride, look, *xf, cancel, development);
+        return;
+    }
+    if (xf) { spk::android::pack_rgba8(r.rgba16, r.row_stride_px, r.width, r.height, out, stride, look, *xf, cancel); return; }
+    if (look) { spk::android::pack_rgba8_look(*look, r.rgba16, r.row_stride_px, r.width, r.height, out, stride, cancel); return; }
     const auto rows = [&](uint32_t y0, uint32_t y1) {
         for (uint32_t y = y0; y < y1; ++y) {
+            if (cancel.cancelled()) return;
             const uint16_t* src = r.rgba16 + size_t(y) * r.row_stride_px * 4;
             uint8_t* dst = out + size_t(y) * stride;
             for (uint32_t x = 0; x < r.width; ++x) {
@@ -322,12 +390,15 @@ void pack_rgba8(const spk_result& r, uint8_t* out, size_t stride, const spk::and
     const uint64_t px = uint64_t(r.width) * r.height;
     const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
     run_rows(r.height, workers, rows);
+    cancel.check();
 }
 
 // RGBA16 rows (engine-encoded sRGB) into an ARGB_8888 Bitmap, whose memory
 // order is R, G, B, A.
 jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* look = nullptr,
-                  const spk::android::OutputTransform* xf = nullptr) {
+                  const spk::android::OutputTransform* xf = nullptr, const float* rgb = nullptr,
+                  const spk::android::OutputCancel& cancel = {}, const spk::android::RawDevelopment* development = nullptr) {
+    cancel.check();
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     jclass config_class = env->FindClass("android/graphics/Bitmap$Config");
     if (!bitmap_class || !config_class) { fail("Bitmap classes not found"); return nullptr; }
@@ -348,7 +419,8 @@ jobject to_bitmap(JNIEnv* env, const spk_result& r, const spk::android::Layer2* 
     }
     PixelLock lock(env, bitmap);
     if (!lock.ok) { fail("cannot lock bitmap pixels"); return nullptr; }
-    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf);
+    pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf, rgb, cancel, development);
+    cancel.check();
     return bitmap;
 }
 
@@ -422,17 +494,24 @@ void make_before(Session* s, const std::vector<float>& rgb, uint32_t w, uint32_t
     s->small_h = th;
 }
 
-bool render(Session* s, const std::string& tier, spk_result& out) {
+bool render(Session* s, const std::string& tier, spk_result& out, std::vector<float>& rgb,
+            const spk::android::OutputCancel& cancel = {}) {
+    cancel.check();
     std::memset(&out, 0, sizeof out);
+    rgb.clear();
     if (s->view.no_film || s->view.di()) {
         // 无: the decoded photo, or a negative's Digital Intermediate through
         // its view table, from upstream's view path (passthrough.hpp).
         std::string error;
-        if (!spk::android::render_view(s->session, tier, s->view.no_film, out, error)) {
+        const bool ok = s->view.no_film
+            ? spk::android::render_view_float(s->session, tier, out, rgb, error, cancel)
+            : spk::android::render_view(s->session, tier, false, out, error, cancel);
+        if (!ok) {
             spk_result_free(&out);
             fail("render " + tier + ": " + error);
             return false;
         }
+        cancel.check();
         return true;
     }
     // spk_reprint reuses the cached negative when the last edit was print-side
@@ -444,6 +523,7 @@ bool render(Session* s, const std::string& tier, spk_result& out) {
         fail("render returned no pixels");
         return false;
     }
+    cancel.check();
     return true;
 }
 
@@ -474,6 +554,21 @@ std::string blank_frame(const uint16_t* rgba, uint32_t width, uint32_t height, s
                std::to_string(lo[2]) + ")";
     }
     return {};
+}
+
+// Float no-film results retain HDR and signed channels. Validate those values
+// before grading rather than mistaking recoverable highlights for flat white.
+std::string blank_float_frame(const std::vector<float>& rgb, const spk_result& r) {
+    if (!r.width || !r.height || rgb.size() != size_t(r.width) * r.height * 3) return "no float pixels";
+    spk::android::FloatFrameCheck check;
+    check.append(rgb.data(), r.width, r.width, r.height, 0, r.height);
+    return check.finish();
+}
+
+std::string blank_result(const ResultGuard& result) {
+    return result.float_rgb.empty()
+        ? blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px)
+        : blank_float_frame(result.float_rgb, result.r);
 }
 
 // LibRaw's OpenMP workers: the performance cores only. A core counts when its
@@ -614,9 +709,11 @@ JNI_FN(jstring, capabilities)(JNIEnv* env, jobject, jlong engine) {
     return jstr(env, caps ? caps : "{}");
 }
 
-JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
-                       jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint) {
+static jlong open_raw(JNIEnv* env, jlong engine_handle, jstring path_j, jint max_edge,
+                      jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint,
+                      const spk::android::FloatDngCancel& cancelled) {
     try {
+        spk::android::float_dng_detail::check_cancel(cancelled);
         auto* engine = reinterpret_cast<spk_engine*>(engine_handle);
         const std::string path = str(env, path_j);
         // Half-size decode (2x2 binning) only when the binned frame still covers
@@ -631,9 +728,26 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         std::array<float, 4> mul{};
         const bool custom_wb = temperature_k > 0;
         std::string error;
+        spk::android::RawPrecisionPlan precision;
+        precision.mode = "integer_compatible16";
+        precision.custom_whitebalance = custom_wb;
         {
-            auto probe = std::make_unique<LibRaw>(LIBRAW_OPTIONS_NO_DATAERR_CALLBACK);
-            if (probe->open_file(path.c_str()) == LIBRAW_SUCCESS) {
+            auto probe = std::make_unique<spk::io::detail::CameraLibRaw>();
+            probe->imgdata.params.use_camera_matrix = 1;
+            const int opened = probe->open_file(path.c_str());
+            spk::android::float_dng_detail::check_cancel(cancelled);
+            if (opened == LIBRAW_SUCCESS) {
+                precision = spk::android::inspect_raw_precision(path, *probe, custom_wb, cancelled);
+                if (precision.mode == "float_linear_v1") {
+                    // The precise path normalizes each original plane once. Its
+                    // illuminant must not reuse LibRaw's integer-range-adjusted WB.
+                    for (int c = 0; c < 3; ++c)
+                        probe->imgdata.color.cam_mul[c] = float(1.0 / precision.source.neutral[c]);
+                    probe->imgdata.color.cam_mul[3] = probe->imgdata.color.cam_mul[1];
+                }
+                // DNG ColorMatrix tags can exist while LibRaw's cam_xyz is empty.
+                // Use the decoder's calibration before deriving temperature/tint.
+                probe->interpolate_dng_matrix(nullptr);
                 sensor_w = probe->imgdata.sizes.width;
                 sensor_h = probe->imgdata.sizes.height;
                 sensor_turned = (probe->imgdata.sizes.flip & 4) != 0;
@@ -641,26 +755,48 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
                     !std::isfinite(as_shot_k) || !std::isfinite(as_shot_tint)) {
                     as_shot_k = 0; as_shot_tint = 0;
                 }
-                if (custom_wb && !spkhost::multipliers_for(*probe, temperature_k, tint, mul, error)) {
+                if (custom_wb && !spk::android::raw_multipliers_for(*probe, temperature_k, tint, mul, error)) {
                     fail("white balance: " + error); return 0;
                 }
             } else if (custom_wb) {
                 fail("white balance: cannot read the RAW metadata"); return 0;
             }
         }
+        spk::android::float_dng_detail::check_cancel(cancelled);
+        std::string opening = str(env, params_j), checked = opening;
+        spk::android::ViewFlags opening_view;
+        if (!spk::android::take_app_keys(checked, opening_view, error)) { fail("open RAW: " + error); return 0; }
         bool binned = false;
         if (sensor_w && sensor_h) {
             uint32_t fw = 0, fh = 0;
             fit(sensor_w, sensor_h, uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)), fw, fh);
             binned = sensor_w / 2 >= fw && sensor_h / 2 >= fh;
         }
+        // Standard development meters the complete unbinned source, independent
+        // of preview/export working size. Neutral keeps its existing fast decode.
+        if (opening_view.no_film && opening_view.raw_development.enabled) binned = false;
+        if (precision.mode == "float_linear_v1") binned = false;
         // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
-        spk::io::set_raw_half_size_budget(binned ? 1 : 0);
         configure_raw_threads();
         spk::io::DecodedRaw decoded;
-        const bool ok = spk::io::decode_raw_compatible(path, custom_wb ? &mul : nullptr, decoded, error);
-        spk::io::set_raw_half_size_budget(0);
+        spk::android::FloatDngMetadata float_source;
+        bool ok;
+        {
+            RawHalfSizeBudget budget(binned ? 1 : 0);
+            ok = spk::android::decode_raw_precision(path, precision, custom_wb ? &mul : nullptr,
+                custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source, cancelled);
+        }
+        spk::android::float_dng_detail::check_cancel(cancelled);
         if (!ok) { fail("RAW decode: " + error); return 0; }
+        const auto raw_metadata = development_metadata(decoded.metadata.dng_render);
+        spk::android::RawDevelopmentStats raw_stats;
+        const bool raw_stats_ready = spk::android::prepare_raw_development_stats(
+            opening_view.raw_development, opening_view.no_film, decoded.rgb.data(),
+            decoded.width, decoded.width, decoded.height, raw_stats);
+        spk::android::float_dng_detail::check_cancel(cancelled);
+        auto development_options = opening_view.raw_development;
+        development_options.enabled = development_options.enabled && opening_view.no_film;
+        auto development = spk::android::RawDevelopment::build(raw_metadata, raw_stats, development_options);
         const uint32_t sw = decoded.width, sh = decoded.height;
         uint32_t w = sw, h = sh;
         fit(sw, sh, uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)), w, h);
@@ -671,8 +807,17 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         } else {
             rgb.swap(decoded.rgb);
         }
-        SessionPtr session(open_pixels(engine, rgb, w, h, str(env, params_j)));
+        spk::android::float_dng_detail::check_cancel(cancelled);
+        SessionPtr session(open_pixels(engine, rgb, w, h, opening));
+        // open_pixels completes its native work before a cancelled candidate is
+        // destroyed; never throw from an in-flight GPU callback.
+        spk::android::float_dng_detail::check_cancel(cancelled);
         if (!session) return 0;
+        session->raw_metadata = raw_metadata;
+        session->raw_stats = raw_stats;
+        session->raw_development = std::move(development);
+        session->raw_stats_binned = binned;
+        session->raw_stats_ready = raw_stats_ready;
         make_before(session.get(), rgb, w, h, /*linear_prophoto=*/true);
         // The sensor's size, not the binned decode's, in display orientation.
         if (sensor_w && sensor_h && binned) {
@@ -685,11 +830,17 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->make = decoded.metadata.make;
         session->model = decoded.metadata.model;
         session->kind = "raw";
+        session->input_precision = precision.mode;
+        session->input_precision_note = precision.note;
+        if (precision.mode == "float_linear_v1") session->float_source = float_source;
         session->as_shot_k = as_shot_k;
         session->as_shot_tint = as_shot_tint;
         session->wb_k = custom_wb ? double(temperature_k) : 0;
         session->wb_tint = custom_wb ? double(tint) : 0;
+        spk::android::float_dng_detail::check_cancel(cancelled);
         return reinterpret_cast<jlong>(session.release());
+    } catch (const spk::android::FloatDngCancelled&) {
+        fail("RAW open cancelled");
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the RAW file; choose a smaller working size");
     } catch (const std::exception& e) {
@@ -698,6 +849,34 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         fail("open RAW: unknown failure");
     }
     return 0;
+}
+
+JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
+                       jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint) {
+    return open_raw(env, engine_handle, path_j, max_edge, max_pixels, params_j, temperature_k, tint, {});
+}
+
+JNI_FN(jlong, createRawOpenCancellation)(JNIEnv*, jobject) {
+    try { return reinterpret_cast<jlong>(new RawOpenCancellation); }
+    catch (...) { fail("cannot allocate RAW cancellation token"); return 0; }
+}
+
+JNI_FN(void, cancelRawOpen)(JNIEnv*, jobject, jlong cancellation) {
+    auto* token = reinterpret_cast<RawOpenCancellation*>(cancellation);
+    if (token) token->cancelled.store(true, std::memory_order_relaxed);
+}
+
+JNI_FN(void, releaseRawOpenCancellation)(JNIEnv*, jobject, jlong cancellation) {
+    delete reinterpret_cast<RawOpenCancellation*>(cancellation);
+}
+
+JNI_FN(jlong, openRawCancellableV1)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j, jint max_edge,
+                                  jlong max_pixels, jstring params_j, jdouble temperature_k, jdouble tint,
+                                  jlong cancellation) {
+    auto* token = reinterpret_cast<RawOpenCancellation*>(cancellation);
+    if (!token) { fail("RAW open requires a cancellation token"); return 0; }
+    return open_raw(env, engine_handle, path_j, max_edge, max_pixels, params_j, temperature_k, tint,
+                    [token] { return token->cancelled.load(std::memory_order_relaxed); });
 }
 
 // Undoes the highlight shoulder of a phone's tone curve, for a JPEG that has no
@@ -781,6 +960,7 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
         session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
+        session->input_precision = "rgba8_sdr";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the image");
@@ -788,6 +968,72 @@ JNI_FN(jlong, openBitmap)(JNIEnv* env, jobject, jlong engine_handle, jobject bit
         fail(std::string("open image: ") + e.what());
     } catch (...) {
         fail("open image: unknown failure");
+    }
+    return 0;
+}
+
+// V1 deliberately leaves the established eight-bit/gain-map paths unchanged.
+JNI_FN(jlong, openBitmapF16V1)(JNIEnv* env, jobject, jlong engine_handle, jobject bitmap, jstring space_j,
+                               jstring params_j, jfloat headroom_stops, jint alpha_mode,
+                               jint source_width, jint source_height) {
+    try {
+        AndroidBitmapInfo info{};
+        if (AndroidBitmap_getInfo(env, bitmap, &info) != ANDROID_BITMAP_RESULT_SUCCESS ||
+            info.format != ANDROID_BITMAP_FORMAT_RGBA_F16) {
+            fail("F16 V1 requires a software RGBA_F16 bitmap"); return 0;
+        }
+        const spk::android::F16LayoutV1 layout(info.width, info.height, info.stride, int(alpha_mode));
+        const std::string space = str(env, space_j);
+        if (space != "sRGB" && space != "Display P3") {
+            fail("unsupported F16 V1 SDR color encoding"); return 0;
+        }
+        const std::string params = str(env, params_j);
+        const spk::android::InputTransform xf(space);
+        const HighlightExpand expand(std::isfinite(headroom_stops) ? std::clamp(float(headroom_stops), 0.0f, 3.0f) : 0.0f);
+        std::vector<float> rgb(layout.rgb_values);
+        std::atomic<bool> valid{true};
+        {
+            PixelLock lock(env, bitmap);
+            if (!lock.ok) { fail("cannot lock F16 bitmap pixels"); return 0; }
+            const uint64_t px = uint64_t(info.width) * info.height;
+            const uint32_t workers = px < 1'000'000 ? 1u : std::min(4u, std::max(1u, std::thread::hardware_concurrency()));
+            const auto* base = static_cast<const uint8_t*>(lock.pixels);
+            run_rows(info.height, workers, [&](uint32_t y0, uint32_t y1) {
+                for (uint32_t y = y0; y < y1 && valid.load(std::memory_order_relaxed); ++y) {
+                    const auto* row = base + size_t(y) * info.stride;
+                    float* dst = rgb.data() + size_t(y) * info.width * 3;
+                    for (uint32_t x = 0; x < info.width; ++x) {
+                        float c[3];
+                        if (!spk::android::decode_f16_sdr_pixel_v1(row + size_t(x) * 8, layout.alpha, c)) {
+                            valid.store(false, std::memory_order_relaxed);
+                            return;
+                        }
+                        for (int channel = 0; channel < 3; ++channel) c[channel] = xf.decode(c[channel], channel);
+                        if (expand.active()) expand.apply(c[0], c[1], c[2]);
+                        xf.to_prophoto(c);
+                        for (int channel = 0; channel < 3; ++channel) dst[3 * x + channel] = c[channel];
+                    }
+                }
+            });
+        }
+        if (!valid.load(std::memory_order_relaxed)) {
+            fail("F16 V1 requires finite SDR codes in [0,1]; extended-range/HDR input is unsupported"); return 0;
+        }
+        SessionPtr session(open_pixels(reinterpret_cast<spk_engine*>(engine_handle), rgb,
+                                       info.width, info.height, params));
+        if (!session) return 0;
+        make_before(session.get(), rgb, info.width, info.height, /*linear_prophoto=*/true);
+        session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
+        session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
+        session->kind = "bitmap";
+        session->input_precision = "f16_sdr_v1";
+        return reinterpret_cast<jlong>(session.release());
+    } catch (const std::bad_alloc&) {
+        fail("out of memory while opening the F16 image");
+    } catch (const std::exception& e) {
+        fail(std::string("open F16 image: ") + e.what());
+    } catch (...) {
+        fail("open F16 image: unknown failure");
     }
     return 0;
 }
@@ -887,6 +1133,7 @@ JNI_FN(jlong, openBitmapHdr)(JNIEnv* env, jobject, jlong engine_handle, jobject 
         session->source_width = source_width > 0 ? uint32_t(source_width) : info.width;
         session->source_height = source_height > 0 ? uint32_t(source_height) : info.height;
         session->kind = "bitmap";
+        session->input_precision = "rgba8_gainmap";
         return reinterpret_cast<jlong>(session.release());
     } catch (const std::bad_alloc&) {
         fail("out of memory while opening the HDR image");
@@ -946,7 +1193,11 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
             spk_open(s->engine, &input, params.c_str(), nullptr), &spk_session_release);
         if (!card) { fail(engine_error("film preview")); return nullptr; }
         ResultGuard result;
-        if (view.no_film || view.di()) {
+        if (view.no_film) {
+            if (!spk::android::render_view_float(card.get(), "full", result.r, result.float_rgb, bad)) {
+                fail("film preview render: " + bad); return nullptr;
+            }
+        } else if (view.di()) {
             // A card on 相纸「无」shows the intermediate as the print does.
             if (!spk::android::render_view(card.get(), "full", view.no_film, result.r, bad)) {
                 fail("film preview render: " + bad);
@@ -957,7 +1208,14 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
             return nullptr;
         }
         // The card is shown beside the print, so it leaves ProPhoto the same way.
-        return to_bitmap(env, result.r, nullptr, renders_prophoto(params) ? s->transform() : nullptr);
+        auto options = view.raw_development;
+        options.enabled = options.enabled && view.no_film && s->kind == "raw";
+        if (options.enabled && !s->raw_stats_ready) {
+            fail("RAW standard development requires reopening the complete source"); return nullptr;
+        }
+        const auto development = spk::android::RawDevelopment::build(s->raw_metadata, s->raw_stats, options);
+        return to_bitmap(env, result.r, nullptr, renders_prophoto(params) ? s->transform() : nullptr,
+            result.float_rgb.empty() ? nullptr : result.float_rgb.data(), {}, development.enabled() ? &development : nullptr);
     } catch (const std::exception& e) {
         fail(std::string("film preview: ") + e.what());
     } catch (...) {
@@ -970,14 +1228,34 @@ JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) return jstr(env, "{}");
     try {
-        const auto num = [](double v) { return std::to_string(std::isfinite(v) ? v : 0.0); };
+        const auto num = [](double v) {
+            std::ostringstream text;
+            text.imbue(std::locale::classic());
+            text << std::setprecision(std::numeric_limits<double>::max_digits10) << (std::isfinite(v) ? v : 0.0);
+            return text.str();
+        };
+        const auto triple = [&](const std::array<double, 3>& values) {
+            return "[" + num(values[0]) + "," + num(values[1]) + "," + num(values[2]) + "]";
+        };
         std::string out = "{\"width\":" + std::to_string(s->width) + ",\"height\":" + std::to_string(s->height) +
             ",\"sourceWidth\":" + std::to_string(s->source_width) +
             ",\"sourceHeight\":" + std::to_string(s->source_height) +
             ",\"kind\":\"" + s->kind + "\",\"make\":\"" + json_escape(utf8_clean(s->make)) +
             "\",\"model\":\"" + json_escape(utf8_clean(s->model)) + "\"" +
+            ",\"inputPrecision\":\"" + json_escape(s->input_precision) + "\"" +
+            ",\"inputPrecisionNote\":\"" + json_escape(s->input_precision_note) + "\"" +
+            ",\"rawFloatSource\":" + (s->input_precision == "float_linear_v1" ?
+                "{\"black\":" + triple(s->float_source.black) + ",\"white\":" + triple(s->float_source.white) +
+                ",\"neutral\":" + triple(s->float_source.neutral) + "}" : "null") +
             ",\"asShotK\":" + num(s->as_shot_k) + ",\"asShotTint\":" + num(s->as_shot_tint) +
-            ",\"wbK\":" + num(s->wb_k) + ",\"wbTint\":" + num(s->wb_tint) + "}";
+            ",\"wbK\":" + num(s->wb_k) + ",\"wbTint\":" + num(s->wb_tint) +
+            ",\"rawStatsBinned\":" + (s->raw_stats_binned ? "true" : "false") +
+            ",\"rawStatsReady\":" + (s->raw_stats_ready ? "true" : "false") +
+            ",\"rawDevelopment\":\"" + (s->development() ? "standard_v1" : "neutral") +
+            "\",\"rawCurve\":\"" + (s->development() ? s->raw_development.curve_name() : "none") +
+            "\",\"rawEffectiveEv\":" + num(s->raw_development.effective_ev()) +
+            ",\"rawAutoEv\":" + num(s->raw_development.auto_ev()) +
+            ",\"rawDevelopmentStatus\":\"" + json_escape(s->raw_development.status()) + "\"}";
         return jstr(env, out);
     } catch (...) {
         fail("source info: out of memory");
@@ -994,11 +1272,23 @@ JNI_FN(jstring, setParams)(JNIEnv* env, jobject, jlong handle, jstring delta_j) 
         spk::android::ViewFlags view = s->view;
         std::string bad;
         if (!spk::android::take_app_keys(delta, view, bad)) { fail("set params: " + bad); return nullptr; }
+        auto options = view.raw_development;
+        options.enabled = options.enabled && view.no_film && s->kind == "raw";
+        // Build before accepting engine params; invalid display metadata cannot
+        // leave the engine and application options on different edits.
+        if (options.enabled && !s->raw_stats_ready) {
+            fail("RAW standard development requires reopening the complete source"); return nullptr;
+        }
+        auto development = spk::android::RawDevelopment::build(s->raw_metadata, s->raw_stats, options);
         char* reply = nullptr;
         const spk_status st = spk_set_params(s->session, delta.c_str(), &reply);
         std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
         if (st != SPK_OK) { fail(engine_error("set params")); return nullptr; }
+        // Accepted params can precede a cancelled/failed render. The old cache
+        // must not be published as that new film or geometry on a later repack.
+        if (delta != "{}" || view.no_film != s->view.no_film) ++s->render_revision;
         s->view = view;
+        s->raw_development = std::move(development);
         return jstr(env, reply ? reply : "{}");
     } catch (const std::exception& e) {
         fail(std::string("set params: ") + e.what());
@@ -1027,30 +1317,65 @@ JNI_FN(jstring, getParams)(JNIEnv* env, jobject, jlong handle) {
 
 // `r` into `reuse` when it is the same size, else into a new Bitmap.
 jobject pack_into(JNIEnv* env, const spk_result& r, jobject reuse, const spk::android::Layer2* look,
-                  const spk::android::OutputTransform* xf) {
+                  const spk::android::OutputTransform* xf, const float* rgb = nullptr,
+                  const spk::android::OutputCancel& cancel = {}, const spk::android::RawDevelopment* development = nullptr) {
+    cancel.check();
     AndroidBitmapInfo info{};
     if (reuse && AndroidBitmap_getInfo(env, reuse, &info) == ANDROID_BITMAP_RESULT_SUCCESS &&
         info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 && info.width == r.width && info.height == r.height) {
         PixelLock lock(env, reuse);
         if (lock.ok) {
-            pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf);
+            pack_rgba8(r, static_cast<uint8_t*>(lock.pixels), info.stride, look, xf, rgb, cancel, development);
+            cancel.check();
             return reuse;
         }
     }
-    return to_bitmap(env, r, look, xf);
+    return to_bitmap(env, r, look, xf, rgb, cancel, development);
 }
 
 JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
         ResultGuard result;
-        if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        return to_bitmap(env, result.r, s->active_look(), s->xf());
+        if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return nullptr;
+        return to_bitmap(env, result.r, s->active_look(), s->xf(), result.float_rgb.empty() ? nullptr : result.float_rgb.data(), cancel, s->development());
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
         fail("render: unknown failure");
+    }
+    return nullptr;
+}
+
+// File-target codes in a fresh bitmap. Kotlin must tag it with that target,
+// allowing Android to map it to the screen without a second gamut compressor.
+JNI_FN(jobject, renderProofBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jstring target_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("no session"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
+    try {
+        const std::string target = str(env, target_j);
+        if (!s->prophoto || (target != "sRGB" && target != "Display P3")) {
+            fail("color preview: unsupported source or target"); return nullptr;
+        }
+        cancel.check();
+        spk::android::OutputTransform output;
+        std::string error;
+        if (!output.fetch(s->engine, target, true, error)) {
+            fail("color preview: " + error); return nullptr;
+        }
+        cancel.check();
+        ResultGuard result;
+        if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return nullptr;
+        // Do not replace the editor's output transform or last/repack source.
+        return to_bitmap(env, result.r, s->active_look(), &output,
+                         result.float_rgb.empty() ? nullptr : result.float_rgb.data(), cancel, s->development());
+    } catch (const std::exception& e) {
+        fail(std::string("color preview: ") + e.what());
+    } catch (...) {
+        fail("color preview: unknown failure");
     }
     return nullptr;
 }
@@ -1060,12 +1385,13 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
 JNI_FN(jobject, exportBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
         ResultGuard result;
-        if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        const std::string blank = blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px);
+        if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return nullptr;
+        const std::string blank = blank_result(result);
         if (!blank.empty()) { fail("export check: " + blank); return nullptr; }
-        return to_bitmap(env, result.r, s->active_look(), s->xf());
+        return to_bitmap(env, result.r, s->active_look(), s->xf(), result.float_rgb.empty() ? nullptr : result.float_rgb.data(), cancel, s->development());
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
     } catch (...) {
@@ -1074,18 +1400,116 @@ JNI_FN(jobject, exportBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
     return nullptr;
 }
 
+// Bounded readback for no-film, bounded output conversion for every path.
+// Packed width/height lets Kotlin write EXIF/check the file without a Bitmap.
+JNI_FN(jlong, exportJpeg444)(JNIEnv* env, jobject, jlong handle, jstring path_j,
+                            jstring tier_j, jint quality, jbyteArray icc_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("no session"); return 0; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
+    const auto check_cancelled = [&] { cancel.check(); };
+    try {
+        const std::string path = str(env, path_j);
+        const auto* xf = s->xf();
+        if (!xf || !xf->ready()) { fail("JPEG: output transform unavailable"); return 0; }
+        std::vector<uint8_t> icc;
+        if (icc_j) {
+            const jsize count = env->GetArrayLength(icc_j);
+            icc.resize(size_t(count));
+            env->GetByteArrayRegion(icc_j, 0, count, reinterpret_cast<jbyte*>(icc.data()));
+            if (env->ExceptionCheck()) return 0;
+        }
+        if (icc.empty()) { fail("JPEG: output profile unavailable"); return 0; }
+        uint32_t width = 0, height = 0;
+        std::unique_ptr<spk::android::Rgba8Spool> spool;
+        std::string error;
+        if (s->view.no_film) {
+            spk::android::FloatFrameCheck check;
+            const auto* look = s->active_look();
+            spk::android::Layer2::Frame frame;
+            std::vector<uint8_t> scratch;
+            const auto sink = [&](uint32_t w, uint32_t h, uint32_t y0, uint32_t count,
+                                  const float* rgb, std::string& sink_error) {
+                check_cancelled();
+                if (!check.append(rgb, w, w, h, y0, count)) {
+                    sink_error = "export check: " + check.finish();
+                    return false;
+                }
+                if (!spool) {
+                    width = w; height = h;
+                    spool = spk::android::Rgba8Spool::create(path, width, height);
+                    if (look) frame = look->frame(width, height);
+                }
+                const spk::android::Rgba8Rows rows(rgb, w, w, h, y0, count, look, xf, &frame, s->development());
+                rows.pack(y0, count, scratch, cancel);
+                spool->append(scratch);
+                return true;
+            };
+            ResultGuard shape;
+            if (!spk::android::render_view_float_rows(s->session, str(env, tier_j), shape.r,
+                                                      sink, error, cancel)) {
+                fail("JPEG: " + error); return 0;
+            }
+            error = check.finish();
+            if (!error.empty()) { fail("export check: " + error); return 0; }
+            if (shape.r.width != width || shape.r.height != height) {
+                fail("JPEG: inconsistent render dimensions"); return 0;
+            }
+            spool->seal();
+        } else {
+            ResultGuard result;
+            if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return 0;
+            error = blank_result(result);
+            if (!error.empty()) { fail("export check: " + error); return 0; }
+            width = result.r.width; height = result.r.height;
+            spool = spk::android::Rgba8Spool::create(path, width, height);
+            const spk::android::Rgba8Rows rows = result.float_rgb.empty()
+                ? spk::android::Rgba8Rows(result.r.rgba16, result.r.row_stride_px, width, height, s->active_look(), xf)
+                : spk::android::Rgba8Rows(result.float_rgb.data(), result.r.row_stride_px, width, height, s->active_look(), xf, s->development());
+            std::vector<uint8_t> scratch;
+            for (uint32_t y = 0; y < height; y += 32) {
+                check_cancelled();
+                rows.pack(y, std::min(32u, height - y), scratch, cancel);
+                spool->append(scratch);
+            }
+            spool->seal();
+        } // Free the render result before libjpeg allocates coefficient planes.
+        const spk::android::JpegRowSource source = [&](uint32_t y0, uint32_t count, std::vector<uint8_t>& scratch) {
+            check_cancelled();
+            return spool->read(y0, count, scratch);
+        };
+        check_cancelled();
+        if (!spk::android::write_jpeg444(path, width, height, quality, icc, source, error)) {
+            fail("JPEG: " + error); return 0;
+        }
+        if (cancel.cancelled()) {
+            std::remove(path.c_str());
+            check_cancelled();
+        }
+        return jlong((uint64_t(width) << 32) | height);
+    } catch (const std::exception& e) {
+        fail(std::string("JPEG: ") + e.what());
+    } catch (...) {
+        fail("JPEG: unknown failure");
+    }
+    return 0;
+}
+
 // Renders `tier` into `reuse` when it is the same size, so a pooled preview
 // allocates nothing; otherwise into a new Bitmap from the same result, so a
 // size change (first preview, crop, rotation, film edge) renders once, not
-// twice. Null on failure (lastError), and `reuse` is then untouched.
+// twice. `reuse` must be a spare: cancellation may leave it partly packed.
+// The cached engine/float result is replaced only after successful packing.
 JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s) { fail("no session"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
         ResultGuard result;
-        if (!render(s, str(env, tier_j), result.r)) return nullptr;
-        jobject out = pack_into(env, result.r, reuse, s->active_look(), s->xf());
-        if (out) s->keep(result.r);
+        if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return nullptr;
+        jobject out = pack_into(env, result.r, reuse, s->active_look(), s->xf(), result.float_rgb.empty() ? nullptr : result.float_rgb.data(), cancel, s->development());
+        cancel.check();
+        if (out) s->keep(result.r, result.float_rgb);
         return out;
     } catch (const std::exception& e) {
         fail(std::string("render: ") + e.what());
@@ -1097,34 +1521,51 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
 
 // Renders `tier` and writes the RGB16 TIFF to `path`, or, when `fd` >= 0, to
 // that descriptor (a pending MediaStore entry, so nothing is copied twice).
-static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring tier_j) {
+// `target` specifies the output color space: "sRGB", "Display P3", or "ProPhoto RGB".
+static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring target_j, jstring tier_j) {
     if (!s) { fail("no session"); return JNI_FALSE; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
         // A TIFF without its profile would be read as some other space: refuse.
         std::vector<uint8_t> icc;
         const std::string icc_path = str(env, icc_j);
         std::ifstream file(icc_path, std::ios::binary);
-        if (icc_path.empty() || !file) { fail("TIFF: sRGB profile missing from engine resources"); return JNI_FALSE; }
+        if (icc_path.empty() || !file) { fail("TIFF: ICC profile missing from engine resources"); return JNI_FALSE; }
         icc.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-        if (icc.empty()) { fail("TIFF: sRGB profile is empty"); return JNI_FALSE; }
+        if (icc.empty()) { fail("TIFF: ICC profile is empty"); return JNI_FALSE; }
+
+        const std::string target = target_j ? str(env, target_j) : std::string("sRGB");
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
+
+        // Set output transform to target color space for export
+        if (!s->set_output(target, true)) {
+            fail("TIFF: cannot set output to " + target);
+            return JNI_FALSE;
+        }
+
         ResultGuard result;
-        if (!render(s, tier, result.r)) return JNI_FALSE;
-        std::string error = blank_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px);
+        if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
+        std::string error = blank_result(result);
         if (!error.empty()) { fail("export check: " + error); return JNI_FALSE; }
         const auto* xf = s->xf();
-        if (xf && xf->target() != "sRGB") { fail("TIFF: the session's output is not sRGB"); return JNI_FALSE; }
+        if (!xf || xf->target() != target) {
+            fail("TIFF: the session's output is not " + target);
+            return JNI_FALSE;
+        }
         const auto* look = s->active_look();
         // Retain full-frame mask/dust geometry, but convert only the encoder's
         // next strips. The engine's result stays immutable through the write.
-        const spk::android::Rgba16Rows rows(result.r.rgba16, result.r.row_stride_px,
-                                            result.r.width, result.r.height, look, xf);
+        const spk::android::Rgba16Rows rows = result.float_rgb.empty()
+            ? spk::android::Rgba16Rows(result.r.rgba16, result.r.row_stride_px, result.r.width, result.r.height, look, xf)
+            : spk::android::Rgba16Rows(result.float_rgb.data(), result.r.row_stride_px, result.r.width, result.r.height, look, xf, s->development());
         const spk::android::TiffRowSource source = [&](uint32_t y0, uint32_t count, std::vector<uint16_t>& scratch) {
-            if (!look && !xf) return spk::android::TiffRowView{
+            cancel.check();
+            if (result.float_rgb.empty() && !look && !xf) return spk::android::TiffRowView{
                 result.r.rgba16 + size_t(y0) * result.r.row_stride_px * 4, result.r.row_stride_px};
-            rows.pack(y0, count, scratch);
+            rows.pack(y0, count, scratch, cancel);
             return spk::android::TiffRowView{scratch.data(), result.r.width};
         };
+        cancel.check();
         if (fd >= 0) {
             // A dup, so fclose leaves the caller's ParcelFileDescriptor to close its own.
             const int own = dup(fd);
@@ -1136,11 +1577,18 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
             }
             std::unique_ptr<std::FILE, decltype(&std::fclose)> owned(file, &std::fclose);
             const bool ok = spk::android::write_tiff16(file, result.r.width, result.r.height, icc, source, error);
-            if (std::fclose(owned.release()) != 0 && ok) { fail("TIFF: close failed"); return JNI_FALSE; }
+            const int closed = std::fclose(owned.release());
+            cancel.check(); // The writer has joined every worker and closed its file.
+            if (closed != 0 && ok) { fail("TIFF: close failed"); return JNI_FALSE; }
             if (!ok) { fail("TIFF: " + error); return JNI_FALSE; }
             return JNI_TRUE;
         }
-        if (!spk::android::write_tiff16(path, result.r.width, result.r.height, icc, source, error)) {
+        const bool ok = spk::android::write_tiff16(path, result.r.width, result.r.height, icc, source, error);
+        if (cancel.cancelled()) {
+            std::remove(path.c_str());
+            cancel.check();
+        }
+        if (!ok) {
             fail("TIFF: " + error);
             return JNI_FALSE;
         }
@@ -1156,13 +1604,19 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
 }
 
 JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j, jstring icc_j, jstring tier_j) {
-    return export_tiff(env, reinterpret_cast<Session*>(handle), str(env, path_j), -1, icc_j, tier_j);
+    return export_tiff(env, reinterpret_cast<Session*>(handle), str(env, path_j), -1, icc_j, nullptr, tier_j);
 }
 
 // exportTiff into an open, writable descriptor; the caller keeps and closes it.
 JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring tier_j) {
     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
-    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, tier_j);
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, nullptr, tier_j);
+}
+
+// exportTiffFd with target color space selection (new in export-pro)
+JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring target_j, jstring tier_j) {
+    if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, target_j, tier_j);
 }
 
 // Safe from another thread while a render is in flight on the engine thread:
@@ -1170,7 +1624,10 @@ JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstr
 // guarantees the session outlives this call (EditorViewModel.cancelLock).
 JNI_FN(void, cancel)(JNIEnv*, jobject, jlong handle) {
     auto* s = reinterpret_cast<Session*>(handle);
-    if (s && s->session) spk_cancel(s->session, nullptr);
+    if (s && s->session) {
+        s->cancel_generation.fetch_add(1, std::memory_order_relaxed);
+        spk_cancel(s->session, nullptr);
+    }
 }
 
 // The fixed per-stock setup (tc_lut, C_max table, compute pipelines) paid
@@ -1193,7 +1650,7 @@ JNI_FN(jlong, trimMemory)(JNIEnv*, jobject, jlong engine) {
 
 // True when the last failure on this thread was a cancellation.
 JNI_FN(jboolean, lastWasCancelled)(JNIEnv*, jobject) {
-    return t_error.find("render cancelled") != std::string::npos ? JNI_TRUE : JNI_FALSE;
+    return t_error.find("render cancelled") != std::string::npos || t_error == "RAW open cancelled" ? JNI_TRUE : JNI_FALSE;
 }
 
 // True when the last failure on this thread means the GPU device is lost:
@@ -1260,9 +1717,11 @@ JNI_FN(jboolean, setLut)(JNIEnv* env, jobject, jlong handle, jfloatArray values_
 // there is nothing kept (lastError), and the caller renders instead.
 JNI_FN(jobject, repack)(JNIEnv* env, jobject, jlong handle, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
-    if (!s || !s->last.rgba16) { fail("nothing to repack"); return nullptr; }
+    if (!s || (!s->last.rgba16 && s->last_float.empty())) { fail("nothing to repack"); return nullptr; }
+    if (s->last_revision != s->render_revision) { fail("cached render belongs to previous parameters"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
     try {
-        return pack_into(env, s->last, reuse, s->active_look(), s->xf());
+        return pack_into(env, s->last, reuse, s->active_look(), s->xf(), s->last_float.empty() ? nullptr : s->last_float.data(), cancel, s->development());
     } catch (const std::exception& e) {
         fail(std::string("repack: ") + e.what());
     } catch (...) {

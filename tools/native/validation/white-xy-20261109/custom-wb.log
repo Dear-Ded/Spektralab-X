@@ -1,0 +1,5 @@
+invalid custom WB: 8 rejection/unchanged-output checks passed
+/data/work/gpt-optimize-wave2-20261109/white-xy/fixtures/missing-source.dng: compatible 32x24 source_wb_valid=0 finite=1 selected_wb_matched=1
+/data/work/gpt-optimize-wave2-20261109/white-xy/fixtures/missing-source.dng: headroom 64x48 source_wb_valid=0 finite=1 selected_wb_matched=1
+/data/work/gpt-optimize-wave2-20261109/white-xy/fixtures/d65-fm.dng: compatible 32x24 source_wb_valid=1 finite=1 selected_wb_matched=1
+missing source WB: 2 strict default rejections and 2 actual custom decodes passed

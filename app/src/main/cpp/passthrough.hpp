@@ -5,23 +5,26 @@
 //
 //   no_film  胶片「无」, upstream's Sidecar.noFilm. The session's decoded
 //            source (linear ProPhoto, as every session here is opened) encoded
-//            as ProPhoto and quantised at the same 16-bit boundary a print
-//            leaves at. Crop, quarter turns and flip come with the request,
+//            as ProPhoto float RGB until Android's grade boundary. Crop,
+//            quarter turns and flip come with the request,
 //            since the engine's own geometry runs inside the film stages.
 //   di       相纸「无」on a negative: the Digital Intermediate (RFC-028). The
 //            print stage writes Cineon codes; the view reads them through
 //            upstream's DI view table (resources/DI, spk_view_grade_di) back
 //            into encoded ProPhoto, as the Mac and desktop canvases show it.
 //
-// Both are asked for in encoded ProPhoto RGBA16 with the view's own Layer 2
-// off, so the result is what spk_reprint returns for a print: everything after
-// (layer2.cpp, output_transform.cpp, repack, TIFF) is unchanged. Header-only,
-// so the build needs no new source file.
+// The view's own Layer 2 is off. DI retains the original RGBA16 path; no-film
+// editing uses float RGB so negative exposure can recover RAW highlights.
 #pragma once
 
 #include <cstdlib>
+#include <cmath>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <utility>
+#include "output_cancel.hpp"
+#include "raw_development.hpp"
 
 #include "json.hpp"
 #include "pipeline/view.hpp"
@@ -32,46 +35,75 @@ namespace spk::android {
 // The app-side key carrying 胶片「无」(Edit.noFilm). Never sent to the engine,
 // which refuses a parameter it does not know.
 constexpr const char* kNoFilmKey = "x_no_film";
+constexpr const char* kRawDevelopmentKey = "x_raw_development";
+constexpr const char* kRawAutoExposureKey = "x_raw_auto_exposure";
+constexpr const char* kRawExposureKey = "x_raw_exposure_ev";
 
 // What the JNI needs to know about a session's params to pick its render.
 struct ViewFlags {
     bool no_film = false;
     bool di_switch = false;   // digital_intermediate, as last sent
     bool scan = false;        // scan_film, as last sent; it wins over the DI
+    RawDevelopmentOptions raw_development{false, true, 0.0f};
     // The app clears digital_intermediate on a slide (Catalog.normalize), so
     // the switch and scan_film alone say whether the engine prints a DI.
     bool di() const { return di_switch && !scan; }
 };
 
-// Takes kNoFilmKey off `json` (an open's params or a set_params delta) and
-// notes it and the DI switches in `flags`. `json` is rewritten only when the
-// key is there; the rewrite is the engine's own Json, whose numbers round-trip
-// at 17 digits, so what the engine reads is the same either way.
+// Remove app keys before the physical engine sees params. Validation commits
+// flags and JSON together. The engine Json round-trips numbers at 17 digits.
 inline bool take_app_keys(std::string& json, ViewFlags& flags, std::string& error) {
     if (json.find(kNoFilmKey) == std::string::npos &&
+        json.find(kRawDevelopmentKey) == std::string::npos &&
+        json.find(kRawAutoExposureKey) == std::string::npos &&
+        json.find(kRawExposureKey) == std::string::npos &&
         json.find("digital_intermediate") == std::string::npos &&
         json.find("scan_film") == std::string::npos) return true;
     spk::Json parsed;
     if (!spk::Json::parse(json, parsed, error)) return false;
     if (!parsed.is_object()) { error = "params must be an object"; return false; }
+    ViewFlags next = flags;
     const spk::Json& di = parsed.at("digital_intermediate");
-    if (di.is_bool()) flags.di_switch = di.as_bool();
+    if (di.is_bool()) next.di_switch = di.as_bool();
     const spk::Json& scan = parsed.at("scan_film");
-    if (scan.is_bool()) flags.scan = scan.as_bool();
-    if (!parsed.has(kNoFilmKey)) return true;
-    flags.no_film = parsed.at(kNoFilmKey).as_bool(false);
+    if (scan.is_bool()) next.scan = scan.as_bool();
+    if (parsed.has(kNoFilmKey)) next.no_film = parsed.at(kNoFilmKey).as_bool(false);
+    if (parsed.has(kRawDevelopmentKey)) {
+        const auto& value = parsed.at(kRawDevelopmentKey);
+        if (!value.is_string() || (value.as_string() != "neutral" && value.as_string() != "standard_v1")) {
+            error = "RAW development must be neutral or standard_v1"; return false;
+        }
+        next.raw_development.enabled = value.as_string() == "standard_v1";
+    }
+    if (parsed.has(kRawAutoExposureKey)) {
+        const auto& value = parsed.at(kRawAutoExposureKey);
+        if (!value.is_bool()) { error = "RAW auto exposure must be a boolean"; return false; }
+        next.raw_development.auto_exposure = value.as_bool();
+    }
+    if (parsed.has(kRawExposureKey)) {
+        const auto& value = parsed.at(kRawExposureKey);
+        const double ev = value.as_double();
+        if (!value.is_number() || !std::isfinite(ev) || ev < -8.0 || ev > 8.0) {
+            error = "RAW exposure must be finite and within -8 to 8 EV"; return false;
+        }
+        next.raw_development.exposure_ev = float(ev);
+    }
     spk::Json rest = spk::Json::object();
     for (const auto& kv : parsed.fields())
-        if (kv.first != kNoFilmKey) rest.set(kv.first, kv.second);
+        if (kv.first != kNoFilmKey && kv.first != kRawDevelopmentKey &&
+            kv.first != kRawAutoExposureKey && kv.first != kRawExposureKey) rest.set(kv.first, kv.second);
     json = rest.dump();
+    flags = next;
     return true;
 }
 
-// `reply` (spk_get_params JSON) with kNoFilmKey added, so Edit.fromParams
-// reads the session's 无 back.
+// Echo application state alongside spk_get_params for saved-edit roundtrips.
 inline std::string with_app_keys(const std::string& reply, const ViewFlags& flags) {
     if (reply.size() < 2 || reply.front() != '{') return reply;
-    const std::string field = std::string("\"") + kNoFilmKey + "\":" + (flags.no_film ? "true" : "false");
+    const std::string field = std::string("\"") + kNoFilmKey + "\":" + (flags.no_film ? "true" : "false") +
+        ",\"" + kRawDevelopmentKey + "\":\"" + (flags.raw_development.enabled ? "standard_v1" : "neutral") + "\"" +
+        ",\"" + kRawAutoExposureKey + "\":" + (flags.raw_development.auto_exposure ? "true" : "false") +
+        ",\"" + kRawExposureKey + "\":" + spk::Json(double(flags.raw_development.exposure_ev)).dump();
     return "{" + field + (reply.size() > 2 ? "," : "") + reply.substr(1);
 }
 
@@ -80,10 +112,8 @@ inline std::string with_app_keys(const std::string& reply, const ViewFlags& flag
 // a malloc'd CPU copy that spk_result_free std::free's (vulkan_gpu.cpp,
 // Gpu::release_texture_static), and rgba16 points at it; this result is
 // allocated the same way.
-inline bool render_view(spk_session* session, const std::string& tier, bool no_film,
-                        spk_result& out, std::string& error) {
-    std::memset(&out, 0, sizeof out);
-    spk::view::Request request;
+inline bool view_request(spk_session* session, const std::string& tier, bool no_film,
+                         spk::view::Request& request, std::string& error) {
     request.tier = tier;
     request.adjustments = spk::Json::object();
     request.adjustments.set("enabled", spk::Json(false));
@@ -113,8 +143,19 @@ inline bool render_view(spk_session* session, const std::string& tier, bool no_f
         request.geometry.set("flipH", spk::Json(p.at("geometry_flip_h").as_bool(false)));
         request.geometry.set("flipV", spk::Json(p.at("geometry_flip_v").as_bool(false)));
     }
+    return true;
+}
+
+inline bool render_view(spk_session* session, const std::string& tier, bool no_film,
+                        spk_result& out, std::string& error, const OutputCancel& cancel = {}) {
+    cancel.check();
+    std::memset(&out, 0, sizeof out);
+    spk::view::Request request;
+    if (!view_request(session, tier, no_film, request, error)) return false;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
     spk::view::Result result;
     if (!spk::view::render(session, request, result, error)) return false;
+    cancel.check();
     const size_t bytes = size_t(result.width) * result.height * 4 * sizeof(uint16_t);
     if (!result.width || !result.height || result.pixels.size() != bytes) {
         error = "view returned no pixels"; return false;
@@ -122,8 +163,66 @@ inline bool render_view(spk_session* session, const std::string& tier, bool no_f
     void* pixels = std::malloc(bytes);
     if (!pixels) { error = "cannot allocate the view's pixels"; return false; }
     std::memcpy(pixels, result.pixels.data(), bytes);
+    if (cancel.cancelled()) {
+        std::free(pixels);
+        cancel.check();
+    }
     out.texture = pixels;
     out.rgba16 = static_cast<const uint16_t*>(pixels);
+    out.width = result.width;
+    out.height = result.height;
+    out.row_stride_px = result.width;
+    out.elapsed_ms = result.print_ms + result.post_ms + result.readback_ms;
+    return true;
+}
+
+// Shape/timing use the C result; float ownership stays in its own vector.
+// No float allocation is ever disguised as the public rgba16/texture payload.
+inline bool render_view_float(spk_session* session, const std::string& tier,
+                              spk_result& out, std::vector<float>& rgb, std::string& error,
+                              const OutputCancel& cancel = {}) {
+    std::memset(&out, 0, sizeof out);
+    rgb.clear();
+    spk::view::Request request;
+    if (!view_request(session, tier, true, request, error)) return false;
+    request.ungraded_float = true;
+    request.rgba16 = false;
+    request.output_channels = 3;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
+    spk::view::Result result;
+    if (!spk::view::render(session, request, result, error)) return false;
+    if (!result.width || !result.height || result.float_pixels.size() != size_t(result.width) * result.height * 3) {
+        error = "view returned no float pixels"; return false;
+    }
+    out.width = result.width;
+    out.height = result.height;
+    out.row_stride_px = result.width;
+    out.elapsed_ms = result.print_ms + result.post_ms + result.readback_ms;
+    rgb = std::move(result.float_pixels);
+    return true;
+}
+
+// Export-only borrowed rows; the sink owns its output transaction and must not
+// re-enter this session. The callback never retains a complete CPU float frame.
+inline bool render_view_float_rows(spk_session* session, const std::string& tier,
+                                   spk_result& out, const spk::view::FloatRowSink& sink,
+                                   std::string& error, const OutputCancel& cancel = {}) {
+    std::memset(&out, 0, sizeof out);
+    cancel.check();
+    if (!sink) { error = "no film: missing float row sink"; return false; }
+    spk::view::Request request;
+    if (!view_request(session, tier, true, request, error)) return false;
+    request.ungraded_float = true;
+    request.rgba16 = false;
+    request.output_channels = 3;
+    request.float_rows = sink;
+    if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
+    spk::view::Result result;
+    if (!spk::view::render(session, request, result, error)) return false;
+    cancel.check();
+    if (!result.width || !result.height || !result.float_pixels.empty()) {
+        error = "view returned invalid float rows"; return false;
+    }
     out.width = result.width;
     out.height = result.height;
     out.row_stride_px = result.width;

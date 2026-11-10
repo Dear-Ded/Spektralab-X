@@ -1,0 +1,40 @@
+f2425bab9243e556859f50e960350649a3332a1c10e568c064154860b4a6375d  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_114715.dng
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=4096x3072 colors=3 bits=16 bytes=75497472
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=4096x3072 colors=3 bits=16 bytes=75497472
+6f0f2a4efc25cb99ca1ef3220d09f611276f518bf918a6c23350fdcdbee7eabb  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_114715.dng.raw
+2c34e3664d00ea820455ffb42f266e45837daecb1a57bbd287085b8440c95d2f  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_114715.dng.rgb
+BYTE IDENTICAL: IMG_20230420_114715.dng raw + RGB16
+94184d94ace7cfd3fc698e6ad6bac53a45342db5989d49d213a4b1660ebcc362  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_115647.dng
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=4096x3072
+RGB=1536x2048 colors=3 bits=16 bytes=18874368
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=4096x3072
+RGB=1536x2048 colors=3 bits=16 bytes=18874368
+72f8ef6860876f69be5b0dc8d467a03eb896dcfb8063682d153810af6f64a50e  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_115647.dng.raw
+2c59f924ff7f5a3874dbc18e87c3900425456dc3aa2d3693728c3faf7ac1f7ed  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_115647.dng.rgb
+BYTE IDENTICAL: IMG_20230420_115647.dng raw + RGB16
+0c65be622a5a0f2e9ca6fd3f3d1e68436115df807ff5eb2553d7727fce5da982  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_152059.dng
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=3072x4096 colors=3 bits=16 bytes=75497472
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=3072x4096 colors=3 bits=16 bytes=75497472
+8ecc5f07da2708d9c5b6c30839d6f1950d2776d4dd348d7687f90112ba46e83c  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_152059.dng.raw
+9994c0233228baf9d2bd92e42818f8f9b8dcd64f81719b9e3ed67f0153f8485b  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_152059.dng.rgb
+BYTE IDENTICAL: IMG_20230420_152059.dng raw + RGB16
+35d5c9760184cf53e964ee1adae15cf39591fd1ecc54c6319362d5d27ccd4ddb  /data/work/gpt-raw-gray-audit-20261109/IMG_20230420_153127.dng
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=4096x3072 colors=3 bits=16 bytes=75497472
+Xiaomi 2304FPN6DC decoder=lossless_dng_load_raw() raw=8192x6144
+RGB=4096x3072 colors=3 bits=16 bytes=75497472
+d4916a17100c4ef39818ad4445c1867a9d6b30e39e99506abebd9af26cb2c12a  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_153127.dng.raw
+7a4d27952a1718f9a9912e6354ec05074d8d6c14328c7ea2a022754d4be3a1c3  /data/work/gpt-maintenance-20261109/file-final/before-IMG_20230420_153127.dng.rgb
+BYTE IDENTICAL: IMG_20230420_153127.dng raw + RGB16
+10a1116bd00e92314b09382b403f76706b1eeab3ce33234a6c75fe25ed289756  /data/work/engine-deepdive/parity-base/raw/Canon_-_EOS_R5_-_RAW,_1.6_crop,_dual-pixel_(3:2).CR3
+Canon EOS R5 decoder=crxLoadRaw() raw=5248x3510
+RGB=2543x1695 colors=3 bits=16 bytes=25862310
+Canon EOS R5 decoder=crxLoadRaw() raw=5248x3510
+RGB=2543x1695 colors=3 bits=16 bytes=25862310
+3cfaa2c4054f78e213024fee282a9b897f16eb788747e849592420d67d7065a3  /data/work/gpt-maintenance-20261109/file-final/before-Canon_-_EOS_R5_-_RAW,_1.6_crop,_dual-pixel_(3:2).CR3.raw
+d3b113037182c8fefb9e3ae5ac438aab8dbfd3c6bcc88bb353536ef18fe511f9  /data/work/gpt-maintenance-20261109/file-final/before-Canon_-_EOS_R5_-_RAW,_1.6_crop,_dual-pixel_(3:2).CR3.rgb
+BYTE IDENTICAL: Canon_-_EOS_R5_-_RAW,_1.6_crop,_dual-pixel_(3:2).CR3 raw + RGB16

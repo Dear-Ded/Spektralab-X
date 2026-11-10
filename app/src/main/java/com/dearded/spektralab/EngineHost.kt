@@ -48,7 +48,7 @@ class SpektraLabApp : Application() {
 }
 
 /** The GPU device behind [engine] is lost (VkResult -4): only a new engine renders again. */
-class DeviceLostException(val engine: Long, detail: String) : Exception("GPU 被系统重置：$detail")
+class DeviceLostException(val engine: Long, detail: String) : Exception(ErrorCodes.format(ErrorCodes.GPU_DEVICE_LOST, "GPU 被系统重置：$detail"))
 
 /**
  * Process-lifetime owner of the native engine: its resources, setup caches and
@@ -67,6 +67,8 @@ class EngineHost(private val app: Application) {
     val pacer by lazy { ExportPacer(app, this) }
     /** The 正在处理 list. Process-wide, so it outlives every editor. */
     val queue: ProcessingQueue by lazy { ProcessingQueue(app, this) }
+    /** Keep candidate decode/replacement from overlapping an export session. */
+    internal val transientSessions = TransientSessionLease()
     /** Uptime of the last slider move or edit; background jobs wait for a quiet moment. */
     @Volatile var lastInteraction = 0L
 

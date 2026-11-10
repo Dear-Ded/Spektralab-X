@@ -73,9 +73,9 @@ fun BatchActions(table: LightTableViewModel, editor: EditorViewModel, chosen: Li
     Box {
         QuietButton("导出") { exportMenu = true }
         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = { exportMenu = false; export(ExportFormat.JPEG, ExportSize.FULL) })
+            DropdownMenuItem(text = { Text("JPEG · 工作尺寸") }, onClick = { exportMenu = false; export(ExportFormat.JPEG, ExportSize.FULL) })
             DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = { exportMenu = false; export(ExportFormat.JPEG, ExportSize.SHARE) })
-            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = { exportMenu = false; export(ExportFormat.TIFF, ExportSize.FULL) })
+            DropdownMenuItem(text = { Text("16 位 TIFF · 工作尺寸") }, onClick = { exportMenu = false; export(ExportFormat.TIFF, ExportSize.FULL) })
         }
     }
     QuietButton("选中") { table.rate(chosen.map { it.id }.toSet(), pick = 1); table.clearSelection() }

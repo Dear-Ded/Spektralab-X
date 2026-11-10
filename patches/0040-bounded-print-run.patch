@@ -1,0 +1,178 @@
+Bounded external-plane execution of the default print run with halo bands (phase two).
+Off by default; nothing in the engine calls it.
+Co-created with Claude (Anthropic), 2026-11-10.
+
+diff --git a/engine/src/pipeline/bounded_print_run.hpp b/engine/src/pipeline/bounded_print_run.hpp
+new file mode 100644
+--- /dev/null
++++ b/engine/src/pipeline/bounded_print_run.hpp
+@@ -0,0 +1,169 @@
++// bounded_print_run.hpp -- phase two of the external-plane work (patch 0040): the
++// default print run (xyz_to_rgb, gamut_compress, unsharp, cctf) in halo bands.
++// Co-created with Claude (Anthropic), 2026-11-10. See NOTICE for project terms.
++//
++// Same kernels, argument order and float32 storage as the Pipeline nodes. The
++// unsharp step calls Blur::gaussian and Blur::lincomb exactly as node_unsharp
++// does, on a band window. The window is the band plus `halo` rows each side,
++// clamped at the plane edges (never reflected into existence), so the FIR
++// kernel reflects over a buffer whose edge is the plane edge. Only the centre
++// rows are read back. Runs whose demand is carried (IIR) are not supported and
++// must take the whole-frame path. Off by default: nothing in the engine calls it.
++#pragma once
++
++#include <algorithm>
++#include <atomic>
++#include <mutex>
++#include <random>
++#include <string>
++#include <thread>
++#include <vector>
++
++#include "blur.hpp"
++#include "bounded_point_chain.hpp"
++#include "image.hpp"
++
++namespace spk {
++
++struct PrintRunTables {
++    PointChainTables point;
++    double unsharp_sigma = 0.0, unsharp_amount = 0.0;  // sigma in pixels at this tier
++    uint32_t halo = 0;                                  // from print_run_halo
++};
++
++// The run's vertical context in rows. `carried` set means a recurrence is needed
++// and the bounded path must not be used.
++inline uint32_t print_run_halo(double sigma, double amount, bool& carried) {
++    carried = false;
++    if (!(sigma > 0.0 && amount > 0.0)) return 0;
++    const double s[3] = {sigma, sigma, sigma};
++    const Blur::Demand d = Blur::demand(s);
++    carried = d.carried;
++    return d.halo;
++}
++
++// The only place a halo band height is chosen. A window keeps about five
++// same-size planes alive (upload, two point stages, blur, lincomb) and one plane
++// must fit a storage-buffer range.
++inline uint32_t choose_window_rows(uint32_t plane_h, uint32_t w, uint32_t halo, uint64_t range_bytes,
++                                   uint64_t budget_bytes, uint32_t requested_rows) {
++    const uint64_t row = uint64_t(w) * 3 * sizeof(float);
++    const uint64_t window = std::min<uint64_t>(range_bytes, budget_bytes / 5) / row;
++    const uint64_t rows = window > 2ull * halo ? window - 2ull * halo : 1;
++    const uint64_t want = requested_rows ? requested_rows : plane_h;
++    return uint32_t(std::max<uint64_t>(std::min<uint64_t>({want, uint64_t(plane_h), rows}), 1));
++}
++
++// One window through the nodes. `in` holds `wrows` rows; the `rows` rows starting
++// at `offset` are the band and are the only ones written to `out`.
++inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float* in, uint32_t w,
++                             uint32_t wrows, uint32_t offset, uint32_t rows, float* out,
++                             std::string& error) {
++    const PointChainTables& p = t.point;
++    const size_t pixels = size_t(w) * wrows, bytes = pixels * 3 * sizeof(float);
++    gpu::BufferRef cur = gpu->upload(in, bytes, error);
++    if (!cur) return false;
++    const uint32_t n[1] = {uint32_t(pixels)};
++    {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(p.xyz_to_rgb),
++                           gpu::Arg::inline_bytes(n, 1), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    if (p.gamut_compress) {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        const uint32_t meta[4] = {uint32_t(pixels), p.cam16_nl, p.cam16_nh, p.cam16_lightness ? 1u : 0u};
++        if (!gpu->dispatch("spk_cam16ucs_compress", {gpu::Arg::buf(cur), gpu::Arg::buf(p.m2x),
++                           gpu::Arg::buf(p.m2r), gpu::Arg::buf(p.cmax), gpu::Arg::buf(p.k),
++                           gpu::Arg::inline_bytes(meta, 4), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    if (t.unsharp_sigma > 0.0 && t.unsharp_amount > 0.0) {
++        Blur blur(gpu);
++        Image src, blurred, sharp;
++        src.h = wrows; src.w = w; src.c = 3; src.buf = std::move(cur);
++        const double s[3] = {t.unsharp_sigma, t.unsharp_sigma, t.unsharp_sigma};
++        const double a[3] = {1.0 + t.unsharp_amount, 1.0 + t.unsharp_amount, 1.0 + t.unsharp_amount};
++        const double b[3] = {-t.unsharp_amount, -t.unsharp_amount, -t.unsharp_amount};
++        if (!blur.gaussian(src, s, blurred, error)) return false;
++        if (!blur.lincomb(src, blurred, a, b, sharp, error)) return false;
++        cur = std::move(sharp.buf);
++        if (!gpu->flush(error)) return false;
++    }
++    if (p.cctf) {
++        gpu::BufferRef next = gpu->alloc(bytes, error);
++        if (!next) return false;
++        const uint32_t meta[2] = {uint32_t(pixels), p.cctf_mode};
++        if (!gpu->dispatch("spk_cctf_encode_matrix", {gpu::Arg::buf(cur), gpu::Arg::buf(p.output_matrix),
++                           gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(next)}, pixels, error)) return false;
++        cur = std::move(next);
++        if (!gpu->flush(error)) return false;
++    }
++    const size_t row_bytes = size_t(w) * 3 * sizeof(float);
++    return gpu->read(cur.get(), size_t(offset) * row_bytes, out, size_t(rows) * row_bytes, error);
++}
++
++// Producer/consumer over halo bands. Row numbers are global plane rows.
++inline bool run_print_run(gpu::Gpu* gpu, const PrintRunTables& t, const ExternalPlane& in,
++                          ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
++                          PointChainStats* stats, std::string& error) {
++    if (in.channels() != 3 || out.channels() != 3 || in.width() != out.width() || in.height() != out.height()) {
++        error = "external planes must be matching RGB float32";
++        return false;
++    }
++    if (band_rows == 0) { error = "band height must be positive"; return false; }
++    std::vector<StripSpan> spans;
++    for (uint32_t y = 0; y < in.height(); y += band_rows)
++        spans.push_back({y, std::min(band_rows, in.height() - y)});
++    if (order == BandOrder::Reverse) std::reverse(spans.begin(), spans.end());
++    if (order == BandOrder::Shuffled) std::shuffle(spans.begin(), spans.end(), std::mt19937(12345));
++
++    std::atomic<size_t> next{0};
++    std::atomic<bool> failed{false};
++    std::mutex gpu_mutex, error_mutex;
++    auto work = [&]() {
++        std::vector<float> src, dst;
++        for (;;) {
++            const size_t i = next.fetch_add(1);
++            if (i >= spans.size() || failed.load()) return;
++            const StripSpan s = spans[i];
++            try {
++                const uint32_t lo = s.y0 > t.halo ? s.y0 - t.halo : 0;
++                const uint32_t hi = std::min(in.height(), s.y0 + s.rows + t.halo);
++                src.resize(size_t(hi - lo) * in.width() * 3);
++                dst.resize(size_t(s.rows) * in.width() * 3);
++                in.read_rows(lo, hi - lo, src.data());
++                std::string band_error;
++                bool ok;
++                {
++                    std::lock_guard<std::mutex> guard(gpu_mutex);
++                    ok = print_run_window(gpu, t, src.data(), in.width(), hi - lo, s.y0 - lo, s.rows,
++                                          dst.data(), band_error);
++                }
++                if (!ok) throw std::runtime_error(band_error);
++                out.write_rows(s.y0, s.rows, dst.data());
++            } catch (const std::exception& e) {
++                std::lock_guard<std::mutex> guard(error_mutex);
++                if (!failed.exchange(true)) error = e.what();
++                return;
++            }
++        }
++    };
++    const unsigned n_workers = std::max(1u, workers);
++    std::vector<std::thread> threads;
++    for (unsigned i = 1; i < n_workers; ++i) threads.emplace_back(work);
++    work();
++    for (auto& th : threads) th.join();
++    if (stats) {
++        stats->bands = uint32_t(spans.size());
++        stats->band_rows = band_rows;
++        stats->max_band_bytes = uint64_t(std::min<uint64_t>(in.height(), uint64_t(band_rows) + 2ull * t.halo)) * in.width() * 3 * sizeof(float);
++    }
++    return !failed.load();
++}
++
++}  // namespace spk

@@ -50,7 +50,7 @@ private val BLOCKS = listOf(
     "致谢" to "渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab\n" +
         "胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm\n" +
         "胶片建模基于 spektrafilm（film modeling powered by spektrafilm）\n" +
-        "RAW 解码：LibRaw（LGPL-2.1）；全分辨率导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；" +
+        "RAW 解码：LibRaw（LGPL-2.1）；高质量导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；" +
         "Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。\n" +
         "SpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与小米公司无关联。",
 )

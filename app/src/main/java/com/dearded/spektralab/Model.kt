@@ -69,6 +69,15 @@ data class Catalog(val films: List<Stock>, val papers: List<Stock>) {
     }
 }
 
+enum class RawDevelopmentMode(val wire: String) {
+    NEUTRAL("neutral"), STANDARD_V1("standard_v1");
+
+    companion object {
+        fun fromWire(wire: String) = entries.firstOrNull { it.wire == wire }
+            ?: throw IllegalArgumentException("Unsupported RAW development: $wire")
+    }
+}
+
 /** The user-facing subset of the engine's parameters (names as on the wire). */
 data class Edit(
     val film: String = "kodak_portra_400",
@@ -84,6 +93,11 @@ data class Edit(
      * `x_no_film`, which the JNI takes off before the engine sees the params.
      */
     val noFilm: Boolean = false,
+    /** Per-photo SDR development, applied only to RAW with no film. Old saves and new imports stay neutral. */
+    val rawDevelopment: RawDevelopmentMode = RawDevelopmentMode.NEUTRAL,
+    val rawAutoExposure: Boolean = true,
+    /** Applied before the RAW display curve, independent of film and Layer 2 exposure. */
+    val rawExposureEv: Double = 0.0,
     /**
      * 相纸「无」on a negative: the Digital Intermediate (RFC-028), the negative
      * with its mask removed and reversed on its own neutral curve, shown
@@ -95,6 +109,7 @@ data class Edit(
      *  left unsent the engine meters "center_weighted", an arithmetic mean a bright sky drags up. */
     val aeMethod: String = "balanced",
     val exposureEv: Double = 0.0,
+    val sceneCurve: SceneCurve = SceneCurve.IDENTITY,
     val filmFormatMm: Double = 36.0,
     val printExposure: Double = 1.0,
     val yShift: Double = 0.0,
@@ -196,8 +211,16 @@ data class Edit(
 
     /** 胶片效果「无」: no grain, halation (and with it the scatter), glare or scanner sharpening. */
     val effectsNone: Boolean get() = !grainActive && !halationActive && !glareActive && unsharpAmount == 0.0
+    val rawDevelopmentChanged: Boolean get() = rawDevelopment != RawDevelopmentMode.NEUTRAL || !rawAutoExposure || rawExposureEv != 0.0
+    fun requiresRawDevelopmentSource(source: SourceInfo?) = source?.kind == "raw" && noFilm &&
+        rawDevelopment == RawDevelopmentMode.STANDARD_V1 && !source.rawStatsReady
 
     fun withoutEffects() = copy(grainActive = false, halationActive = false, glareActive = false, unsharpAmount = 0.0)
+
+    /** Output-only edits can reuse the immutable engine frame; geometry and film cannot. */
+    fun sameRenderInputAs(previous: Edit) = copy(look = previous.look,
+        rawDevelopment = previous.rawDevelopment, rawAutoExposure = previous.rawAutoExposure,
+        rawExposureEv = previous.rawExposureEv) == previous
 
     /** 相纸「无」: a slide scanned directly, a negative as its Digital Intermediate. */
     fun paperNone(positive: Boolean) = if (positive) scanFilm else digitalIntermediate && !scanFilm
@@ -270,6 +293,7 @@ data class Edit(
          * direct scan, which the engine refuses for a slide.
          */
         private val EXTRA_FIELDS: List<Pair<String, (Edit) -> Any>> = listOf(
+            "scene_curve" to { e: Edit -> e.sceneCurve.wire },
             "preflash_exposure" to { e: Edit -> e.preflash.coerceIn(0.0, 1.0) },
             "density_curve_gamma" to { e: Edit -> e.negativeGamma.coerceIn(0.2, 4.0) },
             "halation_boost_ev" to { e: Edit -> e.highlightBoostEv.coerceIn(0.0, 8.0) },
@@ -285,6 +309,11 @@ data class Edit(
             "print_stock" to { e: Edit -> e.paper },
             "scan_film" to { e: Edit -> e.scanFilm },
             "x_no_film" to { e: Edit -> e.noFilm },
+            "x_raw_development" to { e: Edit -> e.rawDevelopment.wire },
+            "x_raw_auto_exposure" to { e: Edit -> e.rawAutoExposure },
+            "x_raw_exposure_ev" to { e: Edit -> e.rawExposureEv.also {
+                require(it.isFinite() && it in -8.0..8.0) { "RAW exposure must be within -8 to 8 EV" }
+            } },
             "digital_intermediate" to { e: Edit -> e.digitalIntermediate },
             "auto_exposure" to { e: Edit -> e.autoExposure },
             "auto_exposure_method" to { e: Edit -> e.aeMethod },
@@ -348,11 +377,17 @@ data class Edit(
             // Params written before 无 existed name a film and have neither key:
             // they always developed on a film and a paper.
             noFilm = p.optBoolean("x_no_film", if (p.has("film_stock")) false else fallback.noFilm),
+            rawDevelopment = RawDevelopmentMode.fromWire(p.optString("x_raw_development", "neutral")),
+            rawAutoExposure = p.optBoolean("x_raw_auto_exposure", true),
+            rawExposureEv = p.optDouble("x_raw_exposure_ev", 0.0).also {
+                require(it.isFinite() && it in -8.0..8.0) { "Invalid RAW exposure" }
+            },
             digitalIntermediate = p.optBoolean("digital_intermediate",
                 if (p.has("film_stock")) false else fallback.digitalIntermediate),
             autoExposure = p.optBoolean("auto_exposure", fallback.autoExposure),
             aeMethod = p.optString("auto_exposure_method", fallback.aeMethod),
             exposureEv = p.optDouble("exposure_compensation_ev", fallback.exposureEv),
+            sceneCurve = if (p.has("scene_curve")) SceneCurve.fromWire(p.getString("scene_curve"), fallback.sceneCurve) else fallback.sceneCurve,
             filmFormatMm = p.optDouble("film_format_mm", fallback.filmFormatMm),
             printExposure = p.optDouble("print_exposure", fallback.printExposure),
             yShift = p.optDouble("y_filter_shift", fallback.yShift),
@@ -617,4 +652,8 @@ data class SourceInfo(
     val asShotTint: Double = 0.0,
     val wbK: Double = 0.0,
     val wbTint: Double = 0.0,
+    val rawStatsBinned: Boolean = false,
+    val rawStatsReady: Boolean = false,
+    val inputPrecision: String = "",
+    val inputPrecisionNote: String = "",
 )

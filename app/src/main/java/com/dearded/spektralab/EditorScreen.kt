@@ -126,16 +126,16 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         queuedExport?.invoke()
         queuedExport = null
     }
-    fun exportWithNotice(format: ExportFormat, size: ExportSize) {
+    fun exportWithNotice(format: ExportFormat, size: ExportSize, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
         savedAt = System.currentTimeMillis()
         val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         if (missing) {
-            queuedExport = { vm.export(format, size) }
+            queuedExport = { vm.export(format, size, tiffColorSpace) }
             notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            vm.export(format, size)
+            vm.export(format, size, tiffColorSpace)
         }
     }
 
@@ -205,17 +205,29 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             Text("保存")
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text("JPEG · 全尺寸") }, onClick = {
+                            DropdownMenuItem(text = { Text("JPEG · 工作尺寸") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
                             })
-                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边 3400）") }, onClick = {
+                            DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边不超过 3400）") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
                             })
-                            DropdownMenuItem(text = { Text("16 位 TIFF · 全尺寸") }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
+                            for (target in listOf("sRGB", "Display P3")) {
+                                DropdownMenuItem(text = { Text("JPEG 颜色预览 · $target") },
+                                    enabled = !ui.loadingDetail && ui.busy == null,
+                                    onClick = { exportMenu = false; vm.loadExportProof(target) })
+                            }
+                            // TIFF 导出：三种色彩空间选项
+                            DropdownMenuItem(text = { Text("16 位 TIFF · sRGB") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
                             })
-                            if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 全尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text("全分辨率导出（后台）") }, onClick = {
+                            DropdownMenuItem(text = { Text("16 位 TIFF · Display P3") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · ProPhoto RGB") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
+                            })
+                            if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 工作尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
+                            DropdownMenuItem(text = { Text("高质量导出（受设备上限限制）") }, onClick = {
                                 exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
                             })
                         }
@@ -499,7 +511,12 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         showChanges = false
     }) { showChanges = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
-    ui.detail?.let { DetailViewer(it, vm::closeDetail) }
+    ui.detail?.let {
+        val target = ui.detailTarget
+        DetailViewer(it, vm::closeDetail,
+            title = if (target == null) "1:1" else "JPEG 颜色预览 · $target",
+            note = if (target == null) null else "预览尺寸；不含纸框和 JPEG 压缩")
+    }
     UpdateDialog(editing = ui.hasImage)
 }
 
@@ -554,8 +571,10 @@ private fun Preview(
                         scaleX = scale; scaleY = scale
                         translationX = offset.x; translationY = offset.y
                     }
-            // The original is shown bare; the print gets its paper frame.
-            val frame = if (holding && ui.before != null) FrameSpec() else ui.edit.frame
+            // When comparing with border enabled, original and print must align pixel-perfect.
+            // Pass the real frame to maintain identical photo positioning, but suppress decoration.
+            val frame = ui.edit.frame
+            val showFrameDecoration = !(holding && ui.before != null)
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
@@ -580,10 +599,10 @@ private fun Preview(
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
                 if (under != null) {
-                    FramedImage(under, frame, caption, Modifier.fillMaxSize())
-                    FramedImage(front, frame, caption, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
+                    FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
+                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
                 } else {
-                    FramedImage(bitmap, frame, caption, Modifier.fillMaxSize())
+                    FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
                 }
                 if (!holding) MaskOverlay(ui, Modifier.fillMaxSize())   // edit-effects: mask handles and brush (MaskPanel.kt)
             }
@@ -760,7 +779,7 @@ private fun Controls(
                             val stepEdited = listOf(
                                 !e.noFilm || e.filmFormatMm != d.filmFormatMm,
                                 !e.noFilm && !e.paperNone(positive),
-                                !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                                !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                                 !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma ||
                                     e.extraEffectsTuned(d),
@@ -775,6 +794,24 @@ private fun Controls(
                                 ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
+                            if (e.noFilm && ui.source?.kind == "raw") {
+                                GroupLabel("RAW 显影")
+                                Segmented(options = listOf("线性显示", "标准显色（实验）"),
+                                    selected = if (e.rawDevelopment == RawDevelopmentMode.NEUTRAL) 0 else 1,
+                                    enabled = enabled) { i ->
+                                    vm.update(e.copy(rawDevelopment = if (i == 0) RawDevelopmentMode.NEUTRAL else RawDevelopmentMode.STANDARD_V1))
+                                }
+                                if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) {
+                                    SwitchRow("RAW 自动曝光", e.rawAutoExposure, enabled) { vm.update(e.copy(rawAutoExposure = it)) }
+                                    LabeledSlider("RAW 曝光", e.rawExposureEv, -8.0, 8.0, 0.0, enabled, "%+.2f EV", onDrag = vm::setInteracting) {
+                                        vm.update(e.copy(rawExposureEv = it))
+                                    }
+                                    Hint("先调曝光，再应用相机内嵌曲线或标准曲线。实验显色不等同相机直出；按住对比仍显示线性原片。")
+                                    TextButton(enabled = enabled, onClick = {
+                                        vm.update(e.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0))
+                                    }) { Text("重置 RAW 显影") }
+                                }
+                            }
                             // 胶片「无」: the steps after the film have nothing to develop; they keep their settings.
                             val enabled = enabled && !(e.noFilm && step > 0)
                             if (e.noFilm && step > 0) FoldHint("没有选胶卷，这一步不起作用。")
@@ -799,8 +836,9 @@ private fun Controls(
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Spacer(Modifier.weight(1f))
                                     StepReset(enabled, what = "曝光", changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
-                                        e.yShift != 0.0 || e.mShift != 0.0) {
+                                        e.yShift != 0.0 || e.mShift != 0.0 || !e.sceneCurve.isIdentity) {
                                         vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
+                                            sceneCurve = SceneCurve.IDENTITY,
                                             printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
                                     }
                                     }
@@ -819,6 +857,19 @@ private fun Controls(
                                     vm.update(e.copy(printExposure = it))
                                 }
                                 SwitchRow("自动曝光", e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
+                                if (!e.noFilm) {
+                                    GroupLabel("胶片前曲线")
+                                    Hint("横轴为胶片曝光，纵轴为映射后的曝光：−8 至 +8 EV，中点为中灰。")
+                                    CurveEditor(e.sceneCurve.display, null, enabled,
+                                        includeLuma = true, editable = !e.sceneCurve.isSampled,
+                                        onDrag = vm::setInteracting) { curves ->
+                                        vm.update(e.copy(sceneCurve = SceneCurve.fromControls(curves)))
+                                    }
+                                    if (!e.sceneCurve.isIdentity) TextButton(enabled = enabled,
+                                        onClick = { vm.update(e.copy(sceneCurve = SceneCurve.IDENTITY)) }) {
+                                        Text(if (e.sceneCurve.isSampled) "重置采样曲线并开始编辑" else "重置所有通道")
+                                    }
+                                }
                                 // UI2.md 2.3 ③: the colour filters and the RAW white balance behind 更多参数.
                                 val expandAll = rememberExpandAll()
                                 var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
@@ -1184,7 +1235,7 @@ private fun Controls(
             val entryEdited = listOf(
                 false,
                 e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
-                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 ||
+                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.rawDevelopmentChanged ||
                     e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
                 e.look != Look.NEUTRAL,
                 e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,
@@ -1423,6 +1474,7 @@ private fun FramedImage(
     bitmap: androidx.compose.ui.graphics.ImageBitmap,
     frame: FrameSpec,
     caption: Caption,
+    showDecoration: Boolean,
     modifier: Modifier,
 ) {
     if (frame.isNone) {
@@ -1435,11 +1487,19 @@ private fun FramedImage(
         val k = minOf(size.width / l.width, size.height / l.height)
         val ox = (size.width - l.width * k) / 2f
         val oy = (size.height - l.height * k) / 2f
-        // The export's own drawing, scaled to the screen: paper or blur, strips, print, hairline, text.
         drawIntoCanvas { c ->
             val n = c.nativeCanvas
             n.save(); n.translate(ox, oy); n.scale(k, k)
-            FrameSpec.drawCard(n, frame, l, android, caption)
+            if (showDecoration) {
+                // Full card: paper or blur, strips, print, hairline, text.
+                FrameSpec.drawCard(n, frame, l, android, caption)
+            } else {
+                // Compare mode: draw only the photo itself, aligned to where it would be with the frame.
+                // The photo rect within the card is at (l.x, l.y).
+                val dst = android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
+                    (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat())
+                n.drawBitmap(android, null, dst, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
+            }
             n.restore()
         }
     }

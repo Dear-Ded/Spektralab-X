@@ -1,0 +1,19 @@
+FILE strict-final.log
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+FILE default-final.log
+JPEG_ROWS_PASS cases=48 file_comparisons=384 max_scratch_bytes=25220 baseline=1 cleanup=passed
+FILE memory-strict-full.log
+JPEG_MEMORY mode=full lifetime_peak_rss_kib=217504 stage_start_rss_kib=70172 stage_peak_rss_kib=217504 conversion_bytes=50360324 file_bytes=9429929 fnv1a=a96b6836768bba6f
+FILE memory-strict-rows.log
+JPEG_MEMORY mode=rows lifetime_peak_rss_kib=168840 stage_start_rss_kib=70236 stage_peak_rss_kib=168840 conversion_bytes=524416 file_bytes=9429929 fnv1a=a96b6836768bba6f
+FILE memory-default-full.log
+JPEG_MEMORY mode=full lifetime_peak_rss_kib=217536 stage_start_rss_kib=70160 stage_peak_rss_kib=217536 conversion_bytes=50360324 file_bytes=9429929 fnv1a=a96b6836768bba6f
+FILE memory-default-rows.log
+JPEG_MEMORY mode=rows lifetime_peak_rss_kib=168748 stage_start_rss_kib=70188 stage_peak_rss_kib=168748 conversion_bytes=524416 file_bytes=9429929 fnv1a=a96b6836768bba6f
+963479a744468160535850be38c1ad81ca6734c8e3aa1fbdf73e7b3a49c6bbad  tools/native/jpeg_rows.cpp
+744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a  app/src/main/cpp/jpeg444.cpp
+d72120cdc9058030eff4be26a2db40f64bae3c91b351b6fbc95a5e5793717a99  app/src/main/cpp/output_transform.cpp
+40d908a438852330591bddaaa22d955b42261134a262bf9347a243a124db01ae  app/src/main/cpp/rgba8_spool.hpp
+b1c720d6422a84423d07c819c3321b79c04cc63d5ec8b2a9d5af95be90f6cdc2  jpeg444-before-stream.cpp
+
+[exit 0 ]

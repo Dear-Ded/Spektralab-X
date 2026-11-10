@@ -1,0 +1,249 @@
+diff --git a/engine/src/io/dng_gain_map.hpp b/engine/src/io/dng_gain_map.hpp
+index 99382c9..293b447 100644
+--- a/engine/src/io/dng_gain_map.hpp
++++ b/engine/src/io/dng_gain_map.hpp
+@@ -18,6 +18,7 @@
+ #include <cstdint>
+ #include <cstring>
+ #include <vector>
++#include "raw_cancellation.hpp"
+ 
+ namespace spk::io::detail {
+ 
+@@ -59,7 +60,8 @@ inline Tap tap(double pos, double origin, double spacing, std::uint32_t points)
+ 
+ // Returns how many GainMap opcodes were applied (0 when the file has none,
+ // is not a Bayer DNG, or the list is malformed: then nothing is touched).
+-inline int apply_dng_gain_maps(LibRaw& raw) {
++inline int apply_dng_gain_maps(LibRaw& raw, RawDecodeProgress* progress = nullptr) {
++    if (progress) progress->check();
+     using namespace gain_map_detail;
+     auto& id = raw.imgdata;
+     ushort* const cfa = id.rawdata.raw_image;
+@@ -77,6 +79,7 @@ inline int apply_dng_gain_maps(LibRaw& raw) {
+     const std::uint32_t count = be32(b);
+     std::size_t p = 4;
+     for (std::uint32_t k = 0; k < count && k < 1024; ++k) {
++        if (progress) progress->check();
+         if (len - p < 16) return 0;
+         const std::uint32_t opcode = be32(b + p), bytes = be32(b + p + 12);
+         p += 16;
+@@ -104,6 +107,7 @@ inline int apply_dng_gain_maps(LibRaw& raw) {
+             m.gains.resize(n);
+             // Points are stored row by row, planes interleaved; a CFA image has one plane.
+             for (std::uint64_t i = 0; i < n; ++i) {
++                if (progress && i % 65536 == 0) progress->check();
+                 const float g = be_float(q + 76 + i * map_planes * 4);
+                 if (!std::isfinite(g) || g < 0.0f || g > 64.0f) return 0;
+                 m.gains[i] = g;
+@@ -133,6 +137,7 @@ inline int apply_dng_gain_maps(LibRaw& raw) {
+     ushort* const active = cfa + std::size_t(id.sizes.top_margin) * pitch + id.sizes.left_margin;
+ 
+     for (const GainMap& m : maps) {
++        if (progress) progress->check();
+         std::vector<Tap> cols;
+         for (std::uint32_t c = m.left; c < m.right; c += m.col_pitch)
+             cols.push_back(tap((c + 0.5) / width, m.origin_h, m.spacing_h, m.points_h));
+@@ -141,6 +146,7 @@ inline int apply_dng_gain_maps(LibRaw& raw) {
+ #pragma omp parallel for schedule(static)
+ #endif
+         for (int ri = 0; ri < rows; ++ri) {
++            if (progress && progress->poll()) continue;
+             const std::uint32_t r = m.top + std::uint32_t(ri) * m.row_pitch;
+             const Tap t = tap((r + 0.5) / height, m.origin_v, m.spacing_v, m.points_v);
+             const float* g0 = &m.gains[std::size_t(t.i0) * m.points_h];
+@@ -160,6 +166,7 @@ inline int apply_dng_gain_maps(LibRaw& raw) {
+                 line[c] = ushort(std::min(out, std::min(white, 65535.0f)));
+             }
+         }
++        if (progress) progress->check();
+     }
+     return int(maps.size());
+ }
+diff --git a/engine/src/io/raw_cancellation.hpp b/engine/src/io/raw_cancellation.hpp
+new file mode 100644
+index 0000000..738c2c1
+--- /dev/null
++++ b/engine/src/io/raw_cancellation.hpp
+@@ -0,0 +1,50 @@
++#pragma once
++
++// Co-created with GPT (OpenAI). Cancellation is observed without throwing out
++// of a LibRaw/OpenMP worker. The caller discards a partially processed decoder.
++#include <atomic>
++#include <functional>
++#include <mutex>
++#include <stdexcept>
++
++namespace spk::io {
++
++using RawDecodeCancel = std::function<bool()>;
++
++class RawDecodeCancelled final : public std::runtime_error {
++public:
++    RawDecodeCancelled() : std::runtime_error("RAW decode cancelled") {}
++};
++
++namespace detail {
++class RawDecodeProgress {
++public:
++    explicit RawDecodeProgress(const RawDecodeCancel& callback) : callback_(callback) {}
++    RawDecodeProgress(const RawDecodeProgress&) = delete;
++    RawDecodeProgress& operator=(const RawDecodeProgress&) = delete;
++
++    // LibRaw may call from decoder workers. Serialise external callbacks so a
++    // caller's state needs no separate decoder-worker synchronisation.
++    bool poll() noexcept {
++        if (stopped_.load(std::memory_order_relaxed)) return true;
++        if (!callback_) return false;
++        try {
++            std::lock_guard<std::mutex> guard(mutex_);
++            if (stopped_.load(std::memory_order_relaxed)) return true;
++            if (callback_()) stopped_.store(true, std::memory_order_relaxed);
++        } catch (...) {
++            stopped_.store(true, std::memory_order_relaxed);
++        }
++        return stopped_.load(std::memory_order_relaxed);
++    }
++
++    // Only the initiating thread throws, after decoder or adapter workers join.
++    void check() { if (poll()) throw RawDecodeCancelled(); }
++
++private:
++    const RawDecodeCancel& callback_;
++    std::atomic<bool> stopped_{false};
++    std::mutex mutex_;
++};
++} // namespace detail
++} // namespace spk::io
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 4cae0fe..f7049d8 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -345,10 +345,18 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+ 
+ bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                            DecodedRaw& out, std::string& error, double white_temperature) {
++    return decode_raw_compatible(source, user_mul, out, error, white_temperature, {});
++}
++
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                           DecodedRaw& out, std::string& error, double white_temperature,
++                           const RawDecodeCancel& cancelled) {
+     error.clear();
+     const auto total_start = Clock::now();
+     try {
+         RawDecodeThreadScope thread_scope;
++        detail::RawDecodeProgress progress(cancelled);
++        progress.check();
+         if (source.empty()) {
+             error = "RAW open: source path is empty";
+             return false;
+@@ -360,6 +368,11 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+ 
+         // LibRaw carries substantial metadata; keep it off the Windows stack.
+         auto raw = std::make_unique<CompatibleLibRaw>();
++        if (cancelled) {
++            raw->set_progress_handler([](void* context, enum LibRaw_progress, int, int) noexcept {
++                return static_cast<detail::RawDecodeProgress*>(context)->poll() ? 1 : 0;
++            }, &progress);
++        }
+         configure_compatible(raw->imgdata.params);
+         if (user_mul) {
+             // A caller-chosen white balance (the host's Temperature/Tint):
+@@ -382,9 +395,11 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         // LibRaw's Unicode filename overload without an ANSI conversion.
+         const int open_status = raw->open_file(source.c_str());
+         decoded.timings.open_ms = elapsed_ms(start);
++        progress.check();
+         if (!libraw_ok(open_status, "RAW open", error)) return false;
+         if (!supported_compression(*raw, error)) return false;
+         raw->interpolate_dng_matrix(user_mul, white_temperature);
++        progress.check();
+         if (!user_mul && !raw->dng_white_xy_error.empty()) {
+             error=raw->dng_white_xy_error;
+             return false;
+@@ -399,19 +414,23 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         start = Clock::now();
+         const int unpack_status = raw->unpack();
+         decoded.timings.unpack_ms = elapsed_ms(start);
++        progress.check();
+         if (!libraw_ok(unpack_status, "RAW unpack", error)) return false;
+         if (raw->error_count() != 0) {
+             error = "RAW unpack: decoder reported corrupt data";
+             return false;
+         }
+         // Lens shading from the DNG's OpcodeList2 (phones), before any processing.
+-        detail::apply_dng_gain_maps(*raw);
++        detail::apply_dng_gain_maps(*raw, &progress);
++        progress.check();
+         if (!capture_source_metadata(*raw, decoded.metadata, user_mul == nullptr, error)) return false;
+         if (const char* name = raw->unpack_function_name()) decoded.metadata.decoder_name = name;
+ 
+         start = Clock::now();
++        progress.check();
+         const int process_status = raw->dcraw_process();
+         decoded.timings.process_ms = elapsed_ms(start);
++        progress.check();
+         if (!libraw_ok(process_status, "RAW process", error)) return false;
+         if (!raw->calibrated) {
+             error = "RAW compatible16: no supported three-channel camera-to-ProPhoto transform";
+@@ -449,6 +468,7 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         using ImagePtr = std::unique_ptr<libraw_processed_image_t,
+                                          decltype(&LibRaw::dcraw_clear_mem)>;
+         ImagePtr image(raw->dcraw_make_mem_image(&image_status), &LibRaw::dcraw_clear_mem);
++        progress.check();
+         if (!libraw_ok(image_status, "RAW output", error)) return false;
+         if (!image || image->type != LIBRAW_IMAGE_BITMAP || image->bits != 16 ||
+             image->colors != 3 || image->width == 0 || image->height == 0) {
+@@ -468,8 +488,10 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         // LibRaw's sensor and four-channel image before allocating float RGB
+         // so those full-size buffers do not overlap unnecessarily.
+         raw.reset();
++        progress.check();
+         decoded.rgb.resize(static_cast<std::size_t>(samples));
+         for (std::size_t i = 0; i < decoded.rgb.size(); ++i) {
++            if (i % 65536 == 0) progress.check();
+             std::uint16_t value;
+             // LibRaw returns native-endian 16-bit samples. memcpy avoids
+             // imposing alignment or aliasing assumptions on its byte array.
+@@ -478,8 +500,11 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         }
+         decoded.timings.convert_ms = elapsed_ms(start);
+         decoded.timings.total_ms = elapsed_ms(total_start);
++        progress.check();
+         out = std::move(decoded);
+         return true;
++    } catch (const RawDecodeCancelled&) {
++        throw;
+     } catch (const std::exception& exception) {
+         error = std::string("RAW decode: ") + exception.what();
+         return false;
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index 823704b..477877b 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -5,6 +5,7 @@
+ #include <filesystem>
+ #include <string>
+ #include <vector>
++#include "raw_cancellation.hpp"
+ 
+ namespace spk::io {
+ 
+@@ -148,6 +149,15 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+ bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                            DecodedRaw& out, std::string& error, double white_temperature);
+ 
++// Same arithmetic and output policy, with cancellation at LibRaw progress,
++// gain-map rows, conversion chunks and publication boundaries. Cancellation
++// throws RawDecodeCancelled and leaves out unchanged; callback exceptions also
++// cancel. Worker callbacks are serialised and never throw into LibRaw/OpenMP.
++// Decoder operations without progress callbacks cannot be preempted internally.
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                           DecodedRaw& out, std::string& error, double white_temperature,
++                           const RawDecodeCancel& cancelled);
++
+ // Experimental expanded-output policy for conventional three-colour Bayer
+ // RAW only. As-shot WB is normalised by its largest multiplier (highlight=1)
+ // before uint16 AHD demosaicing. LibRaw's actual ProPhoto matrix is evaluated

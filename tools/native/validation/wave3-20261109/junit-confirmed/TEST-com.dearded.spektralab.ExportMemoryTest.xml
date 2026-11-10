@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExportMemoryTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-09T09:35:44.086Z" hostname="ser858255664526" time="0.013">
+  <properties/>
+  <testcase name="shareKeepsTheWorkingSourceResident" classname="com.dearded.spektralab.ExportMemoryTest" time="0.001"/>
+  <testcase name="missingLegacyHintUsesBothEnforcedBounds" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <testcase name="memoryFloorNeverRaisesATighterUserOrRetryCap" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <testcase name="unknownRawWithOriginalEdgeGetsBudgetedBeforeOpen" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <testcase name="conservativeBoundDoesNotShrinkAJobThatFits" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <testcase name="unknownUnrestrictedSourceMustGetAFiniteCap" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <testcase name="sourceBoundsCoverIndependentFitAcrossAspectRatiosAndCaps" classname="com.dearded.spektralab.ExportMemoryTest" time="0.01"/>
+  <testcase name="knownWorkingAreaIsNotReplacedByTheLargerDeviceCap" classname="com.dearded.spektralab.ExportMemoryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

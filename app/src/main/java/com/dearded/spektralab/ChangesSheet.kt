@@ -55,6 +55,10 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     val out = mutableListOf<Change>()
     // A new photo opens on 无 (Edit.NONE): a film, a paper or the film's effects are each a change.
     val positive = catalog.film(e.film)?.positive == true
+    if (e.rawDevelopmentChanged)
+        out += Change("RAW 显影", if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) "标准显色" else "线性显示", 1, step = 0) {
+            it.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0)
+        }
     if (!e.noFilm || e.filmFormatMm != d.filmFormatMm)
         out += Change("胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
             FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {
@@ -64,14 +68,16 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
         out += Change("相纸", catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
             catalog.normalize(if (positive) it.copy(scanFilm = true) else it.copy(scanFilm = false, digitalIntermediate = true))
         }
-    if (!e.autoExposure || e.exposureEv != d.exposureEv || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
+    if (!e.autoExposure || e.exposureEv != d.exposureEv || !e.sceneCurve.isIdentity || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
         out += Change("曝光", listOfNotNull(
             e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.1f EV", it) },
             e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
             "滤镜".takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
             "手动曝光".takeIf { !e.autoExposure },
+            "胶片前曲线".takeIf { !e.sceneCurve.isIdentity },
         ).joinToString(" · "), 1, step = 2) {
             it.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv, printExposure = d.printExposure,
+                sceneCurve = SceneCurve.IDENTITY,
                 yShift = d.yShift, mShift = d.mShift)
         }
     val fxTuned = e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||

@@ -1,0 +1,482 @@
+{
+  "engine": {
+    "patches": 33,
+    "files": 92,
+    "zero_fuzz": true,
+    "sources": [
+      {
+        "path": "engine/CMakeLists.txt",
+        "sha256": "4c9ee2aedfe21f7800ef674f5893f9a586b8f24a2021e1840f4f97da13789e2d"
+      },
+      {
+        "path": "engine/host/white_balance.cpp",
+        "sha256": "af147c07d6c1e15500b05e9b73fc8cc12a96f9f4421f4ac94ccbd2c5f4697dec"
+      },
+      {
+        "path": "engine/src/core/cam16.cpp",
+        "sha256": "715af1bfa8658d1dfb7dd64dd6bbc1c14bc8c0b467d20e98a18497bf7d3077c6"
+      },
+      {
+        "path": "engine/src/core/digital_intermediate.cpp",
+        "sha256": "ffcef5cc42b63f39b2233f56a411b08cf30c01307a1eaad0ae43b27fa203c289"
+      },
+      {
+        "path": "engine/src/core/numeric.cpp",
+        "sha256": "138660966cf3481cf29a53d5da6ad406c53f7481b1ffd8d0b5565ab05d6645f1"
+      },
+      {
+        "path": "engine/src/core/numeric.hpp",
+        "sha256": "d7157d5cf64630661879492bd02ed70d044471056b2ac5985c41cb5c854ac25a"
+      },
+      {
+        "path": "engine/src/core/params.cpp",
+        "sha256": "17ee866717969026d8c055b521d6697675c7562bbbb290b1e4592505cba22c21"
+      },
+      {
+        "path": "engine/src/core/params.hpp",
+        "sha256": "3c68a01336fd63377eedd5faf063620091807a73466a429fe001c233e8c1d8e5"
+      },
+      {
+        "path": "engine/src/core/print_lut.cpp",
+        "sha256": "3fd3cfff6d1bc447441e7fab7e4f281cef7d91396585e92a274544ca115c174f"
+      },
+      {
+        "path": "engine/src/core/print_lut.hpp",
+        "sha256": "8e6d181cf2bdf07b3bee1f82667423bb019e3f7ccee844c386847f650da460a9"
+      },
+      {
+        "path": "engine/src/core/setup_cache.cpp",
+        "sha256": "2e70189965123ba9be0acd76b2fbc4bf0e3b3ad946079f3ce3f87a63f23070ad"
+      },
+      {
+        "path": "engine/src/core/setup_cache.hpp",
+        "sha256": "b27c3e08ef42fdd81c80cdd39d26e556605e7fbfaf6007faf3c852fbd6702289"
+      },
+      {
+        "path": "engine/src/gpu/gpu.hpp",
+        "sha256": "cf9456df137412067d8b5fda9f5728c6c336016a8d36b0f4abd725cfbb0c573a"
+      },
+      {
+        "path": "engine/src/gpu/vulkan_gpu.cpp",
+        "sha256": "c59f13964811fd8fd3ec90d9b368f08bad887e69650af0ee1eeae5ec66f565ad"
+      },
+      {
+        "path": "engine/src/io/dng_forward_matrix.hpp",
+        "sha256": "137277bc946364905c414615e78fc4402181ce3eef76708229565a2dcb0e5930"
+      },
+      {
+        "path": "engine/src/io/dng_gain_map.hpp",
+        "sha256": "2a7fb8a1ea95e61f687c2827fff470695d9f10c0219ded9625e528124cf7b69b"
+      },
+      {
+        "path": "engine/src/io/dng_opcode_list3.hpp",
+        "sha256": "d23e5b447dcc2630f530e32b131fc3f456900ea26d2e2fbc12071a5f09fee33a"
+      },
+      {
+        "path": "engine/src/io/dng_white_xy.hpp",
+        "sha256": "f9a228c1191868c2ef2eb4518ac08da5cf1ae0bdba54e7a464853f7d15d08517"
+      },
+      {
+        "path": "engine/src/io/raw_camera.hpp",
+        "sha256": "cad767a3d5accda735043c8ba0a72a99c315a6bf3930619df5764cb8fe71a58e"
+      },
+      {
+        "path": "engine/src/io/raw_decoder.cpp",
+        "sha256": "8b4ec7e0bb17300effbb2ac6cfccfe7c051056269603fc0ab30b6c6bf1e45cf6"
+      },
+      {
+        "path": "engine/src/io/raw_decoder.hpp",
+        "sha256": "6e50d3fbb6c541807e4d843381bc190fc407c202cf3209e30c462c9c5f21428f"
+      },
+      {
+        "path": "engine/src/pipeline/blur.cpp",
+        "sha256": "04668bf8a5ac3cd14ea8962b7c58037cd2f309d2c3ae6a071c909535ee64aad8"
+      },
+      {
+        "path": "engine/src/pipeline/blur.hpp",
+        "sha256": "7515f781d4d4b082374688b476ebcc25836e079c0f538266696f05d834cab8f6"
+      },
+      {
+        "path": "engine/src/pipeline/engine.cpp",
+        "sha256": "d20e7f07572b98698644547eca1625d49905b142e302281e08c21408e4681775"
+      },
+      {
+        "path": "engine/src/pipeline/pipeline.cpp",
+        "sha256": "ff7a484656b84f20b8cdca1f39a1079dca33b17afc027a17bfae2ed41a2e62a1"
+      },
+      {
+        "path": "engine/src/pipeline/pipeline.hpp",
+        "sha256": "ae87e170fbaaf63b73a7ecdf09cb40341a21396b1291a9d93df5387afc0c38d6"
+      },
+      {
+        "path": "engine/src/pipeline/scene_latitude.cpp",
+        "sha256": "ecfe8003fc6cfdd07327cbf18889776b5e784817517b861842605db3aa0d66c6"
+      },
+      {
+        "path": "engine/src/pipeline/view.hpp",
+        "sha256": "f439a6323af07119c6907e71a0364e6349e0aec9392ff2de07dba4fd2ed05fd3"
+      },
+      {
+        "path": "engine/src/pipeline/view_process.cpp",
+        "sha256": "53f7624b6b9d1ec4203aa0f7f54cf4b2bb05f2ad5c157f1e02bcabe9e099b3d9"
+      },
+      {
+        "path": "engine/src/shaders/scene_latitude.metal",
+        "sha256": "6821bc4d77f3c2193b8ec590a28a1c141e3e05f7627f95d5f96ec3bbc940db48"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_affine3.comp",
+        "sha256": "37c5a0a02e67c02f01d82101e89ec57c884245281e177d3a0aef227858190274"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_boost.comp",
+        "sha256": "0dafac28bd3d6cc6e54149393a5309abaed26b2e6ccf8b636372a5591c56fbe9"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_bw_correct.comp",
+        "sha256": "69bdff333dcb564898a2a09115255e2e6ca8e7936cc0ce20a9d33c72fa859fc3"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_cam16ucs_body.glsl",
+        "sha256": "d0beb0dee91872f4ffb8f39c283affb719501d6e3ec620be46a41d90d9653f82"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_cam16ucs_compress.comp",
+        "sha256": "f61fe0eb61a1891e4d2bb74517b016061dbed0a1e298330eccaeedd8c508d27d"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_cctf_decode.comp",
+        "sha256": "d28600a9951830affee2df2c0c1c7ea0ce598d3369207a9cfdba83611be8c9c1"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp",
+        "sha256": "b1487ec24afe2772fe6b6d86c6a1f1db33c10573701c2f33d5589e41f3199102"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_couplers_correction.comp",
+        "sha256": "c483d7dd49d39f2f9ef47fb44672ba97ab08a9da9777d06baee31ee63c0880bf"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_curves.comp",
+        "sha256": "6dbd04839b0f829ab5abcddb7a20ad34089e3f9a65758d51dd1e0a6d6b4c9483"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_di_encode.comp",
+        "sha256": "37c15a7e26a1a4f8156222a050520d9eb68ad70eec77e2d342eb691e87d5dcac"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_di_normalise.comp",
+        "sha256": "646a4e7607306e523b9690f41eb2729f2a12b7cfe0ec7e95cdeb9c97ae82a460"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_dir_finish.comp",
+        "sha256": "56e981c383d11896043bc1782509a0a0d63dd405b7241f3540ed9edb9e943363"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_edr.comp",
+        "sha256": "2a28dcb5ced3b4ff315d0338de9c3604aa1e5d712d27d769ed5c4372ea44dd4b"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_geometry_resample_df.comp",
+        "sha256": "a266e5b7a505ab945813aa2e588e067b787c3cedf6066a70a574b120956247cb"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_glare_add.comp",
+        "sha256": "07c6c809344bfe2b6a0b0f22941136bbb5db938d514005d4bd6ca3d1a6ddce33"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_grain_layer_one.comp",
+        "sha256": "5ece14af4dc5d6b1633d0985f274384316f3d9303178f140540b2b982d240334"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_grain_layers.comp",
+        "sha256": "7c6ca92da328a8cf838cc485deb8d737c657710704f9ec52ef84cb932112d9d9"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_grain_simple.comp",
+        "sha256": "34553cc768196680a3ac9f6a32bc01a9d444f39e2bdb1afb107ff3f10a682e77"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_highlight_headroom.comp",
+        "sha256": "460258b885dce008ee01ee7d1c52263df1ace65dd2a8ded9e837738c1a7659b8"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_iir_df_acc.comp",
+        "sha256": "da6da8eab15ad63cffd34c9468d629e66f4bb1a5c95e3e62e9de9c62c7d99e26"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_lincomb3.comp",
+        "sha256": "5281b33bbdbb3e15ee8ba4e6187d7d473add2c85e9069a072cd6ed8d4b7d7de2"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_log10_guarded.comp",
+        "sha256": "522f077dac1c1e331900844c1b002f3458b8876ba3689f688f009d215284a2eb"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_lognormal_field.comp",
+        "sha256": "cffa8599fa0dc0a76d06954ced7edd7bf959ee355d9e2c81921752beae2fc986"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_lut2d_cubic.comp",
+        "sha256": "e4158018bb29fb75f3ca454444c71301f578e834b299ece5fc74b5a1cc8fcf72"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_lut3d_trilinear.comp",
+        "sha256": "b5ee36e3f49fc798217ea5ac2a77579bd0be28b6b663138b6946a3d0efb92070"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_math_probe.comp",
+        "sha256": "f39b9868294df563afc9ffa0d646ac9dfd9b581a948f2f862c4e654e95aa5f34"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_matmul3.comp",
+        "sha256": "ef5a045e1d09b7c68cc917ca477488e8c5e0de60abe5f57281f7ef65b0c18980"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_mul.comp",
+        "sha256": "3672697a8eb175b079e46f307af5a8039dcae3a9cf6781f3bd6fa17fdae066b8"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_overscan_add_mask.comp",
+        "sha256": "cfa8ef32cfae2680c9ea36be05ba3c30b60101280f743f45fc62ba26c6eed030"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_overscan_body.glsl",
+        "sha256": "ac35e3e93a7f51f945026a695fe8590bbe39bc0c155b4d2b23949c455eaeda03"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_overscan_canvas.comp",
+        "sha256": "f776c09597a6f349aff12921e27f79ab5b1b058865fd494207b9cea6e55c50bf"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_overscan_film_present.comp",
+        "sha256": "d2f0d921c4a941b3bc6c820e7d427120acf950a50c8fcdb4c0af197ad456bc9f"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_overscan_light.comp",
+        "sha256": "868343fda0bbe5a2193ac04745703071d36ac82d77ac8213042407b8281b2985"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_print_exposure.comp",
+        "sha256": "2c05eaae54c021799744ef823b3d8ae6ac49d4424ba8b6e70adb7ec0f8627fa2"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_reduce_max.comp",
+        "sha256": "b84e57dcac7c349930ee4cecd50d8b1afa335a945af190c54925c399d9e122e8"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_rng_probe.comp",
+        "sha256": "7309ae0145e0bbe0d56759ad25c9345dd00e7eb9a98ded14b2a5ff40c846be16"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_scene_curve.comp",
+        "sha256": "0055e5785a65e567dc65d36b874fc673b42bc78606e2b2339643cfdbd4636871"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_scene_latitude.comp",
+        "sha256": "e4456097ab258839a1f312b103a07e746a1965b9fe2fad05a3208a3d2e75acec"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_sep_fir_acc.comp",
+        "sha256": "0db13ade6b2e6f6a4b114199a0af404b5bf6257487125d045462b5ec28fb0cd0"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_sep_fir_rows.comp",
+        "sha256": "620dabd9d9ad6e97531751cd18c8001a082ea701a0371cc36a60f45c08306f8a"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_spectral_epilogue.comp",
+        "sha256": "ba180488163eea10d7d0c8485338b26007582bf26a3dec357d913cfaf7c1251d"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_split_probe.comp",
+        "sha256": "8b2fe65317e88ea36a292f99f304d2c2d0f70714287cd5899fe80f14791030da"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_stride_sample.comp",
+        "sha256": "ef055f155639527f95eb50af1f383aa17b4fe4496715e3fb4f742787037ca53d"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_take_rgb.comp",
+        "sha256": "a07d021db008cdaaf44ca4b3ab89ac60b559e7eaafc3cfc01f4ac1b36186ec24"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_tc_b.comp",
+        "sha256": "d459e5b4e30d0022d5cce248bb84ebab60ab5c815307dc543fb1988b960eca88"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_to_rgba16.comp",
+        "sha256": "8d58bb1629da06b2e4976cd9e1987be78e2a5cb6abd792be4540e81ab9b707be"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_cam16.comp",
+        "sha256": "f48955cf07d8884a641b7393bb75a9af816352323e380c1b41a7084d21802f1c"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_geometry.comp",
+        "sha256": "eb3bb7ff309c88f7ebbb199b2c8fda741da2902c45773822f3b6e71c64cfb6d1"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_grade.comp",
+        "sha256": "bea4c0ce49cdf256c4a2001f8c095557b07bc694b4a69c4f8581ec37c7db5431"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_grade_body.glsl",
+        "sha256": "2a67714960ddefc974f89e3b9105e2282cb69a67e84fd4ae2b251163182f8774"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_grade_di.comp",
+        "sha256": "8dbce8699a5274288fde9cf48f8fc079ef2cddbaa76f14ce36c632d44bdd3e97"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_grade_float.comp",
+        "sha256": "635dbd13a4ae0acf62181bb6e52bc4a5692713aba1d035f48032ee71eb730953"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_pack.comp",
+        "sha256": "0b9d25a386d7cf5ace309a30429ba2c2fe4dd6fb85acd96c2cd4519c3a602f4b"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_view_pair.comp",
+        "sha256": "bda932772397704ef193cbdde96a1ac6a06d48ead94745f1727260dd4ea90d7e"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp",
+        "sha256": "4bd725719c053a71c6ae3b5dc6c978e41edf803aa6a97a10f1648a7f52446337"
+      },
+      {
+        "path": "engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp",
+        "sha256": "f60d0c43f13085f17f894903bae1e49e4e4cd4248142188cb11dd975f74c5744"
+      },
+      {
+        "path": "engine/tests/dng_opcode_list3.cpp",
+        "sha256": "61adb1c9b691e4dbda8a6196adc1fd327611b8641da547567891b364e53a5c08"
+      },
+      {
+        "path": "engine/tests/gpu_vulkan_device_lost.cpp",
+        "sha256": "7412a0218a44c0ae4a6cb2ef5dc125c173bf2de38c6bd397c09b9fbecf803912"
+      },
+      {
+        "path": "engine/tests/parity_schema.py",
+        "sha256": "e3a40e2de98d73a9db7c4300ef5417cd64dea05796da801899add93b6a1c80ad"
+      },
+      {
+        "path": "engine/tests/raw_threads.cpp",
+        "sha256": "dbc93d8adbebc625e7a9256c934df6a617a2b6c249e82b91465155dcdcc89f85"
+      },
+      {
+        "path": "engine/tests/vulkan_test_hooks.hpp",
+        "sha256": "84494384d9056e1476868b7b81d4525718761d605d9c52fde459fc74dc74f84a"
+      },
+      {
+        "path": "engine/tools/raw_render.cpp",
+        "sha256": "0a1126f8234f6aac941206c3379c83449465456d6d273a9088b06d50ba53367d"
+      }
+    ]
+  },
+  "libraw": {
+    "patches": 15,
+    "files": 22,
+    "zero_fuzz": true,
+    "sources": [
+      {
+        "path": "internal/libraw_cameraids.h",
+        "sha256": "698489ab06341648bf32904b03982d1296b78beaa5323d8d93678e2353a43411"
+      },
+      {
+        "path": "internal/libraw_internal_funcs.h",
+        "sha256": "dad73542f14560470dc26e792ecb055ea062840aa826037dfadf5837786f4ad7"
+      },
+      {
+        "path": "libraw/libraw_const.h",
+        "sha256": "c2e66e993ae567066678a8d1ddb9506eee5249975338345eced5210b2ee4d592"
+      },
+      {
+        "path": "libraw/libraw_internal.h",
+        "sha256": "76edd396b550529efa14984080b32515f2a045aac9453bd7f68a6fdb853fcf8d"
+      },
+      {
+        "path": "libraw/libraw_types.h",
+        "sha256": "db15f5f380c9e4534350ca9f09182f0a74a474c848cd7b5b6dfc6f06c8ea48c1"
+      },
+      {
+        "path": "src/decoders/crx.cpp",
+        "sha256": "e3df045878da662697f6927ba25c7f62f201e3bb16e6169465ff2d4a322614bb"
+      },
+      {
+        "path": "src/decoders/decoders_dcraw.cpp",
+        "sha256": "e5afe722ca7e744747063909233af50fb2161c6a1a766df71d4b8a937dbde393"
+      },
+      {
+        "path": "src/decoders/decoders_libraw_dcrdefs.cpp",
+        "sha256": "aa13da70a50d177d5c5ce4ff1aac101ca5c5a84a950541802c64cf63a7f42ced"
+      },
+      {
+        "path": "src/decoders/dng.cpp",
+        "sha256": "13ac11d70a740012dbfe75dd22cb939170bf1ba72f200de7dc0ee73eeba9ce1f"
+      },
+      {
+        "path": "src/decoders/fp_dng.cpp",
+        "sha256": "9d8e925de445c32f1710d346e13c65e7f66de9033e21a3395510fcc3393d0455"
+      },
+      {
+        "path": "src/decoders/sony_arw6.cpp",
+        "sha256": "e7dc103273a6680e95ec5f423ac745635b20da9e38c1f49dc18bca1f60de5946"
+      },
+      {
+        "path": "src/demosaic/xtrans_demosaic.cpp",
+        "sha256": "8f6de2685bc5968a7569301fa7ce912cbcad33c6a6556a1ebdf7d6acf0cd0d5a"
+      },
+      {
+        "path": "src/metadata/identify.cpp",
+        "sha256": "9ee2586664c012294efd74bc413780a4a37dd12e87bdb68bfd7caf59fd4b32f3"
+      },
+      {
+        "path": "src/metadata/normalize_model.cpp",
+        "sha256": "92f26d2d160a458deb4e3605e76d32e2b759ecacfa780c43621856c2c1761a71"
+      },
+      {
+        "path": "src/metadata/sony.cpp",
+        "sha256": "b31324db64e5ddb194d214f519547700ae880a886732d75b98f4bbe9543eb596"
+      },
+      {
+        "path": "src/metadata/tiff.cpp",
+        "sha256": "510273ac1b1badb5c2d6945caa9e332357f494055126a7f068121be264013e2d"
+      },
+      {
+        "path": "src/postprocessing/postprocessing_aux.cpp",
+        "sha256": "35e12fff82f6b60c55553b9e29b94c8be27143e13ca447aee306f2d3f1d00013"
+      },
+      {
+        "path": "src/tables/cameralist.cpp",
+        "sha256": "b2e1fbc07d3e5678d35e4e99f3cd9ccad7c82333b919769f108623f14e0f3ca9"
+      },
+      {
+        "path": "src/tables/colordata.cpp",
+        "sha256": "db2c5648071a3076d771d6eb7fa7324d5b4399e631858d24d3485635544f90eb"
+      },
+      {
+        "path": "src/utils/decoder_info.cpp",
+        "sha256": "21557a31fae03074c3f3094145f0c887f990a5cc376ad36d20a12c26b70f917c"
+      },
+      {
+        "path": "src/utils/open.cpp",
+        "sha256": "87530daa60184ff4aa30663f805c9647344b55c81a567680e21efa7fd608ffac"
+      },
+      {
+        "path": "src/utils/utils_libraw.cpp",
+        "sha256": "3c5649b729f5653bebc9f33fba5c06cb3e081261128742cf354aade60590120f"
+      }
+    ]
+  },
+  "android_libraw_sources_identical": true,
+  "archive_sha256": "52ef254ffa7c70484a411c269f3f837f75d5a215ed7332d5fdab267317408f05",
+  "junit": {
+    "suites": 9,
+    "tests": 66,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "task_state": "UP-TO-DATE"
+  }
+}

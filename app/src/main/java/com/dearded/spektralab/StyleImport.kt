@@ -269,6 +269,7 @@ class StyleImports(private val context: Context) {
             engine = SpkEngine(
                 film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
                 exposureEv = edit.exposureEv, printExposure = edit.printExposure,
+                sceneCurve = edit.sceneCurve,
                 yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
                 formatMm = edit.filmFormatMm,
                 grain = if (edit.grainActive) edit.grainAmount else 0.0,
@@ -322,6 +323,7 @@ fun SpkLook.toStyle(id: String, edit: Edit, lutId: String): Style {
         film = e.film ?: edit.film,
         paper = e.paper ?: if (e.film != null) "" else edit.paper,
         exposureEv = e.exposureEv ?: edit.exposureEv,
+        sceneCurve = e.sceneCurve ?: edit.sceneCurve,
         printExposure = e.printExposure ?: edit.printExposure,
         yCc = e.yCc ?: edit.yShift * Edit.FILTER_SHIFT_CC,
         mCc = e.mCc ?: edit.mShift * Edit.FILTER_SHIFT_CC,

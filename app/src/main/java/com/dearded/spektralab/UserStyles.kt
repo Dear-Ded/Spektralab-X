@@ -79,5 +79,5 @@ class UserStyles(private val dir: File) {
         if (!tmp.renameTo(target)) { target.delete(); if (!tmp.renameTo(target)) error("cannot store $target") }
     }
 
-    private companion object { const val MAX_FILE = 512L shl 10 }
+    private companion object { const val MAX_FILE = SpkPackage.MAX_LOOK }
 }

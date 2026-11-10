@@ -13,7 +13,7 @@ flags=(-std=c++20 -O2 -pthread)
 app="$repo/app/src/main/cpp"
 e="$B/engine"
 "${CXX:-c++}" "${flags[@]}" -I"$app" -I"$MATH_DIR" -I"$UP/engine/include" -I"$UP/engine/src" \
-    "$repo/tools/native/output_rows.cpp" "$app/output_transform.cpp" "$app/layer2.cpp" "$app/tiff16.cpp" \
+    "$repo/tools/native/output_rows.cpp" "$app/output_transform.cpp" "$app/raw_development.cpp" "$app/layer2.cpp" "$app/tiff16.cpp" \
     -Wl,--start-group "$e/libspektralab_engine.a" "$e/libspektralab_core.a" "$e/libspk_volk.a" \
     -Wl,--end-group -ldl -lz -o "$build/output_rows"
 "$build/output_rows" "$B/engine/resources" "$@"

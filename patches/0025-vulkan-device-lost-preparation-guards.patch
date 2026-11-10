@@ -1,0 +1,484 @@
+Refuse Vulkan work before allocation or transfer after device loss.
+
+Selective backport from JamesQiu2005/SpektraLab Windows_Linux at
+ a4289ab99bc09fc998e6148dc3d496f9079e5857 (2026-11-09).
+Source: https://github.com/JamesQiu2005/SpektraLab/tree/a4289ab99bc09fc998e6148dc3d496f9079e5857
+
+Extends Android patch 0008 while retaining pooled descriptors, mapped
+inline arguments, pipeline cache, and bounded/small-buffer pool policies.
+The queue-lock recheck precedes the Android inline-ring host copy. The
+first diagnostic stays stable and retains the app's (VkResult -4) marker.
+Cleanup remains available. No shader arithmetic or resource pin changes.
+
+Includes upstream's safe latch-injection regression, extended to the
+Android bounded allocator and every upload wrapper, plus its CMake target.
+The regression links the production backend and does not cause a real GPU
+reset. Also carries upstream's explicit pipeline <algorithm> include.
+
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+index bd34a2c..304083d 100644
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -307,7 +307,7 @@ if(SPEKTRALAB_PORTABLE_BACKEND)
+             add_test(NAME spk_vulkan_smoke
+                 COMMAND spk_vulkan_smoke "${vulkan_resource_dir}")
+ 
+-            foreach(probe grain pointwise resample transfer geometry lut_di view no_film bw scene_latitude overscan pair)
++            foreach(probe grain pointwise resample transfer device_lost geometry lut_di view no_film bw scene_latitude overscan pair)
+                 add_executable(spk_vulkan_${probe} tests/gpu_vulkan_${probe}.cpp)
+                 target_include_directories(spk_vulkan_${probe} PRIVATE
+                     "${CMAKE_CURRENT_SOURCE_DIR}/include"
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index ca4687f..bc5e530 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -54,13 +54,20 @@ struct Buffer {
+     bool persistent = false;
+ };
+ 
++// Test-only entry point: exercise fail-fast without provoking a GPU reset.
++bool test_latch_device_lost(Gpu* gpu, std::string& error);
++
+ namespace {
+ 
+ constexpr uint32_t kWorkgroup = 256;
+ constexpr uint32_t kMaxBindings = 8;   // the widest kernel in the table below
+ 
+ std::string vk_error(const char* operation, VkResult result) {
+-    return std::string(operation) + " failed (VkResult " + std::to_string(int(result)) + ")";
++    std::string text = std::string(operation) + " failed (VkResult " + std::to_string(int(result)) + ")";
++    if (result == VK_ERROR_DEVICE_LOST)
++        text += ": the device was lost; no further allocation, transfer or rendering "
++                "until the device is recreated";
++    return text;
+ }
+ 
+ struct KernelSpec { const char* name; uint32_t bindings; uint32_t workgroup; };
+@@ -631,6 +638,7 @@ public:
+         BufferRef out = alloc(bytes, error);
+         if (!out) return {};
+         std::lock_guard<std::mutex> lock(dispatch_mutex_);
++        if (!device_usable(error)) return {};
+         const auto start = diagnostic_start();
+         if (!submit_sync([&](VkCommandBuffer command) {
+                 device_barrier(command, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT);
+@@ -718,6 +726,7 @@ public:
+         if (!validate_copy(dst, dst_offset, src, src_offset, bytes, error)) return false;
+         if (!bytes || (dst == src && dst_offset == src_offset)) return true;
+         std::lock_guard<std::mutex> lock(dispatch_mutex_);
++        if (!device_usable(error)) return false;
+         const auto start = diagnostic_start();
+         if (!submit_sync([&](VkCommandBuffer command) {
+                 device_barrier(command, VK_PIPELINE_STAGE_TRANSFER_BIT,
+@@ -735,6 +744,8 @@ public:
+         if (!validate_read(src, src_offset, dst, bytes, error)) return false;
+         if (!bytes) return true;
+         std::lock_guard<std::mutex> lock(dispatch_mutex_);
++        // Refuse before staging grows or the caller's host range is touched.
++        if (!device_usable(error)) return false;
+         const auto start = diagnostic_start();
+         if (!ensure_staging(read_staging_, std::min(bytes, staging_chunk_bytes_), true, error)) return false;
+         for (size_t offset = 0; offset < bytes;) {
+@@ -767,6 +778,7 @@ public:
+     bool dispatch(const char* kernel, const std::vector<Arg>& args,
+                   size_t n_threads, std::string& error) override {
+         if (n_threads == 0) return true;
++        if (!device_usable(error)) return false;
+         // Probe kernels must not recurse into the startup gate. A rejected
+         // device stays rejected, including low-level callers that dispatch
+         // without first calling check_math_mode themselves.
+@@ -840,6 +852,9 @@ public:
+         // The ring is rewritten from its start on every dispatch. That is safe
+         // because this lock is held until submit_sync below has waited for the
+         // queue to go idle, so the previous dispatch's bytes are no longer read.
++        // A request waiting for the queue must observe a loss recorded by its
++        // previous owner before rewriting the mapped inline ring.
++        if (!device_usable(error)) return false;
+         if (!ring_args.empty()) {
+             size_t offset = 0;
+             for (size_t i : ring_args) {
+@@ -915,14 +930,8 @@ public:
+         return submitted;
+     }
+ 
+-    bool flush(std::string& error) override {  // dispatch is synchronous for this milestone
+-        // Android: a lost device has nothing to flush to; say so rather than succeed.
+-        if (device_lost_.load(std::memory_order_acquire)) {
+-            error = vk_error("flush", VK_ERROR_DEVICE_LOST) + "; the device was lost earlier";
+-            return false;
+-        }
+-        return true;
+-    }
++    // Synchronous dispatch leaves no queue to drain, but loss still fails.
++    bool flush(std::string& error) override { return device_usable(error); }
+     void* texture(Buffer* buffer, uint32_t width, uint32_t height,
+                   uint32_t row_stride_px, std::string& error) override {
+         if (!buffer || width == 0 || height == 0 || row_stride_px < width ||
+@@ -1031,6 +1040,8 @@ public:
+     bool take_critical_pressure() override { return false; }
+ 
+ private:
++    friend bool ::spk::gpu::test_latch_device_lost(Gpu* gpu, std::string& error);
++
+     using Clock = std::chrono::steady_clock;
+     static constexpr size_t kMaxStagingBytes = size_t(64) * 1024 * 1024;
+     // Android: the inline-argument ring. The widest dispatch passes well under
+@@ -1055,17 +1066,27 @@ private:
+             static_cast<unsigned long long>(read_staging_.allocation_bytes));
+     }
+ 
++    // Cleanup remains valid on a lost device; new work repeats the first
++    // diagnosis. Its mutex also protects flush(), which takes no queue lock.
++    bool device_usable(std::string& error) const {
++        if (!device_lost_.load(std::memory_order_acquire)) return true;
++        std::lock_guard<std::mutex> lock(device_lost_mutex_);
++        error = device_lost_error_;
++        return false;
++    }
++
++    void latch_device_lost(VkResult result, const char* operation) {
++        if (result != VK_ERROR_DEVICE_LOST) return;
++        std::lock_guard<std::mutex> lock(device_lost_mutex_);
++        if (!device_lost_.exchange(true, std::memory_order_acq_rel))
++            device_lost_error_ = vk_error(operation, result);
++    }
++
+     // Caller holds dispatch_mutex_: one queue and command pool, and synchronous
+     // completion before any staging allocation or pooled buffer can be reused.
+     template <typename Record>
+     bool submit_sync(Record&& record, const char* operation, std::string& error) {
+-        // Android: once the device is lost nothing more is submitted to it
+-        // (upstream PR #64's latch). The message keeps "(VkResult -4)", which
+-        // the app reads as "replace the engine".
+-        if (device_lost_.load(std::memory_order_acquire)) {
+-            error = vk_error(operation, VK_ERROR_DEVICE_LOST) + "; the device was lost earlier";
+-            return false;
+-        }
++        if (!device_usable(error)) return false;
+         VkCommandBufferAllocateInfo allocate_info{};
+         allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+         allocate_info.commandPool = command_pool_;
+@@ -1092,8 +1113,11 @@ private:
+             }
+             vkFreeCommandBuffers(device_, command_pool_, 1, &command);
+         }
+-        if (result == VK_ERROR_DEVICE_LOST) device_lost_.store(true, std::memory_order_release);
+-        if (result != VK_SUCCESS) { error = vk_error(operation, result); return false; }
++        if (result != VK_SUCCESS) {
++            latch_device_lost(result, operation);
++            error = vk_error(operation, result);
++            return false;
++        }
+         return true;
+     }
+ 
+@@ -1172,6 +1196,9 @@ private:
+         BufferRef out = allocate(bytes, persistent, error);
+         if (!out) return {};
+         std::lock_guard<std::mutex> lock(dispatch_mutex_);
++        // Returning an empty ref releases the allocation if loss happened
++        // while waiting. Do not grow staging or copy host data in that case.
++        if (!device_usable(error)) return {};
+         if (!ensure_staging(upload_staging_, std::min(bytes, staging_chunk_bytes_), false, error)) return {};
+         for (size_t offset = 0; offset < bytes;) {
+             const size_t chunk = std::min(bytes - offset, staging_chunk_bytes_);
+@@ -1213,6 +1240,9 @@ private:
+             return {};
+         }
+         std::lock_guard<std::mutex> lock(buffers_mutex_);
++        // Check under the pool lock before creating or reusing a buffer.
++        // release() and trim_pool() remain available for session cleanup.
++        if (!device_usable(error)) return {};
+         if (!persistent) {
+             // Do not retain a full-resolution plane for a small preview or
+             // constant request. Dispatch completion makes zero-ref blocks idle.
+@@ -1310,7 +1340,11 @@ private:
+                                   VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+         create.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+         VkResult result = vkCreateBuffer(device_, &create, nullptr, &b.handle);
+-        if (result != VK_SUCCESS) { error = vk_error("vkCreateBuffer", result); return false; }
++        if (result != VK_SUCCESS) {
++            latch_device_lost(result, "vkCreateBuffer");
++            error = vk_error("vkCreateBuffer", result);
++            return false;
++        }
+         VkMemoryRequirements requirements{};
+         vkGetBufferMemoryRequirements(device_, b.handle, &requirements);
+         uint32_t memory_index = UINT32_MAX;
+@@ -1485,9 +1519,10 @@ private:
+     VkPhysicalDeviceProperties properties_{};
+     // maxStorageBufferRange, unless probe_cpu_storage_range measured more.
+     VkDeviceSize storage_range_limit_ = 0;
+-    // Android: set by the first VK_ERROR_DEVICE_LOST; every later submit and
+-    // flush fails at once instead of reaching a dead VkDevice again.
++    // First loss wins; checks also precede allocation and transfer preparation.
+     std::atomic<bool> device_lost_{false};
++    mutable std::mutex device_lost_mutex_;
++    std::string device_lost_error_;
+     // -1 unvalidated/rejected, 1 validated fused fma, 0 validated split.
+     int fused_fma_ = -1;
+     bool math_checked_ = false;
+@@ -1520,6 +1555,13 @@ private:
+ 
+ }  // namespace
+ 
++bool test_latch_device_lost(Gpu* gpu, std::string& error) {
++    auto* vulkan = dynamic_cast<VulkanGpu*>(gpu);
++    if (!vulkan) { error = "not a Vulkan backend"; return false; }
++    vulkan->latch_device_lost(VK_ERROR_DEVICE_LOST, "injected device loss");
++    return true;
++}
++
+ Gpu* Gpu::create_vulkan(const std::string& shader_dir, std::string& error) {
+     auto gpu = std::make_unique<VulkanGpu>(shader_dir);
+     if (!gpu->initialize(error)) return nullptr;
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+index b13d945..0446f92 100644
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -5,6 +5,7 @@
+ #include "windows_unported.hpp"
+ #endif
+ 
++#include <algorithm>
+ #include <chrono>
+ #include <cmath>
+ #include <cstring>
+diff --git a/engine/tests/gpu_vulkan_device_lost.cpp b/engine/tests/gpu_vulkan_device_lost.cpp
+new file mode 100644
+index 0000000..8dab665
+--- /dev/null
++++ b/engine/tests/gpu_vulkan_device_lost.cpp
+@@ -0,0 +1,206 @@
++// Device-lost fail-fast gate.
++//
++// A real loss needs a Windows TDR or a driver fault, which no test can ask for.
++// So the latch is injected instead, and what this checks is the policy that
++// follows it: after the first loss, every request that would do work must fail
++// with the one stored diagnosis, and must do so before it allocates a buffer,
++// grows or fills staging memory, or submits a command. Pool accounting below
++// detects compute-buffer allocation/reuse, while host sentinels detect writes
++// to the readback destination. Staging/ring checks also require code review;
++// those allocations are deliberately outside the public pool counters.
++//
++// Cleanup is the deliberate exception: release() and trim_pool() still run,
++// because a session has to be able to free what it holds and the Vulkan
++// specification defines those calls on a lost device.
++#include "gpu/gpu.hpp"
++#include "vulkan_test_hooks.hpp"
++
++#include <cstdint>
++#include <cstdio>
++#include <cstring>
++#include <memory>
++#include <string>
++#include <vector>
++
++namespace {
++
++using spk::gpu::Arg;
++using spk::gpu::BufferRef;
++using spk::gpu::Gpu;
++
++bool require(bool condition, const char* message, std::string& error) {
++    if (!condition) error = message;
++    return condition;
++}
++
++// The pool counters that a refused request must leave alone: a buffer made,
++// reused, or a queued allocation would move at least one of them.
++struct Snapshot {
++    size_t buffers = 0;
++    size_t total_bytes = 0;
++    size_t live_bytes = 0;
++    uint64_t allocations = 0;
++    uint64_t persistent_allocations = 0;
++    uint64_t reuses = 0;
++};
++
++Snapshot take(Gpu* gpu) {
++    const auto stats = gpu->pool_stats();
++    Snapshot out;
++    out.buffers = stats.buffers;
++    out.total_bytes = stats.total_bytes;
++    out.live_bytes = stats.live_bytes;
++    out.allocations = stats.audit.allocations;
++    out.persistent_allocations = stats.audit.persistent_allocations;
++    out.reuses = stats.audit.reuses;
++    return out;
++}
++
++bool same_pool(const Snapshot& a, const Snapshot& b) {
++    return a.buffers == b.buffers && a.total_bytes == b.total_bytes &&
++           a.live_bytes == b.live_bytes && a.allocations == b.allocations &&
++           a.persistent_allocations == b.persistent_allocations &&
++           a.reuses == b.reuses;
++}
++
++}  // namespace
++
++int main(int argc, char** argv) {
++    if (argc != 2) {
++        std::fprintf(stderr, "usage: spk_vulkan_device_lost <resources>\n");
++        return 2;
++    }
++    std::string error;
++    std::unique_ptr<Gpu> gpu(Gpu::create_vulkan(std::string(argv[1]) + "/vulkan", error));
++    if (!gpu) {
++        std::fprintf(stderr, "Vulkan device: %s\n", error.c_str());
++        return 1;
++    }
++    std::printf("Vulkan device: %s\n", gpu->device_name().c_str());
++
++    constexpr size_t bytes = 64 * 1024;
++    std::vector<uint32_t> payload(bytes / sizeof(uint32_t), 0x5a5a5a5au);
++    auto source = gpu->upload(payload.data(), bytes, error);
++    auto target = gpu->alloc(bytes, error);
++    if (!source || !target || !gpu->flush(error)) {
++        std::fprintf(stderr, "device-lost fixture: %s\n", error.c_str());
++        return 1;
++    }
++
++    const Snapshot before = take(gpu.get());
++    if (!spk::gpu::test_latch_device_lost(gpu.get(), error)) {
++        std::fprintf(stderr, "device-lost injection: %s\n", error.c_str());
++        return 1;
++    }
++
++    // Every later request fails, and each one repeats the latched diagnosis
++    // rather than inventing a new one. `first` is that diagnosis.
++    std::string first;
++    size_t refused = 0;
++    auto refuses = [&](const char* label, auto&& operation) {
++        std::string diagnostic;
++        if (operation(diagnostic)) {
++            error = std::string("accepted after the device was lost: ") + label;
++            return false;
++        }
++        if (diagnostic.empty()) {
++            error = std::string("failed without a diagnosis: ") + label;
++            return false;
++        }
++        if (first.empty()) {
++            first = diagnostic;
++        } else if (diagnostic != first) {
++            error = std::string("diagnosis drifted at ") + label + ": " + diagnostic;
++            return false;
++        }
++        ++refused;
++        return true;
++    };
++
++    // The four families the reviewer named: allocation, upload preparation,
++    // readback preparation, and command submission.
++    if (!refuses("alloc", [&](std::string& e) { return bool(gpu->alloc(bytes, e)); }) ||
++        !refuses("alloc_bounded", [&](std::string& e) { return bool(gpu->alloc_bounded(bytes, e)); }) ||
++        !refuses("alloc_zeroed", [&](std::string& e) { return bool(gpu->alloc_zeroed(bytes, e)); }) ||
++        !refuses("alloc_persistent", [&](std::string& e) { return bool(gpu->alloc_persistent(bytes, e)); }) ||
++        !refuses("upload", [&](std::string& e) { return bool(gpu->upload(payload.data(), bytes, e)); }) ||
++        !refuses("upload_persistent",
++                 [&](std::string& e) { return bool(gpu->upload_persistent(payload.data(), bytes, e)); }) ||
++        !refuses("upload_f32", [&](std::string& e) {
++            std::vector<double> narrow(bytes / sizeof(float), 0.5);
++            return bool(gpu->upload_f32(narrow.data(), narrow.size(), e));
++        }) ||
++        !refuses("upload_persistent_f32", [&](std::string& e) {
++            std::vector<double> narrow(bytes / sizeof(float), 0.5);
++            return bool(gpu->upload_persistent_f32(narrow.data(), narrow.size(), e));
++        }) ||
++        !refuses("upload_u32", [&](std::string& e) {
++            return bool(gpu->upload_u32(payload.data(), payload.size(), e));
++        }) ||
++        !refuses("upload_persistent_u32", [&](std::string& e) {
++            return bool(gpu->upload_persistent_u32(payload.data(), payload.size(), e));
++        }) ||
++        !refuses("alloc_file_backed", [&](std::string& e) {
++            return bool(gpu->alloc_file_backed(bytes, e));
++        }) ||
++        !refuses("upload_file_backed", [&](std::string& e) {
++            return bool(gpu->upload_file_backed(payload.data(), bytes, e));
++        }) ||
++        !refuses("copy", [&](std::string& e) {
++            return gpu->copy(target.get(), 0, source.get(), 0, bytes, e);
++        }) ||
++        !refuses("dispatch", [&](std::string& e) {
++            const uint32_t n[1] = {1};
++            return gpu->dispatch("spk_mul",
++                {Arg::buf(source), Arg::buf(source), Arg::inline_bytes(n, 1), Arg::buf(target)},
++                1, e);
++        }) ||
++        !refuses("flush", [&](std::string& e) { return gpu->flush(e); })) {
++        std::fprintf(stderr, "device-lost fail-fast: %s\n", error.c_str());
++        return 1;
++    }
++
++    // Readback has a host range to protect as well: a refused read must not
++    // copy one byte into the caller's buffer.
++    std::vector<uint32_t> host(bytes / sizeof(uint32_t), 0xa5a5a5a5u);
++    const auto host_before = host;
++    if (!refuses("read", [&](std::string& e) { return gpu->read(source.get(), 0, host.data(), bytes, e); }) ||
++        !require(host == host_before, "a refused read wrote into the caller's buffer", error)) {
++        std::fprintf(stderr, "device-lost readback: %s\n", error.c_str());
++        return 1;
++    }
++    if (!require(first.find("device was lost") != std::string::npos,
++                 "the latched diagnosis does not name the lost device", error) ||
++        !require(first.find("(VkResult -4)") != std::string::npos,
++                 "the Android recovery marker was lost", error)) {
++        std::fprintf(stderr, "device-lost diagnosis: %s\n", error.c_str());
++        return 1;
++    }
++
++    // None of that touched the pool: no buffer was created, reused or queued.
++    const Snapshot after = take(gpu.get());
++    if (!require(same_pool(before, after),
++                 "a refused request allocated, reused, or released a buffer", error)) {
++        std::fprintf(stderr, "device-lost pool: %s (buffers %zu -> %zu, total %zu -> %zu)\n",
++                     error.c_str(), before.buffers, after.buffers, before.total_bytes,
++                     after.total_bytes);
++        return 1;
++    }
++
++    // Cleanup stays available: the session can still free what it holds, and
++    // the device is never asked to render again.
++    source.reset();
++    target.reset();
++    const size_t freed = gpu->trim_pool(0);
++    const Snapshot released = take(gpu.get());
++    if (!require(freed >= bytes && released.buffers == 0 && released.total_bytes == 0,
++                 "cleanup after a lost device did not free the pool", error)) {
++        std::fprintf(stderr, "device-lost cleanup: %s\n", error.c_str());
++        return 1;
++    }
++
++    std::printf("device lost: %zu requests refused with one latched diagnosis, "
++                "%zu buffers and %zu bytes came back on cleanup\n",
++                refused, after.buffers, freed);
++    return 0;
++}
+diff --git a/engine/tests/vulkan_test_hooks.hpp b/engine/tests/vulkan_test_hooks.hpp
+new file mode 100644
+index 0000000..8e2d3a8
+--- /dev/null
++++ b/engine/tests/vulkan_test_hooks.hpp
+@@ -0,0 +1,20 @@
++// Test-only entry points exported by the engine's Vulkan backend.
++//
++// Declared here, next to the tests that use them, rather than in a public
++// header: the engine never calls these, and a shipping build pays one unused
++// symbol for being able to test the fail-fast policy without provoking a GPU
++// reset on the developer's machine.
++#pragma once
++
++#include <string>
++
++#include "gpu/gpu.hpp"
++
++namespace spk::gpu {
++
++// Marks the Vulkan backend's device lost exactly as a real
++// VK_ERROR_DEVICE_LOST would, without touching the live VkDevice. Returns
++// false when `gpu` is not the Vulkan backend.
++bool test_latch_device_lost(Gpu* gpu, std::string& error);
++
++}  // namespace spk::gpu

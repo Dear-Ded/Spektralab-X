@@ -1,0 +1,6 @@
+reserve errors PASS ENOSPC EDQUOT EIO EINVAL explicit_bytes cleanup
+real reservation PASS EINTR anonymous incomplete_seal byte_parity cleanup
+unsupported PASS ENOSYS EOPNOTSUPP low_space zero_frsize stat_error exact_blocks overflow_safe
+later IO errors PASS append flush cleanup
+real blocks PASS required=28324 allocated=28672 closed
+spool disk probe PASS

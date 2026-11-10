@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-optimize-wave2-20261109/float-strip-streaming-20261110/repo/tools/native/float_dng_streaming_fixtures.py", line 111, in <module>
+    main()
+  File "/data/work/gpt-optimize-wave2-20261109/float-strip-streaming-20261110/repo/tools/native/float_dng_streaming_fixtures.py", line 90, in main
+    assert record['ok'] and record['support'] == 'Supported', (path, options, label, record)
+KeyError: 'ok'

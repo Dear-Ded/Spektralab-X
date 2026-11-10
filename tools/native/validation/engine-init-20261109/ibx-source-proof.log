@@ -1,0 +1,129 @@
+d20e7f07572b98698644547eca1625d49905b142e302281e08c21408e4681775  /data/work/engine-deepdive/scene-curve-0029/upstream/engine/src/pipeline/engine.cpp
+c59f13964811fd8fd3ec90d9b368f08bad887e69650af0ee1eeae5ec66f565ad  /data/work/engine-deepdive/scene-curve-0029/upstream/engine/src/gpu/vulkan_gpu.cpp
+   612	spk_engine* spk_engine_create(const char* resources_dir, void* device) {
+   613	    g_error.clear();
+   614	    if (!resources_dir) { g_error = "resources_dir is null"; return nullptr; }
+   615	    auto engine = std::make_unique<spk_engine>();
+   616	    engine->resources_dir = resources_dir;
+   617	
+   618	    std::string error;
+   619	    if (!engine->blob.open(engine->resources_dir + "/spektrafilm_constants.bin", error)) {
+   620	        g_error = error;
+   621	        return nullptr;
+   622	    }
+   623	    if (!engine->colour.init(engine->blob, error)) { g_error = error; return nullptr; }
+   624	
+   625	    const std::string filters_text = read_text_file(engine->resources_dir + "/neutral_print_filters.json");
+   626	    if (!filters_text.empty()) {
+   627	        std::string parse_error;
+   628	        if (!Json::parse(filters_text, engine->neutral_filters, parse_error)) {
+   629	            g_error = "neutral_print_filters.json: " + parse_error;
+   630	            return nullptr;
+   631	        }
+   632	    }
+   633	
+   634	    if (!engine->print_luts.init(engine->resources_dir, error)) { g_error = error; return nullptr; }
+   635	
+   636	#ifndef __APPLE__
+   637	    if (device) { g_error = "Windows device-buffer input is not implemented yet; pass null"; return nullptr; }
+   638	    engine->gpu = gpu::Gpu::create_vulkan(engine->resources_dir + "/vulkan", error);
+   639	#else
+   640	    engine->gpu = gpu::Gpu::create_metal(device, engine->resources_dir + "/spektrafilm.metallib", error);
+   641	#endif
+   642	    if (!engine->gpu) { g_error = error; return nullptr; }
+   643	
+   644	    // RFC-014 §5.1 trap 1, checked rather than trusted. A build flag is the
+   645	    // kind of guard that stops being read; this asks the GPU what it actually
+   646	    // compiled, and refuses to start if the answer is fast math.
+   647	    std::string detail;
+   648	    if (!engine->gpu->check_math_mode(detail)) { g_error = detail; return nullptr; }
+   649	    engine->math_mode = detail;
+   650	
+   651	    engine->cached_capabilities = engine->capabilities_json().dump();
+   652	    engine->cached_schema = transport_schema().dump();
+   653	    return engine.release();
+   654	}
+   655	
+   656	void spk_engine_destroy(spk_engine* engine) {
+   570	                detail = fallback_reason + "; Vulkan split-product probe is not exact at index " + std::to_string(i);
+   571	                return false;
+   572	            }
+   573	        }
+   574	        fused_fma_ = 0;  // commit the choice only after validation succeeds
+   575	        detail = "Vulkan probe passed (exact Dekker split product; " + fallback_reason + "; full shader parity pending)";
+   576	        if (properties_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) probe_cpu_storage_range(detail);
+   577	        return true;
+   578	    }
+   579	
+   580	    // lavapipe advertises maxStorageBufferRange = 128 MiB, which refuses any
+   581	    // frame above ~11 MP (a 3-channel float plane of 4284 x 2844 is 146 MB),
+   582	    // and the CPU device is the fallback for a machine with no GPU at all.
+   583	    // llvmpipe addresses an SSBO with 32-bit offsets, so on a CPU device only
+   584	    // the range is *measured* rather than trusted: a dispatch over a buffer
+   585	    // 16 MiB past the advertised limit must read and write distinct values on
+   586	    // both sides of it. Only then is the limit raised to 4 GiB - 4, and the
+   587	    // math_mode string says so. Any GPU keeps its advertised limit, and
+   588	    // SPEKTRAFILM_VULKAN_STRICT_LIMITS=1 keeps it here too.
+   589	    void probe_cpu_storage_range(std::string& detail) {
+   590	        if (const char* strict = std::getenv("SPEKTRAFILM_VULKAN_STRICT_LIMITS"); strict && *strict == '1') return;
+   591	        const VkDeviceSize advertised = properties_.limits.maxStorageBufferRange;
+   592	        if (advertised >= 0xFFFFFFF0ull) return;
+   593	        // spk_take_rgb over n RGBA pixels: it reads 16n bytes and writes 12n,
+   594	        // both past the advertised range, with one thread per pixel (n stays
+   595	        // under the 65535-workgroup dispatch limit).
+   596	        const size_t n = size_t(advertised / 12) + (size_t(1) << 20);
+   597	        if ((n + 255) / 256 > properties_.limits.maxComputeWorkGroupCount[0]) return;
+   598	        std::vector<float> input(n * 4);
+   599	        auto pattern = [](size_t i) { return float(uint32_t(i * 2654435761u) >> 8); };
+   600	        for (size_t i = 0; i < input.size(); ++i) input[i] = pattern(i);
+   601	        std::string error;
+   602	        bool ok = false;
+   603	        {
+   604	            BufferRef in = upload(input.data(), input.size() * 4, error);
+   605	            BufferRef out = alloc(n * 12, error);
+   606	            const uint32_t meta[2] = {uint32_t(n), 4u};
+   607	            if (in && out) {
+   608	                storage_range_limit_ = VkDeviceSize(n) * 16;   // this one dispatch only
+   609	                const bool ran = dispatch("spk_take_rgb", {Arg::buf(in), Arg::inline_bytes(meta, 2), Arg::buf(out)},
+   610	                                          n, error);
+   611	                storage_range_limit_ = advertised;
+   612	                std::vector<float> got(n * 3);
+   613	                if (ran && read(out.get(), 0, got.data(), n * 12, error)) {
+   614	                    ok = true;
+   615	                    for (size_t i = 0; ok && i < n; ++i)
+   616	                        for (size_t c = 0; c < 3; ++c)
+   617	                            if (got[3 * i + c] != pattern(4 * i + c)) { ok = false; break; }
+   618	                }
+   619	            }
+   620	        }
+   621	        // The probe's buffers would otherwise sit in the pool and be handed,
+   622	        // at their full size, to the next small allocation.
+   623	        trim_pool(0);
+   624	        if (!ok) return;
+   625	        storage_range_limit_ = 0xFFFFFFFCull;
+   626	        detail += "; storage buffers past the advertised " + std::to_string(advertised >> 20) +
+   627	                  " MiB maxStorageBufferRange verified by probe on this CPU device";
+   628	    }
+   629	
+   630	    void begin_frame() override {
+   631	        std::lock_guard<std::mutex> lock(buffers_mutex_);
+186:            staging_chunk_bytes_ = size_t(value);
+754:        if (!ensure_staging(read_staging_, std::min(bytes, staging_chunk_bytes_), true, error)) return false;
+756:            const size_t chunk = std::min(bytes - offset, staging_chunk_bytes_);
+761:                vkCmdCopyBuffer(command, src->handle, read_staging_.handle, 1, &range);
+768:                barrier.buffer = read_staging_.handle;
+774:                !mapped_range(read_staging_, chunk, false, error)) return false;
+775:            std::memcpy(static_cast<unsigned char*>(dst) + offset, read_staging_.mapped, chunk);
+1018:            const VkDeviceSize staging_freed = upload_staging_.allocation_bytes + read_staging_.allocation_bytes;
+1020:            destroy_buffer(&read_staging_);
+1023:                    "\"upload_staging_bytes\":0,\"read_staging_bytes\":0}\n",
+1054:    static constexpr size_t kMaxStagingBytes = size_t(64) * 1024 * 1024;
+1071:            "\"upload_staging_bytes\":%llu,\"read_staging_bytes\":%llu}\n",
+1074:            static_cast<unsigned long long>(read_staging_.allocation_bytes));
+1151:    bool ensure_staging(Buffer& staging, size_t bytes, bool readback, std::string& error) {
+1210:        if (!ensure_staging(upload_staging_, std::min(bytes, staging_chunk_bytes_), false, error)) return {};
+1212:            const size_t chunk = std::min(bytes - offset, staging_chunk_bytes_);
+1553:    Buffer read_staging_;
+1555:    size_t staging_chunk_bytes_ = kMaxStagingBytes;
+
+[exit 0 ]
