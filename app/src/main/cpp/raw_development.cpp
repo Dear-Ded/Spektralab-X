@@ -75,6 +75,18 @@ RawDevelopmentStats raw_development_stats(const float* rgb, size_t stride,
     return stats;
 }
 
+bool prepare_raw_development_stats(const RawDevelopmentOptions& options, bool no_film,
+                                   const float* rgb, size_t stride,
+                                   uint32_t w, uint32_t h, RawDevelopmentStats& out,
+                                   const OutputCancel& cancel) {
+    if (!options.enabled || !no_film) {
+        out = {};
+        return false;
+    }
+    out = raw_development_stats(rgb, stride, w, h, cancel);
+    return true;
+}
+
 RawDevelopment RawDevelopment::build(const RawDevelopmentMetadata& meta,
                                      const RawDevelopmentStats& stats,
                                      const RawDevelopmentOptions& options) {

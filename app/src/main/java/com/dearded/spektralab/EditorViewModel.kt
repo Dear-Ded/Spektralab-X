@@ -68,6 +68,8 @@ data class UiState(
     val exif: ExifCopy = ExifCopy.NONE,
     /** The full working-size render for 1:1 viewing; dropped on any edit. */
     val detail: Bitmap? = null,
+    /** Non-null for a preview-size JPEG color inspection, in this file target. */
+    val detailTarget: String? = null,
     val loadingDetail: Boolean = false,
     /** The film and paper a new photo starts on; "" = the last photo's (remembered). */
     val defaultFilm: String = "",
@@ -129,6 +131,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var openSpace = "sRGB"
     private var openLinear = false
     private var cardsJob: kotlinx.coroutines.Job? = null
+    @Volatile private var detailRevision = 0L
 
     init {
         viewModelScope.launch { startEngine() }
@@ -220,6 +223,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     private var openJob: kotlinx.coroutines.Job? = null
+    private data class ReopenEdit(val edit: Edit, val record: Boolean, val moveHistory: (() -> Unit)?)
 
     /**
      * Opens run one at a time: a newer one first cancels and waits for the
@@ -227,12 +231,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * the old one, then both stored theirs) and could delete each other's
      * cached RAW.
      */
-    private fun launchOpen(uri: Uri, wb: Pair<Double, Double>?, savedEdit: Edit? = null) {
+    private fun launchOpen(uri: Uri, wb: Pair<Double, Double>?, savedEdit: Edit? = null, change: ReopenEdit? = null) {
+        invalidateDetail()
         clearOverride(render = false)
         val previous = openJob
         openJob = viewModelScope.launch {
             previous?.cancelAndJoin()
-            doOpen(uri, wb, savedEdit)
+            doOpen(uri, wb, savedEdit, change)
         }
     }
 
@@ -267,7 +272,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null, savedEdit: Edit? = null) {
+    private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null, savedEdit: Edit? = null, change: ReopenEdit? = null) {
         _ui.update { it.copy(busy = "正在读取…", error = null, detail = null) }
         cardsJob?.cancel()
         cancelStalePreview()
@@ -287,7 +292,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 val n = loader.displayName(uri)
                 n to loader.isRaw(n, resolver.getType(uri), uri)
             }
-            val requested = savedEdit?.let(_ui.value.catalog::normalize) ?: wanted
+            val requested = change?.edit ?: savedEdit?.let(_ui.value.catalog::normalize) ?: wanted
             val resetHistory = wb == null || savedEdit != null
             val edge = _ui.value.workingEdge
             // The film edge lays the frame on a canvas up to 1.6x its area, and the
@@ -382,6 +387,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         asShotK = info.optDouble("asShotK", 0.0), asShotTint = info.optDouble("asShotTint", 0.0),
                         wbK = info.optDouble("wbK", 0.0), wbTint = info.optDouble("wbTint", 0.0),
                         rawStatsBinned = info.optBoolean("rawStatsBinned", false),
+                        rawStatsReady = info.optBoolean("rawStatsReady", false),
                     ),
                 )
             var retired = 0L
@@ -406,7 +412,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         openedEdit = if (savedEdit != null) requested else edit
                         history.clear()
                     }
-                    _ui.value = nextUi
+                    if (change != null) {
+                        if (change.record) history.record(_ui.value.edit, edit, android.os.SystemClock.uptimeMillis())
+                        change.moveHistory?.invoke()
+                        rememberPair(_ui.value.edit, edit)
+                    }
+                    _ui.value = nextUi.copy(canUndo = history.canUndo, canRedo = history.canRedo)
                     committed = true
                 }
             } finally {
@@ -466,7 +477,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * a slider drag would never show anything.
      */
     private fun cancelStalePreview() = synchronized(cancelLock) {
-        if (inFlightTier == "preview" && session != 0L) NativeEngine.cancel(session)
+        if ((inFlightTier == "preview" || inFlightTier == "detail") && session != 0L) NativeEngine.cancel(session)
     }
 
     // --- editing and rendering -------------------------------------------------
@@ -488,34 +499,39 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         applyEdit(edit, record = true)
     }
 
-    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true) {
-        // The real edit renders below; after an override the engine holds the override's
-        // params, so even a look-only change must develop again, not re-pack.
-        val wasOverridden = clearOverride(render = false)
-        val edit = _ui.value.catalog.normalize(raw)
-        val current = _ui.value.edit
-        // "记住上次用的" across a restart: a new process would start on 无 otherwise.
+    private fun rememberPair(current: Edit, edit: Edit) {
         if (edit.film != current.film || edit.paper != current.paper || edit.noFilm != current.noFilm ||
             edit.digitalIntermediate != current.digitalIntermediate)
             prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper)
                 .putBoolean("last_no_film", edit.noFilm).putBoolean("last_di", edit.digitalIntermediate).apply()
+    }
+
+    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, moveHistory: (() -> Unit)? = null) {
+        val edit = _ui.value.catalog.normalize(raw)
+        val src = _ui.value.source
+        val uri = lastUri
+        // Keep the accepted edit/save/history intact until a full-source candidate
+        // has decoded and validated the requested development metadata.
+        if (src != null && uri != null && edit.requiresRawDevelopmentSource(src)) {
+            cancelStalePreview()
+            launchOpen(uri, wb = src.wbK to src.wbTint, change = ReopenEdit(edit, record, moveHistory))
+            return
+        }
+        // The real edit renders below; after an override the engine holds the override's
+        // params, so even a look-only change must develop again, not re-pack.
+        val wasOverridden = clearOverride(render = false)
+        val current = _ui.value.edit
+        if (edit != current || wasOverridden) invalidateDetail()
+        // "记住上次用的" across a restart: a new process would start on 无 otherwise.
+        rememberPair(current, edit)
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
+        moveHistory?.invoke()
         wanted = edit
         saves.trySend(Unit)
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
         _ui.update {
             it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
                 detail = if (edit == it.edit) it.detail else null)
-        }
-        // A fast neutral open may have binned the sensor. Reopen that source
-        // before enabling development so its global meter matches full export.
-        val src = _ui.value.source
-        val uri = lastUri
-        if (src?.kind == "raw" && src.rawStatsBinned && uri != null &&
-            edit.rawDevelopment == RawDevelopmentMode.STANDARD_V1) {
-            cancelStalePreview()
-            launchOpen(uri, wb = src.wbK to src.wbTint)
-            return
         }
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
@@ -531,47 +547,89 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * Renders the full working size once for 1:1 viewing. Refused above
      * kMaxDetailPixels, where the ARGB bitmap alone would pass ~64 MB.
      */
-    fun loadDetail() {
+    fun loadDetail() = loadInspection(null)
+
+    fun loadExportProof(target: String) {
+        require(target == "sRGB" || target == "Display P3")
+        loadInspection(target)
+    }
+
+    private fun loadInspection(target: String?) {
         val state = _ui.value
         val src = state.source ?: return
         if (state.loadingDetail || state.detail != null || state.exporting || state.busy != null) return
-        if (src.width.toLong() * src.height > kMaxDetailPixels) {
+        if (target == null && src.width.toLong() * src.height > kMaxDetailPixels) {
             _ui.update { it.copy(message = "工作尺寸超过 1600 万像素，1:1 查看已关闭；导出不受影响") }
             return
         }
+        clearOverride(render = true)
         val edit = state.edit
+        val revision = ++detailRevision
+        fun current() = detailRevision == revision && _ui.value.edit == edit &&
+            _ui.value.source === src && _ui.value.busy == null
+        _ui.update { it.copy(loadingDetail = true) }
         viewModelScope.launch {
-            _ui.update { it.copy(loadingDetail = true) }
             try {
                 val bitmap = withContext(EngineThread.dispatcher) {
-                    if (_ui.value.busy != null || _ui.value.source !== src) return@withContext null
+                    if (!current() || session == 0L) return@withContext null
                     applyWanted()?.let { throw EngineException("参数无效：$it") }
-                    NativeEngine.renderBitmap(session, "full")?.also(DisplayColor::tag)
-                        ?: throw EngineException("渲染失败：${NativeEngine.lastError()}")
+                    inFlightTier = "detail"
+                    try {
+                        val rendered = if (target == null) NativeEngine.renderBitmap(session, "full")
+                            else NativeEngine.renderProofBitmap(session, "preview", target)
+                        if (rendered == null) {
+                            if (NativeEngine.lastWasCancelled()) return@withContext null
+                            throw EngineException("渲染失败：${NativeEngine.lastError()}")
+                        }
+                        try {
+                            if (target == null) DisplayColor.tag(rendered) else DisplayColor.tagOutput(rendered, target)
+                        } catch (e: Throwable) {
+                            rendered.recycle()
+                            throw e
+                        }
+                        rendered
+                    } finally {
+                        inFlightTier = null
+                    }
                 }
-                // An edit that landed while this rendered makes it stale.
-                _ui.update { if (it.edit == edit && it.source === src && it.busy == null) it.copy(detail = bitmap) else it }
-                if (bitmap != null) log("detail ${bitmap.width}x${bitmap.height}")
+                if (bitmap != null) {
+                    if (current()) {
+                        _ui.update { it.copy(detail = bitmap, detailTarget = target) }
+                        log("${if (target == null) "detail" else "color preview $target"} ${bitmap.width}x${bitmap.height}")
+                    } else bitmap.recycle()
+                }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: OutOfMemoryError) {
-                _ui.update { it.copy(message = "内存不足，无法 1:1 查看") }
+                if (current()) _ui.update { it.copy(message = "内存不足，无法打开图像预览") }
             } catch (e: Throwable) {
-                _ui.update { it.copy(message = e.message ?: e.toString()) }
+                if (current()) _ui.update { it.copy(message = e.message ?: e.toString()) }
             } finally {
-                _ui.update { it.copy(loadingDetail = false) }
+                if (detailRevision == revision) _ui.update { it.copy(loadingDetail = false) }
             }
         }
     }
 
-    fun closeDetail() = _ui.update { it.copy(detail = null) }
+    private fun invalidateDetail() {
+        ++detailRevision
+        synchronized(cancelLock) {
+            if (inFlightTier == "detail" && session != 0L) NativeEngine.cancel(session)
+        }
+        _ui.update { it.copy(detail = null, detailTarget = null, loadingDetail = false) }
+    }
+
+    fun closeDetail() = invalidateDetail()
 
     fun undo() {
-        applyEdit(history.undo(_ui.value.edit) ?: return, record = false)
+        if (_ui.value.busy != null) return
+        val current = _ui.value.edit
+        applyEdit(history.undoTarget ?: return, record = false, moveHistory = { history.undo(current) })
     }
 
     fun redo() {
-        applyEdit(history.redo(_ui.value.edit) ?: return, record = false)
+        if (_ui.value.busy != null) return
+        val current = _ui.value.edit
+        applyEdit(history.redoTarget ?: return, record = false, moveHistory = { history.redo(current) })
     }
 
     /**
@@ -1156,7 +1214,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun trimMemory(level: Int) {
         if (level < android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
             level != android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) return
-        _ui.update { it.copy(detail = null) }
+        invalidateDetail()
         synchronized(pool) { spare.clear() }
         val e = engine
         if (e == 0L) return

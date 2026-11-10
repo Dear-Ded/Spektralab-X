@@ -75,6 +75,13 @@ object NativeEngine {
     external fun renderBitmap(session: Long, tier: String): Bitmap?
 
     /**
+     * JPEG colors at [tier], before encoding/paper composition. [target] is
+     * "sRGB" or "Display P3"; tag the returned codes with that file target,
+     * not the display space. Keeps the session's output and repack source.
+     */
+    external fun renderProofBitmap(session: Long, tier: String, target: String): Bitmap?
+
+    /**
      * [renderBitmap] for an export: null (lastError "export check: ...") when
      * the frame is flat black or white, which only a failed render produces.
      */

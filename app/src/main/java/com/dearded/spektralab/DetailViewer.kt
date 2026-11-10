@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,7 +40,8 @@ import kotlinx.coroutines.flow.first
  * halation, which the fitted preview cannot show. Pan with one finger.
  */
 @Composable
-internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) {
+internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit,
+                          title: String = "1:1", note: String? = null) {
     // A full-screen layer in the activity's own window, not a Dialog: a dialog is
     // a second window, and opening or closing it brings the system bars back
     // (docs/UI.md, 沉浸式). One window, one insets controller.
@@ -90,8 +92,12 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit) 
                     .background(Color.Black.copy(alpha = 0.5f), Corners.s),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("1:1 · ${bitmap.width}×${bitmap.height}", color = Color.White,
-                    style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 8.dp))
+                Column(Modifier.weight(1f, fill = false).padding(horizontal = 8.dp)) {
+                    Text("$title · ${bitmap.width}×${bitmap.height}", color = Color.White,
+                        style = MaterialTheme.typography.labelSmall)
+                    if (note != null) Text(note, color = Color.White,
+                        style = MaterialTheme.typography.labelSmall)
+                }
                 // Back to the fitted photo: 适应 / 1:1 as a visible pair (ui2_icecream.md 6.9).
                 TextButton(onClick = onClose) { Text("适应", color = Color.White) }
             }

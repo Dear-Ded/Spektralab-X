@@ -75,6 +75,7 @@ struct Session {
     spk::android::RawDevelopmentStats raw_stats;
     spk::android::RawDevelopment raw_development;
     bool raw_stats_binned = false;
+    bool raw_stats_ready = false;
     std::vector<uint8_t> before;   // RGBA8, see make_before
     uint32_t before_w = 0, before_h = 0;
     // The same small frame before encoding, in the session's input space:
@@ -737,7 +738,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         }
         // Standard development meters the complete unbinned source, independent
         // of preview/export working size. Neutral keeps its existing fast decode.
-        if (opening_view.raw_development.enabled) binned = false;
+        if (opening_view.no_film && opening_view.raw_development.enabled) binned = false;
         // The patch bins when area > 4 x budget (Bayer only): 1 forces it, 0 never.
         spk::io::set_raw_half_size_budget(binned ? 1 : 0);
         configure_raw_threads();
@@ -747,8 +748,10 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         spk::io::set_raw_half_size_budget(0);
         if (!ok) { fail("RAW decode: " + error); return 0; }
         const auto raw_metadata = development_metadata(decoded.metadata.dng_render);
-        const auto raw_stats = spk::android::raw_development_stats(
-            decoded.rgb.data(), decoded.width, decoded.width, decoded.height);
+        spk::android::RawDevelopmentStats raw_stats;
+        const bool raw_stats_ready = spk::android::prepare_raw_development_stats(
+            opening_view.raw_development, opening_view.no_film, decoded.rgb.data(),
+            decoded.width, decoded.width, decoded.height, raw_stats);
         auto development_options = opening_view.raw_development;
         development_options.enabled = development_options.enabled && opening_view.no_film;
         auto development = spk::android::RawDevelopment::build(raw_metadata, raw_stats, development_options);
@@ -768,6 +771,7 @@ JNI_FN(jlong, openRaw)(JNIEnv* env, jobject, jlong engine_handle, jstring path_j
         session->raw_stats = raw_stats;
         session->raw_development = std::move(development);
         session->raw_stats_binned = binned;
+        session->raw_stats_ready = raw_stats_ready;
         make_before(session.get(), rgb, w, h, /*linear_prophoto=*/true);
         // The sensor's size, not the binned decode's, in display orientation.
         if (sensor_w && sensor_h && binned) {
@@ -1058,6 +1062,9 @@ JNI_FN(jobject, filmPreview)(JNIEnv* env, jobject, jlong handle, jstring params_
         // The card is shown beside the print, so it leaves ProPhoto the same way.
         auto options = view.raw_development;
         options.enabled = options.enabled && view.no_film && s->kind == "raw";
+        if (options.enabled && !s->raw_stats_ready) {
+            fail("RAW standard development requires reopening the complete source"); return nullptr;
+        }
         const auto development = spk::android::RawDevelopment::build(s->raw_metadata, s->raw_stats, options);
         return to_bitmap(env, result.r, nullptr, renders_prophoto(params) ? s->transform() : nullptr,
             result.float_rgb.empty() ? nullptr : result.float_rgb.data(), {}, development.enabled() ? &development : nullptr);
@@ -1082,6 +1089,7 @@ JNI_FN(jstring, sourceInfo)(JNIEnv* env, jobject, jlong handle) {
             ",\"asShotK\":" + num(s->as_shot_k) + ",\"asShotTint\":" + num(s->as_shot_tint) +
             ",\"wbK\":" + num(s->wb_k) + ",\"wbTint\":" + num(s->wb_tint) +
             ",\"rawStatsBinned\":" + (s->raw_stats_binned ? "true" : "false") +
+            ",\"rawStatsReady\":" + (s->raw_stats_ready ? "true" : "false") +
             ",\"rawDevelopment\":\"" + (s->development() ? "standard_v1" : "neutral") +
             "\",\"rawCurve\":\"" + (s->development() ? s->raw_development.curve_name() : "none") +
             "\",\"rawEffectiveEv\":" + num(s->raw_development.effective_ev()) +
@@ -1107,8 +1115,8 @@ JNI_FN(jstring, setParams)(JNIEnv* env, jobject, jlong handle, jstring delta_j) 
         options.enabled = options.enabled && view.no_film && s->kind == "raw";
         // Build before accepting engine params; invalid display metadata cannot
         // leave the engine and application options on different edits.
-        if (options.enabled && s->raw_stats_binned) {
-            fail("RAW standard development requires reopening the unbinned source"); return nullptr;
+        if (options.enabled && !s->raw_stats_ready) {
+            fail("RAW standard development requires reopening the complete source"); return nullptr;
         }
         auto development = spk::android::RawDevelopment::build(s->raw_metadata, s->raw_stats, options);
         char* reply = nullptr;
@@ -1176,6 +1184,37 @@ JNI_FN(jobject, renderBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j
         fail(std::string("render: ") + e.what());
     } catch (...) {
         fail("render: unknown failure");
+    }
+    return nullptr;
+}
+
+// File-target codes in a fresh bitmap. Kotlin must tag it with that target,
+// allowing Android to map it to the screen without a second gamut compressor.
+JNI_FN(jobject, renderProofBitmap)(JNIEnv* env, jobject, jlong handle, jstring tier_j, jstring target_j) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("no session"); return nullptr; }
+    const spk::android::OutputCancel cancel(s->cancel_generation);
+    try {
+        const std::string target = str(env, target_j);
+        if (!s->prophoto || (target != "sRGB" && target != "Display P3")) {
+            fail("color preview: unsupported source or target"); return nullptr;
+        }
+        cancel.check();
+        spk::android::OutputTransform output;
+        std::string error;
+        if (!output.fetch(s->engine, target, true, error)) {
+            fail("color preview: " + error); return nullptr;
+        }
+        cancel.check();
+        ResultGuard result;
+        if (!render(s, str(env, tier_j), result.r, result.float_rgb, cancel)) return nullptr;
+        // Do not replace the editor's output transform or last/repack source.
+        return to_bitmap(env, result.r, s->active_look(), &output,
+                         result.float_rgb.empty() ? nullptr : result.float_rgb.data(), cancel, s->development());
+    } catch (const std::exception& e) {
+        fail(std::string("color preview: ") + e.what());
+    } catch (...) {
+        fail("color preview: unknown failure");
     }
     return nullptr;
 }

@@ -212,6 +212,8 @@ data class Edit(
     /** 胶片效果「无」: no grain, halation (and with it the scatter), glare or scanner sharpening. */
     val effectsNone: Boolean get() = !grainActive && !halationActive && !glareActive && unsharpAmount == 0.0
     val rawDevelopmentChanged: Boolean get() = rawDevelopment != RawDevelopmentMode.NEUTRAL || !rawAutoExposure || rawExposureEv != 0.0
+    fun requiresRawDevelopmentSource(source: SourceInfo?) = source?.kind == "raw" && noFilm &&
+        rawDevelopment == RawDevelopmentMode.STANDARD_V1 && !source.rawStatsReady
 
     fun withoutEffects() = copy(grainActive = false, halationActive = false, glareActive = false, unsharpAmount = 0.0)
 
@@ -651,4 +653,5 @@ data class SourceInfo(
     val wbK: Double = 0.0,
     val wbTint: Double = 0.0,
     val rawStatsBinned: Boolean = false,
+    val rawStatsReady: Boolean = false,
 )

@@ -78,6 +78,17 @@ class RawDevelopmentTest {
         assertFalse(edited.copy(exposureEv = 1.0).sameRenderInputAs(edited))
     }
 
+    @Test fun meteringIsRequiredOnlyForActiveRawDevelopment() {
+        val source = SourceInfo("test.dng", 1024, 768, 4096, 3072, "raw", "test", 0.0, 0.0, 0.0, 0.0)
+        assertTrue(edited.requiresRawDevelopmentSource(source))
+        assertTrue(edited.copy(rawAutoExposure = false).requiresRawDevelopmentSource(source))
+        assertFalse(edited.requiresRawDevelopmentSource(source.copy(rawStatsReady = true)))
+        assertFalse(edited.copy(noFilm = false).requiresRawDevelopmentSource(source))
+        assertFalse(Edit.NONE.requiresRawDevelopmentSource(source))
+        assertFalse(edited.requiresRawDevelopmentSource(source.copy(kind = "photo")))
+        assertFalse(edited.requiresRawDevelopmentSource(null))
+    }
+
     private fun assertIntent(expected: Edit, actual: Edit) {
         assertEquals(expected.rawDevelopment, actual.rawDevelopment)
         assertEquals(expected.rawAutoExposure, actual.rawAutoExposure)

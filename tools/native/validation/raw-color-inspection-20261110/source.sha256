@@ -1,0 +1,6 @@
+324863ca17d586607517e72c570f3487e91def22d4991dad7a308032d0bbde42  app/src/main/cpp/raw_development.cpp
+8199905c70305b1e002d4ec0c7942d90bd2c1a9562b2c008aab944bdbc128ce8  app/src/main/cpp/raw_development.hpp
+dbbbbcfb21defc4ddc27d889cd4b94c7afd3f8499c1c1778c2e3bb93ea9be051  app/src/main/cpp/spektralab_jni.cpp
+aaa05dce7056c7379ac3480e962229f51b43b50b5b8025f101040bb7fb5e36cd  app/src/main/java/com/dearded/spektralab/EditorViewModel.kt
+508af74b81851d42ed58b4fef1c973fab1d71f07fcf6aa0aa8ac0741eb572f6d  app/src/main/java/com/dearded/spektralab/DisplayColor.kt
+21e02d0f8ed2d20b47a4859457d058c6acbf092e8c6348381fd3253257e58e16  app/src/testDebug/java/com/dearded/spektralab/OutputColorTagTest.kt

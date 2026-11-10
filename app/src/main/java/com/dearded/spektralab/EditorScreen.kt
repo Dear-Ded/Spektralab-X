@@ -211,6 +211,11 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             DropdownMenuItem(text = { Text("JPEG · 分享尺寸（长边不超过 3400）") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
                             })
+                            for (target in listOf("sRGB", "Display P3")) {
+                                DropdownMenuItem(text = { Text("JPEG 颜色预览 · $target") },
+                                    enabled = !ui.loadingDetail && ui.busy == null,
+                                    onClick = { exportMenu = false; vm.loadExportProof(target) })
+                            }
                             DropdownMenuItem(text = { Text("16 位 TIFF · 工作尺寸") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL)
                             })
@@ -499,7 +504,12 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
         showChanges = false
     }) { showChanges = false }
     if (ui.showQueue) QueueSheet(jobs, vm::cancelJob, vm::retryJob, vm::clearFinishedJobs) { vm.showQueue(false) }
-    ui.detail?.let { DetailViewer(it, vm::closeDetail) }
+    ui.detail?.let {
+        val target = ui.detailTarget
+        DetailViewer(it, vm::closeDetail,
+            title = if (target == null) "1:1" else "JPEG 颜色预览 · $target",
+            note = if (target == null) null else "预览尺寸；不含纸框和 JPEG 压缩")
+    }
     UpdateDialog(editing = ui.hasImage)
 }
 

@@ -43,6 +43,14 @@ RawDevelopmentStats raw_development_stats(const float* linear_rgb, size_t stride
                                           uint32_t w, uint32_t h,
                                           const OutputCancel& cancel = {});
 
+// Returns whether the complete source was scanned, including an all-dark source
+// with no usable AE samples. Neutral and physical-film opens do not read pixels.
+// Failure leaves out unchanged; callers publish readiness only after success.
+bool prepare_raw_development_stats(const RawDevelopmentOptions& options, bool no_film,
+                                   const float* linear_rgb, size_t stride_px,
+                                   uint32_t w, uint32_t h, RawDevelopmentStats& out,
+                                   const OutputCancel& cancel = {});
+
 class RawDevelopment {
 public:
     static RawDevelopment build(const RawDevelopmentMetadata& metadata,

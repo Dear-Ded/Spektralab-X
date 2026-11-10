@@ -12,6 +12,8 @@ class EditHistory(private val settleMs: Long = 700L, private val capacity: Int =
 
     val canUndo get() = undo.isNotEmpty()
     val canRedo get() = redo.isNotEmpty()
+    val undoTarget: Edit? get() = undo.lastOrNull()
+    val redoTarget: Edit? get() = redo.lastOrNull()
 
     /** [before] -> [after] happened at [now] (uptime ms). */
     fun record(before: Edit, after: Edit, now: Long) {

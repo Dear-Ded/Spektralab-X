@@ -186,6 +186,40 @@ void frozen_plan_strip_and_thread_parity() {
     require(!std::memcmp(full.data(), strips.data(), full.size()*sizeof(float)), "strip/thread dependent development");
 }
 
+void lazy_statistics() {
+    RawDevelopmentStats out;
+    out.valid_pixels = 99;
+    // Null/invalid geometry must never reach the scanner on either bypass.
+    require(!prepare_raw_development_stats({}, true, nullptr, 0, 0, 0, out) &&
+            out.valid_pixels == 0 && !out.available, "neutral scanned pixels or kept stale statistics");
+    out.valid_pixels = 99;
+    require(!prepare_raw_development_stats({true,true,0}, false, nullptr, 0, 0, 0, out) &&
+            out.valid_pixels == 0 && !out.available, "physical film scanned pixels");
+    const float pixels[] = {.1f,.2f,.3f, 0,0,0};
+    const auto expected = raw_development_stats(pixels, 2, 2, 1);
+    require(prepare_raw_development_stats({true,false,0}, true, pixels, 2, 2, 1, out),
+            "standard with AE disabled did not prepare future AE statistics");
+    require(out.histogram == expected.histogram && out.log2_mean == expected.log2_mean &&
+            out.valid_pixels == expected.valid_pixels && out.dark_pixels == expected.dark_pixels &&
+            out.invalid_pixels == expected.invalid_pixels && out.available == expected.available,
+            "lazy statistics changed scanner result");
+    rejects([&] { prepare_raw_development_stats({true,true,0}, true, nullptr, 0, 0, 0, out); },
+            "enabled lazy scanner accepted invalid source");
+    require(out.histogram == expected.histogram && out.log2_mean == expected.log2_mean,
+            "failed lazy scan destroyed previous statistics");
+    std::atomic<uint64_t> generation{0};
+    OutputCancel token(generation);
+    ++generation;
+    bool cancelled = false;
+    try { prepare_raw_development_stats({true,true,0}, true, pixels, 2, 2, 1, out, token); }
+    catch (const std::runtime_error& e) { cancelled = std::string(e.what()) == "render cancelled"; }
+    require(cancelled && out.histogram == expected.histogram && out.log2_mean == expected.log2_mean,
+            "cancelled lazy scan published partial statistics");
+    const float black[] = {0,0,0};
+    require(prepare_raw_development_stats({true,true,0}, true, black, 1, 1, 1, out) &&
+            !out.available && out.dark_pixels == 1, "prepared all-black source confused with unscanned source");
+}
+
 void metadata_rejection_and_status() {
     auto m = identity();
     m.extra_camera_profiles = true;
@@ -219,8 +253,8 @@ void cancellation() {
 int main() {
     try {
         neutral_bypass(); technical_exposure_and_hdr(); fallback_curve(); embedded_shape();
-        whole_frame_statistics(); frozen_plan_strip_and_thread_parity(); metadata_rejection_and_status(); cancellation();
-        std::cout << "raw_development: 8 groups passed (synthetic; no Android acceptance)\n";
+        whole_frame_statistics(); frozen_plan_strip_and_thread_parity(); lazy_statistics(); metadata_rejection_and_status(); cancellation();
+        std::cout << "raw_development: 9 groups passed (synthetic; no Android acceptance)\n";
         return 0;
     } catch (const std::exception& e) {
         std::cerr << "raw_development: " << e.what() << '\n';
