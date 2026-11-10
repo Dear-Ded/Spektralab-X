@@ -110,7 +110,6 @@ class SourceLoader(private val context: Context) {
      */
     fun decodePhoto(uri: Uri, edge: Int, maxPixels: Long): Photo {
         val p3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
-        var space = "sRGB"
         var sourceWidth = 0
         var sourceHeight = 0
         val source = ImageDecoder.createSource(context.contentResolver, uri)
@@ -119,7 +118,7 @@ class SourceLoader(private val context: Context) {
             sourceHeight = info.size.height
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.setTargetColorSpace(
-                if (wideSource(info.colorSpace)) { space = "Display P3"; p3 } else ColorSpace.get(ColorSpace.Named.SRGB)
+                if (wideSource(info.colorSpace)) p3 else ColorSpace.get(ColorSpace.Named.SRGB)
             )
             val s = fitScale(info.size.width, info.size.height, edge, maxPixels)
             if (s < 1.0) decoder.setTargetSize(max(1, (info.size.width * s).toInt()), max(1, (info.size.height * s).toInt()))
@@ -127,22 +126,45 @@ class SourceLoader(private val context: Context) {
         // Taken before any rescale or copy: the gain map is sampled by
         // normalised position, so the base's final size does not matter.
         val gain = if (android.os.Build.VERSION.SDK_INT >= 34) GainmapReader.read(decoded) else null
-        // setTargetSize is a hint some decoders ignore (seen with DNG and very
-        // large HEIC in another port), so enforce both working-size limits.
-        var out = decoded
-        val s = fitScale(out.width, out.height, edge, maxPixels)
-        if (s < 1.0) {
-            val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
-            if (scaled !== out) out.recycle()
-            out = scaled
-        }
-        if (out.config == Bitmap.Config.ARGB_8888) return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
-        val copy = out.copy(Bitmap.Config.ARGB_8888, false)
-        out.recycle()
-        return Photo(copy ?: throw EngineException("无法转换图像格式"), space, gain?.first, gain?.second, sourceWidth, sourceHeight)
+        return preparePhoto(decoded, gain, edge, maxPixels, sourceWidth, sourceHeight)
     }
 
     companion object {
+        /** Owns decoder pixels until a validated photo takes them, including on failure. */
+        internal fun preparePhoto(decoded: Bitmap, gain: Pair<Bitmap, FloatArray>?, edge: Int, maxPixels: Long,
+                                  sourceWidth: Int, sourceHeight: Int): Photo {
+            var out = decoded
+            try {
+                // Enforce both limits on the actual decoder result, including providers
+                // whose decoder did not honour the requested working dimensions.
+                val s = fitScale(out.width, out.height, edge, maxPixels)
+                if (s < 1.0) {
+                    val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
+                    if (scaled !== out) out.recycle()
+                    out = scaled
+                }
+                if (out.config != Bitmap.Config.ARGB_8888) {
+                    val copy = out.copy(Bitmap.Config.ARGB_8888, false)
+                        ?: throw EngineException("无法转换图像格式")
+                    out.recycle()
+                    out = copy
+                }
+                // A requested ImageDecoder target is not a guarantee. Never label
+                // another transfer function or gamut as the engine's sRGB/P3 input.
+                val cs = out.colorSpace
+                val space = when {
+                    cs?.isSrgb == true -> "sRGB"
+                    cs == ColorSpace.get(ColorSpace.Named.DISPLAY_P3) -> "Display P3"
+                    else -> throw EngineException("无法转换图像色彩空间：${cs?.name ?: "unknown"}")
+                }
+                return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
+            } catch (failure: Throwable) {
+                out.recycle()
+                gain?.first?.recycle()
+                throw failure
+            }
+        }
+
         val RAW_EXTENSIONS = setOf(
             "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
             "srw", "x3f", "3fr", "iiq", "erf", "kdc", "mrw", "rwl", "raw", "mos", "mef", "dcr",

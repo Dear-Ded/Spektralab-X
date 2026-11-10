@@ -182,7 +182,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private var worker: Job? = null
     private var runner: kotlinx.coroutines.Deferred<String>? = null
     private val handleLock = Any()
-    private val grantLock = Any()
+    private val grantLock = SourceGrantLock.monitor
     @Volatile private var runningHandle = 0L
     @Volatile private var cancelRequested = -1L
     @Volatile private var pauseRequested = -1L
@@ -203,14 +203,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     fun enqueue(job: ProcessingJob) {
         // A contact sheet reads the light table's own frames (FrameStore holds their grants).
-        if (job.sheet) {
-            _jobs.update { it + job.copy(secured = true) }
+        synchronized(grantLock) {
+            _jobs.update { it + job.copy(secured = job.sheet) }
             persist()
+        }
+        if (job.sheet) {
             start()
             return
         }
-        _jobs.update { it + job.copy(secured = false) }
-        persist()
         host.scope.launch {
             val secured = withContext(Dispatchers.IO) {
                 // From the URI as the user picked it, while its grant is fresh: a
@@ -932,13 +932,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uri = Uri.parse(job.uri)
         if (uri.scheme == "file") return job
         val resolver = app.contentResolver
-        val held = resolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
-        if (held || runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess) {
-            synchronized(grantLock) {
+        val persisted = synchronized(grantLock) {
+            val held = resolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
+            if (held || runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess) {
                 prefs.edit().putStringSet("grants", HashSet(prefs.getStringSet("grants", emptySet()).orEmpty()) + job.uri).apply()
-            }
-            return job.copy(persisted = true)
+                true
+            } else false
         }
+        if (persisted) return job.copy(persisted = true)
         return runCatching {
             sourcesDir.mkdirs()
             val safe = job.name.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80).ifEmpty { "source" }
@@ -1025,8 +1026,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val uris = needed.filter { it.persisted || !it.secured }.map { it.uri }.toSet()
         val held = prefs.getStringSet("grants", emptySet()).orEmpty().toSet()
         val keep = held.filter { it in uris }.toSet()
+        val editorUri = app.getSharedPreferences("settings", 0).getString("editor_grant", null)
+        val frames = FrameStore.of(app)
         for (u in held - keep) {
-            runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            // Persisted grants belong to the app, not to each take() call.
+            // Hand ownership back without leaving a stale queue reference.
+            if (u != editorUri && !frames.holds(u)) {
+                runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            }
         }
         if (keep.size != held.size) prefs.edit().putStringSet("grants", keep).apply()
     }

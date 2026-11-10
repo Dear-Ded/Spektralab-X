@@ -1136,15 +1136,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      */
     private fun holdGrant(uri: Uri) {
         if (uri.scheme != "content") return
-        val resolver = app.contentResolver
-        val took = runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess
-        val previous = prefs.getString("editor_grant", null)
-        if (previous != null && previous != uri.toString()) {
-            val queued = app.getSharedPreferences("processing", 0).getStringSet("grants", emptySet()).orEmpty()
-            if (previous !in queued && !FrameStore.of(app).holds(previous))
-                runCatching { resolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        synchronized(SourceGrantLock.monitor) {
+            val resolver = app.contentResolver
+            val took = runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }.isSuccess
+            val previous = prefs.getString("editor_grant", null)
+            if (previous != null && previous != uri.toString()) {
+                val queued = app.getSharedPreferences("processing", 0).getStringSet("grants", emptySet()).orEmpty()
+                if (previous !in queued && !FrameStore.of(app).holds(previous))
+                    runCatching { resolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            }
+            prefs.edit().putString("editor_grant", if (took) uri.toString() else null).apply()
         }
-        prefs.edit().putString("editor_grant", if (took) uri.toString() else null).apply()
     }
 
     /** A photo has been opened in this process, so [wanted] already holds the last pair. */

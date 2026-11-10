@@ -3,7 +3,10 @@ package com.dearded.spektralab
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.ColorSpace
+import android.graphics.Paint
+import android.graphics.Rect
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -70,7 +73,7 @@ object FilmThumbs {
     private fun sizeFor(px: Int) = if (px <= 256) 256 else 512
 
     private fun keyOf(frame: Frame, edit: Edit, px: Int): String {
-        val text = "lut-v2|${frame.id}|$px|${edit.toJson()}|${edit.look.toJson()}"
+        val text = "lut-v3|${frame.id}|$px|${edit.toJson()}|${edit.look.toJson()}"
         return MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).take(12).joinToString("") { "%02x".format(it) }
     }
 
@@ -155,40 +158,66 @@ object FilmThumbs {
 
     private suspend fun develop(app: Context, host: EngineHost, r: Request): Bitmap? {
         val thumb = Thumbnails.load(app, r.frame, r.px) ?: return null
-        // Our own software copy at the request's size: the cached thumbnail is shared,
-        // and the session takes (and recycles) the bitmap it opens on.
-        val copy = withContext(Dispatchers.Default) {
-            val long = max(thumb.width, thumb.height)
-            val scaled = if (long > r.px) {
-                val s = r.px.toFloat() / long
-                Bitmap.createScaledBitmap(thumb, max(1, (thumb.width * s).toInt()), max(1, (thumb.height * s).toInt()), true)
-            } else thumb
-            val soft = scaled.copy(Bitmap.Config.ARGB_8888, false)
-            if (scaled !== thumb) scaled.recycle()
-            soft
-        } ?: return null
-        val space = if (copy.colorSpace == ColorSpace.get(ColorSpace.Named.DISPLAY_P3)) "Display P3" else "sRGB"
-        val ready = host.start(r.edit.film, r.edit.paper)
-        val edit = ready.catalog.normalize(r.edit)
-        val out = withContext(EngineThread.dispatcher) {
-            val opened = openPhotoSession(ready.engine, Photo(copy, space), 0f) { s, linear ->
-                Edit.openingParams(edit, inputSpace = s, linear = linear).toString()
+        var photo: Photo? = null
+        var output: Bitmap? = null
+        try {
+            // Assign inside the dispatcher so prompt cancellation cannot lose the owned copy.
+            withContext(Dispatchers.Default) { photo = prepareSource(thumb, r.px) }
+            val ready = host.start(r.edit.film, r.edit.paper)
+            val edit = ready.catalog.normalize(r.edit)
+            withContext(EngineThread.dispatcher) {
+                val input = checkNotNull(photo)
+                photo = null // openPhotoSession owns and recycles it from here, including on failure.
+                val opened = openPhotoSession(ready.engine, input, 0f) { s, linear ->
+                    Edit.openingParams(edit, inputSpace = s, linear = linear).toString()
+                }
+                val h = opened.handle
+                if (h == 0L) return@withContext
+                try {
+                    if (!NativeEngine.setOutput(h, DisplayColor.space, false))
+                        throw EngineException("缩略图输出设置失败：${NativeEngine.lastError()}")
+                    UserLibrary.get(app).applyLut(h, edit.look, null)
+                    if (!NativeEngine.setLook(h, if (edit.look.neutral) null else edit.look.values()))
+                        throw EngineException("缩略图调整失败：${NativeEngine.lastError()}")
+                    output = NativeEngine.renderBitmap(h, "full")
+                    output?.let(DisplayColor::tag)
+                } finally {
+                    NativeEngine.release(h)
+                }
             }
-            val h = opened.handle
-            if (h == 0L) return@withContext null
-            try {
-                if (!NativeEngine.setOutput(h, DisplayColor.space, false))
-                    throw EngineException("缩略图输出设置失败：${NativeEngine.lastError()}")
-                UserLibrary.get(app).applyLut(h, edit.look, null)
-                if (!NativeEngine.setLook(h, if (edit.look.neutral) null else edit.look.values()))
-                    throw EngineException("缩略图调整失败：${NativeEngine.lastError()}")
-                NativeEngine.renderBitmap(h, "full")?.also(DisplayColor::tag)
-            } finally {
-                NativeEngine.release(h)
-            }
+            val out = output
+            if (out != null) withContext(Dispatchers.IO) { writeDisk(app, r.key, out) }
+            output = null // The worker takes ownership after the final cancellable dispatcher hop.
+            return out
+        } finally {
+            photo?.recycle()
+            output?.recycle()
         }
-        if (out != null) withContext(Dispatchers.IO) { writeDisk(app, r.key, out) }
-        return out
+    }
+
+    /** The shared thumbnail may use any ICC space; native input accepts only sRGB or P3. */
+    internal fun prepareSource(thumb: Bitmap, px: Int): Photo {
+        require(px > 0)
+        val wide = SourceLoader.wideSource(thumb.colorSpace)
+        val target = ColorSpace.get(if (wide) ColorSpace.Named.DISPLAY_P3 else ColorSpace.Named.SRGB)
+        val scale = min(1f, px.toFloat() / max(thumb.width, thumb.height))
+        val width = max(1, (thumb.width * scale).toInt())
+        val height = max(1, (thumb.height * scale).toInt())
+        // Software Canvas cannot read HARDWARE. Preserve its range until the colour conversion.
+        val source = if (thumb.config == Bitmap.Config.HARDWARE)
+            checkNotNull(thumb.copy(Bitmap.Config.RGBA_F16, false)) else thumb
+        try {
+            val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888, thumb.hasAlpha(), target)
+            try {
+                Canvas(out).drawBitmap(source, null, Rect(0, 0, width, height), Paint(Paint.FILTER_BITMAP_FLAG))
+                return Photo(out, if (wide) "Display P3" else "sRGB")
+            } catch (failure: Throwable) {
+                out.recycle()
+                throw failure
+            }
+        } finally {
+            if (source !== thumb) source.recycle()
+        }
     }
 
     // --- disk cache: cache/FilmThumbs, oldest dropped past DISK_CAP -----------------

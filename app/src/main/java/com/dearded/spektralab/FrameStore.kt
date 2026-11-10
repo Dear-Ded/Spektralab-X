@@ -139,7 +139,7 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
 class FrameStore private constructor(private val context: Context) {
     private val dir = File(context.filesDir, "Sidecars")
     private val indexFile = File(dir, "index.json")
-    private val lock = Any()
+    private val lock = SourceGrantLock.monitor
     private val _frames = MutableStateFlow<List<Frame>>(emptyList())
     val frames: StateFlow<List<Frame>> = _frames
     @Volatile private var loaded = false
@@ -189,7 +189,12 @@ class FrameStore private constructor(private val context: Context) {
         synchronized(lock) {
             val byId = LinkedHashMap<String, Frame>()
             _frames.value.forEach { byId[it.id] = it }
-            for (f in incoming) {
+            for (described in incoming) {
+                val persisted = described.persisted || runCatching {
+                    context.contentResolver.takePersistableUriPermission(
+                        Uri.parse(described.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }.isSuccess
+                val f = described.copy(persisted = persisted)
                 val old = byId[f.id]
                 if (old == null) {
                     // A sidecar left by an earlier removal still belongs to this photo.
@@ -243,13 +248,10 @@ class FrameStore private constructor(private val context: Context) {
         }
         if (rotation % 180 != 0) { val t = w; w = h; h = t }
         val exif = ExifCopy.read(context, uri)
-        val persisted = uri.scheme == "file" || runCatching {
-            r.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }.isSuccess
         return Frame(
             id = Frame.idOf(name, size, date), uri = uri.toString(), name = name, size = size, date = date,
             mime = mime, raw = raw, width = w.coerceAtLeast(0), height = h.coerceAtLeast(0),
-            exifDate = exif.dateTimeOriginal.orEmpty(), persisted = persisted,
+            exifDate = exif.dateTimeOriginal.orEmpty(), persisted = uri.scheme == "file",
         )
     }
 
@@ -280,13 +282,16 @@ class FrameStore private constructor(private val context: Context) {
 
     /**
      * Takes [ids] off the table. Their sidecars stay (a re-import finds them);
-     * a grant goes back unless another frame or an unfinished export uses it.
+     * a grant goes back unless another frame, the editor or an unfinished export uses it.
+     * [inUse] is read under the grant lock, together with queue owner publication.
      */
-    fun remove(ids: Set<String>, inUse: Set<String>): Unit = synchronized(lock) {
+    fun remove(ids: Set<String>, inUse: () -> Set<String>): Unit = synchronized(lock) {
+        load()
         val gone = _frames.value.filter { it.id in ids }
         _frames.update { list -> list.filter { it.id !in ids } }
         writeIndex()
-        val still = _frames.value.map { it.uri }.toSet() + inUse
+        val editorUri = context.getSharedPreferences("settings", 0).getString("editor_grant", null)
+        val still = _frames.value.map { it.uri }.toSet() + inUse() + listOfNotNull(editorUri)
         for (f in gone) if (f.uri !in still && Uri.parse(f.uri).scheme != "file") {
             runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(f.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         }

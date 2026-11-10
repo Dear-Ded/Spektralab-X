@@ -220,8 +220,11 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun removeSelected() {
         val ids = _state.value.selection
         if (ids.isEmpty()) return
-        val inUse = host.queue.jobs.value.filter { it.state != JobState.DONE }.map { it.uri }.toSet()
-        viewModelScope.launch(Dispatchers.IO) { store.remove(ids, inUse) }
+        viewModelScope.launch(Dispatchers.IO) {
+            store.remove(ids) {
+                host.queue.jobs.value.filter { it.state != JobState.DONE }.map { it.uri }.toSet()
+            }
+        }
         _state.update { it.copy(selection = emptySet()) }
         show("已从观片台移走 ${ids.size} 张（编辑记录保留）")
     }
