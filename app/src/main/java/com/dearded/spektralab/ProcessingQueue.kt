@@ -31,10 +31,10 @@ import kotlin.math.roundToInt
 enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 
 /** The pre-save check found a frame no photo produces ([what]: 全黑, 全白, 纯色); nothing was saved. */
-class BlankFrameException(val what: String) : Exception("导出画面异常（$what），未保存")
+class BlankFrameException(val what: String) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, "导出画面异常（$what），未保存"))
 
 /** The engine could not allocate (native heap or GPU memory); retried a size down like a Java OutOfMemoryError. */
-class OutOfMemoryException(detail: String) : Exception("内存不足：$detail")
+class OutOfMemoryException(detail: String) : Exception(ErrorCodes.format(ErrorCodes.OUT_OF_MEMORY, "内存不足：$detail"))
 
 /**
  * One export: a snapshot of the photo and its whole edit, so the editor is
