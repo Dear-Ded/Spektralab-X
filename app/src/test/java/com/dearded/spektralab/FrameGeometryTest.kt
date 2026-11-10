@@ -151,7 +151,7 @@ class FrameGeometryTest {
 
         // The photo position should not be affected by keyline/gap - those are drawn around it
         val layout = frame.layout(imageW, imageH)
-        val scale = containerW / layout.width.coerceAtLeast(1f)
+        val scale = containerW / layout.width.coerceAtLeast(1)
         val cardOffsetY = (containerH - layout.height * scale) / 2f
         val photoLeft = layout.x * scale
         val photoTop = cardOffsetY + layout.y * scale
@@ -248,9 +248,14 @@ class FrameGeometryTest {
         // 4240 / newHeight = 9/16 → newHeight = 4240 * 16/9 = 7538
         assertEquals(7538, layout.height)
 
-        val scale = containerW / layout.width.coerceAtLeast(1f)
+        // Height is the tighter fit once the square print is padded out to 9:16.
+        val scale = minOf(
+            containerW / layout.width.coerceAtLeast(1),
+            containerH / layout.height.coerceAtLeast(1),
+        )
+        val cardOffsetX = (containerW - layout.width * scale) / 2f
         val cardOffsetY = (containerH - layout.height * scale) / 2f
-        val photoLeft = layout.x * scale
+        val photoLeft = cardOffsetX + layout.x * scale
         val photoTop = cardOffsetY + layout.y * scale
 
         assertRectEquals(

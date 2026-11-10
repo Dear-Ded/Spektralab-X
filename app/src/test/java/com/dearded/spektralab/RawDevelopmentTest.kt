@@ -27,7 +27,7 @@ class RawDevelopmentTest {
         val sidecar = Sidecar.fromJson(JSONObject(Sidecar(edited).toJson(frame).toString()))!!.edit
         assertIntent(edited, sidecar)
         val job = ProcessingJob(1, frame.uri, frame.name, true, edited.toJson().toString(), 0.0, 0.0,
-            ExportFormat.JPEG, ExportSize.FULL, 0, 24_000_000, 24_000_000)
+            ExportFormat.JPEG, ExportSize.FULL, workingEdge = 0, maxPixels = 24_000_000, outPixels = 24_000_000)
         val restored = ProcessingJob.fromJson(JSONObject(job.toJson().toString()))!!
         assertIntent(edited, Edit.fromParams(JSONObject(restored.editJson), Edit()))
     }

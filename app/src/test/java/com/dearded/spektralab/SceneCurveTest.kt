@@ -130,7 +130,7 @@ class SceneCurveTest {
     @Test fun queueSnapshotPreservesTheActualExportTable() {
         val edit = Edit(sceneCurve = SceneCurve.fromWire(sampled(4096)))
         val job = ProcessingJob(1, frame.uri, frame.name, true, edit.toJson().toString(), 0.0, 0.0,
-            ExportFormat.JPEG, ExportSize.FULL, 0, 24_000_000, 24_000_000)
+            ExportFormat.JPEG, ExportSize.FULL, workingEdge = 0, maxPixels = 24_000_000, outPixels = 24_000_000)
         val restored = ProcessingJob.fromJson(JSONObject(job.toJson().toString()))!!
         assertEquals(edit.sceneCurve.wire, Edit.fromParams(JSONObject(restored.editJson), Edit()).sceneCurve.wire)
     }

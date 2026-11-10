@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -317,7 +318,11 @@ fun Expandable(
         exit = fadeOut(Motion.fastEffects()) + shrinkVertically(SizeSpring, shrinkTowards = Alignment.Top),
         label = "expandable",
     ) {
-        Column(verticalArrangement = verticalArrangement, content = content)
+        // This open/close transition is the AnimatedVisibilityScope shared bounds
+        // in the content read through LocalNavScope (Styles.kt).
+        CompositionLocalProvider(LocalNavScope provides this) {
+            Column(verticalArrangement = verticalArrangement, content = content)
+        }
     }
 }
 

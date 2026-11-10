@@ -757,6 +757,8 @@ private fun Controls(
                 transitionSpec = { directionalSwap(targetState > initialState) },
                 label = "tab",
             ) { page ->
+            // This page is the AnimatedVisibilityScope shared frames read (LocalNavScope).
+            androidx.compose.runtime.CompositionLocalProvider(LocalNavScope provides this) {
             Column(
                 // UI2.md 7.2 point 1: rows 12 dp apart, groups 20; no dividers.
                 Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp),
@@ -1226,6 +1228,7 @@ private fun Controls(
                         SwitchRow("水平翻转", e.flipH, enabled) { vm.update(e.copy(flipH = it)) }
                         }
                     }
+            }
             }
             }
             }
