@@ -11,8 +11,8 @@
 //   -> tone curves -> HSL (8 bands) -> fade -> vignette
 //
 // Vibrance, the HSL bands and fade are this port's additions. The integer
-// film path follows upstream's arithmetic; no-film float corrects exposure
-// for the actual transfer and bounds SDR tone weights. It runs on the engine's
+// film path retains upstream's exposure arithmetic; no-film float corrects
+// exposure for the actual transfer. Both bound SDR tone weights. It runs on the engine's
 // encoded ProPhoto output, before the output transform, and pivots on
 // ProPhoto's encoded mid-grey (0.3857, upstream's `proPhotoMidGrey`).
 #pragma once

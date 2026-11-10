@@ -228,9 +228,9 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& 
             x = bright_lut_[i] + (bright_lut_[i + 1] - bright_lut_[i]) * (p - i);
         }
     }
-    float l = tone_position(luma(c[0], c[1], c[2]));
-    // These SDR tone weights must not grow quadratically with HDR pixels.
-    if (unquantised) l = saturate(l);
+    // Even SDR film codes can exceed white after exposure or contrast.
+    // Bound the tone weights, while retaining the pixels' highlight headroom.
+    float l = saturate(tone_position(luma(c[0], c[1], c[2])));
     if (shadows_ != 0) {
         const float w = (1 - l) * (1 - l);
         for (float& x : c) x += shadows_ * 0.25f * w * (1 - x);

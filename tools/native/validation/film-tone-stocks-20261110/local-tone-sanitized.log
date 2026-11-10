@@ -1,0 +1,3 @@
+local recovered channels: 6 masked HDR/signed cases passed
+local ordinary domain: 36873 RGB triplets byte-identical
+local bounded weights: 524 parsed integer/float mask cases passed

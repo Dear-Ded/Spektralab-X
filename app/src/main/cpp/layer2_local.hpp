@@ -163,8 +163,7 @@ struct Tone {
         }
         if (bright != 0)
             for (int i = 0; i < 3; ++i) c[i] = std::pow(std::max(0.0f, c[i]), bright_e);
-        const float position = tone_position(luma(c));
-        const float l = unquantised ? sat01(position) : position;
+        const float l = sat01(tone_position(luma(c)));
         if (shadows != 0) {
             const float w = (1 - l) * (1 - l);
             for (int i = 0; i < 3; ++i) c[i] += shadows * 0.25f * w * (1 - c[i]);

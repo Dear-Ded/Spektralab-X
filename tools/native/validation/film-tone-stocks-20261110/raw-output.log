@@ -1,0 +1,1 @@
+RAW_DEVELOPMENT_OUTPUT_PASS cases=96 targets=sRGB,P3 transforms=display,export bitdepths=8,16 steps=1,3,32,65 whole_rows=equal borrowed8=equal neutral_legacy=equal source=immutable HDR=restored cancelled=recovered exposed_highlights=monotonic_8_and_16

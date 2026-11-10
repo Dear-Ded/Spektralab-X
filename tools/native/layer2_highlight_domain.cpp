@@ -15,10 +15,11 @@ int main(int argc, char** argv) {
     using namespace spk::android;
     const bool require_monotonic = argc == 2 && std::string_view(argv[1]) == "--require-monotonic";
     unsigned reversals = 0, negative_highlights = 0, parity_failures = 0;
-    unsigned legacy_failures = 0, sdr_zero_ev_failures = 0, hdr_shadow_failures = 0;
+    unsigned legacy_domain_failures = 0, sdr_zero_ev_failures = 0, hdr_shadow_failures = 0;
     unsigned signed_highlight_failures = 0, channel_ratio_failures = 0;
+    unsigned integer_cases = 0, float_cases = 0;
     std::cout << std::setprecision(10);
-    for (float ev : {0.0f, 3.0f}) {
+    for (bool unquantised : {false, true}) for (float ev : {0.0f, 3.0f}) {
         std::vector<float> values(kLookSize, 0.0f);
         values[kExposure] = ev;
         values[kHighlights] = -100.0f;
@@ -27,10 +28,13 @@ int main(int argc, char** argv) {
         local::Tone local_tone(params);
         float previous = -1.0f;
         for (double linear : {0.0, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0}) {
+            // Film enters as RGBA16. Its legal positive exposure alone must
+            // not make brighter source codes reverse or become black.
+            if (!unquantised && linear > 1.0) continue;
             const float encoded = float(linear < 1.0 / 512 ? 16 * linear : std::pow(linear, 1.0 / 1.8));
             std::array<float, 3> c{encoded, encoded, encoded}, masked = c;
-            global.apply(c[0], c[1], c[2], .5f, .5f, {}, true);
-            local_tone.apply(masked.data(), true);
+            global.apply(c[0], c[1], c[2], .5f, .5f, {}, unquantised);
+            local_tone.apply(masked.data(), unquantised);
             float legacy = ev == 0 ? encoded : std::max(0.0f, encoded) * std::pow(2.0f, ev / 2.2f);
             const float legacy_luma = .2126f * legacy + .7152f * legacy + .0722f * legacy;
             const float position = legacy_luma <= .3857f ? .5f * legacy_luma / .3857f
@@ -39,28 +43,35 @@ int main(int argc, char** argv) {
             std::array<float, 3> old{encoded, encoded, encoded}, old_mask = old;
             global.apply(old[0], old[1], old[2], .5f, .5f, {}, false);
             local_tone.apply(old_mask.data(), false);
-            if (old[0] != legacy || old_mask[0] != legacy) ++legacy_failures;
+            if (position >= 0 && position <= 1 && (old[0] != legacy || old_mask[0] != legacy)) ++legacy_domain_failures;
             if (ev == 0 && linear <= 1 && c[0] != legacy) ++sdr_zero_ev_failures;
             const float packed = std::clamp(c[0], 0.0f, 1.0f);
             if (packed + 1e-6 < previous) ++reversals;
             if (c[0] < 0.0f) ++negative_highlights;
             if (std::abs(c[0] - masked[0]) > 1e-5f) ++parity_failures;
+            unquantised ? ++float_cases : ++integer_cases;
             previous = packed;
-            std::cout << "ev=" << ev << " highlights=-100 linear_in=" << linear
+            std::cout << "float=" << unquantised << " ev=" << ev << " highlights=-100 linear_in=" << linear
                       << " encoded_out=" << c[0] << " after_pack_clamp=" << packed << '\n';
         }
     }
-    for (float shadows : {-100.0f, 100.0f}) {
+    for (bool unquantised : {false, true}) for (float shadows : {-100.0f, 100.0f}) {
         std::vector<float> values(kLookSize, 0.0f);
+        values[kExposure] = 3;
+        const Layer2 exposure_only(values);
         values[kShadows] = shadows;
         Layer2 global(values);
-        const float params[10] = {0, 0, 0, 0, 0, shadows, 0, 0, 0, 0};
+        const float params[10] = {3, 0, 0, 0, 0, shadows, 0, 0, 0, 0};
         local::Tone local_tone(params);
-        for (float encoded : {1.0f, 2.0f, 4.0f, 8.0f}) {
-            std::array<float, 3> c{encoded, encoded, encoded}, masked = c;
-            global.apply(c[0], c[1], c[2], .5f, .5f, {}, true);
-            local_tone.apply(masked.data(), true);
-            if (c[0] != encoded || masked[0] != encoded) ++hdr_shadow_failures;
+        for (float encoded : {.5f, .75f, 1.0f, 2.0f, 4.0f, 8.0f}) {
+            if (!unquantised && encoded > 1.0f) continue;
+            std::array<float, 3> c{encoded, encoded, encoded}, masked = c, exposed = c;
+            exposure_only.apply(exposed[0], exposed[1], exposed[2], .5f, .5f, {}, unquantised);
+            global.apply(c[0], c[1], c[2], .5f, .5f, {}, unquantised);
+            local_tone.apply(masked.data(), unquantised);
+            // A shadow-only control must leave already-white light alone.
+            // Compare to exposure alone, without reproducing its tone formula.
+            if (exposed[0] <= 1 || c != exposed || masked != exposed) ++hdr_shadow_failures;
         }
     }
     {
@@ -85,10 +96,11 @@ int main(int argc, char** argv) {
         }
     }
     std::cout << "ramp_reversals=" << reversals << " negative_highlights=" << negative_highlights
-              << " global_local_parity_failures=" << parity_failures << " legacy_failures=" << legacy_failures
+              << " global_local_parity_failures=" << parity_failures << " legacy_domain_failures=" << legacy_domain_failures
               << " sdr_zero_ev_failures=" << sdr_zero_ev_failures << " hdr_shadow_failures=" << hdr_shadow_failures
-              << " signed_highlight_failures=" << signed_highlight_failures << " channel_ratio_failures=" << channel_ratio_failures << '\n';
-    return parity_failures || legacy_failures || sdr_zero_ev_failures ||
+              << " signed_highlight_failures=" << signed_highlight_failures << " channel_ratio_failures=" << channel_ratio_failures
+              << " integer_cases=" << integer_cases << " float_cases=" << float_cases << '\n';
+    return parity_failures || legacy_domain_failures || sdr_zero_ev_failures ||
         (require_monotonic && (reversals || negative_highlights || hdr_shadow_failures ||
                               signed_highlight_failures || channel_ratio_failures)) ? 1 : 0;
 }

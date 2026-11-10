@@ -80,9 +80,50 @@ void preserved_domain() {
         }
     std::cout << "local ordinary domain: " << cases << " RGB triplets byte-identical\n";
 }
+
+void bounded_mask_weights() {
+    size_t cases = 0;
+    // Exercise the complete mask parser and full-coverage blend, not just
+    // local::Tone. All inputs are legal RGBA16 codes before positive exposure.
+    for (bool unquantised : {false, true}) {
+        std::array<float, 10> controls{};
+        controls[0] = 3;
+        const Layer2 exposure_only(masked(controls));
+        const auto frame = exposure_only.frame(17, 13);
+        require(bool(frame.placed), "tone-weight fixture missed mask parser");
+        controls[4] = -100;
+        const Layer2 highlights(masked(controls));
+        float previous = -1;
+        for (unsigned code = 0; code <= 65535; code += 257) {
+            const float input = float(code) / 65535;
+            float r = input, g = input, b = input;
+            highlights.apply(r, g, b, .5f, .5f, frame, unquantised);
+            require(std::isfinite(r) && r >= 0 && r + 1e-6f >= previous,
+                    "legal mask exposure/highlights reversed bright light");
+            require(std::abs(r - g) < 2e-6f && std::abs(r - b) < 2e-6f,
+                    "mask highlights introduced a gray hue");
+            previous = r;
+            ++cases;
+        }
+        require(previous >= .75f, "mask turned exposed white dark");
+        controls[4] = 0;
+        for (float shadows : {-100.f, 100.f}) {
+            controls[5] = shadows;
+            const Layer2 shadow_layer(masked(controls));
+            for (float input : {.5f, .75f, 1.f}) {
+                std::array<float, 3> expected{input, input, input}, got = expected;
+                exposure_only.apply(expected[0], expected[1], expected[2], .5f, .5f, frame, unquantised);
+                shadow_layer.apply(got[0], got[1], got[2], .5f, .5f, frame, unquantised);
+                require(expected[0] > 1 && got == expected, "mask shadow control changed already-white light");
+                ++cases;
+            }
+        }
+    }
+    std::cout << "local bounded weights: " << cases << " parsed integer/float mask cases passed\n";
+}
 }
 
 int main() {
-    try { recovered_channels(); preserved_domain(); return 0; }
+    try { recovered_channels(); preserved_domain(); bounded_mask_weights(); return 0; }
     catch (const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
 }

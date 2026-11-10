@@ -18,7 +18,10 @@ negative and produce black output. The weights are now bounded to `[0,1]`;
 the pixels themselves retain signed/HDR headroom until the existing packing
 boundary. Global and local masks use the same rules.
 
-Integer film-grade arithmetic is unchanged. No-film edits with nonzero EV or
+Integer film exposure retains its legacy arithmetic. The subsequent
+[film and stock-state fixes](RAW_FILM_STATE_FIXES_2026-11-10.md) also bound the
+integer film tone weights; the initial correction covered no-film float only.
+No-film edits with nonzero EV or
 out-of-range tone weights deliberately render differently after this correction.
 The neutral RAW default and the scene-linear physical-film input are unchanged.
 

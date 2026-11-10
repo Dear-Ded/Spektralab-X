@@ -501,9 +501,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private fun rememberPair(current: Edit, edit: Edit) {
         if (edit.film != current.film || edit.paper != current.paper || edit.noFilm != current.noFilm ||
-            edit.digitalIntermediate != current.digitalIntermediate)
+            edit.digitalIntermediate != current.digitalIntermediate || edit.scanFilm != current.scanFilm)
             prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper)
-                .putBoolean("last_no_film", edit.noFilm).putBoolean("last_di", edit.digitalIntermediate).apply()
+                .putBoolean("last_no_film", edit.noFilm).putBoolean("last_di", edit.digitalIntermediate)
+                .putBoolean("last_scan_film", edit.scanFilm).apply()
     }
 
     private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, moveHistory: (() -> Unit)? = null) {
@@ -1184,16 +1185,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // first photo after a restart takes the pair recorded by applyEdit.
         val remember = mode == NEW_REMEMBER
         if (remember && lastOpenedAny) return e
-        val wantFilm = if (remember) prefs.getString("last_film", "").orEmpty() else _ui.value.defaultFilm
-        val wantPaper = if (remember) prefs.getString("last_paper", "").orEmpty() else _ui.value.defaultPaper
-        val film = catalog.film(wantFilm) ?: return e
-        val next = withFilm(e, catalog, film.id) ?: return e
-        val paper = catalog.paper(wantPaper)
-        val paired = if (paper != null && paper.bw == film.bw) catalog.normalize(next.copy(paper = paper.id)) else next
-        // A fixed pair is a film and a paper; remembering also brings back a last 无.
-        return if (!remember) paired
-               else catalog.normalize(paired.copy(noFilm = prefs.getBoolean("last_no_film", false),
-                   digitalIntermediate = prefs.getBoolean("last_di", false)))
+        if (!remember) return withFixedStocks(e, catalog, _ui.value.defaultFilm, _ui.value.defaultPaper) ?: e
+        val wantFilm = prefs.getString("last_film", "").orEmpty()
+        val wantPaper = prefs.getString("last_paper", "").orEmpty()
+        return withRememberedStocks(e, catalog, wantFilm, wantPaper,
+            prefs.getBoolean("last_no_film", false), prefs.getBoolean("last_di", false),
+            if (prefs.contains("last_scan_film")) prefs.getBoolean("last_scan_film", false) else null) ?: e
     }
 
     fun setWorkingEdge(edge: Int) {
@@ -1295,6 +1292,28 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val di = !film.positive && !film.bw && (edit.digitalIntermediate || edit.scanFilm)
             return catalog.normalize(edit.copy(film = id, scanFilm = film.positive, paper = paper,
                 noFilm = false, digitalIntermediate = di))
+        }
+
+        /** A fixed film/paper pair prints on that paper, just like picking it by hand. */
+        internal fun withFixedStocks(edit: Edit, catalog: Catalog, filmId: String, paperId: String): Edit? {
+            val film = catalog.film(filmId) ?: return null
+            val next = withFilm(edit, catalog, filmId) ?: return null
+            val paper = catalog.paper(paperId)
+                ?.takeIf { it.bw == film.bw }
+                ?: catalog.paper(next.paper)?.takeIf { it.bw == film.bw }
+                ?: return next
+            return catalog.normalize(next.copy(paper = paper.id, scanFilm = false, digitalIntermediate = false))
+        }
+
+        /** Restart restores the selected print/scan intent, not only the stock names. */
+        internal fun withRememberedStocks(edit: Edit, catalog: Catalog, filmId: String, paperId: String,
+                                          noFilm: Boolean, di: Boolean, scan: Boolean?): Edit? {
+            val film = catalog.film(filmId) ?: return null
+            val next = withFilm(edit, catalog, filmId) ?: return null
+            val paper = catalog.paper(paperId)
+            val paired = if (paper != null && paper.bw == film.bw) next.copy(paper = paper.id) else next
+            return catalog.normalize(paired.copy(noFilm = noFilm, digitalIntermediate = di,
+                scanFilm = scan ?: paired.scanFilm))
         }
 
         const val NEW_NONE = "none"
