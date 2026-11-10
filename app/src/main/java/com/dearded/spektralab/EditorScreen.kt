@@ -564,8 +564,10 @@ private fun Preview(
                         scaleX = scale; scaleY = scale
                         translationX = offset.x; translationY = offset.y
                     }
-            // The original is shown bare; the print gets its paper frame.
-            val frame = if (holding && ui.before != null) FrameSpec() else ui.edit.frame
+            // When comparing with border enabled, original and print must align pixel-perfect.
+            // Pass the real frame to maintain identical photo positioning, but suppress decoration.
+            val frame = ui.edit.frame
+            val showFrameDecoration = !(holding && ui.before != null)
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
@@ -590,10 +592,10 @@ private fun Preview(
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 val under = back
                 if (under != null) {
-                    FramedImage(under, frame, caption, Modifier.fillMaxSize())
-                    FramedImage(front, frame, caption, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
+                    FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
+                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
                 } else {
-                    FramedImage(bitmap, frame, caption, Modifier.fillMaxSize())
+                    FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
                 }
                 if (!holding) MaskOverlay(ui, Modifier.fillMaxSize())   // edit-effects: mask handles and brush (MaskPanel.kt)
             }
@@ -1465,6 +1467,7 @@ private fun FramedImage(
     bitmap: androidx.compose.ui.graphics.ImageBitmap,
     frame: FrameSpec,
     caption: Caption,
+    showDecoration: Boolean,
     modifier: Modifier,
 ) {
     if (frame.isNone) {
@@ -1477,11 +1480,19 @@ private fun FramedImage(
         val k = minOf(size.width / l.width, size.height / l.height)
         val ox = (size.width - l.width * k) / 2f
         val oy = (size.height - l.height * k) / 2f
-        // The export's own drawing, scaled to the screen: paper or blur, strips, print, hairline, text.
         drawIntoCanvas { c ->
             val n = c.nativeCanvas
             n.save(); n.translate(ox, oy); n.scale(k, k)
-            FrameSpec.drawCard(n, frame, l, android, caption)
+            if (showDecoration) {
+                // Full card: paper or blur, strips, print, hairline, text.
+                FrameSpec.drawCard(n, frame, l, android, caption)
+            } else {
+                // Compare mode: draw only the photo itself, aligned to where it would be with the frame.
+                // The photo rect within the card is at (l.x, l.y).
+                val dst = android.graphics.RectF(l.x.toFloat(), l.y.toFloat(),
+                    (l.x + bitmap.width).toFloat(), (l.y + bitmap.height).toFloat())
+                n.drawBitmap(android, null, dst, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
+            }
             n.restore()
         }
     }
