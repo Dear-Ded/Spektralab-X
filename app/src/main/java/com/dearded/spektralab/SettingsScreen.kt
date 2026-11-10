@@ -252,6 +252,11 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 { InfoRow("设备", ui.deviceSummary.ifEmpty { "—" }) },
                 { InfoRow("引擎", ui.engineSummary.ifEmpty { "—" }) },
                 {
+                    ActionRow("性能测试", "测量本机的预览、切换风格、导出速度，给出工作尺寸建议。") {
+                        vm.startBenchmark()
+                    }
+                },
+                {
                     val clipboard = LocalClipboardManager.current
                     var copied by remember { mutableStateOf(false) }
                     ActionRow(if (copied) "已复制诊断信息" else "复制诊断信息", "报告问题时一起贴上，里面没有照片和位置。") {

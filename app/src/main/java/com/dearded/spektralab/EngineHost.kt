@@ -48,7 +48,7 @@ class SpektraLabApp : Application() {
 }
 
 /** The GPU device behind [engine] is lost (VkResult -4): only a new engine renders again. */
-class DeviceLostException(val engine: Long, detail: String) : Exception("GPU 被系统重置：$detail")
+class DeviceLostException(val engine: Long, detail: String) : Exception(ErrorCodes.format(ErrorCodes.GPU_DEVICE_LOST, "GPU 被系统重置：$detail"))
 
 /**
  * Process-lifetime owner of the native engine: its resources, setup caches and

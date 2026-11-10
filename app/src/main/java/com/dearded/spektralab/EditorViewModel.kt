@@ -80,7 +80,7 @@ data class UiState(
     val hasImage get() = source != null
 }
 
-class EngineException(message: String) : Exception(message)
+class EngineException(message: String, val errorCode: String = ErrorCodes.ENGINE_EXCEPTION) : Exception(ErrorCodes.format(errorCode, message))
 
 class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("settings", 0)
@@ -132,6 +132,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var openLinear = false
     private var cardsJob: kotlinx.coroutines.Job? = null
     @Volatile private var detailRevision = 0L
+    // 基准测试结果，用于诊断信息
+    private var benchmarkResult: BenchmarkResult? = null
+    private var benchmarkJob: kotlinx.coroutines.Job? = null
 
     init {
         viewModelScope.launch { startEngine() }
@@ -1068,6 +1071,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 (if (src.camera.isNotBlank()) " · ${src.camera}" else ""))
             if (src != null && src.inputPrecision.isNotBlank()) appendLine("Input precision: ${src.inputPrecision}" +
                 (if (src.inputPrecisionNote.isNotBlank()) " · ${src.inputPrecisionNote}" else ""))
+            benchmarkResult?.let { append(BenchmarkPolicy.diagnostics(it)) }
             appendLine("Edit: ${ui.edit.toJson()}")
             appendLine("Events:")
             host.events.snapshot().forEach { appendLine("  $it") }
@@ -1212,6 +1216,54 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val uri = lastUri ?: return
         val src = _ui.value.source ?: return
         launchOpen(uri, wb = src.wbK to src.wbTint)
+    }
+
+    /** 启动性能测试（在设置页面调用）*/
+    fun startBenchmark() {
+        benchmarkJob?.cancel()
+        benchmarkJob = viewModelScope.launch {
+            _ui.update { it.copy(busy = "正在准备性能测试…") }
+            try {
+                val ui = _ui.value
+                val ready = host.start(wanted.film, wanted.paper)
+                val backend = RealBenchmarkBackend(ready.engine, ready.catalog, ready.dir)
+                val am = app.getSystemService(android.app.ActivityManager::class.java)
+                val runner = BenchmarkRunner(
+                    backend = backend,
+                    clockMs = { android.os.SystemClock.elapsedRealtime() },
+                    headroom = { host.thermal.headroom() },
+                    resetPeak = { ProcMemory.resetPeak() },
+                    rssKb = { ProcMemory.statusKb("VmRSS") },
+                    peakKb = { ProcMemory.statusKb("VmHWM") },
+                    maxPixels = ui.maxPixels,
+                    peakBudgetMb = am?.memoryClass?.toLong()?.times(1024) ?: 0L,
+                )
+                when (val outcome = runner.run { phase, _ -> _ui.update { it.copy(busy = phase) } }) {
+                    is BenchmarkOutcome.Done -> {
+                        benchmarkResult = outcome.result
+                        log("benchmark completed: ${outcome.result.firstPreviewMs}ms preview, ${outcome.result.exportMs}ms export")
+                        _ui.update { it.copy(busy = null, message = "性能测试完成。结果已加入诊断信息。") }
+                    }
+                    is BenchmarkOutcome.TooHot -> {
+                        val msg = "机身温度偏高（热余量 ${"%.2f".format(outcome.headroom)}），测试已停止在「${outcome.phase}」。降温后重试。"
+                        log("benchmark aborted: too hot at ${outcome.phase}")
+                        _ui.update { it.copy(busy = null, message = msg) }
+                    }
+                    is BenchmarkOutcome.Failed -> {
+                        val msg = "[${outcome.code}] ${outcome.message}"
+                        log("benchmark failed: $msg")
+                        _ui.update { it.copy(busy = null, error = msg) }
+                    }
+                }
+            } catch (e: CancellationException) {
+                _ui.update { it.copy(busy = null) }
+            } catch (e: Throwable) {
+                val code = ErrorCodes.extract(e.message) ?: ErrorCodes.ENGINE_EXCEPTION
+                val msg = ErrorCodes.format(code, "性能测试失败：${e.message}")
+                log("benchmark exception: $msg")
+                _ui.update { it.copy(busy = null, error = msg) }
+            }
+        }
     }
 
     /**
