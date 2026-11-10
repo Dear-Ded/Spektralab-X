@@ -16,7 +16,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 
 **升级方式：** 数字版本升至 0.2，旧 beta 的更新器可以识别本版；同时修正阶段序号比较，支持后续 alpha-2、beta2、rc2 等版本。
 
-- 修复风格卡片打开强度面板时的共享边界转场无法编译：从卡片收起和面板展开这两段动画取得可见性作用域；没有该作用域或系统关闭动画时，面板仍按原来的方式展开。
+- 修复风格选项互相重叠：分组、卡片和强度面板改回上下排列，展开的强度面板不再盖住卡片。共享边界转场会把两者画在同一块区域，此处不再使用。
 - 修正手机 DNG 的色彩转换：有有效 ForwardMatrix 时按文件内嵌配置转换相机颜色，避免只反求 ColorMatrix 造成的色彩差异；不额外增加饱和度。
 - 修复部分小米 DNG 的 RAW 色温、色调读取及调整失败：元数据探针与解码器使用同一相机校准入口。
 - 支持仅含 AsShotWhiteXY 的三通道 DNG：保留原始拍摄白点，按校准签名和双光源矩阵恢复源白平衡，覆盖 ForwardMatrix 及无 FM 的转换。公开 Pixel 8 Pro 默认解码已通过；不代表完整 DNG SDK 或 Lightroom 视觉一致性。
