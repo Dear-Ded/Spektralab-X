@@ -1,0 +1,1 @@
+0.2.00-alpha-2: the style picker no longer piles its chips, cards, and strength panel on top of each other. Opening strength sits under the cards. Everything else matches 0.2.00-alpha-1. Not checked on a phone yet.
