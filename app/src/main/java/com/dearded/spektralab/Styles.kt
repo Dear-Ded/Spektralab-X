@@ -443,25 +443,26 @@ private fun StyleStripContent(
                     )
                 }
             } else Modifier
-            ThumbCard(
-                selected = on,
-                image = bitmap,
-                title = s.name,
-                subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
-                enabled = enabled,
-                placeholder = s.name,
-                starred = picks.isFavourite(s.id),
-                onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
-                modifier = cardModifier,
-                onClick = {
-                    if (on) open = if (open == s.id) null else s.id
-                    else {
-                        open = null
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                        pick(s, strengthOf(s.id))
+            Column(Modifier.width(112.dp).then(cardModifier)) {
+                ThumbCard(
+                    selected = on,
+                    image = bitmap,
+                    title = s.name,
+                    subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
+                    enabled = enabled,
+                    placeholder = s.name,
+                    starred = picks.isFavourite(s.id),
+                    onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
+                    onClick = {
+                        if (on) open = if (open == s.id) null else s.id
+                        else {
+                            open = null
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                            pick(s, strengthOf(s.id))
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
     if (naming) {
