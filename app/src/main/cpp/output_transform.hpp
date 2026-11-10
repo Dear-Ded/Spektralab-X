@@ -7,8 +7,8 @@
 //            `display_transform`, gamut compression off);
 //   export   the same matrix, then CAM16-UCS chroma compression into the
 //            file's space with the lightness shoulder off -- the film print
-//            already applied it (engine.cpp's export branch, the Mac's
-//            ColourManagement.swift).
+//            already applied it. The late chroma knee follows the Mac's
+//            ColourManagement.swift file intent (d661b3b957ad, 2026-11-06).
 //
 // Every number comes from spk_output_transform. The per-pixel arithmetic is
 // upstream's own (engine/host/output.cpp), copied in at configure time

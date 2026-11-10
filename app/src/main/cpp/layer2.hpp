@@ -10,8 +10,9 @@
 //   -> black/white point -> saturation (+ vibrance) -> colour balance
 //   -> tone curves -> HSL (8 bands) -> fade -> vignette
 //
-// Vibrance, the HSL bands and fade are this port's additions; everything else
-// follows upstream's arithmetic. Like upstream, it runs on the engine's
+// Vibrance, the HSL bands and fade are this port's additions. The integer
+// film path follows upstream's arithmetic; no-film float corrects exposure
+// for the actual transfer and bounds SDR tone weights. It runs on the engine's
 // encoded ProPhoto output, before the output transform, and pivots on
 // ProPhoto's encoded mid-grey (0.3857, upstream's `proPhotoMidGrey`).
 #pragma once
@@ -75,8 +76,8 @@ public:
     void apply(float& r, float& g, float& b, float u, float v) const { apply(r, g, b, u, v, Frame{}); }
     // The same with `f`, this look's frame(w, h) for the frame (u, v) is in;
     // without it masks and dust are skipped.
-    // Unquantised no-film input uses the original tone equations; the old
-    // RGBA16 path retains its lookup tables and exposure arithmetic.
+    // Unquantised no-film exposure uses the actual piecewise ProPhoto transfer
+    // in linear light. The RGBA16 path retains its legacy exposure arithmetic.
     void apply(float& r, float& g, float& b, float u, float v, const Frame& f,
                bool unquantised = false) const;
 
@@ -84,7 +85,7 @@ private:
     bool identity_ = true;
     float wb_[3] = {1, 1, 1};
     float exposure_gain_ = 1;   // in the encoded domain: (2^ev)^(1/2.2)
-    float linear_exposure_gain_ = 1;
+    double linear_exposure_gain_ = 1, encoded_exposure_gain_ = 1;
     float contrast_ = 0, brightness_ = 0, saturation_ = 1, vibrance_ = 0;
     float highlights_ = 0, shadows_ = 0, black_ = 0, white_ = 0, fade_ = 0;
     float vignette_ = 0, vignette_mid_ = 0.5f;

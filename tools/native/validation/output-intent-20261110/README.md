@@ -1,5 +1,11 @@
 # Export appearance: proof first, mapping candidates second
 
+Follow-up: this is a historical candidate study. A later upstream-source
+comparison identified the Mac's already-shipped knee `[0.7,0.995,6]`, which is
+now explicitly requested for Android file output. The threshold-0.8 and hard
+boundary candidates below were not adopted. See
+[the implemented Mac intent](../../../../docs/RAW_COLOR_FIXES_2026-11-10.md).
+
 Co-created with GPT (OpenAI), 2026-11-10. Research snapshot: app `3662467`;
 upstream pin `a46627d250545a394ca21522f8a28b0fb89e4c42` plus the repository
 overlays. Production code, physical-film input and default colors are unchanged.

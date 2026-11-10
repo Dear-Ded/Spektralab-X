@@ -2,6 +2,7 @@
 #include "passthrough.hpp"
 #include "output_transform.hpp"
 #include "layer2.hpp"
+#include "mac_export_reference.hpp"
 
 #include <algorithm>
 #include <array>
@@ -67,9 +68,15 @@ Session open(spk_engine* engine, const std::vector<float>& data, uint32_t w, uin
     check(bool(s), std::string("open: ") + spk_last_error(engine));
     return s;
 }
-spk::view::Result reference(spk_session* session, const LookCase& look,
+spk::view::Result reference(spk_engine* engine, spk_session* session, const LookCase& look,
                             const std::string& target, bool exporting, bool bits16,
                             const spk::Json& geometry = spk::Json::object(), uint32_t edge = 0) {
+    if (exporting) {
+        // Keep the real GPU grade/geometry boundary, but evaluate the Mac's
+        // updated file intent with an independent double CAM16 implementation.
+        const auto graded = reference(engine, session, look, "ProPhoto RGB", false, true, geometry, edge);
+        return spk::test::mac_export_reference(engine, graded, target, bits16);
+    }
     spk::view::Request request;
     request.no_film = true; request.target_space = target;
     request.export_intent = exporting; request.rgba16 = bits16;
@@ -79,6 +86,26 @@ spk::view::Result reference(spk_session* session, const LookCase& look,
     std::string error;
     check(spk::view::render(session, request, result, error), error);
     return result;
+}
+// The upstream grade still uses gamma 2.2 for exposure in encoded ProPhoto.
+// For float exposure cases, use an independently pre-exposed scene and keep
+// that old operation disabled. Other grade/output operations remain the GPU
+// reference, rather than copying the corrected production exposure helper.
+spk::view::Result linear_exposure_reference(spk_engine* engine, spk_session* session,
+                                           const std::vector<float>& input, uint32_t w, uint32_t h,
+                                           const LookCase& look, const std::string& target,
+                                           bool exporting, bool bits16) {
+    if (look.values[kExposure] == 0) return reference(engine, session, look, target, exporting, bits16);
+    check(look.values[kTemperature] == 0 && look.values[kTint] == 0,
+          "pre-exposure oracle requires neutral white balance");
+    auto exposed = input;
+    const double gain = std::exp2(double(look.values[kExposure]));
+    for (float& value : exposed) value = float(double(value) * gain);
+    auto corrected = open(engine, exposed, w, h);
+    auto remaining = look;
+    remaining.values[kExposure] = 0;
+    remaining.adjustments.set("exposure", spk::Json(0.0));
+    return reference(engine, corrected.get(), remaining, target, exporting, bits16);
 }
 unsigned max_error16(const std::vector<uint16_t>& got, const spk::view::Result& expected) {
     check(expected.pixels.size() == got.size() * 2, "RGBA16 shape mismatch");
@@ -100,7 +127,8 @@ void regression(spk_engine* engine, bool legacy) {
         look.set(kExposure, "exposure", item[3]);
         if (item[0] < 0) look.set(kSaturation, "saturation", -100);
         Layer2 layer(look.values);
-        const auto expected = reference(session.get(), look, "ProPhoto RGB", false, true);
+        const auto expected = linear_exposure_reference(engine, session.get(), input, 1, 1,
+                                                        look, "ProPhoto RGB", false, true);
         spk_result shape{};
         std::vector<float> rgb;
         std::string error;
@@ -134,6 +162,16 @@ void matrix(spk_engine* engine) {
     check(render_view_float(session.get(), "full", shape, rgb, error), error);
     check(std::any_of(rgb.begin(), rgb.end(), [](float v) { return v < 0; }) &&
           std::any_of(rgb.begin(), rgb.end(), [](float v) { return v > 1; }), "float boundary clipped the source");
+    // Upstream's SDR shadow/highlight weights extrapolate outside 0..1.
+    // Compare those controls only within their valid domain; the independent
+    // layer2_highlight_domain probe checks signed/HDR behavior and EV recovery.
+    auto bounded_input = input;
+    for (size_t i = 0; i < bounded_input.size(); ++i)
+        bounded_input[i] = .18f + .72f * float(i % 127) / 126.0f;
+    auto bounded_session = open(engine, bounded_input, w, h);
+    spk_result bounded_shape{};
+    std::vector<float> bounded_rgb;
+    check(render_view_float(bounded_session.get(), "full", bounded_shape, bounded_rgb, error), error);
     std::vector<LookCase> looks(15);
     looks[1].set(kExposure, "exposure", -3);
     looks[2].set(kExposure, "exposure", 2);
@@ -188,6 +226,10 @@ void matrix(spk_engine* engine) {
         looks[14].values.insert(looks[14].values.end(), {3, 0, 0, .5f, mid, 1, 1});
     unsigned cases = 0, worst16 = 0, worst8 = 0;
     for (const auto& look : looks) {
+        const bool bounded_tone = look.values[kHighlights] != 0 || look.values[kShadows] != 0;
+        const auto& source = bounded_tone ? bounded_input : input;
+        const auto& codes = bounded_tone ? bounded_rgb : rgb;
+        auto* reference_session = bounded_tone ? bounded_session.get() : session.get();
         Layer2 layer(look.values);
         const Layer2* active = layer.identity() ? nullptr : &layer;
         for (const std::string target : {"sRGB", "Display P3"}) for (bool exporting : {false, true}) {
@@ -195,8 +237,9 @@ void matrix(spk_engine* engine) {
             check(xf.fetch(engine, target, exporting, error), error);
             xf.set_exact(true);
             std::vector<uint16_t> file;
-            pack_float_rgba16(rgb.data(), w, w, h, file, active, xf);
-            const auto expected16 = reference(session.get(), look, target, exporting, true);
+            pack_float_rgba16(codes.data(), w, w, h, file, active, xf);
+            const auto expected16 = linear_exposure_reference(engine, reference_session, source, w, h,
+                                                               look, target, exporting, true);
             const unsigned e16 = max_error16(file, expected16);
             worst16 = std::max(worst16, e16);
             if (e16 > 8) {
@@ -207,14 +250,14 @@ void matrix(spk_engine* engine) {
                     if (std::abs(int(file[i]) - int(expected)) == int(e16)) {
                         const size_t pixel = i / 4;
                         std::cout << "worst pixel=" << pixel << " channel=" << i % 4 << " got=" << file[i] << " expected=" << expected
-                                  << " source=" << rgb[pixel * 3] << ',' << rgb[pixel * 3 + 1] << ',' << rgb[pixel * 3 + 2] << '\n';
+                                  << " source=" << codes[pixel * 3] << ',' << codes[pixel * 3 + 1] << ',' << codes[pixel * 3 + 2] << '\n';
                         break;
                     }
                 }
             }
             check(e16 <= 8, "float/reference RGBA16 mismatch: " + target + " max=" + std::to_string(e16));
             // TIFF strips use full-frame coordinates and may arrive out of order.
-            Rgba16Rows strips(rgb.data(), w, w, h, active, &xf);
+            Rgba16Rows strips(codes.data(), w, w, h, active, &xf);
             std::vector<uint16_t> rows;
             for (uint32_t y = h; y > 0; --y) {
                 strips.pack(y - 1, 1, rows);
@@ -222,12 +265,13 @@ void matrix(spk_engine* engine) {
             }
             // Repacking immutable float pixels must be independent of the previous look.
             std::vector<uint16_t> again;
-            pack_float_rgba16(rgb.data(), w, w, h, again, active, xf);
+            pack_float_rgba16(codes.data(), w, w, h, again, active, xf);
             check(file == again, "cached float repack changed bytes");
             std::vector<uint8_t> screen(size_t(w) * h * 4);
             xf.set_exact(false); // use the production display encoding table
-            pack_float_rgba8(rgb.data(), w, w, h, screen.data(), w * 4, active, xf);
-            const auto expected8 = reference(session.get(), look, target, exporting, false);
+            pack_float_rgba8(codes.data(), w, w, h, screen.data(), w * 4, active, xf);
+            const auto expected8 = linear_exposure_reference(engine, reference_session, source, w, h,
+                                                              look, target, exporting, false);
             check(screen.size() == expected8.pixels.size(), "RGBA8 shape mismatch");
             unsigned e8 = 0;
             for (size_t i = 0; i < screen.size(); ++i)
@@ -261,7 +305,7 @@ void geometry(spk_engine* engine) {
     identity.adjustments.set("enabled", spk::Json(false));
     spk::Json expected_geometry;
     check(spk::Json::parse(R"({"crop":{"x":0.1,"y":0.1,"width":0.8,"height":0.6},"quarterTurns":1,"flipH":true})", expected_geometry, error), error);
-    const auto expected = reference(session.get(), identity, "ProPhoto RGB", false, true, expected_geometry, 3);
+    const auto expected = reference(engine, session.get(), identity, "ProPhoto RGB", false, true, expected_geometry, 3);
     OutputTransform xf;
     check(xf.fetch(engine, "ProPhoto RGB", false, error), error); xf.set_exact(true);
     std::vector<uint16_t> file;

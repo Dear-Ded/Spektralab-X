@@ -59,7 +59,11 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
     char* json = nullptr;
     const float* cmax = nullptr;
     uint32_t count = 0;
-    const char* spec = exporting ? "{\"lightness_compression_active\":false}" : "{\"algorithm\":\"off\"}";
+    // Match the Mac file intent (upstream d661b3b957ad): preserve most
+    // in-gamut chroma, with a small safety margin at the target boundary.
+    const char* spec = exporting
+        ? R"({"lightness_compression_active":false,"knee":[0.7,0.995,6]})"
+        : R"({"algorithm":"off"})";
     if (spk_output_transform(engine, "ProPhoto RGB", target.c_str(), spec, &json, &cmax, &count) != SPK_OK) {
         const char* e = spk_last_error(engine);
         error = e && *e ? e : "output transform failed";

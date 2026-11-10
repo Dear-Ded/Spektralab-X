@@ -1,0 +1,19 @@
+ev=0 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+ev=0 highlights=-100 linear_in=0.0625 encoded_out=0.2101756185 after_pack_clamp=0.2101756185
+ev=0 highlights=-100 linear_in=0.125 encoded_out=0.3018513024 after_pack_clamp=0.3018513024
+ev=0 highlights=-100 linear_in=0.25 encoded_out=0.4262706041 after_pack_clamp=0.4262706041
+ev=0 highlights=-100 linear_in=0.5 encoded_out=0.5872835517 after_pack_clamp=0.5872835517
+ev=0 highlights=-100 linear_in=1 encoded_out=0.75 after_pack_clamp=0.75
+ev=0 highlights=-100 linear_in=2 encoded_out=0.7676258683 after_pack_clamp=0.7676258683
+ev=0 highlights=-100 linear_in=4 encoded_out=0.1187243462 after_pack_clamp=0.1187243462
+ev=0 highlights=-100 linear_in=8 encoded_out=-2.915827513 after_pack_clamp=0
+ev=3 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+ev=3 highlights=-100 linear_in=0.0625 encoded_out=0.495908618 after_pack_clamp=0.495908618
+ev=3 highlights=-100 linear_in=0.125 encoded_out=0.6655865908 after_pack_clamp=0.6655865908
+ev=3 highlights=-100 linear_in=0.25 encoded_out=0.7935073376 after_pack_clamp=0.7935073376
+ev=3 highlights=-100 linear_in=0.5 encoded_out=0.6146197319 after_pack_clamp=0.6146197319
+ev=3 highlights=-100 linear_in=1 encoded_out=-0.7726929188 after_pack_clamp=0
+ev=3 highlights=-100 linear_in=2 encoded_out=-6.294075489 after_pack_clamp=0
+ev=3 highlights=-100 linear_in=4 encoded_out=-25.27630997 after_pack_clamp=0
+ev=3 highlights=-100 linear_in=8 encoded_out=-87.2690506 after_pack_clamp=0
+ramp_reversals=4 negative_highlights=5 global_local_parity_failures=0 legacy_failures=0 sdr_zero_ev_failures=0 hdr_shadow_failures=6 signed_highlight_failures=1 channel_ratio_failures=0

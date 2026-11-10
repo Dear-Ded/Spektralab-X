@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "layer2_local.hpp"
+#include "prophoto_exposure.hpp"
 #include "tone_curve.hpp"
 
 namespace spk::android {
@@ -158,7 +159,8 @@ Layer2::Layer2(const std::vector<float>& v) {
     wb_[0] = 1 + 0.18f * t; wb_[1] = 1 - 0.12f * g; wb_[2] = 1 - 0.18f * t;
     // pow(pow(c, 2.2) * 2^ev, 1/2.2) is c * 2^(ev/2.2): the same, without two pows a pixel.
     exposure_gain_ = std::pow(2.0f, at(kExposure) / 2.2f);
-    linear_exposure_gain_ = float(std::pow(2.0, double(at(kExposure))));
+    linear_exposure_gain_ = std::exp2(double(at(kExposure)));
+    encoded_exposure_gain_ = std::exp2(double(at(kExposure)) / 1.8);
     contrast_ = at(kContrast) / 100;
     brightness_ = at(kBrightness) / 100;
     saturation_ = 1 + at(kSaturation) / 100;
@@ -203,9 +205,9 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& 
         if (identity_) return;   // the table alone: the sliders are all neutral
     }
     float c[3] = {r * wb_[0], g * wb_[1], b * wb_[2]};
-    if (exposure_gain_ != 1.0f) {
+    if (unquantised ? linear_exposure_gain_ != 1.0 : exposure_gain_ != 1.0f) {
         for (float& x : c) {
-            if (unquantised) x = std::pow(std::pow(std::max(0.0f, x), 2.2f) * linear_exposure_gain_, 1.0f / 2.2f);
+            if (unquantised) x = expose_encoded_prophoto(x, linear_exposure_gain_, encoded_exposure_gain_);
             else x = std::max(0.0f, x) * exposure_gain_;
         }
     }
@@ -227,6 +229,8 @@ void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& 
         }
     }
     float l = tone_position(luma(c[0], c[1], c[2]));
+    // These SDR tone weights must not grow quadratically with HDR pixels.
+    if (unquantised) l = saturate(l);
     if (shadows_ != 0) {
         const float w = (1 - l) * (1 - l);
         for (float& x : c) x += shadows_ * 0.25f * w * (1 - x);

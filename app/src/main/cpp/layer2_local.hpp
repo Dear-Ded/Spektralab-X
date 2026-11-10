@@ -32,6 +32,8 @@
 // what the export shows. See tools/work/edit-effects_research.md.
 #pragma once
 
+#include "prophoto_exposure.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -125,7 +127,8 @@ struct Grid {
 // colour balance and the vignette are global statements and stay out.
 struct Tone {
     float wb[3] = {1, 1, 1};
-    float gain = 1, linear_gain = 1, contrast = 0, bright = 0, bright_e = 1;
+    float gain = 1, contrast = 0, bright = 0, bright_e = 1;
+    double linear_gain = 1, encoded_gain = 1;
     float highlights = 0, shadows = 0, black = 0, span = 1, saturation = 1;
 
     Tone() = default;
@@ -134,7 +137,8 @@ struct Tone {
         const float t = a[8] / 100, g = a[9] / 100;
         wb[0] = 1 + 0.18f * t; wb[1] = 1 - 0.12f * g; wb[2] = 1 - 0.18f * t;
         gain = std::pow(2.0f, a[0] / 2.2f);
-        linear_gain = float(std::pow(2.0, double(a[0])));
+        linear_gain = std::exp2(double(a[0]));
+        encoded_gain = std::exp2(double(a[0]) / 1.8);
         contrast = a[1] / 100;
         bright = a[2] / 100;
         bright_e = 1.0f / (1.0f + bright * 0.8f);
@@ -148,10 +152,10 @@ struct Tone {
     void apply(float c[3], bool unquantised = false) const {
         using namespace detail;
         for (int i = 0; i < 3; ++i) c[i] *= wb[i];
-        if (gain != 1)
+        if (unquantised ? linear_gain != 1.0 : gain != 1)
             for (int i = 0; i < 3; ++i)
                 c[i] = unquantised
-                    ? std::pow(std::pow(std::max(0.0f, c[i]), 2.2f) * linear_gain, 1.0f / 2.2f)
+                    ? expose_encoded_prophoto(c[i], linear_gain, encoded_gain)
                     : std::max(0.0f, c[i]) * gain;
         if (contrast != 0) {
             const float k = 1 + contrast * 1.2f;
@@ -159,7 +163,8 @@ struct Tone {
         }
         if (bright != 0)
             for (int i = 0; i < 3; ++i) c[i] = std::pow(std::max(0.0f, c[i]), bright_e);
-        const float l = tone_position(luma(c));
+        const float position = tone_position(luma(c));
+        const float l = unquantised ? sat01(position) : position;
         if (shadows != 0) {
             const float w = (1 - l) * (1 - l);
             for (int i = 0; i < 3; ++i) c[i] += shadows * 0.25f * w * (1 - c[i]);

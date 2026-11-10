@@ -178,6 +178,37 @@ void recovery_and_hdr(spk_engine* engine) {
           "pre-cancelled row pack changed storage");
     check(source == original,"cancelled output mutated source");
 }
+
+void exposed_highlights(spk_engine* engine) {
+    constexpr uint32_t w = 257, h = 1;
+    std::vector<float> source(w * 3);
+    for (uint32_t x = 0; x < w; ++x)
+        std::fill_n(source.data() + x * 3, 3, encode(double(x) / (w - 1)));
+    std::vector<float> settings(kLookSize, 0);
+    settings[kExposure] = 3;
+    settings[kHighlights] = -100;
+    const Layer2 look(settings);
+    for (const char* target : {"sRGB", "Display P3"}) for (bool exporting : {false, true}) {
+        OutputTransform xf; std::string error;
+        check(xf.fetch(engine, target, exporting, error), error.c_str());
+        std::vector<uint8_t> rgba8(w * 4);
+        std::vector<uint16_t> rgba16;
+        pack_float_rgba8(source.data(), w, w, h, rgba8.data(), w * 4, &look, xf);
+        pack_float_rgba16(source.data(), w, w, h, rgba16, &look, xf);
+        for (uint32_t x = 1; x < w; ++x) for (unsigned c = 0; c < 3; ++c) {
+            check(rgba8[x*4+c] >= rgba8[(x-1)*4+c], "exposed highlight ramp reverses in actual RGBA8 output");
+            check(rgba16[x*4+c] >= rgba16[(x-1)*4+c], "exposed highlight ramp reverses in actual RGBA16 output");
+        }
+        for (unsigned c = 0; c < 3; ++c)
+            check(rgba8[(w-1)*4+c] > 250 && rgba16[(w-1)*4+c] > 64000,
+                  "bright source becomes black after exposure/highlight/output");
+        std::vector<uint8_t> row8;
+        std::vector<uint16_t> row16;
+        Rgba8Rows(source.data(), w, w, h, &look, &xf).pack(0, 1, row8);
+        Rgba16Rows(source.data(), w, w, h, &look, &xf).pack(0, 1, row16);
+        check(rgba8 == row8 && rgba16 == row16, "exposed highlight row output differs");
+    }
+}
 }  // namespace
 
 int main(int argc,char** argv) {
@@ -187,9 +218,11 @@ int main(int argc,char** argv) {
         check(bool(engine),"engine create failed");
         const size_t cases=parity(engine.get());
         recovery_and_hdr(engine.get());
+        exposed_highlights(engine.get());
         std::cout << "RAW_DEVELOPMENT_OUTPUT_PASS cases=" << cases
                   << " targets=sRGB,P3 transforms=display,export bitdepths=8,16 steps=1,3,32,65"
-                  << " whole_rows=equal borrowed8=equal neutral_legacy=equal source=immutable HDR=restored cancelled=recovered\n";
+                  << " whole_rows=equal borrowed8=equal neutral_legacy=equal source=immutable HDR=restored cancelled=recovered"
+                  << " exposed_highlights=monotonic_8_and_16\n";
         return 0;
     } catch (const std::exception& e) { std::cerr << "FAIL " << e.what() << '\n'; return 1; }
 }

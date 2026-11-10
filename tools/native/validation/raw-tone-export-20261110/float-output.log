@@ -1,0 +1,6 @@
+RAW app-key validation and persistence PASS
+regression 0 new_max16=2 old_max16=19122
+regression 1 new_max16=1 old_max16=2231
+matrix PASS cases=120 max16=3 max8=0 tiff_rows=780 repack=60 missing_transform=refused
+geometry PASS crop/turn/flip/resize invalid_requests=6
+no-film float PASS

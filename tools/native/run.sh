@@ -21,6 +21,7 @@ app="$repo/app/src/main/cpp"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/local_tone.cpp" \
     "$app/layer2.cpp" -o "$build/local_tone"
 "$build/local_tone"
+BUILD_DIR="$build/layer2-domains" bash "$repo/tools/native/run_layer2_domains.sh"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/curve_regression.cpp" -o "$build/curve_regression"
 "$build/curve_regression"
 BUILD_DIR="$build/curve-wire" bash "$repo/tools/native/run_curve_wire.sh"

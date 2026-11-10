@@ -1,5 +1,13 @@
 # Native adaptation regressions
 
+The RAW tone and desktop file-intent corrections are documented in
+[RAW color fixes](../../docs/RAW_COLOR_FIXES_2026-11-10.md). `run.sh` includes
+the independent exposure/highlight domain probes. They can also run without
+an engine build using `bash tools/native/run_layer2_domains.sh`; set
+`SANITIZE=1` for ASan/UBSan. The no-film GPU runner uses an independent double
+Mac export oracle after the real ProPhoto grade boundary. See
+[the current evidence](validation/raw-tone-export-20261110/).
+
 Co-created with GPT (OpenAI, AI assistant), 2026-11-08.
 
 Run on Linux with a C++20 compiler. No Vulkan device is needed for the `run.sh`

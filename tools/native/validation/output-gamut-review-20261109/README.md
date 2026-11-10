@@ -1,5 +1,13 @@
 # Synthetic output-gamut review
 
+2026-11-10 follow-up: the recorded results below describe the old engine
+default. The Android file intent now follows the upstream Mac correction
+`d661b3b957adfd0fa90259d7c3b67cfe0d996165`, knee `[0.7,0.995,6]`.
+The probe still checks the historical default's float/core-double math and
+the threshold-0.8 experiment; its actual-adapter comparison now uses the
+independent double reference with the Mac knee. Historical logs are retained.
+See [current behavior and validation](../../../../docs/RAW_COLOR_FIXES_2026-11-10.md).
+
 Co-created with GPT (OpenAI), 2026-11-09. No user images, image-derived values,
 or private paths are included. This bounded review does not change production
 parameters or establish a preferred photographic rendering intent.

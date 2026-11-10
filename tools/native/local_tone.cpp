@@ -36,15 +36,23 @@ void recovered_channels() {
         const Layer2 layer(masked(controls));
         const auto frame = layer.frame(17, 13);
         require(bool(frame.placed), "mask fixture did not reach production parser");
-        double expected = 0;
         const double weights[] = {.2126, .7152, .0722};
-        for (int k = 0; k < 3; ++k) {
-            double c = item[k];
-            if (item[4] != 0) c = std::pow(std::pow(std::max(0.0, c), 2.2) * std::pow(2.0, item[4]), 1.0 / 2.2);
-            if (item[3] != 0) c = std::pow(std::max(0.0, c), 1.0 / (1 + item[3] * .008));
-            expected += c * weights[k];
-        }
         for (bool unquantised : {false, true}) {
+            double expected = 0;
+            for (int k = 0; k < 3; ++k) {
+                double c = item[k];
+                if (item[4] != 0) {
+                    if (unquantised) {
+                        const double linear = c < 1.0 / 32.0 ? c / 16.0 : std::pow(c, 1.8);
+                        const double exposed = linear * std::exp2(double(item[4]));
+                        c = exposed < 1.0 / 512.0 ? 16.0 * exposed : std::pow(exposed, 1.0 / 1.8);
+                    } else {
+                        c = std::pow(std::pow(std::max(0.0, c), 2.2) * std::pow(2.0, item[4]), 1.0 / 2.2);
+                    }
+                }
+                if (item[3] != 0) c = std::pow(std::max(0.0, c), 1.0 / (1 + item[3] * .008));
+                expected += c * weights[k];
+            }
             float r = item[0], g = item[1], b = item[2];
             layer.apply(r, g, b, .5f, .5f, frame, unquantised);
             for (float c : {r, g, b}) require(std::isfinite(c) && std::abs(c - expected) < 2e-6, "mask clipped recoverable RGB");

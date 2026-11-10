@@ -42,11 +42,11 @@ double direct_cmax(const spk::Cam16Setup& st,double jp,double hue) {
         if(inside)lo=mid;else hi=mid;
     }return lo;
 }
-RGB reference(const spk::Cam16Setup& st,const RGB& rgb,double threshold,double& d,double& cm,double& jp) {
+RGB reference(const spk::Cam16Setup& st,const RGB& rgb,double threshold,double& d,double& cm,double& jp,double limit=1) {
     double xyz[3],jab[3];st.m_to_xyz.apply(rgb.data(),xyz);spk::xyz_to_cam16ucs(st,xyz,jab);
     jp=jab[0];cm=std::max(1e-9,table(st,jp,std::atan2(jab[2],jab[1])));
     const double m=std::hypot(jab[1],jab[2]);d=m/cm;
-    const double compressed=spk::reinhard_knee(d,threshold,1,6);
+    const double compressed=spk::reinhard_knee(d,threshold,limit,6);
     const double ratio=m?compressed*cm/m:1;
     jab[1]*=ratio;jab[2]*=ratio;
     spk::cam16ucs_to_xyz(st,jab,xyz);RGB out;st.m_to_rgb.apply(xyz,out.data());return out;
@@ -88,7 +88,9 @@ int main(int argc,char** argv) {
             production::cam16ucs_into(f,mx,mr,k,cmax,64,720,false);
             const double fa[]={f[0],f[1],f[2]};const double delta=maxdiff(ref.data(),fa);worst=std::max(worst,delta);
             double pro[3];inv.apply(rgb.data(),pro);float encoded[3];for(int j=0;j<3;++j)encoded[j]=proencode(pro[j]);actual.apply(encoded);
-            double encoded_ref[3];for(int j=0;j<3;++j)encoded_ref[j]=encode(ref[j]);
+            double mac_d,mac_cm,mac_jp;
+            const RGB mac=reference(st,rgb,.7,mac_d,mac_cm,mac_jp,.995);
+            double encoded_ref[3];for(int j=0;j<3;++j)encoded_ref[j]=encode(mac[j]);
             encoded_worst=std::max(encoded_worst,maxdiff(encoded_ref,std::array<double,3>{encoded[0],encoded[1],encoded[2]}.data()));
             double dl,cl,jl;const RGB late=reference(st,rgb,.8,dl,cl,jl);
             if(d<=.8){
