@@ -1,21 +1,7 @@
 name: engine-gpu
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'patches/**'
-      - 'tools/native/**'
-      - 'app/src/main/cpp/storage_probe*'
-      - 'scripts/fetch-upstream.sh'
-      - '.github/workflows/engine-gpu.yml'
-  pull_request:
-    paths:
-      - 'patches/**'
-      - 'tools/native/**'
-      - 'app/src/main/cpp/storage_probe*'
-      - 'scripts/fetch-upstream.sh'
-      - '.github/workflows/engine-gpu.yml'
+  workflow_call:
   workflow_dispatch:
 
 permissions:

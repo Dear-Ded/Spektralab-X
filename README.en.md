@@ -31,7 +31,7 @@ Film modeling powered by [spektrafilm](https://github.com/andreavolpato/spektraf
 </div>
 
 > [!IMPORTANT]
-> **Under rapid development (pre-release).** Updates land almost daily, and more features are on the way: a redesigned editor, more borders, on-device tuning and more; see the [roadmap](docs/ROADMAP.md). **Star** the repository, or use **Watch → Custom → Releases** to hear about new versions.
+> **Under rapid development (beta).** Updates land almost daily, and more features are on the way: a redesigned editor, more borders, on-device tuning and more; see the [roadmap](docs/ROADMAP.md). **Star** the repository, or use **Watch → Custom → Releases** to hear about new versions.
 >
 > Built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek).
 
@@ -177,7 +177,7 @@ There is no Xiaomi 16. Memory, recommended working sizes and known risks per gen
 > [!CAUTION]
 > **Official builds are published only on this repository's [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases), and they are free forever.** If you paid for "Spektralab-X" in an app store, a file-sharing site or a second-hand marketplace, it is not an official build: ask for a refund and check the signature as shown below.
 
-1. Open [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) and download `Spektralab-X-<version>-arm64-v8a.apk` from the latest pre-release.
+1. Open [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) and download `Spektralab-X-<version>-arm64-v8a.apk` from the latest `v…-beta` release.
 2. Install it on the phone. Xiaomi / HyperOS asks you to allow unknown sources under "Security" the first time.
 3. Later versions install over earlier ones; your presets are kept.
 
@@ -275,7 +275,7 @@ Yes. Publish your full source under GPL-3.0, credit this project, the upstream p
 
 Work proceeds by milestone; the full list, acceptance criteria and research notes are in [docs/ROADMAP.md](docs/ROADMAP.md) (Chinese).
 
-- **Near term:** fixes from on-device feedback, colour fidelity and the style system, a redesigned UI, export stability, deeper Xiaomi integration (Super Island, background keep-alive, Xiaomi DNG).
+- **Near term (0.1.x-beta):** fixes from on-device feedback, colour fidelity and the style system, a redesigned UI, export stability, deeper Xiaomi integration (Super Island, background keep-alive, Xiaomi DNG).
 - **First stable release:** remote processing, sending photos to your own computer or server for post-processing and back to the phone (draft spec: [docs/REMOTE.md](docs/REMOTE.md)).
 - **Later plans:** once the Xiaomi-tuned version is stable for daily use, separate projects for a **general Android version**, **Windows** and **iOS**. These are plans, not promises with dates.
 
@@ -330,7 +330,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 Without `SPK_KEYSTORE` the build is debug-signed and will not install over an official release. The full pipeline is in [`.github/workflows/android.yml`](.github/workflows/android.yml).
 
-The display version lives in [`VERSION`](VERSION) as `major.minor.patch[-label]`. The independent Android version code lives in [`VERSION_CODE`](VERSION_CODE); use these two files as the source of current values. Increment the version code for every release, including a change from `alpha` to `beta` without a numeric version change. Do not derive it from the display version. Each release needs a new display version, a matching [CHANGELOG.md](CHANGELOG.md) section and English and Chinese fastlane notes named after the internal version code; CI publishes on a push to `main`.
+The display version lives in [`VERSION`](VERSION) as `major.minor.patch[-label]`, currently `0.1.19-beta`. The independent Android version code lives in [`VERSION_CODE`](VERSION_CODE), currently `120`; increment it for every release, including a change from `alpha` to `beta` without a numeric version change. Do not derive it from the display version. Each release needs a new display version, a matching [CHANGELOG.md](CHANGELOG.md) section and English and Chinese fastlane notes named after the internal version code; CI publishes on a push to `main`.
 
 ## Reposting and derivative works
 

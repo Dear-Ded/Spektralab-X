@@ -31,7 +31,7 @@ SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Ad
 </div>
 
 > [!IMPORTANT]
-> **项目正在快速开发迭代中（预发布）。** 几乎每天都有更新，后续会陆续加入更多功能：界面重构、更多边框、真机适配等，详见[路线图](docs/ROADMAP.md)。欢迎点 **Star** 收藏，或 **Watch → Custom → Releases** 关注新版本。
+> **项目正在快速开发迭代中（Beta）。** 几乎每天都有更新，后续会陆续加入更多功能：界面重构、更多边框、真机适配等，详见[路线图](docs/ROADMAP.md)。欢迎点 **Star** 收藏，或 **Watch → Custom → Releases** 关注新版本。
 >
 > 本项目由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发。
 
@@ -177,7 +177,7 @@ Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)�
 > [!CAUTION]
 > **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“Spektralab-X”，那不是官方版本，请申请退款，并按下面的方法核对签名。
 
-1. 打开 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases)，下载最新预发布版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
+1. 打开 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases)，下载最新 `v…-beta` 版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
 2. 在手机上安装。小米 / HyperOS 第一次安装未知来源应用时，会要求在“安全”里允许。
 3. 以后的版本可以直接覆盖安装，编辑预设会保留。
 
@@ -275,7 +275,7 @@ gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/Spektralab
 
 按里程碑推进，完整清单、验收标准和调研结论见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
-- **近期：** 真机反馈修复、色彩还原与风格体系、界面与交互重构、导出稳定性、小米深度适配（超级岛、后台保活、小米 DNG）。
+- **近期（0.1.x-beta）：** 真机反馈修复、色彩还原与风格体系、界面与交互重构、导出稳定性、小米深度适配（超级岛、后台保活、小米 DNG）。
 - **正式版：** 远程处理，把照片交给自己的电脑或服务器做后处理再传回手机（规范草案见 [docs/REMOTE.md](docs/REMOTE.md)）。
 - **之后的计划：** 小米优化版稳定到可以日常使用后，另开项目做**通用安卓版**、**Windows 版**和 **iOS 版**。这些是计划，没有承诺时间。
 
@@ -330,7 +330,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 没有设置 `SPK_KEYSTORE` 时用调试密钥签名，装不上正式版的位置。完整流程见 [`.github/workflows/android.yml`](.github/workflows/android.yml)。
 
-显示版本写在 [`VERSION`](VERSION)，格式为 `主版本.次版本.修订号[-阶段]`；Android 内部版本码独立写在 [`VERSION_CODE`](VERSION_CODE)。当前值以这两个文件为准。内部版本码每次发布必须递增，包括只把 `alpha` 改为 `beta` 的发布，不能再从显示版本推导。发布时使用新的显示版本，同步 [CHANGELOG.md](CHANGELOG.md) 和以内部版本码命名的中英文 fastlane 短说明；推送到 `main` 后由 CI 发布。
+显示版本写在 [`VERSION`](VERSION)，格式为 `主版本.次版本.修订号[-阶段]`，当前为 `0.1.19-beta`。Android 内部版本码独立写在 [`VERSION_CODE`](VERSION_CODE)，当前为 `120`；每次发布必须递增，包括只把 `alpha` 改为 `beta` 的发布，不能再从显示版本推导。发布时使用新的显示版本，同步 [CHANGELOG.md](CHANGELOG.md) 和以内部版本码命名的中英文 fastlane 短说明；推送到 `main` 后由 CI 发布。
 
 ## 转载与二次开发
 
