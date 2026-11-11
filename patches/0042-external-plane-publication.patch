@@ -1,0 +1,579 @@
+External float-plane publication and bounded-run cancellation.
+Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
+
+Preallocation does not prove pixel coverage. Require complete, non-overlapping
+rows before sealing; owned outputs are invalidated on failure or cancellation.
+Share the point/FIR worker executor, handle short and interrupted positional
+I/O, and check cancellation at I/O and GPU boundaries. Valid kernel math and
+order are unchanged. These helpers remain outside production Pipeline.
+
+diff --git a/engine/src/pipeline/bounded_point_chain.hpp b/engine/src/pipeline/bounded_point_chain.hpp
+index ccf8e9b..1ef8f13 100644
+--- a/engine/src/pipeline/bounded_point_chain.hpp
++++ b/engine/src/pipeline/bounded_point_chain.hpp
+@@ -16,6 +16,7 @@
+ #include <cerrno>
+ #include <cstdint>
+ #include <cstdlib>
++#include <exception>
+ #include <fcntl.h>
+ #include <limits>
+ #include <mutex>
+@@ -27,70 +28,11 @@
+ #include <vector>
+ 
+ #include "gpu/gpu.hpp"
++#include "external_plane.hpp"
+ #include "strip.hpp"
+ 
+ namespace spk {
+ 
+-// A float32 plane (w x h x c, tightly packed) backed by an unlinked file.
+-// Reads and writes are positional, so concurrent bands never share a cursor.
+-class ExternalPlane {
+-public:
+-    ExternalPlane(const std::string& dir, uint32_t w, uint32_t h, uint32_t c) : w_(w), h_(h), c_(c) {
+-        if (!w || !h || !c) throw std::invalid_argument("empty external plane");
+-        const uint64_t row = uint64_t(w) * c * sizeof(float);
+-        if (row / sizeof(float) / c != w || row > uint64_t(std::numeric_limits<off_t>::max()) / h)
+-            throw std::overflow_error("external plane exceeds file offsets");
+-        const std::string name = dir + "/spk-plane-XXXXXX";
+-        std::vector<char> pattern(name.begin(), name.end());
+-        pattern.push_back('\0');
+-        fd_ = mkstemp(pattern.data());
+-        if (fd_ < 0) throw std::runtime_error("cannot create external plane");
+-        int unlinked;
+-        do { unlinked = unlink(pattern.data()); } while (unlinked < 0 && errno == EINTR);
+-        if (unlinked < 0) {
+-            close(fd_); fd_ = -1;
+-            throw std::runtime_error("cannot unlink external plane");
+-        }
+-        int reserved;
+-        do { reserved = posix_fallocate(fd_, 0, off_t(bytes())); } while (reserved == EINTR);
+-        if (reserved != 0) {
+-            close(fd_);
+-            fd_ = -1;
+-            throw std::runtime_error("cannot reserve external plane space");
+-        }
+-    }
+-    ~ExternalPlane() { if (fd_ >= 0) close(fd_); }
+-    ExternalPlane(const ExternalPlane&) = delete;
+-    ExternalPlane& operator=(const ExternalPlane&) = delete;
+-
+-    uint32_t width() const { return w_; }
+-    uint32_t height() const { return h_; }
+-    uint32_t channels() const { return c_; }
+-    uint64_t row_bytes() const { return uint64_t(w_) * c_ * sizeof(float); }
+-    uint64_t bytes() const { return row_bytes() * h_; }
+-
+-    void write_rows(uint32_t y0, uint32_t rows, const float* data) { io(true, y0, rows, const_cast<float*>(data)); }
+-    void read_rows(uint32_t y0, uint32_t rows, float* out) const { io(false, y0, rows, out); }
+-
+-private:
+-    void io(bool write, uint32_t y0, uint32_t rows, float* data) const {
+-        if (y0 > h_ || rows > h_ - y0) throw std::out_of_range("external plane rows");
+-        if (rows && (!data || row_bytes() > std::numeric_limits<size_t>::max() / rows))
+-            throw std::invalid_argument("invalid external plane row storage");
+-        char* p = reinterpret_cast<char*>(data);
+-        size_t left = size_t(rows * row_bytes());
+-        off_t off = off_t(y0 * row_bytes());
+-        while (left) {
+-            const ssize_t n = write ? pwrite(fd_, p, left, off) : pread(fd_, p, left, off);
+-            if (n < 0 && errno == EINTR) continue;
+-            if (n <= 0) throw std::runtime_error("external plane io failed");
+-            p += n; off += n; left -= size_t(n);
+-        }
+-    }
+-    int fd_ = -1;
+-    uint32_t w_, h_, c_;
+-};
+-
+ // Frame-level constants, uploaded once and shared by every band. Built by the
+ // caller exactly as Pipeline builds baked_.xyz_to_rgb, cam16_* and output_matrix.
+ struct PointChainTables {
+@@ -125,10 +67,11 @@ inline uint32_t choose_band_rows(uint32_t plane_h, uint32_t w, uint64_t range_by
+ // One band through the three pointwise nodes. Dispatch arguments mirror
+ // Pipeline::node_xyz_to_rgb, node_gamut_compress and node_cctf.
+ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const float* in, uint32_t w,
+-                             uint32_t rows, float* out, std::string& error) {
++                             uint32_t rows, float* out, std::string& error, const BoundedCancel& cancel = {}) {
+     if (!w || !rows || !in || !out || uint64_t(w) * rows > std::numeric_limits<uint32_t>::max()) {
+         error = "invalid point band geometry"; return false;
+     }
++    if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     const size_t pixels = size_t(w) * rows, floats = pixels * 3, bytes = floats * sizeof(float);
+     gpu::BufferRef cur = gpu->upload(in, bytes, error);
+     if (!cur) return false;
+@@ -136,44 +79,56 @@ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const flo
+     {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(t.xyz_to_rgb),
+                            gpu::Arg::inline_bytes(n, 1), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (t.gamut_compress) {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[4] = {uint32_t(pixels), t.cam16_nl, t.cam16_nh, t.cam16_lightness ? 1u : 0u};
+         if (!gpu->dispatch("spk_cam16ucs_compress", {gpu::Arg::buf(cur), gpu::Arg::buf(t.m2x),
+                            gpu::Arg::buf(t.m2r), gpu::Arg::buf(t.cmax), gpu::Arg::buf(t.k),
+                            gpu::Arg::inline_bytes(meta, 4), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (t.cctf) {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[2] = {uint32_t(pixels), t.cctf_mode};
+         if (!gpu->dispatch("spk_cctf_encode_matrix", {gpu::Arg::buf(cur), gpu::Arg::buf(t.output_matrix),
+                            gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+-    return gpu->read(cur.get(), 0, out, bytes, error);
++    return gpu->read(cur.get(), 0, out, bytes, error) && bounded_gpu_checkpoint(cancel, error);
+ }
+ 
+ // Producer/consumer over bands: workers read a band from `in`, run the GPU
+ // chain (serialised by one mutex, since Gpu dispatch batches share a queue)
+ // and write the band to `out` at its global rows. File I/O runs in parallel.
+-inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const ExternalPlane& in,
+-                            ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
+-                            PointChainStats* stats, std::string& error) {
++template<class Kernel>
++inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint32_t band_rows,
++                               uint32_t halo, BandOrder order, unsigned workers, PointChainStats* stats,
++                               std::string& error, const BoundedCancel& cancel, Kernel&& kernel) {
++    if (stats) *stats = {};
+     if (in.channels() != 3 || out.channels() != 3 || in.width() != out.width() || in.height() != out.height()) {
+         error = "external planes must be matching RGB float32";
+         return false;
+     }
+     if (band_rows == 0) { error = "band height must be positive"; return false; }
++    if (&in == &out || !in.ready()) { error = "external plane input must be sealed and distinct"; return false; }
++    try {
++    auto output = out.producer();
++    bounded_cancel_checkpoint(cancel);
+     std::vector<StripSpan> spans;
+     for (uint64_t y = 0; y < in.height(); y += band_rows)
+         spans.push_back({uint32_t(y), std::min(band_rows, in.height() - uint32_t(y))});
+@@ -183,6 +138,7 @@ inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const Exte
+     std::atomic<size_t> next{0};
+     std::atomic<bool> failed{false};
+     std::mutex gpu_mutex, error_mutex;
++    std::exception_ptr failure;
+     auto work = [&]() {
+         std::vector<float> src, dst;
+         for (;;) {
+@@ -190,20 +146,25 @@ inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const Exte
+             if (i >= spans.size() || failed.load()) return;
+             const StripSpan s = spans[i];
+             try {
+-                src.resize(size_t(s.rows) * in.width() * 3);
+-                dst.resize(src.size());
+-                in.read_rows(s.y0, s.rows, src.data());
++                bounded_cancel_checkpoint(cancel);
++                const uint32_t lo = s.y0 > halo ? s.y0 - halo : 0;
++                const uint32_t hi = uint32_t(std::min<uint64_t>(in.height(), uint64_t(s.y0) + s.rows + halo));
++                src.resize(size_t(hi - lo) * in.width() * 3);
++                dst.resize(size_t(s.rows) * in.width() * 3);
++                in.read_rows(lo, hi - lo, src.data(), cancel);
+                 std::string band_error;
+                 bool ok;
+                 {
+                     std::lock_guard<std::mutex> guard(gpu_mutex);
+-                    ok = point_chain_band(gpu, t, src.data(), in.width(), s.rows, dst.data(), band_error);
++                    if (failed.load()) return;
++                    bounded_cancel_checkpoint(cancel);
++                    ok = kernel(src.data(), in.width(), hi - lo, s.y0 - lo, s.rows, dst.data(), band_error);
+                 }
+-                if (!ok) throw std::runtime_error(band_error);
+-                out.write_rows(s.y0, s.rows, dst.data());
+-            } catch (const std::exception& e) {
++                if (!ok) throw std::runtime_error(band_error.empty() ? "bounded GPU band failed" : band_error);
++                output.write_rows(s.y0, s.rows, dst.data(), cancel);
++            } catch (...) {
+                 std::lock_guard<std::mutex> guard(error_mutex);
+-                if (!failed.exchange(true)) error = e.what();
++                if (!failed.exchange(true)) failure = std::current_exception();
+                 return;
+             }
+         }
+@@ -217,12 +178,30 @@ inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const Exte
+     }
+     work();
+     for (auto& th : threads) th.join();
++    if (failure) std::rethrow_exception(failure);
++    output.seal(cancel);
+     if (stats) {
+         stats->bands = uint32_t(spans.size());
+         stats->band_rows = band_rows;
+-        stats->max_band_bytes = uint64_t(band_rows) * in.width() * 3 * sizeof(float);
++        stats->max_band_bytes = std::min<uint64_t>(in.height(), uint64_t(band_rows) + 2ull * halo) * in.width() * 3 * sizeof(float);
++    }
++    return true;
++    } catch (const std::exception& e) {
++        error = e.what();
++        return false;
++    } catch (...) {
++        error = "unknown external plane failure";
++        return false;
+     }
+-    return !failed.load();
++}
++
++inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const ExternalPlane& in,
++                            ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
++                            PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {}) {
++    return run_external_bands(in, out, band_rows, 0, order, workers, stats, error, cancel,
++        [&](const float* src, uint32_t w, uint32_t window, uint32_t, uint32_t, float* dst, std::string& e) {
++            return point_chain_band(gpu, t, src, w, window, dst, e, cancel);
++        });
+ }
+ 
+ }  // namespace spk
+diff --git a/engine/src/pipeline/bounded_print_run.hpp b/engine/src/pipeline/bounded_print_run.hpp
+index 7bbf697..f5c763d 100644
+--- a/engine/src/pipeline/bounded_print_run.hpp
++++ b/engine/src/pipeline/bounded_print_run.hpp
+@@ -74,12 +74,13 @@ inline bool valid_print_run(const PrintRunTables& t, std::string& error) {
+ // at `offset` are the band and are the only ones written to `out`.
+ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float* in, uint32_t w,
+                              uint32_t wrows, uint32_t offset, uint32_t rows, float* out,
+-                             std::string& error) {
++                             std::string& error, const BoundedCancel& cancel = {}) {
+     if (!valid_print_run(t, error)) return false;
+     if (!w || !wrows || !rows || offset > wrows || rows > wrows - offset || !in || !out ||
+         uint64_t(w) * wrows > std::numeric_limits<uint32_t>::max()) {
+         error = "invalid print window geometry"; return false;
+     }
++    if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     const PointChainTables& p = t.point;
+     const size_t pixels = size_t(w) * wrows, bytes = pixels * 3 * sizeof(float);
+     gpu::BufferRef cur = gpu->upload(in, bytes, error);
+@@ -88,22 +89,27 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+     {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(p.xyz_to_rgb),
+                            gpu::Arg::inline_bytes(n, 1), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (p.gamut_compress) {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[4] = {uint32_t(pixels), p.cam16_nl, p.cam16_nh, p.cam16_lightness ? 1u : 0u};
+         if (!gpu->dispatch("spk_cam16ucs_compress", {gpu::Arg::buf(cur), gpu::Arg::buf(p.m2x),
+                            gpu::Arg::buf(p.m2r), gpu::Arg::buf(p.cmax), gpu::Arg::buf(p.k),
+                            gpu::Arg::inline_bytes(meta, 4), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (t.unsharp_sigma > 0.0 && t.unsharp_amount > 0.0) {
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         Blur blur(gpu);
+         Image src, blurred, sharp;
+         src.h = wrows; src.w = w; src.c = 3; src.buf = std::move(cur);
+@@ -114,82 +120,35 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+         if (!blur.lincomb(src, blurred, a, b, sharp, error)) return false;
+         cur = std::move(sharp.buf);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (p.cctf) {
+         gpu::BufferRef next = gpu->alloc(bytes, error);
+         if (!next) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[2] = {uint32_t(pixels), p.cctf_mode};
+         if (!gpu->dispatch("spk_cctf_encode_matrix", {gpu::Arg::buf(cur), gpu::Arg::buf(p.output_matrix),
+                            gpu::Arg::inline_bytes(meta, 2), gpu::Arg::buf(next)}, pixels, error)) return false;
+         cur = std::move(next);
+         if (!gpu->flush(error)) return false;
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     const size_t row_bytes = size_t(w) * 3 * sizeof(float);
+-    return gpu->read(cur.get(), size_t(offset) * row_bytes, out, size_t(rows) * row_bytes, error);
++    return gpu->read(cur.get(), size_t(offset) * row_bytes, out, size_t(rows) * row_bytes, error) &&
++        bounded_gpu_checkpoint(cancel, error);
+ }
+ 
+ // Producer/consumer over halo bands. Row numbers are global plane rows.
+ inline bool run_print_run(gpu::Gpu* gpu, const PrintRunTables& t, const ExternalPlane& in,
+                           ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
+-                          PointChainStats* stats, std::string& error) {
+-    if (in.channels() != 3 || out.channels() != 3 || in.width() != out.width() || in.height() != out.height()) {
+-        error = "external planes must be matching RGB float32";
+-        return false;
+-    }
+-    if (band_rows == 0) { error = "band height must be positive"; return false; }
++                          PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {}) {
++    if (stats) *stats = {};
+     if (!valid_print_run(t, error)) return false;
+-    std::vector<StripSpan> spans;
+-    for (uint64_t y = 0; y < in.height(); y += band_rows)
+-        spans.push_back({uint32_t(y), std::min(band_rows, in.height() - uint32_t(y))});
+-    if (order == BandOrder::Reverse) std::reverse(spans.begin(), spans.end());
+-    if (order == BandOrder::Shuffled) std::shuffle(spans.begin(), spans.end(), std::mt19937(12345));
+-
+-    std::atomic<size_t> next{0};
+-    std::atomic<bool> failed{false};
+-    std::mutex gpu_mutex, error_mutex;
+-    auto work = [&]() {
+-        std::vector<float> src, dst;
+-        for (;;) {
+-            const size_t i = next.fetch_add(1);
+-            if (i >= spans.size() || failed.load()) return;
+-            const StripSpan s = spans[i];
+-            try {
+-                const uint32_t lo = s.y0 > t.halo ? s.y0 - t.halo : 0;
+-                const uint32_t hi = uint32_t(std::min<uint64_t>(in.height(), uint64_t(s.y0) + s.rows + t.halo));
+-                src.resize(size_t(hi - lo) * in.width() * 3);
+-                dst.resize(size_t(s.rows) * in.width() * 3);
+-                in.read_rows(lo, hi - lo, src.data());
+-                std::string band_error;
+-                bool ok;
+-                {
+-                    std::lock_guard<std::mutex> guard(gpu_mutex);
+-                    ok = print_run_window(gpu, t, src.data(), in.width(), hi - lo, s.y0 - lo, s.rows,
+-                                          dst.data(), band_error);
+-                }
+-                if (!ok) throw std::runtime_error(band_error);
+-                out.write_rows(s.y0, s.rows, dst.data());
+-            } catch (const std::exception& e) {
+-                std::lock_guard<std::mutex> guard(error_mutex);
+-                if (!failed.exchange(true)) error = e.what();
+-                return;
+-            }
+-        }
+-    };
+-    const unsigned n_workers = unsigned(std::min<size_t>(std::max(1u, workers), spans.size()));
+-    std::vector<std::thread> threads;
+-    try {
+-        for (unsigned i = 1; i < n_workers; ++i) threads.emplace_back(work);
+-    } catch (...) {
+-        // Finish through the shared queue even when another worker cannot start.
+-    }
+-    work();
+-    for (auto& th : threads) th.join();
+-    if (stats) {
+-        stats->bands = uint32_t(spans.size());
+-        stats->band_rows = band_rows;
+-        stats->max_band_bytes = uint64_t(std::min<uint64_t>(in.height(), uint64_t(band_rows) + 2ull * t.halo)) * in.width() * 3 * sizeof(float);
+-    }
+-    return !failed.load();
++    return run_external_bands(in, out, band_rows, t.halo, order, workers, stats, error, cancel,
++        [&](const float* src, uint32_t w, uint32_t window, uint32_t offset, uint32_t rows,
++            float* dst, std::string& e) {
++            return print_run_window(gpu, t, src, w, window, offset, rows, dst, e, cancel);
++        });
+ }
+ 
+ }  // namespace spk
+diff --git a/engine/src/pipeline/external_plane.hpp b/engine/src/pipeline/external_plane.hpp
+new file mode 100644
+index 0000000..814f2bc
+--- /dev/null
++++ b/engine/src/pipeline/external_plane.hpp
+@@ -0,0 +1,189 @@
++// Spektralab-X - https://github.com/Dear-Ded/Spektralab-X
++// Copyright (C) 2026 Spektralab-X contributors
++// Additional terms under GPL-3.0 section 7 apply; see NOTICE.
++// Anonymous float planes publish only after every row has been written.
++// Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
++#pragma once
++
++#include <algorithm>
++#include <cerrno>
++#include <cstdint>
++#include <cstdlib>
++#include <fcntl.h>
++#include <functional>
++#include <limits>
++#include <memory>
++#include <mutex>
++#include <stdexcept>
++#include <string>
++#include <unistd.h>
++#include <utility>
++#include <vector>
++
++namespace spk {
++
++// Called at I/O and GPU boundaries, possibly from multiple workers.
++using BoundedCancel = std::function<bool()>;
++
++inline void bounded_cancel_checkpoint(const BoundedCancel& cancel) {
++    if (cancel && cancel()) throw std::runtime_error("render cancelled");
++}
++
++inline bool bounded_gpu_checkpoint(const BoundedCancel& cancel, std::string& error) {
++    if (!cancel || !cancel()) return true;
++    error = "render cancelled";
++    return false;
++}
++
++class ExternalPlane {
++    enum class State { Filling, Producing, Sealed, Failed };
++
++public:
++    class Producer {
++    public:
++        Producer(const Producer&) = delete;
++        Producer& operator=(const Producer&) = delete;
++        Producer(Producer&& other) noexcept : plane_(std::exchange(other.plane_, nullptr)) {}
++        ~Producer() { if (plane_) plane_->invalidate(); }
++
++        void write_rows(uint32_t y, uint32_t rows, const float* data, const BoundedCancel& cancel = {}) const {
++            if (!plane_) throw std::logic_error("external plane producer is closed");
++            plane_->write(y, rows, data, State::Producing, cancel);
++        }
++        void seal(const BoundedCancel& cancel = {}) {
++            if (!plane_) throw std::logic_error("external plane producer is closed");
++            bounded_cancel_checkpoint(cancel);
++            plane_->seal_from(State::Producing);
++            plane_ = nullptr;
++        }
++
++    private:
++        friend class ExternalPlane;
++        explicit Producer(ExternalPlane* plane) : plane_(plane) {}
++        ExternalPlane* plane_;
++    };
++
++    ExternalPlane(const std::string& dir, uint32_t w, uint32_t h, uint32_t c) : w_(w), h_(h), c_(c) {
++        if (!w || !h || !c) throw std::invalid_argument("empty external plane");
++        const uint64_t row = uint64_t(w) * c * sizeof(float);
++        if (row / sizeof(float) / c != w || row > uint64_t(std::numeric_limits<off_t>::max()) / h)
++            throw std::overflow_error("external plane exceeds file offsets");
++        // One byte per row is allocated before opening the file. No coverage
++        // allocation can fail after a successful pixel write.
++        rows_.reset(new uint8_t[h]());
++        const std::string name = dir + "/spk-plane-XXXXXX";
++        std::vector<char> pattern(name.begin(), name.end());
++        pattern.push_back('\0');
++        fd_ = mkstemp(pattern.data());
++        if (fd_ < 0) throw std::runtime_error("cannot create external plane");
++        int unlinked;
++        do { unlinked = unlink(pattern.data()); } while (unlinked < 0 && errno == EINTR);
++        if (unlinked < 0) {
++            close(fd_); fd_ = -1;
++            throw std::runtime_error("cannot unlink external plane");
++        }
++        int reserved;
++        do { reserved = posix_fallocate(fd_, 0, off_t(bytes())); } while (reserved == EINTR);
++        if (reserved != 0) {
++            close(fd_); fd_ = -1;
++            throw std::runtime_error("cannot reserve external plane space");
++        }
++    }
++    ~ExternalPlane() { if (fd_ >= 0) close(fd_); }
++    ExternalPlane(const ExternalPlane&) = delete;
++    ExternalPlane& operator=(const ExternalPlane&) = delete;
++
++    uint32_t width() const { return w_; }
++    uint32_t height() const { return h_; }
++    uint32_t channels() const { return c_; }
++    uint64_t row_bytes() const { return uint64_t(w_) * c_ * sizeof(float); }
++    uint64_t bytes() const { return row_bytes() * h_; }
++    uint64_t coverage_bytes() const { return h_; }
++
++    bool ready() const {
++        std::lock_guard<std::mutex> lock(mutex_);
++        return state_ == State::Sealed;
++    }
++    Producer producer() {
++        std::lock_guard<std::mutex> lock(mutex_);
++        if (state_ != State::Filling || written_ || pending_)
++            throw std::logic_error("external plane output must be empty");
++        state_ = State::Producing;
++        return Producer(this);
++    }
++    void seal() { seal_from(State::Filling); }
++
++    void write_rows(uint32_t y, uint32_t rows, const float* data, const BoundedCancel& cancel = {}) {
++        write(y, rows, data, State::Filling, cancel);
++    }
++    void read_rows(uint32_t y, uint32_t rows, float* out, const BoundedCancel& cancel = {}) const {
++        validate(y, rows, out);
++        if (!ready()) throw std::logic_error("external plane is not sealed");
++        io(false, y, rows, out, cancel);
++    }
++
++private:
++    void invalidate() noexcept {
++        std::lock_guard<std::mutex> lock(mutex_);
++        state_ = State::Failed;
++    }
++    void seal_from(State required) {
++        std::lock_guard<std::mutex> lock(mutex_);
++        if (state_ == State::Sealed && required == State::Filling) return;
++        if (state_ != required) throw std::logic_error("external plane cannot be sealed in this state");
++        if (pending_ || written_ != h_) throw std::logic_error("incomplete external plane");
++        state_ = State::Sealed;
++    }
++    void validate(uint32_t y, uint32_t rows, const float* data) const {
++        if (y > h_ || rows > h_ - y) throw std::out_of_range("external plane rows");
++        if (rows && (!data || row_bytes() > std::numeric_limits<size_t>::max() / rows))
++            throw std::invalid_argument("invalid external plane row storage");
++    }
++    void write(uint32_t y, uint32_t rows, const float* data, State required, const BoundedCancel& cancel) {
++        validate(y, rows, data);
++        bounded_cancel_checkpoint(cancel);
++        {
++            std::lock_guard<std::mutex> lock(mutex_);
++            if (state_ != required) throw std::logic_error("external plane is not writable");
++            for (uint32_t i = 0; i < rows; ++i)
++                if (rows_[y + i]) throw std::logic_error("external plane rows overlap");
++            if (!rows) return;
++            std::fill_n(rows_.get() + y, rows, uint8_t(1));
++            ++pending_;
++        }
++        try {
++            io(true, y, rows, const_cast<float*>(data), cancel);
++        } catch (...) {
++            std::lock_guard<std::mutex> lock(mutex_);
++            --pending_;
++            state_ = State::Failed;
++            throw;
++        }
++        std::lock_guard<std::mutex> lock(mutex_);
++        --pending_;
++        if (state_ != required) throw std::logic_error("external plane output was aborted");
++        std::fill_n(rows_.get() + y, rows, uint8_t(2));
++        written_ += rows;
++    }
++    void io(bool write, uint32_t y, uint32_t rows, float* data, const BoundedCancel& cancel) const {
++        char* p = reinterpret_cast<char*>(data);
++        size_t left = size_t(rows * row_bytes());
++        off_t off = off_t(y * row_bytes());
++        while (left) {
++            bounded_cancel_checkpoint(cancel);
++            const size_t chunk = std::min<size_t>(left, 1u << 20);
++            const ssize_t n = write ? pwrite(fd_, p, chunk, off) : pread(fd_, p, chunk, off);
++            if (n < 0 && errno == EINTR) continue;
++            if (n <= 0 || size_t(n) > chunk) throw std::runtime_error("external plane io failed");
++            p += n; off += n; left -= size_t(n);
++        }
++        bounded_cancel_checkpoint(cancel);
++    }
++    int fd_ = -1;
++    uint32_t w_, h_, c_, written_ = 0, pending_ = 0;
++    std::unique_ptr<uint8_t[]> rows_;
++    mutable std::mutex mutex_;
++    State state_ = State::Filling;
++};
++
++} // namespace spk

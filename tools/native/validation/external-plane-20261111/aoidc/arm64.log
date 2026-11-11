@@ -1,0 +1,5 @@
+Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+Target: aarch64-unknown-linux-android29
+Thread model: posix
+InstalledDir: /opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
+ARM64 API29 headers compile: PASS (-Wall -Wextra -Werror)

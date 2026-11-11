@@ -92,6 +92,8 @@ IBX 已编译并执行上游 `hdr_curve_unit` 九项 CPU 检查，验证 knee、
 
 ## 下一阶段可执行路线
 
+后续 0042 已完成下表首项中的覆盖追踪、seal、取消与失败不发布，并在两云增加故障注入和 GPU 取消恢复验证。统一内存账本和生产 Pipeline 接入仍未完成；见 [后续实现与证据](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md)。
+
 | 优先级 | 具体交付 | 通过条件 |
 | --- | --- | --- |
 | P0 | 为 external plane 加覆盖追踪/seal、取消和失败后不发布；为每 worker staging、GPU 常量/池、codec 建统一账本 | 缺带、重复/重叠策略、磁盘失败、取消、worker 创建失败均有注入；准入前拒绝超限；合法字节不变 |

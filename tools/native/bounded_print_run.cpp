@@ -1,5 +1,6 @@
 // Phase-two verification of halo-band external-plane execution (patch 0040).
 // Synthetic data only. Co-created with Claude (Anthropic), 2026-11-10. See NOTICE.
+// Publication and GPU cancellation checks co-created with GPT (OpenAI), 2026-11-11.
 #include "gpu/gpu.hpp"
 #include "core/blob.hpp"
 #include "core/cam16.hpp"
@@ -96,6 +97,7 @@ void fill(ExternalPlane& p, size_t seed) {
         }
         p.write_rows(y, 1, row.data());
     }
+    p.seal();
 }
 
 // Independent whole-frame reference: the Pipeline nodes written out again.
@@ -136,6 +138,7 @@ void whole_reference(gpu::Gpu* g, const PrintRunTables& t, const ExternalPlane& 
     require(g->flush(error), error);
     require(g->read(d.get(), 0, dst.data(), bytes, error), error);
     out.write_rows(0, h, dst.data());
+    out.seal();
 }
 
 bool same(const ExternalPlane& a, const ExternalPlane& b, size_t& floats) {
@@ -151,6 +154,47 @@ bool same(const ExternalPlane& a, const ExternalPlane& b, size_t& floats) {
         floats += x.size();
     }
     return true;
+}
+
+void cancellation_checks(gpu::Gpu* gpu, const Colour& colour, const std::string& scratch) {
+    constexpr uint32_t w = 17, h = 23;
+    const auto tables = make_tables(gpu, colour, "sRGB", 2, true, 0.7, 0.7);
+    ExternalPlane input(scratch, w, h, 3), reference(scratch, w, h, 3);
+    fill(input, 81);
+    whole_reference(gpu, tables, input, reference);
+    std::vector<float> src(size_t(w) * h * 3), dst(src.size()), expected(src.size());
+    input.read_rows(0, h, src.data());
+    reference.read_rows(0, h, expected.data());
+    unsigned checkpoints = 0;
+    require(print_run_window(gpu, tables, src.data(), w, h, 0, h, dst.data(), error,
+        [&] { ++checkpoints; return false; }), error);
+    require(checkpoints >= 10, "print cancellation checkpoints missing");
+    for (unsigned stop = 1; stop <= checkpoints; ++stop) {
+        unsigned visited = 0;
+        std::string message;
+        require(!print_run_window(gpu, tables, src.data(), w, h, 0, h, dst.data(), message,
+            [&] { return ++visited == stop; }) && message == "render cancelled", "print GPU cancel ignored");
+        require(print_run_window(gpu, tables, src.data(), w, h, 0, h, dst.data(), error), error);
+        require(std::memcmp(dst.data(), expected.data(), dst.size() * sizeof(float)) == 0,
+            "print GPU recovery differs after cancellation");
+    }
+    unsigned total = 0;
+    ExternalPlane control(scratch, w, h, 3);
+    require(run_print_run(gpu, tables, input, control, 3, BandOrder::Forward, 1, nullptr, error,
+        [&] { ++total; return false; }), error);
+    for (unsigned stop : {1u, total / 2, total}) {
+        ExternalPlane output(scratch, w, h, 3), recovery(scratch, w, h, 3);
+        unsigned visited = 0;
+        PointChainStats stats{99, 99, 99};
+        std::string message;
+        require(!run_print_run(gpu, tables, input, output, 3, BandOrder::Forward, 1, &stats, message,
+            [&] { return ++visited == stop; }) && message == "render cancelled", "print run cancel ignored");
+        require(!output.ready() && stats.bands == 0 && input.ready(), "print run published partial output");
+        require(run_print_run(gpu, tables, input, recovery, 3, BandOrder::Shuffled, 4, nullptr, error), error);
+        size_t floats = 0;
+        require(same(recovery, reference, floats), "print run recovery differs after cancellation");
+    }
+    std::cout << "PRINT_CANCEL_PASS gpu_boundaries=" << checkpoints << " run_boundaries=3 recovery_bytes_equal=true\n";
 }
 
 void halo_checks() {
@@ -254,6 +298,7 @@ int main(int argc, char** argv) {
         Colour colour;
         require(blob.open(std::string(argv[2]) + "/spektrafilm_constants.bin", error) && colour.init(blob, error), error);
         halo_checks();
+        cancellation_checks(g.get(), colour, scratch);
         matrix(g.get(), colour, scratch);
         if (is_strict) range_case(g.get(), colour, scratch);
         std::cout << "BOUNDED_PRINT_RUN_PASS cases=" << cases << " float32_values=" << compared

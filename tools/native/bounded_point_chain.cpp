@@ -1,5 +1,6 @@
 // Phase-one verification of bounded external-plane execution (patch 0039).
 // Synthetic data only. Co-created with Claude (Anthropic), 2026-11-10. See NOTICE.
+// Publication and GPU cancellation checks co-created with GPT (OpenAI), 2026-11-11.
 #include "gpu/gpu.hpp"
 #include "core/blob.hpp"
 #include "core/cam16.hpp"
@@ -107,6 +108,7 @@ void fill(ExternalPlane& p, size_t seed) {
         }
         p.write_rows(y, 1, row.data());
     }
+    p.seal();
 }
 
 // Independent whole-frame reference: the three Pipeline nodes written out again.
@@ -136,6 +138,7 @@ void whole_reference(Gpu* gpu, const PointChainTables& t, const ExternalPlane& i
     std::vector<float> dst(px * 3);
     require(gpu->read(d.get(), 0, dst.data(), bytes, error), error);
     out.write_rows(0, h, dst.data());
+    out.seal();
 }
 
 bool same(const ExternalPlane& a, const ExternalPlane& b, size_t& floats) {
@@ -164,6 +167,47 @@ uint64_t fnv1a(const ExternalPlane& p) {
         for (size_t i = 0; i < v.size() * sizeof(float); ++i) { h ^= bytes[i]; h *= 0x100000001b3ull; }
     }
     return h;
+}
+
+void cancellation_checks(Gpu* gpu, const spk::Colour& colour, const std::string& scratch) {
+    constexpr uint32_t w = 17, h = 23;
+    const auto tables = make_tables(gpu, colour, "sRGB", 2, true);
+    ExternalPlane input(scratch, w, h, 3), reference(scratch, w, h, 3);
+    fill(input, 81);
+    whole_reference(gpu, tables, input, reference);
+    std::vector<float> src(size_t(w) * h * 3), dst(src.size()), expected(src.size());
+    input.read_rows(0, h, src.data());
+    reference.read_rows(0, h, expected.data());
+    unsigned checkpoints = 0;
+    require(spk::point_chain_band(gpu, tables, src.data(), w, h, dst.data(), error,
+        [&] { ++checkpoints; return false; }), error);
+    require(checkpoints >= 8, "point cancellation checkpoints missing");
+    for (unsigned stop = 1; stop <= checkpoints; ++stop) {
+        unsigned visited = 0;
+        std::string message;
+        require(!spk::point_chain_band(gpu, tables, src.data(), w, h, dst.data(), message,
+            [&] { return ++visited == stop; }) && message == "render cancelled", "point GPU cancel ignored");
+        require(spk::point_chain_band(gpu, tables, src.data(), w, h, dst.data(), error), error);
+        require(std::memcmp(dst.data(), expected.data(), dst.size() * sizeof(float)) == 0,
+            "point GPU recovery differs after cancellation");
+    }
+    unsigned total = 0;
+    ExternalPlane control(scratch, w, h, 3);
+    require(spk::run_point_chain(gpu, tables, input, control, 3, BandOrder::Forward, 1, nullptr, error,
+        [&] { ++total; return false; }), error);
+    for (unsigned stop : {1u, total / 2, total}) {
+        ExternalPlane output(scratch, w, h, 3), recovery(scratch, w, h, 3);
+        unsigned visited = 0;
+        spk::PointChainStats stats{99, 99, 99};
+        std::string message;
+        require(!spk::run_point_chain(gpu, tables, input, output, 3, BandOrder::Forward, 1, &stats, message,
+            [&] { return ++visited == stop; }) && message == "render cancelled", "point run cancel ignored");
+        require(!output.ready() && stats.bands == 0 && input.ready(), "point run published partial output");
+        require(spk::run_point_chain(gpu, tables, input, recovery, 3, BandOrder::Shuffled, 4, nullptr, error), error);
+        size_t floats = 0;
+        require(same(recovery, reference, floats), "point run recovery differs after cancellation");
+    }
+    std::cout << "POINT_CANCEL_PASS gpu_boundaries=" << checkpoints << " run_boundaries=3 recovery_bytes_equal=true\n";
 }
 
 void band_rows_checks() {
@@ -240,6 +284,7 @@ void range_case(Gpu* gpu, const spk::Colour& colour, const std::string& scratch)
         std::vector<float> rows(size_t(k) * w * 3), got(rows.size()), want(rows.size());
         in.read_rows(y0, k, rows.data());
         win.write_rows(0, k, rows.data());
+        win.seal();
         whole_reference(gpu, t, win, ref);
         a.read_rows(y0, k, got.data());
         ref.read_rows(0, k, want.data());
@@ -269,6 +314,7 @@ void memory(Gpu* gpu, const spk::Colour& colour, const std::string& scratch, boo
         in.read_rows(0, h, src.data());
         require(spk::point_chain_band(gpu, t, src.data(), w, h, dst.data(), error), error);
         out.write_rows(0, h, dst.data());
+        out.seal();
     } else {
         rows = spk::choose_band_rows(h, w, kRange, uint64_t(48) << 20, 0);
         require(spk::run_point_chain(gpu, t, in, out, rows, BandOrder::Forward, 1, nullptr, error), error);
@@ -302,6 +348,7 @@ int main(int argc, char** argv) {
             return 0;
         }
         band_rows_checks();
+        cancellation_checks(gpu.get(), colour, scratch);
         matrix(gpu.get(), colour, scratch);
         if (is_strict) range_case(gpu.get(), colour, scratch);
         std::cout << "BOUNDED_POINT_CHAIN_PASS cases=" << cases << " float32_values=" << compared

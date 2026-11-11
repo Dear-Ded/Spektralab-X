@@ -522,6 +522,32 @@ MEMORY=1 UP=... B=... RESOURCES_DIR=... BUILD_DIR=... bash tools/native/run_boun
 
 Requires patch 0039. It compares banded external-plane execution of the pointwise print_linear chain (xyz to RGB, CAM16 gamut, CCTF) with an independent whole-frame run byte for byte across band heights, band orders and worker counts, and checks that a 4097x3073 plane is refused by a strict 128 MiB range while bands pass. `MEMORY=1` adds separate-process VmHWM runs. Synthetic data, host llvmpipe only; not a phone measurement and not wired into the render pipeline. See [the design](../../docs/ENGINE_EXTERNAL_PLANE_DESIGN_2026-11-10.md).
 
+## External-plane publication and cancellation
+
+Patch 0042 requires 0039-0041. Fill an input with disjoint `write_rows` calls,
+then `seal()` it before use. Readback requires a sealed plane. Bounded runs own
+their output through an exclusive Producer and publish only on complete success;
+failure/cancellation invalidates that output. Published input remains immutable.
+The caller must own the Gpu exclusively and provide a thread-safe cancellation
+callback. Cancellation occurs between I/O chunks and GPU stages, not inside a
+blocking system call or an in-progress dispatch.
+
+```bash
+UP=/path/to/patched/upstream BUILD_DIR=/path/to/publication \
+  bash tools/native/run_external_plane_contract.sh
+UP=/path/to/patched/upstream BUILD_DIR=/path/to/publication-asan SANITIZE=1 \
+  bash tools/native/run_external_plane_contract.sh
+```
+
+This Linux-only harness links no engine archive. It injects short/interrupted
+I/O, EOF, reservation/write failure, worker creation failure and cancellation;
+checks concurrent coverage/commit, abandoned output and descriptor cleanup;
+and compares synthetic float bytes including signed zero and NaN payloads.
+`BEFORE_FIX=1` reproduces the unsealed-read bug against 0041. The point/print GPU
+runners now require 0042 and also exercise cancellation at each stage, final
+publication and recovery against independent whole-frame bytes. See
+[the report](../../docs/ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md).
+
 ## Bounded prototype contracts and upstream kernel references
 
 Patch 0041 requires 0039/0040. It refuses impossible one-row/halo budgets,

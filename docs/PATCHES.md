@@ -47,6 +47,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 | `0033-integer-view-readback-cancellation.patch` | `pipeline/view_process.cpp` | 为整数 view 增加最终 GPU 打包前、完成后、CPU 分配前和读回后的安全取消边界；Android DI adapter 传入同一 generation token，旧无输出变换的 look/直接打包按行轮询并在 worker 汇合后报告。实际 noFilm 整数/DI 分别 10/9 个边界及恢复对照通过；不能抢占在途 GPU 工作。GPT（OpenAI）共创。 |
 | `0034-nofilm-float-row-readback.patch` | `pipeline/view.hpp`、`pipeline/view_process.cpp` | 内部 noFilm float view 可同步交付最多 32 行，Android 4:4:4 JPEG 直接调色并写入匿名 spool，省去整幅 CPU float 结果。沿用全图坐标、原数值与坏帧采样检查，false/throw/cancel 失败时不交付 JPEG；预览、胶片/DI 和 TIFF 保留原路径。内部 C++ Request 布局变化，消费者需同步重编；不代表完整 RAW 分块或全程峰值下降。见 [实现与验证](NOFILM_ROW_READBACK_2026-11-09.md)。GPT（OpenAI）共创。 |
 
+0042 后续补充：[`0042-external-plane-publication.patch`](../patches/0042-external-plane-publication.patch) 将外存原型拆为独立 `external_plane.hpp`，追踪逐行覆盖和封存状态，失败或取消不发布输出，并共享 point/FIR worker 执行器。合法 kernel 数值与顺序保持，仍未接入生产 Pipeline。两云故障注入、逐字节 GPU 回归及恢复验证见 [报告](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 

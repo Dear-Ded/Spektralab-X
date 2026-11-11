@@ -1,0 +1,7 @@
+/data/work/gpt-engine-audit-20261111/plane-publication/repo/tools/native/external_plane_contract.cpp:46:6: warning: ‘void {anonymous}::equal(const spk::ExternalPlane&, const std::vector<float>&)’ defined but not used [-Wunused-function]
+   46 | void equal(const spk::ExternalPlane& plane, const std::vector<float>& expected) {
+      |      ^~~~~
+/data/work/gpt-engine-audit-20261111/plane-publication/repo/tools/native/external_plane_contract.cpp:40:20: warning: ‘std::vector<float> {anonymous}::pixels(uint32_t, uint32_t)’ defined but not used [-Wunused-function]
+   40 | std::vector<float> pixels(uint32_t w, uint32_t h) {
+      |                    ^~~~~~
+FAIL unwritten preallocated pixels were readable

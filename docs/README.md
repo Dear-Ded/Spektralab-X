@@ -38,6 +38,8 @@ Most documents are in Chinese; those marked EN have English.
 | [PATCHES.md](PATCHES.md) | 对上游引擎的补丁和写新补丁的流程 · EN |
 | [ANDROID_ENGINE_ADAPTATION.md](ANDROID_ENGINE_ADAPTATION.md) | 安卓引擎适配：已实现的数值、缓存、HDR、导出修复，云端验证和完整分块渲染的剩余工作；GPT 共创记录 |
 | [ENGINE_DEEP_REVIEW_2026-11-09.md](ENGINE_DEEP_REVIEW_2026-11-09.md) | 本轮深审：场景曲线分批、Float 精度、HDR 蒙版、JPEG 尺寸事实，以及内存/取消/全尺寸管线的后续适配 |
+| [ENGINE_ANDROID_REASSESSMENT_2026-11-11.md](ENGINE_ANDROID_REASSESSMENT_2026-11-11.md) | 后续版本复核：TIFF/ICC/JNI、上游 HDR、两云证据与执行路线 |
+| [ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md) | 外存分块完成状态与取消：缺带复现、失败不发布、两云故障注入与 GPU 恢复 |
 | [ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md](ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md) | 六阶段引擎优化路线；本轮 CRX 维护、工作源预算、JPEG 外存行转换的实现、两云证据与剩余边界 |
 | [DNG_WHITE_XY_2026-11-09.md](DNG_WHITE_XY_2026-11-09.md) | WhiteXY-only DNG 的校准、源白平衡与 FM/Bradford 实现，合成/真实样片对照及 profile 支持边界 |
 | [DNG_FLOAT_PRECISION_2026-11-09.md](DNG_FLOAT_PRECISION_2026-11-09.md) | 浮点 DNG 的早期整数化、图像最大值耦合与分数黑电平实证，受限 float LinearRaw 的实现依赖 |
