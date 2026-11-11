@@ -5,6 +5,12 @@ bounded-prototype contracts and upstream HDR research are recorded in
 [the engine reassessment](../../docs/ENGINE_ANDROID_REASSESSMENT_2026-11-11.md).
 See [the synthetic two-host evidence](validation/engine-android-20261111/).
 
+The [default-pair 33-cube gate](../../docs/LUT_INTERACTION_GATE_2026-11-11.md)
+compares the current film/paper default through the production display boundary
+on both Linux hosts. Common synthetic SDR groups pass; signed stress tails do
+not qualify a general RAW preview. This is an offline experiment, not an enabled
+LUT interaction or a replacement for full-resolution strip rendering.
+
 The RAW tone and desktop file-intent corrections are documented in
 [RAW color fixes](../../docs/RAW_COLOR_FIXES_2026-11-10.md). `run.sh` includes
 the independent exposure/highlight domain probes. They can also run without

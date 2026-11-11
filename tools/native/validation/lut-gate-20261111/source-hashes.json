@@ -1,0 +1,58 @@
+[
+  {
+    "path": "tools/native/lut_offline.cpp",
+    "sha256": "294fe9621a7b1903f8288be262387c1d949cdfaf25c0f0d2ef28dfe996a129ed"
+  },
+  {
+    "path": "tools/native/run_lut_offline.sh",
+    "sha256": "9ae0059fc339f62c187e960e1fd535e743d1a07453286dfecd9b8ae75d978f81"
+  },
+  {
+    "path": "tools/native/lut_metrics.py",
+    "sha256": "c415ca4a2bf25c291ed3cd5ffc29338815cf9ea27163ca53cbda43e0a0398a2a"
+  },
+  {
+    "path": "tools/lut_experiment/gate_report.py",
+    "sha256": "7e1ddf2391aeff5fa9789b6a256de796bc1e77b012702bafd9863a2877bfd9b8"
+  },
+  {
+    "path": "tools/lut_experiment/ciede2000_reference.py",
+    "sha256": "84b99d76b85e23abbbb64e08d6ebba9a1abbd66c88a11adbea04d71805542c2c"
+  },
+  {
+    "path": "app/src/main/java/com/dearded/spektralab/EditorViewModel.kt",
+    "sha256": "9a4b410f6c7fdfa9d90b82eac98361832388cde0ed0855546042098a2d81a608"
+  },
+  {
+    "path": "app/src/main/java/com/dearded/spektralab/PreviewPublication.kt",
+    "sha256": "67dccc27a386e537adbcb4b71b3e53ee459b6581165ab7527383be1179f8fb2a"
+  },
+  {
+    "path": "app/src/test/java/com/dearded/spektralab/PreviewPublicationTest.kt",
+    "sha256": "3ff536d83c4ee4b82fbed2d668d09587a55461f2b5b0a1b16541307c725258fd"
+  },
+  {
+    "path": "tools/jvm/run_preview_publication.ps1",
+    "sha256": "d46b84d8ffeb9dafc74bcbbf588893c677c765f7430128e06fd2dc9ca8595873"
+  },
+  {
+    "path": "tools/jvm/preview/Bitmap.kt",
+    "sha256": "6c92ce2ddbd096da4989bc66090ed65fa8dc6adda4d5cb5aba2c10427d8b3076"
+  },
+  {
+    "path": "tools/jvm/preview/PreviewEditorContract.kt",
+    "sha256": "22f349371d6427750d573d3592207c5f3dc1cf91cd09ffe5677bcb2fdfb56883"
+  },
+  {
+    "path": "tools/jvm/preview/PreviewHarness.kt.in",
+    "sha256": "6af30d6dc30d90f48dd3f8bcecf85422e28bcf1e41afe63af2f90f3ebee452a7"
+  },
+  {
+    "path": "tools/jvm/preview/README.md",
+    "sha256": "81e58f6895233a212edaa0f5283fe6369b7938261669ab54c41ffa47c2c6910f"
+  },
+  {
+    "path": "tools/jvm/preview/SystemClock.kt",
+    "sha256": "5b0e39a4eab4225b2a8cc3a97d5f454010dcd3e90771e875d9e4a2111d16f2d9"
+  }
+]

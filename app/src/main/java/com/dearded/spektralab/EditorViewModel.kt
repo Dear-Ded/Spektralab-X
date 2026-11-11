@@ -113,6 +113,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var applied = Edit()
     private var iccPath = ""
     @Volatile private var wanted = Edit.NONE
+    private val previewPublication = PreviewPublication(Edit.NONE)
+    private var appliedIntent = previewPublication.intent()
+    private var sessionOutput = "sRGB"
 
     private val renders = Channel<Unit>(Channel.CONFLATED)
     // A Layer 2 change: the last render re-packed through the new look, no engine pass.
@@ -381,9 +384,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     photo?.recycle()
                 }
             }
+            val displaySpace = DisplayColor.space
             val (edit, info, before) = withContext(EngineThread.dispatcher) {
                 // The screen's space: Display P3 when the window is wide-gamut.
-                if (!NativeEngine.setOutput(handle, DisplayColor.space, false)) log("display transform: ${NativeEngine.lastError()}")
+                if (!NativeEngine.setOutput(handle, displaySpace, false))
+                    throw EngineException("display transform: ${NativeEngine.lastError()}")
                 val params = NativeEngine.getParams(handle)?.let(::JSONObject) ?: JSONObject()
                 val edit = Edit.fromParams(params, look)
                 Triple(edit, JSONObject(NativeEngine.sourceInfo(handle)), NativeEngine.beforeBitmap(handle))
@@ -419,6 +424,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         applied = edit
                         appliedLook = Look.NEUTRAL
                         wanted = edit
+                        previewPublication.replaceSource(replacement)
+                        appliedIntent = previewPublication.request(edit)
+                        sessionOutput = displaySpace
                         openSpace = INPUT_SPACE
                         openLinear = true
                     }
@@ -487,6 +495,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun releaseSession() = synchronized(cancelLock) {
         if (session != 0L) NativeEngine.release(session)
         session = 0L
+        previewPublication.replaceSource(0L)
     }
 
     /**
@@ -547,6 +556,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         moveHistory?.invoke()
         wanted = edit
+        previewPublication.request(edit)
         saves.trySend(Unit)
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
         _ui.update {
@@ -584,15 +594,20 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
         clearOverride(render = true)
         val edit = state.edit
+        val intent = previewPublication.intent()
         val revision = ++detailRevision
+        var identity: PreviewFrame<Edit>? = null
         fun current() = detailRevision == revision && _ui.value.edit == edit &&
-            _ui.value.source === src && _ui.value.busy == null
+            _ui.value.source === src && _ui.value.busy == null && previewPublication.intent() == intent &&
+            (identity?.let { previewPublication.current(it) } ?: true)
         _ui.update { it.copy(loadingDetail = true) }
         viewModelScope.launch {
             try {
                 val bitmap = withContext(EngineThread.dispatcher) {
                     if (!current() || session == 0L) return@withContext null
                     applyWanted()?.let { throw EngineException("参数无效：$it") }
+                    identity = previewPublication.frame(session, appliedIntent,
+                        if (target == null) "full" else "preview", target ?: sessionOutput)
                     inFlightTier = "detail"
                     try {
                         val rendered = if (target == null) NativeEngine.renderBitmap(session, "full")
@@ -602,7 +617,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                             throw EngineException("渲染失败：${NativeEngine.lastError()}")
                         }
                         try {
-                            if (target == null) DisplayColor.tag(rendered) else DisplayColor.tagOutput(rendered, target)
+                            DisplayColor.tagOutput(rendered, target ?: sessionOutput)
                         } catch (e: Throwable) {
                             rendered.recycle()
                             throw e
@@ -763,6 +778,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val next = edit?.let { _ui.value.catalog.normalize(it) }?.takeIf { it != wanted }
         if (next == override) return
         override = next
+        previewPublication.request(next ?: wanted)
         cancelStalePreview()
         renders.trySend(Unit)
     }
@@ -771,21 +787,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun clearOverride(render: Boolean): Boolean {
         if (override == null) return false
         override = null
+        previewPublication.request(wanted)
         if (render) renders.trySend(Unit)
         return true
     }
 
     private fun applyWanted(): String? {
-        val target = override ?: wanted
+        val intent = previewPublication.intent()
+        val target = intent.edit
         applyLook(target.look)
-        if (target == applied) return null
+        if (target == applied) { appliedIntent = intent; return null }
         val delta = target.delta(applied)
-        if (delta.length() == 0) { applied = target; return null }
+        if (delta.length() == 0) { applied = target; appliedIntent = intent; return null }
         if (NativeEngine.setParams(session, delta.toString()) == null) {
-            if (target === override) override = null else rejected = target
+            if (target === override) {
+                override = null
+                previewPublication.request(wanted)
+            } else rejected = target
             return NativeEngine.lastError()
         }
         applied = target
+        appliedIntent = intent
         return null
     }
 
@@ -816,20 +838,20 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun repackLoop() {
         for (request in repacks) {
-            val tier = _ui.value.imageTier
-            if (tier.isEmpty() || _ui.value.busy != null) continue
-            var renderedSession = 0L
+            if (_ui.value.imageTier.isEmpty() || _ui.value.busy != null) continue
+            var identity: PreviewFrame<Edit>? = null
             val out = try {
                 withContext(EngineThread.dispatcher) {
                     if (session == 0L || _ui.value.busy != null) return@withContext null
-                    renderedSession = session
+                    val tier = previewPublication.cachedTier(session) ?: return@withContext null
                     val target = override ?: wanted
                     // A preceding film/geometry edit may still be waiting for a
                     // render. Its old cache cannot be repacked as the new input.
                     if (!target.sameRenderInputAs(applied)) return@withContext null
                     applyWanted()?.let { throw EngineException("参数无效：$it") }
+                    identity = previewPublication.frame(session, appliedIntent, tier, sessionOutput)
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
-                    val bitmap = NativeEngine.repack(session, reuse)?.also(DisplayColor::tag)
+                    val bitmap = NativeEngine.repack(session, reuse)?.also { DisplayColor.tagOutput(it, sessionOutput) }
                     if (bitmap == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
                     bitmap?.prepareToDraw()
                     bitmap
@@ -841,7 +863,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             // Nothing kept to re-pack (a fresh session): develop instead.
             if (out == null) { renders.trySend(Unit); continue }
-            if (renderedSession != session || _ui.value.busy != null) continue
+            val frame = identity ?: continue
+            if (_ui.value.busy != null || !previewPublication.publish(frame)) continue
+            val tier = frame.tier
             retire(tier, out)
             _ui.update { it.copy(image = out, imageTier = tier) }
         }
@@ -889,7 +913,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
         // The same render fills the spare, or a new bitmap when the tier changed
         // size (crop, rotation, film edge); either way the frame renders once.
-        val out = NativeEngine.renderReuse(session, tier, reuse)?.also(DisplayColor::tag)
+        val out = NativeEngine.renderReuse(session, tier, reuse)?.also { DisplayColor.tagOutput(it, sessionOutput) }
         if (out == null && reuse != null) synchronized(pool) { spare[tier] = reuse }
         // Upload to the GPU here, on the engine thread, instead of on the
         // RenderThread during the frame that first shows it (a 30-46 MB upload
@@ -920,21 +944,27 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         var failure: String? = null
         var reverted: Edit? = null
         var bitmap: Bitmap? = null
-        var renderedSession = 0L
+        var identity: PreviewFrame<Edit>? = null
         try {
             val started = android.os.SystemClock.elapsedRealtime()
             bitmap = withContext(EngineThread.dispatcher) {
                 if (session == 0L || _ui.value.busy != null) return@withContext null
-                renderedSession = session
+                identity = previewPublication.frame(session, previewPublication.intent(), tier, sessionOutput)
                 applyWanted()?.let { error ->
                     failure = "参数无效：$error"
                     // Only if the user has not asked for something newer meanwhile.
-                    if (wanted == rejected) { wanted = applied; reverted = applied }
+                    if (wanted == rejected) {
+                        wanted = applied
+                        val restored = previewPublication.request(applied)
+                        identity = previewPublication.frame(session, restored, tier, sessionOutput)
+                        reverted = applied
+                    }
                     return@withContext null
                 }
+                identity = previewPublication.frame(session, appliedIntent, tier, sessionOutput)
                 inFlightTier = tier
                 try {
-                    renderPooled(tier) ?: run {
+                    renderPooled(tier)?.also { previewPublication.keep(identity!!) } ?: run {
                         // Cancelled for a newer edit: not a failure, and the loop
                         // already has the newer request queued.
                         if (NativeEngine.lastWasDeviceLost()) {
@@ -958,13 +988,17 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             failure = "渲染失败：${e.message ?: e}"
         } finally {
             failure?.let { log("render $tier failed: $it") }
-            val shown = bitmap?.takeIf { renderedSession == session && _ui.value.busy == null }
+            val frame = identity
+            val current = frame != null && previewPublication.current(frame)
+            val shown = bitmap?.takeIf {
+                frame != null && _ui.value.busy == null && previewPublication.publish(frame, allowStaleLive = true)
+            }
             // Outside update: its lambda may run more than once.
             if (shown != null) retire(tier, shown)
             _ui.update {
                 var next = it.copy(rendering = false)
                 if (shown != null) next = next.copy(image = shown, imageTier = tier)
-                if (renderedSession == session && it.busy == null) {
+                if (current && it.busy == null) {
                     reverted?.let { e -> next = next.copy(edit = e) }
                     failure?.let { f -> next = next.copy(message = f) }
                 }

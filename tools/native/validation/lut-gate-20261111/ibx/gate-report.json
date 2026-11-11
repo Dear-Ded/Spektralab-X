@@ -1,0 +1,586 @@
+{
+  "decisions": {
+    "trilinear": "KEEP_COMMON_SDR_CANDIDATE",
+    "tetrahedral": "KEEP_COMMON_SDR_CANDIDATE"
+  },
+  "threshold": "Each common group independently: mean CIEDE2000 <= 3; no tail hard threshold",
+  "scope": "Synthetic fixed-exposure point approximation only; spatial deletion and signed/wide support are separate limitations",
+  "primary_interpolation16": {
+    "interpolation16/33/trilinear/common-srgb": {
+      "count": 1024,
+      "mean": 0.43759870888164354,
+      "p95": 0.8325839311306747,
+      "p99": 1.0287988028116228,
+      "max": 1.2789520196318083,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/trilinear/common-neutral": {
+      "count": 1024,
+      "mean": 0.4388095454095851,
+      "p95": 1.0541327515701882,
+      "p99": 1.3058089474219083,
+      "max": 1.4047825669377412,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/trilinear/common-warm": {
+      "count": 1024,
+      "mean": 0.43320912452161997,
+      "p95": 0.9099957138294392,
+      "p99": 1.2234851402762845,
+      "max": 1.5966129912134752,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/trilinear/common-dark": {
+      "count": 1024,
+      "mean": 0.017712705357128444,
+      "p95": 0.07114953298385884,
+      "p99": 0.11899327215529353,
+      "max": 0.2024349750481036,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/tetrahedral/common-srgb": {
+      "count": 1024,
+      "mean": 0.2986013165226676,
+      "p95": 0.5919546158305709,
+      "p99": 0.7835053575744634,
+      "max": 1.1285873567388673,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/tetrahedral/common-neutral": {
+      "count": 1024,
+      "mean": 0.2063547524493764,
+      "p95": 0.5344068189473931,
+      "p99": 0.7914229547988925,
+      "max": 0.8704142725777727,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/tetrahedral/common-warm": {
+      "count": 1024,
+      "mean": 0.3029922832665299,
+      "p95": 0.647225573870868,
+      "p99": 0.8764363218597184,
+      "max": 1.410181788210535,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation16/33/tetrahedral/common-dark": {
+      "count": 1024,
+      "mean": 0.01551720774606919,
+      "p95": 0.0600477032921455,
+      "p99": 0.09824990623697374,
+      "max": 0.1320549904058084,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    }
+  },
+  "secondary_interpolation8": {
+    "interpolation8/33/trilinear/common-srgb": {
+      "count": 1024,
+      "mean": 0.48693703597440785,
+      "p95": 0.9783841178802326,
+      "p99": 1.2176283992963008,
+      "max": 1.4721095490226965,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/trilinear/common-neutral": {
+      "count": 1024,
+      "mean": 0.5983789394905815,
+      "p95": 1.282613683421453,
+      "p99": 1.7780971574926874,
+      "max": 2.3936234042105657,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/trilinear/common-warm": {
+      "count": 1024,
+      "mean": 0.4889232454174838,
+      "p95": 1.0262769887956213,
+      "p99": 1.3707937935666925,
+      "max": 2.321042798096624,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/trilinear/common-dark": {
+      "count": 1024,
+      "mean": 0.17609674682635956,
+      "p95": 0.5554665685407687,
+      "p99": 0.5554665685407687,
+      "max": 0.8862653932409045,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/tetrahedral/common-srgb": {
+      "count": 1024,
+      "mean": 0.3592484625699641,
+      "p95": 0.7500036957760835,
+      "p99": 1.0299107718364486,
+      "max": 1.4544647987462627,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/tetrahedral/common-neutral": {
+      "count": 1024,
+      "mean": 0.4370681639628296,
+      "p95": 1.1407304772301672,
+      "p99": 1.1740149867683243,
+      "max": 1.8213062576264936,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/tetrahedral/common-warm": {
+      "count": 1024,
+      "mean": 0.3677163981409665,
+      "p95": 0.7817564772434946,
+      "p99": 1.089161203913053,
+      "max": 2.321042798096624,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    },
+    "interpolation8/33/tetrahedral/common-dark": {
+      "count": 1024,
+      "mean": 0.15112353992093147,
+      "p95": 0.5554665685407687,
+      "p99": 0.5554665685407687,
+      "max": 0.8862653932409045,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0,
+      "mean_le3": true
+    }
+  },
+  "stress_signed_wide": {
+    "interpolation16/33/trilinear/neutral": {
+      "count": 1024,
+      "mean": 0.21032031707889992,
+      "p95": 0.8783088391162274,
+      "p99": 1.2089887332055254,
+      "max": 1.4014519894489474,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/trilinear/dark": {
+      "count": 1024,
+      "mean": 0.007141443291832616,
+      "p95": 0.027757834326538035,
+      "p99": 0.10145653810826602,
+      "max": 0.12528409413914304,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/trilinear/shaped": {
+      "count": 1024,
+      "mean": 0.46506660850706777,
+      "p95": 0.8699495672239188,
+      "p99": 9.505723591665763,
+      "max": 37.10488025183835,
+      "count_gt3": 23,
+      "fraction_gt3": 0.0224609375,
+      "count_gt5": 17,
+      "fraction_gt5": 0.0166015625
+    },
+    "interpolation16/33/trilinear/linear": {
+      "count": 1024,
+      "mean": 0.178558823088214,
+      "p95": 0.5786232550102894,
+      "p99": 1.1558581943965396,
+      "max": 2.357022660897579,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/trilinear/saturated": {
+      "count": 1024,
+      "mean": 0.10719969305115286,
+      "p95": 0.3827943193162083,
+      "p99": 0.7810147479388793,
+      "max": 0.9140932590686992,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/trilinear/signed": {
+      "count": 1024,
+      "mean": 0.1286920170532337,
+      "p95": 0.38648541404782094,
+      "p99": 0.8359558439037695,
+      "max": 0.9067295936327109,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/tetrahedral/neutral": {
+      "count": 1024,
+      "mean": 0.09738953693782224,
+      "p95": 0.41851156701372216,
+      "p99": 0.729902567988858,
+      "max": 0.870186584111535,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/tetrahedral/dark": {
+      "count": 1024,
+      "mean": 0.005709977869900283,
+      "p95": 0.022832456244227167,
+      "p99": 0.07882682299601791,
+      "max": 0.09758922783330465,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/tetrahedral/shaped": {
+      "count": 1024,
+      "mean": 0.5055011695608709,
+      "p95": 0.916125207665662,
+      "p99": 11.403847041529744,
+      "max": 44.385458648108795,
+      "count_gt3": 26,
+      "fraction_gt3": 0.025390625,
+      "count_gt5": 24,
+      "fraction_gt5": 0.0234375
+    },
+    "interpolation16/33/tetrahedral/linear": {
+      "count": 1024,
+      "mean": 0.12324761374571018,
+      "p95": 0.4021082046279658,
+      "p99": 0.7226085330644452,
+      "max": 1.5488096096485573,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/tetrahedral/saturated": {
+      "count": 1024,
+      "mean": 0.10691578347654987,
+      "p95": 0.3810228893387809,
+      "p99": 0.7810147479388793,
+      "max": 0.922352389613079,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation16/33/tetrahedral/signed": {
+      "count": 1024,
+      "mean": 0.11677884347452354,
+      "p95": 0.24666045615474125,
+      "p99": 0.614357193200228,
+      "max": 0.7649901624032384,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/trilinear/neutral": {
+      "count": 1024,
+      "mean": 0.2998652462014828,
+      "p95": 1.1045995112479756,
+      "p99": 1.4695862199898833,
+      "max": 2.3864174940576937,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/trilinear/dark": {
+      "count": 1024,
+      "mean": 0.05798221048228931,
+      "p95": 0.5554665685407687,
+      "p99": 0.5554665685407687,
+      "max": 0.8848401797748864,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/trilinear/shaped": {
+      "count": 1024,
+      "mean": 0.5060552278479973,
+      "p95": 1.0007566400370325,
+      "p99": 9.466478428922226,
+      "max": 37.13711609926451,
+      "count_gt3": 24,
+      "fraction_gt3": 0.0234375,
+      "count_gt5": 17,
+      "fraction_gt5": 0.0166015625
+    },
+    "interpolation8/33/trilinear/linear": {
+      "count": 1024,
+      "mean": 0.2076259858895497,
+      "p95": 0.881950774287559,
+      "p99": 1.2508000295620005,
+      "max": 2.641565351441425,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/trilinear/saturated": {
+      "count": 1024,
+      "mean": 0.1340014568517728,
+      "p95": 0.5745339260107389,
+      "p99": 0.9609078784652771,
+      "max": 1.3043864022179277,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/trilinear/signed": {
+      "count": 1024,
+      "mean": 0.1598286407046202,
+      "p95": 0.4331123483293645,
+      "p99": 0.8440369936412879,
+      "max": 1.0537251309166067,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/tetrahedral/neutral": {
+      "count": 1024,
+      "mean": 0.21508838509381123,
+      "p95": 1.0014950748721887,
+      "p99": 1.1652025825635126,
+      "max": 1.8185385212196623,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/tetrahedral/dark": {
+      "count": 1024,
+      "mean": 0.050287080976919946,
+      "p95": 0.5554665685407687,
+      "p99": 0.5554665685407687,
+      "max": 0.5554665685407687,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/tetrahedral/shaped": {
+      "count": 1024,
+      "mean": 0.5407963202793026,
+      "p95": 0.9728284833549172,
+      "p99": 11.455989111332192,
+      "max": 44.22879801136096,
+      "count_gt3": 26,
+      "fraction_gt3": 0.025390625,
+      "count_gt5": 24,
+      "fraction_gt5": 0.0234375
+    },
+    "interpolation8/33/tetrahedral/linear": {
+      "count": 1024,
+      "mean": 0.14715966054607446,
+      "p95": 0.6369949641625225,
+      "p99": 0.9924782420659545,
+      "max": 1.6403446617006128,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/tetrahedral/saturated": {
+      "count": 1024,
+      "mean": 0.1345132504472854,
+      "p95": 0.5748825131040167,
+      "p99": 0.9609078784652771,
+      "max": 1.3043864022179277,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "interpolation8/33/tetrahedral/signed": {
+      "count": 1024,
+      "mean": 0.150065818493174,
+      "p95": 0.37472395478850146,
+      "p99": 0.6049929822241433,
+      "max": 0.9572676359848145,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    }
+  },
+  "preview_and_spatial_ablation": {
+    "preview16/33/tetrahedral/synthetic-1024-scene": {
+      "count": 14839,
+      "mean": 0.31838575169869476,
+      "p95": 0.6899348623906355,
+      "p99": 1.0183261930336813,
+      "max": 1.6905440560706042,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    },
+    "model-deletion16/0/point-vs-spatial/synthetic-1024-scene": {
+      "count": 14839,
+      "mean": 1.1989979570165965,
+      "p95": 4.07178658215207,
+      "p99": 7.785061817958583,
+      "max": 15.195343199062343,
+      "count_gt3": 1254,
+      "fraction_gt3": 0.08450704225352113,
+      "count_gt5": 479,
+      "fraction_gt5": 0.03227980322124133
+    },
+    "model-deletion/0/point-vs-configured-spatial/synthetic-scene": {
+      "count": 4096,
+      "mean": 0.184251258637073,
+      "p95": 0.4608861622033365,
+      "p99": 0.6246930061270104,
+      "max": 1.64602797287723,
+      "count_gt3": 0,
+      "fraction_gt3": 0.0,
+      "count_gt5": 0,
+      "fraction_gt5": 0.0
+    }
+  },
+  "finite_csv": {
+    "rows": 74750,
+    "all_input_reference_approximate_finite": true,
+    "prequantization_caution": "CSV cannot establish pre-pack finiteness; the native probe must check floats before production clamping/packing"
+  },
+  "sampling": {
+    "heldout_per_original_group": {
+      "common-srgb": 1024,
+      "common-neutral": 1024,
+      "common-warm": 1024,
+      "common-dark": 1024,
+      "neutral": 1024,
+      "dark": 1024,
+      "shaped": 1024,
+      "linear": 1024,
+      "saturated": 1024,
+      "signed": 1024
+    },
+    "training_nodes_in_metrics": false,
+    "provenance": "native probe emits held-out samples only; CSV alone cannot prove disjointness from LUT baking"
+  },
+  "independent_formula_check": {
+    "pairs": 34,
+    "max_rounded_reference_error": 4.9498977271467126e-05,
+    "max_symmetry_error": 0.0
+  },
+  "timing": {
+    "point_spectral_end_to_end": {
+      "repeats_ms": [
+        332.848269,
+        288.534938,
+        318.730513
+      ],
+      "median_ms": 318.730513
+    },
+    "cpu_tetrahedral_lut_end_to_end": {
+      "repeats_ms": [
+        127.663904,
+        120.777935,
+        122.456592
+      ],
+      "median_ms": 122.456592
+    },
+    "host_point_spectral_to_cpu_lut_ratio": 2.602804045044794,
+    "scope": "Cloud CPU llvmpipe versus CPU tetrahedral interpolation; not Android shader or App speedup",
+    "end_to_end_includes": "input flatten/upload for spectral; interpolation for CPU LUT; both include host P3 packing and P3 decoding for Lab",
+    "working_boundary": "The spectral probe reads float32 and reproduces the UNORM16 boundary on CPU; GPU-working parity is a separate native control, not a timed JNI fetch",
+    "excluded": "pipeline construction, LUT baking, file/JNI/image decoding, UI, and per-image auto exposure",
+    "grid-33_ms": [
+      17.874839
+    ],
+    "preview-full-spatial_ms": [
+      554.614539
+    ],
+    "preview-full-spatial-end-to-end_ms": [
+      631.12559
+    ],
+    "full_spatial_caution": "preview-full-spatial wall excludes source upload and display conversion; only an explicitly recorded end-to-end row is comparable"
+  },
+  "contract": {
+    "film": "kodak_portra_400",
+    "paper": "kodak_supra_endura",
+    "input": "linear ProPhoto RGB",
+    "lut_values": "encoded ProPhoto RGB float32",
+    "metrics": "production UNORM16 working boundary, production P3 display transform, quantized 16/8 bit P3 decoded to linear P3",
+    "domain": [
+      -0.25,
+      16
+    ],
+    "shaper_pivot": 0.01,
+    "shaper_zero": 0.25,
+    "film_format_mm": 36,
+    "live_edge": 1024,
+    "auto_exposure": "fixed 0 EV, no per-image metering",
+    "point_spatial_effects": "disabled; separate full spatial ablation",
+    "fusion": "off",
+    "grid_order": "blue-fast RGB float32",
+    "seed": 539365650,
+    "quality_gate": "each common synthetic group mean DE00 <= 3; tails and stress reported separately; not natural-photo or Android acceptance",
+    "warning": "read_params is not a complete internal Params serialization"
+  }
+}

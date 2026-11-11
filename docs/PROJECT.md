@@ -2,7 +2,9 @@
 
 这一页是项目的总入口：现状、需求、路线、参考项目、分工和文档索引都从这里找。细节在各专题文档里，本页只写结论和链接。新开的开发会话先读这一页。
 
-更新：2026-11-08 · 本次发布 `0.1.19-beta` · 最近变更见 [CHANGELOG.md](../CHANGELOG.md)。下方早期里程碑的版本排期保留作历史参考。
+更新：2026-11-11。当前源码版本 `0.2.00-alpha-2`，内部版本码 122；本轮只改源码、做宿主验证，不打 APK、不改版本、不发布。未发布修改见 [CHANGELOG.md](../CHANGELOG.md)。下方早期里程碑的版本排期保留作历史参考。
+
+新协作会话先核对当前分支与工作树，再读[引擎跟进](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)、[印放尾段](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)、[预览发布修复](PREVIEW_PUBLICATION_FIX_2026-11-11.md)和[交互 LUT 实验](LUT_INTERACTION_GATE_2026-11-11.md)。新 RAW 默认仍保持线性显示。LUT 尚未接入应用，完整有界分条导出尚未完成，宿主/NDK 编译不能当成真机验收。
 
 ## 1. 项目是什么
 
@@ -16,8 +18,8 @@
 
 | 部分 | 现状 | 文档 |
 |---|---|---|
-| 引擎 | 上游 C++20 引擎，Vulkan 计算后端，固定上游提交 `a46627d`，另加 4 个补丁 | [ARCHITECTURE.md](ARCHITECTURE.md)、[PATCHES.md](PATCHES.md) |
-| 解码 | LibRaw 0.22.2；手机照片走 ImageDecoder；Ultra HDR 增益图；DNG 双光源矩阵插值 | — |
+| 引擎 | 上游 C++20 引擎，Vulkan 计算后端，固定上游提交 `a46627d`，当前 49 张引擎补丁；0048 只有受限生产尾段分带 | [ARCHITECTURE.md](ARCHITECTURE.md)、[PATCHES.md](PATCHES.md) |
+| 解码 | LibRaw 0.22.2 加 17 张维护补丁；手机照片走 ImageDecoder；DNG 校准与白点修复仍按具体样例验收 | [源码跟进](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md) |
 | 色彩路径 | 按上游做法：ProPhoto 冲印，屏幕矩阵加裁切，导出 CAM16 压缩；P3 广色域窗口 | [PARITY.md](PARITY.md)、[PLATFORMS.md](PLATFORMS.md) |
 | 色彩对照 | RAW 与合成图和上游 Linux 宿主逐像素一致（43 组，导出均值 ΔE00 0.000）；手机 JPEG 还差 ≤0.36，正在修 | [PARITY.md](PARITY.md) |
 | 编辑 | 胶片 / 调整 / 冲印 / 效果 / 构图五页；调整层（Layer 2）实时重打包；一键风格；预设；边框 15 款 | [UI.md](UI.md) |
@@ -44,7 +46,7 @@
 - **仓库**：商业项目级装修；醒目提示快速迭代中、欢迎关注点星；访问量和下载量展示；鼓励转载二创但须署名；防倒卖的出处标识；不泄露开发者个人信息。
 - **命名**：所有位置统一为 Spektralab-X；指上游时保留 SpektraLab 原名。
 - **图标**：深色底、光谱胶片条、扁平（方案 A，已上线）。
-- **版本**：使用 alpha / beta / rc 标记预发布阶段；本次保持 `0.1.19` 并进入 beta。内部安装码由 `VERSION_CODE` 单独递增，阶段变更不等于完成真机验收。
+- **版本**：使用 alpha / beta / rc 标记预发布阶段；当前源码为 `0.2.00-alpha-2`，本轮保持不变。内部安装码由 `VERSION_CODE` 单独递增，阶段变更不等于完成真机验收。
 
 ## 4. 开发路线
 

@@ -1,0 +1,84 @@
+package com.dearded.spektralab
+
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import android.graphics.Bitmap
+
+class Edit(val value: Int = 0) {
+    val look: Int get() = value % 10
+    fun delta(other: Edit) = Delta(if (sameRenderInputAs(other)) 0 else 1)
+    fun sameRenderInputAs(other: Edit) = value / 10 == other.value / 10
+    override fun equals(other: Any?) = other is Edit && value == other.value
+    override fun hashCode() = value
+}
+class Delta(private val size: Int) { fun length() = size; override fun toString() = "{}" }
+data class UiState(val image: Bitmap? = null, val imageTier: String = "preview", val busy: String? = null,
+    val edit: Edit = Edit(), val rendering: Boolean = false, val message: String? = null,
+    val source: SourceInfo? = SourceInfo(), val loadingDetail: Boolean = false, val exporting: Boolean = false,
+    val detail: Bitmap? = null, val detailTarget: String? = null, val catalog: Catalog = Catalog())
+class SourceInfo(val width: Int = 100, val height: Int = 100)
+class Catalog { fun normalize(edit: Edit) = edit }
+class EngineException(message: String) : Exception(message)
+object EngineThread { lateinit var dispatcher: CoroutineDispatcher }
+object DisplayColor {
+    var space = "sRGB"
+    fun tag(bitmap: Bitmap) { bitmap.profile = space }
+    fun tagOutput(bitmap: Bitmap, target: String) { bitmap.profile = target }
+}
+object NativeEngine {
+    var cacheTier = "preview"
+    var fail = false
+    var rejectParams = false
+    fun setParams(session: Long, delta: String): String? = if (rejectParams) null else "{}"
+    fun renderReuse(session: Long, tier: String, reuse: Bitmap?): Bitmap? {
+        if (fail) return null
+        cacheTier = tier
+        return Bitmap(if (tier == "live") 640 else 3400)
+    }
+    fun repack(session: Long, reuse: Bitmap?) = Bitmap(if (cacheTier == "live") 640 else 3400)
+    fun renderBitmap(session: Long, tier: String) = Bitmap(if (tier == "full") 4096 else 3400)
+    fun renderProofBitmap(session: Long, tier: String, target: String) = Bitmap(3400)
+    fun lastWasDeviceLost() = false
+    fun lastWasCancelled() = false
+    fun lastError() = "fake failure"
+}
+class TestHost { suspend fun recover(engine: Long) {} }
+
+/** The methods below are extracted verbatim from EditorViewModel.kt. */
+internal class PreviewHarness(val viewModelScope: CoroutineScope) {
+    val _ui = MutableStateFlow(UiState(image = Bitmap(3400)))
+    var session = 7L
+    var engine = 1L
+    var wanted = Edit()
+    var applied = Edit()
+    var rejected: Edit? = null
+    var override: Edit? = null
+    var inFlightTier: String? = null
+    var detailRevision = 0L
+    val kMaxDetailPixels = 16_000_000L
+    val host = TestHost()
+    val previewPublication = PreviewPublication(Edit())
+    var appliedIntent = previewPublication.intent()
+    var sessionOutput = "sRGB"
+    val pool = Any()
+    val spare = HashMap<String, Bitmap>()
+    val shownByTier = HashMap<String, Bitmap>()
+    val coolingByTier = HashMap<String, Bitmap>()
+    val repacks = Channel<Unit>(Channel.CONFLATED)
+    val renders = Channel<Unit>(Channel.CONFLATED)
+    init {
+        previewPublication.replaceSource(session)
+        previewPublication.keep(previewPublication.frame(session, appliedIntent, "preview", sessionOutput))
+    }
+    private fun log(message: String) {}
+    private fun applyLook(look: Int) {}
+    private fun cancelStalePreview() {}
+    fun request(edit: Edit) { wanted = edit; previewPublication.request(edit); _ui.update { it.copy(edit = edit) } }
+    fun replaceSameHandle() { previewPublication.replaceSource(session); _ui.update { it.copy(image = null, imageTier = "") } }
+    suspend fun render(tier: String) = renderOnce(tier)
+    suspend fun repack() = repackLoop()
+    fun inspect(target: String?) = loadInspection(target)
+/* PRODUCTION_METHODS */
+}

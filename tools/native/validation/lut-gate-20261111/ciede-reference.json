@@ -1,0 +1,18 @@
+{
+  "reference": {
+    "pairs": 34,
+    "max_rounded_reference_error": 4.9498977271467126e-05,
+    "max_symmetry_error": 0.0
+  },
+  "reference_rounding_bound": 5e-05,
+  "existing_metric": {
+    "pairs": 34,
+    "max_rounded_reference_error": 4.9498977271467126e-05,
+    "max_symmetry_error": 0.0
+  },
+  "random_crosscheck": {
+    "pairs": 4096,
+    "seed": "0x20261111",
+    "max_difference": 1.4210854715202004e-14
+  }
+}

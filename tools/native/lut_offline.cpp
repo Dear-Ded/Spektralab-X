@@ -3,6 +3,8 @@
 // Additional terms under GPL-3.0 section 7 apply; see NOTICE.
 // Co-created with GPT (OpenAI), 2026-11-11. Synthetic, offline research only.
 #include "pipeline/pipeline.hpp"
+#include "input_transform.hpp"
+#include "output_transform.hpp"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -108,6 +110,7 @@ struct Lut {
                 for(unsigned c=0;c<3;++c) out[c]+=float(weight*v[c]);
             }
         }
+        for(float v:out) require(std::isfinite(v),"nonfinite LUT interpolation result");
         return out;
     }
 };
@@ -132,13 +135,60 @@ void csv(std::ostream& out,const std::string& set,unsigned size,const std::strin
     for(const auto& v:{s.x,ref,got}) for(float c:v) out<<','<<c;
     out<<'\n';
 }
+
+void validate_working_pack(spk::gpu::Gpu& gpu,const std::vector<RGB>& encoded,
+                           const spk::android::OutputTransform& xf) {
+    const auto source=flatten(encoded);
+    auto src=gpu.upload(source.data(),source.size()*sizeof(float),error); require(bool(src),error);
+    std::vector<uint16_t> working(encoded.size()*4);
+    auto dst=gpu.alloc(working.size()*sizeof(uint16_t),error); require(bool(dst),error);
+    const uint32_t meta[]={uint32_t(encoded.size()),uint32_t(encoded.size()),uint32_t(encoded.size())};
+    require(gpu.dispatch("spk_to_rgba16",{spk::gpu::Arg::buf(src),spk::gpu::Arg::inline_bytes(meta,3),
+        spk::gpu::Arg::buf(dst)},encoded.size(),error)&&gpu.read(dst.get(),0,working.data(),working.size()*sizeof(uint16_t),error),error);
+    for(size_t i=0;i<encoded.size();++i) {
+        for(unsigned c=0;c<3;++c)
+            require(working[4*i+c]==uint16_t(std::floor(std::clamp(encoded[i][c],0.f,1.f)*65535.f+.5f)),"GPU/CPU working quantization differs");
+        require(working[4*i+3]==65535,"GPU working alpha differs");
+    }
+    std::vector<uint16_t> actual16,probe16;
+    spk::android::pack_rgba16(working.data(),encoded.size(),uint32_t(encoded.size()),1,actual16,nullptr,xf);
+    spk::android::pack_float_rgba16(source.data(),encoded.size(),uint32_t(encoded.size()),1,probe16,nullptr,xf);
+    require(actual16==probe16,"GPU-working and float-probe P3 16bit bytes differ");
+    std::vector<uint8_t> actual8(encoded.size()*4),probe8(actual8.size());
+    spk::android::pack_rgba8(working.data(),encoded.size(),uint32_t(encoded.size()),1,actual8.data(),actual8.size(),nullptr,xf);
+    spk::android::pack_float_rgba8(source.data(),encoded.size(),uint32_t(encoded.size()),1,probe8.data(),probe8.size(),nullptr,xf);
+    require(actual8==probe8,"GPU-working and float-probe P3 8bit bytes differ");
+    std::cout<<"PASS actual GPU working pack and production float/u16 P3 output parity pixels="<<encoded.size()<<'\n';
+}
+
+// Both candidates cross the production UNORM16 working-space boundary before
+// their P3 display conversion. Lab metrics consume decoded P3, not encoded RGB.
+std::vector<RGB> display(const std::vector<RGB>& encoded, const spk::android::OutputTransform& xf, bool eight) {
+    for(const auto& rgb:encoded) for(float v:rgb) require(std::isfinite(v),"nonfinite display input");
+    const auto source=flatten(encoded);
+    std::vector<RGB> result(encoded.size());
+    if(eight) {
+        std::vector<uint8_t> packed(encoded.size()*4);
+        spk::android::pack_float_rgba8(source.data(),encoded.size(),uint32_t(encoded.size()),1,
+            packed.data(),packed.size(),nullptr,xf);
+        for(size_t i=0;i<result.size();++i) for(unsigned c=0;c<3;++c) result[i][c]=packed[4*i+c]/255.f;
+    } else {
+        std::vector<uint16_t> packed;
+        spk::android::pack_float_rgba16(source.data(),encoded.size(),uint32_t(encoded.size()),1,packed,nullptr,xf);
+        for(size_t i=0;i<result.size();++i) for(unsigned c=0;c<3;++c) result[i][c]=packed[4*i+c]/65535.f;
+    }
+    for(auto& rgb:result) for(float& v:rgb)
+        v=v<=.04045f?v/12.92f:std::pow((v+.055f)/1.055f,2.4f);
+    return result;
+}
 }
 
 int main(int argc,char** argv) {
     try {
-        require(argc==5,"usage: lut_offline SHADERS RESOURCES OUTDIR smoke|full");
+        require(argc==5,"usage: lut_offline SHADERS RESOURCES OUTDIR smoke|full|gate");
         static_assert(sizeof(RGB)==3*sizeof(float));
-        require(std::string(argv[4])=="smoke"||std::string(argv[4])=="full","invalid mode");
+        const bool gate=std::string(argv[4])=="gate";
+        require(std::string(argv[4])=="smoke"||std::string(argv[4])=="full"||gate,"invalid mode");
         const bool smoke=std::string(argv[4])=="smoke";
         const std::string dir=argv[3]; std::filesystem::create_directories(dir);
         setenv("SPK_VULKAN_FUSION","off",1); unsetenv("SPK_BOUNDED_PRINT_TAIL");
@@ -152,9 +202,14 @@ int main(int argc,char** argv) {
         const std::string text{std::istreambuf_iterator<char>(filterfile),{}};
         spk::Json filters; require(spk::Json::parse(text,filters,error),error);
         spk::Params point;
-        require(spk::init_params(argv[2],"kodak_portra_400","kodak_portra_endura",filters,point,error),error);
+        require(spk::init_params(argv[2],"kodak_portra_400",gate?"kodak_supra_endura":"kodak_portra_endura",filters,point,error),error);
         point.io.input_color_space="ProPhoto RGB"; point.io.input_cctf_decoding=false;
-        point.io.output_color_space="Display P3"; point.io.output_cctf_encoding=false;
+        point.io.output_color_space=gate?"ProPhoto RGB":"Display P3"; point.io.output_cctf_encoding=gate;
+        if(gate) {
+            point.camera.film_format_mm=36;
+            point.io.preview_long_edge=1024;
+            point.enlarger.print_exposure_compensation=false;
+        }
         point.camera.auto_exposure=false; point.camera.exposure_baseline_ev=0;
         point.camera.scene_latitude.active=false; point.camera.scene_latitude.b_active=false;
         point.camera.scene_curve.clear(); point.film_render.halation.boost_ev=0;
@@ -171,12 +226,20 @@ int main(int argc,char** argv) {
         std::ofstream(dir+"/point-params.json")<<spk::read_params(point).dump()<<'\n';
         std::ofstream(dir+"/ablation-reference-params.json")<<spk::read_params(full).dump()<<'\n';
         std::ofstream(dir+"/contract.json")<<R"({"input":"linear ProPhoto RGB","output":"linear Display P3","domain":[-0.25,16],"shaper_pivot":0.01,"shaper_zero":0.25,"dir_diffusion_size_um":0,"camera_diffusion_active":false,"enlarger_diffusion_active":false,"enlarger_lens_blur":0,"fusion":"off","grid_order":"blue-fast RGB float32","seed":539365649,"warning":"read_params is not a complete internal Params serialization"})"<<'\n';
+        if(gate) std::ofstream(dir+"/contract.json")<<R"({"film":"kodak_portra_400","paper":"kodak_supra_endura","input":"linear ProPhoto RGB","lut_values":"encoded ProPhoto RGB float32","metrics":"production UNORM16 working boundary, production P3 display transform, quantized 16/8 bit P3 decoded to linear P3","domain":[-0.25,16],"shaper_pivot":0.01,"shaper_zero":0.25,"film_format_mm":36,"live_edge":1024,"auto_exposure":"fixed 0 EV, no per-image metering","point_spatial_effects":"disabled; separate full spatial ablation","fusion":"off","grid_order":"blue-fast RGB float32","seed":539365650,"quality_gate":"each common synthetic group mean DE00 <= 3; tails and stress reported separately; not natural-photo or Android acceptance","warning":"read_params is not a complete internal Params serialization"})"<<'\n';
         std::ofstream timing(dir+"/timing.csv"); timing<<"render,stage,ms\n"<<std::setprecision(12);
         std::ofstream results(dir+"/samples.csv");
         results<<"set,size,method,group,fallback,in_r,in_g,in_b,ref_r,ref_g,ref_b,got_r,got_g,got_b\n"<<std::setprecision(10);
         spk::SetupCache cache;
         Renderer renderer(gpu.get(),&colour,&blob,&cache,point);
-        std::mt19937 random(0x20261111); std::uniform_real_distribution<double> uniform(0,1);
+        std::mt19937 random(gate?0x20261112:0x20261111); std::uniform_real_distribution<double> uniform(0,1);
+        spk::android::InputTransform input("sRGB");
+        std::unique_ptr<spk_engine,decltype(&spk_engine_destroy)> engine(nullptr,&spk_engine_destroy);
+        spk::android::OutputTransform output;
+        if(gate) {
+            engine.reset(spk_engine_create(argv[2],nullptr)); require(bool(engine),"output metadata engine creation failed");
+            require(output.fetch(engine.get(),"Display P3",false,error),error);
+        }
         std::vector<Sample> samples;
         const unsigned count=smoke?64:1024;
         for(unsigned i=0;i<count;++i) {
@@ -188,10 +251,23 @@ int main(int argc,char** argv) {
             RGB saturated={.00001f,.00001f,.00001f}; saturated[i%3]=unshape(.25+.75*u);
             samples.push_back({"saturated",saturated});
             samples.push_back({"signed",{float(-.249*u),float(16*u),float(.18*(1-u))}});
+            if(gate) {
+                auto add=[&](const char* label,RGB encoded) {
+                    for(unsigned c=0;c<3;++c) encoded[c]=input.decode(encoded[c],c);
+                    input.to_prophoto(encoded.data()); samples.push_back({label,encoded});
+                };
+                add("common-srgb",{float(uniform(random)),float(uniform(random)),float(uniform(random))});
+                const float neutral=float(u); add("common-neutral",{neutral,neutral,neutral});
+                add("common-warm",{float(.2+.7*uniform(random)),float(.1+.55*uniform(random)),float(.06+.44*uniform(random))});
+                add("common-dark",{float(std::pow(10.,-4+3*uniform(random))),float(std::pow(10.,-4+3*uniform(random))),float(std::pow(10.,-4+3*uniform(random)))});
+            }
         }
         for(RGB x:std::vector<RGB>{{-.26f,0,0},{16.1f,1,1},{1,-1,0},{32,32,32}}) samples.push_back({"outside",x});
         std::vector<RGB> inputs; for(const auto& s:samples) inputs.push_back(s.x);
         const auto reference=renderer.run(inputs,1,"held-out",timing,true);
+        if(gate) validate_working_pack(*gpu,reference,output);
+        const auto reference16=gate?display(reference,output,false):std::vector<RGB>{};
+        const auto reference8=gate?display(reference,output,true):std::vector<RGB>{};
         auto reversed=inputs; std::reverse(reversed.begin(),reversed.end());
         auto permutation=renderer.run(reversed,uint32_t(reversed.size()),"permuted-reshape",timing,true);
         std::reverse(permutation.begin(),permutation.end());
@@ -201,7 +277,7 @@ int main(int argc,char** argv) {
         std::vector<RGB> outside;
         for(const auto& s:samples) if(!supported(s.x)) outside.push_back(s.x);
         const auto fallback_values=renderer.run(outside,1,"out-of-domain-fallback",timing,true);
-        for(unsigned n:(smoke?std::vector<unsigned>{9}:std::vector<unsigned>{33,65})) {
+        for(unsigned n:(smoke?std::vector<unsigned>{9}:gate?std::vector<unsigned>{33}:std::vector<unsigned>{33,65})) {
             std::vector<RGB> grid;
             for(unsigned r=0;r<n;++r) for(unsigned g=0;g<n;++g) for(unsigned b=0;b<n;++b)
                 grid.push_back({unshape(double(r)/(n-1)),unshape(double(g)/(n-1)),unshape(double(b)/(n-1))});
@@ -210,11 +286,52 @@ int main(int argc,char** argv) {
             binary.write(reinterpret_cast<const char*>(lut.values.data()),std::streamsize(lut.values.size()*sizeof(RGB)));
             for(bool tetra:{false,true}) {
                 size_t fallback_index=0;
+                std::vector<RGB> approximate;
                 for(size_t i=0;i<samples.size();++i) {
                     const bool fallback=!supported(samples[i].x);
                     const RGB got=fallback?fallback_values[fallback_index++]:lut.sample(samples[i].x,tetra);
                     if(fallback) require(got==reference[i],"actual fallback differs from reference");
-                    csv(results,"interpolation",n,tetra?"tetrahedral":"trilinear",samples[i],reference[i],got,fallback);
+                    if(gate) approximate.push_back(got);
+                    else csv(results,"interpolation",n,tetra?"tetrahedral":"trilinear",samples[i],reference[i],got,fallback);
+                }
+                if(gate) for(bool eight:{false,true}) {
+                    const auto packed=display(approximate,output,eight);
+                    const auto& ref=eight?reference8:reference16;
+                    for(size_t i=0;i<samples.size();++i)
+                        csv(results,eight?"interpolation8":"interpolation16",n,tetra?"tetrahedral":"trilinear",samples[i],ref[i],packed[i],!supported(samples[i].x));
+                }
+            }
+            if(gate) {
+                // A real 1024-pixel live geometry, not a reshaped training cube.
+                const unsigned width=1024,height=768;
+                std::vector<RGB> scene; scene.reserve(size_t(width)*height);
+                for(unsigned y=0;y<height;++y) for(unsigned x=0;x<width;++x) {
+                    const double u=double(x)/(width-1),v=double(y)/(height-1);
+                    const double checker=((x/43+y/37)%2)?1.:.45;
+                    RGB rgb={float((.05+.9*u)*checker),float((.03+.92*v)*checker),float((.04+.9*(1-u*v))*checker)};
+                    for(unsigned c=0;c<3;++c) rgb[c]=input.decode(rgb[c],c);
+                    input.to_prophoto(rgb.data()); scene.push_back(rgb);
+                }
+                std::vector<RGB> exact,approximate;
+                for(unsigned repeat=0;repeat<3;++repeat) {
+                    auto start=std::chrono::steady_clock::now();
+                    const auto raw=renderer.run(scene,width,"preview-point-"+std::to_string(repeat),timing,true);
+                    exact=display(raw,output,false);
+                    timing<<"preview-exact-end-to-end-"<<repeat<<",wall,"<<std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count()<<'\n';
+                    start=std::chrono::steady_clock::now();
+                    std::vector<RGB> interpolated; interpolated.reserve(scene.size());
+                    for(const auto& rgb:scene) interpolated.push_back(lut.sample(rgb,true));
+                    approximate=display(interpolated,output,false);
+                    timing<<"preview-cpu-lut-end-to-end-"<<repeat<<",wall,"<<std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count()<<'\n';
+                }
+                Renderer complete(gpu.get(),&colour,&blob,&cache,full);
+                const auto spatial_start=std::chrono::steady_clock::now();
+                const auto spatial=display(complete.run(scene,width,"preview-full-spatial",timing,false),output,false);
+                timing<<"preview-full-spatial-end-to-end,wall,"<<std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-spatial_start).count()<<'\n';
+                // Held-out image pixels only; training nodes never enter metrics.
+                for(size_t i=0;i<scene.size();i+=53) {
+                    csv(results,"preview16",n,"tetrahedral",{"synthetic-1024-scene",scene[i]},exact[i],approximate[i],false);
+                    csv(results,"model-deletion16",0,"point-vs-spatial",{"synthetic-1024-scene",scene[i]},spatial[i],exact[i],false);
                 }
             }
         }
@@ -225,9 +342,11 @@ int main(int argc,char** argv) {
             const double t=double(y)/(edge-1);
             scene.push_back({float(v),float(v*(.15+.85*t)),float(v*(1-.85*t))});
         }
-        const auto without=renderer.run(scene,edge,"ablation-point",timing,true);
+        const auto without_raw=renderer.run(scene,edge,"ablation-point",timing,true);
+        const auto without=gate?display(without_raw,output,false):without_raw;
         Renderer complete(gpu.get(),&colour,&blob,&cache,full);
-        const auto with=complete.run(scene,edge,"ablation-configured-spatial",timing,false);
+        const auto with_raw=complete.run(scene,edge,"ablation-configured-spatial",timing,false);
+        const auto with=gate?display(with_raw,output,false):with_raw;
         for(size_t i=0;i<scene.size();++i) csv(results,"model-deletion",0,"point-vs-configured-spatial",{"synthetic-scene",scene[i]},with[i],without[i],false);
         std::cout<<"PASS fixed point permutation/repeat; LUT generation and held-out data complete samples="<<samples.size()<<'\n';
     } catch(const std::exception& e) { std::cerr<<"FAIL "<<e.what()<<'\n'; return 1; }
