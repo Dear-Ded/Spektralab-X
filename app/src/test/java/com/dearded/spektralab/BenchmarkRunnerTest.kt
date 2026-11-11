@@ -2,11 +2,62 @@ package com.dearded.spektralab
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Assert.*
 import org.junit.Test
 
 class BenchmarkRunnerTest {
+    @Test
+    fun `cancellation signals a blocked render before release`() = runBlocking {
+        Executors.newSingleThreadExecutor().asCoroutineDispatcher().use { engine ->
+            val entered = CompletableDeferred<Unit>()
+            val signalled = CountDownLatch(1)
+            val finish = CountDownLatch(1)
+            val closed = AtomicBoolean(false)
+            val backend = object : BenchmarkBackend {
+                override suspend fun open(edge: Int) {}
+                override suspend fun firstPreview() = withContext(engine) {
+                    entered.complete(Unit)
+                    check(finish.await(5, TimeUnit.SECONDS))
+                }
+                override suspend fun switchStyle(index: Int) {}
+                override suspend fun export() {}
+                override fun cancel() { check(!closed.get()); signalled.countDown() }
+                override suspend fun close() { closed.set(true) }
+            }
+            val runner = BenchmarkRunner(backend, { 0 }, { .6f }, { false }, { 0 }, { 0 }, 12_000_000, 0)
+            val job = launch { runner.run() }
+            try {
+                withTimeout(5000) { entered.await() }
+                job.cancel()
+                assertTrue(signalled.await(5, TimeUnit.SECONDS))
+                assertFalse(closed.get())
+            } finally {
+                finish.countDown()
+                withTimeout(5000) { job.join() }
+            }
+            assertTrue(closed.get())
+        }
+    }
+
+    @Test
+    fun `style switch requests the physical film pipeline`() {
+        val delta = benchmarkFilmParams("kodak_gold_200")
+        assertEquals("kodak_gold_200", delta.getString("film_stock"))
+        assertFalse(delta.has("film"))
+        assertFalse(delta.getBoolean("x_no_film"))
+        assertFalse(delta.getBoolean("digital_intermediate"))
+        assertFalse(delta.getBoolean("scan_film"))
+    }
     @Test
     fun `runner completes successfully`() = runBlocking {
         var opened = false

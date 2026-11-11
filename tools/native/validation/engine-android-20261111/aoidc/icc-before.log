@@ -1,0 +1,3 @@
+profile bytes=422, declared=1024
+Exception in thread "main" java.lang.IllegalStateException: ICC header length differs from serialized profile
+	at IccProfileContractKt.main(IccProfileContract.kt:17)

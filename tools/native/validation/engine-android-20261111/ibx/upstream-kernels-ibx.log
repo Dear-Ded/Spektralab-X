@@ -1,0 +1,4 @@
+Vulkan di_encode device: llvmpipe (LLVM 19.1.7, 256 bits)
+di_encode: 10 GPU cases passed; float64 Cineon/Oklab reference; max delta 2.27185282e-05
+Vulkan headroom device: llvmpipe (LLVM 19.1.7, 256 bits)
+headroom: 6 GPU cases passed; float64 headroom compression reference; max delta 2.94519461e-06

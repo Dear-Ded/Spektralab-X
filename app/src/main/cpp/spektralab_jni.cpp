@@ -137,11 +137,6 @@ struct Session {
         return &out;
     }
     const spk::android::OutputTransform* xf() { return prophoto ? transform() : nullptr; }
-    bool set_output(const std::string& target, bool fetch_now) {
-        std::string e;
-        if (fetch_now && !out.fetch(engine, target, false, e)) return false;
-        return true;
-    }
     ~Session() { spk_result_free(&last); }
 };
 
@@ -1542,21 +1537,25 @@ static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, in
         const std::string target = target_j ? str(env, target_j) : std::string("sRGB");
         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
 
-        // Set output transform to target color space for export
-        if (!s->set_output(target, true)) {
-            fail("TIFF: cannot set output to " + target);
+        // Each file owns its export intent. Do not overwrite the display/repack
+        // transform, or replace file CAM16 compression with the preview path.
+        spk::android::OutputTransform output;
+        std::string error;
+        const spk::android::OutputTransform* xf = nullptr;
+        if (s->prophoto && !output.fetch(s->engine, target, true, error)) {
+            fail("TIFF: output transform: " + error);
+            return JNI_FALSE;
+        }
+        if (s->prophoto) xf = &output;
+        else if (target != "sRGB") {
+            fail("TIFF: target conversion requires a ProPhoto session");
             return JNI_FALSE;
         }
 
         ResultGuard result;
         if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
-        std::string error = blank_result(result);
+        error = blank_result(result);
         if (!error.empty()) { fail("export check: " + error); return JNI_FALSE; }
-        const auto* xf = s->xf();
-        if (!xf || xf->target() != target) {
-            fail("TIFF: the session's output is not " + target);
-            return JNI_FALSE;
-        }
         const auto* look = s->active_look();
         // Retain full-frame mask/dust geometry, but convert only the encoder's
         // next strips. The engine's result stays immutable through the write.
@@ -1613,8 +1612,13 @@ JNI_FN(jboolean, exportTiff)(JNIEnv* env, jobject, jlong handle, jstring path_j,
 }
 
 // exportTiff into an open, writable descriptor; the caller keeps and closes it.
-// Supports optional target color space selection (export-pro enhancement).
-JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring target_j, jstring tier_j) {
+JNI_FN(jboolean, exportTiffFd)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring tier_j) {
+    if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+    return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, nullptr, tier_j);
+}
+
+// Versioned entry: never bind two native signatures to the same short JNI name.
+JNI_FN(jboolean, exportTiffFdV1)(JNIEnv* env, jobject, jlong handle, jint fd, jstring icc_j, jstring target_j, jstring tier_j) {
     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
     return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, target_j, tier_j);
 }

@@ -164,13 +164,17 @@ void halo_checks() {
     for (uint32_t w : {1u, 7u, 4097u, 65500u}) for (uint32_t halo : {0u, 2u, 5u})
         for (uint64_t budget : {uint64_t(1) << 20, uint64_t(5) << 20, uint64_t(96) << 20, uint64_t(1) << 40})
             for (uint64_t range : {uint64_t(1) << 20, kRange}) for (uint32_t req : {0u, 1u, 33u}) {
-                const uint32_t rows = choose_window_rows(3073, w, halo, range, budget, req);
-                require(rows >= 1 && rows <= 3073, "window rows out of range");
-                if (rows > 1) {
+                const uint64_t minimum = (1ull + 2ull * halo) * w * 12;
+                const bool fits = minimum <= range && 5 * minimum <= budget;
+                try {
+                    const uint32_t rows = choose_window_rows(3073, w, halo, range, budget, req);
+                    require(fits && rows >= 1 && rows <= 3073, "window rows out of range");
                     require((uint64_t(rows) + 2ull * halo) * w * 12 <= range, "window exceeds storage range");
                     require(5 * (uint64_t(rows) + 2ull * halo) * w * 12 <= budget, "window exceeds byte budget");
+                    if (req) require(rows <= req, "rows exceed request");
+                } catch (const std::invalid_argument&) {
+                    require(!fits, "valid one-row halo budget was rejected");
                 }
-                if (req) require(rows <= req, "rows exceed request");
                 ++n;
             }
     std::cout << "halo_checks=" << n << std::endl;

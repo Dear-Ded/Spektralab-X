@@ -170,13 +170,16 @@ void band_rows_checks() {
     size_t n = 0;
     for (uint32_t w : {1u, 7u, 4097u, 65500u}) for (uint64_t budget : {uint64_t(1) << 20, uint64_t(3) << 20, uint64_t(96) << 20, uint64_t(1) << 40})
         for (uint64_t range : {uint64_t(1) << 20, kRange}) for (uint32_t req : {0u, 1u, 33u}) {
-            const uint32_t rows = spk::choose_band_rows(3073, w, range, budget, req);
-            require(rows >= 1 && rows <= 3073, "band rows out of range");
-            if (rows > 1) {
+            const bool fits = uint64_t(w) * 12 <= range && 3 * uint64_t(w) * 12 <= budget;
+            try {
+                const uint32_t rows = spk::choose_band_rows(3073, w, range, budget, req);
+                require(fits && rows >= 1 && rows <= 3073, "band rows out of range");
                 require(uint64_t(rows) * w * 12 <= range, "band exceeds storage range");
                 require(3 * uint64_t(rows) * w * 12 <= budget, "band exceeds byte budget");
+                if (req) require(rows <= req, "band exceeds requested rows");
+            } catch (const std::invalid_argument&) {
+                require(!fits, "valid one-row budget was rejected");
             }
-            if (req) require(rows <= req, "band exceeds requested rows");
             ++n;
         }
     std::cout << "band_rows_checks=" << n << "\n";

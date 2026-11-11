@@ -12,9 +12,11 @@
 | 3. 有界输出 | 无纸框极致 JPEG 先按 32 行转换并写匿名 RGBA8 外存文件，释放整图渲染结果，再 scanline 编码；避免额外整图 Bitmap，保留全帧坐标、原量化和编码参数 | full-pack 与多种行带高度的 RGBA8 及完整 JPEG 字节一致；sRGB/P3、float/RGBA16、局部蒙版/纹理；失败时清理未完成文件 | 已实现并通过两云验证；仅输出转换有界，编码系数、源图和 GPU 中间结果仍驻留 |
 | 4. RAW 数值合同 | 建立 float DNG、小数 BlackLevel、非均匀多通道重复黑电平的合法合成 fixture；记录矩阵、白平衡、WhiteLevel、原始数域；补齐 AsShotWhiteXY 与 BaselineExposure 的参考合同。再决定真正 float demosaic/转换入口或明确限制 | 独立 DNG 数学参考；不同最大值不暗中改变同一像素刻度；负值/HDR/邻近浮点样本；真实 Pixel/GCam/Samsung 与 Lightroom对照 | WhiteXY 已落地；2026-11-10 严格子集 float LinearRaw 已接入正式 JNI，恢复原始 ASN 并保留浮点。其他浮点格式/custom WB 仍走有诊断的整数兼容；完整 float Bayer、配置文件与手机外观验收未完成 |
 | 5. 统一阶段准入与取消 | EngineHost 分配前登记 source、decode scratch、candidate、新旧 float cache、输出/纸框；共享阶段 lease；取消贯穿 view、readback、行转换及编码 | 并发旧编辑/新候选/导出下的预算、失败原子性、取消清理；分开记录 CPU RSS、平台记账和 GPU 逻辑容量。已提交 GPU 工作完成后才释放 | float/整数 view、DI、legacy look 取消已补齐；新增候选与导出生命周期 lease，避免两者重叠。尚非完整字节预算，旧会话/缓存、普通预览和小型缩略 native 不受此 lease 限制 |
-| 6. 完整外存分块 | 为 source/negative/print 引入有界 plane，先点运算，再 FIR halo，后 IIR 跨块递归状态与全局统计；逐链替换全帧 SSBO | 多个块宽/高对同一全尺寸参考逐阶段比字节；全局 RNG/物理胶片坐标、边界、算序、量化点保持一致；真实 Adreno/Mali 驱动与热状态验证 | 待实施；dispatch 拆批不等于解除 SSBO 容量限制 |
+| 6. 完整外存分块 | 为 source/negative/print 引入有界 plane，先点运算，再 FIR halo，后 IIR 跨块递归状态与全局统计；逐链替换全帧 SSBO | 多个块宽/高对同一全尺寸参考逐阶段比字节；全局 RNG/物理胶片坐标、边界、算序、量化点保持一致；真实 Adreno/Mali 驱动与热状态验证 | 0039/0040 已有 point/FIR 独立原型，0041 补齐容量与边界拒绝；尚未接入生产 Pipeline。完整阶段预算、IIR/全局/颗粒仍待实施；dispatch 拆批不等于解除 SSBO 容量限制 |
 
 ## 算法与外部方法的吸收条件
+
+2026-11-11 已基于后续 `72d1afd` 重新审阅上游 main 2.3.2、Windows_Linux、darktable、RawTherapee 和 Android 衍生实现，并修复 TIFF/ICC/JNI、benchmark 与分块合同。详见 [重新解构与后续路线](ENGINE_ANDROID_REASSESSMENT_2026-11-11.md)，历史测量不覆盖到新功能。
 
 正常路径的执行优化保留 float32 算序、原模型及量化边界；改变错误输入处理或数学结果的修复单独记账。
 不以强加饱和度、全局曝光补偿或加大 JPEG 文件伪装 RAW 还原。

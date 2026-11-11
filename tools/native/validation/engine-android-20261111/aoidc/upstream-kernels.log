@@ -1,0 +1,6 @@
+/data/work/gpt-engine-audit-20261111/upstream-kernels/source/gpu_vulkan_di_encode.cpp: OK
+Vulkan di_encode device: llvmpipe (LLVM 15.0.7, 256 bits)
+di_encode: 10 GPU cases passed; float64 Cineon/Oklab reference; max delta 2.1025299e-05
+/data/work/gpt-engine-audit-20261111/upstream-kernels/source/gpu_vulkan_headroom.cpp: OK
+Vulkan headroom device: llvmpipe (LLVM 15.0.7, 256 bits)
+headroom: 6 GPU cases passed; float64 headroom compression reference; max delta 2.65471088e-06

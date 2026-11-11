@@ -1,0 +1,2 @@
+Android NDK r27.2, real Android API 29 headers, production spektralab_jni.cpp
+PASS ARM64 JNI source compilation; no APK or device execution

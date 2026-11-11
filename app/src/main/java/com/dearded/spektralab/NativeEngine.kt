@@ -136,7 +136,11 @@ object NativeEngine {
      * TIFF 导出到文件描述符，支持指定目标色彩空间。
      * @param targetSpace 目标色彩空间："sRGB", "Display P3", 或 "ProPhoto RGB"
      */
-    external fun exportTiffFd(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean
+    fun exportTiffFd(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean =
+        exportTiffFdV1(session, fd, iccPath, targetSpace, tier)
+
+    // A distinct native name keeps the original four-argument JNI ABI intact.
+    private external fun exportTiffFdV1(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean
 
     external fun release(session: Long)
 

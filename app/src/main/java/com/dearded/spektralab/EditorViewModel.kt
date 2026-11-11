@@ -1236,7 +1236,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 val ui = _ui.value
                 val ready = host.start(wanted.film, wanted.paper)
                 val backend = RealBenchmarkBackend(ready.engine, ready.catalog, ready.dir)
-                val am = app.getSystemService(android.app.ActivityManager::class.java)
                 val runner = BenchmarkRunner(
                     backend = backend,
                     clockMs = { android.os.SystemClock.elapsedRealtime() },
@@ -1245,9 +1244,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     rssKb = { ProcMemory.statusKb("VmRSS") },
                     peakKb = { ProcMemory.statusKb("VmHWM") },
                     maxPixels = ui.maxPixels,
-                    peakBudgetMb = am?.memoryClass?.toLong()?.times(1024) ?: 0L,
+                    // memoryClass is a Java-heap MB limit, not native/GPU RSS.
+                    // No measured per-process native budget is available here.
+                    peakBudgetMb = 0L,
                 )
-                when (val outcome = runner.run { phase, _ -> _ui.update { it.copy(busy = phase) } }) {
+                val outcome = host.transientSessions.withLease(
+                    onWaiting = { _ui.update { it.copy(busy = "等待当前处理") } },
+                ) { runner.run { phase, _ -> _ui.update { it.copy(busy = phase) } } }
+                when (outcome) {
                     is BenchmarkOutcome.Done -> {
                         benchmarkResult = outcome.result
                         log("benchmark completed: ${outcome.result.firstPreviewMs}ms preview, ${outcome.result.exportMs}ms export")

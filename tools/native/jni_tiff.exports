@@ -1,0 +1,11 @@
+{
+  global:
+    Java_com_dearded_spektralab_NativeEngine_create;
+    Java_com_dearded_spektralab_NativeEngine_destroy;
+    Java_com_dearded_spektralab_NativeEngine_lastError;
+    Java_com_dearded_spektralab_NativeEngine_release;
+    Java_com_dearded_spektralab_NativeEngine_exportTiffFd;
+    Java_com_dearded_spektralab_NativeEngine_exportTiffFdV1;
+    Java_TiffJniContract_*;
+  local: *;
+};

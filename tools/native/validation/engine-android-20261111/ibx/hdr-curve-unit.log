@@ -1,0 +1,11 @@
+  ok    a medium whose slope falls before mid-grey still has a curve
+  ok    its knee is inside the bracket [-0.0945, +0.0945]: 0.0944882 EV
+  ok    and its delta is a number of stops
+  ok    a mid-grey on the plateau (gamma0 ~1e-7) is refused: hdr curve: the medium has no gamma at mid-grey
+  ok    H 1.00005 refused (hdr curve: headroom must be in [1.0001, 16])
+  ok    H 1.00010: top 0.000144262291 = log2 H 0.000144262291 = the last sample 0.000144262291
+  ok    H 2.00000: top 1 = log2 H 1 = the last sample 1
+  ok    H 4.00000: top 2 = log2 H 2 = the last sample 2
+  ok    H 16.00000: top 4 = log2 H 4 = the last sample 4
+
+hdr curve unit: 0 failed

@@ -3,7 +3,6 @@ package com.dearded.spektralab
 import android.graphics.Bitmap
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 /**
@@ -15,7 +14,7 @@ internal class RealBenchmarkBackend(
     private val catalog: Catalog,
     private val dir: File,
 ) : BenchmarkBackend {
-    private var session = 0L
+    @Volatile private var session = 0L
     private val films = catalog.films.filter { !it.bw }.take(2)
 
     override suspend fun open(edge: Int) = withContext(EngineThread.dispatcher) {
@@ -44,8 +43,9 @@ internal class RealBenchmarkBackend(
 
     override suspend fun switchStyle(index: Int) = withContext(EngineThread.dispatcher) {
         check(session != 0L) { "会话未打开" }
-        val film = films.getOrNull(index % films.size)?.id ?: return@withContext
-        val delta = JSONObject().put("film", film).put("scan_film", false)
+        check(films.isNotEmpty()) { "性能测试需要至少一款彩色胶卷" }
+        val film = films[Math.floorMod(index, films.size)].id
+        val delta = benchmarkFilmParams(film)
         if (NativeEngine.setParams(session, delta.toString()) == null) {
             throw EngineException("切换风格失败：${NativeEngine.lastError()}", ErrorCodes.ENGINE_EXCEPTION)
         }
@@ -97,3 +97,10 @@ internal class RealBenchmarkBackend(
         return bmp
     }
 }
+
+/** Use the same engine keys and render mode as an actual film selection. */
+internal fun benchmarkFilmParams(film: String): JSONObject = JSONObject()
+    .put("film_stock", film)
+    .put("x_no_film", false)
+    .put("digital_intermediate", false)
+    .put("scan_film", false)

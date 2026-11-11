@@ -1,5 +1,10 @@
 # Native adaptation regressions
 
+The 2026-11-11 source review, TIFF/ICC/JNI corrections, benchmark corrections,
+bounded-prototype contracts and upstream HDR research are recorded in
+[the engine reassessment](../../docs/ENGINE_ANDROID_REASSESSMENT_2026-11-11.md).
+See [the synthetic two-host evidence](validation/engine-android-20261111/).
+
 The RAW tone and desktop file-intent corrections are documented in
 [RAW color fixes](../../docs/RAW_COLOR_FIXES_2026-11-10.md). `run.sh` includes
 the independent exposure/highlight domain probes. They can also run without
@@ -516,3 +521,56 @@ MEMORY=1 UP=... B=... RESOURCES_DIR=... BUILD_DIR=... bash tools/native/run_boun
 ```
 
 Requires patch 0039. It compares banded external-plane execution of the pointwise print_linear chain (xyz to RGB, CAM16 gamut, CCTF) with an independent whole-frame run byte for byte across band heights, band orders and worker counts, and checks that a 4097x3073 plane is refused by a strict 128 MiB range while bands pass. `MEMORY=1` adds separate-process VmHWM runs. Synthetic data, host llvmpipe only; not a phone measurement and not wired into the render pipeline. See [the design](../../docs/ENGINE_EXTERNAL_PLANE_DESIGN_2026-11-10.md).
+
+## Bounded prototype contracts and upstream kernel references
+
+Patch 0041 requires 0039/0040. It refuses impossible one-row/halo budgets,
+invalid geometry, insufficient FIR halo and an IIR run without carried state.
+The contract probe includes before/after rejection checks; the existing GPU
+point/print runners still compare legal execution with whole-frame bytes.
+
+```bash
+UP=/path/to/patched/upstream B=/path/to/build BUILD_DIR=/path/to/contracts \
+  bash tools/native/run_bounded_contract.sh
+UP=/path/to/patched/upstream B=/path/to/build BUILD_DIR=/path/to/contracts-asan \
+  SANITIZE=1 bash tools/native/run_bounded_contract.sh
+UP=/path/to/patched/upstream B=/path/to/build BUILD_DIR=/path/to/upstream-oracles \
+  bash tools/native/run_upstream_kernel_reference.sh
+```
+
+The oracle runner downloads two tests from fixed upstream 223205f, verifies
+their SHA-256, then compiles them against the supplied engine archive. It checks
+DI/Cineon/Oklab and headroom kernels against independent float64 references,
+guards and repeated execution. It does not replace production math or port
+main's HDR pipeline. A cached file with the wrong hash fails before compilation.
+
+## Production TIFF intent, JNI binding and ICC
+
+```bash
+BUILD_DIR=/path/to/icc bash tools/jvm/run_icc_profile.sh
+javac -d /path/to/cmm tools/jvm/ProfileCmm.java
+java -Djava.awt.headless=true -cp /path/to/cmm ProfileCmm /path/to/icc/prophoto.icc
+UP=/path/to/upstream B=/path/to/build CODEC=/path/to/jpeg-prefix \
+  MATH_DIR=/path/to/generated/math VULKAN_HEADERS=/path/to/Vulkan-Headers/include \
+  BUILD_DIR=/path/to/tiff bash tools/native/run_jni_tiff.sh
+```
+
+The ICC runner compiles the production Kotlin generator using Kotlin 2.0.21
+already cached by Gradle (or `KOTLIN_COMPILER_CP`/`KOTLIN_STDLIB`). It checks
+profile structure and independent XYZ values. `ProfileCmm.java` separately
+checks 4100 RGB samples using the JDK's CMM, suitable for the second host.
+
+The TIFF runner includes the actual production JNI translation unit, with only
+Android platform APIs stubbed for the Linux host. It links production engine
+and codec archives, checks complete TIFF bytes for twelve film/nofilm/target/look cases,
+preview intent retention, descriptor ownership and old/new entry points.
+`SANITIZE=1` instruments the probe and adapter units, not existing archives.
+
+`JVM=1` instead builds a shared JNI library and runs the actual production
+`NativeEngine.kt` from a JVM, using a type-only Android Bitmap stub. This mode
+requires all supplied static archives built with position-independent code,
+the JDK compiler, and the Kotlin 2.0.21 Gradle cache. Use a separate output
+directory and do not combine `JVM=1` with `SANITIZE=1`. `JAVA_INCLUDE` overrides
+the default JDK 17 header directory; `RESOURCES` overrides engine resources.
+This exercises actual native symbol resolution and TIFF output, not Android
+Bitmap runtime, a device install or an APK build.

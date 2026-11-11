@@ -1,8 +1,16 @@
 package com.dearded.spektralab
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -54,25 +62,36 @@ internal class BenchmarkRunner(
     private val peakBudgetMb: Long,
     private val wallClockMs: () -> Long = System::currentTimeMillis,
 ) {
-    suspend fun run(onProgress: (String, Float) -> Unit = { _, _ -> }): BenchmarkOutcome {
+    suspend fun run(onProgress: (String, Float) -> Unit = { _, _ -> }): BenchmarkOutcome = coroutineScope {
         val before = headroom()
-        if (BenchmarkPolicy.thermalGate(before) == ThermalGate.HOT) return BenchmarkOutcome.TooHot(before, "开始前")
+        if (BenchmarkPolicy.thermalGate(before) == ThermalGate.HOT) return@coroutineScope BenchmarkOutcome.TooHot(before, "开始前")
         val reset = resetPeak()
         val rss0 = rssKb()
         val edge = BenchmarkPolicy.TEST_EDGE
+        val runContext = currentCoroutineContext()
+        // Run the signal when cancellation starts, even if the engine dispatcher
+        // is blocked in native render. Join it before releasing the session.
+        var watcher: kotlinx.coroutines.Job? = null
         try {
             onProgress("准备合成图", 0.05f)
             backend.open(edge)
+            watcher = launch(Dispatchers.Unconfined, start = CoroutineStart.UNDISPATCHED) {
+                try {
+                    awaitCancellation()
+                } finally {
+                    if (!runContext.isActive) backend.cancel()
+                }
+            }
 
-            hot("首次预览")?.let { return it }
+            hot("首次预览")?.let { return@coroutineScope it }
             onProgress("首次预览", 0.2f)
             val firstMs = timed { backend.firstPreview() }
 
-            hot("切换风格")?.let { return it }
+            hot("切换风格")?.let { return@coroutineScope it }
             onProgress("切换风格", 0.45f)
             val samples = List(STYLE_SAMPLES) { i -> timed { backend.switchStyle(i) } }
 
-            hot("导出")?.let { return it }
+            hot("导出")?.let { return@coroutineScope it }
             onProgress("导出", 0.7f)
             val exportMs = timed { backend.export() }
 
@@ -82,14 +101,16 @@ internal class BenchmarkRunner(
             val switchMs = median(samples)
             val advice = BenchmarkPolicy.advise(edge, switchMs, exportMs, growthMb, after, maxPixels, peakBudgetMb)
             onProgress("完成", 1f)
-            return BenchmarkOutcome.Done(BenchmarkResult(edge, firstMs, switchMs, exportMs, growthMb, before, after, advice, wallClockMs()))
+            BenchmarkOutcome.Done(BenchmarkResult(edge, firstMs, switchMs, exportMs, growthMb, before, after, advice, wallClockMs()))
         } catch (e: CancellationException) {
-            backend.cancel()
             throw e
         } catch (e: Throwable) {
-            return BenchmarkOutcome.Failed(codeOf(e), e.message ?: e.toString())
+            BenchmarkOutcome.Failed(codeOf(e), e.message ?: e.toString())
         } finally {
-            withContext(NonCancellable) { runCatching { backend.close() } }
+            withContext(NonCancellable) {
+                watcher?.cancelAndJoin()
+                runCatching { backend.close() }
+            }
         }
     }
 
