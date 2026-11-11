@@ -15,7 +15,7 @@
 版本 {version}（{code}）
 
 **关于本项目**
-光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前是 Beta 版。**这不是 SpektraLab 官方版本**，与 SpektraLab 的作者和所有者无关联，未获其背书。
+光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前是预发布版本。**这不是 SpektraLab 官方版本**，与 SpektraLab 的作者和所有者无关联，未获其背书。
 作者：Spektralab-X 贡献者
 引擎适配共创：GPT（OpenAI，AI 助手）
 源码：https://github.com/Dear-Ded/Spektralab-X
@@ -51,7 +51,7 @@ SpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与
 Version {version} ({code})
 
 **About**
-Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is in beta. **This is not an official SpektraLab build**, and it is not affiliated with or endorsed by the authors or owners of SpektraLab.
+Spectral film and print simulation. Spektralab-X is an Android derivative of SpektraLab (JamesQiu2005/SpektraLab) and spektrafilm, built by one independent developer working with AI assistants (Claude, GPT, Grok and DeepSeek). It is a pre-release. **This is not an official SpektraLab build**, and it is not affiliated with or endorsed by the authors or owners of SpektraLab.
 Author: Spektralab-X contributors
 Engine adaptation co-creator: GPT (OpenAI, AI assistant)
 Source: https://github.com/Dear-Ded/Spektralab-X

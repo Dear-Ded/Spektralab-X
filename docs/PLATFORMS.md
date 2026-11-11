@@ -1,10 +1,17 @@
-# 平台差异：Spektralab-X（安卓）与上游 SpektraLab（macOS、Windows / Linux） / Platform differences
+# 历史平台对照：2026-11-04 / Historical platform comparison
 
-更新：2026-11-04 · 对应 `0.1.19-alpha` · 上游固定提交 `a46627d` 加本仓库 `patches/` 0001–0005
+记录基准：2026-11-04 · 对应 `0.1.19-alpha` · 上游固定提交 `a46627d` 加当时的 `patches/` 0001–0005。
+
+**本文保留当时的功能与测量记录，不代表当前支持清单。** 当前显示版本和内部版本码以 [VERSION](../VERSION) / [VERSION_CODE](../VERSION_CODE) 为准，补丁以 [PATCHES.md](PATCHES.md) 和目录为准。后续已加入 P3 / ProPhoto TIFF、浮点输入、蒙版、场景曲线、软打样及多项 RAW 与恢复修复，见 [CHANGELOG](../CHANGELOG.md)、[引擎跟进](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)和[生产尾段记录](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。颗粒与眩光的后续统计、固定种子和文件对照见 [PARITY.md](PARITY.md)。Adreno 真机与 macOS 全流程对照仍未完成。
+
+This is a dated historical record. Later features and regressions are documented
+in the changelog and linked engine reports; the capability tables below are not
+the current product support matrix. Historical lavapipe measurements do not
+certify Android GPU drivers.
 
 ## 简要说明 / Summary
 
-- **胶片部分是同一个引擎。** 安卓版编译的是上游自己的 C++ 引擎和 Vulkan 着色器，胶片、相纸数据也相同。改动只有 5 个补丁（[PATCHES.md](PATCHES.md)），都是为了在手机 GPU 上跑得动，或让编辑和导出两条线程同时渲染，不改色彩。
+- **当时的胶片部分使用同一个引擎。** 安卓版编译上游自己的 C++ 引擎和 Vulkan 着色器，胶片、相纸数据也相同。该历史记录的补丁范围为 0001–0005；后续修改另见 [PATCHES.md](PATCHES.md)。
 - **和上游 Linux 宿主程序比，颜色一致。** 同样的输入、同样的设置，43 组对照里导出图的平均色差是 ΔE00 0.000（RAW、合成图），手机 JPEG 是 0.016 以下。人眼大约在 ΔE00 1 才能分辨，这些差别看不出来。
 - **和 macOS 版还没有直接比过。** 手边没有 Mac。macOS 版用苹果自己的 RAW 解码器，安卓和 Windows / Linux 都用 LibRaw，所以同一个 RAW 在 macOS 上本来就会不同。这一点上游自己的 Windows / Linux 版也一样。
 - **手机的限制在尺寸，不在颜色。** 小米 12–14 的 GPU 单块显存最多 128 MiB，大约只能处理 800 万像素的画面；拖动滑块时预览只有 1024 像素。
