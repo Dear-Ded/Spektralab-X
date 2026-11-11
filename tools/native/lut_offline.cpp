@@ -3,6 +3,7 @@
 // Additional terms under GPL-3.0 section 7 apply; see NOTICE.
 // Co-created with GPT (OpenAI), 2026-11-11. Synthetic, offline research only.
 #include "pipeline/pipeline.hpp"
+#include "core/hanatos.hpp"
 #include "input_transform.hpp"
 #include "output_transform.hpp"
 #include <algorithm>
@@ -85,10 +86,16 @@ struct Lut {
     const RGB& at(unsigned r,unsigned g,unsigned b) const { return values[(size_t(r)*n+g)*n+b]; }
     RGB sample(const RGB& x,bool tetrahedral) const {
         require(supported(x),"out-of-domain LUT request must use actual renderer");
+        return interpolate({shape(x[0]),shape(x[1]),shape(x[2])},tetrahedral);
+    }
+    RGB interpolate(const std::array<double,3>& coordinate,bool tetrahedral) const {
+        require(n>=2&&values.size()==size_t(n)*n*n,"invalid LUT lattice");
         std::array<unsigned,3> base;
         std::array<double,3> f;
         for(unsigned c=0;c<3;++c) {
-            const double position=std::clamp(shape(x[c]),0.,1.)*(n-1);
+            require(std::isfinite(coordinate[c])&&coordinate[c]>=-1e-7&&coordinate[c]<=1+1e-7,
+                    "coordinate outside the requested lattice");
+            const double position=std::clamp(coordinate[c],0.,1.)*(n-1);
             base[c]=std::min(unsigned(position),n-2); f[c]=position-base[c];
         }
         RGB out{};
@@ -181,13 +188,124 @@ std::vector<RGB> display(const std::vector<RGB>& encoded, const spk::android::Ou
         v=v<=.04045f?v/12.92f:std::pow((v+.055f)/1.055f,2.4f);
     return result;
 }
+
+void signed_coordinates(spk::gpu::Gpu& gpu,const spk::Mat3& matrix,const std::vector<Sample>& samples,
+                        unsigned n,const std::string& path) {
+    std::vector<RGB> inputs; for(const auto& sample:samples) inputs.push_back(sample.x);
+    const auto source=flatten(inputs);
+    std::vector<float> coefficients;
+    for(const auto& row:matrix.m) for(double value:row) coefficients.push_back(float(value));
+    auto src=gpu.upload(source.data(),source.size()*sizeof(float),error); require(bool(src),error);
+    auto mat=gpu.upload(coefficients.data(),coefficients.size()*sizeof(float),error); require(bool(mat),error);
+    auto tc=gpu.alloc(samples.size()*2*sizeof(float),error); require(bool(tc),error);
+    auto brightness=gpu.alloc(samples.size()*sizeof(float),error); require(bool(brightness),error);
+    const uint32_t meta[]={uint32_t(samples.size())};
+    require(gpu.dispatch("spk_tc_b",{spk::gpu::Arg::buf(src),spk::gpu::Arg::buf(mat),
+        spk::gpu::Arg::inline_bytes(meta,1),spk::gpu::Arg::buf(tc),spk::gpu::Arg::buf(brightness)},samples.size(),error),error);
+    std::vector<float> coords(samples.size()*2),energy(samples.size());
+    require(gpu.read(tc.get(),0,coords.data(),coords.size()*sizeof(float),error)&&
+        gpu.read(brightness.get(),0,energy.data(),energy.size()*sizeof(float),error),error);
+    std::ofstream out(path); out<<std::setprecision(12);
+    out<<"group,in_r,in_g,in_b,gpu_tc_x,gpu_tc_y,gpu_brightness,cpu_X,cpu_Y,cpu_Z,positive_xyz_cell\n";
+    for(size_t i=0;i<samples.size();++i) {
+        const RGB& x=samples[i].x;
+        double xyz[3]={};
+        for(unsigned r=0;r<3;++r) for(unsigned c=0;c<3;++c) xyz[r]+=double(coefficients[3*r+c])*x[c];
+        bool positive=supported(x);
+        std::array<unsigned,3> base{};
+        if(positive) for(unsigned c=0;c<3;++c) base[c]=std::min(unsigned(shape(x[c])*(n-1)),n-2);
+        // A diagnostic classification, not a proven interpolation-error bound.
+        if(positive) for(unsigned corner=0;corner<8;++corner) {
+            RGB vertex;
+            for(unsigned c=0;c<3;++c) vertex[c]=unshape(double(base[c]+((corner>>c)&1))/(n-1));
+            for(unsigned r=0;r<3;++r) {
+                double value=0,scale=0;
+                for(unsigned c=0;c<3;++c) {
+                    const double term=double(coefficients[3*r+c])*vertex[c];
+                    value+=term; scale+=std::abs(term);
+                }
+                if(value<=1e-6*scale+1e-12) positive=false;
+            }
+        }
+        require(std::isfinite(coords[2*i])&&std::isfinite(coords[2*i+1])&&std::isfinite(energy[i]),
+                "nonfinite actual upsampling coordinates");
+        out<<samples[i].group;
+        for(float value:x) out<<','<<value;
+        out<<','<<coords[2*i]<<','<<coords[2*i+1]<<','<<energy[i];
+        for(double value:xyz) out<<','<<value;
+        out<<','<<positive<<'\n';
+    }
+}
+
+void local_signed_probe(Renderer& renderer,spk::gpu::Gpu& gpu,const spk::Mat3& matrix,
+                        const spk::android::OutputTransform& output,const std::string& dir,
+                        std::ostream& results,std::ostream& timing) {
+    // Previous held-out failures are regression anchors, not a new acceptance set.
+    const std::vector<RGB> anchors={{.5552405119f,-.2167534232f,-.2419789582f},
+        {.003888315056f,.3225855529f,-.2246024311f},
+        {.167887941f,-.01222540624f,-.09380492568f},
+        {.1558107734f,-.01677556336f,-.09125823528f}};
+    for(size_t anchor=0;anchor<anchors.size();++anchor) {
+        std::array<double,3> lower{},upper{};
+        for(unsigned c=0;c<3;++c) {
+            const unsigned cell=std::min(unsigned(shape(anchors[anchor][c])*32),31u);
+            lower[c]=double(cell)/32; upper[c]=double(cell+1)/32;
+        }
+        constexpr unsigned edge=17;
+        std::vector<RGB> grid;
+        for(unsigned r=0;r<edge;++r) for(unsigned g=0;g<edge;++g) for(unsigned b=0;b<edge;++b) {
+            RGB x; const unsigned indices[]={r,g,b};
+            for(unsigned c=0;c<3;++c) x[c]=unshape(lower[c]+(upper[c]-lower[c])*indices[c]/(edge-1));
+            grid.push_back(x);
+        }
+        Lut local{edge,renderer.run(grid,edge,"local-grid-"+std::to_string(anchor),timing,true)};
+        std::vector<Sample> samples={{"anchor-"+std::to_string(anchor),anchors[anchor]}};
+        for(unsigned c=0;c<3;++c) for(int direction:{-1,1}) {
+            RGB neighbor=anchors[anchor];
+            neighbor[c]=std::nextafter(neighbor[c],direction<0?-INFINITY:INFINITY);
+            samples.push_back({"ulp-"+std::to_string(anchor),neighbor});
+        }
+        for(unsigned step=0;step<257;++step) {
+            // Off-grid line through the same original cell, independent of local nodes.
+            RGB x;
+            for(unsigned c=0;c<3;++c) x[c]=unshape(lower[c]+(upper[c]-lower[c])*(step+.371)/257);
+            samples.push_back({"cell-line-"+std::to_string(anchor),x});
+        }
+        // Probe the actual front-end Y=0 branch without changing the renderer.
+        const float mr=float(matrix.m[1][0]),mg=float(matrix.m[1][1]),mb=float(matrix.m[1][2]);
+        if(mg!=0) {
+            RGB crossing=anchors[anchor];
+            crossing[1]=float(-(double(mr)*crossing[0]+double(mb)*crossing[2])/mg);
+            if(supported(crossing)&&shape(crossing[1])>lower[1]&&shape(crossing[1])<upper[1]) {
+                for(int step=-32;step<=32;++step) {
+                    RGB x=crossing;
+                    for(int ulp=0;ulp<std::abs(step);++ulp)
+                        x[1]=std::nextafter(x[1],step<0?-INFINITY:INFINITY);
+                    samples.push_back({"Y-cross-"+std::to_string(anchor),x});
+                }
+            }
+        }
+        std::vector<RGB> inputs,approximate;
+        for(const auto& sample:samples) {
+            inputs.push_back(sample.x);
+            std::array<double,3> position;
+            for(unsigned c=0;c<3;++c) position[c]=(shape(sample.x[c])-lower[c])/(upper[c]-lower[c]);
+            approximate.push_back(local.interpolate(position,true));
+        }
+        const auto reference=display(renderer.run(inputs,1,"local-reference-"+std::to_string(anchor),timing,true),output,false);
+        const auto packed=display(approximate,output,false);
+        for(size_t i=0;i<samples.size();++i) csv(results,"local16",edge,"tetrahedral",samples[i],reference[i],packed[i],false);
+        signed_coordinates(gpu,matrix,samples,33,dir+"/local-coordinates-"+std::to_string(anchor)+".csv");
+    }
+}
 }
 
 int main(int argc,char** argv) {
     try {
-        require(argc==5,"usage: lut_offline SHADERS RESOURCES OUTDIR smoke|full|gate");
+        require(argc==5,"usage: lut_offline SHADERS RESOURCES OUTDIR smoke|full|gate|diagnostic");
         static_assert(sizeof(RGB)==3*sizeof(float));
-        const bool gate=std::string(argv[4])=="gate";
+        const bool diagnostic=std::string(argv[4])=="diagnostic";
+        const bool gate=std::string(argv[4])=="gate"||diagnostic;
         require(std::string(argv[4])=="smoke"||std::string(argv[4])=="full"||gate,"invalid mode");
         const bool smoke=std::string(argv[4])=="smoke";
         const std::string dir=argv[3]; std::filesystem::create_directories(dir);
@@ -277,7 +395,18 @@ int main(int argc,char** argv) {
         std::vector<RGB> outside;
         for(const auto& s:samples) if(!supported(s.x)) outside.push_back(s.x);
         const auto fallback_values=renderer.run(outside,1,"out-of-domain-fallback",timing,true);
-        for(unsigned n:(smoke?std::vector<unsigned>{9}:gate?std::vector<unsigned>{33}:std::vector<unsigned>{33,65})) {
+        spk::Mat3 tc_matrix;
+        if(diagnostic) require(spk::tc_b_matrix(colour,blob,point.io.input_color_space,
+            point.film.info.reference_illuminant,tc_matrix,error),error);
+        if(diagnostic) {
+            std::ofstream config(dir+"/diagnostic.json");
+            config<<R"({"mode":"diagnostic","global_grids":[33,65],"local_subgrid":17,"local_anchors":"four previous held-out failures; not an acceptance set","classifier":"positive XYZ at all original lattice cell vertices with rounding margin; diagnostic, not a DE00 guarantee","matrix_rgb_to_xyz_float32":[)";
+            for(unsigned r=0;r<3;++r) for(unsigned c=0;c<3;++c)
+                config<<(r||c?",":"")<<std::setprecision(12)<<float(tc_matrix.m[r][c]);
+            config<<"]}\n";
+        }
+        for(unsigned n:(smoke?std::vector<unsigned>{9}:gate&&!diagnostic?std::vector<unsigned>{33}:std::vector<unsigned>{33,65})) {
+            if(diagnostic) signed_coordinates(*gpu,tc_matrix,samples,n,dir+"/coordinates-"+std::to_string(n)+".csv");
             std::vector<RGB> grid;
             for(unsigned r=0;r<n;++r) for(unsigned g=0;g<n;++g) for(unsigned b=0;b<n;++b)
                 grid.push_back({unshape(double(r)/(n-1)),unshape(double(g)/(n-1)),unshape(double(b)/(n-1))});
@@ -301,7 +430,7 @@ int main(int argc,char** argv) {
                         csv(results,eight?"interpolation8":"interpolation16",n,tetra?"tetrahedral":"trilinear",samples[i],ref[i],packed[i],!supported(samples[i].x));
                 }
             }
-            if(gate) {
+            if(gate&&!diagnostic) {
                 // A real 1024-pixel live geometry, not a reshaped training cube.
                 const unsigned width=1024,height=768;
                 std::vector<RGB> scene; scene.reserve(size_t(width)*height);
@@ -335,6 +464,7 @@ int main(int argc,char** argv) {
                 }
             }
         }
+        if(diagnostic) local_signed_probe(renderer,*gpu,tc_matrix,output,dir,results,timing);
         const unsigned edge=smoke?16:64;
         std::vector<RGB> scene;
         for(unsigned y=0;y<edge;++y) for(unsigned x=0;x<edge;++x) {

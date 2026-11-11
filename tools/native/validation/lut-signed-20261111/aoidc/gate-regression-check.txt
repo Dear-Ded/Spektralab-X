@@ -1,0 +1,5 @@
+PASS original gate samples.csv byte-identical
+PASS original 33-cube float32 lattice byte-identical
+74751 /data/work/gpt-lut-gate-20261111/gate-regression/samples.csv
+e11f7595ebc3b1dfa1a63b4f870ecb2c2bc8b540b5d473bc7358db49a0bff30b  /data/work/gpt-lut-gate-20261111/gate-regression/samples.csv
+4baa8a176de60d3cc3a3a02a32cb7a6ad7f2055beea18b1c204708127992ae79  /data/work/gpt-lut-gate-20261111/gate-regression/lut-33.f32

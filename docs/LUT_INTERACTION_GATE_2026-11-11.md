@@ -31,6 +31,12 @@ interpolation. Removing configured spatial effects separately gives mean
 not interpolation error. Grain, halation, DIR diffusion, contrast masks and
 other spatial effects cannot be claimed as reproduced by this three-input LUT.
 
+The [signed-domain follow-up](LUT_SIGNED_DOMAIN_2026-11-11.md) now reads the
+actual GPU projection and tests 65^3 plus local subgrids. Two hosts reproduce a
+one-float32-step reference change of DE00 51.79945; 65^3 still reaches 21.70646
+tetrahedral error. This narrows the next support/fallback investigation; it
+does not change this gate's common-group acceptance into arbitrary-RAW approval.
+
 ## Matching the application
 
 The older experiment used Portra Endura and direct linear P3 output. This gate

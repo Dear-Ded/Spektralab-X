@@ -1,0 +1,42 @@
+{
+  "base_commit": "d0925f1f454351944f0fa74a92e848ff1cd7c0c1",
+  "engine_manifest_sha256": "1aa7cfe5b3fd1db7d9cf53bb9d6ee8c62e88944da7f579f949fce9aecf34bf8a",
+  "source_files": [
+    {
+      "path": "tools/native/lut_offline.cpp",
+      "sha256": "aab716c7c2fe2614cd041d0a742ad11e73e490c3c30ef27e1fe9b97074e48c59"
+    },
+    {
+      "path": "tools/native/run_lut_offline.sh",
+      "sha256": "9ae0059fc339f62c187e960e1fd535e743d1a07453286dfecd9b8ae75d978f81"
+    },
+    {
+      "path": "tools/lut_experiment/signed_report.py",
+      "sha256": "875804c623651e1c3f8e4c0f28dc64178f76f640ff9b9c6d527df61251fe7650"
+    },
+    {
+      "path": "tools/lut_experiment/check_signed_evidence.py",
+      "sha256": "82168a3f0eb5a345c8f90f9df7e24f0dfed85ae183166e83239d9e7416db7f62"
+    },
+    {
+      "path": "tools/lut_experiment/run_negative_denominator.sh",
+      "sha256": "cebe066f38864ea64a08503d2c84b77b436db25645d3d16eaee691fb20d45c87"
+    },
+    {
+      "path": "tools/lut_experiment/prepare_negative_denominator.py",
+      "sha256": "cb656b674fbaf22344ac1206380ddd38dca4b47c4fd4cc4cad8f936e33906c2c"
+    },
+    {
+      "path": "tools/lut_experiment/compare_negative_denominator.py",
+      "sha256": "9ce6cb2e1e93c4e75b0022f7b4cade03d3cbfa8b8985d37176af7ee5be7a0d24"
+    },
+    {
+      "path": "tools/lut_experiment/gate_report.py",
+      "sha256": "7e1ddf2391aeff5fa9789b6a256de796bc1e77b012702bafd9863a2877bfd9b8"
+    },
+    {
+      "path": "tools/lut_experiment/ciede2000_reference.py",
+      "sha256": "84b99d76b85e23abbbb64e08d6ebba9a1abbd66c88a11adbea04d71805542c2c"
+    }
+  ]
+}

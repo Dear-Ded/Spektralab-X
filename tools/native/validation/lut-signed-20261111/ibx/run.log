@@ -1,0 +1,21 @@
+0a3a4457871a0d9acf9ed312011b4b6b4beba78f26c0aa19560d98843d55a492  /data/home/gpt-lut-gate-20261111/signed/lut_offline
+503ea2ba3547637da2356f5e896a80cec4ee3243ab74b797b00093a125bb9a7e  /data/home/gpt-lut-gate-20261111/build/engine/libspektralab_engine.a
+gpu=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+render=held-out pixels=10244 ms=22.0857
+PASS actual GPU working pack and production float/u16 P3 output parity pixels=10244
+render=permuted-reshape pixels=10244 ms=5.57775
+render=repeat pixels=10244 ms=5.10922
+render=out-of-domain-fallback pixels=4 ms=0.758994
+render=grid-33 pixels=35937 ms=17.7069
+render=grid-65 pixels=274625 ms=94.6796
+render=local-grid-0 pixels=4913 ms=2.89496
+render=local-reference-0 pixels=329 ms=0.949
+render=local-grid-1 pixels=4913 ms=2.61886
+render=local-reference-1 pixels=264 ms=0.886393
+render=local-grid-2 pixels=4913 ms=2.68341
+render=local-reference-2 pixels=264 ms=0.936476
+render=local-grid-3 pixels=4913 ms=2.68726
+render=local-reference-3 pixels=264 ms=0.951585
+render=ablation-point pixels=4096 ms=2.43721
+render=ablation-configured-spatial pixels=4096 ms=14.5213
+PASS fixed point permutation/repeat; LUT generation and held-out data complete samples=10244

@@ -1,0 +1,23 @@
+	Command being timed: "/data/home/gpt-lut-gate-20261111/signed/lut_offline /data/home/gpt-lut-negative-denom-20261111/shaders /data/home/gpt-lut-gate-20261111/build/engine/resources /data/home/gpt-lut-negative-denom-20261111/result diagnostic"
+	User time (seconds): 1.15
+	System time (seconds): 0.31
+	Percent of CPU this job got: 104%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.40
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 152240
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 299
+	Minor (reclaiming a frame) page faults: 32224
+	Voluntary context switches: 3346
+	Involuntary context switches: 28
+	Swaps: 0
+	File system inputs: 32352
+	File system outputs: 41680
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

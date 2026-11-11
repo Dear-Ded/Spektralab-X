@@ -1,0 +1,89 @@
+{
+  "scope": "Counterfactual signed-denominator experiment; not correctness or merge approval",
+  "conclusion_limit": "An isolated intervention measures causal sensitivity; it does not establish a correct signed-domain renderer, natural-image support, or a mergeable algorithm",
+  "output_byte_scope": "Production P3 UNORM16 reconstructed from losslessly identifying decimal CSV; internal float buffers are not exported",
+  "sharma_reference": {
+    "pairs": 34,
+    "max_rounded_reference_error": 4.9498977271467126e-05,
+    "max_symmetry_error": 0.0
+  },
+  "positive_xyz_cells": {
+    "33": {
+      "count": 7307,
+      "byte_count": 58456,
+      "byte_identical": true,
+      "sha256": "8d0eeaa6e801aed0fdf5d2a87514bdd087092a835ff7d0af04efd19b58cc2250",
+      "changed_unsafe_references": 19
+    },
+    "65": {
+      "count": 7639,
+      "byte_count": 61112,
+      "byte_identical": true,
+      "sha256": "459d0e3d53f8d8e2b0a8ec2d0e60fdd73b7b55efebf8a5cfeb6ba022b6c18095",
+      "changed_unsafe_references": 19
+    }
+  },
+  "y_cross": {
+    "Y-cross-0": {
+      "count": 65,
+      "changed_outputs": 33,
+      "max_counterfactual_change": 51.79945350316964,
+      "max_adjacent_before": 51.79945350316964,
+      "max_adjacent_after": 0.0,
+      "old_maximum_adjacent_witness": [
+        {
+          "input": [
+            0.5552405119,
+            -0.2234972715,
+            -0.2419789582
+          ],
+          "reference_before": [
+            0.0,
+            0.02312636003,
+            0.2130467445
+          ],
+          "reference_after": [
+            0.0,
+            0.02312636003,
+            0.2130467445
+          ],
+          "tc_before": [
+            1.0,
+            0.0
+          ],
+          "tc_after": [
+            1.0,
+            5.13399243118e-08
+          ]
+        },
+        {
+          "input": [
+            0.5552405119,
+            -0.2234972566,
+            -0.2419789582
+          ],
+          "reference_before": [
+            0.0,
+            0.1157631204,
+            0.01304093748
+          ],
+          "reference_after": [
+            0.0,
+            0.02312636003,
+            0.2130467445
+          ],
+          "tc_before": [
+            1.0,
+            1.0
+          ],
+          "tc_after": [
+            1.0,
+            0.0
+          ]
+        }
+      ]
+    }
+  },
+  "changed_local_tc_y_count": 895,
+  "untouched_input_count": 55
+}

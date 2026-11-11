@@ -4,7 +4,7 @@
 
 更新：2026-11-11。当前源码版本 `0.2.00-alpha-2`，内部版本码 122；本轮只改源码、做宿主验证，不打 APK、不改版本、不发布。未发布修改见 [CHANGELOG.md](../CHANGELOG.md)。下方早期里程碑的版本排期保留作历史参考。
 
-新协作会话先核对当前分支与工作树，再读[引擎跟进](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)、[印放尾段](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)、[预览发布修复](PREVIEW_PUBLICATION_FIX_2026-11-11.md)和[交互 LUT 实验](LUT_INTERACTION_GATE_2026-11-11.md)。新 RAW 默认仍保持线性显示。LUT 尚未接入应用，完整有界分条导出尚未完成，宿主/NDK 编译不能当成真机验收。
+新协作会话先核对当前分支与工作树，再读[引擎跟进](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)、[印放尾段](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)、[预览发布修复](PREVIEW_PUBLICATION_FIX_2026-11-11.md)、[交互 LUT 实验](LUT_INTERACTION_GATE_2026-11-11.md)和[负通道边界诊断](LUT_SIGNED_DOMAIN_2026-11-11.md)。两云已复现上游继承的负域投影突变，不能靠统一加密色表解决。新 RAW 默认仍保持线性显示。LUT 尚未接入应用，完整有界分条导出尚未完成，宿主/NDK 编译不能当成真机验收。
 
 ## 1. 项目是什么
 

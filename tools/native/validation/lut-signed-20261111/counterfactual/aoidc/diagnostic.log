@@ -1,0 +1,19 @@
+gpu=llvmpipe (LLVM 15.0.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+render=held-out pixels=10244 ms=128.29
+PASS actual GPU working pack and production float/u16 P3 output parity pixels=10244
+render=permuted-reshape pixels=10244 ms=40.8305
+render=repeat pixels=10244 ms=53.1735
+render=out-of-domain-fallback pixels=4 ms=1.72235
+render=grid-33 pixels=35937 ms=112.103
+render=grid-65 pixels=274625 ms=747.762
+render=local-grid-0 pixels=4913 ms=22.8654
+render=local-reference-0 pixels=329 ms=4.79006
+render=local-grid-1 pixels=4913 ms=25.9511
+render=local-reference-1 pixels=264 ms=5.3012
+render=local-grid-2 pixels=4913 ms=25.6327
+render=local-reference-2 pixels=264 ms=5.2425
+render=local-grid-3 pixels=4913 ms=26.0031
+render=local-reference-3 pixels=264 ms=5.16108
+render=ablation-point pixels=4096 ms=20.1043
+render=ablation-configured-spatial pixels=4096 ms=67.2782
+PASS fixed point permutation/repeat; LUT generation and held-out data complete samples=10244
