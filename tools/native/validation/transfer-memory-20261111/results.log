@@ -1,0 +1,34 @@
+Source-only cloud validation, 2026-11-11
+AOIDC full native engine rebuilt for changed Gpu interface.
+Integrated source: pinned upstream plus patches 0001..0048.
+Strict replay: 48 patches, 97 files, zero fuzz, all affected source SHA256 equal.
+
+inline_ring=1
+VULKAN_TRANSFER_MEMORY_PASS checks=24 warm_upload=4194304 warm_read=4194304 small_read=4096
+inline_ring=0
+VULKAN_TRANSFER_MEMORY_PASS checks=24 warm_upload=4194304 warm_read=4194304 small_read=4096
+
+Independent IBX complete rebuild: both ring modes PASS 24 checks each.
+Device-lost regression, both ring modes:
+16 requests refused with one latched diagnosis, 2 buffers and 131072 bytes came back on cleanup.
+
+Final integrated params regression:
+params_transaction checks=70 failures=0 failure_classes=output,print,shoot,film-stock,print-stock full_snapshot=true byte_exact=true
+Final integrated production tail:
+PASS production print tail checks=2796 renders=268 float_values=2200950 spill_allocation_before=819992 spill_allocation_after=739568 window_shapes=4 window_trim_freed=185724
+ARM64_API29_FINAL_SYNTAX_PASS (2 pre-existing C-linkage return-type warnings)
+
+SHA256 final tested source and artifacts (cloud build identifiers, not distributed binaries):
+c763d491e46d7b5fb97e1a9463fcc7b80a9ed8d6b81f4c88ccb3e6be8f2fef32  engine/src/gpu/gpu.hpp
+d6c3835935d2ac3855677e290502a85fe630336ea340b818e25117e2da3d4623  engine/src/gpu/vulkan_gpu.cpp
+3c1cdc6574bf944db2f22b3e19f46222062025b3f3195680e9404e17a1f8d36e  engine/src/pipeline/engine.cpp
+591da448af0ef7f460890ea290570fd86514d02b62e41223584dece56f32e256  engine/src/pipeline/pipeline.cpp
+1c4102d86db74e7e5bc4c6fa1e755789ae2dc205565549f7a8513517d5f37799  engine/src/pipeline/pipeline.hpp
+b8a6dd6521da7c8e5d2b34276eb2def667ea4977c374a09cffaad0d2f0e075ae  engine/include/spektrafilm/spk_engine.h
+1fc39c94b4e27b1fc81e94366d54d0264cfd80ff7dbeec4e9b7847aab740d373  engine/libspektralab_engine.a
+070fb9d3c8d79abf65ee26e6a491e3e895dfdaeca180e384ec4da7f5d76f96ad  engine/libspektralab_core.a
+5d9bbb69a3bde97f0fe63a4140d8251186a6d77bbb5dd6cfb940861fb8facdad  engine/libspk_volk.a
+be5f1b9f69516b80918398f8ec33aae1ca52d4ebdad176a13285f188efb74cb5  probe/vulkan_transfer_memory
+94bd2e2042e5c1c88c015f605f1927a0de788e31fdaa50874be560a5a8430b0c  probe/params_transaction
+8265f88a56b80e118a70fe4ff8da266b1eae80cfbc17bb72594a4392cf3919af  probe/pipeline.o
+14727c75361f4be0a3d225e0d65240d42ecaa50b19dbc42ef56d61d89513264c  probe/pipeline_print_tail

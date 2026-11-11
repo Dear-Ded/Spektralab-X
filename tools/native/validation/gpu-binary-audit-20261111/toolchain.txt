@@ -1,0 +1,35 @@
+2026-11-11T07:04:45Z
+Glslang Version: 10:11.8.0
+ESSL Version: OpenGL ES GLSL 3.20 glslang Khronos. 11.8.0
+GLSL Version: 4.60 glslang Khronos. 11.8.0
+SPIR-V Version 0x00010600, Revision 1
+GLSL.std.450 Version 100, Revision 1
+Khronos Tool ID 8
+SPIR-V Generator Version 10
+GL_KHR_vulkan_glsl version 100
+ARB_GL_gl_spirv version 100
+SPIRV-Tools v2022.2-dev unknown hash, 2022-02-16T16:37:15
+Targets:
+  SPIR-V 1.0
+  SPIR-V 1.1
+  SPIR-V 1.2
+  SPIR-V 1.3
+  SPIR-V 1.4
+  SPIR-V 1.5
+  SPIR-V 1.6
+  SPIR-V 1.2 (under OpenCL 2.2 Full Profile semantics)
+  SPIR-V 1.0 (under Vulkan 1.0 semantics)
+  SPIR-V 1.3 (under Vulkan 1.1 semantics)
+ SPIR-V 1.4 (under Vulkan 1.1 semantics)
+ SPIR-V 1.5 (under Vulkan 1.2 semantics)
+ SPIR-V 1.6 (under Vulkan 1.3 semantics)
+SPIRV-Tools v2022.2-dev unknown hash, 2022-02-16T16:37:15
+Target: SPIR-V 1.5
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Ubuntu clang version 14.0.0-1ubuntu1.1
+shader compiler command
+cd <tail-validation>/build/engine && /usr/bin/cmake -E make_directory <tail-validation>/build/engine/resources/vulkan && /bin/glslangValidator -V --target-env vulkan1.0 -I<tail-validation>/source/engine/src/shaders/vulkan -o <tail-validation>/build/engine/resources/vulkan/spk_math_probe.spv <tail-validation>/source/engine/src/shaders/vulkan/spk_math_probe.comp
+core compiler command
+/usr/bin/c++ -DSPK_VULKAN_BACKEND=1 -I<tail-validation>/source/engine/src/core -O3 -DNDEBUG -fPIC -std=gnu++20 -MD -MT engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o -MF engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o.d -o engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o -c <tail-validation>/source/engine/src/core/colour.cpp
+pipeline compiler command
+/usr/bin/c++ -DSPK_VULKAN_BACKEND=1 -I<tail-validation>/build/engine/generated -I<tail-validation>/source/engine/include -I<tail-validation>/source/engine/src -I<tail-validation>/source/engine/src/core -O3 -DNDEBUG -fPIC -std=gnu++20 -MD -MT engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o -MF engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o.d -o engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o -c <tail-validation>/source/engine/src/pipeline/pipeline.cpp

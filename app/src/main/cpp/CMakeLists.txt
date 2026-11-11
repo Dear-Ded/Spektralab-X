@@ -81,9 +81,13 @@ add_subdirectory("${SPK_UPSTREAM}/engine" engine)
 # thetechgeekko/Spektrafilm-android ships on Android: an embedded ICC profile,
 # everything identify() allocates for metadata, and DNG tile streams.
 target_compile_definitions(spk_libraw PUBLIC
+    USE_ZLIB
     LIBRAW_MAX_PROFILE_SIZE_MB=16
     LIBRAW_MAX_METADATA_ALLOC_SIZE_MB=16
     LIBRAW_MAX_TILE_STREAM_COUNT=131072)
+# Linking z into JNI alone does not compile LibRaw's Deflate DNG decoder.
+# Keep the dependency on the archive so every consumer gets the required link.
+target_link_libraries(spk_libraw PUBLIC z)
 
 # white_balance.cpp is upstream's desktop-host Temperature/Tint (Robertson
 # isotherms, LibRaw's camera matrix), with the RAW adaptation patches applied.

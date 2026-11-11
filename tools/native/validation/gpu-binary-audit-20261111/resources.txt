@@ -1,0 +1,20 @@
+blob files
+Imprint-fonts-LICENSE.txt 4414
+Imprint-mono-font-DejaVu-LICENSE.txt 8816
+Product-profiles-NOTICE.md 4065
+neutral_print_filters.json 22195
+paper_grades.json 1228
+print_luts.json 1559
+product-neutral-print-filters.json 297
+spektrafilm_constants.bin 9450196
+stb-LICENSE.txt 2510
+blob sha256
+f2c06600606fa169171f58b6639d2669f372a2b39ebe9c72e3edeff5f6d7d31d  <tail-validation>/build/engine/resources/spektrafilm_constants.bin
+blob first 80 bytes
+ 53 50 4b 52 01 00 00 00 47 00 00 00 00 00 00 00
+ 73 70 65 63 74 72 61 6c 2f 77 61 76 65 6c 65 6e
+ 67 74 68 73 00 00 00 00 00 00 00 00 00 00 00 00
+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+*
+volk version
+22:#define VOLK_HEADER_VERSION 341

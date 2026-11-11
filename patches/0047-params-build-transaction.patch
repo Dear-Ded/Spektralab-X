@@ -1,0 +1,52 @@
+# Spektralab-X - https://github.com/Dear-Ded/Spektralab-X
+# Copyright (C) 2026 Spektralab-X contributors
+# Additional terms under GPL-3.0 section 7 apply; see NOTICE.
+# Co-created with GPT (OpenAI), 2026-11-11.
+# Keep accepted parameters and their Pipeline together when a rebuild rejects
+# a delta or cannot prepare its GPU tables. Stage only rebuild paths; live
+# deltas retain their existing path. Successful render expressions are unchanged.
+diff --git a/engine/src/pipeline/engine.cpp b/engine/src/pipeline/engine.cpp
+index 547cce8..c87a3d4 100644
+--- a/engine/src/pipeline/engine.cpp
++++ b/engine/src/pipeline/engine.cpp
+@@ -2472,6 +2472,15 @@ spk_status spk_set_params(spk_session* session, const char* params_delta_json, c
+     // compare against.
+     const uint32_t live_edge_before = tier_long_edge(session->params, kTiers[0]);
+ 
++    // Rebuilds can reject valid transport values or fail while preparing GPU
++    // tables. Keep the accepted tree and its pipeline together until success.
++    std::optional<Params> candidate;
++    if (rebuild) {
++        if (stock_change) candidate.emplace();
++        else candidate.emplace(session->params);
++    }
++    Params& pending = candidate ? *candidate : session->params;
++
+     if (stock_change) {
+         // A stock change rebuilds the parameter tree, because it needs a
+         // profile load and a fresh digest. `settings` is carried across
+@@ -2502,19 +2511,20 @@ spk_status spk_set_params(spk_session* session, const char* params_delta_json, c
+         // schema row to be read back through.
+         apply_product_defaults(fresh, session->product_defaults);
+         if (!digest(fresh, engine->neutral_filters, error)) { g_error = error; return SPK_ERR_USER; }
+-        session->params = fresh;
++        pending = std::move(fresh);
+     } else {
+-        apply_delta(session->params, delta);
++        apply_delta(pending, delta);
+         // The one field whose meaning is a preset rather than a number: no
+         // digest runs on this path, so the preset is re-read here.
+-        if (delta.has("antihalation_removed")) apply_halation_preset(session->params);
++        if (delta.has("antihalation_removed")) apply_halation_preset(pending);
+     }
+ 
+     if (rebuild) {
+         std::string error;
+         auto pipeline = std::make_unique<Pipeline>(engine->gpu, &engine->colour, &engine->blob,
+                                                    &engine->setup_cache);
+-        if (!pipeline->build(session->params, error)) { g_error = error; return SPK_ERR_USER; }
++        if (!pipeline->build(*candidate, error)) { g_error = error; return SPK_ERR_USER; }
++        session->params = std::move(*candidate);
+         session->pipeline = std::move(pipeline);
+     } else {
+         // The live path: written straight onto the pipeline's own copy, which

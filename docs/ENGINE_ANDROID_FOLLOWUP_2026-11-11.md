@@ -1,5 +1,10 @@
 # Engine Source Follow-up, 2026-11-11
 
+Follow-up: patches 0046..0048 now add backend allocation accounting, rejected
+parameter transaction protection and an opt-in production paper-print tail.
+See [the integration record](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md).
+The helper-only status below describes the earlier 0043..0045 stage.
+
 Co-created with GPT (OpenAI). Source and cloud validation only. Version,
 version code, packaging and release settings are unchanged. New RAW imports
 retain the existing neutral/linear default.

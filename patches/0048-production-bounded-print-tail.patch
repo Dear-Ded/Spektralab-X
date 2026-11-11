@@ -1,0 +1,221 @@
+# Spektralab-X - https://github.com/Dear-Ded/Spektralab-X
+# Copyright (C) 2026 Spektralab-X contributors
+# Additional terms under GPL-3.0 section 7 apply; see NOTICE.
+# Co-created with GPT (OpenAI), 2026-11-11.
+# Opt-in Linux/Android production print tail through external halo bands.
+# Reuse existing shaders and FIR arithmetic; defaults and wire protocol unchanged.
+# Bounds only per-run logical window/host payload, not process/device memory.
+# Exclude DI, film scan, overscan, EDR, scanner blur, fusion and carried IIR.
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+index fe68914..51243aa 100644
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -1,14 +1,20 @@
+ #include "pipeline.hpp"
+ #include "timer.hpp"
+ #include "halation_psf.hpp"
++#if defined(__linux__)
++#include "bounded_print_run.hpp"
++#endif
+ #if !defined(__APPLE__) || defined(SPK_VULKAN_BACKEND)
+ #include "windows_unported.hpp"
+ #endif
+ 
+ #include <algorithm>
+ #include <chrono>
++#include <charconv>
+ #include <cmath>
++#include <cstdlib>
+ #include <cstring>
++#include <memory>
+ 
+ namespace spk {
+ 
+@@ -49,6 +55,32 @@ uint32_t cctf_mode_for(const std::string& cs) {
+ 
+ namespace {
+ 
++// Experimental production entry: no wire/default changes. This bounds only one
++// tail's window/host payload, not full images, idle pools or concurrent sessions.
++bool bounded_tail_enabled(bool& enabled, std::string& error) {
++    const char* value = std::getenv("SPK_BOUNDED_PRINT_TAIL");
++    enabled = value && std::strcmp(value, "1") == 0;
++    if (!value || enabled || std::strcmp(value, "0") == 0) return true;
++    error = "SPK_BOUNDED_PRINT_TAIL must be 0 or 1";
++    return false;
++}
++
++#if defined(__linux__)
++bool bounded_tail_number(const char* name, uint64_t fallback, uint64_t limit,
++                         uint64_t& out, std::string& error) {
++    const char* value = std::getenv(name);
++    out = fallback;
++    if (!value) return true;
++    const size_t length = std::strlen(value);
++    if (length && length <= 20) {
++        const auto parsed = std::from_chars(value, value + length, out);
++        if (parsed.ec == std::errc{} && parsed.ptr == value + length && out && out <= limit) return true;
++    }
++    error = std::string(name) + " must be a positive decimal within its limit";
++    return false;
++}
++#endif
++
+ template<class F> struct ScopeExit {
+     F cleanup;
+     ~ScopeExit() { cleanup(); }
+@@ -2516,10 +2548,131 @@ bool Pipeline::print_prefix(const Image& negative, bool striped, std::string& er
+     return true;
+ }
+ 
++bool Pipeline::print_tail_bounded(Image in, Image& out, std::string& error) {
++#if !defined(__linux__)
++    error = "bounded print tail requires the Linux/Android external-plane backend";
++    return false;
++#else
++    if (di_active_ || params_.io.digital_intermediate || params_.io.scan_film || overscan_wanted() ||
++        params_.print_render.edr_enabled || !(params_.scanner.lens_blur <= 0.0) ||
++        (params_.io.output_gamut_compress.algorithm != "off" &&
++         params_.io.output_gamut_compress.algorithm != "cam16ucs") || vulkan_fusion_enabled()) {
++        error = "bounded print tail requires paper, no DI/overscan/EDR/scanner blur, off or CAM16 gamut, and fusion off";
++        return false;
++    }
++    if (!gpu_->backend_memory_stats().available) {
++        error = "bounded print tail requires the Vulkan allocation ledger";
++        return false;
++    }
++    PrintRunTables tables;
++    tables.unsharp_sigma = unsharp_sigma();
++    tables.unsharp_amount = params_.scanner.unsharp_mask[1];
++    bool carried = false;
++    tables.halo = print_run_halo(tables.unsharp_sigma, tables.unsharp_amount, carried);
++    if (!valid_print_run(tables, error)) return false;
++    const char* dir = std::getenv("SPK_BOUNDED_PRINT_TAIL_DIR");
++    if (!dir || !*dir || dir[0] != '/' || std::strlen(dir) > 4096) {
++        error = "SPK_BOUNDED_PRINT_TAIL_DIR requires an absolute temporary directory";
++        return false;
++    }
++    uint64_t requested, host_budget, window_budget;
++    if (!bounded_tail_number("SPK_BOUNDED_PRINT_TAIL_ROWS", 64, 65536, requested, error) ||
++        !bounded_tail_number("SPK_BOUNDED_PRINT_TAIL_HOST_BYTES", uint64_t(64) << 20, uint64_t(1) << 40, host_budget, error) ||
++        !bounded_tail_number("SPK_BOUNDED_PRINT_TAIL_GPU_BYTES", uint64_t(64) << 20, uint64_t(1) << 40, window_budget, error)) return false;
++    if (!in.buf || in.c != 3 || !in.w || !in.h ||
++        uint64_t(in.w) * in.h > std::numeric_limits<size_t>::max() / (3 * sizeof(float))) {
++        error = "invalid bounded print tail image"; return false;
++    }
++    try {
++        // Vulkan's minimum storage-buffer range; the complete Image is used
++        // only for transfer here. Its allocation and caller-held images are
++        // deliberately outside the per-window payload limit.
++        const uint32_t rows = choose_window_rows(in.h, in.w, tables.halo, uint64_t(128) << 20,
++                                                 window_budget, uint32_t(requested));
++        const auto plan = plan_external_bands(in.w, in.h, rows, tables.halo, 1, host_budget);
++        const BoundedCancel cancel = [this] { return progress_ && bool(progress_->cancelled); };
++        if (!bounded_gpu_checkpoint(cancel, error)) return false;
++        if (!gpu_->flush(error)) return false;
++        gpu_->trim_transfer_staging();
++        ScopeExit transfer_cleanup{[&] { gpu_->trim_transfer_staging(); }};
++        Timer timer(this, "scanning.bounded_print_tail");
++        tables.point.xyz_to_rgb = baked_.xyz_to_rgb;
++        tables.point.m2x = baked_.cam16_m2x; tables.point.m2r = baked_.cam16_m2r;
++        tables.point.cmax = baked_.cam16_cmax; tables.point.k = baked_.cam16_k;
++        tables.point.output_matrix = baked_.output_matrix;
++        tables.point.cam16_nl = uint32_t(baked_.cam16_nl); tables.point.cam16_nh = uint32_t(baked_.cam16_nh);
++        tables.point.cam16_lightness = baked_.cam16_lightness;
++        tables.point.gamut_compress = params_.io.output_gamut_compress.algorithm != "off";
++        tables.point.cctf = params_.io.output_cctf_encoding;
++        tables.point.cctf_mode = output_cctf_mode_;
++        ExternalPlane source(dir, in.w, in.h, 3), result(dir, in.w, in.h, 3);
++        const size_t row_bytes = size_t(in.w) * 3 * sizeof(float);
++        // Admission includes both coverage arrays and the larger worker arrays.
++        // This transfer array is smaller and never overlaps those worker arrays.
++        auto transfer = std::make_unique<float[]>(plan.output_floats);
++        for (uint32_t y = 0; y < in.h;) {
++            const uint32_t n = std::min(rows, in.h - y);
++            if (!bounded_gpu_checkpoint(cancel, error) ||
++                !gpu_->read(in.buf.get(), size_t(y) * row_bytes, transfer.get(), size_t(n) * row_bytes, error)) return false;
++            source.write_rows(y, n, transfer.get(), cancel);
++            y += n;
++        }
++        bounded_cancel_checkpoint(cancel);
++        source.seal();
++        const uint32_t w = in.w, h = in.h;
++        in = Image{};
++        transfer.reset();
++        // Dropping references alone leaves whole-frame blocks in the pool.
++        // No pending work survives the synchronous read/flush boundary.
++        gpu_->trim_pool(0);
++        gpu_->trim_transfer_staging();
++        // Exact-capacity windows have different edge/centre sizes. Return
++        // each previous window's idle blocks before allocating the next one,
++        // rather than retaining several sizes inside the payload envelope.
++        if (!run_external_bands(source, result, rows, tables.halo, BandOrder::Forward, 1, nullptr,
++                error, cancel, [&](const float* src, uint32_t width, uint32_t window,
++                                   uint32_t offset, uint32_t count, float* dst, std::string& e) {
++                    if (!gpu_->flush(e)) return false;
++                    gpu_->trim_pool(0);
++                    gpu_->trim_transfer_staging();
++                    return print_run_window(gpu_, tables, src, width, window, offset, count, dst, e, cancel);
++                }, host_budget)) return false;
++        // A sealed result is not a published Image. Assemble privately and
++        // commit only after every read/upload/copy and the final flush succeeds.
++        Image candidate;
++        candidate.w = w; candidate.h = h; candidate.c = 3;
++        gpu_->trim_pool(0);
++        candidate.buf = gpu_->alloc(candidate.bytes(), error);
++        if (!candidate.buf) return false;
++        transfer = std::make_unique<float[]>(plan.output_floats);
++        for (uint32_t y = 0; y < h;) {
++            const uint32_t n = std::min(rows, h - y);
++            result.read_rows(y, n, transfer.get(), cancel);
++            auto band = gpu_->upload_persistent(transfer.get(), size_t(n) * row_bytes, error);
++            if (!band || !bounded_gpu_checkpoint(cancel, error) ||
++                !gpu_->copy(candidate.buf.get(), size_t(y) * row_bytes, band.get(), 0, size_t(n) * row_bytes, error)) return false;
++            y += n;
++        }
++        if (!gpu_->flush(error) || !bounded_gpu_checkpoint(cancel, error)) return false;
++        gpu_->trim_transfer_staging();
++        if (progress_) progress_->fired += unsigned(tables.point.gamut_compress) +
++            unsigned(tables.unsharp_sigma > 0.0 && tables.unsharp_amount > 0.0) + unsigned(tables.point.cctf);
++        out = std::move(candidate);
++        return true;
++    } catch (const std::exception& e) {
++        error = e.what();
++        return false;
++    }
++#endif
++}
++
+ bool Pipeline::print_segment(const Image& cmy, Image& out, std::string& error) {
++    bool bounded = false;
++    if (!bounded_tail_enabled(bounded, error)) return false;
+     Chain cur;
+     cur.cur = cmy;
+     for (size_t i = 0; i < kPrintStageCount; ++i) {
++        if (bounded && i == 2) return print_tail_bounded(std::move(cur.cur), out, error);
+         Chain next;
+         if (!(this->*kPrintStages[i].run)(std::move(cur), next, error)) return false;
+         cur = std::move(next);
+@@ -2560,6 +2713,9 @@ bool Pipeline::run_print_striped(const Image& cmy, Image& out, Progress* progres
+     if (!built_) { error = "pipeline was not built"; return false; }
+     progress_ = progress;
+     ScopeExit cleanup{[&] { release_contrast_mask(); progress_ = nullptr; }};
++    bool bounded = false;
++    if (!bounded_tail_enabled(bounded, error)) return false;
++    if (bounded) { error = "bounded print tail does not support the striped Pipeline entry"; return false; }
+     if (pixel_size_um_ <= 0.0) {
+         error = "run_print was called before any run_film, so the film's pixel pitch is unknown";
+         return false;
+diff --git a/engine/src/pipeline/pipeline.hpp b/engine/src/pipeline/pipeline.hpp
+index 1cffbae..8740f77 100644
+--- a/engine/src/pipeline/pipeline.hpp
++++ b/engine/src/pipeline/pipeline.hpp
+@@ -623,6 +623,7 @@ private:
+     /// negative's own rows.
+     bool print_prefix(const Image& negative, bool striped, std::string& error);
+     bool print_segment(const Image& cmy, Image& out, std::string& error);
++    bool print_tail_bounded(Image in, Image& out, std::string& error);
+ 
+     // --- what a neighbourhood stage needs from a boundary ----------------
+     // One demand per `Neighbourhood` stage, computed from **the same parameter
+

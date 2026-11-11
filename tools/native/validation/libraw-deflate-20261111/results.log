@@ -1,0 +1,10 @@
+Host: AOIDC, Linux x86_64, GNU C++ 11.4.0, OpenMP 4.5, zlib 1.2.11
+Date: 2026-11-11
+Same patched LibRaw 0.22.2 source compiled twice from clean build directories.
+baseline: USE_ZLIB absent; candidate: USE_ZLIB defined, ZLIB::ZLIB linked.
+{"cases": 6, "passed": true, "deflated_cases": 2, "unchanged_controls": 4}
+Deflate float Bayer and LinearRaw: baseline open=0, unpack=-100008, process=-100008.
+Deflate float Bayer and LinearRaw: candidate open=unpack=process=0, float preserved.
+Each candidate unpacked buffer equals generated float32 samples byte for byte.
+Each candidate Deflate processed buffer equals its uncompressed counterpart byte for byte.
+All four controls: baseline/candidate unpacked and processed buffers match byte for byte.

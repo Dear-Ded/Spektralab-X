@@ -1,0 +1,16 @@
+Host: IBX
+Full native build: 100% success
+0043: applied final gated calibration patch
+0046: applied final transfer ledger patch
+0047: applied candidate parameter transaction patch
+Patch application: zero fuzz; 0047 offset 11 lines
+Old exit: 1
+params_transaction checks=70 failures=20 failure_classes=output,print,shoot,film-stock,print-stock full_snapshot=true byte_exact=true
+New exit: 0
+params_transaction checks=70 failures=0 failure_classes=output,print,shoot,film-stock,print-stock full_snapshot=true byte_exact=true
+Each old failure class: params preservation, ordinary live recovery params, ordinary rebuild recovery status, ordinary rebuild recovery output
+Accepted synthetic outputs: cmp PASS, 20 images, 88160 bytes
+inline_ring=1
+VULKAN_TRANSFER_MEMORY_PASS checks=24 warm_upload=4194304 warm_read=4194304 small_read=4096
+inline_ring=0
+VULKAN_TRANSFER_MEMORY_PASS checks=24 warm_upload=4194304 warm_read=4194304 small_read=4096

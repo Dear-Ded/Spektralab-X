@@ -41,6 +41,9 @@ Most documents are in Chinese; those marked EN have English.
 | [ENGINE_ANDROID_REASSESSMENT_2026-11-11.md](ENGINE_ANDROID_REASSESSMENT_2026-11-11.md) | 后续版本复核：TIFF/ICC/JNI、上游 HDR、两云证据与执行路线 |
 | [ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md) | 外存分块完成状态与取消：缺带复现、失败不发布、两云故障注入与 GPU 恢复 |
 | [ENGINE_ANDROID_FOLLOWUP_2026-11-11.md](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md) | ASN 校准签名、生产管线失败恢复、外存窗口容量与 CPU payload 准入；双云证据和剩余迁移边界 |
+| [ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md) | Vulkan 实际分配、参数失败事务与默认关闭的真实印放尾段分块；48 个补丁重放和生产渲染对照 |
+| [COLOR_CONTRACT_NOTES_2026-11-11.md](COLOR_CONTRACT_NOTES_2026-11-11.md) | 引擎、文件、Android 显示的色彩支持分层与标准边界；LibRaw Deflate 支持缺口及修复 |
+| [GPU_BINARY_AND_ANDROID_ABI_2026-11-11.md](GPU_BINARY_AND_ANDROID_ABI_2026-11-11.md) | Android 原生全编、ELF 16 KiB 对齐、53 个 SPIR-V、资产字节布局与浮点合同；云机资源实测 |
 | [UPSTREAM_V2_RESEARCH_2026-11-11.md](UPSTREAM_V2_RESEARCH_2026-11-11.md) | V2.3.2 固定源码研究：minilab 成像变化、Vulkan/HDR 缺口、参数与资源，以及 45 条补丁迁移账 |
 | [ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md](ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md) | 六阶段引擎优化路线；本轮 CRX 维护、工作源预算、JPEG 外存行转换的实现、两云证据与剩余边界 |
 | [DNG_WHITE_XY_2026-11-09.md](DNG_WHITE_XY_2026-11-09.md) | WhiteXY-only DNG 的校准、源白平衡与 FM/Bradford 实现，合成/真实样片对照及 profile 支持边界 |

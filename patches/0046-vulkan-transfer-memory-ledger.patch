@@ -1,0 +1,139 @@
+# Spektralab-X - https://github.com/Dear-Ded/Spektralab-X
+# Copyright (C) 2026 Spektralab-X contributors
+# Additional terms under GPL-3.0 section 7 apply; see NOTICE.
+Report tracked Vulkan allocation capacities and release transfer staging alone.
+Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
+
+Keep logical pool/persistent totals stable; report actual vkAllocateMemory sizes
+separately, including upload/read staging and the inline argument ring. Neither
+ledger measures process RSS or driver-private allocations. An explicit transfer
+trim waits on the queue mutex and preserves image buffers, idle pool and ring.
+Pixel kernels, defaults and automatic eviction behavior are unchanged.
+
+diff --git a/engine/include/spektrafilm/spk_engine.h b/engine/include/spektrafilm/spk_engine.h
+index b0c2a45..d8ec49d 100644
+--- a/engine/include/spektrafilm/spk_engine.h
++++ b/engine/include/spektrafilm/spk_engine.h
+@@ -163,10 +163,15 @@ const char* spk_params_schema(spk_engine* engine);
+  * **`persistent.source_bytes`, `persistent.cached_negative_bytes` and
+  * `persistent.file_backed_bytes` are a breakdown *of* `persistent.bytes`, not
+  * additions to it**, and `persistent.sessions` is that breakdown per open
+- * session. So the engine's whole holding is
++ * session. The engine's logical image-buffer holding is
+  * `pool.total_bytes + persistent.bytes`, which is the top-level
+  * `total_bytes`; registering a per-session entry and a pool entry means
+  * splitting `persistent.sessions`, not adding it to the pool.
++ * Vulkan additionally reports `backend_allocations`: actual vkAllocateMemory
++ * capacities for tracked buffers, upload/read staging and the inline ring.
++ * This separately locked snapshot overlaps pool/persistent; never add its
++ * total to `total_bytes`. `available=false` means the backend does not report
++ * it. Driver-private allocations and process RSS are outside both ledgers.
+  *
+  * `file_backed_bytes` is the part of the holding whose pages live in a file
+  * rather than in the process's ledger (RFC-020 §4.7) -- the source and the
+diff --git a/engine/src/gpu/gpu.hpp b/engine/src/gpu/gpu.hpp
+index 295923c..31e1b06 100644
+--- a/engine/src/gpu/gpu.hpp
++++ b/engine/src/gpu/gpu.hpp
+@@ -204,6 +204,21 @@ struct PoolStats {
+     PoolAudit audit;
+ };
+ 
++// Backend-owned allocation capacities, separate from logical pool sizes.
++// Vulkan reports vkAllocateMemory sizes including its transfer staging/ring;
++// driver-private memory and process RSS are not measured by this ledger.
++struct BackendMemoryStats {
++    bool available = false;
++    uint64_t buffer_allocation_bytes = 0;
++    uint64_t upload_staging_allocation_bytes = 0;
++    uint64_t read_staging_allocation_bytes = 0;
++    uint64_t inline_ring_allocation_bytes = 0;
++    uint64_t total_bytes() const {
++        return buffer_allocation_bytes + upload_staging_allocation_bytes +
++            read_staging_allocation_bytes + inline_ring_allocation_bytes;
++    }
++};
++
+ // One dispatch's arguments, in buffer-index order. A small constant may be
+ // passed inline (`bytes`) instead of allocated; the backend decides how.
+ struct Arg {
+@@ -427,6 +442,10 @@ public:
+     // fixed when each buffer was made. No Metal object is walked, retained or
+     // asked anything, and nothing here can fail.
+     virtual PoolStats pool_stats() const = 0;
++    virtual BackendMemoryStats backend_memory_stats() const { return {}; }
++    // Called at an explicit phase boundary. Complete outstanding transfers
++    // before discarding only backend transfer staging, keeping image buffers.
++    virtual uint64_t trim_transfer_staging() { return 0; }
+     // Independent diagnostic windows; zero token means unsupported. Does not
+     // reset the frame counter or alter pool eviction. Peaks exclude staging.
+     struct MemoryObservation {
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index 446a7fc..a27ebc8 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -995,6 +995,26 @@ public:
+         }
+         return out;
+     }
++    BackendMemoryStats backend_memory_stats() const override {
++        std::lock_guard<std::mutex> dispatch_lock(dispatch_mutex_);
++        std::lock_guard<std::mutex> lock(buffers_mutex_);
++        BackendMemoryStats out;
++        out.available = true;
++        for (const Buffer* b : buffers_) out.buffer_allocation_bytes += b->allocation_bytes;
++        out.upload_staging_allocation_bytes = upload_staging_.allocation_bytes;
++        out.read_staging_allocation_bytes = read_staging_.allocation_bytes;
++        out.inline_ring_allocation_bytes = inline_ring_.allocation_bytes;
++        return out;
++    }
++    uint64_t trim_transfer_staging() override {
++        // All submissions finish under this mutex, so no command can still
++        // name these buffers. Image buffers and the argument ring stay intact.
++        std::lock_guard<std::mutex> lock(dispatch_mutex_);
++        const uint64_t freed = upload_staging_.allocation_bytes + read_staging_.allocation_bytes;
++        destroy_buffer(&upload_staging_);
++        destroy_buffer(&read_staging_);
++        return freed;
++    }
+     size_t trim_pool(size_t keep_bytes) override {
+         // Match transfer/dispatch lock order. Every queue submission is
+         // synchronous, so owning this lock also makes staging safe to destroy.
+@@ -1548,7 +1568,7 @@ private:
+     bool pipeline_cache_dirty_ = false;
+     std::unordered_map<std::string, ComputePipeline> pipelines_;
+     mutable std::mutex buffers_mutex_;
+-    std::mutex dispatch_mutex_;
++    mutable std::mutex dispatch_mutex_;
+     Buffer upload_staging_;
+     Buffer read_staging_;
+     Buffer inline_ring_;   // Android: guarded by dispatch_mutex_; mapped == nullptr when unused
+diff --git a/engine/src/pipeline/engine.cpp b/engine/src/pipeline/engine.cpp
+index 547cce8..7504738 100644
+--- a/engine/src/pipeline/engine.cpp
++++ b/engine/src/pipeline/engine.cpp
+@@ -411,6 +411,7 @@ struct spk_engine {
+     // ways.
+     Json memory_report_json() {
+         const gpu::PoolStats pool = gpu ? gpu->pool_stats() : gpu::PoolStats{};
++        const gpu::BackendMemoryStats backend = gpu ? gpu->backend_memory_stats() : gpu::BackendMemoryStats{};
+ 
+         Json pool_json = Json::object();
+         pool_json.set("total_bytes", Json(double(pool.total_bytes)));
+@@ -519,6 +520,16 @@ struct spk_engine {
+ 
+         Json out = Json::object();
+         out.set("total_bytes", Json(double(pool.total_bytes + pool.persistent_bytes)));
++        // A separately locked backend snapshot; overlaps pool/persistent, so
++        // never add this category to total_bytes. Not driver-wide memory/RSS.
++        Json allocations = Json::object();
++        allocations.set("available", Json(backend.available));
++        allocations.set("buffer_bytes", Json(double(backend.buffer_allocation_bytes)));
++        allocations.set("upload_staging_bytes", Json(double(backend.upload_staging_allocation_bytes)));
++        allocations.set("read_staging_bytes", Json(double(backend.read_staging_allocation_bytes)));
++        allocations.set("inline_ring_bytes", Json(double(backend.inline_ring_allocation_bytes)));
++        allocations.set("total_bytes", Json(double(backend.total_bytes())));
++        out.set("backend_allocations", std::move(allocations));
+         // Temporary-file bytes, not GPU allocations and not additive to total.
+         out.set("suspended_bytes", Json(double(suspended_bytes)));
+         out.set("pool", std::move(pool_json));

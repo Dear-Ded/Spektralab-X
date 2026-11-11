@@ -1,0 +1,22 @@
+aabf6a7f871e7f54436f1d872e8e897ab815c1cf5d9b854fd3ee8b90a9d6cd78  <tail-validation>/sanitized/pipeline.o
+42c5b6ae80fab29b70b93d44f00943e32d7cda016ff0c5e4b171048b2e9679de  <tail-validation>/sanitized/pipeline_print_tail
+421fee63231e562825b0e7aef274f98c2322162c5687e1e6668da8a57f6ed61b  <tail-validation>/build/engine/libspektralab_engine.a
+<tail-validation>/source/engine/src/pipeline/pipeline.cpp:2256:35: runtime error: index 140729526143808 out of bounds for type 'Stage [7]'
+<tail-validation>/source/engine/src/pipeline/pipeline.cpp:2256:41: runtime error: load of address 0x17ffa7045e0c30 with insufficient space for an object of type 'struct Pipeline *'
+0x17ffa7045e0c30: note: pointer points here
+<memory cannot be printed>
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==597203==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000004ef011 bp 0x7ffe256a07e0 sp 0x7ffe256a05e0 T0)
+==597203==The signal is caused by a READ memory access.
+==597203==Hint: this fault was caused by a dereference of a high value address (see register values below).  Dissassemble the provided pc to learn which register was used.
+    #0 0x4ef011 in spk::Pipeline::film_segment(spk::Image, spk::Image&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) <tail-validation>/source/engine/src/pipeline/pipeline.cpp:2256
+    #1 0x5a4dae in spk::Pipeline::run_film(spk::Image const&, spk::Image&, spk::Progress*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) <tail-validation>/source/engine/src/pipeline/pipeline.cpp:2299
+    #2 0x41e8ca in main <tail-validation>/repo/tools/native/pipeline_print_tail.cpp:211
+    #3 0x7f1294f1fd8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7f1294f1fe3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #5 0x40cc94 in _start (<tail-validation>/sanitized/pipeline_print_tail+0x40cc94)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV <tail-validation>/source/engine/src/pipeline/pipeline.cpp:2256 in spk::Pipeline::film_segment(spk::Image, spk::Image&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)
+==597203==ABORTING

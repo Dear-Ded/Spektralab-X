@@ -1,0 +1,84 @@
+clang: warning: argument unused during compilation: '-no-pie' [-Wunused-command-line-argument]
+e6ad11a982752b6400bb190eb2889b0848d3dbdec20319d758560ab72505a4b8  <tail-validation>/sanitized-clang14/pipeline.o
+3d187a4f3adafd3831566d021b262824137cde9067c3c376b7eced23fba034cd  <tail-validation>/sanitized-clang14/pipeline_print_tail
+a8a627dfc1086ae332db7f2b6fe6b37ea35b4a2f4eaa5ce025a1cedb2313215d  <tail-validation>/build/engine/libspektralab_engine.a
+film_print_memcmp space=sRGB cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=sRGB cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=sRGB cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=sRGB cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=sRGB cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=sRGB cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=sRGB cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=sRGB cctf=1 tier=2 gamut=1 true
+film_print_memcmp space=Display P3 cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=Display P3 cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=Display P3 cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=Display P3 cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=Display P3 cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=Display P3 cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=Display P3 cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=Display P3 cctf=1 tier=2 gamut=1 true
+film_print_memcmp space=ProPhoto RGB cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=ProPhoto RGB cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=ProPhoto RGB cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=ProPhoto RGB cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=ProPhoto RGB cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=ProPhoto RGB cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=ProPhoto RGB cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=ProPhoto RGB cctf=1 tier=2 gamut=1 true
+film_print_memcmp space=Adobe RGB (1998) cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=Adobe RGB (1998) cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=Adobe RGB (1998) cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=Adobe RGB (1998) cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=Adobe RGB (1998) cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=Adobe RGB (1998) cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=Adobe RGB (1998) cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=Adobe RGB (1998) cctf=1 tier=2 gamut=1 true
+film_print_memcmp space=ITU-R BT.709 cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=ITU-R BT.709 cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=ITU-R BT.709 cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=ITU-R BT.709 cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=ITU-R BT.709 cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=ITU-R BT.709 cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=ITU-R BT.709 cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=ITU-R BT.709 cctf=1 tier=2 gamut=1 true
+film_print_memcmp space=ITU-R BT.2020 cctf=0 tier=1 gamut=0 true
+film_print_memcmp space=ITU-R BT.2020 cctf=0 tier=1 gamut=1 true
+film_print_memcmp space=ITU-R BT.2020 cctf=0 tier=2 gamut=0 true
+film_print_memcmp space=ITU-R BT.2020 cctf=0 tier=2 gamut=1 true
+film_print_memcmp space=ITU-R BT.2020 cctf=1 tier=1 gamut=0 true
+film_print_memcmp space=ITU-R BT.2020 cctf=1 tier=1 gamut=1 true
+film_print_memcmp space=ITU-R BT.2020 cctf=1 tier=2 gamut=0 true
+film_print_memcmp space=ITU-R BT.2020 cctf=1 tier=2 gamut=1 true
+rejected=external pwrite error=external plane io failed
+rejected=external pread error=external plane io failed
+rejected=external cancellation error=render cancelled
+rejected=external pwrite error=external plane io failed
+rejected=external pread error=external plane io failed
+rejected=external cancellation error=render cancelled
+rejected=GPU failure/cancellation error=injected tail dispatch failure
+rejected=GPU failure/cancellation error=render cancelled
+rejected=GPU failure/cancellation error=injected final tail copy failure
+rejected=temporary create failure error=cannot create external plane
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_ROWS must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_ROWS must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_ROWS must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_ROWS must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_ROWS must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_HOST_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_HOST_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_HOST_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_HOST_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_HOST_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_GPU_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_GPU_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_GPU_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_GPU_BYTES must be a positive decimal within its limit
+rejected=invalid numeric opt-in error=SPK_BOUNDED_PRINT_TAIL_GPU_BYTES must be a positive decimal within its limit
+rejected=host admission error=host payload budget cannot hold one external band worker
+rejected=invalid opt-in selector error=SPK_BOUNDED_PRINT_TAIL must be 0 or 1
+rejected=invalid opt-in selector error=SPK_BOUNDED_PRINT_TAIL must be 0 or 1
+rejected=invalid opt-in selector error=SPK_BOUNDED_PRINT_TAIL must be 0 or 1
+rejected=invalid opt-in selector error=SPK_BOUNDED_PRINT_TAIL must be 0 or 1
+rejected=striped entry error=bounded print tail does not support the striped Pipeline entry
+PASS production print tail checks=2796 renders=268 float_values=2200950 spill_allocation_before=819992 spill_allocation_after=739568 window_shapes=4 window_trim_freed=185724 gpu=llvmpipe (LLVM 15.0.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)

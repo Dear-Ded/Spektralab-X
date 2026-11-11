@@ -15,8 +15,12 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 修复部分带非单位相机校准矩阵的 DNG 忽略有效 ForwardMatrix 的问题；保留新 RAW 的线性显示默认值，不增加曝光或饱和度。
 - 修复分块渲染失败或取消后污染下一次渲染的状态；印放最后收尾失败时保留原输出，避免误报完成。
 - 为外存分块原型增加窗口精确容量、CPU 数据预算准入和 RGB 索引溢出检查；仍未启用完整生产分块管线。
+- 补齐 Vulkan 实际缓冲、上传/读回暂存和参数环的分项统计，增加同步完成后回收传输暂存的接口；逻辑图像统计与实际分配统计不能相加。
+- 修复某些参数组合构建失败后，记录参数与仍在工作的旧管线不一致的问题；失败时保留原参数和原管线。
+- 将外存分块接入受限的真实相纸印放尾段，默认关闭；现有 shader 和 FIR 算序不变，失败保留原输出。完整 RAW、胶片中间结果和最终图像仍需整幅驻留，不代表手机全程内存有界。
+- 开启 LibRaw 已有但此前未编译的 zlib 解码支持，修复部分 Deflate 压缩浮点 DNG 打不开；合成 Bayer、LinearRaw 及整数相邻控制通过，未改变 RAW 显影默认值。
 
-验证与限制见 [源码跟进记录](docs/ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)。
+验证与限制见 [源码跟进记录](docs/ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)和[生产尾段记录](docs/ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。
 
 ## 0.2.00-alpha-2 · 2026-11-10
 

@@ -51,6 +51,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0043–0045 后续补充：ASN 的校准签名与非单位相机矩阵修复、生产 Pipeline 失败恢复和结果提交、外存窗口精确容量与 CPU payload 准入。新 RAW 仍默认线性显示，外存 helper 仍未接入生产；双云对照、适用范围与未解决问题见 [源码跟进记录](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)。GPT（OpenAI）共创。
 
+0046–0048 后续补充：Vulkan 实际分配与传输暂存分项统计、参数构建失败的事务边界，以及默认关闭的生产相纸印放外存尾段。每个 halo window 前回收旧尺寸闲置块，保留已有数值算序与失败后原输出。48 个补丁零 fuzz 重放，97 个受影响文件与测试源码一致；并非完整 RAW/胶片分块或进程内存保证。实现、配置和验证见 [生产尾段记录](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 
