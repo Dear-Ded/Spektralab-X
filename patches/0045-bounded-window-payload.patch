@@ -1,0 +1,464 @@
+Exact window allocations and external-band host-payload admission.
+Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
+
+Keep FIR arithmetic unchanged while making its window scratch and coefficient
+uploads exact-capacity. Admit CPU payload before claiming the output, reduce
+worker slots to the supplied budget, and allocate fixed maximum row arrays.
+Check RGB element indexing as well as host size_t address range.
+The payload ledger is not a process RSS or Vulkan physical-memory bound.
+External helpers remain outside production Pipeline.
+
+diff --git a/engine/src/pipeline/blur.cpp b/engine/src/pipeline/blur.cpp
+index 04768d5..9d8b4f0 100644
+--- a/engine/src/pipeline/blur.cpp
++++ b/engine/src/pipeline/blur.cpp
+@@ -22,15 +22,15 @@ void broadcast3(const double* src, double dst[3], double fallback) {
+ 
+ }  // namespace
+ 
+-bool Blur::alloc_like(const Image& img, Image& out, std::string& error) {
++bool Blur::alloc_like(const Image& img, Image& out, std::string& error, bool bounded) {
+     out.h = img.h; out.w = img.w; out.c = img.c;
+-    out.buf = gpu_->alloc(img.bytes(), error);
++    out.buf = bounded ? gpu_->alloc_bounded(img.bytes(), error) : gpu_->alloc(img.bytes(), error);
+     return static_cast<bool>(out.buf);
+ }
+ 
+ bool Blur::fir(Image img, const double sigmas[3], double truncate, const bool active[3],
+                Image& out, std::string& error, const Image* acc, const double* weight,
+-               bool consume_input) {
++               bool consume_input, bool bounded) {
+     // (3, 2R+1) weights, a delta for every inactive channel, so one kernel
+     // handles a mix of blurred and pass-through channels in one pass.
+     Vec kernels[3];
+@@ -48,13 +48,15 @@ bool Blur::fir(Image img, const double sigmas[3], double truncate, const bool ac
+         for (size_t i = 0; i < kernels[c].size(); ++i)
+             table[size_t(c) * (2 * R + 1) + (R - r + i)] = float(kernels[c][i]);
+     }
+-    gpu::BufferRef w = gpu_->upload(table.data(), table.size() * sizeof(float), error);
++    gpu::BufferRef w = bounded ? gpu_->upload_persistent(table.data(), table.size() * sizeof(float), error)
++                              : gpu_->upload(table.data(), table.size() * sizeof(float), error);
+     if (!w) return false;
+ 
+     double wt[3];
+     broadcast3(weight, wt, 1.0);
+     const float wtf[3] = {float(wt[0]), float(wt[1]), float(wt[2])};
+-    gpu::BufferRef wt_buf = gpu_->upload(wtf, sizeof wtf, error);
++    gpu::BufferRef wt_buf = bounded ? gpu_->upload_persistent(wtf, sizeof wtf, error)
++                                   : gpu_->upload(wtf, sizeof wtf, error);
+     if (!wt_buf) return false;
+ 
+     // The reference runs vertical then horizontal, and the fused multiply-add
+@@ -67,7 +69,7 @@ bool Blur::fir(Image img, const double sigmas[3], double truncate, const bool ac
+     constexpr size_t kScratchBytes = size_t(8) << 20;
+     constexpr size_t kBandedAbove = size_t(16) << 20;
+     if (!consume_input && img.bytes() > kBandedAbove) {
+-        if (!alloc_like(img, out, error)) return false;
++        if (!alloc_like(img, out, error, bounded)) return false;
+         const size_t row_bytes = size_t(img.w) * img.c * sizeof(float);
+         const uint32_t rows = uint32_t(std::min(size_t(img.h),
+             std::max(size_t(1), kScratchBytes / row_bytes)));
+@@ -93,8 +95,8 @@ bool Blur::fir(Image img, const double sigmas[3], double truncate, const bool ac
+     }
+ #endif
+     Image tmp;
+-    if (!alloc_like(img, tmp, error)) return false;
+-    if (!consume_input && !alloc_like(img, out, error)) return false;
++    if (!alloc_like(img, tmp, error, bounded)) return false;
++    if (!consume_input && !alloc_like(img, out, error, bounded)) return false;
+     const uint32_t meta_v[6] = {img.h, img.w, uint32_t(R), 0, 0, 0};
+     const uint32_t meta_h[6] = {img.h, img.w, uint32_t(R), 1, acc ? 1u : 0u, 0};
+     const size_t n = img.pixels();
+@@ -108,7 +110,7 @@ bool Blur::fir(Image img, const double sigmas[3], double truncate, const bool ac
+         // for horizontal. A retained alias keeps its buffer out of the pool;
+         // consuming a handle never grants permission to overwrite that alias.
+         img.buf.reset();
+-        if (!gpu_->flush(error) || !alloc_like(tmp, out, error)) return false;
++        if (!gpu_->flush(error) || !alloc_like(tmp, out, error, bounded)) return false;
+     }
+     return gpu_->dispatch("spk_sep_fir_acc",
+                           {gpu::Arg::buf(tmp.buf), gpu::Arg::buf(w), gpu::Arg::buf(acc ? acc->buf : tmp.buf),
+@@ -233,6 +235,23 @@ Blur::Demand Blur::merge(const Demand& a, const Demand& b) {
+     return d;
+ }
+ 
++bool Blur::gaussian_fir_bounded(const Image& img, const double sigma[3], Image& out,
++                                std::string& error, double truncate) {
++    if (!std::isfinite(truncate) || truncate < 0.0 || truncate > 3.0) {
++        error = "bounded FIR requires a finite truncate in [0, 3]"; return false;
++    }
++    bool active[3], any = false;
++    for (int c = 0; c < 3; ++c) {
++        if (!std::isfinite(sigma[c]) || sigma[c] >= kSmallSigmaMax) {
++            error = "bounded FIR does not support IIR or non-finite sigma"; return false;
++        }
++        active[c] = is_fir(sigma[c]);
++        any |= active[c];
++    }
++    if (!any) { out = img; return true; }
++    return fir(img, sigma, truncate, active, out, error, nullptr, nullptr, false, true);
++}
++
+ bool Blur::gaussian_consume(Image img, const double sigma[3], Image& out, std::string& error,
+                             double truncate, const Image* acc, const double* weight) {
+     bool use_fir[3];
+@@ -337,13 +356,13 @@ bool Blur::mixture(const Image& img, const std::vector<Component>& components, I
+ }
+ 
+ bool Blur::lincomb(const Image& x, const Image& y, const double a[3], const double b[3],
+-                   Image& out, std::string& error) {
++                   Image& out, std::string& error, bool bounded) {
+     const float af[3] = {float(a[0]), float(a[1]), float(a[2])};
+     const float bf[3] = {float(b[0]), float(b[1]), float(b[2])};
+-    gpu::BufferRef ab = gpu_->upload(af, sizeof af, error);
+-    gpu::BufferRef bb = gpu_->upload(bf, sizeof bf, error);
++    gpu::BufferRef ab = bounded ? gpu_->upload_persistent(af, sizeof af, error) : gpu_->upload(af, sizeof af, error);
++    gpu::BufferRef bb = bounded ? gpu_->upload_persistent(bf, sizeof bf, error) : gpu_->upload(bf, sizeof bf, error);
+     if (!ab || !bb) return false;
+-    if (!alloc_like(x, out, error)) return false;
++    if (!alloc_like(x, out, error, bounded)) return false;
+     const uint32_t n[1] = {uint32_t(x.elements())};
+     return gpu_->dispatch("spk_lincomb3",
+                           {gpu::Arg::buf(x.buf), gpu::Arg::buf(y.buf), gpu::Arg::buf(ab),
+diff --git a/engine/src/pipeline/blur.hpp b/engine/src/pipeline/blur.hpp
+index 464cdf1..0f7bd40 100644
+--- a/engine/src/pipeline/blur.hpp
++++ b/engine/src/pipeline/blur.hpp
+@@ -38,6 +38,11 @@ public:
+                           double truncate = 3.0, const Image* acc = nullptr,
+                           const double* weight = nullptr);
+ 
++    // FIR-only execution for external windows. Exact logical capacities keep
++    // a small window or coefficient table from borrowing an old large plane.
++    bool gaussian_fir_bounded(const Image& img, const double sigma[3], Image& out,
++                              std::string& error, double truncate = 3.0);
++
+     // --- class R, and what it turned out to be -----------------------------
+     //
+     // The IIR used to transpose the plane so that both passes could be one
+@@ -124,7 +129,7 @@ public:
+ 
+     // `a * x + b * y` with per-channel scalars.
+     bool lincomb(const Image& x, const Image& y, const double a[3], const double b[3],
+-                 Image& out, std::string& error);
++                 Image& out, std::string& error, bool bounded = false);
+ 
+     // A per-channel affine, `x * s + t` -- the exposure gain, the density_min
+     // subtraction, the sub-layer division.
+@@ -133,10 +138,10 @@ public:
+ private:
+     bool fir(Image img, const double sigmas[3], double truncate, const bool active[3],
+              Image& out, std::string& error, const Image* acc, const double* weight,
+-             bool consume_input = false);
++             bool consume_input = false, bool bounded = false);
+     bool iir(const Image& img, const double sigmas[3], const bool active[3],
+              Image& out, std::string& error, const Image* acc, const double* weight);
+-    bool alloc_like(const Image& img, Image& out, std::string& error);
++    bool alloc_like(const Image& img, Image& out, std::string& error, bool bounded = false);
+ 
+     gpu::Gpu* gpu_;
+     SweepReport* sweep_report_ = nullptr;
+diff --git a/engine/src/pipeline/bounded_point_chain.hpp b/engine/src/pipeline/bounded_point_chain.hpp
+index 1ef8f13..01da8d9 100644
+--- a/engine/src/pipeline/bounded_point_chain.hpp
++++ b/engine/src/pipeline/bounded_point_chain.hpp
+@@ -19,6 +19,7 @@
+ #include <exception>
+ #include <fcntl.h>
+ #include <limits>
++#include <memory>
+ #include <mutex>
+ #include <random>
+ #include <stdexcept>
+@@ -47,8 +48,41 @@ struct PointChainStats {
+     uint32_t bands = 0;
+     uint32_t band_rows = 0;
+     uint64_t max_band_bytes = 0;   // one band's float32 plane
++    uint64_t host_payload_bytes = 0; // fixed row coverage, spans and worker float arrays
++    unsigned worker_slots = 0;
+ };
+ 
++struct ExternalBandPlan {
++    size_t bands = 0, input_floats = 0, output_floats = 0;
++    uint64_t host_payload_bytes = 0;
++    unsigned workers = 0;
++};
++
++// Payload admission, not an RSS limit: driver staging, thread stacks, tables,
++// allocator overhead and other live application buffers are outside this budget.
++inline ExternalBandPlan plan_external_bands(uint32_t w, uint32_t h, uint32_t rows,
++                                            uint32_t halo, unsigned workers, uint64_t budget) {
++    if (!w || !h || !rows) throw std::invalid_argument("empty external band geometry");
++    const uint64_t window = std::min<uint64_t>(h, uint64_t(rows) + 2ull * halo);
++    const uint64_t body = std::min(rows, h);
++    if (window * w > std::numeric_limits<uint32_t>::max() / 3)
++        throw std::invalid_argument("external window exceeds kernel pixel range");
++    ExternalBandPlan p;
++    const uint64_t count = (uint64_t(h) + rows - 1) / rows;
++    const uint64_t input = window * w * 3, output = body * w * 3;
++    const uint64_t fixed = count * sizeof(StripSpan) + 2ull * h;
++    const uint64_t per_worker = (input + output) * sizeof(float);
++    if (count > std::numeric_limits<size_t>::max() / sizeof(StripSpan) ||
++        input > std::numeric_limits<size_t>::max() / sizeof(float) ||
++        output > std::numeric_limits<size_t>::max() / sizeof(float) ||
++        fixed > budget || per_worker > budget - fixed)
++        throw std::invalid_argument("host payload budget cannot hold one external band worker");
++    p.bands = size_t(count); p.input_floats = size_t(input); p.output_floats = size_t(output);
++    p.workers = unsigned(std::min<uint64_t>({std::max(1u, workers), count, (budget - fixed) / per_worker}));
++    p.host_payload_bytes = fixed + uint64_t(p.workers) * per_worker;
++    return p;
++}
++
+ // The only place a band height is chosen. A band keeps three same-size planes
+ // alive (upload, intermediate, result), so the live set is 3 band planes and a
+ // single plane must also fit one storage-buffer range.
+@@ -57,7 +91,7 @@ inline uint32_t choose_band_rows(uint32_t plane_h, uint32_t w, uint64_t range_by
+     if (!plane_h || !w) throw std::invalid_argument("empty band geometry");
+     const uint64_t row = uint64_t(w) * 3 * sizeof(float);
+     uint64_t cap = std::min<uint64_t>(range_bytes, budget_bytes / 3) / row;
+-    cap = std::min<uint64_t>(cap, std::numeric_limits<uint32_t>::max() / w);
++    cap = std::min<uint64_t>(cap, std::numeric_limits<uint32_t>::max() / 3 / w);
+     if (cap == 0) throw std::invalid_argument("budget cannot hold one RGB band row");
+     uint64_t rows = requested_rows ? requested_rows : plane_h;
+     rows = std::min<uint64_t>({rows, uint64_t(plane_h), cap});
+@@ -68,16 +102,20 @@ inline uint32_t choose_band_rows(uint32_t plane_h, uint32_t w, uint64_t range_by
+ // Pipeline::node_xyz_to_rgb, node_gamut_compress and node_cctf.
+ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const float* in, uint32_t w,
+                              uint32_t rows, float* out, std::string& error, const BoundedCancel& cancel = {}) {
+-    if (!w || !rows || !in || !out || uint64_t(w) * rows > std::numeric_limits<uint32_t>::max()) {
++    if (!w || !rows || !in || !out || uint64_t(w) * rows > std::numeric_limits<uint32_t>::max() / 3) {
+         error = "invalid point band geometry"; return false;
+     }
+     if (!bounded_gpu_checkpoint(cancel, error)) return false;
+-    const size_t pixels = size_t(w) * rows, floats = pixels * 3, bytes = floats * sizeof(float);
+-    gpu::BufferRef cur = gpu->upload(in, bytes, error);
++    const uint64_t bytes64 = uint64_t(w) * rows * 3 * sizeof(float);
++    if (bytes64 > std::numeric_limits<size_t>::max()) {
++        error = "point band exceeds host address range"; return false;
++    }
++    const size_t pixels = size_t(w) * rows, bytes = size_t(bytes64);
++    gpu::BufferRef cur = gpu->upload_persistent(in, bytes, error);
+     if (!cur) return false;
+     const uint32_t n[1] = {uint32_t(pixels)};
+     {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(t.xyz_to_rgb),
+@@ -87,7 +125,7 @@ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const flo
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (t.gamut_compress) {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[4] = {uint32_t(pixels), t.cam16_nl, t.cam16_nh, t.cam16_lightness ? 1u : 0u};
+@@ -99,7 +137,7 @@ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const flo
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (t.cctf) {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[2] = {uint32_t(pixels), t.cctf_mode};
+@@ -118,7 +156,8 @@ inline bool point_chain_band(gpu::Gpu* gpu, const PointChainTables& t, const flo
+ template<class Kernel>
+ inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint32_t band_rows,
+                                uint32_t halo, BandOrder order, unsigned workers, PointChainStats* stats,
+-                               std::string& error, const BoundedCancel& cancel, Kernel&& kernel) {
++                               std::string& error, const BoundedCancel& cancel, Kernel&& kernel,
++                               uint64_t host_payload_budget_bytes = std::numeric_limits<uint64_t>::max()) {
+     if (stats) *stats = {};
+     if (in.channels() != 3 || out.channels() != 3 || in.width() != out.width() || in.height() != out.height()) {
+         error = "external planes must be matching RGB float32";
+@@ -127,11 +166,15 @@ inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint
+     if (band_rows == 0) { error = "band height must be positive"; return false; }
+     if (&in == &out || !in.ready()) { error = "external plane input must be sealed and distinct"; return false; }
+     try {
++    const auto plan = plan_external_bands(in.width(), in.height(), band_rows, halo, workers,
++                                          host_payload_budget_bytes);
+     auto output = out.producer();
+     bounded_cancel_checkpoint(cancel);
+-    std::vector<StripSpan> spans;
+-    for (uint64_t y = 0; y < in.height(); y += band_rows)
+-        spans.push_back({uint32_t(y), std::min(band_rows, in.height() - uint32_t(y))});
++    std::vector<StripSpan> spans(plan.bands);
++    for (size_t i = 0; i < spans.size(); ++i) {
++        const uint32_t y = uint32_t(uint64_t(i) * band_rows);
++        spans[i] = {y, std::min(band_rows, in.height() - y)};
++    }
+     if (order == BandOrder::Reverse) std::reverse(spans.begin(), spans.end());
+     if (order == BandOrder::Shuffled) std::shuffle(spans.begin(), spans.end(), std::mt19937(12345));
+ 
+@@ -140,36 +183,37 @@ inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint
+     std::mutex gpu_mutex, error_mutex;
+     std::exception_ptr failure;
+     auto work = [&]() {
+-        std::vector<float> src, dst;
++        try {
++        // Allocate once at the admitted maximum. Resizing a growing vector per
++        // edge window can retain substantially more capacity than its size.
++        std::unique_ptr<float[]> src(new float[plan.input_floats]);
++        std::unique_ptr<float[]> dst(new float[plan.output_floats]);
+         for (;;) {
+             const size_t i = next.fetch_add(1);
+             if (i >= spans.size() || failed.load()) return;
+             const StripSpan s = spans[i];
+-            try {
++            bounded_cancel_checkpoint(cancel);
++            const uint32_t lo = s.y0 > halo ? s.y0 - halo : 0;
++            const uint32_t hi = uint32_t(std::min<uint64_t>(in.height(), uint64_t(s.y0) + s.rows + halo));
++            in.read_rows(lo, hi - lo, src.get(), cancel);
++            std::string band_error;
++            bool ok;
++            {
++                std::lock_guard<std::mutex> guard(gpu_mutex);
++                if (failed.load()) return;
+                 bounded_cancel_checkpoint(cancel);
+-                const uint32_t lo = s.y0 > halo ? s.y0 - halo : 0;
+-                const uint32_t hi = uint32_t(std::min<uint64_t>(in.height(), uint64_t(s.y0) + s.rows + halo));
+-                src.resize(size_t(hi - lo) * in.width() * 3);
+-                dst.resize(size_t(s.rows) * in.width() * 3);
+-                in.read_rows(lo, hi - lo, src.data(), cancel);
+-                std::string band_error;
+-                bool ok;
+-                {
+-                    std::lock_guard<std::mutex> guard(gpu_mutex);
+-                    if (failed.load()) return;
+-                    bounded_cancel_checkpoint(cancel);
+-                    ok = kernel(src.data(), in.width(), hi - lo, s.y0 - lo, s.rows, dst.data(), band_error);
+-                }
+-                if (!ok) throw std::runtime_error(band_error.empty() ? "bounded GPU band failed" : band_error);
+-                output.write_rows(s.y0, s.rows, dst.data(), cancel);
+-            } catch (...) {
+-                std::lock_guard<std::mutex> guard(error_mutex);
+-                if (!failed.exchange(true)) failure = std::current_exception();
+-                return;
++                ok = kernel(src.get(), in.width(), hi - lo, s.y0 - lo, s.rows, dst.get(), band_error);
+             }
++            if (!ok) throw std::runtime_error(band_error.empty() ? "bounded GPU band failed" : band_error);
++            output.write_rows(s.y0, s.rows, dst.get(), cancel);
++        }
++        } catch (...) {
++            std::lock_guard<std::mutex> guard(error_mutex);
++            if (!failed.exchange(true)) failure = std::current_exception();
++            return;
+         }
+     };
+-    const unsigned n_workers = unsigned(std::min<size_t>(std::max(1u, workers), spans.size()));
++    const unsigned n_workers = plan.workers;
+     std::vector<std::thread> threads;
+     try {
+         for (unsigned i = 1; i < n_workers; ++i) threads.emplace_back(work);
+@@ -184,6 +228,8 @@ inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint
+         stats->bands = uint32_t(spans.size());
+         stats->band_rows = band_rows;
+         stats->max_band_bytes = std::min<uint64_t>(in.height(), uint64_t(band_rows) + 2ull * halo) * in.width() * 3 * sizeof(float);
++        stats->host_payload_bytes = plan.host_payload_bytes;
++        stats->worker_slots = plan.workers;
+     }
+     return true;
+     } catch (const std::exception& e) {
+@@ -197,11 +243,12 @@ inline bool run_external_bands(const ExternalPlane& in, ExternalPlane& out, uint
+ 
+ inline bool run_point_chain(gpu::Gpu* gpu, const PointChainTables& t, const ExternalPlane& in,
+                             ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
+-                            PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {}) {
++                            PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {},
++                            uint64_t host_payload_budget_bytes = std::numeric_limits<uint64_t>::max()) {
+     return run_external_bands(in, out, band_rows, 0, order, workers, stats, error, cancel,
+         [&](const float* src, uint32_t w, uint32_t window, uint32_t, uint32_t, float* dst, std::string& e) {
+             return point_chain_band(gpu, t, src, w, window, dst, e, cancel);
+-        });
++        }, host_payload_budget_bytes);
+ }
+ 
+ }  // namespace spk
+diff --git a/engine/src/pipeline/bounded_print_run.hpp b/engine/src/pipeline/bounded_print_run.hpp
+index f5c763d..16c9fd5 100644
+--- a/engine/src/pipeline/bounded_print_run.hpp
++++ b/engine/src/pipeline/bounded_print_run.hpp
+@@ -51,7 +51,7 @@ inline uint32_t choose_window_rows(uint32_t plane_h, uint32_t w, uint32_t halo,
+     if (!plane_h || !w) throw std::invalid_argument("empty window geometry");
+     const uint64_t row = uint64_t(w) * 3 * sizeof(float);
+     const uint64_t window = std::min<uint64_t>(std::min<uint64_t>(range_bytes, budget_bytes / 5) / row,
+-                                               std::numeric_limits<uint32_t>::max() / w);
++                                               std::numeric_limits<uint32_t>::max() / 3 / w);
+     if (window < plane_h && window <= 2ull * halo)
+         throw std::invalid_argument("budget cannot hold a row and its halo");
+     const uint64_t rows = window >= plane_h ? plane_h : window - 2ull * halo;
+@@ -77,17 +77,21 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+                              std::string& error, const BoundedCancel& cancel = {}) {
+     if (!valid_print_run(t, error)) return false;
+     if (!w || !wrows || !rows || offset > wrows || rows > wrows - offset || !in || !out ||
+-        uint64_t(w) * wrows > std::numeric_limits<uint32_t>::max()) {
++        uint64_t(w) * wrows > std::numeric_limits<uint32_t>::max() / 3) {
+         error = "invalid print window geometry"; return false;
+     }
+     if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     const PointChainTables& p = t.point;
+-    const size_t pixels = size_t(w) * wrows, bytes = pixels * 3 * sizeof(float);
+-    gpu::BufferRef cur = gpu->upload(in, bytes, error);
++    const uint64_t bytes64 = uint64_t(w) * wrows * 3 * sizeof(float);
++    if (bytes64 > std::numeric_limits<size_t>::max()) {
++        error = "print window exceeds host address range"; return false;
++    }
++    const size_t pixels = size_t(w) * wrows, bytes = size_t(bytes64);
++    gpu::BufferRef cur = gpu->upload_persistent(in, bytes, error);
+     if (!cur) return false;
+     const uint32_t n[1] = {uint32_t(pixels)};
+     {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         if (!gpu->dispatch("spk_matmul3", {gpu::Arg::buf(cur), gpu::Arg::buf(p.xyz_to_rgb),
+@@ -97,7 +101,7 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (p.gamut_compress) {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[4] = {uint32_t(pixels), p.cam16_nl, p.cam16_nh, p.cam16_lightness ? 1u : 0u};
+@@ -116,14 +120,14 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+         const double s[3] = {t.unsharp_sigma, t.unsharp_sigma, t.unsharp_sigma};
+         const double a[3] = {1.0 + t.unsharp_amount, 1.0 + t.unsharp_amount, 1.0 + t.unsharp_amount};
+         const double b[3] = {-t.unsharp_amount, -t.unsharp_amount, -t.unsharp_amount};
+-        if (!blur.gaussian(src, s, blurred, error)) return false;
+-        if (!blur.lincomb(src, blurred, a, b, sharp, error)) return false;
++        if (!blur.gaussian_fir_bounded(src, s, blurred, error)) return false;
++        if (!blur.lincomb(src, blurred, a, b, sharp, error, true)) return false;
+         cur = std::move(sharp.buf);
+         if (!gpu->flush(error)) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+     }
+     if (p.cctf) {
+-        gpu::BufferRef next = gpu->alloc(bytes, error);
++        gpu::BufferRef next = gpu->alloc_bounded(bytes, error);
+         if (!next) return false;
+         if (!bounded_gpu_checkpoint(cancel, error)) return false;
+         const uint32_t meta[2] = {uint32_t(pixels), p.cctf_mode};
+@@ -141,14 +145,15 @@ inline bool print_run_window(gpu::Gpu* gpu, const PrintRunTables& t, const float
+ // Producer/consumer over halo bands. Row numbers are global plane rows.
+ inline bool run_print_run(gpu::Gpu* gpu, const PrintRunTables& t, const ExternalPlane& in,
+                           ExternalPlane& out, uint32_t band_rows, BandOrder order, unsigned workers,
+-                          PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {}) {
++                          PointChainStats* stats, std::string& error, const BoundedCancel& cancel = {},
++                          uint64_t host_payload_budget_bytes = std::numeric_limits<uint64_t>::max()) {
+     if (stats) *stats = {};
+     if (!valid_print_run(t, error)) return false;
+     return run_external_bands(in, out, band_rows, t.halo, order, workers, stats, error, cancel,
+         [&](const float* src, uint32_t w, uint32_t window, uint32_t offset, uint32_t rows,
+             float* dst, std::string& e) {
+             return print_run_window(gpu, t, src, w, window, offset, rows, dst, e, cancel);
+-        });
++        }, host_payload_budget_bytes);
+ }
+ 
+ }  // namespace spk
+

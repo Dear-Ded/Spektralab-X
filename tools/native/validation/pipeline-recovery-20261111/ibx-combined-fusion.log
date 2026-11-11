@@ -1,0 +1,26 @@
+fed553cf7b3a071312af91baab7f042634ba5a64c502f4f3ebf279d2038edb3b  /data/home/gpt-bounded-budget-20261111/build/engine/libspektralab_engine.a
+9880d58700805dca25a47a676c04812c4fd7efadd6ac50e5dd30b32f915c5965  /data/home/gpt-bounded-budget-20261111/build/engine/resources/vulkan/spk_dir_finish.spv
+3632e5a9db43f410d4f4d48ba770a1aeca757ad9b3df4ed03ba27e4fccbf1adc  /data/home/gpt-bounded-budget-20261111/build/engine/resources/vulkan/spk_xyz_cam16_compress.spv
+backend=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+DIR passed cases=48 floats=135240
+XYZ/CAM16 space=sRGB passed
+XYZ/CAM16 space=Display P3 passed
+XYZ/CAM16 space=ProPhoto RGB passed
+XYZ/CAM16 space=Adobe RGB (1998) passed
+XYZ/CAM16 space=ITU-R BT.709 passed
+XYZ/CAM16 space=ITU-R BT.2020 passed
+render space=sRGB di=0 float32_memcmp_equal=true
+default_and_unknown_modes_use_separated_path=true
+render space=sRGB di=1 float32_memcmp_equal=true
+render space=Display P3 di=0 float32_memcmp_equal=true
+render space=Display P3 di=1 float32_memcmp_equal=true
+render space=ProPhoto RGB di=0 float32_memcmp_equal=true
+render space=ProPhoto RGB di=1 float32_memcmp_equal=true
+render space=Adobe RGB (1998) di=0 float32_memcmp_equal=true
+render space=Adobe RGB (1998) di=1 float32_memcmp_equal=true
+render space=ITU-R BT.709 di=0 float32_memcmp_equal=true
+render space=ITU-R BT.709 di=1 float32_memcmp_equal=true
+render space=ITU-R BT.2020 di=0 float32_memcmp_equal=true
+render space=ITU-R BT.2020 di=1 float32_memcmp_equal=true
+PASS cases=494 float32_values=1490286 nonfinite_reference_values=640 tail_guards=true dispatch_chunks_tested=true actual_2d_dispatch=false
+

@@ -1,0 +1,80 @@
+Use signature-selected CameraCalibration for explicit ASN ForwardMatrix DNGs.
+Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
+
+Extend the existing identity-calibration gate only for finite nonidentity CC,
+explicit AsShotNeutral, valid signatures and a usable ForwardMatrix. Share the
+selected calibration with demosaic coefficients and final FM conversion.
+Keep legacy unit/near-unit, non-finite, invalid-signature and no-FM fallbacks.
+Default linear display, exposure, saturation and development intent stay intact.
+
+--- a/engine/src/io/raw_camera.hpp
++++ b/engine/src/io/raw_camera.hpp
+@@ -71,6 +71,13 @@ public:
+         }
+         dng_forward::Profile profile;
+         bool safe_calibration = true;
++        bool finite_calibration = true;
++        bool nonidentity_calibration = false;
++        const auto& levels = col.dng_levels;
++        const bool asn_source = (levels.parsedfields & LIBRAW_DNGFM_ASSHOTNEUTRAL) != 0;
++        const bool calibrated = !levels.calibration_signature_invalid &&
++            std::strcmp(levels.camera_calibration_signature,
++                        levels.profile_calibration_signature) == 0;
+         for (int s=0;s<2;++s) {
+             auto& slot=profile.slots[s];
+             slot.kelvin=illuminant_k(col.dng_color[s].illuminant);
+@@ -82,12 +89,21 @@ public:
+             }
+             for (int r=0;r<3;++r) for(int c=0;c<3;++c) {
+                 const double value=col.dng_color[s].calibration[r][c];
++                nonidentity_calibration |= !no_calibration &&
++                    std::fabs(value-double(r==c)) >= 1e-7;
+                 slot.calibration[r*3+c]=no_calibration ? double(r==c) : value;
++                finite_calibration &= std::isfinite(value);
+                 safe_calibration &= std::isfinite(value) &&
+                     (no_calibration || std::fabs(value-double(r==c)) < 1e-7);
+             }
+         }
+         dng_forward::Vector camera_neutral{};
++        const bool extend_calibration = finite_calibration && nonidentity_calibration &&
++            asn_source && !levels.calibration_signature_invalid;
++        if (extend_calibration && !calibrated)
++            for (auto& slot : profile.slots)
++                for (int r=0;r<3;++r) for(int c=0;c<3;++c)
++                    slot.calibration[r*3+c]=double(r==c);
+         bool valid_neutral=true;
+         for(int c=0;c<3;++c) {
+             const double a=col.dng_levels.analogbalance[c];
+@@ -97,10 +113,28 @@ public:
+             camera_neutral[c]=valid_neutral ? 1./wb : 0;
+         }
+         dng_forward::Prepared prepared;
+-        // LibRaw exposes no DNG calibration/profile signatures. Non-identity
+-        // CC cannot be proven to belong to this profile; retain legacy output.
+-        if (safe_calibration && valid_neutral && dng_forward::prepare(profile,camera_neutral,prepared,selected_kelvin)) {
++        // CameraCalibration belongs to this profile only when its signatures
++        // match, including the DNG default of two empty signatures.
++        if ((safe_calibration || extend_calibration) && valid_neutral &&
++            dng_forward::prepare(profile,camera_neutral,prepared,selected_kelvin) &&
++            (!extend_calibration || prepared.has_forward)) {
+             if (prepared.has_forward) forward_=prepared;
++            if (extend_calibration) {
++                // Use the same signature-selected calibration for the legacy
++                // demosaic coefficients and the final ForwardMatrix transform.
++                double camera[4][3] = {};
++                for(int r=0;r<3;++r)for(int c=0;c<3;++c)
++                    camera[r][c]=prepared.camera_from_xyz[r*3+c];
++                float pre[4], rgb[3][4] = {};
++                std::memcpy(pre,col.pre_mul,sizeof pre);
++                cam_xyz_coeff(rgb,camera);
++                std::memcpy(col.pre_mul,pre,sizeof pre);
++                std::memcpy(col.rgb_cam,rgb,sizeof rgb);
++                for(int r=0;r<3;++r)for(int c=0;c<3;++c)
++                    col.cam_xyz[r][c]=float(camera[r][c]);
++                dng_matrix_k=prepared.kelvin;
++                return true;
++            }
+             // Prepare the legacy dual-illuminant matrix below even with FM:
+             // actual postprocess WB can reject FM at the conversion boundary.
+             // Single-illuminant DNGs used to return before exposing cam_xyz,
+

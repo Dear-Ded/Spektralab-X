@@ -1,0 +1,242 @@
+[
+  {
+    "case": "no-fm-single-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "fffafe36ad6761f904bd81ef8644b544f7583a0ef8c064162160437195bcec48"
+  },
+  {
+    "case": "no-fm-single-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "d1dc2cc78d3de77d3a8dfaef66c4b9cdfd20530df9e23254c7ae2a69671ca8ed"
+  },
+  {
+    "case": "no-fm-single-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "6acc983b9490ccb010553e6958e27a9c64e498c59cb4277ed72f670a334a3f14"
+  },
+  {
+    "case": "no-fm-single-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "7ad6ec242d7615127b290996497008074e34a3d081c36a508aa210de241457b8"
+  },
+  {
+    "case": "no-fm-single-match",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "fffafe36ad6761f904bd81ef8644b544f7583a0ef8c064162160437195bcec48"
+  },
+  {
+    "case": "no-fm-single-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "d1dc2cc78d3de77d3a8dfaef66c4b9cdfd20530df9e23254c7ae2a69671ca8ed"
+  },
+  {
+    "case": "no-fm-single-match",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "6acc983b9490ccb010553e6958e27a9c64e498c59cb4277ed72f670a334a3f14"
+  },
+  {
+    "case": "no-fm-single-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "7ad6ec242d7615127b290996497008074e34a3d081c36a508aa210de241457b8"
+  },
+  {
+    "case": "no-fm-single-different",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-single-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "case": "no-fm-single-different",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "case": "no-fm-single-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "case": "no-fm-single-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-single-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "case": "no-fm-single-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "case": "no-fm-single-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "case": "no-fm-single-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-single-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "case": "no-fm-single-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "case": "no-fm-single-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "case": "no-fm-dual-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-dual-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "7b2794c397955191aa63c039824420d423fe43bf0aa544f2a77599ca87b0c067"
+  },
+  {
+    "case": "no-fm-dual-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "1021e5284bbd3d0309f2799413fc87a7747057df91d7c93903335d5e22370a16"
+  },
+  {
+    "case": "no-fm-dual-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "e24a3a1595fb0df4796c128772f5c5f95ea40bdabac72d17bbb33c5906979570"
+  },
+  {
+    "case": "no-fm-dual-match",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-dual-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "7b2794c397955191aa63c039824420d423fe43bf0aa544f2a77599ca87b0c067"
+  },
+  {
+    "case": "no-fm-dual-match",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "1021e5284bbd3d0309f2799413fc87a7747057df91d7c93903335d5e22370a16"
+  },
+  {
+    "case": "no-fm-dual-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "e24a3a1595fb0df4796c128772f5c5f95ea40bdabac72d17bbb33c5906979570"
+  },
+  {
+    "case": "no-fm-dual-different",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-dual-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "case": "no-fm-dual-different",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "case": "no-fm-dual-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  },
+  {
+    "case": "no-fm-dual-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-dual-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "case": "no-fm-dual-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "case": "no-fm-dual-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  },
+  {
+    "case": "no-fm-dual-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "case": "no-fm-dual-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "case": "no-fm-dual-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "case": "no-fm-dual-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  }
+]

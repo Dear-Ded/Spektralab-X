@@ -1,0 +1,11 @@
+318a02e19157e83a666ef6aee66aa2612f214132acfe4a123f1af9569a477b26  /data/work/gpt-bounded-budget-20261111/build/engine/libspektralab_engine.a
+6fb1ed232262b79f1e5d5345f750f282a964f591dd09afb1080fdbe88ca47edc  /data/work/gpt-bounded-budget-20261111/print-final/bounded_print_run
+backend=llvmpipe (LLVM 15.0.7, 256 bits) strict_limits=1
+halo_checks=288
+PRINT_CANCEL_PASS gpu_boundaries=10 run_boundaries=3 recovery_bytes_equal=true
+space=sRGB passed
+space=Display P3 passed
+space=ProPhoto RGB passed
+whole_plane_rejected=spk_matmul3: buffer exceeds maxStorageBufferRange
+large_plane bands_a=8 rows_a=405 halo=2 max_window_bytes=20108076 bands_b=32 bytes_equal=true
+BOUNDED_PRINT_RUN_PASS cases=2251 float32_values=75470400 strict_range_case=1 workers=1,4 orders=forward,reverse,shuffled

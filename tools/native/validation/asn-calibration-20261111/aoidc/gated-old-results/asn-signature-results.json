@@ -1,0 +1,6162 @@
+[
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      1.2027124166488647
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.1250019073486328,
+      0.12497138977050781,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-single-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.002794295295164,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "fffafe36ad6761f904bd81ef8644b544f7583a0ef8c064162160437195bcec48"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31158924102783203,
+      0,
+      0.19490349292755127
+    ],
+    "maximum_pixel_spread": 0.31158924102783203,
+    "error": "",
+    "case": "calibrated-single-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.0027440234951723,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "d1dc2cc78d3de77d3a8dfaef66c4b9cdfd20530df9e23254c7ae2a69671ca8ed"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      0.8982301950454712,
+      1,
+      0.8314539790153503,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12499652057886124,
+      0.12499717622995377,
+      0.12499681115150452
+    ],
+    "maximum_pixel_spread": 6.556510925292969e-07,
+    "error": "",
+    "case": "calibrated-single-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.002794295295164,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "6acc983b9490ccb010553e6958e27a9c64e498c59cb4277ed72f670a334a3f14"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.5,
+      0.75,
+      0.5
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31160372495651245,
+      -0.020678238943219185,
+      0.19490623474121094
+    ],
+    "maximum_pixel_spread": 0.3322819769382477,
+    "error": "",
+    "case": "calibrated-single-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.0027440234951723,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "7ad6ec242d7615127b290996497008074e34a3d081c36a508aa210de241457b8"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      1.2027124166488647
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.1250019073486328,
+      0.12497138977050781,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-single-match",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.002794295295164,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "fffafe36ad6761f904bd81ef8644b544f7583a0ef8c064162160437195bcec48"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31158924102783203,
+      0,
+      0.19490349292755127
+    ],
+    "maximum_pixel_spread": 0.31158924102783203,
+    "error": "",
+    "case": "calibrated-single-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.0027440234951723,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "d1dc2cc78d3de77d3a8dfaef66c4b9cdfd20530df9e23254c7ae2a69671ca8ed"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      0.8982301950454712,
+      1,
+      0.8314539790153503,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12499652057886124,
+      0.12499717622995377,
+      0.12499681115150452
+    ],
+    "maximum_pixel_spread": 6.556510925292969e-07,
+    "error": "",
+    "case": "calibrated-single-match",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.002794295295164,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "6acc983b9490ccb010553e6958e27a9c64e498c59cb4277ed72f670a334a3f14"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.0803126096725464,
+      1.2027124166488647,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.5,
+      0.75,
+      0.5
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.31160372495651245,
+      -0.020678238943219185,
+      0.19490623474121094
+    ],
+    "maximum_pixel_spread": 0.3322819769382477,
+    "error": "",
+    "case": "calibrated-single-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.0027440234951723,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "7ad6ec242d7615127b290996497008074e34a3d081c36a508aa210de241457b8"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-single-different",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.28183412551879883,
+      0.01188677828758955,
+      0.19441519677639008
+    ],
+    "maximum_pixel_spread": 0.269947350025177,
+    "error": "",
+    "case": "calibrated-single-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12498698383569717,
+      0.12498761713504791,
+      0.12498725205659866
+    ],
+    "maximum_pixel_spread": 6.332993507385254e-07,
+    "error": "",
+    "case": "calibrated-single-different",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.5,
+      0.75,
+      0.5
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.281818151473999,
+      0.01187804713845253,
+      0.19443011283874512
+    ],
+    "maximum_pixel_spread": 0.2699401080608368,
+    "error": "",
+    "case": "calibrated-single-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-single-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.28183412551879883,
+      0.01188677828758955,
+      0.19441519677639008
+    ],
+    "maximum_pixel_spread": 0.269947350025177,
+    "error": "",
+    "case": "calibrated-single-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12498698383569717,
+      0.12498761713504791,
+      0.12498725205659866
+    ],
+    "maximum_pixel_spread": 6.332993507385254e-07,
+    "error": "",
+    "case": "calibrated-single-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.5,
+      0.75,
+      0.5
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.281818151473999,
+      0.01187804713845253,
+      0.19443011283874512
+    ],
+    "maximum_pixel_spread": 0.2699401080608368,
+    "error": "",
+    "case": "calibrated-single-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-single-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.28183412551879883,
+      0.01188677828758955,
+      0.19441519677639008
+    ],
+    "maximum_pixel_spread": 0.269947350025177,
+    "error": "",
+    "case": "calibrated-single-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "73ffc4520967e26aea536496caf0d43a1c136d648a2200ab67947941f6e402f7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.12498698383569717,
+      0.12498761713504791,
+      0.12498725205659866
+    ],
+    "maximum_pixel_spread": 6.332993507385254e-07,
+    "error": "",
+    "case": "calibrated-single-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "d7e86c90be942e74bb2b70168892b1484c6ca67a2baa12285d7c5b03c2326ce6"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 0,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 0,
+    "source_valid": 1,
+    "temperature_valid": 0,
+    "source_temperature": 0,
+    "source_tint": 0,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      2,
+      1,
+      1.5,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.5,
+      0.75,
+      0.5
+    ],
+    "camera_to_output": [
+      1.8057388067245483,
+      -0.5359751582145691,
+      -0.26976680755615234,
+      0,
+      -1.0027037858963013,
+      1.9637441635131836,
+      0.03896157443523407,
+      0,
+      -0.04368852078914642,
+      -0.11152395606040955,
+      1.1552114486694336,
+      0
+    ],
+    "camera_xyz": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "mean": [
+      0.281818151473999,
+      0.01187804713845253,
+      0.19443011283874512
+    ],
+    "maximum_pixel_spread": 0.2699401080608368,
+    "error": "",
+    "case": "calibrated-single-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.0027034298029587,
+    "matrix_pass": false,
+    "temperature_pass": false,
+    "pixel_sha256": "9e0aa908e10f33263c77b79a5101d2538e6a7abfd1b18515eb820b9e02325e08"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      1.0536420345306396
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-dual-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.012803457608706,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1.2244491577148438,
+      1.0782028436660767,
+      1,
+      1.0782028436660767
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.125490203499794,
+      0.12953384220600128,
+      0.12468146532773972
+    ],
+    "maximum_pixel_spread": 0.004852376878261566,
+    "error": "",
+    "case": "calibrated-dual-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.012574331360244,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "7b2794c397955191aa63c039824420d423fe43bf0aa544f2a77599ca87b0c067"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.8685793280601501,
+      0.8243589997291565,
+      0.8685793280601501
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497390806674957,
+      0.12498192489147186,
+      0.12500132620334625
+    ],
+    "maximum_pixel_spread": 2.7418136596679688e-05,
+    "error": "",
+    "case": "calibrated-dual-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.012803457608706,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "1021e5284bbd3d0309f2799413fc87a7747057df91d7c93903335d5e22370a16"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.8805614709854126,
+      0.8166937232017517,
+      0.8805614709854126
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12547391653060913,
+      0.12955912947654724,
+      0.12468638271093369
+    ],
+    "maximum_pixel_spread": 0.004872746765613556,
+    "error": "",
+    "case": "calibrated-dual-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.012574331360244,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "e24a3a1595fb0df4796c128772f5c5f95ea40bdabac72d17bbb33c5906979570"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      1.0536420345306396
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-dual-match",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.012803457608706,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1.2244491577148438,
+      1.0782028436660767,
+      1,
+      1.0782028436660767
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.125490203499794,
+      0.12953384220600128,
+      0.12468146532773972
+    ],
+    "maximum_pixel_spread": 0.004852376878261566,
+    "error": "",
+    "case": "calibrated-dual-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.012574331360244,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "7b2794c397955191aa63c039824420d423fe43bf0aa544f2a77599ca87b0c067"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.073723655648,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.8685793280601501,
+      0.8243589997291565,
+      0.8685793280601501
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12497390806674957,
+      0.12498192489147186,
+      0.12500132620334625
+    ],
+    "maximum_pixel_spread": 2.7418136596679688e-05,
+    "error": "",
+    "case": "calibrated-dual-match",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.012803457608706,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "1021e5284bbd3d0309f2799413fc87a7747057df91d7c93903335d5e22370a16"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.700533553697,
+    "source_tint": 9.769479586621017,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2130637168884277,
+      1.0536420345306396,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.8805614709854126,
+      0.8166937232017517,
+      0.8805614709854126
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.12547391653060913,
+      0.12955912947654724,
+      0.12468638271093369
+    ],
+    "maximum_pixel_spread": 0.004872746765613556,
+    "error": "",
+    "case": "calibrated-dual-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.012574331360244,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "e24a3a1595fb0df4796c128772f5c5f95ea40bdabac72d17bbb33c5906979570"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-dual-different",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1.2244491577148438,
+      1.0782028436660767,
+      1,
+      1.0782028436660767
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13083085417747498,
+      0.11522087454795837,
+      0.1253223419189453
+    ],
+    "maximum_pixel_spread": 0.015609979629516602,
+    "error": "",
+    "case": "calibrated-dual-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12495605647563934,
+      0.12501154839992523,
+      0.12499281764030457
+    ],
+    "maximum_pixel_spread": 5.549192428588867e-05,
+    "error": "",
+    "case": "calibrated-dual-different",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.8805614709854126,
+      0.8166937232017517,
+      0.8805614709854126
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13081258535385132,
+      0.11523935198783875,
+      0.12532716989517212
+    ],
+    "maximum_pixel_spread": 0.015573233366012573,
+    "error": "",
+    "case": "calibrated-dual-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-dual-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1.2244491577148438,
+      1.0782028436660767,
+      1,
+      1.0782028436660767
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13083085417747498,
+      0.11522087454795837,
+      0.1253223419189453
+    ],
+    "maximum_pixel_spread": 0.015609979629516602,
+    "error": "",
+    "case": "calibrated-dual-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12495605647563934,
+      0.12501154839992523,
+      0.12499281764030457
+    ],
+    "maximum_pixel_spread": 5.549192428588867e-05,
+    "error": "",
+    "case": "calibrated-dual-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.8805614709854126,
+      0.8166937232017517,
+      0.8805614709854126
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13081258535385132,
+      0.11523935198783875,
+      0.12532716989517212
+    ],
+    "maximum_pixel_spread": 0.015573233366012573,
+    "error": "",
+    "case": "calibrated-dual-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12497138977050781,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 3.0517578125e-05,
+    "error": "",
+    "case": "calibrated-dual-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "9fb62c9de03b76d199a2c86035dd52bffe5eb61ff2cc3f95311ef019ed8f4767"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1.2244491577148438,
+      1.0782028436660767,
+      1,
+      1.0782028436660767
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13083085417747498,
+      0.11522087454795837,
+      0.1253223419189453
+    ],
+    "maximum_pixel_spread": 0.015609979629516602,
+    "error": "",
+    "case": "calibrated-dual-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "fdb5e0b67a642798eb06de11ab28fb5b38348bda1b9d5fb304ad2b5852c6311f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6144.967315111344,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.9507091045379639,
+      -0.6103205680847168,
+      -0.3403915762901306,
+      0,
+      -1.0279974937438965,
+      1.9744255542755127,
+      0.05357382073998451,
+      0,
+      -0.030115842819213867,
+      -0.09483543038368225,
+      1.1249502897262573,
+      0
+    ],
+    "camera_xyz": [
+      0.6883794069290161,
+      0.1458626687526703,
+      0.09276604652404785,
+      0.1339821219444275,
+      0.8539133667945862,
+      0.04111948609352112,
+      0.0233810655772686,
+      0.09858617931604385,
+      0.8874710202217102
+    ],
+    "mean": [
+      0.12495605647563934,
+      0.12501154839992523,
+      0.12499281764030457
+    ],
+    "maximum_pixel_spread": 5.549192428588867e-05,
+    "error": "",
+    "case": "calibrated-dual-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 1.027997137650554,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "05cec47da6b0717bf432179c2cb8e821b19a7a7601d5010dbf97b712b2e29b96"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6144.848752297998,
+    "source_tint": -27.29947964726229,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.1356390714645386,
+      1,
+      0.9274693131446838,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.8805614709854126,
+      0.8166937232017517,
+      0.8805614709854126
+    ],
+    "camera_to_output": [
+      1.9579578638076782,
+      -0.6138229370117188,
+      -0.34413790702819824,
+      0,
+      -1.0291481018066406,
+      1.9747403860092163,
+      0.054409950971603394,
+      0,
+      -0.029443487524986267,
+      -0.09423699975013733,
+      1.123679518699646,
+      0
+    ],
+    "camera_xyz": [
+      0.6824520230293274,
+      0.146232008934021,
+      0.09374400228261948,
+      0.1336659938097,
+      0.8600020408630371,
+      0.04190399870276451,
+      0.022659998387098312,
+      0.0982619971036911,
+      0.8890959620475769
+    ],
+    "mean": [
+      0.13081258535385132,
+      0.11523935198783875,
+      0.12532716989517212
+    ],
+    "maximum_pixel_spread": 0.015573233366012573,
+    "error": "",
+    "case": "calibrated-dual-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 1.029147745713298,
+    "matrix_pass": false,
+    "temperature_pass": true,
+    "pixel_sha256": "37a773e6de6f49714dbb834d0d383dbb29d8de68cd16ff9942c666da5b0635d0"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-single-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1.1576573848724365,
+      1.1262707710266113,
+      1,
+      1.1262707710266113
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.1260547786951065,
+      0.1278706043958664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0028686970472335815,
+    "error": "",
+    "case": "identity-single-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d0aef4b45968b11ae40d7d00fadc76599e72837b2c9eeddf034d705c32246f5f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498737126588821,
+      0.12498738616704941,
+      0.12498737871646881
+    ],
+    "maximum_pixel_spread": 1.4901161193847656e-08,
+    "error": "",
+    "case": "identity-single-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "32d1de65f508aa527b4cf66dd3a029f29600c1542f775be9985f5bb7810868b7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9728877544403076,
+      0.8638134002685547,
+      0.9728877544403076
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12605543434619904,
+      0.12787491083145142,
+      0.12499555945396423
+    ],
+    "maximum_pixel_spread": 0.0028793513774871826,
+    "error": "",
+    "case": "identity-single-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d8fff3f28892e0046ec1f3768a713795b8dad9a12b7096954953738e26a8df70"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-single-match",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1.1576573848724365,
+      1.1262707710266113,
+      1,
+      1.1262707710266113
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.1260547786951065,
+      0.1278706043958664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0028686970472335815,
+    "error": "",
+    "case": "identity-single-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d0aef4b45968b11ae40d7d00fadc76599e72837b2c9eeddf034d705c32246f5f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498737126588821,
+      0.12498738616704941,
+      0.12498737871646881
+    ],
+    "maximum_pixel_spread": 1.4901161193847656e-08,
+    "error": "",
+    "case": "identity-single-match",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "32d1de65f508aa527b4cf66dd3a029f29600c1542f775be9985f5bb7810868b7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9728877544403076,
+      0.8638134002685547,
+      0.9728877544403076
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12605543434619904,
+      0.12787491083145142,
+      0.12499555945396423
+    ],
+    "maximum_pixel_spread": 0.0028793513774871826,
+    "error": "",
+    "case": "identity-single-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d8fff3f28892e0046ec1f3768a713795b8dad9a12b7096954953738e26a8df70"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-single-different",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1.1576573848724365,
+      1.1262707710266113,
+      1,
+      1.1262707710266113
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.1260547786951065,
+      0.1278706043958664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0028686970472335815,
+    "error": "",
+    "case": "identity-single-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d0aef4b45968b11ae40d7d00fadc76599e72837b2c9eeddf034d705c32246f5f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498737126588821,
+      0.12498738616704941,
+      0.12498737871646881
+    ],
+    "maximum_pixel_spread": 1.4901161193847656e-08,
+    "error": "",
+    "case": "identity-single-different",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "32d1de65f508aa527b4cf66dd3a029f29600c1542f775be9985f5bb7810868b7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9728877544403076,
+      0.8638134002685547,
+      0.9728877544403076
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12605543434619904,
+      0.12787491083145142,
+      0.12499555945396423
+    ],
+    "maximum_pixel_spread": 0.0028793513774871826,
+    "error": "",
+    "case": "identity-single-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d8fff3f28892e0046ec1f3768a713795b8dad9a12b7096954953738e26a8df70"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-single-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1.1576573848724365,
+      1.1262707710266113,
+      1,
+      1.1262707710266113
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.1260547786951065,
+      0.1278706043958664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0028686970472335815,
+    "error": "",
+    "case": "identity-single-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d0aef4b45968b11ae40d7d00fadc76599e72837b2c9eeddf034d705c32246f5f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498737126588821,
+      0.12498738616704941,
+      0.12498737871646881
+    ],
+    "maximum_pixel_spread": 1.4901161193847656e-08,
+    "error": "",
+    "case": "identity-single-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "32d1de65f508aa527b4cf66dd3a029f29600c1542f775be9985f5bb7810868b7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9728877544403076,
+      0.8638134002685547,
+      0.9728877544403076
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12605543434619904,
+      0.12787491083145142,
+      0.12499555945396423
+    ],
+    "maximum_pixel_spread": 0.0028793513774871826,
+    "error": "",
+    "case": "identity-single-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d8fff3f28892e0046ec1f3768a713795b8dad9a12b7096954953738e26a8df70"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      1.100846290588379
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-single-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1.1576573848724365,
+      1.1262707710266113,
+      1,
+      1.1262707710266113
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.1260547786951065,
+      0.1278706043958664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0028686970472335815,
+    "error": "",
+    "case": "identity-single-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d0aef4b45968b11ae40d7d00fadc76599e72837b2c9eeddf034d705c32246f5f"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.084818670282,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.959051787853241,
+      0.8711950182914734,
+      0.959051787853241
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12498737126588821,
+      0.12498738616704941,
+      0.12498737871646881
+    ],
+    "maximum_pixel_spread": 1.4901161193847656e-08,
+    "error": "",
+    "case": "identity-single-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "32d1de65f508aa527b4cf66dd3a029f29600c1542f775be9985f5bb7810868b7"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.711734874862,
+    "source_tint": 9.77022619831773,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.1478486061096191,
+      1.100846290588379,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0278677940368652,
+      1,
+      0.8878859877586365,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9728877544403076,
+      0.8638134002685547,
+      0.9728877544403076
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7560000419616699,
+      0.1080000028014183,
+      0.06480000168085098,
+      0.14550000429153442,
+      0.7760000228881836,
+      0.01940000057220459,
+      0.030899997800588608,
+      0.10300000011920929,
+      0.8240000009536743
+    ],
+    "mean": [
+      0.12605543434619904,
+      0.12787491083145142,
+      0.12499555945396423
+    ],
+    "maximum_pixel_spread": 0.0028793513774871826,
+    "error": "",
+    "case": "identity-single-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "d8fff3f28892e0046ec1f3768a713795b8dad9a12b7096954953738e26a8df70"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-dual-missing",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1.2196393013000488,
+      1.1410338878631592,
+      1,
+      1.1410338878631592
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.1262073665857315,
+      0.1279926747083664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0029907673597335815,
+    "error": "",
+    "case": "identity-dual-missing",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "63581a9ff90fee625b37e6918ab5ff77e173dec9ace60e907b29b851ebc812e3"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12497394531965256,
+      0.12499237805604935,
+      0.12499238550662994
+    ],
+    "maximum_pixel_spread": 1.8440186977386475e-05,
+    "error": "",
+    "case": "identity-dual-missing",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "26ae614322010263bbf0d8b7fc1a5d8a7a0c109354d16d54803ba2b9131ea860"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9355502724647522,
+      0.8199145197868347,
+      0.9355502724647522
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12619782984256744,
+      0.127984419465065,
+      0.1249881386756897
+    ],
+    "maximum_pixel_spread": 0.002996280789375305,
+    "error": "",
+    "case": "identity-dual-missing",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "bcbc8cc1e9f5287f5bfb3b97bfba5ca204194de6d231875a4843ef893911df77"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-dual-match",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1.2196393013000488,
+      1.1410338878631592,
+      1,
+      1.1410338878631592
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.1262073665857315,
+      0.1279926747083664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0029907673597335815,
+    "error": "",
+    "case": "identity-dual-match",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "63581a9ff90fee625b37e6918ab5ff77e173dec9ace60e907b29b851ebc812e3"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12497394531965256,
+      0.12499237805604935,
+      0.12499238550662994
+    ],
+    "maximum_pixel_spread": 1.8440186977386475e-05,
+    "error": "",
+    "case": "identity-dual-match",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "26ae614322010263bbf0d8b7fc1a5d8a7a0c109354d16d54803ba2b9131ea860"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9355502724647522,
+      0.8199145197868347,
+      0.9355502724647522
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12619782984256744,
+      0.127984419465065,
+      0.1249881386756897
+    ],
+    "maximum_pixel_spread": 0.002996280789375305,
+    "error": "",
+    "case": "identity-dual-match",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "bcbc8cc1e9f5287f5bfb3b97bfba5ca204194de6d231875a4843ef893911df77"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-dual-different",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1.2196393013000488,
+      1.1410338878631592,
+      1,
+      1.1410338878631592
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.1262073665857315,
+      0.1279926747083664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0029907673597335815,
+    "error": "",
+    "case": "identity-dual-different",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "63581a9ff90fee625b37e6918ab5ff77e173dec9ace60e907b29b851ebc812e3"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12497394531965256,
+      0.12499237805604935,
+      0.12499238550662994
+    ],
+    "maximum_pixel_spread": 1.8440186977386475e-05,
+    "error": "",
+    "case": "identity-dual-different",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "26ae614322010263bbf0d8b7fc1a5d8a7a0c109354d16d54803ba2b9131ea860"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9355502724647522,
+      0.8199145197868347,
+      0.9355502724647522
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12619782984256744,
+      0.127984419465065,
+      0.1249881386756897
+    ],
+    "maximum_pixel_spread": 0.002996280789375305,
+    "error": "",
+    "case": "identity-dual-different",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "bcbc8cc1e9f5287f5bfb3b97bfba5ca204194de6d231875a4843ef893911df77"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-dual-camera_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1.2196393013000488,
+      1.1410338878631592,
+      1,
+      1.1410338878631592
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.1262073665857315,
+      0.1279926747083664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0029907673597335815,
+    "error": "",
+    "case": "identity-dual-camera_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "63581a9ff90fee625b37e6918ab5ff77e173dec9ace60e907b29b851ebc812e3"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12497394531965256,
+      0.12499237805604935,
+      0.12499238550662994
+    ],
+    "maximum_pixel_spread": 1.8440186977386475e-05,
+    "error": "",
+    "case": "identity-dual-camera_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "26ae614322010263bbf0d8b7fc1a5d8a7a0c109354d16d54803ba2b9131ea860"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9355502724647522,
+      0.8199145197868347,
+      0.9355502724647522
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12619782984256744,
+      0.127984419465065,
+      0.1249881386756897
+    ],
+    "maximum_pixel_spread": 0.002996280789375305,
+    "error": "",
+    "case": "identity-dual-camera_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "bcbc8cc1e9f5287f5bfb3b97bfba5ca204194de6d231875a4843ef893911df77"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      1.1142966747283936
+    ],
+    "camera_to_output": [
+      1.000000238418579,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12498664855957031,
+      0.12498664855957031,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 1.52587890625e-05,
+    "error": "",
+    "case": "identity-dual-profile_only",
+    "policy": "compatible",
+    "mode": "default",
+    "matrix_error": 5.2702738839727203e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "450d050d31ea1bfd2fab82605c29cabcb96aaa8c22c016382f339ae4b2f4041d"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1.2196393013000488,
+      1.1410338878631592,
+      1,
+      1.1410338878631592
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999997019767761,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.1262073665857315,
+      0.1279926747083664,
+      0.1250019073486328
+    ],
+    "maximum_pixel_spread": 0.0029907673597335815,
+    "error": "",
+    "case": "identity-dual-profile_only",
+    "policy": "compatible",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "63581a9ff90fee625b37e6918ab5ff77e173dec9ace60e907b29b851ebc812e3"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6505.080538152102,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "applied_wb": [
+      1,
+      0.9225751757621765,
+      0.8279439210891724,
+      0.9225751757621765
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12497394531965256,
+      0.12499237805604935,
+      0.12499238550662994
+    ],
+    "maximum_pixel_spread": 1.8440186977386475e-05,
+    "error": "",
+    "case": "identity-dual-profile_only",
+    "policy": "headroom",
+    "mode": "default",
+    "matrix_error": 6.650655071105405e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "26ae614322010263bbf0d8b7fc1a5d8a7a0c109354d16d54803ba2b9131ea860"
+  },
+  {
+    "open": 0,
+    "ok": 1,
+    "unchanged": 0,
+    "matrix_ok": 1,
+    "finite": 1,
+    "width": 64,
+    "height": 48,
+    "kelvin": 6500,
+    "source_valid": 1,
+    "temperature_valid": 1,
+    "source_temperature": 6503.707775298871,
+    "source_tint": 9.770199407505348,
+    "derived": 0,
+    "from_xy": 0,
+    "xy": [
+      0,
+      0
+    ],
+    "source_wb": [
+      1.2078112363815308,
+      1.1142966747283936,
+      1,
+      0
+    ],
+    "selected_wb": [
+      1.0688896179199219,
+      1,
+      0.8763981461524963,
+      1
+    ],
+    "applied_wb": [
+      1,
+      0.9355502724647522,
+      0.8199145197868347,
+      0.9355502724647522
+    ],
+    "camera_to_output": [
+      1.0000001192092896,
+      4.3618706513370853e-07,
+      -6.152324658614816e-07,
+      0,
+      -3.445809682034451e-07,
+      0.9999996423721313,
+      6.703572239530331e-07,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "camera_xyz": [
+      0.7020000219345093,
+      0.1404000073671341,
+      0.08640000224113464,
+      0.11640000343322754,
+      0.8245000243186951,
+      0.03880000114440918,
+      0.02059999853372574,
+      0.08239999413490295,
+      0.9063999652862549
+    ],
+    "mean": [
+      0.12619782984256744,
+      0.127984419465065,
+      0.1249881386756897
+    ],
+    "maximum_pixel_spread": 0.002996280789375305,
+    "error": "",
+    "case": "identity-dual-profile_only",
+    "policy": "headroom",
+    "mode": "custom",
+    "matrix_error": 6.650655093309865e-08,
+    "matrix_pass": true,
+    "temperature_pass": true,
+    "pixel_sha256": "bcbc8cc1e9f5287f5bfb3b97bfba5ca204194de6d231875a4843ef893911df77"
+  }
+]

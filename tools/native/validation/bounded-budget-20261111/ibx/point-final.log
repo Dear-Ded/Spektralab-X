@@ -1,0 +1,14 @@
+fed553cf7b3a071312af91baab7f042634ba5a64c502f4f3ebf279d2038edb3b  /data/home/gpt-bounded-budget-20261111/build/engine/libspektralab_engine.a
+710b6317700734cad1166add85d94c4773c4ef8a08e996b733f3534067723e1e  /data/home/gpt-bounded-budget-20261111/point-final/bounded_point_chain
+backend=llvmpipe (LLVM 19.1.7, 256 bits) strict_limits=1
+band_rows_checks=96
+POINT_CANCEL_PASS gpu_boundaries=8 run_boundaries=3 recovery_bytes_equal=true
+space=sRGB passed
+space=Display P3 passed
+space=ProPhoto RGB passed
+space=Adobe RGB (1998) passed
+space=ITU-R BT.709 passed
+space=ITU-R BT.2020 passed
+whole_plane_rejected=spk_matmul3: buffer exceeds maxStorageBufferRange
+large_plane bands_a=5 rows_a=682 max_band_bytes=33529848 bands_b=181 bytes_equal=true windows=3
+BOUNDED_POINT_CHAIN_PASS cases=901 float32_values=102764160 strict_range_case=1 workers=1,4 orders=forward,reverse,shuffled

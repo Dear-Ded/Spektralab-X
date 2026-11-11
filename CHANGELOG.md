@@ -8,6 +8,16 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 未发布 · 源码修复
+
+版本号与内部版本码不变，未打包或发布。GPT（OpenAI）共创。
+
+- 修复部分带非单位相机校准矩阵的 DNG 忽略有效 ForwardMatrix 的问题；保留新 RAW 的线性显示默认值，不增加曝光或饱和度。
+- 修复分块渲染失败或取消后污染下一次渲染的状态；印放最后收尾失败时保留原输出，避免误报完成。
+- 为外存分块原型增加窗口精确容量、CPU 数据预算准入和 RGB 索引溢出检查；仍未启用完整生产分块管线。
+
+验证与限制见 [源码跟进记录](docs/ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)。
+
 ## 0.2.00-alpha-2 · 2026-11-10
 
 内部安装版本码 122。接着已发布的 `0.2.00-alpha-1`，只修风格选项叠在一起。尚未在真机上点过。

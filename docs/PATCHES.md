@@ -49,6 +49,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0042 后续补充：[`0042-external-plane-publication.patch`](../patches/0042-external-plane-publication.patch) 将外存原型拆为独立 `external_plane.hpp`，追踪逐行覆盖和封存状态，失败或取消不发布输出，并共享 point/FIR worker 执行器。合法 kernel 数值与顺序保持，仍未接入生产 Pipeline。两云故障注入、逐字节 GPU 回归及恢复验证见 [报告](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md)。GPT（OpenAI）共创。
 
+0043–0045 后续补充：ASN 的校准签名与非单位相机矩阵修复、生产 Pipeline 失败恢复和结果提交、外存窗口精确容量与 CPU payload 准入。新 RAW 仍默认线性显示，外存 helper 仍未接入生产；双云对照、适用范围与未解决问题见 [源码跟进记录](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 

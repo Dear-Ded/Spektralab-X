@@ -1,0 +1,3 @@
+device=llvmpipe (LLVM 15.0.7, 256 bits)
+warm_pool_exact=pass sharpen=0 window_bytes=4692
+FAIL: small window borrowed oversized pool buffers

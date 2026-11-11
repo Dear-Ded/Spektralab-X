@@ -1,0 +1,116 @@
+Restore Pipeline state and preserve output after failure or cancellation.
+Co-created with GPT (OpenAI), 2026-11-11. See NOTICE for project terms.
+
+Reset band coordinates and borrowed sweep/progress state on every exit, release
+contrast-mask resources, and clear stale completion flags at all four entries.
+Commit print output and completion only after the final phase flush succeeds.
+Successful pixel arithmetic is unchanged; no external executor is enabled.
+
+diff --git a/engine/src/pipeline/pipeline.cpp b/engine/src/pipeline/pipeline.cpp
+index 181a0e3..fe68914 100644
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -49,6 +49,12 @@ uint32_t cctf_mode_for(const std::string& cs) {
+ 
+ namespace {
+ 
++template<class F> struct ScopeExit {
++    F cleanup;
++    ~ScopeExit() { cleanup(); }
++};
++template<class F> ScopeExit(F) -> ScopeExit<F>;
++
+ bool vulkan_fusion_enabled() {
+ #if defined(SPK_VULKAN_BACKEND)
+     const char* mode = std::getenv("SPK_VULKAN_FUSION");
+@@ -2249,8 +2255,10 @@ std::vector<StripSpan> Pipeline::strip_plan(uint32_t plane_h) const {
+ }
+ 
+ bool Pipeline::run_film(const Image& in, Image& out, Progress* progress, std::string& error) {
++    if (progress) progress->done = false;
+     if (!built_) { error = "pipeline was not built"; return false; }
+     progress_ = progress;
++    ScopeExit cleanup{[&] { progress_ = nullptr; }};
+     if (progress_) { progress_->total_nodes = node_count_; progress_->fired = 0; }
+     last_ae_ev_.reset();
+ 
+@@ -2269,6 +2277,11 @@ bool Pipeline::run_film(const Image& in, Image& out, Progress* progress, std::st
+ bool Pipeline::run_stages_striped(const Stage* stages, size_t count, Chain& chain,
+                                   const std::vector<StripSpan>& plan, Progress::StripRun& report,
+                                   std::string& error) {
++    ScopeExit cleanup{[&] {
++        band_row0_ = 0;
++        strip_plane_h_ = 0;
++        blur_.set_sweep_report(nullptr);
++    }};
+     // **Every stage is resolved for this run before anything is walked.** The
+     // class in the table is what the code can do -- a property of the code, the
+     // same on every frame -- and the demand is what *these parameters* let it
+@@ -2454,8 +2467,10 @@ bool Pipeline::band_into(const Image& band, const BandRead& read, Image& plane,
+ 
+ bool Pipeline::run_film_striped(const Image& in, Image& out, Progress* progress,
+                                std::string& error) {
++    if (progress) progress->done = false;
+     if (!built_) { error = "pipeline was not built"; return false; }
+     progress_ = progress;
++    ScopeExit cleanup{[&] { progress_ = nullptr; }};
+     if (progress_) { progress_->total_nodes = node_count_; progress_->fired = 0; }
+     last_ae_ev_.reset();
+ 
+@@ -2514,8 +2529,10 @@ bool Pipeline::print_segment(const Image& cmy, Image& out, std::string& error) {
+ }
+ 
+ bool Pipeline::run_print(const Image& cmy, Image& out, Progress* progress, std::string& error) {
++    if (progress) progress->done = false;
+     if (!built_) { error = "pipeline was not built"; return false; }
+     progress_ = progress;
++    ScopeExit cleanup{[&] { release_contrast_mask(); progress_ = nullptr; }};
+     if (pixel_size_um_ <= 0.0) {
+         // Every reprint is preceded by the negative that produced its input,
+         // so the pitch is always known by the time this runs. Saying so beats
+@@ -2525,20 +2542,24 @@ bool Pipeline::run_print(const Image& cmy, Image& out, Progress* progress, std::
+     }
+     if (!print_prefix(cmy, false, error)) { progress_ = nullptr; return false; }
+     if (!prepare_contrast_mask(cmy, error)) { progress_ = nullptr; return false; }
+-    const bool ok = print_segment(cmy, out, error);
++    Image candidate;
++    const bool ok = print_segment(cmy, candidate, error);
+     release_contrast_mask();
+     if (!ok) return false;
+-    if (progress_) progress_->done = true;
+-    progress_ = nullptr;
+     // Only the RGB result continues into packing. Bound idle print scratch
+     // before the caller allocates its full-resolution persistent RGBA cache.
+-    return gpu_->trim_idle_for_phase(out.bytes(), out.bytes(), error);
++    if (!gpu_->trim_idle_for_phase(candidate.bytes(), candidate.bytes(), error)) return false;
++    out = std::move(candidate);
++    if (progress_) progress_->done = true;
++    return true;
+ }
+ 
+ bool Pipeline::run_print_striped(const Image& cmy, Image& out, Progress* progress,
+                                  std::string& error) {
++    if (progress) progress->done = false;
+     if (!built_) { error = "pipeline was not built"; return false; }
+     progress_ = progress;
++    ScopeExit cleanup{[&] { release_contrast_mask(); progress_ = nullptr; }};
+     if (pixel_size_um_ <= 0.0) {
+         error = "run_print was called before any run_film, so the film's pixel pitch is unknown";
+         return false;
+@@ -2555,10 +2576,11 @@ bool Pipeline::run_print_striped(const Image& cmy, Image& out, Progress* progres
+                                        error);
+     release_contrast_mask();
+     if (!ok) return false;
+-    if (progress_) { progress_->strips.push_back(std::move(report)); progress_->done = true; }
+-    progress_ = nullptr;
+-    out = chain.cur;
+-    return gpu_->trim_idle_for_phase(out.bytes(), out.bytes(), error);
++    if (!gpu_->trim_idle_for_phase(chain.cur.bytes(), chain.cur.bytes(), error)) return false;
++    if (progress_) progress_->strips.push_back(std::move(report));
++    out = std::move(chain.cur);
++    if (progress_) progress_->done = true;
++    return true;
+ }
+ 
+ #undef SPK_NODE
+

@@ -1,0 +1,5 @@
+host_payload_admission=pass budget=1282 workers=2/4
+device=llvmpipe (LLVM 19.1.7, 256 bits)
+warm_pool_exact=pass sharpen=0 window_bytes=4692
+warm_pool_exact=pass sharpen=1 window_bytes=4692
+BOUNDED_BUDGET_PASS checks=56
