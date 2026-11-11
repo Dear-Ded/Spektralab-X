@@ -1,0 +1,117 @@
+{
+  "status": "PASS",
+  "lcms_encoded_version": 2180,
+  "profile_sha256": "04e9d00188531524a16ba754615edb6cb92cd2a7ff0025e84f3b81769b584f60",
+  "samples_sha256": "e58672f5f6cb6b21fe87660fe6b0713ec26abadbc9c54ccd4d0a6dcfb266e9b8",
+  "cctf_domain_rows": [
+    4118,
+    4118,
+    4118
+  ],
+  "cctf_decode_max_abs": [
+    1.7930487061779132e-07,
+    6.01020202495306e-08,
+    2.936808779496758e-08
+  ],
+  "cctf_encode_max_abs": [
+    1.4225086764074746e-07,
+    4.609565196211918e-08,
+    3.720317609534618e-08
+  ],
+  "romm_cmm_xyz_cases": 32,
+  "romm_xyz_max_abs": 6.455261480353691e-06,
+  "romm_channel_curve_samples": 12291,
+  "romm_curve_max_abs": 6.377421417624873e-07,
+  "colorants_d50_columns": [
+    [
+      0.79766845703125,
+      0.2880401611328125,
+      0.0
+    ],
+    [
+      0.13519287109375,
+      0.7118682861328125,
+      0.0
+    ],
+    [
+      0.0313568115234375,
+      9.1552734375e-05,
+      0.8252105712890625
+    ]
+  ],
+  "extension_observations": [
+    {
+      "mode": 0,
+      "value": -2.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 0,
+      "value": -1.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 0,
+      "value": 1.5,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 0,
+      "value": 2.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 1,
+      "value": -2.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 1,
+      "value": -1.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 1,
+      "value": 1.5,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 1,
+      "value": 2.0,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 2,
+      "value": -2.0,
+      "decode_finite": false,
+      "encode_finite": false
+    },
+    {
+      "mode": 2,
+      "value": -1.0,
+      "decode_finite": false,
+      "encode_finite": false
+    },
+    {
+      "mode": 2,
+      "value": 1.5,
+      "decode_finite": true,
+      "encode_finite": true
+    },
+    {
+      "mode": 2,
+      "value": 2.0,
+      "decode_finite": true,
+      "encode_finite": true
+    }
+  ],
+  "scope": "SDR ICC domain 0..1; extension observations are not ICC conformance claims"
+}

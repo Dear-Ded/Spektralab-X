@@ -331,6 +331,9 @@ spk::android::RawDevelopmentMetadata development_metadata(const spk::io::RawDngR
     out.profile_tone_curve = src.profile_tone_curve;
     out.profile_tone_curve_present = src.profile_tone_curve_present;
     out.profile_tone_curve_invalid = src.profile_tone_curve_invalid;
+    out.profile_dynamic_range = src.profile_dynamic_range;
+    out.profile_dynamic_range_present = src.profile_dynamic_range_present;
+    out.profile_dynamic_range_invalid = src.profile_dynamic_range_invalid;
     out.extra_camera_profiles = src.extra_camera_profiles;
     out.profile_source_mismatch = src.profile_source_mismatch;
     return out;

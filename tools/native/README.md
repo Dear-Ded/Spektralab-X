@@ -600,3 +600,18 @@ directory and do not combine `JVM=1` with `SANITIZE=1`. `JAVA_INCLUDE` overrides
 the default JDK 17 header directory; `RESOURCES` overrides engine resources.
 This exercises actual native symbol resolution and TIFF output, not Android
 Bitmap runtime, a device install or an APK build.
+
+The typed transfer/profile runner additionally compares actual upstream CCTFs
+and the Kotlin-generated ROMM ICC with an independent Little CMS runtime:
+
+```bash
+UP=/path/to/patched/upstream BUILD_DIR=/path/to/typed-icc \
+  PROPHOTO_ICC=/path/to/icc/prophoto.icc \
+  bash tools/native/run_icc_typed_contract.sh
+```
+
+See [the ICC contract](../../docs/ICC_TYPED_CONTRACT_2026-11-11.md),
+[DNG HDR-profile guard](../../docs/DNG_PROFILE_DYNAMIC_RANGE_2026-11-11.md),
+[offline LUT rejection](../../docs/LUT_OFFLINE_EXPERIMENT_2026-11-11.md), and
+[cloud Android feasibility](../../docs/CLOUD_ANDROID_TESTING_2026-11-11.md)
+for each probe's domain, reproduction and device-test limits.

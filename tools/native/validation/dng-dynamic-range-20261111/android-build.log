@@ -1,0 +1,247 @@
+[0/2] Re-checking globbed directories...
+[1/186] Creating directories for 'spk_jpeg_build'
+[2/186] No download step for 'spk_jpeg_build'
+[3/186] No update step for 'spk_jpeg_build'
+[4/186] No patch step for 'spk_jpeg_build'
+[5/186] Performing configure step for 'spk_jpeg_build'
+[6/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/cam16.cpp.o
+[7/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/blob.cpp.o
+[8/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o
+[9/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+[10/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+[11/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[12/186] Performing build step for 'spk_jpeg_build'
+[13/186] Performing install step for 'spk_jpeg_build'
+[14/186] Completed 'spk_jpeg_build'
+[15/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/numeric.cpp.o
+[16/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/json.cpp.o
+[17/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+[18/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+[19/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/print_lut.cpp.o
+[20/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/profile.cpp.o
+[21/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[22/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/spectral.cpp.o
+[23/186] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+[24/186] Linking CXX static library engine/libspektralab_core.a
+[25/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/blur.cpp.o
+[26/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+[27/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[28/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[29/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[30/186] Building C object engine/CMakeFiles/spk_volk.dir/third_party/volk/volk.c.o
+[31/186] Linking C static library engine/libspk_volk.a
+[32/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/imprint_raster.cpp.o
+[33/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[34/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp.o
+[35/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/minolta.cpp.o
+[36/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/canon_600.cpp.o
+[37/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/crx.cpp.o
+[38/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_libraw_dcrdefs.cpp.o
+[39/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp.o
+[40/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/dng.cpp.o
+[41/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/generic.cpp.o
+[42/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/fp_dng.cpp.o
+[43/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp.o
+[44/186] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/pipeline/engine.cpp:2604:8: warning: 'medium_probe_params' has C-linkage specified, but returns user-defined type 'Params' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2604 | Params medium_probe_params(const Params& session) {
+      |        ^
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/pipeline/engine.cpp:2677:6: warning: 'side_json' has C-linkage specified, but returns user-defined type 'Json' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2677 | Json side_json(const slm::Side& s) {
+      |      ^
+2 warnings generated.
+[45/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp.o
+[46/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp.o
+[47/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp.o
+[48/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/smal.cpp.o
+[49/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/pana8.cpp.o
+[50/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/unpack.cpp.o
+[51/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/sonycc.cpp.o
+[52/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/unpack_thumb.cpp.o
+[53/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/ahd_demosaic.cpp.o
+[54/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/aahd_demosaic.cpp.o
+[55/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/sony_arw6.cpp.o
+[56/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decompressors/losslessjpeg.cpp.o
+[57/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/misc_demosaic.cpp.o
+[58/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp.o
+[59/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp.o
+[60/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/xtrans_demosaic.cpp.o
+[61/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/integration/dngsdk_glue.cpp.o
+[62/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/integration/rawspeed_glue.cpp.o
+[63/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/libraw_c_api.cpp.o
+[64/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/libraw_datastream.cpp.o
+[65/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/adobepano.cpp.o
+[66/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/ciff.cpp.o
+[67/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/canon.cpp.o
+[68/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp.o
+[69/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/epson.cpp.o
+[70/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/exif_gps.cpp.o
+[71/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/hasselblad_model.cpp.o
+[72/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/fuji.cpp.o
+[73/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/identify_tools.cpp.o
+[74/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/identify.cpp.o
+[75/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/leica.cpp.o
+[76/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/kodak.cpp.o
+[77/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/makernotes.cpp.o
+[78/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/mediumformat.cpp.o
+[79/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/misc_parsers.cpp.o
+[80/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/nikon.cpp.o
+[81/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp.o
+[82/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/olympus.cpp.o
+[83/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/p1.cpp.o
+[84/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/pentax.cpp.o
+[85/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/samsung.cpp.o
+[86/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/aspect_ratio.cpp.o
+[87/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/sony.cpp.o
+[88/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/dcraw_process.cpp.o
+[89/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/mem_image.cpp.o
+[90/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/tiff.cpp.o
+[91/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils.cpp.o
+[92/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp.o
+[93/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/ext_preprocess.cpp.o
+[94/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils_dcrdefs.cpp.o
+[95/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/raw2image.cpp.o
+[96/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/subtract_black.cpp.o
+[97/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/cameralist.cpp.o
+[98/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/colorconst.cpp.o
+[99/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/wblists.cpp.o
+[100/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/colordata.cpp.o
+[101/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/curves.cpp.o
+[102/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/decoder_info.cpp.o
+[103/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/init_close_utils.cpp.o
+[104/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/open.cpp.o
+[105/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/phaseone_processing.cpp.o
+[106/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/read_utils.cpp.o
+[107/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/thumb_utils.cpp.o
+[108/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/utils_dcraw.cpp.o
+[109/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/utils_libraw.cpp.o
+[110/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/x3f/x3f_parse_process.cpp.o
+[111/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/x3f/x3f_utils_patched.cpp.o
+[112/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/apply_profile.cpp.o
+[113/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/file_write.cpp.o
+[114/186] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/tiff_writer.cpp.o
+[115/186] Linking CXX static library engine/libspk_libraw.a
+[116/186] Generating resources/vulkan/spk_affine3.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[117/186] Generating resources/vulkan/spk_boost.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[118/186] Generating resources/vulkan/spk_bw_correct.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[119/186] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[120/186] Generating resources/vulkan/spk_cctf_decode.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[121/186] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[122/186] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/raw_headroom.cpp.o
+[123/186] Generating resources/vulkan/spk_couplers_correction.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[124/186] Generating resources/vulkan/spk_curves.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[125/186] Generating resources/vulkan/spk_di_encode.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[126/186] Generating resources/vulkan/spk_dir_finish.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[127/186] Generating resources/vulkan/spk_di_normalise.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[128/186] Generating resources/vulkan/spk_edr.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[129/186] Generating resources/vulkan/spk_geometry_resample_df.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[130/186] Generating resources/vulkan/spk_glare_add.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[131/186] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/image_writer.cpp.o
+[132/186] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[133/186] Generating resources/vulkan/spk_grain_layers.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[134/186] Generating resources/vulkan/spk_grain_simple.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[135/186] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[136/186] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[137/186] Generating resources/vulkan/spk_lincomb3.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[138/186] Generating resources/vulkan/spk_log10_guarded.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[139/186] Generating resources/vulkan/spk_lognormal_field.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[140/186] Generating resources/vulkan/spk_lut2d_cubic.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[141/186] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[142/186] Generating resources/vulkan/spk_math_probe.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[143/186] Generating resources/vulkan/spk_matmul3.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[144/186] Generating resources/vulkan/spk_mul.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[145/186] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+[146/186] Generating resources/vulkan/spk_overscan_canvas.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+[147/186] Generating resources/vulkan/spk_overscan_light.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[148/186] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[149/186] Generating resources/vulkan/spk_print_exposure.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[150/186] Generating resources/vulkan/spk_reduce_max.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[151/186] Generating resources/vulkan/spk_rng_probe.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[152/186] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[153/186] Generating resources/vulkan/spk_scene_latitude.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[154/186] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[155/186] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[156/186] Generating resources/vulkan/spk_spectral_epilogue.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[157/186] Generating resources/vulkan/spk_split_probe.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[158/186] Generating resources/vulkan/spk_take_rgb.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[159/186] Generating resources/vulkan/spk_stride_sample.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[160/186] Generating resources/vulkan/spk_tc_b.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[161/186] Generating resources/vulkan/spk_to_rgba16.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[162/186] Generating resources/vulkan/spk_view_cam16.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[163/186] Generating resources/vulkan/spk_view_geometry.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+[164/186] Generating resources/vulkan/spk_view_grade.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[165/186] Generating resources/vulkan/spk_view_grade_di.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[166/186] Generating resources/vulkan/spk_view_pack.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[167/186] Generating resources/vulkan/spk_view_grade_float.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[168/186] Generating resources/vulkan/spk_view_pair.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[169/186] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[170/186] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/work/gpt-dng-dynamic-20261111/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[171/186] cd /data/work/gpt-dng-dynamic-20261111/android/engine && /usr/bin/cmake -E copy_directory /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources /data/work/gpt-dng-dynamic-20261111/android/engine/resources && /usr/bin/cmake -E copy_directory /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/profiles /data/work/gpt-dng-dynamic-20261111/android/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/NOTICE.md /data/work/gpt-dng-dynamic-20261111/android/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/fonts/LICENSE /data/work/gpt-dng-dynamic-20261111/android/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/gpt-dng-dynamic-20261111/android/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/third_party/stb/LICENSE /data/work/gpt-dng-dynamic-20261111/android/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/paper_grades.json /data/work/gpt-dng-dynamic-20261111/android/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/gpt-dng-dynamic-20261111/upstream/engine/resources_product/neutral_print_filters.json /data/work/gpt-dng-dynamic-20261111/android/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/gpt-dng-dynamic-20261111/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/gpt-dng-dynamic-20261111/android/engine/resources/DI
+[172/186] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/raw_decoder.cpp.o
+[173/186] Building CXX object CMakeFiles/spektralab_jni.dir/jpeg444.cpp.o
+[174/186] Building CXX object CMakeFiles/spektralab_jni.dir/storage_probe.cpp.o
+[175/186] Building CXX object CMakeFiles/spektralab_jni.dir/tiff16.cpp.o
+[176/186] Building CXX object CMakeFiles/spektralab_jni.dir/resize.cpp.o
+[177/186] Building CXX object CMakeFiles/spektralab_jni.dir/raw_development.cpp.o
+[178/186] Building CXX object CMakeFiles/spektralab_jni.dir/layer2.cpp.o
+[179/186] Building CXX object CMakeFiles/spektralab_jni.dir/output_transform.cpp.o
+[180/186] Building CXX object CMakeFiles/spektralab_jni.dir/input_transform.cpp.o
+[181/186] Linking CXX static library engine/libspk_image_io.a
+[182/186] Building CXX object CMakeFiles/spektralab_jni.dir/data/work/gpt-dng-dynamic-20261111/upstream/engine/host/white_balance.cpp.o
+[183/186] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[184/186] Linking CXX static library engine/libspektralab_engine.a
+[185/186] Building CXX object CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o
+[186/186] Linking CXX shared library libspektralab_jni.so

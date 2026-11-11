@@ -31,6 +31,9 @@ cp "$engine/resources_product/neutral_print_filters.json" "$out/product-neutral-
 # engine.cpp reads only the ProPhoto view LUT.
 cp "$up/modern_UI/Spektrafilm/Spektrafilm/Resources/DI/SpektraLab DI view, Cineon to ProPhoto RGB.cube" "$out/DI/"
 
+# Keep this derivative's terms alongside upstream's separately named licence.
+cp "$repo/LICENSE" "$out/licenses/Spektralab-X-LICENSE.txt"
+cp "$repo/NOTICE" "$out/licenses/Spektralab-X-NOTICE.txt"
 cp "$up/license/LICENSE" "$out/licenses/LICENSE.txt"
 cp "$up/license/SPEKTRAFILM_LICENSE.txt" "$out/licenses/SPEKTRAFILM_LICENSE.txt"
 cp "$engine/resources_product/NOTICE.md" "$out/licenses/Product-profiles-NOTICE.md"

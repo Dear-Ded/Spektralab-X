@@ -1,0 +1,1 @@
+{"input":"linear ProPhoto RGB","output":"linear Display P3","domain":[-0.25,16],"shaper_pivot":0.01,"shaper_zero":0.25,"dir_diffusion_size_um":0,"camera_diffusion_active":false,"enlarger_diffusion_active":false,"enlarger_lens_blur":0,"fusion":"off","grid_order":"blue-fast RGB float32","seed":539365649,"warning":"read_params is not a complete internal Params serialization"}

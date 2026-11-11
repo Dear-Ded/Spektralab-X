@@ -1,0 +1,9 @@
+2026-11-11 source-only independent asset staging
+staged 53 kernels and resources (24M)
+cmp root LICENSE vs licenses/Spektralab-X-LICENSE.txt: PASS
+cmp root NOTICE vs licenses/Spektralab-X-NOTICE.txt: PASS
+cmp upstream license/LICENSE vs licenses/LICENSE.txt: PASS
+53 SPIR-V files
+3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  Spektralab-X-LICENSE.txt
+6f3946aff5a22c2ea7d29718f01f4722e3640c650616c86d129dca99be2442de  Spektralab-X-NOTICE.txt
+3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  LICENSE.txt

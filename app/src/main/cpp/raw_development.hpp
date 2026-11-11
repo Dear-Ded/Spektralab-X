@@ -22,6 +22,8 @@ struct RawDevelopmentMetadata {
     bool default_black_render_present = false, default_black_render_invalid = false;
     std::vector<std::array<float, 2>> profile_tone_curve;
     bool profile_tone_curve_present = false, profile_tone_curve_invalid = false;
+    uint32_t profile_dynamic_range = 0;
+    bool profile_dynamic_range_present = false, profile_dynamic_range_invalid = false;
     bool extra_camera_profiles = false, profile_source_mismatch = false;
 };
 

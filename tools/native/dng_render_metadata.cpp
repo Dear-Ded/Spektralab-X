@@ -50,7 +50,10 @@ int main(int argc, char** argv) {
         << ",\"tone_present\":" << m.profile_tone_curve_present
         << ",\"tone_invalid\":" << m.profile_tone_curve_invalid
         << ",\"extra_profiles\":" << m.extra_camera_profiles
-        << ",\"profile_mismatch\":" << m.profile_source_mismatch << ",\"tone\":[";
+        << ",\"profile_mismatch\":" << m.profile_source_mismatch
+        << ",\"dynamic_present\":" << m.profile_dynamic_range_present
+        << ",\"dynamic_invalid\":" << m.profile_dynamic_range_invalid
+        << ",\"dynamic_range\":" << m.profile_dynamic_range << ",\"tone\":[";
     for (size_t i = 0; i < m.profile_tone_curve.size(); ++i) {
         if (i) std::cout << ',';
         std::cout << '[' << m.profile_tone_curve[i][0] << ',' << m.profile_tone_curve[i][1] << ']';

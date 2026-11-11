@@ -44,6 +44,10 @@ Most documents are in Chinese; those marked EN have English.
 | [ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md) | Vulkan 实际分配、参数失败事务与默认关闭的真实印放尾段分块；48 个补丁重放和生产渲染对照 |
 | [COLOR_CONTRACT_NOTES_2026-11-11.md](COLOR_CONTRACT_NOTES_2026-11-11.md) | 引擎、文件、Android 显示的色彩支持分层与标准边界；LibRaw Deflate 支持缺口及修复 |
 | [GPU_BINARY_AND_ANDROID_ABI_2026-11-11.md](GPU_BINARY_AND_ANDROID_ABI_2026-11-11.md) | Android 原生全编、ELF 16 KiB 对齐、53 个 SPIR-V、资产字节布局与浮点合同；云机资源实测 |
+| [DNG_PROFILE_DYNAMIC_RANGE_2026-11-11.md](DNG_PROFILE_DYNAMIC_RANGE_2026-11-11.md) | DNG HDR 相机配置的误用保护、45 个合成文件对照、完整 ARM64 重编与剩余 HDR 显影范围 |
+| [ICC_TYPED_CONTRACT_2026-11-11.md](ICC_TYPED_CONTRACT_2026-11-11.md) | 实际 CCTF/ROMM ICC 与独立 Little CMS 对照；Adobe RGB 扩展的精确 TRC 与范围合同 |
+| [LUT_OFFLINE_EXPERIMENT_2026-11-11.md](LUT_OFFLINE_EXPERIMENT_2026-11-11.md) | 真实胶片/相纸 Pipeline 烘焙的 33/65 立方 LUT；平均误差低但负输入最坏误差不可接受，未接入默认 |
+| [CLOUD_ANDROID_TESTING_2026-11-11.md](CLOUD_ANDROID_TESTING_2026-11-11.md) | 云机 KVM/SDK 实测、无 APK 原生探针、模拟器资源预算与真机验收边界 |
 | [UPSTREAM_V2_RESEARCH_2026-11-11.md](UPSTREAM_V2_RESEARCH_2026-11-11.md) | V2.3.2 固定源码研究：minilab 成像变化、Vulkan/HDR 缺口、参数与资源，以及 45 条补丁迁移账 |
 | [ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md](ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md) | 六阶段引擎优化路线；本轮 CRX 维护、工作源预算、JPEG 外存行转换的实现、两云证据与剩余边界 |
 | [DNG_WHITE_XY_2026-11-09.md](DNG_WHITE_XY_2026-11-09.md) | WhiteXY-only DNG 的校准、源白平衡与 FM/Bradford 实现，合成/真实样片对照及 profile 支持边界 |

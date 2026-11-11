@@ -53,6 +53,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0046–0048 后续补充：Vulkan 实际分配与传输暂存分项统计、参数构建失败的事务边界，以及默认关闭的生产相纸印放外存尾段。每个 halo window 前回收旧尺寸闲置块，保留已有数值算序与失败后原输出。48 个补丁零 fuzz 重放，97 个受影响文件与测试源码一致；并非完整 RAW/胶片分块或进程内存保证。实现、配置和验证见 [生产尾段记录](ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。GPT（OpenAI）共创。
 
+0049 与 LibRaw 0023 配套保存 DNG `ProfileDynamicRange`，可选标准显色拒绝 HDR 或损坏的显式标记，默认线性解码不变。49 个引擎补丁零 fuzz 重放，97 个受影响文件与构建源码一致；45 个合成 DNG 与旧解码像素一致，完整 ARM64 原生库重编通过。没有实现完整 HDR 配置，详见 [动态范围合同](DNG_PROFILE_DYNAMIC_RANGE_2026-11-11.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 
@@ -71,6 +73,8 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0019-sony-arw6` | 上游 SpektraLab b5467e8（PR #60）的 `third_party/libraw-arw6` 覆盖层，内含 LibRaw master 的 ARW6 解码器 | 0.22.2 解不了索尼 A7 V（ILCE-7M5）的有损压缩 ARW（Compressed / Compressed HQ，TIFF 压缩 32766）。上游以整文件覆盖的方式叠加；这里改成相对 0.22.2 加本目录补丁的差异，内容与上游覆盖层一致。新增 `sony_arw6.cpp`，其余只加 A7 V 的识别、裁切、色彩矩阵和黑白电平。`LibRaw::version()` 仍为 0.22.2；其他文件解码不变。 |
 | `0020-crx-signed-quantizer-index` | LibRaw 0.22.3，`cf02d66eb5c19d4e46df7aee0582e47a4918509a` 的四处索引保护 | CRX 的 signed qParam 与 Golomb QP 可产生负余数；按维护版规则夹到首个表项，避免负索引。保留非负值算序，不声称修完极端移位边界。464 个 sanitizer 案例及五张真实 RAW 的十对输出验证见 [记录](../tools/native/validation/libraw-maintenance-20261109/result.json)。GPT（OpenAI）共创。 |
 | `0021-dng-as-shot-white-xy` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保存 AsShotWhiteXY、完整有界校准签名与 parsed flags，按 selected RAW IFD/IFD0 回退传递，供引擎 0032 使用。超出 255 内容字节或 NUL 格式不支持时明确标记，不截断比较；不新增 Camera Profile IFD 选择。内部结构布局改变，头文件和整个 LibRaw archive 必须同步重编。GPT（OpenAI）共创。 |
+| `0022-dng-render-metadata` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保留有界主 profile 曝光、黑位与色调曲线元数据，标记 extra/mixed profile；不改变线性像素。见 [验证](../tools/native/validation/dng-render-metadata-20261109/README.md)。GPT（OpenAI）共创。 |
+| `0023-dng-profile-dynamic-range` | 本项目，依据 Adobe DNG 1.7.1 / 固定 SDK | 解析 UNDEFINED8 的 version/range/hint，区分缺失、SDR、HDR 与损坏值，沿用 selected-profile IFD 来源合同；不执行 HDR 曲线。内部结构改变，整个 archive 和消费者同步重编。GPT（OpenAI）共创。 |
 
 `crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
 该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。

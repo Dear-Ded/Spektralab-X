@@ -19,6 +19,8 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 修复某些参数组合构建失败后，记录参数与仍在工作的旧管线不一致的问题；失败时保留原参数和原管线。
 - 将外存分块接入受限的真实相纸印放尾段，默认关闭；现有 shader 和 FIR 算序不变，失败保留原输出。完整 RAW、胶片中间结果和最终图像仍需整幅驻留，不代表手机全程内存有界。
 - 开启 LibRaw 已有但此前未编译的 zlib 解码支持，修复部分 Deflate 压缩浮点 DNG 打不开；合成 Bayer、LinearRaw 及整数相邻控制通过，未改变 RAW 显影默认值。
+- 补齐应用资产中的本项目 LICENSE 和 NOTICE 全文，保留上游及依赖许可证各自的文件名。
+- 识别 DNG 1.7 的 ProfileDynamicRange，阻止可选“标准显色”把 HDR 相机配置误作 SDR；缺失或有效 SDR 标记保持原行为，线性默认和胶片输入不变。这是显式拒绝错误套用，尚非完整 HDR 显影支持。
 
 验证与限制见 [源码跟进记录](docs/ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)和[生产尾段记录](docs/ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。
 

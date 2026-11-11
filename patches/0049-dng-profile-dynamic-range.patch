@@ -1,0 +1,30 @@
+# Co-created with GPT (OpenAI), 2026-11-11. See NOTICE.
+# Preserve the selected DNG profile's dynamic-range contract without applying it.
+# Paired with LibRaw 0023; all internal metadata consumers must be rebuilt.
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index f7049d8..f298be2 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -164,6 +164,9 @@ bool capture_source_metadata(const detail::CameraLibRaw& raw, RawMetadata& metad
+     render.default_black_render = levels.default_black_render;
+     render.profile_tone_curve_present = present(LIBRAW_DNGFM_PROFILETONECURVE);
+     render.profile_tone_curve_invalid = invalid(LIBRAW_DNGFM_PROFILETONECURVE);
++    render.profile_dynamic_range_present = present(LIBRAW_DNGFM_PROFILEDYNAMICRANGE);
++    render.profile_dynamic_range_invalid = invalid(LIBRAW_DNGFM_PROFILEDYNAMICRANGE);
++    render.profile_dynamic_range = levels.profile_dynamic_range;
+     const unsigned points = levels.profile_tone_curve_points;
+     if (points > 256) {
+         error = "RAW metadata: profile tone curve exceeds bounded storage";
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index 477877b..7f5eeeb 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -62,6 +62,8 @@ struct RawDngRenderMetadata {
+     bool default_black_render_present = false, default_black_render_invalid = false;
+     std::uint32_t default_black_render = 0;
+     bool profile_tone_curve_present = false, profile_tone_curve_invalid = false;
++    std::uint32_t profile_dynamic_range = 0;
++    bool profile_dynamic_range_present = false, profile_dynamic_range_invalid = false;
+     std::vector<std::array<float, 2>> profile_tone_curve;
+     bool extra_camera_profiles = false;
+     bool profile_source_mismatch = false;

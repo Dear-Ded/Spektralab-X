@@ -1,0 +1,100 @@
+# Co-created with GPT (OpenAI), 2026-11-11. See NOTICE.
+# Capture DNG 1.7 ProfileDynamicRange and reject malformed explicit metadata.
+# Same selected-profile IFD provenance as the existing rendering fields.
+# Extends internal LibRaw structures; the whole archive must be rebuilt.
+diff --git a/libraw/libraw_const.h b/libraw/libraw_const.h
+index 7c03554..ed150b6 100644
+--- a/libraw/libraw_const.h
++++ b/libraw/libraw_const.h
+@@ -139,7 +139,8 @@ enum LibRaw_dngfields_marks
+   LIBRAW_DNGFM_PROFILETONECURVE = 1 << 21,
+   LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET = 1 << 22,
+   LIBRAW_DNGFM_DEFAULTBLACKRENDER = 1 << 23,
+-  LIBRAW_DNGFM_EXTRACAMERAPROFILES = 1 << 24
++  LIBRAW_DNGFM_EXTRACAMERAPROFILES = 1 << 24,
++  LIBRAW_DNGFM_PROFILEDYNAMICRANGE = 1 << 25
+ };
+ 
+ enum LibRaw_As_Shot_WB_Applied_codes
+diff --git a/libraw/libraw_types.h b/libraw/libraw_types.h
+index d89d527..de79827 100644
+--- a/libraw/libraw_types.h
++++ b/libraw/libraw_types.h
+@@ -278,6 +278,7 @@ typedef unsigned long long UINT64;
+     unsigned default_black_render;
+     unsigned render_metadata_invalid;
+     unsigned render_profile_source_mismatch;
++    unsigned profile_dynamic_range;
+   } libraw_dng_levels_t;
+ 
+   typedef struct
+diff --git a/src/metadata/identify.cpp b/src/metadata/identify.cpp
+index 7295e1f..69ecb8a 100644
+--- a/src/metadata/identify.cpp
++++ b/src/metadata/identify.cpp
+@@ -1542,7 +1542,7 @@ void LibRaw::identify_process_dng_fields()
+                 }
+             const unsigned render_bits[] = {LIBRAW_DNGFM_PROFILETONECURVE,
+                 LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET, LIBRAW_DNGFM_DEFAULTBLACKRENDER,
+-                LIBRAW_DNGFM_EXTRACAMERAPROFILES};
++                LIBRAW_DNGFM_EXTRACAMERAPROFILES, LIBRAW_DNGFM_PROFILEDYNAMICRANGE};
+             for (unsigned field = 0; field < sizeof(render_bits) / sizeof(render_bits[0]); ++field)
+             {
+                 const unsigned bit = render_bits[field];
+@@ -1563,6 +1563,8 @@ void LibRaw::identify_process_dng_fields()
+                     imgdata.color.dng_levels.baseline_exposure_offset = levels.baseline_exposure_offset;
+                 else if (bit == LIBRAW_DNGFM_DEFAULTBLACKRENDER)
+                     imgdata.color.dng_levels.default_black_render = levels.default_black_render;
++                else if (bit == LIBRAW_DNGFM_PROFILEDYNAMICRANGE)
++                    imgdata.color.dng_levels.profile_dynamic_range = levels.profile_dynamic_range;
+             }
+ 
+ 			sidx = IFDLEVELINDEX(iifd, LIBRAW_DNGFM_WHITE);
+diff --git a/src/metadata/tiff.cpp b/src/metadata/tiff.cpp
+index faa39ba..3e87b1d 100644
+--- a/src/metadata/tiff.cpp
++++ b/src/metadata/tiff.cpp
+@@ -18,6 +18,7 @@
+ 
+ #include "../../internal/dcraw_defs.h"
+ #include "../../internal/libraw_cameraids.h"
++#include <cmath>
+ 
+ int LibRaw::parse_tiff_ifd(INT64 base)
+ {
+@@ -62,7 +63,8 @@ int LibRaw::parse_tiff_ifd(INT64 base)
+       const unsigned render_bit = tag == 0xc6fc ? LIBRAW_DNGFM_PROFILETONECURVE :
+           tag == 0xc7a5 ? LIBRAW_DNGFM_BASELINEEXPOSUREOFFSET :
+           tag == 0xc7a6 ? LIBRAW_DNGFM_DEFAULTBLACKRENDER :
+-          tag == 0xc62a ? LIBRAW_DNGFM_BASELINEEXPOSURE : 0;
++          tag == 0xc62a ? LIBRAW_DNGFM_BASELINEEXPOSURE :
++          tag == 0xcd47 ? LIBRAW_DNGFM_PROFILEDYNAMICRANGE : 0;
+       tiff_ifd[ifd].dng_levels.parsedfields |= render_bit;
+       tiff_ifd[ifd].dng_levels.render_metadata_invalid |= render_bit;
+       if (tag == 0xc6f5)
+@@ -1637,6 +1639,25 @@ int LibRaw::parse_tiff_ifd(INT64 base)
+       }
+       break;
+     }
++    case 0xcd47: /* 52551 ProfileDynamicRange: version, range, float hint */
++    {
++      libraw_dng_levels_t &levels = tiff_ifd[ifd].dng_levels;
++      levels.parsedfields |= LIBRAW_DNGFM_PROFILEDYNAMICRANGE;
++      levels.render_metadata_invalid &= ~LIBRAW_DNGFM_PROFILEDYNAMICRANGE;
++      levels.profile_dynamic_range = 0;
++      if (type != 7 || len != 8 || savepos < 0 || savepos > fsize - 8)
++        levels.render_metadata_invalid |= LIBRAW_DNGFM_PROFILEDYNAMICRANGE;
++      else
++      {
++        const unsigned version = get2(), range = get2();
++        const double hint = getreal(11);
++        if (version != 1 || range > 1 || !std::isfinite(hint) || (range == 0 && hint > 1))
++          levels.render_metadata_invalid |= LIBRAW_DNGFM_PROFILEDYNAMICRANGE;
++        else
++          levels.profile_dynamic_range = range;
++      }
++      break;
++    }
+     case 0xc6f5: /* 50933 ExtraCameraProfiles: detect only, do not follow offsets */
+       tiff_ifd[ifd].dng_levels.parsedfields |= LIBRAW_DNGFM_EXTRACAMERAPROFILES;
+       break;

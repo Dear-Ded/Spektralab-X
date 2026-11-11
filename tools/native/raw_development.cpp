@@ -230,6 +230,19 @@ void metadata_rejection_and_status() {
     rejects([&] { plan(m); }, "duplicate curve x accepted");
     m = identity(); m.profile_tone_curve_invalid = true;
     rejects([&] { plan(m); }, "invalid curve replaced by fallback");
+    m = identity(); m.profile_dynamic_range_present = true; m.profile_dynamic_range = 1;
+    rejects([&] { plan(m); }, "HDR camera profile interpreted as SDR");
+    require(!RawDevelopment::build(m, {}, {}).enabled(), "neutral HDR profile stopped bypassing development");
+    m.profile_dynamic_range = 0;
+    const auto explicit_sdr = plan(m), implicit_sdr = plan(identity());
+    float explicit_pixel[] = {.2f, .4f, .6f}, implicit_pixel[] = {.2f, .4f, .6f};
+    explicit_sdr.apply_encoded_prophoto(explicit_pixel);
+    implicit_sdr.apply_encoded_prophoto(implicit_pixel);
+    require(std::memcmp(explicit_pixel, implicit_pixel, sizeof explicit_pixel) == 0,
+            "explicit SDR changed existing development bytes");
+    m.profile_dynamic_range_invalid = true;
+    rejects([&] { plan(m); }, "malformed dynamic-range tag treated as absent");
+    require(!RawDevelopment::build(m, {}, {}).enabled(), "neutral malformed profile changed default");
     rejects([&] { plan(identity(), 9); }, "unbounded user EV accepted");
     rejects([&] { plan(identity(), std::numeric_limits<float>::quiet_NaN()); }, "NaN EV accepted");
     m = identity(); m.baseline_exposure_present = true; m.baseline_exposure = 10000;

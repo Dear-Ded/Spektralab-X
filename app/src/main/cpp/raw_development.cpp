@@ -96,6 +96,10 @@ RawDevelopment RawDevelopment::build(const RawDevelopmentMetadata& meta,
         throw std::invalid_argument("RAW exposure must be finite and within -8 to 8 EV");
     if (meta.extra_camera_profiles || meta.profile_source_mismatch)
         throw std::invalid_argument("RAW standard development does not support this profile selection");
+    if (meta.profile_dynamic_range_invalid)
+        throw std::invalid_argument("invalid RAW ProfileDynamicRange");
+    if (meta.profile_dynamic_range_present && meta.profile_dynamic_range != 0)
+        throw std::invalid_argument("RAW standard development does not support HDR camera profiles");
     if (meta.baseline_exposure_invalid || meta.baseline_exposure_offset_invalid ||
         meta.default_black_render_invalid || meta.profile_tone_curve_invalid)
         throw std::invalid_argument("invalid RAW display metadata");
