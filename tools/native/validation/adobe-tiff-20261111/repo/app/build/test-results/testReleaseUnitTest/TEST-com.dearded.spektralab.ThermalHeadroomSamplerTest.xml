@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ThermalHeadroomSamplerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-11T08:59:49.071Z" hostname="ser858255664526" time="0.013">
+  <properties/>
+  <testcase name="slowOrFailedQueryIsNotResubmittedUntilTenSecondsAfterCompletion" classname="com.dearded.spektralab.ThermalHeadroomSamplerTest" time="0.002"/>
+  <testcase name="simultaneousCallersQueueOnlyOneQuery" classname="com.dearded.spektralab.ThermalHeadroomSamplerTest" time="0.007"/>
+  <testcase name="rejectedExecutorDoesNotLeaveSamplingPermanentlyInFlight" classname="com.dearded.spektralab.ThermalHeadroomSamplerTest" time="0.001"/>
+  <testcase name="firstSampleAtZeroAndTenSecondBoundary" classname="com.dearded.spektralab.ThermalHeadroomSamplerTest" time="0.001"/>
+  <testcase name="failedSamplesExpireInsteadOfKeepingStaleHeadroomForever" classname="com.dearded.spektralab.ThermalHeadroomSamplerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

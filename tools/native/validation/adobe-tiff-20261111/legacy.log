@@ -1,0 +1,4 @@
+848640 /data/work/gpt-adobe-20261111/legacy/after.bin
+1afa2e91264fdf6c404ec0b6c6e65ee80f1c0e59877c0d9e20bfd951702a6054  /data/work/gpt-adobe-20261111/legacy/before.bin
+1afa2e91264fdf6c404ec0b6c6e65ee80f1c0e59877c0d9e20bfd951702a6054  /data/work/gpt-adobe-20261111/legacy/after.bin
+PASS 48 real-engine legacy target/intent/curve/source/grade cases; full and strip sample bytes identical

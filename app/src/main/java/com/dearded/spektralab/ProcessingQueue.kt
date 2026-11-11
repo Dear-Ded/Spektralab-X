@@ -82,6 +82,8 @@ data class ProcessingJob(
     val secured: Boolean = true,
     /** The pending gallery entry being written, so a kill mid-save is cleaned up or found saved. */
     val pendingUri: String = "",
+    /** A user cancellation survives a kill before the runner can reconcile its entry. */
+    val cancelledByUser: Boolean = false,
     /** The source's GPS tags ([ExifLocation.encode]), read at enqueue when 导出保留拍摄位置 is on; "" = none. */
     val location: String = "",
     /**
@@ -122,6 +124,7 @@ data class ProcessingJob(
         .put("state", state.name).put("message", message).put("attempts", attempts)
         .put("createdAt", createdAt).put("finishedAt", finishedAt)
         .put("src", sourcePath).put("persisted", persisted).put("secured", secured).put("pending", pendingUri)
+        .put("cancelledByUser", cancelledByUser)
         .put("location", location).put("extreme", extreme)
         .put("sheet", sheetJson).put("sheetFrames", sheetFrames).put("workingPixels", workingPixels)
 
@@ -142,6 +145,7 @@ data class ProcessingJob(
                 attempts = o.optInt("attempts"), createdAt = o.optLong("createdAt"), finishedAt = o.optLong("finishedAt"),
                 sourcePath = o.optString("src"), persisted = o.optBoolean("persisted"),
                 secured = o.optBoolean("secured", true), pendingUri = o.optString("pending"),
+                cancelledByUser = o.optBoolean("cancelledByUser", false),
                 location = o.optString("location"), extreme = o.optBoolean("extreme"),
                 sheetJson = o.optString("sheet"), sheetFrames = o.optInt("sheetFrames"),
                 workingPixels = o.optLong("workingPixels"),
@@ -186,6 +190,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private var worker: Job? = null
     private var runner: kotlinx.coroutines.Deferred<String>? = null
     private val handleLock = Any()
+    private val galleryLock = Any()
     private val grantLock = SourceGrantLock.monitor
     @Volatile private var runningHandle = 0L
     @Volatile private var cancelRequested = -1L
@@ -231,9 +236,19 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     fun cancel(id: Long) {
         val job = _jobs.value.firstOrNull { it.id == id } ?: return
         when (job.state) {
-            JobState.QUEUED -> { set(id) { it.copy(state = JobState.CANCELLED, finishedAt = now(), etaSeconds = 0) }; persist(); releaseSourcesLater() }
+            JobState.QUEUED -> {
+                set(id) { it.copy(state = JobState.CANCELLED, cancelledByUser = true, finishedAt = now(), etaSeconds = 0) }
+                persist(sync = true)
+                if (job.pendingUri.isNotEmpty()) host.scope.launch {
+                    finishUnsuccessful(id, JobState.CANCELLED, "已取消", expectedPendingUri = job.pendingUri)
+                    persist()
+                }
+                releaseSourcesLater()
+            }
             JobState.RUNNING -> {
                 cancelRequested = id
+                set(id) { it.copy(cancelledByUser = true) }
+                persist(sync = true)
                 synchronized(handleLock) { if (runningHandle != 0L) NativeEngine.cancel(runningHandle) }
                 runner?.cancel()
             }
@@ -245,12 +260,20 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     fun retry(id: Long) {
         val job = _jobs.value.firstOrNull { it.id == id } ?: return
         if (job.active) return
+        if (job.pendingUri.isNotEmpty()) {
+            set(id) { it.copy(state = JobState.QUEUED, progress = 0f, phase = "", message = "",
+                attempts = 0, etaSeconds = -1, finishedAt = 0, cancelledByUser = false) }
+            persist()
+            start()
+            return
+        }
         enqueue(job.copy(id = nextId(), state = JobState.QUEUED, progress = 0f, phase = "", message = "",
-            attempts = 0, etaSeconds = -1, createdAt = now(), finishedAt = 0, pendingUri = ""))
+            attempts = 0, etaSeconds = -1, createdAt = now(), finishedAt = 0, pendingUri = "", cancelledByUser = false))
     }
 
     fun clearFinished() {
-        _jobs.update { list -> list.filter { it.active } }
+        // A failed status can still own a gallery transaction awaiting confirmation.
+        _jobs.update { list -> list.filter { it.active || it.pendingUri.isNotEmpty() } }
         persist()
         releaseSourcesLater()
     }
@@ -323,13 +346,20 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
 
     private suspend fun runOne(queued: ProcessingJob) {
         val id = queued.id
+        if (queued.pendingUri.isNotEmpty() && withContext(Dispatchers.IO) { settle(queued) }) { persist(); return }
+        if (_jobs.value.firstOrNull { it.id == id }?.cancelledByUser == true) {
+            set(id) { it.copy(state = JobState.CANCELLED, etaSeconds = 0, finishedAt = now(), message = "已取消") }
+            persist()
+            return
+        }
+        // Cancellation may have arrived while the provider was being queried.
+        if (_jobs.value.firstOrNull { it.id == id }?.state != JobState.QUEUED) return
         if (queued.attempts >= 2) {
             set(id) { it.copy(state = JobState.FAILED, finishedAt = now(), etaSeconds = 0,
                 message = "处理时两次被系统中断，多半是内存不足；请调小工作尺寸后重试") }
             persist()
             return
         }
-        if (queued.pendingUri.isNotEmpty() && withContext(Dispatchers.IO) { settle(queued) }) { persist(); return }
         val started = SystemClock.elapsedRealtime()
         val estimate = estimateSeconds(queued)
         set(id) { it.copy(state = JobState.RUNNING, attempts = it.attempts + 1, progress = 0.02f, phase = "准备", etaSeconds = estimate) }
@@ -358,14 +388,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             when {
                 // pause() already put it back in line and wrote the list.
                 pauseRequested == id -> Unit
-                cancelRequested == id -> set(id) { it.copy(state = JobState.CANCELLED, etaSeconds = 0, finishedAt = now(), message = "已取消", pendingUri = "") }
+                cancelRequested == id -> finishUnsuccessful(id, JobState.CANCELLED, "已取消")
                 else -> throw e
             }
         } catch (e: OutOfMemoryError) {
-            set(id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(), message = "内存不足；请调小工作尺寸后重试", pendingUri = "") }
+            finishUnsuccessful(id, JobState.FAILED, "内存不足；请调小工作尺寸后重试")
             host.events.add("job $id failed: out of memory, $peakDiagnostic")
         } catch (e: Throwable) {
-            set(id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(), message = failureMessage(e), pendingUri = "") }
+            finishUnsuccessful(id, JobState.FAILED, failureMessage(e))
             host.events.add("job $id failed: ${e.message ?: e}, $peakDiagnostic")
         } finally {
             runner = null
@@ -373,6 +403,21 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             persist()
             releaseSourcesLater()
             refreshNotification(force = true)
+        }
+    }
+
+    private suspend fun finishUnsuccessful(id: Long, state: JobState, message: String, expectedPendingUri: String? = null) {
+        withContext(NonCancellable + Dispatchers.IO) {
+            synchronized(galleryLock) {
+                val job = _jobs.value.firstOrNull { it.id == id } ?: return@synchronized
+                // A delayed queued cancellation owns only its original gallery ticket.
+                if (expectedPendingUri != null && job.pendingUri != expectedPendingUri) return@synchronized
+                if (job.pendingUri.isNotEmpty() && settle(job)) return@synchronized
+                set(id) {
+                    if (it.state != job.state || (state == JobState.CANCELLED && !it.cancelledByUser)) it
+                    else it.copy(state = state, etaSeconds = 0, finishedAt = now(), message = message, pendingUri = "")
+                }
+            }
         }
     }
 
@@ -432,6 +477,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             return process(job, step)
         } catch (e: Throwable) {
             if (!recoverable(e)) throw e
+            val pending = _jobs.value.firstOrNull { it.id == job.id }
+            if (pending != null && pending.pendingUri.isNotEmpty() &&
+                withContext(NonCancellable + Dispatchers.IO) { settle(pending) }) {
+                val resolved = _jobs.value.first { it.id == job.id }
+                if (resolved.state == JobState.DONE) return resolved.message
+                throw EngineException(resolved.message)
+            }
             host.events.add("job ${job.id}: ${e.message ?: e}")
             when (e) {
                 is DeviceLostException -> {
@@ -680,7 +732,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     /** Records the pending gallery entry before a byte is written. Any thread. */
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
-        persist(sync = true)
+        if (!persist(sync = true)) throw EngineException("无法记录相册写入状态")
     }
 
     /**
@@ -716,7 +768,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // 69.3 MP and took a device down, SAINTTaiYi dd7bd70). A job with no cap
         // still gets the ceiling here.
         val maxPixels = if (edit.filmEdge) frameCapForCanvas(job.maxPixels) else job.maxPixels
-        // TIFF carries the bundled sRGB profile, so only a JPEG goes wide.
+        // JPEG uses the wide-gamut preference; TIFF selects its own target below.
         val wide = job.wideGamut && job.format == ExportFormat.JPEG
         val outSpace = if (wide) "Display P3" else "sRGB"
         yieldToEditor()
@@ -768,7 +820,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 }
             }
             // The file's own space, through the CAM16 export path (upstream's export
-            // transform, lightness shoulder off). TIFF carries the sRGB profile.
+            // transform, lightness shoulder off). TIFF selects a local transform below.
             withContext(ExportThread.dispatcher) {
                 if (!NativeEngine.setOutput(handle, outSpace, true)) engineFailure(engine, "导出失败")
             }
@@ -788,8 +840,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     // Rendered straight into a pending entry (the gallery hides it), so
                     // a 100+ MB file is written once; checked, then published.
                     val name = "$stem.tif"
-                    val target = withContext(Dispatchers.IO) { MediaSaver.create(app, name, "image/tiff") }
-                    markPending(job.id, target)
+                    val target = withContext(Dispatchers.IO) {
+                        MediaSaver.create(app, name, "image/tiff").also { markPending(job.id, it) }
+                    }
                     try {
                         // 根据目标色彩空间准备 ICC 配置文件路径和目标空间名称
                         val (iccPath, targetSpace) = when (job.tiffColorSpace) {
@@ -820,6 +873,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 val tmpIcc = File(app.cacheDir, "export_prophoto.icc")
                                 tmpIcc.writeBytes(prophotoIcc)
                                 tmpIcc.absolutePath to "ProPhoto RGB"
+                            }
+                            TiffColorSpace.ADOBE_RGB -> {
+                                // Exact 563/256 TRC; Android's named space uses gamma 2.2.
+                                val tmpIcc = File(app.cacheDir, "export_adobe_rgb.icc")
+                                tmpIcc.writeBytes(IccProfile.generateAdobeRgb())
+                                tmpIcc.absolutePath to job.tiffColorSpace.targetName
                             }
                         }
 
@@ -1011,27 +1070,39 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             set(id) { if (it.state == JobState.QUEUED) smaller(it) else it }
             host.events.add("job $id: memory kill, retrying a size down")
         }
-        val stale = MediaSaver.sweepPending(app)
+        val protectedUris = _jobs.value.map { it.pendingUri }.filter { it.isNotEmpty() }.toSet()
+        val stale = MediaSaver.sweepPending(app, protectedUris)
         if (stale > 0) host.events.add("removed $stale unfinished gallery entries")
         persist()
     }
 
     /**
      * IO. A job's recorded gallery entry: published means the job is done
-     * (true), otherwise the partial file is deleted and the job runs again.
+     * (true). Only confirmed removal permits another render (false); an
+     * unavailable provider retains the URI and stops this job for manual retry.
      */
-    private fun settle(job: ProcessingJob): Boolean {
-        val uri = Uri.parse(job.pendingUri)
-        val (state, name) = runCatching { MediaSaver.state(app, uri) }.getOrDefault(MediaSaver.State.GONE to "")
-        if (state == MediaSaver.State.PUBLISHED) {
-            set(job.id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0,
-                finishedAt = now(), message = name.ifEmpty { it.message }, pendingUri = "") }
-            host.events.add("job ${job.id}: already saved as $name")
-            return true
+    private fun settle(job: ProcessingJob): Boolean = synchronized(galleryLock) {
+        val latest = _jobs.value.firstOrNull { it.id == job.id } ?: return@synchronized true
+        if (latest.pendingUri.isEmpty()) return@synchronized latest.state != JobState.QUEUED
+        val entry = MediaSaver.discardIfPending(app, Uri.parse(latest.pendingUri))
+        when (entry.state) {
+            GalleryState.PUBLISHED -> {
+                set(job.id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0,
+                    finishedAt = now(), message = entry.name.ifEmpty { "已保存到相册" }, pendingUri = "") }
+                host.events.add("job ${job.id}: already saved as ${entry.name}")
+                true
+            }
+            GalleryState.GONE -> {
+                set(job.id) { it.copy(pendingUri = "") }
+                false
+            }
+            GalleryState.UNKNOWN, GalleryState.PENDING -> {
+                set(job.id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(),
+                    message = "相册写入结果暂时无法确认；请稍后重试核对") }
+                host.events.add("job ${job.id}: gallery result unknown; URI retained")
+                true
+            }
         }
-        MediaSaver.discardIfPending(app, uri)
-        set(job.id) { it.copy(pendingUri = "") }
-        return false
     }
 
     /** IO. Encodes a killed export left in cache, and sources no job needs any more. */
@@ -1155,23 +1226,24 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         _jobs.update { list -> list.map { if (it.id == id) f(it) else it } }
 
     /** [sync] writes before returning: for state a kill must not lose (an attempt, a pending entry). */
-    private fun persist(sync: Boolean = false) {
-        // Finished jobs are kept for the list, newest 30.
+    private fun persist(sync: Boolean = false): Boolean {
+        // Keep every unresolved gallery ticket, plus the newest 30 finished records.
         val list = _jobs.value
-        val keep = list.filter { it.active } + list.filter { !it.active }.sortedByDescending { it.finishedAt }.take(30)
+        val keep = list.filter { it.active || it.pendingUri.isNotEmpty() } +
+            list.filter { !it.active && it.pendingUri.isEmpty() }.sortedByDescending { it.finishedAt }.take(30)
         val arr = JSONArray()
         keep.sortedBy { it.id }.forEach { arr.put(it.toJson()) }
         val edit = prefs.edit().putString("jobs", arr.toString())
-        if (sync) edit.commit() else edit.apply()
+        return if (sync) edit.commit() else { edit.apply(); true }
     }
 
     private fun load(): List<ProcessingJob> = runCatching {
         val arr = JSONArray(prefs.getString("jobs", "[]"))
         val list = (0 until arr.length()).mapNotNull { ProcessingJob.fromJson(arr.getJSONObject(it)) }
         interrupted = list.filter { it.state == JobState.RUNNING }.map { it.id }.toSet()
-        // A job that was running when the process died goes back in line; one
-        // still being secured runs on its URI as it is.
-        list.map { if (it.state == JobState.RUNNING) it.copy(state = JobState.QUEUED) else it }
+        // A killed runner resumes unless the user cancelled it. Its gallery
+        // ticket is still reconciled first, so a published result always wins.
+        list.map { if (it.state == JobState.RUNNING) it.copy(state = if (it.cancelledByUser) JobState.CANCELLED else JobState.QUEUED) else it }
             .map { if (!it.secured) it.copy(secured = true) else it }
             .also { noticedInit(it) }
     }.getOrDefault(emptyList())

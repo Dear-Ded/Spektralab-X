@@ -15,5 +15,7 @@ if [[ -z "$compiler" ]]; then
     compiler="$compiler:$stdlib"
 fi
 java -cp "$compiler" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -classpath "$stdlib" \
-    -d "$build/classes" "$repo/app/src/main/java/com/dearded/spektralab/IccProfile.kt" "$repo/tools/jvm/IccProfileContract.kt"
+    -d "$build/classes" "$repo/app/src/main/java/com/dearded/spektralab/IccProfile.kt" \
+    "$repo/tools/jvm/IccProfileContract.kt" "$repo/tools/jvm/AdobeIccContract.kt"
 java -Djava.awt.headless=true -cp "$build/classes:$stdlib" IccProfileContractKt "$build/prophoto.icc"
+java -Djava.awt.headless=true -cp "$build/classes:$stdlib" AdobeIccContractKt "$build/adobe.icc"

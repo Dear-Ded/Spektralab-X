@@ -33,8 +33,6 @@ object MediaSaver {
     /** Every name this app has saved under, before and after the rename. */
     private val PREFIXES = listOf("Spektralab-X_", "SpektraLab_")
 
-    enum class State { GONE, PENDING, PUBLISHED }
-
     /** A new pending entry for [name]. */
     fun create(context: Context, name: String, mime: String): Uri {
         val resolver = context.contentResolver
@@ -59,8 +57,8 @@ object MediaSaver {
         if (context.contentResolver.update(uri, values, null, null) != 1) throw EngineException("无法发布到相册")
     }
 
-    /** Whether [uri] is still pending, already published, or gone, with its display name. */
-    fun state(context: Context, uri: Uri): Pair<State, String> {
+    /** Null cursors and provider failures are unknown; a successful empty query confirms absence. */
+    fun state(context: Context, uri: Uri): GalleryEntry = GalleryTransaction.read {
         val projection = arrayOf(MediaStore.MediaColumns.IS_PENDING, MediaStore.MediaColumns.DISPLAY_NAME)
         val cursor: Cursor? = if (Build.VERSION.SDK_INT >= 30) {
             val args = Bundle().apply { putInt(MediaStore.QUERY_ARG_MATCH_PENDING, MediaStore.MATCH_INCLUDE) }
@@ -70,20 +68,19 @@ object MediaSaver {
             context.contentResolver.query(MediaStore.setIncludePending(uri), projection, null, null, null)
         }
         cursor?.use { c ->
-            if (c.moveToFirst()) return (if (c.getInt(0) != 0) State.PENDING else State.PUBLISHED) to c.getString(1).orEmpty()
+            if (c.moveToFirst()) GalleryEntry(if (c.getInt(0) != 0) GalleryState.PENDING else GalleryState.PUBLISHED, c.getString(1).orEmpty())
+            else GalleryEntry(GalleryState.GONE)
         }
-        return State.GONE to ""
     }
 
     /**
      * Deletes [uri] only while it is still pending: a kill between publishing
      * and recording it must not delete a finished photo. Never throws.
      */
-    fun discardIfPending(context: Context, uri: Uri): State {
-        val (state, _) = runCatching { state(context, uri) }.getOrElse { return State.GONE }
-        if (state == State.PENDING) runCatching { context.contentResolver.delete(uri, null, null) }
-        return state
-    }
+    fun discardIfPending(context: Context, uri: Uri): GalleryEntry = GalleryTransaction.discardPending(
+        query = { state(context, uri) },
+        delete = { context.contentResolver.delete(uri, "${MediaStore.MediaColumns.IS_PENDING} = 1", null) },
+    )
 
     /**
      * Copies a verified [file] into a new entry, checks the copy's size and
@@ -122,8 +119,8 @@ object MediaSaver {
         }
     }
 
-    /** Removes every pending entry of ours (a killed export's); returns how many. Never throws. */
-    fun sweepPending(context: Context): Int {
+    /** Removes untracked pending entries of ours; unresolved queue tickets stay protected. Never throws. */
+    fun sweepPending(context: Context, protectedUris: Set<String> = emptySet()): Int {
         var removed = 0
         for (collection in listOf(
             MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
@@ -147,7 +144,9 @@ object MediaSaver {
             val ids = ArrayList<Long>()
             cursor?.use { c -> while (c.moveToNext()) ids += c.getLong(0) }
             for (id in ids) {
-                if (runCatching { context.contentResolver.delete(ContentUris.withAppendedId(collection, id), null, null) }
+                val uri = ContentUris.withAppendedId(collection, id)
+                if (uri.toString() in protectedUris) continue
+                if (runCatching { context.contentResolver.delete(uri, "${MediaStore.MediaColumns.IS_PENDING} = 1", null) }
                         .getOrDefault(0) > 0) removed++
             }
         }

@@ -1,0 +1,42 @@
+JUnit version 4.13.2
+........................E..........E
+Time: 0.519
+There were 2 failures:
+1) queuedCancelThenImmediateRetryKeepsExplicitRetryQueued(com.dearded.spektralab.GalleryQueueContract)
+java.lang.AssertionError: expected:<QUEUED> but was:<CANCELLED>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.dearded.spektralab.GalleryQueueContract$queuedCancelThenImmediateRetryKeepsExplicitRetryQueued$1.invokeSuspend(GalleryQueueContract.kt:397)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at com.dearded.spektralab.GalleryQueueContract.fixture(GalleryQueueContract.kt:108)
+	at com.dearded.spektralab.GalleryQueueContract.queuedCancelThenImmediateRetryKeepsExplicitRetryQueued(GalleryQueueContract.kt:389)
+2) delayedQueuedCancelCleanupCannotTouchANewerTicket(com.dearded.spektralab.GalleryQueueContract)
+java.lang.AssertionError: expected:<QUEUED> but was:<CANCELLED>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.dearded.spektralab.GalleryQueueContract$delayedQueuedCancelCleanupCannotTouchANewerTicket$1.invokeSuspend(GalleryQueueContract.kt:421)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at com.dearded.spektralab.GalleryQueueContract.fixture(GalleryQueueContract.kt:108)
+	at com.dearded.spektralab.GalleryQueueContract.delayedQueuedCancelCleanupCannotTouchANewerTicket(GalleryQueueContract.kt:407)
+
+FAILURES!!!
+Tests run: 34,  Failures: 2
+

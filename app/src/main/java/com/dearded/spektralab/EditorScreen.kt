@@ -216,7 +216,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                                     enabled = !ui.loadingDetail && ui.busy == null,
                                     onClick = { exportMenu = false; vm.loadExportProof(target) })
                             }
-                            // TIFF 导出：三种色彩空间选项
+                            // TIFF target selection is explicit for each export.
                             DropdownMenuItem(text = { Text("16 位 TIFF · sRGB") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
                             })
@@ -225,6 +225,9 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             })
                             DropdownMenuItem(text = { Text("16 位 TIFF · ProPhoto RGB") }, onClick = {
                                 exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
+                            })
+                            DropdownMenuItem(text = { Text("16 位 TIFF · Adobe RGB (1998)") }, onClick = {
+                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.ADOBE_RGB)
                             })
                             if (HeifExport.available) DropdownMenuItem(text = { Text("HEIF · 工作尺寸（sRGB）") }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
                             DropdownMenuItem(text = { Text("高质量导出（受设备上限限制）") }, onClick = {

@@ -4,6 +4,12 @@ Co-created with GPT (OpenAI, AI assistant), 2026-11-11.
 
 ## Result and scope
 
+Follow-up: [explicit Adobe TIFF export](ADOBE_RGB_TIFF_2026-11-11.md) now closes
+the real-engine matrix and JNI checks. Its independent PCS test found that the
+engine's CAT02 transform did not match the new Bradford ICC colorants; only the
+new Adobe file intent is corrected. The earlier transfer-only findings below
+describe the preceding three-target state and do not prove matrix agreement.
+
 This review found no new ICC arithmetic defect reachable through the current
 Android sRGB, Display P3 or ProPhoto TIFF choices. It adds an independent Little
 CMS comparison, rather than changing the native ICC parser or RAW defaults.

@@ -203,7 +203,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 {
                     SettingRow(
                         "广色域导出（Display P3）", ui.wideGamut, true,
-                        note = "TIFF 始终是 sRGB。",
+                        note = "仅用于 JPEG；TIFF 色彩空间在保存菜单中选择。",
                     ) { vm.setWideGamut(it) }
                 },
                 {

@@ -40,7 +40,8 @@ enum class ExportSize(val tier: String) { FULL("full"), SHARE("preview") }
 enum class TiffColorSpace(val displayName: String, val targetName: String) {
     SRGB("sRGB", "sRGB"),
     DISPLAY_P3("Display P3", "Display P3"),
-    PROPHOTO("ProPhoto RGB", "ProPhoto RGB")
+    PROPHOTO("ProPhoto RGB", "ProPhoto RGB"),
+    ADOBE_RGB("Adobe RGB (1998)", "Adobe RGB (1998)")
 }
 
 data class UiState(

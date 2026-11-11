@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExifFillTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-11T08:59:47.654Z" hostname="ser858255664526" time="0.007">
+  <properties/>
+  <testcase name="nothingToAdd" classname="com.dearded.spektralab.ExifFillTest" time="0.002"/>
+  <testcase name="secondsApart" classname="com.dearded.spektralab.ExifFillTest" time="0.004"/>
+  <testcase name="fillsOnlyGaps" classname="com.dearded.spektralab.ExifFillTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

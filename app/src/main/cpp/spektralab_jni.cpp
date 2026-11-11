@@ -1524,7 +1524,7 @@ JNI_FN(jobject, renderReuse)(JNIEnv* env, jobject, jlong handle, jstring tier_j,
 
 // Renders `tier` and writes the RGB16 TIFF to `path`, or, when `fd` >= 0, to
 // that descriptor (a pending MediaStore entry, so nothing is copied twice).
-// `target` specifies the output color space: "sRGB", "Display P3", or "ProPhoto RGB".
+// `target` is a named output space, including explicit Adobe RGB (1998) TIFF.
 static jboolean export_tiff(JNIEnv* env, Session* s, const std::string& path, int fd, jstring icc_j, jstring target_j, jstring tier_j) {
     if (!s) { fail("no session"); return JNI_FALSE; }
     const spk::android::OutputCancel cancel(s->cancel_generation);

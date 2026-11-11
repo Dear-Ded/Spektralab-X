@@ -1,0 +1,21 @@
+{
+  "source_commit": "1c6bdd23087cbe29e3c74b9c21bfad5097a3d283 + candidate changes",
+  "release_jvm": {
+    "suites": 20,
+    "tests": 148,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "kotlin_variants": [
+    "debug",
+    "release"
+  ],
+  "apk_count": 0,
+  "jni_exports": 38,
+  "elf_load_alignments": [
+    16384,
+    16384,
+    16384
+  ]
+}

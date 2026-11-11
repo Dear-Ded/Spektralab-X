@@ -1,0 +1,13 @@
+PASS old three JNI targets: 12 actual + 12 reference complete TIFF files byte-identical
+('nofilm_Display P3_plain.tif', 'e7adfd409a867cb85a3847e78b4f4caacd31a20688a8314d39d8ffc1799566b7')
+('nofilm_sRGB_plain.tif', '3e49461b6b38da00650a8e5d309ba834f0d60e4b7ce842551a4f392cc06078ec')
+('film_sRGB_grade.tif', '810f67e004ba180cb93a374b4b482f57047c03fb943e87d01338747bada33730')
+('nofilm_Display P3_grade.tif', '866ceadaac54f0d971899f5635e5f2deffb9de3fca651e363551c062a48b51c0')
+('nofilm_sRGB_grade.tif', '24a8c910b7a8e7b2717ae9725b31e5546cebd4ee64b07923b432cfc6e67d82b6')
+('film_ProPhoto RGB_grade.tif', 'df9b9a3941857bd90097b95e45e5dafb0917d779a7ae84915c176b05653de51a')
+('film_sRGB_plain.tif', '521d26b41179c05eefb1da7714669f1ade3ecff07b51cd77ef8622444d03fd31')
+('nofilm_ProPhoto RGB_plain.tif', 'df6f4af7b5d8ce6142e462dd933d8f0b5a06db37d9c464ef8672132dfae22c54')
+('film_Display P3_grade.tif', 'ea7eba1c280ec93884afe1e9e2eadf6007e71004e185759848b8a8c494ac8de5')
+('film_ProPhoto RGB_plain.tif', '11001a0c9fa55252f2dd7cdd5c17608817a68ed68cc4e0aad64bc05ab6ddac77')
+('film_Display P3_plain.tif', '55ba026b72343b52a9dd7fcbc31a7dac6d17e8c1ae866c665fd297a49db22880')
+('nofilm_ProPhoto RGB_grade.tif', 'f22978c9941f6288edc97f777a3a3bb5e1b6ec8cba3af6a66c3a96709944e844')

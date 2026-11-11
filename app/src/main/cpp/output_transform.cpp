@@ -61,7 +61,10 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
     uint32_t count = 0;
     // Match the Mac file intent (upstream d661b3b957ad): preserve most
     // in-gamut chroma, with a small safety margin at the target boundary.
-    const char* spec = exporting
+    // Adobe's explicit TIFF policy is relative-colorimetric linear clipping,
+    // without CAM16 compression. Keep the established intents for other spaces.
+    const bool adobe_export = exporting && target == "Adobe RGB (1998)";
+    const char* spec = exporting && !adobe_export
         ? R"({"lightness_compression_active":false,"knee":[0.7,0.995,6]})"
         : R"({"algorithm":"off"})";
     if (spk_output_transform(engine, "ProPhoto RGB", target.c_str(), spec, &json, &cmax, &count) != SPK_OK) {
@@ -74,11 +77,20 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
     spk_string_free(json);
     if (!parsed) return false;
     dst_ = target;
+    adobe_export_ = adobe_export;
     src_mode_ = uint32_t(reply.at("source_cctf_mode").as_int());
     dst_mode_ = uint32_t(reply.at("target_cctf_mode").as_int());
     const auto& m = reply.at("matrix").items();
     if (m.size() != 9) { error = "output transform: no matrix"; return false; }
     for (size_t i = 0; i < 9; ++i) matrix_[i] = float(m[i].as_double());
+    if (adobe_export_) {
+        // inv(Adobe D50 PCS) * ROMM D50 PCS, matching IccProfile.kt.
+        // The engine's CAT02 D50->D65 matrix does not describe the Adobe
+        // profile's Bradford PCS colorants. Keep other file intents unchanged.
+        matrix_ = {1.389564687376496941f, -0.169414940507039286f, -0.220232536307972017f,
+                  -0.228798904814672891f, 1.231746470222334087f, -0.002947327958333993f,
+                  -0.017631431735298570f, -0.096267508428705724f, 1.114304002759633084f};
+    }
     const spk::Json& g = reply.at("gamut_compress");
     cam16_ = g.at("algorithm").as_string() == "cam16ucs";
     lightness_ = g.at("lightness_compression_active").as_bool();
@@ -110,11 +122,13 @@ bool OutputTransform::fetch(spk_engine* engine, const std::string& target, bool 
 // Tables for the display, where the result is 8 bits; the exact curves for a
 // file, and for anything outside 0..1.
 float OutputTransform::decode(float v) const {
-    if (cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_decode_mode(v, src_mode_);
+    if (adobe_export_ || cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_decode_mode(v, src_mode_);
     return lerp_lut(decode_lut_, kDecodeN, v);
 }
 
 float OutputTransform::encode(float v) const {
+    // Clip before fractional-power encoding, and use the exact curve for files.
+    if (adobe_export_) return upstream::cctf_encode_mode(saturate(v), dst_mode_);
     if (cam16_ || exact_ || v < 0.0f || v > 1.0f) return upstream::cctf_encode_mode(v, dst_mode_);
     return lerp_lut(encode_lut_, kEncodeN, v);
 }

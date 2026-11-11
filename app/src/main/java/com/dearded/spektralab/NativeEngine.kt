@@ -134,7 +134,8 @@ object NativeEngine {
 
     /**
      * TIFF 导出到文件描述符，支持指定目标色彩空间。
-     * @param targetSpace 目标色彩空间："sRGB", "Display P3", 或 "ProPhoto RGB"
+     * @param targetSpace "sRGB", "Display P3", "ProPhoto RGB", or "Adobe RGB (1998)".
+     * [iccPath] must describe the selected target's encoded samples.
      */
     fun exportTiffFd(session: Long, fd: Int, iccPath: String, targetSpace: String, tier: String): Boolean =
         exportTiffFdV1(session, fd, iccPath, targetSpace, tier)

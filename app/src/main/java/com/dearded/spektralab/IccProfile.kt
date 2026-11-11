@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.roundToInt
 
-/** Matrix/TRC profile for the encoded ProPhoto pixels emitted by the engine. */
+/** Matrix/TRC profiles for the encoded TIFF pixels emitted by the engine. */
 object IccProfile {
     /**
      * ICC v4 matrix-shaper, using engine/host/image_io.cpp's D50 colorants.
@@ -27,6 +27,39 @@ object IccProfile {
             "gTRC" to curve,
             "bTRC" to curve,
         )
+        return matrixProfile(tags)
+    }
+
+    /** Adobe RGB (1998), relative D50 PCS, zero black and exact 563/256 gamma. */
+    fun generateAdobeRgb(): ByteArray {
+        val curve = buffer(16).apply {
+            signature("para"); putInt(0); putShort(0); putShort(0)
+            fixed(563.0 / 256.0)
+        }.array()
+        val adaptation = buffer(44).apply {
+            signature("sf32"); putInt(0)
+            // Bradford D65 -> ICC D50. Colorants below are already adapted.
+            listOf(1.0478112, .0228866, -.0501270,
+                .0295424, .9904844, -.0170491,
+                -.0092345, .0150436, .7521316).forEach { fixed(it) }
+        }.array()
+        return matrixProfile(listOf(
+            "desc" to localizedText("Adobe RGB (1998)"),
+            "cprt" to localizedText("Public Domain"),
+            "wtpt" to xyz(.9642, 1.0, .8249),
+            "chad" to adaptation,
+            // Adobe RGB (1998) encoding specification, section 4.3.7.3.
+            // Each tag stores one column of the D50 PCS matrix.
+            "rXYZ" to xyz(.60974, .31111, .01947),
+            "gXYZ" to xyz(.20528, .62567, .06087),
+            "bXYZ" to xyz(.14919, .06322, .74457),
+            "rTRC" to curve,
+            "gTRC" to curve,
+            "bTRC" to curve,
+        ))
+    }
+
+    private fun matrixProfile(tags: List<Pair<String, ByteArray>>): ByteArray {
         val tableEnd = 132 + tags.size * 12
         val size = tableEnd + tags.sumOf { aligned(it.second.size) }
         val profile = buffer(size)

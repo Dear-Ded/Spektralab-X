@@ -1,0 +1,87 @@
+package com.dearded.spektralab
+
+import android.content.Context
+import android.net.Uri
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import org.json.JSONArray
+import org.json.JSONObject
+import kotlin.math.max
+
+// Only the queue methods below are taken verbatim from production. Engine,
+// service, notification and preferences adapters are deliberately test doubles.
+class EngineException(message: String) : Exception(message)
+class DeviceLostException(val engine: Long) : Exception("device lost")
+class BlankFrameException(val what: String) : Exception("blank")
+object SystemClock { fun elapsedRealtime() = System.nanoTime() / 1_000_000 }
+object NativeEngine { fun cancel(handle: Long) {} }
+class TestEvents {
+    val lines = java.util.concurrent.CopyOnWriteArrayList<String>()
+    fun add(message: String) { lines += message }
+}
+class TestHost(val scope: CoroutineScope) {
+    val events = TestEvents()
+    val lastExitWasMemory = false
+    suspend fun recover(engine: Long) {}
+}
+class TestPrefs {
+    var json = "[]"
+    var commitSucceeds = true
+    fun edit() = Editor()
+    fun getString(key: String, fallback: String) = json
+    inner class Editor {
+        private var pending = ""
+        fun putString(key: String, value: String) = apply { pending = value }
+        fun commit(): Boolean { if (commitSucceeds) json = pending; return commitSucceeds }
+        fun apply() { json = pending }
+    }
+}
+
+/* PRODUCTION_DECLARATIONS */
+
+class ProcessingQueue(val app: Context, val host: TestHost, initial: List<ProcessingJob>) {
+    private val _jobs = MutableStateFlow(initial)
+    private var interrupted = emptySet<Long>()
+    private var noticed = hashSetOf<Long>()
+    val jobs get() = _jobs.value
+    val prefs = TestPrefs()
+    private val galleryLock = Any()
+    private val handleLock = Any()
+    private var runningHandle = 0L
+    private var runner: Deferred<String>? = null
+    private var cancelRequested = -1L
+    private var pauseRequested = -1L
+    var starts = 0
+    var renders = 0
+    var useAdmitted = false
+    var processor: suspend ProcessingQueue.(ProcessingJob) -> String = { error("unexpected render") }
+    fun start() { starts++ }
+    private fun enqueue(job: ProcessingJob) { _jobs.update { it + job }; start() }
+    private fun releaseSourcesLater() {}
+    private fun refreshNotification(force: Boolean = false) {}
+    private fun tick(id: Long, started: Long, estimate: Int) {}
+    private fun estimateSeconds(job: ProcessingJob) = 1
+    private fun learn(job: ProcessingJob, seconds: Double) {}
+    private fun now() = System.currentTimeMillis()
+    private fun failureMessage(e: Throwable) = e.message.orEmpty()
+    private suspend fun runRecovering(job: ProcessingJob, sampled: (String) -> Unit, step: (String, Float) -> Unit): String {
+        return if (useAdmitted) runAdmitted(job, step) else process(job, step)
+    }
+    private suspend fun process(job: ProcessingJob, step: (String, Float) -> Unit): String {
+        renders++
+        return processor(job)
+    }
+    private fun fitToMemory(job: ProcessingJob) = job
+    private fun smaller(job: ProcessingJob) = job.copy(maxPixels = job.maxPixels / 2)
+    private fun recoverable(e: Throwable) = e is DeviceLostException || e is BlankFrameException || isOutOfMemory(e)
+    private fun isOutOfMemory(e: Throwable) = e is OutOfMemoryError
+    suspend fun runTest(job: ProcessingJob = jobs.first()) = runOne(job)
+    fun settleTest(id: Long) = settle(jobs.first { it.id == id })
+    fun recordTest(id: Long, uri: Uri) = markPending(id, uri)
+    fun persistTest() = persist(sync = true)
+    fun loadTest() = load()
+    fun recoverTest() = recoverInterrupted()
+
+/* PRODUCTION_METHODS */
+}

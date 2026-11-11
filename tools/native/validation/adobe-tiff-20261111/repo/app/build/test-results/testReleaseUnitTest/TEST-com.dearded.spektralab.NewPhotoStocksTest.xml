@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.NewPhotoStocksTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-11T08:59:47.727Z" hostname="ser858255664526" time="0.009">
+  <properties/>
+  <testcase name="removedFilmDoesNotInventAReplacement" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.005"/>
+  <testcase name="ordinaryFilmSelectionStillRetainsTheChosenPaperNoneIntent" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.0"/>
+  <testcase name="fixedPairClearsAPreviousIntermediateOrScan" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.001"/>
+  <testcase name="slideWithoutAPrintableFallbackKeepsItsSafeDirectScan" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.001"/>
+  <testcase name="fixedNegativeAndPaperPrintFromANewNeutralPhoto" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.0"/>
+  <testcase name="incompatibleOrMissingPaperUsesTheFilmsPrintableFallback" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.001"/>
+  <testcase name="rememberedNegativeRestoresIntermediateAndNoFilmChoices" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.0"/>
+  <testcase name="rememberedSlideRestoresPrintingAndDirectScanSeparately" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.0"/>
+  <testcase name="fixedSlideWithPaperClearsDirectScan" classname="com.dearded.spektralab.NewPhotoStocksTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+PASS Adobe finite conversion, 4 float/u16 and grade cases; four strip heights; identical full/row TIFF bytes
+{
+  "lcms_version": 2120,
+  "files": 4,
+  "samples": 4420,
+  "clipped_samples": 2860,
+  "max_profile_xyz_error": 7.109586383169386e-06,
+  "max_pixel_xyz_error": 1.1880088886528917e-05,
+  "max_code_difference_published_matrix": 0.4993160301382886,
+  "near_zero_intervals": 0,
+  "wrong_gamma_2_2_rejections": 1529,
+  "engine_cat02_rejections": 2214
+}

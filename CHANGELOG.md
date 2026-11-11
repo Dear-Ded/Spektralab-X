@@ -21,6 +21,9 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 开启 LibRaw 已有但此前未编译的 zlib 解码支持，修复部分 Deflate 压缩浮点 DNG 打不开；合成 Bayer、LinearRaw 及整数相邻控制通过，未改变 RAW 显影默认值。
 - 补齐应用资产中的本项目 LICENSE 和 NOTICE 全文，保留上游及依赖许可证各自的文件名。
 - 识别 DNG 1.7 的 ProfileDynamicRange，阻止可选“标准显色”把 HDR 相机配置误作 SDR；缺失或有效 SDR 标记保持原行为，线性默认和胶片输入不变。这是显式拒绝错误套用，尚非完整 HDR 显影支持。
+- 增加显式选择的 Adobe RGB (1998) 16 位 TIFF 导出，使像素转换、精确传递曲线与内嵌 ICC 保持一致；真实引擎验证发现并修正了 CAT02 与 Bradford 白点适应不一致的问题。默认仍为 sRGB，原有三目标样本保持字节一致。
+- 修复相册已经保存成功却被取消或异常误报失败，以及相册临时不可查询时重试生成重复照片的风险；保留未确认写入记录，核对成功后再决定是否重做。
+- 持久化用户取消意图，避免取消后进程被杀、重启又自动导出；相册已完成的照片仍优先记为完成。清空历史会保留尚未确认的相册记录，供后续重试核对。
 
 验证与限制见 [源码跟进记录](docs/ENGINE_ANDROID_FOLLOWUP_2026-11-11.md)和[生产尾段记录](docs/ENGINE_PRINT_TAIL_INTEGRATION_2026-11-11.md)。
 

@@ -1,0 +1,108 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:checkDebugAarMetadata
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:buildKotlinToolingMetadata
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:processDebugManifestForPackage
+> Task :app:checkReleaseAarMetadata
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:generateReleaseResValues FROM-CACHE
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:mergeReleaseResources FROM-CACHE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:processReleaseManifest FROM-CACHE
+> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseResources FROM-CACHE
+> Task :app:processDebugResources
+> Task :app:compileReleaseKotlin
+> Task :app:compileDebugKotlin
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/AboutSection.kt:61:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:464:25 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:334:25 Condition is always 'true'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1289:57 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EngineHost.kt:157:45 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:66:40 Condition is always 'false'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:71:25 Condition is always 'true'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/SceneCurve.kt:6:23 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
+
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in Kotlin 2.1.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:260:37 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+
+> Task :app:compileReleaseKotlin
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/AboutSection.kt:61:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:464:25 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:334:25 Condition is always 'true'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1289:57 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/EngineHost.kt:157:45 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:66:40 Condition is always 'false'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/PaperStrip.kt:71:25 Condition is always 'true'.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/SceneCurve.kt:6:23 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
+
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in Kotlin 2.1.
+w: file:///data/work/gpt-adobe-20261111/repo/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:260:37 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:bundleReleaseClassesToCompileJar
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:preReleaseUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:convertLinkedResourcesToBinaryRelease FROM-CACHE
+> Task :app:packageReleaseUnitTestForUnitTest
+> Task :app:processReleaseUnitTestManifest
+> Task :app:generateReleaseUnitTestConfig
+> Task :app:processReleaseJavaRes
+> Task :app:compileReleaseUnitTestKotlin
+> Task :app:compileReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processReleaseUnitTestJavaRes
+> Task :app:testReleaseUnitTest
+
+BUILD SUCCESSFUL in 2m 26s
+50 actionable tasks: 26 executed, 24 from cache

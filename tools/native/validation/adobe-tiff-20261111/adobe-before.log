@@ -1,0 +1,7 @@
+PASS Adobe finite conversion, 4 float/u16 and grade cases; four strip heights; identical full/row TIFF bytes
+Traceback (most recent call last):
+  File "/data/work/gpt-adobe-20261111/tools/native/adobe_tiff_cmm.py", line 174, in <module>
+    main()
+  File "/data/work/gpt-adobe-20261111/tools/native/adobe_tiff_cmm.py", line 159, in main
+    assert max_xyz < .0004, max_xyz
+AssertionError: 0.010765898601022061

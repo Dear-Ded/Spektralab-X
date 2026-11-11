@@ -9,10 +9,13 @@
 //            file's space with the lightness shoulder off -- the film print
 //            already applied it. The late chroma knee follows the Mac's
 //            ColourManagement.swift file intent (d661b3b957ad, 2026-11-06).
+//            Explicit Adobe RGB TIFF instead clips target linear RGB to [0,1]
+//            before its exact fractional-power encoding, without CAM16.
 //
-// Every number comes from spk_output_transform. The per-pixel arithmetic is
-// upstream's own (engine/host/output.cpp), copied in at configure time
-// (CMakeLists.txt), so nothing here is a re-derivation.
+// Existing intents use spk_output_transform's metadata. Adobe's explicit
+// file intent uses the ROMM/Adobe D50 PCS matrices matching IccProfile.kt.
+// Transfer curves and CAM16 arithmetic come from engine/host/output.cpp,
+// copied in at configure time by CMakeLists.txt.
 #pragma once
 
 #include <array>
@@ -32,7 +35,7 @@ class RawDevelopment;
 
 class OutputTransform {
 public:
-    // `target` is "sRGB" or "Display P3"; `exporting` picks the export path.
+    // Named engine target; Adobe TIFF uses linear clipping, other exports CAM16.
     bool fetch(spk_engine* engine, const std::string& target, bool exporting, std::string& error);
     bool ready() const { return ready_; }
     const std::string& target() const { return dst_; }
@@ -40,7 +43,7 @@ public:
     // Exact transfer curves everywhere, not the display tables (parity tests).
     void set_exact(bool on) { exact_ = on; }
 
-    // Encoded ProPhoto in, encoded target out (unclamped), in place.
+    // Encoded ProPhoto in, encoded target out; Adobe export clips linear RGB.
     void apply(float c[3]) const;
     // The same from 16-bit engine codes, through an exact table.
     void apply16(const uint16_t* s, float c[3]) const;
@@ -51,6 +54,7 @@ private:
     void finish(const float v[3], float c[3]) const;
 
     bool ready_ = false, cam16_ = false, lightness_ = false, exact_ = false;
+    bool adobe_export_ = false;
     std::string dst_;
     uint32_t src_mode_ = 1, dst_mode_ = 0;
     std::array<float, 9> matrix_{}, m2x_{}, m2r_{};

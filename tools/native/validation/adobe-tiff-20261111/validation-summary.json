@@ -1,0 +1,38 @@
+{
+  "source_commit": "1c6bdd23087cbe29e3c74b9c21bfad5097a3d283 + candidate changes",
+  "release_jvm": {
+    "suites": 20,
+    "tests": 148,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "kotlin_variants": [
+    "debug",
+    "release"
+  ],
+  "apk_count": 0,
+  "jni_exports": 38,
+  "elf_load_alignments": [
+    16384,
+    16384,
+    16384
+  ],
+  "source_sha256": {
+    "app/src/main/cpp/output_transform.cpp": "aa281d374c90ebb2ad209a6040e522e53e41466daa62b4877700367126a2684d",
+    "app/src/main/cpp/output_transform.hpp": "e300bfdee049054d491be836cdaf3ba49b1ada0548ba2669afeed87db6092708",
+    "app/src/main/java/com/dearded/spektralab/IccProfile.kt": "3318dd0d73817c8abc417a110a2be80df35e1767d37e5082a899fe908fc8c3b3",
+    "app/src/main/java/com/dearded/spektralab/EditorScreen.kt": "978e131695c1341b68dc2dcfccce06ed296b3b9039491d64ee3e588f26b021c5",
+    "app/src/main/java/com/dearded/spektralab/EditorViewModel.kt": "9ce7e58a42a1842ff04234171587a15afa5647f9754ffe3d1e5ba48310ec6c56",
+    "app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt": "9d75c0eb0f503d11bf667ab6962ced3dcb5d08044884ff02e0499a0b440e0fb4",
+    "app/src/main/java/com/dearded/spektralab/MediaSaver.kt": "0284f046ee4b2d03c7ea74dfe413dcfa409844d38ac14c09df4b7cc9875195e4",
+    "app/src/main/java/com/dearded/spektralab/GalleryTransaction.kt": "a36d8da9cadbad84500f4943db53b253c9314d20a1a03cb689d8c3867817aea2",
+    "app/src/test/java/com/dearded/spektralab/GalleryTransactionTest.kt": "5c4e63d1c13b23224f20ff398a611dac3fc687a81b18ba29cffcbb99f99e0d7c",
+    "app/src/test/java/com/dearded/spektralab/TiffColorSpaceTest.kt": "b78a71c4005c997112f0f3f5a142ebf8a8476b79101163f6ec90f306b8c96cda",
+    "tools/native/adobe_tiff.cpp": "75ee717fe4581a63d9c645c754d844099f44850ab994dd1d74f9d369db6e5bba",
+    "tools/native/adobe_tiff_cmm.py": "935c3ce8614be164beeddbef9c793a469707a237d4744b2f47778a49a1f45217",
+    "tools/native/adobe_legacy.cpp": "e623f1daabcdfa53718fecb7f4d5b0b58d0ef3ebc83d101f153992cf7ccce18c",
+    "tools/native/jni_tiff.cpp": "531bc85644bef177d8465539b4fa106d7d0f00f0d08c10b45ec67d2d8dbd0d73",
+    "tools/jvm/TiffJniContract.kt": "939be7187704e98318ba44734e63e46bc51d5428ca02f35d8a58bf95e9c9c63c"
+  }
+}
