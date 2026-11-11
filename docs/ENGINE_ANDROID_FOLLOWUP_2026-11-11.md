@@ -88,7 +88,8 @@ logical capacity is not exact physical GPU allocation. Persistent uploads may
 increase allocation cost. Full RAW decode, film intermediates, caches, final
 packing and IIR recurrences still need separate integration and measurement.
 
-V2 is being assessed independently against its official release and source.
-Changing its imaging calibration, output contract or platform implementation
-requires a separate migration decision; these three fixes do not change the
-upstream pin.
+The [V2.3.2 source review](UPSTREAM_V2_RESEARCH_2026-11-11.md) records its official
+release, minilab imaging changes, Vulkan/HDR gaps and all 45 patch dispositions.
+It does not include a V2 build or runtime test. Changing imaging calibration,
+output contracts or platform implementation requires separate migration work;
+these three fixes do not change the upstream pin.

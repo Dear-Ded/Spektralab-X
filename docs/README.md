@@ -41,6 +41,7 @@ Most documents are in Chinese; those marked EN have English.
 | [ENGINE_ANDROID_REASSESSMENT_2026-11-11.md](ENGINE_ANDROID_REASSESSMENT_2026-11-11.md) | 后续版本复核：TIFF/ICC/JNI、上游 HDR、两云证据与执行路线 |
 | [ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md](ENGINE_EXTERNAL_PLANE_PUBLICATION_2026-11-11.md) | 外存分块完成状态与取消：缺带复现、失败不发布、两云故障注入与 GPU 恢复 |
 | [ENGINE_ANDROID_FOLLOWUP_2026-11-11.md](ENGINE_ANDROID_FOLLOWUP_2026-11-11.md) | ASN 校准签名、生产管线失败恢复、外存窗口容量与 CPU payload 准入；双云证据和剩余迁移边界 |
+| [UPSTREAM_V2_RESEARCH_2026-11-11.md](UPSTREAM_V2_RESEARCH_2026-11-11.md) | V2.3.2 固定源码研究：minilab 成像变化、Vulkan/HDR 缺口、参数与资源，以及 45 条补丁迁移账 |
 | [ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md](ENGINE_OPTIMIZATION_ROADMAP_2026-11-09.md) | 六阶段引擎优化路线；本轮 CRX 维护、工作源预算、JPEG 外存行转换的实现、两云证据与剩余边界 |
 | [DNG_WHITE_XY_2026-11-09.md](DNG_WHITE_XY_2026-11-09.md) | WhiteXY-only DNG 的校准、源白平衡与 FM/Bradford 实现，合成/真实样片对照及 profile 支持边界 |
 | [DNG_FLOAT_PRECISION_2026-11-09.md](DNG_FLOAT_PRECISION_2026-11-09.md) | 浮点 DNG 的早期整数化、图像最大值耦合与分数黑电平实证，受限 float LinearRaw 的实现依赖 |
