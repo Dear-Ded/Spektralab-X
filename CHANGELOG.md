@@ -8,19 +8,28 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
-## 未发布 · 源码优化
+## 0.2.00-alpha-4 · 2026-11-12
 
-沿用 alpha-3 的版本号与内部版本码，本节改动尚未打包发版。GPT（OpenAI）共创。
+**省流：** RAW 读取保留更多原始精度，修正部分 DNG 的亮度刻度，镜头校正可及时取消。未大规模真机验证，需要社区反馈。
+
+相对 `0.2.00-alpha-3`，内部安装版本码递增为 **124**，保留原发布签名，可覆盖安装。新 RAW 仍默认线性显示，主页保持原样。本轮共创：**GPT（OpenAI，AI 助手）**。
+
+### RAW 读取和取消
 
 - 保留浮点精度的 LinearRaw 读取支持多个未压缩 float32 RGB 条带，兼容独立的 SHORT/LONG 偏移与长度、文件内乱序存放及不足整块的末条带；原有单条带输出保持逐字节一致。
 - 每次只读取一行，先检查条带计数、容量、重叠和文件范围；取消或读盘失败保留上一份有效结果。两云精度、故障与内存对照及 Android JNI 编译通过，尚非完整 RAW 分块或手机实测。
 - 在同一严格 LinearRaw 子集内，Deflate 压缩（Predictor 3）的 float32 RGB 条带现在也能保留浮点精度，避免进入整数兼容转换；负通道、高光与白平衡沿用原有计算。流式解压检查完整校验尾、输出长度和条带边界，坏流或取消不发布半份结果。
 - RAW 镜头畸变、暗角校正及其临时通道复制过程中也检查取消，工作线程汇合后再退出，保留上一张有效照片；未取消时的像素和元数据保持一致。双云及 Android 编译记录见 [镜头校正验证](docs/ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md)。
 - 修正部分整数三通道 LinearRaw DNG 在均匀非零黑点下的亮度刻度：扣黑后按白点减黑点归一化，避免整幅偏暗。保留源元数据及既有 Bayer、浮点和非均匀黑点策略；仍默认线性显示。见 [双云及 Windows 验证](docs/ENGINE_LINEAR_RAW_BLACK_2026-11-12.md)。
+
+### 引擎实验，默认关闭
+
 - 增加默认关闭的 Vulkan 递归模糊边界实验，修正画面边缘的递归收尾；默认图像仍走原算法。双云 Vulkan 合成对照及 ARM64 编译见 [实验记录](docs/ENGINE_IIR_BOUNDARY_2026-11-12.md)，尚未切换手机默认算法。
 - 新增独立的大半径实验模式，用相邻状态差值减少递归计算的精度损失，实验半径支持到 sigma 1024；保留旧默认和原实验输出。CineStill 高分辨率薄图及独立数值对照见 [验证记录](docs/ENGINE_IIR_LARGE_RADIUS_2026-11-12.md)，仍待手机和完整大照片验收。
 
 详见[浮点条带适配与验证](docs/ENGINE_FLOAT_STRIPS_2026-11-12.md)及[压缩浮点读取与双云验证](docs/ENGINE_FLOAT_DEFLATE_2026-11-12.md)。
+
+**仍待验证：** 真实 Adreno/Mali 手机的驱动、显示、全尺寸内存和相册行为，以及受控胶片实拍对照。两台云机通过数值测试不等于手机验收，也不保证匹配相机 JPEG 或 Lightroom。完整分块渲染、交互色表预览和新光晕默认算法均未启用。
 
 ## 0.2.00-alpha-3 · 2026-11-11
 
