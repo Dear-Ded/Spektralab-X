@@ -180,17 +180,17 @@ class EngineHost(private val app: Application) {
     }
 
     /**
-     * Replaces [failed] after its GPU device was lost (zhaoye's recoverEngine()):
-     * nothing on a lost VkDevice works again, so the engine is destroyed and a
-     * new one created. When another caller already replaced it, returns the
+     * Replaces [failed] after device loss or a failed render integrity check.
+     * The new device also discards the failed engine's caches and pooled state.
+     * When another caller already replaced it, returns the
      * current one. The old engine is only retired while a session is still
      * open on it; that session's release frees it.
      */
-    suspend fun recover(failed: Long): Ready = mutex.withLock {
+    suspend fun recover(failed: Long, reason: String = "GPU device lost"): Ready = mutex.withLock {
         ready?.let { r -> if (r.engine != failed) return@withLock r.again() }
         val old = ready
         ready = null
-        events.add("GPU device lost: replacing the engine")
+        events.add("$reason: replacing the engine")
         val next = withContext(NonCancellable + EngineThread.dispatcher) {
             if (old != null) NativeEngine.destroy(old.engine)
             build(stocks.first, stocks.second)

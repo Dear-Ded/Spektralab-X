@@ -1,0 +1,19 @@
+/data/work/gpt-feedback-env-20261112/android-build/native/libspektralab_jni.so: 1 file pushed, 0 skipped. 15.1 MB/s (29630016 bytes in 1.868s)
+/data/work/gpt-feedback-env-20261112/android-build/feedback.jar: 1 file pushed, 0 skipped. 124.3 MB/s (6592 bytes in 0.000s)
+/data/work/gpt-feedback-env-20261112/android-build/libfeedback_fixture.so: 1 file pushed, 0 skipped. 170.5 MB/s (402744 bytes in 0.002s)
+3 files pushed, 0 skipped. 5.7 MB/s (30039352 bytes in 4.996s)
+/data/work/gpt-feedback-env-20261112/android-build/native/engine/resources/: 104 files pushed, 0 skipped. 3.2 MB/s (31168338 bytes in 9.283s)
+frame=preview-repack shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+frame=full shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+frame=full-repack shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+frame=export-bitmap-srgb shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+frame=film-bitmap-jpeg-srgb shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+jpeg=film-bitmap-jpeg-srgb bytes=432137
+frame=export-bitmap-p3 shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+frame=film-bitmap-jpeg-p3 shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+jpeg=film-bitmap-jpeg-p3 bytes=416857
+frame=film444-jpeg shape=1281x855 black_rows=0 white_rows=0 alpha_errors=0
+jpeg=film444-jpeg bytes=657849
+PASS android pipeline 1281x855
+case,width,height,exit_code,boot_completed_before,boot_completed_after
+pipeline-smoke,1281,855,0,,

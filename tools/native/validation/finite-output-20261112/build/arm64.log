@@ -1,0 +1,256 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /data/work/gpt-feedback-recovery-20261112/arm64
+[0/2] Re-checking globbed directories...
+[1/189] Creating directories for 'spk_jpeg_build'
+[2/189] No download step for 'spk_jpeg_build'
+[3/189] No update step for 'spk_jpeg_build'
+[4/189] No patch step for 'spk_jpeg_build'
+[5/189] Performing configure step for 'spk_jpeg_build'
+[6/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/blob.cpp.o
+[7/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/cam16.cpp.o
+[8/189] Performing build step for 'spk_jpeg_build'
+[9/189] Performing install step for 'spk_jpeg_build'
+[10/189] Completed 'spk_jpeg_build'
+[11/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o
+[12/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+[13/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[14/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+[15/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/json.cpp.o
+[16/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+[17/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/numeric.cpp.o
+[18/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[19/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/print_lut.cpp.o
+[20/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+[21/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/profile.cpp.o
+[22/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+[23/189] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/spectral.cpp.o
+[24/189] Linking CXX static library engine/libspektralab_core.a
+[25/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/blur.cpp.o
+[26/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[27/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[28/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+[29/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[30/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+/data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/engine.cpp:2609:8: warning: 'medium_probe_params' has C-linkage specified, but returns user-defined type 'Params' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2609 | Params medium_probe_params(const Params& session) {
+      |        ^
+/data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/engine.cpp:2682:6: warning: 'side_json' has C-linkage specified, but returns user-defined type 'Json' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2682 | Json side_json(const slm::Side& s) {
+      |      ^
+2 warnings generated.
+[31/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/imprint_raster.cpp.o
+[32/189] Building C object engine/CMakeFiles/spk_volk.dir/third_party/volk/volk.c.o
+[33/189] Linking C static library engine/libspk_volk.a
+[34/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[35/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp.o
+[36/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/mediumformat.cpp.o
+[37/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/canon_600.cpp.o
+[38/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/crx.cpp.o
+[39/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp.o
+[40/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp.o
+[41/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/decoders_libraw_dcrdefs.cpp.o
+[42/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/dng.cpp.o
+[43/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/fp_dng.cpp.o
+[44/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/generic.cpp.o
+[45/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp.o
+[46/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp.o
+[47/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp.o
+[48/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/pana8.cpp.o
+[49/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/smal.cpp.o
+[50/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/sonycc.cpp.o
+[51/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/unpack.cpp.o
+[52/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/sony_arw6.cpp.o
+[53/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decoders/unpack_thumb.cpp.o
+[54/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/decompressors/losslessjpeg.cpp.o
+[55/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/aahd_demosaic.cpp.o
+[56/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/ahd_demosaic.cpp.o
+[57/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp.o
+[58/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp.o
+[59/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/misc_demosaic.cpp.o
+[60/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/demosaic/xtrans_demosaic.cpp.o
+[61/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/integration/dngsdk_glue.cpp.o
+[62/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/integration/rawspeed_glue.cpp.o
+[63/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/libraw_c_api.cpp.o
+[64/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/libraw_datastream.cpp.o
+[65/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/adobepano.cpp.o
+[66/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/canon.cpp.o
+[67/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/ciff.cpp.o
+[68/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp.o
+[69/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/epson.cpp.o
+[70/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/exif_gps.cpp.o
+[71/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/fuji.cpp.o
+[72/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/hasselblad_model.cpp.o
+[73/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/identify_tools.cpp.o
+[74/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/identify.cpp.o
+[75/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/kodak.cpp.o
+[76/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/leica.cpp.o
+[77/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/makernotes.cpp.o
+[78/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/minolta.cpp.o
+[79/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/misc_parsers.cpp.o
+[80/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/nikon.cpp.o
+[81/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp.o
+[82/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/olympus.cpp.o
+[83/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/p1.cpp.o
+[84/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/pentax.cpp.o
+[85/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/samsung.cpp.o
+[86/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/sony.cpp.o
+[87/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/aspect_ratio.cpp.o
+[88/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/metadata/tiff.cpp.o
+[89/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/dcraw_process.cpp.o
+[90/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/mem_image.cpp.o
+[91/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp.o
+[92/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils.cpp.o
+[93/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils_dcrdefs.cpp.o
+[94/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/ext_preprocess.cpp.o
+[95/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/raw2image.cpp.o
+[96/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/preprocessing/subtract_black.cpp.o
+[97/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/cameralist.cpp.o
+[98/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/colorconst.cpp.o
+[99/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/colordata.cpp.o
+[100/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/tables/wblists.cpp.o
+[101/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/curves.cpp.o
+[102/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/decoder_info.cpp.o
+[103/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/init_close_utils.cpp.o
+[104/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/open.cpp.o
+[105/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/phaseone_processing.cpp.o
+[106/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/read_utils.cpp.o
+[107/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/thumb_utils.cpp.o
+[108/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/utils_dcraw.cpp.o
+[109/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/utils/utils_libraw.cpp.o
+[110/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/apply_profile.cpp.o
+[111/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/file_write.cpp.o
+[112/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/x3f/x3f_parse_process.cpp.o
+[113/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/x3f/x3f_utils_patched.cpp.o
+[114/189] Building CXX object engine/CMakeFiles/spk_libraw.dir/__/LibRaw-0.22.2-spk/src/write/tiff_writer.cpp.o
+[115/189] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/raw_headroom.cpp.o
+[116/189] Linking CXX static library engine/libspk_libraw.a
+[117/189] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/image_writer.cpp.o
+[118/189] Generating resources/vulkan/spk_affine3.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[119/189] Generating resources/vulkan/spk_boost.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[120/189] Generating resources/vulkan/spk_bw_correct.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[121/189] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[122/189] Generating resources/vulkan/spk_cctf_decode.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[123/189] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[124/189] Generating resources/vulkan/spk_couplers_correction.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[125/189] Generating resources/vulkan/spk_curves.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[126/189] Generating resources/vulkan/spk_di_encode.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[127/189] Building CXX object engine/CMakeFiles/spk_image_io.dir/src/io/raw_decoder.cpp.o
+[128/189] Linking CXX static library engine/libspk_image_io.a
+[129/189] Generating resources/vulkan/spk_di_normalise.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[130/189] Generating resources/vulkan/spk_dir_finish.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[131/189] Generating resources/vulkan/spk_edr.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[132/189] Generating resources/vulkan/spk_geometry_resample_df.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[133/189] Generating resources/vulkan/spk_glare_add.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[134/189] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[135/189] Generating resources/vulkan/spk_grain_layers.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[136/189] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[137/189] Generating resources/vulkan/spk_grain_simple.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[138/189] Generating resources/vulkan/spk_iir_boundary_df_acc.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_iir_boundary_df_acc.comp
+[139/189] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[140/189] Generating resources/vulkan/spk_iir_difference_df_acc.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+[141/189] Generating resources/vulkan/spk_lincomb3.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[142/189] Generating resources/vulkan/spk_log10_guarded.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[143/189] Generating resources/vulkan/spk_lognormal_field.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[144/189] Generating resources/vulkan/spk_lut2d_cubic.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[145/189] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[146/189] Generating resources/vulkan/spk_math_probe.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[147/189] Generating resources/vulkan/spk_matmul3.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[148/189] Generating resources/vulkan/spk_mul.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[149/189] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+[150/189] Generating resources/vulkan/spk_overscan_canvas.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+[151/189] Generating resources/vulkan/spk_overscan_light.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[152/189] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[153/189] Generating resources/vulkan/spk_print_exposure.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[154/189] Generating resources/vulkan/spk_reduce_max.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[155/189] Generating resources/vulkan/spk_rng_probe.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[156/189] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[157/189] Generating resources/vulkan/spk_scene_latitude.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[158/189] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[159/189] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[160/189] Generating resources/vulkan/spk_spectral_epilogue.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[161/189] Generating resources/vulkan/spk_split_probe.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[162/189] Generating resources/vulkan/spk_stride_sample.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[163/189] Generating resources/vulkan/spk_take_rgb.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[164/189] Generating resources/vulkan/spk_tc_b.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[165/189] Generating resources/vulkan/spk_to_rgba16.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[166/189] Generating resources/vulkan/spk_validate_finite.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_validate_finite.comp
+[167/189] Generating resources/vulkan/spk_view_cam16.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[168/189] Generating resources/vulkan/spk_view_geometry.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+[169/189] Generating resources/vulkan/spk_view_grade.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[170/189] Generating resources/vulkan/spk_view_grade_float.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[171/189] Generating resources/vulkan/spk_view_grade_di.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[172/189] Generating resources/vulkan/spk_view_pack.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[173/189] Generating resources/vulkan/spk_view_pair.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[174/189] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[175/189] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[176/189] cd /data/work/gpt-feedback-recovery-20261112/arm64/engine && /usr/bin/cmake -E copy_directory /data/work/gpt-finite-output-20261112/upstream/engine/resources /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources && /usr/bin/cmake -E copy_directory /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/profiles /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/NOTICE.md /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/fonts/LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/third_party/stb/LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/paper_grades.json /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/gpt-finite-output-20261112/upstream/engine/resources_product/neutral_print_filters.json /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/gpt-finite-output-20261112/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/DI
+[177/189] Building CXX object CMakeFiles/spektralab_jni.dir/tiff16.cpp.o
+[178/189] Building CXX object CMakeFiles/spektralab_jni.dir/storage_probe.cpp.o
+[179/189] Building CXX object CMakeFiles/spektralab_jni.dir/jpeg444.cpp.o
+[180/189] Building CXX object CMakeFiles/spektralab_jni.dir/resize.cpp.o
+[181/189] Building CXX object CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o
+[182/189] Building CXX object CMakeFiles/spektralab_jni.dir/layer2.cpp.o
+[183/189] Building CXX object CMakeFiles/spektralab_jni.dir/output_transform.cpp.o
+[184/189] Building CXX object CMakeFiles/spektralab_jni.dir/raw_development.cpp.o
+[185/189] Building CXX object CMakeFiles/spektralab_jni.dir/input_transform.cpp.o
+[186/189] Building CXX object CMakeFiles/spektralab_jni.dir/data/work/gpt-finite-output-20261112/upstream/engine/host/white_balance.cpp.o
+[187/189] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[188/189] Linking CXX static library engine/libspektralab_engine.a
+[189/189] Linking CXX shared library libspektralab_jni.so

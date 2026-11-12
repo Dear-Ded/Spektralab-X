@@ -1,0 +1,7 @@
+Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+5b6a05feb6203281ee9f69fee4b532ec4c60672f5b26dfb2961cc3347d21a4d7  /data/work/gpt-feedback-env-20261112/android-build/native/libspektralab_jni.so
+adc11d0b684bf71e1943e6d8d4cd9bfb850c7b63f2a110b057b1306dd60590a6  /data/work/gpt-feedback-env-20261112/android-build/feedback.jar
+e0a6614fd03cfaef8a03f3f21b3a04d8c0ce822b163ec640ae3e4fc4af89e9f7  /data/work/gpt-feedback-env-20261112/android-build/libfeedback_fixture.so
+11032c0d528b530b1bbebdecd227b20f17b1bbba15128ae667113020c141248f  /data/work/gpt-feedback-env-20261112/android-build/native/engine/resources/vulkan/spk_validate_finite.spv
+5e4b8e30cf897d35dd10a24655a579967d58c56b1ac846c784b9d05bb7f31653  /data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/view_process.cpp
+2868ce194d884801257db3f4241bcff1ba74e220032c25d7d428433dc3d4b0db  /data/work/gpt-finite-output-20261112/repo/tools/native/finite_output.cpp

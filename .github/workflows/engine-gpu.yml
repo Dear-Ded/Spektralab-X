@@ -42,6 +42,13 @@ jobs:
             bash tools/native/run_probe_lifetime.sh > fir-evidence/probe.log 2>&1
           ./probe-tests/storage_probe_lifetime --smoke >> fir-evidence/probe.log 2>&1
           cat fir-evidence/probe.log
+      - name: Reject non-finite Vulkan output
+        run: |
+          UP="$PWD/upstream" B="$PWD/build-fir" BUILD_DIR="$PWD/finite-tests" \
+            SPEKTRAFILM_VULKAN_FORCE_SPLIT=1 \
+            bash tools/native/run_finite_output.sh > fir-evidence/finite.log 2>&1
+          cp finite-tests/candidate.csv finite-tests/inputs.sha256 fir-evidence/
+          cat fir-evidence/finite.log
       - name: Compare full-plane and row FIR bytes
         run: |
           mkdir -p fir-evidence

@@ -1,0 +1,8 @@
+In file included from /data/work/gpt-finite-output-20261112/repo/tools/native/finite_output.cpp:7:
+/data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/engine.cpp:2609:8: warning: 'medium_probe_params' has C-linkage specified, but returns user-defined type 'Params' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2609 | Params medium_probe_params(const Params& session) {
+      |        ^
+/data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/engine.cpp:2682:6: warning: 'side_json' has C-linkage specified, but returns user-defined type 'Json' which is incompatible with C [-Wreturn-type-c-linkage]
+ 2682 | Json side_json(const slm::Side& s) {
+      |      ^
+2 warnings generated.

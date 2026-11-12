@@ -30,8 +30,8 @@ import kotlin.math.roundToInt
 
 enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 
-/** The pre-save check rejected a flat or incomplete frame; nothing was saved. */
-class BlankFrameException(val what: String) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, "导出画面异常（$what），未保存"))
+/** A render integrity check failed; the retry must replace its GPU state. */
+class BlankFrameException(val what: String, val engine: Long) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, "导出画面异常（$what），未保存"))
 
 /** The engine could not allocate (native heap or GPU memory); retried a size down like a Java OutOfMemoryError. */
 class OutOfMemoryException(detail: String) : Exception(ErrorCodes.format(ErrorCodes.OUT_OF_MEMORY, "内存不足：$detail"))
@@ -490,9 +490,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     step("GPU 被重置，正在重试", 0.05f)
                     host.recover(e.engine)
                 }
-                // A blank frame is a render that went wrong without saying so;
-                // the same smaller retry, on the same engine.
-                is BlankFrameException -> step("画面异常，正在重试", 0.05f)
+                is BlankFrameException -> {
+                    step("画面异常，重建引擎后重试", 0.05f)
+                    host.recover(e.engine, "render integrity failure")
+                }
                 // Java heap or native allocation: what the failed attempt held is
                 // released by now (process's finally), and the retry trims the
                 // GPU pool before it opens.
@@ -510,6 +511,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 throw EngineException("GPU 连续两次被系统重置；请调小工作尺寸后重试")
             } catch (again: BlankFrameException) {
                 host.events.add("job ${job.id}: blank again: ${again.message}")
+                host.recover(again.engine, "repeated render integrity failure")
                 throw EngineException("导出画面两次异常（${again.what}），未保存；请调小工作尺寸后重试")
             } catch (again: Throwable) {
                 if (!isOutOfMemory(again)) throw again
@@ -630,9 +632,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         if (NativeEngine.lastWasCancelled()) throw CancellationException("cancelled")
         if (NativeEngine.lastWasDeviceLost()) throw DeviceLostException(engine, NativeEngine.lastError())
         val error = NativeEngine.lastError()
-        if (error.startsWith("export check:")) {
+        if (error.startsWith("export check:") || "render integrity:" in error) {
             host.events.add(error)
-            throw BlankFrameException(blankReason(error))
+            throw BlankFrameException(blankReason(error), engine)
         }
         if (nativeOutOfMemory(error)) throw OutOfMemoryException(error)
         throw EngineException("$what：$error")
@@ -644,8 +646,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         error.startsWith("cannot allocate a ") || "(VkResult -1)" in error || "(VkResult -2)" in error
 
     private fun blankReason(error: String): String = when {
+        "non-finite RGB" in error -> "像素计算异常"
+        "incomplete GPU validation" in error -> "GPU 计算不完整"
         "RGBA16 alpha" in error -> "像素不完整"
-        "frame layout" in error -> "像素布局异常"
+        "frame layout" in error || "RGB layout" in error -> "像素布局异常"
         "black" in error -> "全黑"
         "white" in error -> "全白"
         "solid colour" in error -> "纯色"

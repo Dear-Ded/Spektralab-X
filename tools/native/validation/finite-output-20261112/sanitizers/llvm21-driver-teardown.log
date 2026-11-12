@@ -1,0 +1,32 @@
+30MP_scan_ms=162.126 summary_bytes=8
+PASS candidate materialise_accepted=3 materialise_rejected=18 view_cases=21 proof_cases=3
+=================================================================
+==684771==ERROR: AddressSanitizer: alloc-dealloc-mismatch (operator new vs free) on 0x521000041100
+    #0 0x7fae3d9f6537 in __interceptor_free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:127
+    #1 0x7fae3978447e  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x9e847e)
+    #2 0x7fae398be42c  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0xb2242c)
+    #3 0x7fae395991e2  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x7fd1e2)
+    #4 0x7fae39598f20  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x7fcf20)
+    #5 0x7fae39581555  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x7e5555)
+    #6 0x7fae3957f280  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x7e3280)
+    #7 0x7fae3a05581c in vkDestroyDevice (/lib/x86_64-linux-gnu/libvulkan.so.1+0x3481c)
+    #8 0x6b4129 in spk::gpu::(anonymous namespace)::VulkanGpu::~VulkanGpu() (/data/work/gpt-finite-output-20261112/asan/candidate+0x6b4129)
+    #9 0x6b434c in spk::gpu::(anonymous namespace)::VulkanGpu::~VulkanGpu() (/data/work/gpt-finite-output-20261112/asan/candidate+0x6b434c)
+    #10 0x5ea48d in spk_engine::~spk_engine() /data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/engine.cpp:343
+    #11 0x4c6167 in main /data/work/gpt-finite-output-20261112/repo/tools/native/finite_output.cpp:152
+    #12 0x7fae3cddad8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7fae3cddae3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #14 0x410fd4 in _start (/data/work/gpt-finite-output-20261112/asan/candidate+0x410fd4)
+
+0x521000041100 is located 0 bytes inside of 4120-byte region [0x521000041100,0x521000042118)
+allocated by thread T1 here:
+    #0 0x7fae3d9f81e7 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:99
+    #1 0x7fae39785e4d  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x9e9e4d)
+
+Thread T1 created by T0 here:
+    #0 0x7fae3d99a685 in __interceptor_pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:216
+    #1 0x7fae3964c075  (/opt/android/emulator/lib64/vulkan/./libvulkan_lvp.so+0x8b0075)
+
+SUMMARY: AddressSanitizer: alloc-dealloc-mismatch ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:127 in __interceptor_free
+==684771==HINT: if you don't care about these errors you may set ASAN_OPTIONS=alloc_dealloc_mismatch=0
+==684771==ABORTING

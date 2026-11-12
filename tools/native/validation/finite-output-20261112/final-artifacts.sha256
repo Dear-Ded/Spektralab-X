@@ -1,0 +1,11 @@
+77d9e564c77a5772219b44d4ff66bcb377670decb33157afe00b3a10ad6aeb4c  /data/work/gpt-finite-output-20261112/0054-final.patch
+e7d9c66788a4faeeb4ff5e27146ccc12a1a32b8fa8b5f87e9eb511cf5b70c474  /data/work/gpt-finite-output-20261112/host/engine/libspektralab_engine.a
+5b6a05feb6203281ee9f69fee4b532ec4c60672f5b26dfb2961cc3347d21a4d7  /data/work/gpt-feedback-env-20261112/android-build/native/libspektralab_jni.so
+d6e2437e5f3194b15aa0132acc7856e786f7348a6d0a3f26a622f8a862baf621  /data/work/gpt-feedback-recovery-20261112/arm64/libspektralab_jni.so
+a39c5ad740c5ec18c98c0521f3763bbddc7f24efffa9177d9708f1540dee198e  /data/work/gpt-finite-output-20261112/upstream/engine/src/pipeline/finite_output.hpp
+d348566e530d1c8d3bf688315e905fd439f16a2bc8afec502c490a4f7e0bf8b1  /data/work/gpt-finite-output-20261112/upstream/engine/src/shaders/vulkan/spk_validate_finite.comp
+11032c0d528b530b1bbebdecd227b20f17b1bbba15128ae667113020c141248f  /data/work/gpt-finite-output-20261112/host/engine/resources/vulkan/spk_validate_finite.spv
+65819394c96fa1b166ccb32286a0bf27c522f45eee815f3aa2fe2c8d2bc06ce8  /data/work/gpt-finite-output-20261112/final-inputs.tgz
+29004ddbfc5f73b53eb1bdc0657be8e4f21d172d6405c15ba444302e24bd0402  /data/work/gpt-finite-output-20261112/final-runner.tgz
+4c8ddd454eede778a08ed56f681c03fc0e794f846b68cdccad8b780fe4e5d2cb  /data/work/gpt-finite-output-20261112/repo/app/src/main/java/com/dearded/spektralab/EngineHost.kt
+04ac3a003566ad2b5baf6755ed6a5405a0620ab093d7e7ab662914271f458620  /data/work/gpt-finite-output-20261112/repo/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt

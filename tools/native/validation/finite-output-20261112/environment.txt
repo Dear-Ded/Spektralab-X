@@ -1,0 +1,10 @@
+2026-11-12T15:22:58+00:00
+Linux ser858255664526 5.15.0-30-generic #31-Ubuntu SMP Thu May 5 10:00:34 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Pkg.UserSrc=false
+Pkg.Revision=37.2.13
+Pkg.Path=emulator
+Pkg.Desc=Android Emulator
+Pkg.BuildId=16740729Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+software_icd=/opt/android/emulator/lib64/vulkan/lvp_icd.json
+asan_icd=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json

@@ -1,0 +1,7 @@
+patching file engine/CMakeLists.txt
+patching file engine/src/gpu/vulkan_gpu.cpp
+patching file engine/src/pipeline/engine.cpp
+patching file engine/src/pipeline/view_process.cpp
+patching file engine/src/pipeline/finite_output.hpp
+patching file engine/src/shaders/vulkan/spk_validate_finite.comp
+PASS all six overlay outputs match tested source

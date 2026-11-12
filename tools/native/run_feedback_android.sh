@@ -5,7 +5,7 @@ set -euo pipefail
 : "${ANDROID_HOME:?SDK required}" "${BUILD_DIR:?build_feedback_android.sh output required}"
 : "${RESULTS:?new isolated host results directory required}"
 : "${ADB_SERIAL:?explicit disposable emulator serial required}"
-case ${ANDROID_CASES:-all} in all|codec|pipeline) ;; *) printf 'ANDROID_CASES must be all, codec or pipeline\n' >&2; exit 1;; esac
+case ${ANDROID_CASES:-all} in all|codec|pipeline|smoke) ;; *) printf 'ANDROID_CASES must be all, codec, pipeline or smoke\n' >&2; exit 1;; esac
 adb=("$ANDROID_HOME/platform-tools/adb" -s "$ADB_SERIAL")
 [[ $ADB_SERIAL == emulator-* ]] || { printf 'Cloud emulator required\n' >&2; exit 1; }
 boot_complete=$("${adb[@]}" shell getprop sys.boot_completed | tr -d '\r')
@@ -25,6 +25,7 @@ printf 'initial_boot_completed=%s\nallow_booting_avd=%s\n' "$boot_complete" "${A
   > "$RESULTS/android-environment.txt"
 cp "$BUILD_DIR/build-inputs.txt" "$RESULTS/build-inputs.txt"
 printf 'case,width,height,exit_code,boot_completed_before,boot_completed_after\n' > "$RESULTS/cases.csv"
+failed=0
 run_case() {
   local name=$1 width=$2 height=$3 mode=$4
   local ready_before ready_after
@@ -41,15 +42,19 @@ run_case() {
   tail -12 "$RESULTS/$name.log"
   return "$status"
 }
-if [[ ${ANDROID_CASES:-all} != pipeline ]]; then
-  run_case codec-full 6709 4475 codec || true
+if [[ ${ANDROID_CASES:-all} != pipeline && ${ANDROID_CASES:-all} != smoke ]]; then
+  run_case codec-full 6709 4475 codec || failed=1
 fi
 if [[ ${ANDROID_CASES:-all} != codec ]]; then
   if run_case pipeline-smoke 1281 855 pipeline; then
-    run_case pipeline-full 6709 4475 pipeline || true
+    if [[ ${ANDROID_CASES:-all} != smoke ]]; then
+      run_case pipeline-full 6709 4475 pipeline || failed=1
+    fi
   else
+    failed=1
     printf 'pipeline-full,6709,4475,skipped-prerequisite,,\n' >> "$RESULTS/cases.csv"
   fi
 fi
 "${adb[@]}" logcat -d -t 300 > "$RESULTS/logcat-tail.txt"
 cat "$RESULTS/cases.csv"
+exit "$failed"
