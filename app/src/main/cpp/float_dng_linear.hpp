@@ -17,6 +17,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <zlib.h>
 
 namespace spk::android {
 
@@ -80,7 +81,64 @@ struct Tag {
 struct StripInput {
     std::ifstream file;
     std::uint32_t rows_per_strip = 0;
-    std::vector<std::uint64_t> offsets;
+    bool deflated = false;
+    std::vector<std::uint64_t> offsets, byte_counts;
+};
+
+// One zlib stream per strip, bounded input and one caller-owned output row.
+// Check the trailer even when the final row exactly fills avail_out.
+class DeflateStrip {
+    std::ifstream& file_;
+    const FloatDngCancel& cancelled_;
+    z_stream stream_{};
+    std::array<unsigned char, 16384> input_{};
+    std::uint64_t remaining_;
+    bool ended_ = false;
+
+    void pump(unsigned char* output, unsigned capacity) {
+        stream_.next_out = output;
+        stream_.avail_out = capacity;
+        do {
+            check_cancel(cancelled_);
+            if (!stream_.avail_in && remaining_) {
+                const auto size = std::min<std::uint64_t>(input_.size(), remaining_);
+                file_.read(reinterpret_cast<char*>(input_.data()), std::streamsize(size));
+                require(bool(file_), "float DNG compressed strip read failed");
+                remaining_ -= size;
+                stream_.next_in = input_.data();
+                stream_.avail_in = unsigned(size);
+            }
+            const auto before_in = stream_.avail_in, before_out = stream_.avail_out;
+            const int status = inflate(&stream_, Z_NO_FLUSH);
+            require(status == Z_OK || status == Z_STREAM_END, "invalid float DNG Deflate stream");
+            ended_ = status == Z_STREAM_END;
+            require(ended_ || before_in != stream_.avail_in || before_out != stream_.avail_out,
+                    "incomplete float DNG Deflate stream");
+        } while (stream_.avail_out && !ended_);
+    }
+
+public:
+    DeflateStrip(std::ifstream& file, std::uint64_t bytes, const FloatDngCancel& cancelled)
+        : file_(file), cancelled_(cancelled), remaining_(bytes) {
+        require(inflateInit(&stream_) == Z_OK, "cannot initialize float DNG Deflate decoder");
+    }
+    ~DeflateStrip() { inflateEnd(&stream_); }
+    DeflateStrip(const DeflateStrip&) = delete;
+    DeflateStrip& operator=(const DeflateStrip&) = delete;
+
+    void row(std::vector<unsigned char>& output) {
+        require(!ended_, "short float DNG Deflate output");
+        pump(output.data(), unsigned(output.size()));
+        require(!stream_.avail_out, "short float DNG Deflate output");
+    }
+    void finish() {
+        if (!ended_) {
+            unsigned char extra;
+            pump(&extra, 1);
+            require(stream_.avail_out == 1, "excess float DNG Deflate output");
+        }
+        require(ended_ && !remaining_ && !stream_.avail_in, "trailing float DNG Deflate data");
+    }
 };
 
 inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatDngLimits& limits,
@@ -115,7 +173,7 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     require(dword(entries.data() + count * 12) == 0, "unsupported float DNG: requires one IFD");
     metadata_ranges.emplace_back(offset, std::uint64_t(offset) + 2 + count * 12 + 4);
     std::map<unsigned, Tag> tags;
-    constexpr unsigned allowed[] = {254,256,257,258,259,262,273,274,277,278,279,284,339,
+    constexpr unsigned allowed[] = {254,256,257,258,259,262,273,274,277,278,279,284,317,339,
         271,272,50706,50707,50708,50713,50714,50717,50721,50728,50778,50829,50964};
     for (unsigned i = 0; i < count; ++i) {
         const auto* p = entries.data() + i * 12;
@@ -167,7 +225,15 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     require(tag(50829).type == 4, "invalid float DNG ActiveArea encoding");
     for (const unsigned id : {271u,272u,50708u})
         if (tags.count(id)) require(tag(id).type == 2, "invalid float DNG camera text encoding");
-    scalar(254, 0); scalar(259, 1); scalar(262, 34892); scalar(277, 3); scalar(284, 1);
+    scalar(254, 0); scalar(262, 34892); scalar(277, 3); scalar(284, 1);
+    const auto compression = values(259);
+    require(compression == std::vector<double>({1}) || compression == std::vector<double>({8}),
+            "unsupported float DNG compression");
+    const bool deflated = compression[0] == 8;
+    if (tags.count(317)) require(tag(317).type == 3, "invalid float DNG Predictor encoding");
+    const auto predictor = tags.count(317) ? values(317) : std::vector<double>{1};
+    require(predictor == std::vector<double>({deflated ? 3.0 : 1.0}),
+            "unsupported float DNG Predictor");
     require(values(258) == std::vector<double>({32,32,32}) && values(339) == std::vector<double>({3,3,3}),
             "unsupported float DNG: requires float32 RGB samples");
     for (const unsigned id : {50706u, 50707u})
@@ -206,8 +272,9 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
         check_cancel(cancelled);
         const auto strip_rows = std::min<std::uint64_t>(rows_per_strip,
             m.height - std::uint64_t(i) * rows_per_strip);
-        const auto length = strip_rows * m.width * 12;
-        require(strip_bytes[i] == double(length), "unsupported float DNG strip byte count");
+        const auto length = std::uint64_t(strip_bytes[i]);
+        require(length && (deflated || length == strip_rows * m.width * 12),
+                "unsupported float DNG strip byte count");
         const auto begin = std::uint64_t(strip[i]);
         require(begin <= bytes && length <= bytes - begin, "float DNG strip outside file");
         const auto end_strip = begin + length;
@@ -239,7 +306,9 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     check_cancel(cancelled);
     if (input) {
         input->rows_per_strip = rows_per_strip;
+        input->deflated = deflated;
         input->offsets.assign(strip.begin(), strip.end());
+        input->byte_counts.assign(strip_bytes.begin(), strip_bytes.end());
         input->file = std::move(file);
     }
     return m;
@@ -351,8 +420,8 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
                 data.sizes.width == m.width && data.sizes.height == m.height &&
                 data.sizes.top_margin == 0 && data.sizes.left_margin == 0 && data.sizes.pixel_aspect == 1,
                 "unsupported float DNG source geometry");
-        require(raw->unpack_function_name() &&
-                std::string(raw->unpack_function_name()) == "uncompressed_fp_dng_load_raw()",
+        require(raw->unpack_function_name() && std::string(raw->unpack_function_name()) ==
+                (input.deflated ? "deflate_dng_load_raw()" : "uncompressed_fp_dng_load_raw()"),
                 "unsupported float DNG decoder");
         candidate.width = m.orientation >= 5 ? m.height : m.width;
         candidate.height = m.orientation >= 5 ? m.width : m.height;
@@ -360,19 +429,32 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
         if (const char* name = raw->unpack_function_name()) candidate.decoder_name = name;
         check_cancel(cancelled);
         candidate.rgb.resize(std::size_t(m.width) * m.height * 3);
-        // Validated strips are LE float32 chunky RGB without a predictor.
-        // LibRaw's matching unpacker only copies these words and scans fmaximum;
-        // the scene-linear path does not use that maximum or convertFloatToInt.
+        // Keep normalization independent of any frame-wide maximum and avoid
+        // LibRaw's complete float plane / float-to-integer compatibility path.
         static_assert(sizeof(float) == 4 && std::numeric_limits<float>::is_iec559);
         std::vector<unsigned char> row(std::size_t(m.width) * 12);
+        std::unique_ptr<DeflateStrip> compressed;
         for (unsigned y = 0; y < m.height; ++y) {
             check_cancel(cancelled);
             if (y % input.rows_per_strip == 0) {
                 input.file.seekg(std::streamoff(input.offsets[y / input.rows_per_strip]));
                 require(bool(input.file), "float DNG strip seek failed");
+                if (input.deflated) {
+                    compressed.reset();
+                    compressed = std::make_unique<DeflateStrip>(input.file,
+                        input.byte_counts[y / input.rows_per_strip], cancelled);
+                }
             }
-            input.file.read(reinterpret_cast<char*>(row.data()), std::streamsize(row.size()));
-            require(bool(input.file), "float DNG strip row read failed");
+            if (input.deflated) {
+                compressed->row(row);
+                if (y + 1 == m.height || (y + 1) % input.rows_per_strip == 0) compressed->finish();
+                // Predictor 3 differences cross byte planes with an RGB
+                // component stride; the recurrence resets on every row.
+                for (std::size_t i = 3; i < row.size(); ++i) row[i] += row[i - 3];
+            } else {
+                input.file.read(reinterpret_cast<char*>(row.data()), std::streamsize(row.size()));
+                require(bool(input.file), "float DNG strip row read failed");
+            }
             for (unsigned x = 0; x < m.width; ++x) {
                 unsigned dx = x, dy = y;
                 switch (m.orientation) {
@@ -386,7 +468,10 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
                 }
                 std::array<double, 3> balanced{};
                 for (unsigned c = 0; c < 3; ++c) {
-                    const auto bits = dword(row.data() + std::size_t(x) * 12 + c * 4);
+                    const auto n = std::size_t(x) * 3 + c, plane = std::size_t(m.width) * 3;
+                    const auto bits = input.deflated ? (std::uint32_t(row[n]) << 24) |
+                        (std::uint32_t(row[n + plane]) << 16) | (std::uint32_t(row[n + plane * 2]) << 8) |
+                        row[n + plane * 3] : dword(row.data() + n * 4);
                     float stored;
                     std::memcpy(&stored, &bits, sizeof stored);
                     const double sample = stored;

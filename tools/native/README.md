@@ -621,3 +621,26 @@ See [the ICC contract](../../docs/ICC_TYPED_CONTRACT_2026-11-11.md),
 [offline LUT rejection](../../docs/LUT_OFFLINE_EXPERIMENT_2026-11-11.md), and
 [cloud Android feasibility](../../docs/CLOUD_ANDROID_TESTING_2026-11-11.md)
 for each probe's domain, reproduction and device-test limits.
+
+## Precision-preserving Deflate LinearRaw strips
+
+```bash
+UP=/path/to/patched/upstream B=/path/to/decoder/build \
+  BASELINE_INCLUDE=/path/to/b7ec00e/header/directory \
+  BUILD_DIR=/path/to/new-results MEMORY=1 bash tools/native/run_float_dng_deflate.sh
+```
+
+Requires C++20, Python 3 and zlib headers/library, with patched LibRaw 0.22.2
+built with `USE_ZLIB`. It compares predicted, shuffled float32 RGB strips to
+frozen uncompressed float output, an independent matrix/orientation reference
+and LibRaw's unpacked words. It also exercises the production precision
+dispatcher, cancellation, malformed/truncated/trailing streams, I/O mutation,
+SHORT/LONG arrays and strip admission. `SANITIZE=1 ASAN_OPTIONS=detect_leaks=0`
+instruments the probes, not supplied archives or system zlib.
+
+The decoder-only CMake project in `float_dng_deflate_host/` can build fresh
+`spk_libraw` and `spk_image_io` archives without Vulkan/resources. Set
+`SPK_UPSTREAM` and `SPEKTRALAB_LIBRAW_SOURCE` to verified patched source trees.
+Large-fixture generation exits before a separate memory measurement process
+starts. Output remains a complete float plane. Evidence, commands and limits:
+[Deflate report](../../docs/ENGINE_FLOAT_DEFLATE_2026-11-12.md).

@@ -1,0 +1,5 @@
+Linux 6.18.54-instabox
+4
+g++ (Debian 14.2.0-19) 14.2.0
+Python 3.13.5
+zlib build/runtime 1.3.1 1.3.1

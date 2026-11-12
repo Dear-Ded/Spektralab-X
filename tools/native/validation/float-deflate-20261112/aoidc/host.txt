@@ -1,0 +1,5 @@
+Linux 5.15.0-30-generic
+4
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Python 3.10.12
+zlib build/runtime 1.2.11 1.2.11

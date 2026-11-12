@@ -60,10 +60,14 @@ int main(int argc, char** argv) {
         const std::filesystem::path path(argv[3]);
         std::filesystem::copy_file(argv[1], path, std::filesystem::copy_options::overwrite_existing);
         const auto original_size = std::filesystem::file_size(path);
-        // The final source-height polls are the row loop plus the final check.
-        // The fixture is wide enough that reading a row bypasses stream buffering.
+        // Metadata completes before LibRaw setup and the retained stream's
+        // first row. Count it separately so Deflate refill polls cannot move
+        // the injection into a later strip whose data is already buffered.
         require(reference.source.width >= 2048 && reference.source.height >= 4, "wide IO fixture required");
-        const int change_at = polls - int(reference.source.height);
+        int metadata_polls = 0;
+        spk::android::float_dng_detail::metadata(argv[1], limits,
+            [&] { ++metadata_polls; return false; });
+        const int change_at = metadata_polls + 4;
         require(change_at > 0, "row poll boundary");
         FloatDngLinear result;
         result.width = 77; result.height = 88; result.rgb = {-9,-3,5}; result.make = "unchanged";
@@ -95,7 +99,7 @@ int main(int argc, char** argv) {
         std::filesystem::remove(retired);
         require(changed, "IO mutation reached before row reads");
         if (mode == "--short-read") {
-            require(!ok && error.find("strip row read failed") != std::string::npos,
+            require(!ok && error.find("read failed") != std::string::npos,
                     "short source must fail explicitly without legacy retry: " + error);
             require(result.width == 77 && result.height == 88 && result.make == "unchanged" &&
                     result.rgb == std::vector<float>({-9,-3,5}), "failed read replaced caller output");

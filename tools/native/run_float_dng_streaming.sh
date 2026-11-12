@@ -18,7 +18,7 @@ for version in old new; do
     if [[ "$version" == old ]]; then include="$baseline"; fi
     for source in float_dng_linear float_dng_streaming; do
         "${CXX:-c++}" "${flags[@]}" -I"$include" -I"$up/engine/src" -I"$lib" \
-            "$repo/tools/native/$source.cpp" "$b/engine/libspk_libraw.a" -ldl -o "$build/$source-$version"
+            "$repo/tools/native/$source.cpp" "$b/engine/libspk_libraw.a" -ldl -lz -o "$build/$source-$version"
     done
 done
 options=()

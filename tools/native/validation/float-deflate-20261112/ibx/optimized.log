@@ -1,0 +1,3 @@
+PASS streaming --short-read: source rows=64,polls=251,mutation_at=31
+PASS streaming --replace-source: source rows=64,polls=251,mutation_at=31
+{"absolute_tolerance": 2e-06, "byte_identical_cases": 499, "cancellation_boundaries": 279, "dispatcher_cancellation_boundaries": 253, "independent_libraw_word_cases": 23, "independent_maximum_absolute_error": 2.384185791015625e-07, "io_mutations": 2, "large_fixture_generated": false, "malformed_rejected": 15, "maximum_strips": 1024, "passed": true}

@@ -1,0 +1,50 @@
+[
+  {
+    "plain": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 156892,
+      "decode_ms": 2336.365583
+    },
+    "deflate": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 160584,
+      "decode_ms": 2847.778189
+    }
+  },
+  {
+    "deflate": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 160668,
+      "decode_ms": 2941.566307
+    },
+    "plain": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 156888,
+      "decode_ms": 2219.90733
+    }
+  },
+  {
+    "plain": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 156864,
+      "decode_ms": 2362.875597
+    },
+    "deflate": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 160668,
+      "decode_ms": 3008.275703
+    }
+  }
+]

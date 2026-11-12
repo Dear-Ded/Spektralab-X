@@ -1,0 +1,11 @@
+{"passed": true, "historical_cases": 26, "historical_accepted": 17, "malformed_cases": 18, "limit_cases": 4, "cancellation_cases": 88, "maximum_absolute_error": 4.76837158203125e-07, "independent_absolute_tolerance": 2e-06, "unchanged_components": 8064, "distant_maximum_byte_equal": true, "scaled_AsShotNeutral_byte_equal": true, "adjacent_float_preserved": true, "signed_and_headroom_preserved": true, "integer_no_read_no_cancel_no_mutation": true, "atomic_failures": true, "input_plus_output_payload_bytes_per_pixel": 24}
+PASS streaming --short-read: source rows=64,polls=85,mutation_at=20
+PASS streaming --replace-source: source rows=64,polls=85,mutation_at=20
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=31
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=31
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=31
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=31
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=31
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=31
+{"byte_identical_cases": 300, "cancellation_boundaries": 124, "float_headroom_and_signed_words_preserved": true, "independent_absolute_tolerance": 2e-06, "io_mutations": 8, "large_fixture_generated": false, "maximum_strips": 1024, "short_long_layout_cases": 8}
+malformed_rejected=15

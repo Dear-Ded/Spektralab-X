@@ -13,5 +13,5 @@ if [[ "${SANITIZE:-0}" == 1 ]]; then
     flags+=(-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-pie -no-pie)
 fi
 "${CXX:-c++}" "${flags[@]}" -I"$repo/app/src/main/cpp" -I"$up/engine/src" -I"$lib" \
-    "$repo/tools/native/float_dng_linear.cpp" "$b/engine/libspk_libraw.a" -ldl -o "$build/float_dng_linear"
+    "$repo/tools/native/float_dng_linear.cpp" "$b/engine/libspk_libraw.a" -ldl -lz -o "$build/float_dng_linear"
 python3 "$repo/tools/native/float_dng_linear_fixtures.py" "$build/fixtures" --probe "$build/float_dng_linear"
