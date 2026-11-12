@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "known_homography_max_corner_error_pixels": 0.01891019195318222,
+  "known_exposure_ev": 0.32192809488736235,
+  "exposure_fit_error_ev": 0.000005228263112722065,
+  "tagged_srgb_identity": true,
+  "input_f32_unchanged": true,
+  "unrelated_jpeg_rejected": true,
+  "dotted_prefix_preserved": true,
+  "jpeg_exif_orientation6_applied": true
+}

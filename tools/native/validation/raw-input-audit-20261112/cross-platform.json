@@ -1,0 +1,53 @@
+{
+  "all_12_outputs_byte_equal": true,
+  "cases": [
+    {
+      "case": "float-output-1",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-2",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-3",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-4",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-5",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-6",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-7",
+      "byte_equal": true
+    },
+    {
+      "case": "float-output-8",
+      "byte_equal": true
+    },
+    {
+      "case": "integer-bayer-full",
+      "byte_equal": true
+    },
+    {
+      "case": "integer-bayer-half",
+      "byte_equal": true
+    },
+    {
+      "case": "integer-linear-full",
+      "byte_equal": true
+    },
+    {
+      "case": "integer-linear-half",
+      "byte_equal": true
+    }
+  ]
+}

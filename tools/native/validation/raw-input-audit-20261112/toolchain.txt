@@ -1,0 +1,13 @@
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+x86_64-w64-mingw32-g++ (GCC) 10-posix 20220113
+cmake version 3.22.1
+	DLL Name: KERNEL32.dll
+	DLL Name: msvcrt.dll
+	DLL Name: WS2_32.dll
+21b9e26b0c49993c22fe71a0ad2654eb52845267f3c9f8d30fa8b4718a813caf  /data/work/gpt-raw-audit-20261112/windows/raw_color_audit.exe
+5eeb3b324e5a37209f670c5a01d0b92f3d84dae68d7138ab0e5d4375f653f563  /data/work/gpt-opcode-cancel-20261112/repo/tools/native/raw_color_audit.cpp
+3cb07ccc8bea7228a9376a79823cc7236ca9f4153d7346d26d07868127c858ab  /data/work/gpt-opcode-cancel-20261112/repo/tools/native/raw_color_audit_regression.py
+daf3e134f656954ab1d2b1d96023dbc8f23445ae4bb9594ffa8a757af3b4db10  /data/work/gpt-opcode-cancel-20261112/repo/app/src/main/cpp/raw_precision_input.hpp
+f2a30d40fc679b78c84bc7e991c5d26f229bb2a22d147d279e4924d4be9534d9  /data/work/gpt-opcode-cancel-20261112/repo/app/src/main/cpp/float_dng_linear.hpp
+ad247eb2c1d3b38d6003c36f2271027c2abf30ceecc8098869eab365bf8a46bb  /data/work/gpt-opcode-cancel-20261112/upstream/engine/src/io/raw_decoder.cpp
+4af219eb8ed688b95f30fd21d5d0580dafcb86020dc90f223c462aed926c31cb  /data/work/gpt-opcode-cancel-20261112/upstream/engine/src/io/raw_camera.hpp

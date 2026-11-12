@@ -1,0 +1,240 @@
+{
+  "summary": {
+    "passed": true,
+    "float_orientations": 8,
+    "integer_decodes": 4,
+    "rational_float_metadata_preserved": true,
+    "integer_black_and_white_preserved": true,
+    "bayer_half_size_and_linear_full_size_verified": true,
+    "maximum_float_error": 1.1920928955078125e-7,
+    "maximum_integer_compatible_error": 0.000007881786360408594,
+    "integer_linear_nonzero_black_reference_gap": 0.0037299514970185466,
+    "complete_dng_normalization_claimed": false
+  },
+  "records": [
+    {
+      "case": "float-output-1",
+      "mode": "float_linear_v1",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "3eccc118768825b9af16c67d9d920c18aae5f64638a8a931ad12e9764e2a623c",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-2",
+      "mode": "float_linear_v1",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "29fd83361e18a68301a4711913965c62de3aff53c9b1311be80f0916d1c34a45",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-3",
+      "mode": "float_linear_v1",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "ccf78d478485b143aa89497ed053e98d22cab8ce1921fb0788232aa6416df08b",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-4",
+      "mode": "float_linear_v1",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "be8f7345c3a5f8c37c75dac889cee8662e490111fe87bcff69ee3fc13e72eb18",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-5",
+      "mode": "float_linear_v1",
+      "width": 48,
+      "height": 64,
+      "pixel_sha256": "82d80c3119b33a2d8100adf92f3c7932bec63fb9418f7aa531bea9fe27dc1eb8",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-6",
+      "mode": "float_linear_v1",
+      "width": 48,
+      "height": 64,
+      "pixel_sha256": "6b001e180567638ff86b3337eb5e8e5a85fb4ded0ad5093a66ca13ba830bbe36",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-7",
+      "mode": "float_linear_v1",
+      "width": 48,
+      "height": 64,
+      "pixel_sha256": "b57436c7c2c452aacfc312fa4fadb5c67a46d11bc9c458f3346245ea55f8e34a",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "float-output-8",
+      "mode": "float_linear_v1",
+      "width": 48,
+      "height": 64,
+      "pixel_sha256": "3866c2d0fdf87ac5dadcd3e86cb2e82a6e799b11b8e56dbc25752c612fa4bf5b",
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "postprocess_maximum": 0,
+      "maximum_independent_pixel_error": 1.1920928955078125e-7
+    },
+    {
+      "case": "integer-bayer-full",
+      "mode": "integer_compatible16",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "40a498d1a3bb5fdddf5f14892cb058598905dedaff4717b4833f7c626af0a243",
+      "black": 64,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "black_pattern": [
+        0
+      ],
+      "white": 4095,
+      "postprocess_maximum": 4031,
+      "maximum_independent_pixel_error": 0.000006747361123771167,
+      "maximum_dng_normalization_reference_gap": 0.000006747361123771167
+    },
+    {
+      "case": "integer-bayer-half",
+      "mode": "integer_compatible16",
+      "width": 32,
+      "height": 24,
+      "pixel_sha256": "9f9c89bb26ca0a3bcb9c973ba75755e53417e17dc1ee525e208a862ff92520c1",
+      "black": 64,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "black_pattern": [
+        0
+      ],
+      "white": 4095,
+      "postprocess_maximum": 4031,
+      "maximum_independent_pixel_error": 0.000006747361123771167,
+      "maximum_dng_normalization_reference_gap": 0.000006747361123771167
+    },
+    {
+      "case": "integer-linear-full",
+      "mode": "integer_compatible16",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "71d4e5ed5b774984af808cdf2ec83703a3bce613393c2548a69ea4bdca813b64",
+      "black": 0,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        0
+      ],
+      "black_pattern": [],
+      "white": 4095,
+      "postprocess_maximum": 4095,
+      "maximum_independent_pixel_error": 0.000007881786360408594,
+      "maximum_dng_normalization_reference_gap": 0.0037299514970185466
+    },
+    {
+      "case": "integer-linear-half",
+      "mode": "integer_compatible16",
+      "width": 64,
+      "height": 48,
+      "pixel_sha256": "71d4e5ed5b774984af808cdf2ec83703a3bce613393c2548a69ea4bdca813b64",
+      "black": 0,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        0
+      ],
+      "black_pattern": [],
+      "white": 4095,
+      "postprocess_maximum": 4095,
+      "maximum_independent_pixel_error": 0.000007881786360408594,
+      "maximum_dng_normalization_reference_gap": 0.0037299514970185466
+    }
+  ]
+}
