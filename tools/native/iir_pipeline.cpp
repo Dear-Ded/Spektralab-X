@@ -38,8 +38,8 @@ double max_diff(const Pixels& a,const Pixels& b) {
     for(size_t i=0;i<a.size();++i) out=std::max(out,std::abs(double(a[i])-b[i]));
     return out;
 }
-double sigma_for(const double b[4]) {
-    double lo=3,hi=256;
+double sigma_for(const double b[4],bool differences) {
+    double lo=3,hi=differences?1024:256;
     for(unsigned i=0;i<52;++i) { double mid=(lo+hi)/2,probe[4]; spk::yvv_coeffs(mid,probe); if(probe[3]<b[3])lo=mid;else hi=mid; }
     return (lo+hi)/2;
 }
@@ -63,6 +63,7 @@ class Observe final:public Gpu {
 public:
     explicit Observe(Gpu* real):real_(real){}
     bool validate=false;
+    unsigned sample_lines=0;
     std::string scene,selection;
     spk::Progress* progress=nullptr;
     std::ofstream* csv=nullptr;
@@ -102,7 +103,8 @@ public:
     size_t trim_pool(size_t n)override{return real_->trim_pool(n);}
     bool take_critical_pressure()override{return real_->take_critical_pressure();}
     bool dispatch(const char* kernel,const std::vector<spk::gpu::Arg>& a,size_t n,std::string& e)override {
-        const bool corrected=std::strcmp(kernel,"spk_iir_boundary_df_acc")==0;
+        const bool differences=std::strcmp(kernel,"spk_iir_difference_df_acc")==0;
+        const bool corrected=differences||std::strcmp(kernel,"spk_iir_boundary_df_acc")==0;
         if(std::strcmp(kernel,"spk_iir_df_acc")==0)++legacy_calls;
         if(!corrected)return real_->dispatch(kernel,a,n,e);
         ++corrected_calls;
@@ -123,11 +125,16 @@ public:
         const uint32_t end=std::min(meta[5],(axis==0?w:h)*3);
         for(uint32_t c=0;c<3;++c) {
             double b[4]; for(unsigned j=0;j<4;++j)b[j]=double(coef[8*c+2*j])+coef[8*c+2*j+1];
-            const double sigma=active[c]?sigma_for(b):0;
+            if(differences) {
+                const double dc=b[1],c1=b[2],c2=b[3];
+                b[3]=1-c2;b[2]=c1-1-2*b[3];b[1]=1-dc-b[2]-b[3];
+            }
+            const double sigma=active[c]?sigma_for(b,differences):0;
             max_sigma=std::max(max_sigma,sigma);
             double err=0,conv=0,scale=1; size_t values=0;
             for(uint32_t t=meta[4];t<end;++t) {
                 if(t%3!=c)continue;
+                if(sample_lines&&values/length>=sample_lines)break;
                 const uint32_t line=t/3,base=(axis==0?line*3:line*w*3)+c;
                 Pixels row(length); for(uint32_t i=0;i<length;++i)row[i]=input[base+i*stride];
                 auto expected=active[c]?explicit_tail(row,b,sigma,64):row;
@@ -228,8 +235,11 @@ Pixels input_image(unsigned w,unsigned h) {
 } // namespace
 
 int main(int argc,char** argv)try {
-    check(argc==4 || (argc==5 && std::strcmp(argv[4],"--legacy-only")==0),"usage: iir_pipeline SHADERS RESOURCES OUTPUT [--legacy-only]");
-    const bool legacy_only=argc==5; const std::filesystem::path dir=argv[3];std::filesystem::create_directories(dir);
+    check(argc==4 || (argc==5 && (std::strcmp(argv[4],"--legacy-only")==0 || std::strcmp(argv[4],"--triggs-v2")==0)),"usage: iir_pipeline SHADERS RESOURCES OUTPUT [--legacy-only|--triggs-v2]");
+    const bool legacy_only=argc==5&&std::strcmp(argv[4],"--legacy-only")==0;
+    const bool differences=argc==5&&std::strcmp(argv[4],"--triggs-v2")==0;
+    const char* experiment=differences?"triggs-v2":"triggs-v1";
+    const std::filesystem::path dir=argv[3];std::filesystem::create_directories(dir);
     std::unique_ptr<Gpu> real(Gpu::create_vulkan(argv[1],error));check(bool(real),error);
     Observe gpu(real.get());std::string math;check(gpu.check_math_mode(math),math);
     std::cerr<<"device="<<gpu.device_name()<<" math="<<math<<'\n';
@@ -274,7 +284,7 @@ int main(int argc,char** argv)try {
         compare_public(old,render(gpu,colour,blob,cache,params,source,full_factor,false));
         for(const auto& frame:old)frozen.write(reinterpret_cast<const char*>(frame.values.data()),frame.values.size()*4);
         if(!legacy_only) {
-            mode("triggs-v1");gpu.selection="triggs-v1";gpu.validate=true;
+            mode(experiment);gpu.selection=experiment;gpu.validate=true;
             const unsigned before=gpu.corrected_calls;
             const auto corrected=render(gpu,colour,blob,cache,params,source,full_factor,true);
             if(scene==0) {check(before==gpu.corrected_calls,"control unexpectedly used IIR");for(size_t i=0;i<old.size();++i)check(same(old[i].values,corrected[i].values),"no-IIR control changed");}
@@ -286,7 +296,8 @@ int main(int argc,char** argv)try {
         }
         ++completed;std::cerr<<"completed="<<names[scene]<<'\n';
     }
-    unsigned range_rejections=0;
+    unsigned range_rejections=0,large_acceptances=0;
+    const size_t small_oracle_values=gpu.checked_values;
     if(!legacy_only) {
         spk::Params p;check(spk::init_params(argv[2],"cinestill_800t","kodak_portra_endura",filters,p,error),error);
         check(p.film_render.halation.back_reflection,"range fixture requires the actual no-AH preset");
@@ -296,12 +307,30 @@ int main(int argc,char** argv)try {
             p.film_render.halation.halation_amount=w==6000?2:1;
             spk::Image source;source.w=w;source.h=2;source.c=3;const auto pixels=input_image(w,2);
             source.buf=gpu.upload(pixels.data(),source.bytes(),error);check(bool(source.buf),error);
-            mode("triggs-v1");gpu.validate=false;spk::Pipeline pipeline(&gpu,&colour,&blob,&cache);
+            mode(experiment);gpu.validate=false;spk::Pipeline pipeline(&gpu,&colour,&blob,&cache);
             check(pipeline.build(p,error),error);pipeline.set_source_shape(w,2,w,2);
             spk::Progress progress;progress.done=true;spk::Image out=source;
             error.clear();const unsigned legacy_before=gpu.legacy_calls;
+            if(differences) {
+                gpu.scene=w==6000?"large_6000_amount2":"large_8000_amount1";
+                gpu.selection=experiment;gpu.validate=true;gpu.sample_lines=1;gpu.progress=&progress;
+                check(pipeline.run_film(source,out,&progress,error),error);
+                // run_film completes the negative; run_print marks the render done.
+                check(!progress.done&&!pipeline.progress_,"successful large film completion state");
+                check(out.w==w&&out.h==2&&out.buf.get()!=source.buf.get(),"large film output shape");
+                read(&gpu,out);spk::Image printed;
+                check(pipeline.run_print(out,printed,&progress,error),error);read(&gpu,printed);
+                check(progress.done&&!pipeline.progress_,"successful large print completion state");
+                gpu.validate=false;gpu.progress=nullptr;gpu.sample_lines=0;
+                check(legacy_before==gpu.legacy_calls,"large experiment fell back to legacy");
+                ++large_acceptances;std::cerr<<"accepted-large-radius width="<<w<<" height=2 amount="<<p.film_render.halation.halation_amount<<'\n';
+                // Same full width with a diagnostic amount beyond the v2 domain.
+                p.film_render.halation.halation_amount=w==6000?32:16;
+                check(pipeline.build(p,error),error);pipeline.set_source_shape(w,2,w,2);
+                out=source;progress.done=true;error.clear();
+            }
             check(!pipeline.run_film(source,out,&progress,error),"high-radius full-width fixture was accepted");
-            check(error.find("[3, 256]")!=std::string::npos,"wrong full-width rejection: "+error);
+            check(error.find(differences?"[3, 1024]":"[3, 256]")!=std::string::npos,"wrong full-width rejection: "+error);
             check(out.buf.get()==source.buf.get() && out.w==source.w && out.h==source.h,"failed film published output");
             check(!progress.done && !pipeline.progress_,"failed film retained completion state");
             check(legacy_before==gpu.legacy_calls,"experiment silently fell back to legacy");
@@ -312,7 +341,8 @@ int main(int argc,char** argv)try {
     mode(nullptr);check(bool(frozen)&&bool(changed)&&bool(stages)&&bool(calls)&&bool(configuration),"evidence write failed");
     std::ofstream summary(dir/"summary.json");summary.precision(17);
     summary<<"{\"passed\":true,\"scenarios\":"<<completed<<",\"stage_comparisons\":"<<stage_comparisons
-        <<",\"range_rejections\":"<<range_rejections
+        <<",\"range_rejections\":"<<range_rejections<<",\"large_acceptances\":"<<large_acceptances
+        <<",\"small_oracle_values\":"<<small_oracle_values<<",\"large_sampled_oracle_values\":"<<gpu.checked_values-small_oracle_values
         <<",\"legacy_dispatches\":"<<gpu.legacy_calls<<",\"corrected_dispatches\":"<<gpu.corrected_calls
         <<",\"oracle_values\":"<<gpu.checked_values<<",\"maximum_oracle_error\":"<<gpu.worst
         <<",\"maximum_scaled_oracle_error\":"<<gpu.relative_worst

@@ -721,3 +721,24 @@ two thin full-width Vulkan fixtures separately require transactional rejection
 above sigma 256. Output includes CSV, JSON and raw float streams; keep binaries
 and float payloads outside Git. These checks do not measure real-film fidelity
 or mobile performance. See [results and parameter limits](../../docs/ENGINE_IIR_PIPELINE_2026-11-12.md).
+
+## Difference-state IIR at larger radii
+
+```bash
+UP=/path/to/upstream-through-0053 B=/path/to/current-build \
+BASELINE_PIPELINE=/path/to/frozen-0052-pipeline/current \
+BUILD_DIR=/outside-repo/new-results bash tools/native/run_iir_large_radius.sh
+```
+
+Requires the actual Vulkan engine/core/volk archives, resources, C++20, Python 3
+and `spirv-val`. `RESOURCES` overrides the build's initialized resources.
+Runs 1040 independent-tail/alias/public-entry cases and 574 mixed-FIR/reversal
+cases for both automatic and forced-split selection. A negative control must
+complete with numerical failures on the old direct-state shader. Complete
+v1/v2 Pipeline probes compare public entry points, small-stage snapshots,
+sampled large-width calls and range failures; the optional frozen directory
+checks both default and v1 stage payloads. All positive gates fail nonzero.
+
+`SPK_IIR_BOUNDARY=triggs-v2` accepts IIR sigmas `[3,1024]`, with no change to
+v1's `[3,256]`, the legacy default, or FIR routing. The mode remains diagnostic,
+without session-cache or sidecar integration. See [numerical results and limits](../../docs/ENGINE_IIR_LARGE_RADIUS_2026-11-12.md).

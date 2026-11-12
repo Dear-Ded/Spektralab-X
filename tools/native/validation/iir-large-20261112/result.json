@@ -1,0 +1,295 @@
+{
+  "date": "2026-11-12",
+  "co_created_with": "GPT (OpenAI)",
+  "mode": "triggs-v2",
+  "sigma_domain": [
+    3,
+    1024
+  ],
+  "default_changed": false,
+  "triggs_v1_changed": false,
+  "tool_archive_sha256": "40ccb8a63ee6ebd38ae840fbefec12c78f96c638a5425025756931b2ea4040eb",
+  "hosts": {
+    "aoidc": {
+      "suites": {
+        "auto": {
+          "passed": true,
+          "cases": 1040,
+          "failures": 0,
+          "maximum_error": 4.76837158203125e-7,
+          "maximum_scaled_error": 1.335144055701676e-7,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "split": {
+          "passed": true,
+          "cases": 1040,
+          "failures": 0,
+          "maximum_error": 4.76837158203125e-7,
+          "maximum_scaled_error": 1.335144055701676e-7,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "mixed-auto": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 4.76837158203125e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 2.384185791015625e-7,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 1.1920928955078125e-7
+          }
+        },
+        "mixed-split": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 4.76837158203125e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 2.384185791015625e-7,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 1.1920928955078125e-7
+          }
+        },
+        "original": {
+          "passed": false,
+          "cases": 1040,
+          "failures": 17,
+          "maximum_error": 0.00018796324729919434,
+          "maximum_scaled_error": 0.000052629709745690436,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "pipeline-v1": {
+          "passed": true,
+          "scenarios": 10,
+          "stage_comparisons": 140,
+          "range_rejections": 2,
+          "large_acceptances": 0,
+          "small_oracle_values": 1209390,
+          "large_sampled_oracle_values": 0,
+          "legacy_dispatches": 116,
+          "corrected_dispatches": 381,
+          "oracle_values": 1209390,
+          "maximum_oracle_error": 0.000030517578125,
+          "maximum_scaled_oracle_error": 1.0644281317285164e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_sigma": 27.49636010999997
+        },
+        "pipeline-v2": {
+          "passed": true,
+          "scenarios": 10,
+          "stage_comparisons": 140,
+          "range_rejections": 2,
+          "large_acceptances": 2,
+          "small_oracle_values": 1209390,
+          "large_sampled_oracle_values": 405216,
+          "legacy_dispatches": 116,
+          "corrected_dispatches": 936,
+          "oracle_values": 1614606,
+          "maximum_oracle_error": 0.000030517578125,
+          "maximum_scaled_oracle_error": 1.1112287778917034e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_sigma": 274.89172583297614
+        }
+      },
+      "baseline_0052_default_and_v1_stage_bytes_equal": true,
+      "stage_stream_bytes": 12689040,
+      "large_radius_output_bytes": 18940368,
+      "payloads": [
+        {
+          "sha256": "8db53f650b4b524e0aaf3fc094f1e559a93359f6a8555fa9e1148f996f6ee434",
+          "path": "verified/auto/output.f32"
+        },
+        {
+          "sha256": "8db53f650b4b524e0aaf3fc094f1e559a93359f6a8555fa9e1148f996f6ee434",
+          "path": "verified/split/output.f32"
+        },
+        {
+          "sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+          "path": "verified/mixed-auto/legacy.f32"
+        },
+        {
+          "sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+          "path": "verified/mixed-split/legacy.f32"
+        },
+        {
+          "sha256": "2ba2b47b6c4419ed54842ed90b140f1671079029b95f8b727d81f3691a00d6b1",
+          "path": "verified/pipeline-v1/legacy.f32"
+        },
+        {
+          "sha256": "54e47fd0c12a47154bcf3caec6e37ec040fce6d5ee574231e4c6ad7fc90c368f",
+          "path": "verified/pipeline-v1/corrected.f32"
+        },
+        {
+          "sha256": "2ba2b47b6c4419ed54842ed90b140f1671079029b95f8b727d81f3691a00d6b1",
+          "path": "verified/pipeline-v2/legacy.f32"
+        },
+        {
+          "sha256": "788ef75d8cbed1bfc20ceff4f4b300565a5769fb4e373b64e58d44a93ed29713",
+          "path": "verified/pipeline-v2/corrected.f32"
+        }
+      ],
+      "evidence_archive_sha256": "374e2e3c000e48d8e09d7517eed7c383ba325c2cc57870e183c9ee7017fef749"
+    },
+    "ibx": {
+      "suites": {
+        "auto": {
+          "passed": true,
+          "cases": 1040,
+          "failures": 0,
+          "maximum_error": 4.76837158203125e-7,
+          "maximum_scaled_error": 1.335144055701676e-7,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "split": {
+          "passed": true,
+          "cases": 1040,
+          "failures": 0,
+          "maximum_error": 4.76837158203125e-7,
+          "maximum_scaled_error": 1.335144055701676e-7,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "mixed-auto": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 4.76837158203125e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 2.384185791015625e-7,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 1.1920928955078125e-7
+          }
+        },
+        "mixed-split": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 4.76837158203125e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 2.384185791015625e-7,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 1.1920928955078125e-7
+          }
+        },
+        "original": {
+          "passed": false,
+          "cases": 1040,
+          "failures": 17,
+          "maximum_error": 0.00018796324729919434,
+          "maximum_scaled_error": 0.000052629709745690436,
+          "maximum_convergence": 5.684341886080802e-14,
+          "maximum_alias_error": 0
+        },
+        "pipeline-v1": {
+          "passed": true,
+          "scenarios": 10,
+          "stage_comparisons": 140,
+          "range_rejections": 2,
+          "large_acceptances": 0,
+          "small_oracle_values": 1209390,
+          "large_sampled_oracle_values": 0,
+          "legacy_dispatches": 116,
+          "corrected_dispatches": 381,
+          "oracle_values": 1209390,
+          "maximum_oracle_error": 0.000030517578125,
+          "maximum_scaled_oracle_error": 1.0644281317285164e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_sigma": 27.49636010999997
+        },
+        "pipeline-v2": {
+          "passed": true,
+          "scenarios": 10,
+          "stage_comparisons": 140,
+          "range_rejections": 2,
+          "large_acceptances": 2,
+          "small_oracle_values": 1209390,
+          "large_sampled_oracle_values": 405216,
+          "legacy_dispatches": 116,
+          "corrected_dispatches": 936,
+          "oracle_values": 1614606,
+          "maximum_oracle_error": 0.000030517578125,
+          "maximum_scaled_oracle_error": 1.0689096095829029e-7,
+          "maximum_oracle_convergence": 0,
+          "maximum_sigma": 274.89172583297614
+        }
+      },
+      "baseline_0052_default_and_v1_stage_bytes_equal": true,
+      "stage_stream_bytes": 12689040,
+      "large_radius_output_bytes": 18940368,
+      "payloads": [
+        {
+          "sha256": "8db53f650b4b524e0aaf3fc094f1e559a93359f6a8555fa9e1148f996f6ee434",
+          "path": "verified/auto/output.f32"
+        },
+        {
+          "sha256": "8db53f650b4b524e0aaf3fc094f1e559a93359f6a8555fa9e1148f996f6ee434",
+          "path": "verified/split/output.f32"
+        },
+        {
+          "sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+          "path": "verified/mixed-auto/legacy.f32"
+        },
+        {
+          "sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+          "path": "verified/mixed-split/legacy.f32"
+        },
+        {
+          "sha256": "f2022a7dc2e3fa1628d0e0ceeb2d8aebd101d27e1f19bce05e5e17fa47249f78",
+          "path": "verified/pipeline-v1/legacy.f32"
+        },
+        {
+          "sha256": "cb091e1fbd9115853d982f4d3b9830dc41318a59cc6d8a76a27bc784f9e8bc6a",
+          "path": "verified/pipeline-v1/corrected.f32"
+        },
+        {
+          "sha256": "f2022a7dc2e3fa1628d0e0ceeb2d8aebd101d27e1f19bce05e5e17fa47249f78",
+          "path": "verified/pipeline-v2/legacy.f32"
+        },
+        {
+          "sha256": "673758db6bd66e0b7ccade8afbcb3dcc715f519211d9c9f3344858b199663d58",
+          "path": "verified/pipeline-v2/corrected.f32"
+        }
+      ],
+      "evidence_archive_sha256": "b74ccbbd80655b7b8d83a06be4434fa1433a1ad6405ae2d9e42d7483a234f43e"
+    }
+  },
+  "replay": {
+    "method": "reverse all 52 overlays from previously verified pinned replay, then apply all 53 with zero fuzz",
+    "affected_files": 101,
+    "byte_equal_to_tested_source": true
+  },
+  "android": {
+    "ndk": "27.2.12479018",
+    "abi": "aarch64",
+    "api": 26,
+    "objects": [
+      "blur.cpp",
+      "vulkan_gpu.cpp"
+    ],
+    "device_execution": false
+  }
+}

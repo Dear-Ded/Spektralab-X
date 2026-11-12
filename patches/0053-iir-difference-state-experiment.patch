@@ -1,0 +1,214 @@
+# Co-created with GPT (OpenAI), 2026-11-12. See NOTICE.
+# Explicit triggs-v2 difference coordinates; legacy and triggs-v1 remain unchanged.
+diff --git a/engine/CMakeLists.txt b/engine/CMakeLists.txt
+index 3846620..8767708 100644
+--- a/engine/CMakeLists.txt
++++ b/engine/CMakeLists.txt
+@@ -136,7 +136,7 @@ if(SPEKTRALAB_PORTABLE_BACKEND)
+         set(SPEKTRALAB_VULKAN_KERNELS
+             spk_math_probe spk_split_probe spk_take_rgb spk_matmul3 spk_stride_sample
+             spk_affine3 spk_tc_b spk_lut2d_cubic spk_sep_fir_acc spk_sep_fir_rows spk_iir_df_acc
+-            spk_iir_boundary_df_acc spk_lincomb3 spk_log10_guarded spk_curves spk_dir_finish
++            spk_iir_boundary_df_acc spk_iir_difference_df_acc spk_lincomb3 spk_log10_guarded spk_curves spk_dir_finish
+             spk_couplers_correction spk_spectral_epilogue
+             spk_print_exposure spk_cam16ucs_compress spk_xyz_cam16_compress
+             spk_cctf_encode_matrix spk_to_rgba16
+diff --git a/engine/src/gpu/vulkan_gpu.cpp b/engine/src/gpu/vulkan_gpu.cpp
+index f0dc82a..f95924f 100644
+--- a/engine/src/gpu/vulkan_gpu.cpp
++++ b/engine/src/gpu/vulkan_gpu.cpp
+@@ -88,6 +88,7 @@ constexpr KernelSpec kKernels[] = {
+     {"spk_sep_fir_rows", 6, kWorkgroup},
+     {"spk_iir_df_acc", 7, kWorkgroup},
+     {"spk_iir_boundary_df_acc", 7, kWorkgroup},
++    {"spk_iir_difference_df_acc", 7, kWorkgroup},
+     {"spk_lincomb3", 6, kWorkgroup},
+     {"spk_log10_guarded", 4, kWorkgroup},
+     {"spk_curves", 6, kWorkgroup},
+diff --git a/engine/src/pipeline/blur.cpp b/engine/src/pipeline/blur.cpp
+index 784bc2a..ec7870b 100644
+--- a/engine/src/pipeline/blur.cpp
++++ b/engine/src/pipeline/blur.cpp
+@@ -5,6 +5,7 @@
+ #include <cstring>
+ #include <cstdlib>
+ #include "iir_boundary.hpp"
++#include "iir_difference.hpp"
+ 
+ namespace spk {
+ 
+@@ -124,8 +125,10 @@ bool Blur::iir(const Image& img, const double sigmas[3], const bool active[3],
+                Image& out, std::string& error, const Image* acc, const double* weight) {
+ #if defined(SPK_VULKAN_BACKEND)
+     const char* mode = std::getenv("SPK_IIR_BOUNDARY");
+-    const bool corrected = mode && std::strcmp(mode, "triggs-v1") == 0;
++    const bool differences = mode && std::strcmp(mode, "triggs-v2") == 0;
++    const bool corrected = differences || (mode && std::strcmp(mode, "triggs-v1") == 0);
+ #else
++    const bool differences = false;
+     const bool corrected = false;
+ #endif
+     float coef[24] = {};
+@@ -134,12 +137,23 @@ bool Blur::iir(const Image& img, const double sigmas[3], const bool active[3],
+     bool any = false;
+     for (int c = 0; c < 3; ++c) {
+         if (!(active[c] && sigmas[c] > 0.0)) continue;
+-        if (corrected && (!std::isfinite(sigmas[c]) || sigmas[c] < 3.0 || sigmas[c] > 256.0)) {
+-            error = "experimental IIR boundary requires sigma in [3, 256]";
++        const double maximum_sigma = differences ? 1024.0 : 256.0;
++        if (corrected && (!std::isfinite(sigmas[c]) || sigmas[c] < 3.0 || sigmas[c] > maximum_sigma)) {
++            error = differences ? "triggs-v2 IIR boundary requires sigma in [3, 1024]"
++                                : "experimental IIR boundary requires sigma in [3, 256]";
+             return false;
+         }
+         double b[4];
+         yvv_coeffs(sigmas[c], b);
++        if (differences) {
++            if (!detail::iir_difference_coeffs(b, coef + 8 * c, boundary + 24 + 22 * c)) {
++                error = "triggs-v2 IIR boundary coefficients are not finite";
++                return false;
++            }
++            act[c] = 1;
++            any = true;
++            continue;
++        }
+         if (corrected && !detail::iir_boundary_coeffs(b, boundary + 24 + 22 * c)) {
+             error = "experimental IIR boundary coefficients are not finite";
+             return false;
+@@ -200,7 +214,8 @@ bool Blur::iir(const Image& img, const double sigmas[3], const bool active[3],
+         for (uint32_t first = 0; first < threads; first += step) {
+             const uint32_t end = std::min(threads, first + step);
+             const uint32_t meta[6] = {img.h, img.w, accumulate, axis, first, end};
+-            if (!gpu_->dispatch(corrected ? "spk_iir_boundary_df_acc" : "spk_iir_df_acc",
++            if (!gpu_->dispatch(differences ? "spk_iir_difference_df_acc" :
++                                corrected ? "spk_iir_boundary_df_acc" : "spk_iir_df_acc",
+                                 {gpu::Arg::buf(src), gpu::Arg::buf(coef_buf), gpu::Arg::buf(act_buf),
+                                  gpu::Arg::buf(dummy->buf), gpu::Arg::buf(wt_buf),
+                                  gpu::Arg::inline_bytes(meta, 6), gpu::Arg::buf(out.buf)},
+diff --git a/engine/src/pipeline/iir_difference.hpp b/engine/src/pipeline/iir_difference.hpp
+new file mode 100644
+index 0000000..3f48f41
+--- /dev/null
++++ b/engine/src/pipeline/iir_difference.hpp
+@@ -0,0 +1,34 @@
++// Co-created with GPT (OpenAI), 2026-11-12. See NOTICE.
++// Same recurrence in finite-difference coordinates, for explicit triggs-v2.
++#pragma once
++#include <array>
++#include <cmath>
++
++namespace spk::detail {
++inline bool iir_difference_coeffs(const double b[4],float recurrence[8],float boundary[22]) {
++    const long double a1=b[1],a2=b[2],a3=b[3],g=b[0],dc=1-a1-a2-a3;
++    const long double scale=g/((1+a1-a2+a3)*dc*(1+a2+(a1-a3)*a3)),k=g/dc;
++    if(!(dc>0)||!std::isfinite(scale)||!std::isfinite(k))return false;
++    const auto store=[](float* out,long double v) {
++        out[0]=float(v);out[1]=float(v-static_cast<long double>(out[0]));
++        return std::isfinite(out[0])&&std::isfinite(out[1]);
++    };
++    if(!store(recurrence,g)||!store(recurrence+2,dc)||!store(recurrence+4,1+a2+2*a3)
++       ||!store(recurrence+6,1-a3))return false;
++    std::array<long double,3> row{(1-a2-a3*a1-a3*a3)*scale,
++        (a3+a1)*(a2+a3*a1)*scale,a3*(a1+a3*a2)*scale};
++    std::array<std::array<long double,3>,3> r{};
++    for(unsigned i=0;i<3;++i) {
++        row={row[0]*a1+row[1],row[0]*a2+row[2],row[0]*a3};r[i]=row;
++    }
++    // Input coordinates are [last, first backward difference, second difference].
++    // Reverse coordinates use [y(n+1), y(n+1)-y(n+2), y(n+1)-2y(n+2)+y(n+3)].
++    for(unsigned i=0;i<3;++i) {
++        for(unsigned j=0;j<3;++j)
++            row[j]=i==0?r[0][j]:i==1?r[0][j]-r[1][j]:r[0][j]-2*r[1][j]+r[2][j];
++        const std::array<long double,3> transformed{row[0]+row[1]+row[2],-row[1]-2*row[2],row[2]};
++        for(unsigned j=0;j<3;++j)if(!store(boundary+6*i+2*j,transformed[j]))return false;
++    }
++    return store(boundary+18,k)&&store(boundary+20,k*k);
++}
++} // namespace spk::detail
+diff --git a/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp b/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+new file mode 100644
+index 0000000..ae905e1
+--- /dev/null
++++ b/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+@@ -0,0 +1,81 @@
++#version 450
++#extension GL_GOOGLE_include_directive : require
++// Co-created with GPT (OpenAI), 2026-11-12. See NOTICE.
++// Explicit triggs-v2. Same filter and float32 plane, difference-coordinate state.
++layout(push_constant) uniform SpkDispatch { uint base; } spk_pc;
++#include "spk_split_product.glsl"
++layout(local_size_x = 256) in;
++layout(constant_id = 0) const bool SPK_FUSED_FMA = true;
++layout(set = 0, binding = 0, std430) readonly buffer Input { float value[]; } image_data;
++layout(set = 0, binding = 1, std430) readonly buffer Coefficients { float value[]; } coefficients;
++layout(set = 0, binding = 2, std430) readonly buffer Active { uint value[]; } active_channels;
++layout(set = 0, binding = 3, std430) readonly buffer Accumulator { float value[]; } accumulator;
++layout(set = 0, binding = 4, std430) readonly buffer MixWeights { float value[]; } mix_weights;
++layout(set = 0, binding = 5, std430) readonly buffer Meta { uint value[]; } meta;
++layout(set = 0, binding = 6, std430) buffer Output { float value[]; } output_data;
++uint spk_global_index() {
++    return gl_GlobalInvocationID.y*(gl_NumWorkGroups.x*gl_WorkGroupSize.x)+gl_GlobalInvocationID.x+spk_pc.base;
++}
++vec2 two_sum(float a,float b) {
++    precise float s=a+b;precise float bb=s-a;precise float e=(a-(s-bb))+(b-bb);return vec2(s,e);
++}
++vec2 quick_two_sum(float a,float b) {
++    precise float s=a+b;precise float e=b-(s-a);return vec2(s,e);
++}
++vec2 two_prod(float a,float b) {
++    precise float p=a*b;
++    if(SPK_FUSED_FMA) {precise float e=fma(a,b,-p);return vec2(p,e);}
++    return spk_split_product(a,b);
++}
++vec2 df_add(vec2 a,vec2 b) {
++    vec2 s=two_sum(a.x,b.x),t=two_sum(a.y,b.y);precise float lo=s.y+t.x;
++    s=quick_two_sum(s.x,lo);precise float last=s.y+t.y;return quick_two_sum(s.x,last);
++}
++vec2 df_mul(vec2 a,vec2 b) {
++    vec2 p=two_prod(a.x,b.x);precise float cross_terms=a.x*b.y+a.y*b.x;
++    precise float lo=p.y+cross_terms;return quick_two_sum(p.x,lo);
++}
++vec2 df_mul_f(vec2 a,float b) {
++    vec2 p=two_prod(a.x,b);precise float lo=p.y+a.y*b;return quick_two_sum(p.x,lo);
++}
++vec2 coeff(uint i) {return vec2(coefficients.value[i],coefficients.value[i+1u]);}
++vec2 terminal(uint row,uint start,vec2 y,vec2 d,vec2 e) {
++    vec2 v=df_mul(coeff(start+row*6u),y);
++    v=df_add(v,df_mul(coeff(start+row*6u+2u),d));
++    return df_add(v,df_mul(coeff(start+row*6u+4u),e));
++}
++void advance(float x,vec2 g,vec2 dc,vec2 c1,vec2 c2,inout vec2 y,inout vec2 d,inout vec2 e) {
++    vec2 third=df_add(df_mul_f(g,x),-df_mul(dc,y));
++    third=df_add(third,-df_mul(c1,d));third=df_add(third,-df_mul(c2,e));
++    e=df_add(e,third);d=df_add(d,e);y=df_add(y,d);
++}
++void main() {
++    uint t=spk_global_index()+meta.value[4],h=meta.value[0],w=meta.value[1];
++    uint accumulate=meta.value[2],axis=meta.value[3],threads=axis==0u?w*3u:h*3u;
++    if(t>=min(threads,meta.value[5]))return;
++    uint c=t%3u,line=t/3u,length=axis==0u?h:w,stride=axis==0u?w*3u:3u;
++    uint base=axis==0u?line*3u+c:line*w*3u+c;
++    if(active_channels.value[c]==0u) {
++        for(uint i=0u;i<length;++i) {
++            uint ix=base+i*stride;precise float mixed=accumulator.value[ix]+mix_weights.value[c]*image_data.value[ix];
++            output_data.value[ix]=accumulate!=0u?mixed:image_data.value[ix];
++        }
++        return;
++    }
++    vec2 g=coeff(8u*c),dc=coeff(8u*c+2u),c1=coeff(8u*c+4u),c2=coeff(8u*c+6u);
++    uint start=24u+22u*c;
++    float endpoint=image_data.value[base+(length-1u)*stride];
++    vec2 y=df_mul_f(coeff(start+18u),image_data.value[base]),d=vec2(0),e=vec2(0);
++    for(uint i=0u;i<length;++i) {
++        advance(image_data.value[base+i*stride],g,dc,c1,c2,y,d,e);
++        output_data.value[base+i*stride]=y.x;
++    }
++    vec2 centred=df_add(y,-df_mul_f(coeff(start+18u),endpoint));
++    vec2 ry=df_add(terminal(0u,start,centred,d,e),df_mul_f(coeff(start+20u),endpoint));
++    vec2 rd=terminal(1u,start,centred,d,e),re=terminal(2u,start,centred,d,e);
++    for(int i=int(length)-1;i>=0;--i) {
++        uint ix=base+uint(i)*stride;advance(output_data.value[ix],g,dc,c1,c2,ry,rd,re);
++        precise float mixed=accumulator.value[ix]+mix_weights.value[c]*ry.x;
++        output_data.value[ix]=accumulate!=0u?mixed:ry.x;
++    }
++}

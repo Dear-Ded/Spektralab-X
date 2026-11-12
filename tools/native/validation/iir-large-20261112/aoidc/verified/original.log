@@ -1,0 +1,28 @@
+device=llvmpipe (LLVM 15.0.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending) kernel=spk_iir_boundary_df_acc
+progress=110
+progress=220
+progress=330
+progress=440
+progress=550
+progress=660
+progress=770
+failed w=513 h=1 sigma=768 pattern=1 add=0 error=1.27255916595e-05 scaled=1.27255916595e-05 conv=0 alias=0
+failed w=1 h=513 sigma=768 pattern=1 add=0 error=1.27255916595e-05 scaled=1.27255916595e-05 conv=0 alias=0
+failed w=513 h=1 sigma=768 pattern=6 add=0 error=4.70876693726e-05 scaled=1.31845475501e-05 conv=0 alias=0
+failed w=1 h=513 sigma=768 pattern=6 add=0 error=0.000187963247299 scaled=5.26297097457e-05 conv=0 alias=0
+progress=880
+failed w=513 h=1 sigma=1024 pattern=3 add=0 error=1.68178230524e-05 scaled=1.68178230524e-05 conv=0 alias=0
+failed w=1 h=513 sigma=1024 pattern=3 add=0 error=1.68178230524e-05 scaled=1.68178230524e-05 conv=0 alias=0
+failed w=1 h=513 sigma=1024 pattern=6 add=0 error=0.00014728307724 scaled=4.12392620205e-05 conv=0 alias=0
+failed w=8192 h=1 sigma=1024 pattern=3 add=0 error=1.83284282684e-05 scaled=1.83284282684e-05 conv=0 alias=0
+failed w=1 h=8192 sigma=1024 pattern=3 add=0 error=1.83284282684e-05 scaled=1.83284282684e-05 conv=0 alias=0
+failed w=8192 h=1 sigma=1024 pattern=6 add=0 error=4.62532043457e-05 scaled=1.29508973403e-05 conv=0 alias=0
+progress=990
+failed w=1025 h=1 sigma=886.362 pattern=6 add=0 error=6.43730163574e-05 scaled=1.8024444752e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=777.709 pattern=6 add=0 error=4.08887863159e-05 scaled=1.14488602776e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=812.77 pattern=6 add=0 error=6.48498535156e-05 scaled=1.81579591575e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=979.127 pattern=6 add=0 error=4.54783439636e-05 scaled=1.27339364313e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=745.736 pattern=6 add=0 error=7.9333782196e-05 scaled=2.22134592267e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=955.228 pattern=6 add=0 error=7.21216201782e-05 scaled=2.01940538425e-05 conv=0 alias=0
+failed w=1025 h=1 sigma=1006.62 pattern=6 add=0 error=3.57627868652e-05 scaled=1.00135804178e-05 conv=0 alias=0
+completed cases=1040 failures=17 max_error=0.000187963247299 scaled=5.26297097457e-05

@@ -1,0 +1,11 @@
+scene,stock,w,h,full_factor,film_mm,back_reflection,grain,glare,scan_film,DI,output_space,cctf
+spatial_off,kodak_portra_400,97,65,1,4,0,0,0,0,0,ProPhoto RGB,1
+portra_35mm,kodak_portra_400,193,65,1,35,0,0,0,0,0,ProPhoto RGB,1
+portra_4mm,kodak_portra_400,97,65,1,4,0,0,0,0,0,ProPhoto RGB,1
+cinestill_35mm,cinestill_800t,193,65,1,35,1,0,0,0,0,ProPhoto RGB,1
+cinestill_4mm,cinestill_800t,97,65,1,4,1,0,0,0,0,ProPhoto RGB,1
+sublayer_grain_glare,kodak_portra_400,97,65,1,4,0,1,1,0,0,ProPhoto RGB,1
+simple_grain_glare,kodak_portra_400,97,65,1,4,0,1,1,0,0,ProPhoto RGB,1
+preview_ratio,kodak_portra_400,97,65,4,4,0,0,0,0,0,ProPhoto RGB,1
+scan_negative,kodak_portra_400,97,65,1,4,0,0,0,1,0,ProPhoto RGB,1
+digital_intermediate,kodak_portra_400,97,65,1,4,0,0,0,0,1,ProPhoto RGB,1

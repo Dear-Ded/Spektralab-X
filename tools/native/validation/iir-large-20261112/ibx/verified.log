@@ -1,0 +1,60 @@
+device=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending) kernel=spk_iir_difference_df_acc
+progress=110
+progress=220
+progress=330
+progress=440
+progress=550
+progress=660
+progress=770
+progress=880
+progress=990
+completed cases=1040 failures=0 max_error=4.76837158203e-07 scaled=1.3351440557e-07
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+PASS: 574 corrected, 574 frozen; max oracle 4.76837158203e-07, reversal 2.38418579102e-07
+device=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending) kernel=spk_iir_difference_df_acc
+progress=110
+progress=220
+progress=330
+progress=440
+progress=550
+progress=660
+progress=770
+progress=880
+progress=990
+completed cases=1040 failures=0 max_error=4.76837158203e-07 scaled=1.3351440557e-07
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending)
+PASS: 574 corrected, 574 frozen; max oracle 4.76837158203e-07, reversal 2.38418579102e-07
+PASS: original direct-state shader fails the same numerical gate
+device=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+completed=spatial_off
+completed=portra_35mm
+completed=portra_4mm
+completed=cinestill_35mm
+completed=cinestill_4mm
+completed=sublayer_grain_glare
+completed=simple_grain_glare
+completed=preview_ratio
+completed=scan_negative
+completed=digital_intermediate
+expected-range-rejection width=6000 height=2 amount=2
+expected-range-rejection width=8000 height=2 amount=1
+PASS complete pipeline: 10 scenarios, 140 stage pairs, 1209390 IIR values
+device=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+completed=spatial_off
+completed=portra_35mm
+completed=portra_4mm
+completed=cinestill_35mm
+completed=cinestill_4mm
+completed=sublayer_grain_glare
+completed=simple_grain_glare
+completed=preview_ratio
+completed=scan_negative
+completed=digital_intermediate
+accepted-large-radius width=6000 height=2 amount=2
+expected-range-rejection width=6000 height=2 amount=32
+accepted-large-radius width=8000 height=2 amount=1
+expected-range-rejection width=8000 height=2 amount=16
+PASS complete pipeline: 10 scenarios, 140 stage pairs, 1614606 IIR values
+PASS: default and triggs-v1 complete stage bytes match frozen 0052

@@ -1,0 +1,170 @@
+patching file engine/CMakeLists.txt
+patching file engine/src/gpu/vulkan_gpu.cpp
+patching file engine/src/pipeline/blur.cpp
+patching file engine/src/pipeline/iir_difference.hpp
+patching file engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+-- The C compiler identification is GNU 14.2.0
+-- The CXX compiler identification is GNU 14.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (1.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /data/home/gpt-iir-large-20261112/host
+[  3%] Building C object engine/CMakeFiles/spk_volk.dir/third_party/volk/volk.c.o
+[  3%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/blob.cpp.o
+[  3%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/cam16.cpp.o
+[  3%] Generating resources/vulkan/spk_overscan_light.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[  4%] Generating resources/vulkan/spk_math_probe.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[  6%] Generating resources/vulkan/spk_split_probe.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[  8%] Generating resources/vulkan/spk_take_rgb.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[  9%] Generating resources/vulkan/spk_matmul3.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[ 11%] Generating resources/vulkan/spk_stride_sample.spv
+[ 13%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[ 13%] Linking C static library libspk_volk.a
+[ 13%] Generating resources/vulkan/spk_affine3.spv
+[ 13%] Built target spk_volk
+[ 14%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[ 14%] Generating resources/vulkan/spk_tc_b.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[ 14%] Generating resources/vulkan/spk_lut2d_cubic.spv
+[ 16%] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[ 16%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[ 18%] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[ 19%] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[ 21%] Generating resources/vulkan/spk_iir_boundary_df_acc.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_boundary_df_acc.comp
+[ 21%] Generating resources/vulkan/spk_iir_difference_df_acc.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+[ 22%] Generating resources/vulkan/spk_lincomb3.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[ 24%] Generating resources/vulkan/spk_log10_guarded.spv
+[ 26%] Generating resources/vulkan/spk_curves.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[ 27%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[ 29%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/json.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[ 31%] Generating resources/vulkan/spk_dir_finish.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[ 32%] Generating resources/vulkan/spk_couplers_correction.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[ 32%] Generating resources/vulkan/spk_spectral_epilogue.spv
+[ 34%] Generating resources/vulkan/spk_print_exposure.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[ 36%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[ 37%] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[ 39%] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[ 40%] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[ 40%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/numeric.cpp.o
+[ 42%] Generating resources/vulkan/spk_to_rgba16.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[ 42%] Generating resources/vulkan/spk_view_grade.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[ 44%] Generating resources/vulkan/spk_view_grade_float.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[ 47%] Generating resources/vulkan/spk_view_grade_di.spv
+[ 47%] Generating resources/vulkan/spk_view_geometry.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[ 49%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[ 50%] Generating resources/vulkan/spk_view_pack.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[ 52%] Generating resources/vulkan/spk_view_cam16.spv
+[ 54%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/print_lut.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[ 54%] Generating resources/vulkan/spk_view_pair.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[ 55%] Generating resources/vulkan/spk_grain_layers.spv
+[ 57%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[ 59%] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[ 59%] Generating resources/vulkan/spk_grain_simple.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[ 60%] Generating resources/vulkan/spk_lognormal_field.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[ 62%] Generating resources/vulkan/spk_rng_probe.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[ 62%] Generating resources/vulkan/spk_mul.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[ 63%] Generating resources/vulkan/spk_glare_add.spv
+[ 65%] Generating resources/vulkan/spk_reduce_max.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[ 65%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/profile.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[ 67%] Generating resources/vulkan/spk_boost.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[ 68%] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[ 70%] Generating resources/vulkan/spk_bw_correct.spv
+[ 72%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[ 73%] Generating resources/vulkan/spk_edr.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[ 73%] Generating resources/vulkan/spk_cctf_decode.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[ 75%] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[ 75%] Generating resources/vulkan/spk_geometry_resample_df.spv
+[ 77%] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/spectral.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[ 78%] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[ 80%] Generating resources/vulkan/spk_di_normalise.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[ 80%] Generating resources/vulkan/spk_di_encode.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[ 81%] Generating resources/vulkan/spk_scene_latitude.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[ 81%] Generating resources/vulkan/spk_scene_curve.spv
+[ 83%] Generating resources/vulkan/spk_overscan_canvas.spv
+[ 85%] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[ 86%] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+/data/home/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[ 88%] Linking CXX static library libspektralab_core.a
+[ 88%] Built target spektralab_core
+[ 91%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/blur.cpp.o
+[ 91%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[ 91%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+[ 91%] Built target spektralab_vulkan_resources
+[ 93%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[ 93%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+/data/home/gpt-iir-large-20261112/upstream/engine/src/pipeline/engine.cpp:212:58: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+  212 |         std::unique_ptr<std::FILE, decltype(&std::fclose)> file{nullptr, &std::fclose};
+      |                                                          ^
+[ 95%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[ 96%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[ 98%] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/imprint_raster.cpp.o
+[ 98%] Built target spektralab_pipeline
+[ 98%] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[100%] Linking CXX static library libspektralab_engine.a
+[100%] Built target spektralab_engine
+[100%] Built target spektralab_vulkan_resources

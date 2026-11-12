@@ -18,6 +18,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - RAW 镜头畸变、暗角校正及其临时通道复制过程中也检查取消，工作线程汇合后再退出，保留上一张有效照片；未取消时的像素和元数据保持一致。双云及 Android 编译记录见 [镜头校正验证](docs/ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md)。
 - 修正部分整数三通道 LinearRaw DNG 在均匀非零黑点下的亮度刻度：扣黑后按白点减黑点归一化，避免整幅偏暗。保留源元数据及既有 Bayer、浮点和非均匀黑点策略；仍默认线性显示。见 [双云及 Windows 验证](docs/ENGINE_LINEAR_RAW_BLACK_2026-11-12.md)。
 - 增加默认关闭的 Vulkan 递归模糊边界实验，修正画面边缘的递归收尾；默认图像仍走原算法。双云 Vulkan 合成对照及 ARM64 编译见 [实验记录](docs/ENGINE_IIR_BOUNDARY_2026-11-12.md)，尚未切换手机默认算法。
+- 新增独立的大半径实验模式，用相邻状态差值减少递归计算的精度损失，实验半径支持到 sigma 1024；保留旧默认和原实验输出。CineStill 高分辨率薄图及独立数值对照见 [验证记录](docs/ENGINE_IIR_LARGE_RADIUS_2026-11-12.md)，仍待手机和完整大照片验收。
 
 详见[浮点条带适配与验证](docs/ENGINE_FLOAT_STRIPS_2026-11-12.md)及[压缩浮点读取与双云验证](docs/ENGINE_FLOAT_DEFLATE_2026-11-12.md)。
 

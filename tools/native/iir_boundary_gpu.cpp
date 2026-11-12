@@ -130,8 +130,10 @@ Pixels signal(unsigned w, unsigned h, unsigned pattern) {
     return p;
 }
 int main(int argc,char** argv) try {
-    require(argc==3 || (argc==4 && std::strcmp(argv[3],"--legacy-only")==0),"usage: iir_boundary_gpu SHADERS OUTPUT [--legacy-only]");
-    const bool legacy_only=argc==4;
+    require(argc==3 || (argc==4 && (std::strcmp(argv[3],"--legacy-only")==0 || std::strcmp(argv[3],"--triggs-v2")==0)),"usage: iir_boundary_gpu SHADERS OUTPUT [--legacy-only|--triggs-v2]");
+    const bool legacy_only=argc==4&&std::strcmp(argv[3],"--legacy-only")==0;
+    const bool differences=argc==4&&std::strcmp(argv[3],"--triggs-v2")==0;
+    const char* experiment=differences?"triggs-v2":"triggs-v1";
     const std::filesystem::path dir=argv[2]; std::filesystem::create_directories(dir);
     std::string error;
     std::unique_ptr<spk::gpu::Gpu> gpu(spk::gpu::Gpu::create_vulkan(argv[1],error));
@@ -155,7 +157,7 @@ int main(int argc,char** argv) try {
         auto expected=reference(input,w,h,sigma,64), longer=reference(input,w,h,sigma,128);
         if (add) { accumulate(expected); accumulate(longer); }
         const double conv=difference(expected,longer);
-        mode("triggs-v1"); const auto actual=render(gpu.get(),input,w,h,sigma,add);
+        mode(experiment); const auto actual=render(gpu.get(),input,w,h,sigma,add);
         const double err=difference(actual,longer), old_err=difference(old,longer);
         double scale=1; for (float v:input) scale=std::max(scale,std::abs(double(v)));
         require(conv<=1e-7*scale,"tail reference did not converge");
@@ -195,12 +197,12 @@ int main(int argc,char** argv) try {
     const double chunk_sigma[3]={3,6,24};
     for (bool add:{false,true}) check(257,259,chunk_sigma,6,add);
     if (!legacy_only) {
-        mode("triggs-v1"); const auto p=signal(3,2,1);
+        mode(experiment); const auto p=signal(3,2,1);
         spk::Image in,out; in.w=3; in.h=2; in.c=3;
         in.buf=gpu->upload(p.data(),p.size()*sizeof(float),error);
         out.h=77; out.w=88; out.c=3;
-        const double unsupported[3]={257,3,6}; spk::Blur blur(gpu.get());
-        require(!blur.gaussian(in,unsupported,out,error) && error.find("[3, 256]")!=std::string::npos,"unsupported sigma was not rejected");
+        const double unsupported[3]={differences?1025.:257.,3,6}; spk::Blur blur(gpu.get());
+        require(!blur.gaussian(in,unsupported,out,error) && error.find(differences?"[3, 1024]":"[3, 256]")!=std::string::npos,"unsupported sigma was not rejected");
         require(out.h==77 && out.w==88 && !out.buf,"rejected sigma changed output");
     }
     mode(nullptr); require(bool(dump) && bool(csv),"output failed");
@@ -215,4 +217,5 @@ int main(int argc,char** argv) try {
     summary<<"}}\n";
     require(bool(summary),"summary failed");
     std::fprintf(stderr,"PASS: %u corrected, %u frozen; max oracle %.12g, reversal %.12g\n",cases,frozen,worst,reversal);
+    return 0;
 } catch (const std::exception& e) { std::fprintf(stderr,"FAIL: %s\n",e.what()); return 1; }

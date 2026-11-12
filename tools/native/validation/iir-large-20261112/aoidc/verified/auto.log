@@ -1,0 +1,11 @@
+device=llvmpipe (LLVM 15.0.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending) kernel=spk_iir_difference_df_acc
+progress=110
+progress=220
+progress=330
+progress=440
+progress=550
+progress=660
+progress=770
+progress=880
+progress=990
+completed cases=1040 failures=0 max_error=4.76837158203e-07 scaled=1.3351440557e-07

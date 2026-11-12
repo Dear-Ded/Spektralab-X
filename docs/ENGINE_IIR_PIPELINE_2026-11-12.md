@@ -166,3 +166,8 @@ survives saved edits, and actual Adreno/Mali execution. Independent Python
 spectral-stage comparison, signed-domain behavior, physical PSF calibration,
 and complete streamed memory accounting remain distinct work. This study adds
 no APK, Android relink, phone run, or controlled film/paper measurement.
+
+Subsequent work adds a separate difference-state v2 experiment through sigma
+1024, retaining this study's v1 behavior and frozen streams. See
+[large-radius validation](ENGINE_IIR_LARGE_RADIUS_2026-11-12.md); the sigma-256
+cutovers above remain the contract for v1.

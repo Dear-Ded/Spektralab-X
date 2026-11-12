@@ -1,0 +1,5 @@
+18940368 verified/auto/output.f32
+12689040 verified/pipeline-v1/legacy.f32
+12689040 verified/pipeline-v1/corrected.f32
+12689040 verified/pipeline-v2/corrected.f32
+57007488 total

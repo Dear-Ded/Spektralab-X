@@ -61,6 +61,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0052 新增显式 `SPK_IIR_BOUNDARY=triggs-v1` Vulkan 实验核，按常量延拓修正递归模糊的三个反向终态，保留完整 float-pair 状态与 float32 中间平面。仅接受有效 IIR sigma `[3,256]`，默认仍调用原 shader；这会有意改变实验图像，尚非手机默认算法或流式 IIR。双云独立延拓参考、默认冻结字节、alias 与 ARM64 编译见 [边界修正验证](ENGINE_IIR_BOUNDARY_2026-11-12.md)。GPT（OpenAI）共创。
 
+0053 增加独立 `SPK_IIR_BOUNDARY=triggs-v2`，将同一递归滤波改为值、一阶差和二阶差状态，CPU 预合成小系数及边界坐标变换，减少大半径相消误差。实验 sigma 支持域为 `[3,1024]`，默认旧核与 triggs-v1 保持。双云大半径、混合 FIR/IIR、完整流程和冻结输出验证见 [大半径实验](ENGINE_IIR_LARGE_RADIUS_2026-11-12.md)。不是手机默认切换或物理模型升级。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
