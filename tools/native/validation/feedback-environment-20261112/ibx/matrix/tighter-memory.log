@@ -1,0 +1,4 @@
+memory.max=2147483648
+memory.swap.max=0
+tier=live shape=1024x683 cached=0 black_rows=0
+tier=preview shape=3400x2267 cached=0 black_rows=0

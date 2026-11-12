@@ -1,0 +1,45 @@
+openjdk version "21.0.13.0.3" 2026-10-24
+OpenJDK Runtime Environment (build 21.0.13.0.3+1-1-22.04.1-Ubuntu)
+OpenJDK 64-Bit Server VM (build 21.0.13.0.3+1-1-22.04.1-Ubuntu, mixed mode, sharing)
+Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+91b6c56248e40507e8a8ca591f1fead065958752ba3f04882f56b77598b6d870  /data/work/gpt-feedback-env-20261112/android-build/native/libspektralab_jni.so
+1a7ef9205a831ad869b53e62ec8b041ef6f3824bf7ff07ed659998f1e042033f  /data/work/gpt-feedback-env-20261112/android-build/feedback.jar
+0070fb89ff9d980350e3b93cbd353d678bffc3c14c87d5faf81714749c47f935  /data/work/gpt-feedback-env-20261112/android-build/libfeedback_fixture.so
+989f7f2d1e7733526133655097cd3f5136ec1804c57a8f38f4c138d010b89da7  /data/work/gpt-feedback-env-20261112/android-repo/tools/native/android_feedback/fixture.cpp
+74570a8ea372817af311163f760db568d7e105a53f04a7a77652986ae1bec446  /data/work/gpt-feedback-env-20261112/android-repo/tools/native/android_feedback/FeedbackAndroid.java
+0fd4bf9403ef6bc451c19fff85e5bb0c173f65e0a09ea8e179bbaf4e69721a75  /data/work/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp
+771548663824e43dab78fa1e16f0e022ac5c39aa590012bf1855f2195a40bdb8  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/CMakeLists.txt
+c221cdd71fe820ac18f66e158ad71010f3f57b535b6b361e9d4967b164a28df5  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/bitmap_f16.hpp
+f2a30d40fc679b78c84bc7e991c5d26f229bb2a22d147d279e4924d4be9534d9  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/float_dng_linear.hpp
+ced7eab9ba614918039af327bff174d27568e62df4f3a0d4385fc335014210e0  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/float_frame_check.hpp
+ca2d404728dd9d80fcf36c3a9acda7860c248d34bb99a33e5db3f837314fca6d  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/gainmap.hpp
+05fe025f77674e99651aae024e113b750fede9b5a715a8077bb873ba06a5fb94  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/input_transform.cpp
+7591c57e36ca01761d1fd84fbd740ebcc4a814579c6a1360eba29ad5a2d00654  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/input_transform.hpp
+e3d335cf410bdb8986169d21d30ea1545c92d25226c835b4ca95750363792422  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/jni_exports.map
+744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/jpeg444.cpp
+7201558159afe4b7c87da0ef99161629c2c723eb42660a6625162a90b934c70d  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/jpeg444.hpp
+f55ad1488bebb8e1f89c6d574931136bddb62af88f8adcfbf82becb192f4f77d  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/layer2.cpp
+7932ce0b782857ddf19e91f0f411351b3c4582c02bb23b8d5e51c846fcd5f976  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/layer2.hpp
+943fd7bcbd7656ad53178c0e887b0296787a56a1f764142195e3a9033303568f  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/layer2_local.hpp
+9add6135a1a2524c1b540c62289de9ed8e2b4c8562ba9531dd9c4f346454b744  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/look_state.hpp
+de03a761379ad1ce37ab50f0bbc77467414ab538da819cc05191687119e0f58d  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/lut3d.hpp
+ec0c15c5d9cd05028b80389d64053389b846b307f0e4c37542e696cd41ff8f0f  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/output_cancel.hpp
+aa281d374c90ebb2ad209a6040e522e53e41466daa62b4877700367126a2684d  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/output_transform.cpp
+e300bfdee049054d491be836cdaf3ba49b1ada0548ba2669afeed87db6092708  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/output_transform.hpp
+e6b4a0af6daae0ca8a7ee0c022c3ff32c92316f022e96f34cb7621dfad22446a  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/passthrough.hpp
+1e810ac309ffc1e020983cb1ff1a4ee76654e42f9f73dd0887bb8b72ee8fa5b5  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/prophoto_exposure.hpp
+1aea76a7562ea97c4b00fd356c05725c4418db83fab6ec19d0f016698a8517b4  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/raw_development.cpp
+5f0aaabf81365b7436497e948d32835b4bd518bd07c2f932ab9115a9e3a68b02  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/raw_development.hpp
+daf3e134f656954ab1d2b1d96023dbc8f23445ae4bb9594ffa8a757af3b4db10  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/raw_precision_input.hpp
+ab7f18735bd86a27e5f74c6d14ff87ac1957e812e0ba7c6f471a9ebebe01f401  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/raw_white_balance.hpp
+52693831a944a17f5a6a3d47a22bc24dc4220a96cc4f8a433787d9302c3f84fd  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/resize.cpp
+5c9fec03b85357e5cbbba7bf248d021ca3e52384e835d7e2f98120fd5f5ea138  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/resize.hpp
+4c5dbd6e1493b6c2d5b77e7acf9ab488e6d5133dba1b690ca6399fdb4fac0a7c  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/rgba8_spool.hpp
+8315e63848e23a799a235e4b304a053a03d1d1b5f135bba7e71c0d4fdaf720bd  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/spektralab_jni.cpp
+8e6aba8871c998fb98d1f20d656652488600acb4dc9f82bf53a8f52d0aad4458  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/storage_probe.comp
+b93d13b126dc191f60fe256133bb8753edf6c66038611c81dc93b347a87b74a1  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/storage_probe.cpp
+604443b33bce0bcbc9ba09ce90957e63366826223086e33791402ccc095ccb06  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/storage_probe.hpp
+d460dcb8da5ef2dba4c609a6b291565a376358d7b824f35159a5df8a97c8dcf0  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/storage_probe_spv.inc
+bffe64d1b22c28529b34f2700e0ed8573ae71f1a8ee14edc10dbc075e94cec38  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/tiff16.cpp
+cf6269ff369ed34632530312990fdced98a51d5fd8a4ed17515c00ae957fd309  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/tiff16.hpp
+7c0c937fbc359b6f4f088594d4c7aa8dd5b227be35f97000166d9d26909ea813  /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/tone_curve.hpp

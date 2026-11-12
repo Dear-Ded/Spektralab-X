@@ -1,0 +1,43 @@
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 13368
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+Terminated
+memory.max=2147483648
+memory.swap.max=0
+tier=live shape=1024x683 cached=0 black_rows=0
+tier=preview shape=3400x2267 cached=0 black_rows=0
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 13368
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 26448
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 16
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1
+case,memory_max_bytes,working_edge,exit_code
+phone-available,5368709120,6709,0
+tighter-memory,2147483648,6709,143
+transfer-chunks,5368709120,6709,0
+smaller-working,5368709120,3400,0
+advertised-capacity,5368709120,6709,1

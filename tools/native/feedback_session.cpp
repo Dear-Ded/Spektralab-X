@@ -24,8 +24,9 @@ std::vector<uint16_t> render(spk_engine* engine, spk_session* session, const cha
                            const char* name, const std::filesystem::path& dir,
                            std::ofstream& csv, bool must_reuse = false) {
     Result result;
-    check(spk_reprint(session, tier, &result.value) == SPK_OK,
-          std::string("render ") + tier + ": " + spk_last_error(engine));
+    const spk_status status = spk_reprint(session, tier, &result.value);
+    check(status == SPK_OK, std::string("render ") + tier + " status=" +
+          std::to_string(status) + ": " + spk_last_error(engine));
     const auto& r = result.value;
     check(r.rgba16 && r.width && r.height && r.row_stride_px >= r.width, "invalid result layout");
     check(!must_reuse || r.negative_was_cached, "print edit unexpectedly discarded negative");
@@ -68,7 +69,9 @@ std::vector<uint16_t> render(spk_engine* engine, spk_session* session, const cha
 }
 
 int main(int argc, char** argv) try {
-    check(argc == 7, "usage: feedback_session RESOURCES INPUT_F32|--synthetic WIDTH HEIGHT OUTPUT_DIR EDGE");
+    check(argc == 7 || (argc == 8 && std::string(argv[7]) == "--first-pass"),
+          "usage: feedback_session RESOURCES INPUT_F32|--synthetic WIDTH HEIGHT OUTPUT_DIR EDGE [--first-pass]");
+    const bool first_pass = argc == 8;
     const unsigned w = std::stoul(argv[3]), h = std::stoul(argv[4]), edge = std::stoul(argv[6]);
     check(w && h && uint64_t(w) * h <= 100000000, "input dimensions out of range");
     const std::filesystem::path dir = argv[5];
@@ -95,6 +98,12 @@ int main(int argc, char** argv) try {
     }
     Engine engine(spk_engine_create(argv[1], nullptr), spk_engine_destroy);
     check(bool(engine), std::string("engine: ") + spk_last_error(nullptr));
+    const auto save_capabilities = [&] {
+        std::ofstream file(dir / "capabilities.json");
+        file << spk_capabilities(engine.get()) << '\n';
+        check(bool(file), "capabilities write failed");
+    };
+    save_capabilities();
     const spk_image image{input.data(), rw, rh, 3};
     const char* params = R"({"film_stock":"kodak_ultramax_400","print_stock":"kodak_ultra_endura","input_color_space":"ProPhoto RGB","input_cctf_decoding":false,"output_color_space":"ProPhoto RGB","output_cctf_encoding":true,"auto_exposure":true,"auto_exposure_method":"balanced","exposure_compensation_ev":0.5,"film_format_mm":36,"print_exposure":1,"preview_long_edge":1024})";
     Session session(spk_open(engine.get(), &image, params, nullptr), spk_session_release);
@@ -104,6 +113,11 @@ int main(int argc, char** argv) try {
     csv << "tier,w,h,sample_w,sample_h,stride,cached,black_rows,white_rows,alpha_errors,fnv64_words\n";
     for (const char* tier : {"live", "preview", "full"})
         render(engine.get(), session.get(), tier, tier, dir, csv);
+    if (first_pass) {
+        save_capabilities();
+        std::cout << "PASS session tiers=3 cache_checks=0 input=" << rw << 'x' << rh << '\n';
+        return 0;
+    }
     // Disable random print glare only for exact cache/reversion comparisons.
     check(spk_set_params(session.get(), R"({"glare_active":false})", nullptr) == SPK_OK, "disable glare");
     const auto stable = render(engine.get(), session.get(), "full", "stable", dir, csv, true);
@@ -112,9 +126,7 @@ int main(int argc, char** argv) try {
     check(stable != render(engine.get(), session.get(), "full", "edited", dir, csv, true), "print edit had no effect");
     check(spk_set_params(session.get(), R"({"print_exposure":1})", nullptr) == SPK_OK, "restore print exposure");
     check(stable == render(engine.get(), session.get(), "full", "restored", dir, csv, true), "restored print differs");
-    std::ofstream capabilities(dir / "capabilities.json");
-    capabilities << spk_capabilities(engine.get()) << '\n';
-    check(bool(capabilities), "capabilities write failed");
+    save_capabilities();
     std::cout << "PASS session tiers=3 cache_checks=3 input=" << rw << 'x' << rh << '\n';
     return 0;
 } catch (const std::exception& exception) {

@@ -1,0 +1,10 @@
+/data/work/gpt-feedback-env-20261112/android-build/native/libspektralab_jni.so: 1 file pushed, 0 skipped. 21.0 MB/s (29568368 bytes in 1.341s)
+/data/work/gpt-feedback-env-20261112/android-build/feedback.jar: 1 file pushed, 0 skipped. 118.0 MB/s (6456 bytes in 0.000s)
+/data/work/gpt-feedback-env-20261112/android-build/libfeedback_fixture.so: 1 file pushed, 0 skipped. 728.2 MB/s (40656 bytes in 0.000s)
+3 files pushed, 0 skipped. 8.2 MB/s (29615480 bytes in 3.431s)
+/data/work/gpt-feedback-env-20261112/android-build/native/engine/resources/: 102 files pushed, 0 skipped. 3.8 MB/s (31165166 bytes in 7.758s)
+heap initial=201326592 expanded=603979776
+Killed 
+case,width,height,exit_code,boot_completed_before,boot_completed_after
+pipeline-smoke,1281,855,137,,
+pipeline-full,6709,4475,skipped-prerequisite,,

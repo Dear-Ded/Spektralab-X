@@ -1,0 +1,102 @@
+'DISPLAY' environment variable not set... skipping surface info
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000150014
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000101000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000099000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000353000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000332001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000218001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000226002
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000392001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000212000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000116001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000163001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000080000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000347001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000286001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000143003
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000028001
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3763 WARNING: UNSUPPORTED: pProperties->pNext sType = 1000190000
+../../third_party/SwiftShader/src/Vulkan/libVulkan.cpp:3948 WARNING: UNSUPPORTED: pMemoryProperties->pNext sType = 1000237000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000067001
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000150013
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000411000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000244000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000381000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000081001
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000284000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000377000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000332000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000218000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000251000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000226003
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000391000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000265000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000238000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000392000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000412000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000116000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000269000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000163000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000294001
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000248000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000344000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000348013
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000347000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000286000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000273000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000260000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000181000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000234000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000323000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000281000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000028000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000190002
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000352000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000336000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000330000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:649 WARNING: UNSUPPORTED: curExtension->sType: 1000252000
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:2483 WARNING: UNSUPPORTED: pQueueFamilyProperties->pNext sType = 1000023016
+../../third_party/SwiftShader/src/Vulkan/VkPhysicalDevice.cpp:2483 WARNING: UNSUPPORTED: pQueueFamilyProperties->pNext sType = 1000023012
+==========
+VULKANINFO
+==========
+
+Vulkan Instance Version: 1.3.204
+
+
+Instance Extensions: count = 12
+-------------------------------
+VK_EXT_debug_report                    : extension revision 10
+VK_EXT_debug_utils                     : extension revision 2
+VK_EXT_headless_surface                : extension revision 1
+VK_KHR_device_group_creation           : extension revision 1
+VK_KHR_external_fence_capabilities     : extension revision 1
+VK_KHR_external_memory_capabilities    : extension revision 1
+VK_KHR_external_semaphore_capabilities : extension revision 1
+VK_KHR_get_physical_device_properties2 : extension revision 2
+VK_KHR_get_surface_capabilities2       : extension revision 1
+VK_KHR_surface                         : extension revision 25
+VK_KHR_wayland_surface                 : extension revision 6
+VK_KHR_xcb_surface                     : extension revision 6
+
+Instance Layers: count = 3
+--------------------------
+VK_LAYER_INTEL_nullhw       INTEL NULL HW                1.1.73   version 1
+VK_LAYER_MESA_device_select Linux device selection layer 1.3.211  version 1
+VK_LAYER_MESA_overlay       Mesa Overlay layer           1.3.211  version 1
+
+Devices:
+========
+GPU0:
+	apiVersion         = 4206592 (1.3.0)
+	driverVersion      = 20971520 (0x1400000)
+	vendorID           = 0x1ae0
+	deviceID           = 0xc0de
+	deviceType         = PHYSICAL_DEVICE_TYPE_CPU
+	deviceName         = SwiftShader Device (Subzero)
+	driverID           = DRIVER_ID_GOOGLE_SWIFTSHADER
+	driverName         = SwiftShader driver
+	driverInfo         = 
+	conformanceVersion = 1.3.3.1
+	deviceUUID         = 53776966-7453-6861-6465-725555494400
+	driverUUID         = 00004001-0000-0000-0000-000000000000

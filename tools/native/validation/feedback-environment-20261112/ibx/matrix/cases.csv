@@ -1,0 +1,6 @@
+case,memory_max_bytes,working_edge,exit_code
+phone-available,5368709120,6709,0
+tighter-memory,2147483648,6709,143
+transfer-chunks,5368709120,6709,0
+smaller-working,5368709120,3400,0
+advertised-capacity,5368709120,6709,1

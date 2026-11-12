@@ -1,0 +1,370 @@
+--------- beginning of system
+11-12 13:09:50.878  1904  1925 V SystemServerTimingAsync: InitThreadPoolExec:RoleObserver took to complete: 66ms
+11-12 13:09:50.987  1904  1904 V SystemServerTiming: StartStatusBarManagerService took to complete: 116ms
+11-12 13:09:50.995  1904  1904 D SystemServer: MusicRecognitionManagerService not defined by OEM or disabled by flag
+11-12 13:09:51.001  1904  1904 D SystemServer: ContentCaptureService disabled because resource is not overlaid
+11-12 13:09:51.012  1904  1904 D SystemServer: AttentionService is not configured on this device
+11-12 13:09:51.019  1904  1904 D SystemServer: InteractionProviderService is not enabled on this device
+11-12 13:09:51.035  1904  1904 D SystemServer: RotationResolverService is not configured on this device
+11-12 13:09:51.057  1904  1904 D SystemServer: SystemCaptionsManagerService disabled because resource is not overlaid
+11-12 13:09:51.059  1904  1904 D SystemServerTiming: StartTextToSpeechManagerService
+11-12 13:09:51.068  1904  1904 I SystemServiceManager: Starting com.android.server.texttospeech.TextToSpeechManagerService
+11-12 13:09:51.190  1904  1904 V SystemServerTiming: StartTextToSpeechManagerService took to complete: 131ms
+11-12 13:09:51.210  1904  1904 D SystemServerTiming: startWearableSensingService
+11-12 13:09:51.251  1904  1904 I SystemServiceManager: Starting com.android.server.wearable.WearableSensingManagerService
+11-12 13:09:51.575  1904  1904 V SystemServerTiming: startWearableSensingService took to complete: 339ms
+11-12 13:09:51.583  1904  1904 D SystemServerTiming: startOnDeviceIntelligenceManagerService
+11-12 13:09:51.592  1904  1904 I SystemServiceManager: Starting com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService
+11-12 13:09:51.747  1904  1904 V SystemServerTiming: startOnDeviceIntelligenceManagerService took to complete: 157ms
+11-12 13:09:51.757  1904  1904 D SystemServerTiming: startContentSafetyManagerService
+11-12 13:09:51.758  1904  1904 I SystemServiceManager: Starting com.android.server.contentsafety.ContentSafetyManagerService
+11-12 13:09:51.816  1904  1904 V SystemServerTiming: startContentSafetyManagerService took to complete: 58ms
+11-12 13:09:51.829  1904  1904 D SystemServer: AmbientContextManagerService not defined by OEM or disabled by flag
+11-12 13:09:51.840  1904  1904 D SystemServerTiming: StartSpeechRecognitionManagerService
+11-12 13:09:51.851  1904  1904 I SystemServiceManager: Starting com.android.server.speech.SpeechRecognitionManagerService
+11-12 13:09:51.909  1904  1904 V SystemServerTiming: StartSpeechRecognitionManagerService took to complete: 70ms
+11-12 13:09:51.917  1904  1904 D SystemServer: AppPredictionService not defined by OEM
+11-12 13:09:51.922  1904  1904 D SystemServer: ContentSuggestionsService not defined by OEM
+11-12 13:09:51.922  1904  1904 D SystemServer: SmartspaceManagerService not defined by OEM or disabled by flag
+11-12 13:09:51.923  1904  1904 D SystemServer: ContextualSearchManagerService not defined or disabled by flag
+11-12 13:09:51.923  1904  1904 D SystemServerTiming: InitConnectivityModuleConnector
+--------- beginning of main
+11-12 13:09:51.923  1904  1904 D ConnectivityModuleConnector: Network stack init
+11-12 13:09:51.924  1904  1904 V SystemServerTiming: InitConnectivityModuleConnector took to complete: 1ms
+11-12 13:09:51.924  1904  1904 D SystemServerTiming: InitNetworkStackClient
+11-12 13:09:51.957  1904  1904 D NetworkStackClient: Network stack init
+11-12 13:09:51.959  1904  1904 V SystemServerTiming: InitNetworkStackClient took to complete: 35ms
+11-12 13:09:51.960  1904  1904 D SystemServerTiming: StartNetworkManagementService
+11-12 13:09:52.112  1818  1835 I netd    : registerUnsolicitedEventListener(interface:0x725a61007b40) <3.89ms>
+11-12 13:09:52.138  1904  1904 V SystemServerTiming: StartNetworkManagementService took to complete: 156ms
+11-12 13:09:52.142  1904  1904 D SystemServerTiming: StartFontManagerService
+11-12 13:09:52.156  1904  1904 I FontManagerService: Using optimized boot-time font loading.
+11-12 13:09:52.193  1904  1925 D SystemServerTimingAsync: InitThreadPoolExec:FontManagerService_create
+11-12 13:09:52.195  1904  1925 D SystemServerInitThreadPool: Started executing FontManagerService_create
+11-12 13:09:52.241  1904  1904 V SystemServerTiming: StartFontManagerService took to complete: 99ms
+11-12 13:09:52.250  1904  1904 D SystemServerTiming: StartTextServicesManager
+11-12 13:09:52.251  1904  1904 I SystemServiceManager: Starting com.android.server.textservices.TextServicesManagerService$Lifecycle
+11-12 13:09:52.307  1904  1925 I SystemFonts: Loading font config from /system/etc/font_fallback.xml
+11-12 13:09:52.341  1904  1904 V SystemServerTiming: StartTextServicesManager took to complete: 92ms
+11-12 13:09:52.357  1904  1904 D SystemServerTiming: StartTextClassificationManagerService
+11-12 13:09:52.359  1904  1904 I SystemServiceManager: Starting com.android.server.textclassifier.TextClassificationManagerService$Lifecycle
+11-12 13:09:52.568  1904  1904 W SystemServiceManager: Service com.android.server.textclassifier.TextClassificationManagerService$Lifecycle took 51 ms in onStart
+11-12 13:09:52.593  1904  1904 V SystemServerTiming: StartTextClassificationManagerService took to complete: 235ms
+11-12 13:09:52.601  1904  1904 D SystemServerTiming: StartNetworkScoreService
+11-12 13:09:52.606  1904  1904 I SystemServiceManager: Starting com.android.server.NetworkScoreService$Lifecycle
+11-12 13:09:52.760  1904  1904 I NetworkScoreService: Registering network_score
+11-12 13:09:52.814  1904  1904 W SystemServiceManager: Service com.android.server.NetworkScoreService$Lifecycle took 54 ms in onStart
+11-12 13:09:52.823  1904  1904 V SystemServerTiming: StartNetworkScoreService took to complete: 217ms
+11-12 13:09:52.849  1904  1904 D SystemServerTiming: StartNetworkStatsService
+11-12 13:09:52.923  1904  1904 I SystemServiceManager: Starting com.android.server.NetworkStatsServiceInitializer
+11-12 13:09:53.602  1904  1904 D nativeloader: Load libservice-connectivity.so using class loader ns clns-shared-15 (caller=/apex/com.android.tethering/javalib/service-connectivity.jar): ok
+11-12 13:09:53.746  1904  1943 W ProcessCpuTracker: Failed to stat(/proc/2089): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:09:53.769  1904  1943 W ProcessCpuTracker: Skipping unknown process pid 2089
+11-12 13:09:54.466  1904  1904 D nativeloader: Load libandroid_net_connectivity_com_android_net_module_util_jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok
+11-12 13:09:54.530  1904  1925 I HWUI    : Using FreeType backend (prop=Auto)
+11-12 13:09:56.191  1904  1943 W ProcessCpuTracker: Failed to stat(/proc/2104): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:09:56.217  1904  1943 W ProcessCpuTracker: Skipping unknown process pid 2104
+11-12 13:09:56.306  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 1904
+11-12 13:09:56.309  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2090
+11-12 13:09:56.309  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 462
+11-12 13:09:56.309  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 421
+11-12 13:09:56.309  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 252
+11-12 13:09:56.310  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 9
+11-12 13:09:56.310  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2082
+11-12 13:09:56.310  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 254
+11-12 13:09:56.353  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 415
+11-12 13:09:56.377  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 14
+11-12 13:09:56.394  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 53
+11-12 13:09:56.417  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 304
+11-12 13:09:56.443  1904  1943 I ActivityManager: Skipping next CPU consuming process, not a java proc: 492
+11-12 13:09:56.807  1904  1904 I NetworkStatsServiceInitializer: Registering netstats
+11-12 13:09:56.886  1904  1904 I NetworkStatsServiceInitializer: Initializing network tracing hooks
+11-12 13:09:56.922  1904  1943 I ActivityManager: Dumping to /data/anr/anr_2026-11-12-13-09-56-446
+11-12 13:09:56.965  1904  1943 I ActivityManager: Collecting stacks for pid 1904
+11-12 13:09:57.102  1904  1904 D NetworkTrace: Registering Perfetto data source
+11-12 13:09:57.127  1904  1904 W SystemServiceManager: Service com.android.server.NetworkStatsServiceInitializer took 319 ms in onStart
+11-12 13:09:57.173  1904  1904 V SystemServerTiming: StartNetworkStatsService took to complete: 4316ms
+11-12 13:09:57.182  1904  1904 D SystemServerTiming: StartNetworkPolicyManagerService
+11-12 13:09:58.041  1904  1904 V SystemServerTiming: StartNetworkPolicyManagerService took to complete: 829ms
+11-12 13:09:58.042  1904  1904 D SystemServerTiming: StartWifi
+11-12 13:09:58.175  1904  1904 I SystemServiceManager: Starting com.android.server.wifi.WifiService
+--------- beginning of kernel
+11-12 13:09:58.618     0     0 I init    : Service 'exec 20 (/system/bin/extra_free_kbytes.sh 4500)' (pid 2082) exited with status 0 oneshot service took 15.071000 seconds in background
+11-12 13:09:58.619     0     0 I init    : Sending SIGKILL to service 'exec 20 (/system/bin/extra_free_kbytes.sh 4500)' (pid 2082) process group...
+11-12 13:09:58.647     0     0 I libprocessgroup: Removed cgroup /sys/fs/cgroup/system/uid_0/pid_2082
+11-12 13:09:59.113  1904  1904 I WifiContext: Got resolveInfos for com.android.server.wifi.intent.action.SERVICE_WIFI_RESOURCES_APK: [ResolveInfo{6646bdc com.android.wifi.resources/android.app.Activity m=0x108000 userHandle=UserHandle{0}}]
+11-12 13:09:59.124  1904  1904 I WifiContext: Found Wifi Resources APK at: com.android.wifi.resources
+11-12 13:09:59.183  1904  1943 I system_server: libdebuggerd_client: started dumping process 1904
+11-12 13:09:59.277   310   310 I tombstoned: registered intercept for pid 1904 and type kDebuggerdJavaBacktrace
+11-12 13:09:59.302  1904  1914 I system_server: Thread[2,tid=1914,WaitingInMainSignalCatcherLoop,Thread*=0x7416d4a14380,peer=0x2007078,"Signal Catcher"]: reacting to signal 3
+11-12 13:09:59.306  1904  1914 I system_server: 
+11-12 13:09:59.872  2090  2090 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-12 13:10:00.572  2090  2090 I AndroidRuntime: Using default boot image
+11-12 13:10:00.585  2090  2090 I AndroidRuntime: Leaving lock profiling enabled
+11-12 13:10:01.168  2090  2090 I app_process: Core platform API enforcement enabled from the hiddenapi_platform_enforcement flag and the device API level
+11-12 13:10:01.259  2090  2090 I app_process: Using generational CollectorTypeCMC GC.
+11-12 13:10:01.583  1904  1949 E OomConnection: failed waiting for OOM events: java.lang.RuntimeException: listener failed waiting for OOM event
+11-12 13:10:03.336  1904  1904 D ScanMetrics: Settings package: com.android.settings
+11-12 13:10:03.367  1904  1904 E ScanMetrics: Can't get GMS uid
+11-12 13:10:04.341  1904  1904 I android_os_HwBinder: HwBinder: Starting thread pool for getting: android.hidl.manager@1.2::IServiceManager/default
+11-12 13:10:04.438   255   255 I hwservicemanager: getTransport: Cannot find entry android.hardware.wifi@1.0::IWifi/default in either framework or device VINTF manifest.
+11-12 13:10:04.526     0     0 I servicemanager: Caller(pid=1904,uid=1000,sid=u:r:system_server:s0) Found android.hardware.wifi.IWifi/default in device VINTF manifest.
+11-12 13:10:04.522  1904  1904 I WifiHalAidlImpl: Creating the Wifi HAL using the AIDL implementation
+11-12 13:10:04.964     0     0 I servicemanager: Caller(pid=1904,uid=1000,sid=u:r:system_server:s0) Found android.hardware.wifi.supplicant.ISupplicant/default in device VINTF manifest.
+11-12 13:10:04.934  1904  1904 I SupplicantStaIfaceHal: Initializing SupplicantStaIfaceHal using AIDL Vendor implementation.
+11-12 13:10:05.055  1818  1835 I netd    : registerUnsolicitedEventListener(interface:0x725a61007be0) <0.40ms>
+11-12 13:10:05.193  1904  1904 I Nl80211Native: useWificond: false
+11-12 13:10:05.328     0     0 I servicemanager: Caller(pid=1904,uid=1000,sid=u:r:system_server:s0) Found android.hardware.wifi.supplicant.ISupplicant/default in device VINTF manifest.
+11-12 13:10:05.337  1904  1904 I SupplicantP2pIfaceHal: Initializing SupplicantP2pIfaceHal using Vendor AIDL implementation.
+11-12 13:10:06.067  1904  1904 I WifiCoexManager: Default coex algorithm is disabled.
+11-12 13:10:06.096  2090  2090 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-12 13:10:07.206  2090  2090 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 13:10:07.231  2090  2090 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/10/icu") succeeded. 
+11-12 13:10:07.234  2090  2090 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt78l.dat
+11-12 13:10:07.341  2090  2090 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 13:10:07.445  2090  2090 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 13:10:07.633  2090  2090 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+11-12 13:10:07.729  2090  2090 W app_process: Unexpected CPU variant for x86: x86_64.
+11-12 13:10:07.729  2090  2090 W app_process: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+11-12 13:10:08.601     0     0 W healthd : battery l=100 v=5000 t=25.0 h=2 st=2 c=900000 fc=3000000 cc=10 chg=a
+11-12 13:10:09.237   310   310 I tombstoned: received crash request for pid 1904
+11-12 13:10:09.250   310   310 I tombstoned: found intercept fd 512 for pid 1904 and type kDebuggerdJavaBacktrace
+11-12 13:10:09.278   310   310 W tombstoned: skipping tombstone file creation due to intercept
+11-12 13:10:09.290  1904  1914 I system_server: Wrote stack traces to tombstoned
+11-12 13:10:09.841  1904  1943 I system_server: libdebuggerd_client: done dumping process 1904
+11-12 13:10:10.114  1904  1943 I ActivityManager: dumpStackTraces nativepids=[450, 456, 266, 398, 462, 465, 466, 275, 1815, 408, 1816, 409, 1817, 1818, 1819, 413, 415, 419, 420, 421, 423, 504, 505, 508, 254, 447]
+11-12 13:10:10.129  1904  1943 I ActivityManager: Collecting stacks for native pid 450
+11-12 13:10:10.216  1904  1943 E android.os.Debug: Failed to get binder state info for pid: 450 status: -2: Success
+11-12 13:10:10.359  1904  1943 I system_server: libdebuggerd_client: started dumping process 450
+11-12 13:10:10.474   310   310 I tombstoned: registered intercept for pid 450 and type kDebuggerdNativeBacktrace
+11-12 13:10:10.514   450   450 I libc    : Requested dump for pid 450 (android.hardwar)
+11-12 13:10:11.234  2090  2090 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+11-12 13:10:11.307  2090  2090 D AndroidRuntime: Calling main entry com.dearded.spektralab.FeedbackAndroid
+11-12 13:10:11.499   276   286 W keystore2: system/security/keystore2/watchdog/src/lib.rs:142 - ### Keystore Watchdog report - BEGIN ###
+11-12 13:10:11.521   276   286 W keystore2: system/security/keystore2/watchdog/src/lib.rs:151 - When extracting from a bug report, please include this header
+11-12 13:10:11.527   276   286 W keystore2: system/security/keystore2/watchdog/src/lib.rs:152 - and all 1 records below.
+11-12 13:10:11.563   276   286 W keystore2: system/security/keystore2/watchdog/src/lib.rs:193 - ThreadId(3) await_boot_completed Started: 11-12 12:55:20.289 UTC Pending: 891.250587865s Overdue 591.250681173s
+11-12 13:10:11.567  2090  2090 D nativeloader: InitApexLibraries:
+11-12 13:10:11.567  2090  2090 D nativeloader:   com_android_art: libnativehelper.so
+11-12 13:10:11.567  2090  2090 D nativeloader:   com_android_i18n: libicui18n.so:libicuuc.so:libicu.so
+11-12 13:10:11.567  2090  2090 D nativeloader:   com_android_neuralnetworks: libneuralnetworks.so
+11-12 13:10:11.570   276   286 W keystore2: system/security/keystore2/watchdog/src/lib.rs:205 - ### Keystore Watchdog report - END ###
+11-12 13:10:11.582  2090  2090 D nativeloader: InitDefaultPublicLibraries for_preload=0: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libclang_rt.hwasan-aarch64-android.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-12 13:10:11.586  2090  2090 D nativeloader: Configuring clns-1 for other apk . target_sdk_version=0, uses_libraries=ALL, library_path=/data/local/tmp/spk-feedback-20261112-v5, permitted_path=/data:/mnt/expand
+11-12 13:10:11.603  2090  2090 D nativeloader: InitExtendedPublicLibraries: 
+11-12 13:10:11.690  2090  2090 D nativeloader: InitApexLibraries:
+11-12 13:10:11.690  2090  2090 D nativeloader:   
+11-12 13:10:11.703  2090  2090 I nativeloader: InitVendorPublicLibraries skipped: Failed to read /vendor/etc/public.libraries.txt: No such file or directory
+11-12 13:10:11.707  2090  2090 D nativeloader: InitProductPublicLibraries: 
+11-12 13:10:11.776  2090  2090 D nativeloader: Load /data/local/tmp/spk-feedback-20261112-v5/libspektralab_jni.so using isolated ns clns-1 (caller=/data/local/tmp/spk-feedback-20261112-v5/feedback.jar): ok
+11-12 13:10:11.816  2090  2090 D nativeloader: Load /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so using class loader ns clns-1 (caller=/data/local/tmp/spk-feedback-20261112-v5/feedback.jar): dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:11.838  2090  2130 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+11-12 13:10:11.843  2090  2129 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+11-12 13:10:11.875  2090  2090 D AndroidRuntime: Shutting down VM
+--------- beginning of crash
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: PID: 2090
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:11.955  2090  2090 E libbinder.IPCThreadState: Failed to get extended error: Bad file descriptor
+11-12 13:10:12.356  2090  2090 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+11-12 13:10:12.402  2090  2090 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+11-12 13:10:12.405  2090  2090 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+11-12 13:10:12.422  1904  1943 E system_server: libdebuggerd_client: failed to read status response from tombstoned: Try again
+11-12 13:10:12.451  2090  2090 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+11-12 13:10:12.465   310   310 I tombstoned: intercept for pid 450 and type kDebuggerdNativeBacktrace terminated: due to input
+11-12 13:10:12.491  2090  2090 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+11-12 13:10:12.532  2090  2090 I AconfigPackage: com.android.uprobestats.flags is mapped to com.android.uprobestats
+11-12 13:10:12.547  2090  2090 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+11-12 13:10:12.561  1904  1943 I ActivityManager: Collecting stacks for native pid 456
+11-12 13:10:12.589  2090  2090 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+11-12 13:10:12.624  2090  2090 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+11-12 13:10:12.626  2131  2131 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdNativeBacktrace
+11-12 13:10:12.637  2090  2090 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+11-12 13:10:12.651  1904  1943 E android.os.Debug: Failed to get binder state info for pid: 456 status: -2: Success
+11-12 13:10:12.654   310   310 I tombstoned: received crash request for pid 450
+11-12 13:10:12.658   310   310 E tombstoned: failed to get crash output for type kDebuggerdNativeBacktrace
+11-12 13:10:12.664  2131  2131 E libc    : failed to read response to DumpRequest packet: No message of desired type
+11-12 13:10:12.680  2090  2090 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+11-12 13:10:12.676  2131  2131 I crash_dump64: performing dump of process 450 (target tid = 450)
+11-12 13:10:12.694  2090  2090 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+11-12 13:10:12.694  2090  2090 I AconfigPackage: com.android.libcore is mapped to com.android.art
+11-12 13:10:12.723  1904  1943 I system_server: libdebuggerd_client: started dumping process 456
+11-12 13:10:12.725  2090  2090 I AconfigPackage: android.telecom.flags is mapped to com.android.telephonycore
+11-12 13:10:12.726  2090  2090 I AconfigPackage: com.android.internal.telecom.flags is mapped to com.android.telephonycore
+11-12 13:10:12.726  2090  2090 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+11-12 13:10:12.759  2090  2090 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+11-12 13:10:12.769  2090  2090 I AconfigPackage: com.android.media.metrics.flags is mapped to com.android.media
+11-12 13:10:12.770  2090  2090 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+11-12 13:10:12.803   310   310 I tombstoned: registered intercept for pid 456 and type kDebuggerdNativeBacktrace
+11-12 13:10:12.807  2090  2090 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+11-12 13:10:12.868   456   456 I libc    : Requested dump for pid 456 (android.hardwar)
+11-12 13:10:12.860  2090  2090 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+11-12 13:10:12.877  2090  2090 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+11-12 13:10:12.931  2090  2090 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+11-12 13:10:12.999  2090  2090 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+11-12 13:10:13.063  2090  2090 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+11-12 13:10:13.077  2090  2090 I AconfigPackage: com.android.nfc.module.nonexported.flags is mapped to com.android.nfcservices
+11-12 13:10:13.137  2090  2090 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+11-12 13:10:13.186  2090  2090 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+11-12 13:10:13.242  2090  2090 I AconfigPackage: com.android.bluetooth.beta.flags is mapped to com.android.bt
+11-12 13:10:13.243  2090  2090 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+11-12 13:10:13.295  2090  2090 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+11-12 13:10:13.373  2090  2090 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+11-12 13:10:13.374  2090  2090 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+11-12 13:10:13.390  1904  1904 D WifiOpenNetworkNotifier: Settings toggle enabled=true
+11-12 13:10:13.437  2090  2090 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+11-12 13:10:13.491  2090  2090 I AconfigPackage: com.android.webapp.flags is mapped to com.android.webapp
+11-12 13:10:13.595     0     0 I init    : Untracked process (pid: 2131 name: (crash_dump64) ppid: 1 pgrp: 2128 state: Z) exited with status 0
+11-12 13:10:13.596     0     0 I init    : Untracked process (pid: 2131 name: (crash_dump64) ppid: 1 pgrp: 2128 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:13.540  2090  2090 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+11-12 13:10:13.602  2090  2090 I AconfigPackage: com.android.cellbroadcastreceiver.flags is mapped to com.android.cellbroadcast
+11-12 13:10:13.636     0     0 I init    : Untracked process (pid: 2133 name: (android.hardwar) ppid: 1 pgrp: 2133 state: Z) exited with status 0
+11-12 13:10:13.641     0     0 I init    : Untracked process (pid: 2133 name: (android.hardwar) ppid: 1 pgrp: 2133 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:13.658  2090  2090 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+11-12 13:10:13.667  2090  2090 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+11-12 13:10:13.667  2090  2090 I AconfigPackage: android.app.sdksandbox.flags is mapped to com.android.adservices
+11-12 13:10:13.687  2090  2090 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+11-12 13:10:13.676  1904  1904 D WifiCountryCode: Default country code from system property ro.boot.wificountrycode is null
+11-12 13:10:13.702  2090  2090 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+11-12 13:10:13.733  2090  2090 I AconfigPackage: com.android.npumanager is mapped to com.android.npumanager
+11-12 13:10:13.808  2090  2090 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+11-12 13:10:13.818  2090  2090 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+11-12 13:10:13.827  2090  2090 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+11-12 13:10:13.860  2090  2090 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+11-12 13:10:13.873  2090  2090 I AconfigPackage: android.net.http is mapped to com.android.tethering
+11-12 13:10:13.874  2090  2090 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+11-12 13:10:13.874  2090  2090 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+11-12 13:10:13.874  2090  2090 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+11-12 13:10:13.874  2090  2090 I AconfigPackage: com.android.tethering.flags is mapped to com.android.tethering
+11-12 13:10:13.874  2090  2090 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+11-12 13:10:13.875  2090  2090 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+11-12 13:10:13.875  2090  2090 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+11-12 13:10:13.875  2090  2090 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+11-12 13:10:13.913  2090  2090 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+11-12 13:10:13.925  2090  2090 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+11-12 13:10:14.041  2090  2090 E libbinder.IPCThreadState: Failed to get extended error: Bad file descriptor
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: Couldn't report crash. Here's the crash:
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: Error reporting crash. Here's the error:
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:626)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService2(IServiceManager.java:589)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.checkService2(ServiceManagerNative.java:81)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService2(ServiceManagerNative.java:70)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:394)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:156)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6118)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6115)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.maybeCreate(Singleton.java:55)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:46)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:6106)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:166)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1098)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1093)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:3387)
+11-12 13:10:14.085  2090  2090 I Process : Sending signal. PID: 2090 SIG: 9
+11-12 13:10:14.566   464   464 I adbd    : adbd service requested 'shell,v2,raw:getprop sys.boot_completed'
+11-12 13:10:14.578  1904  1904 D WakeupController: Settings.Global: WifiWake enabled
+11-12 13:10:14.618  1904  2115 E WifiConfigManager: Cannot save to store before store is read!
+11-12 13:10:14.710  1904  2115 D WakeupController: WifiSettingsConfigStore: WifiWake enabled
+11-12 13:10:14.831  1904  1943 E system_server: libdebuggerd_client: failed to read status response from tombstoned: Try again
+11-12 13:10:14.870   310   310 I tombstoned: intercept for pid 456 and type kDebuggerdNativeBacktrace terminated: due to input
+11-12 13:10:14.935  1904  1943 I ActivityManager: Collecting stacks for native pid 266
+11-12 13:10:15.115  1904  1943 I system_server: libdebuggerd_client: started dumping process 266
+11-12 13:10:15.156  1904  1904 I WifiPwrStatsManager: WifiPowerStatsManager initialized.
+11-12 13:10:15.178   310   310 I tombstoned: registered intercept for pid 266 and type kDebuggerdNativeBacktrace
+11-12 13:10:15.196  2137  2137 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdNativeBacktrace
+11-12 13:10:15.214   310   310 I tombstoned: received crash request for pid 456
+11-12 13:10:15.218   310   310 E tombstoned: failed to get crash output for type kDebuggerdNativeBacktrace
+11-12 13:10:15.222  2137  2137 E libc    : failed to read response to DumpRequest packet: No message of desired type
+11-12 13:10:15.242   266   266 I libc    : Requested dump for pid 266 (binder:266_2)
+11-12 13:10:15.250  2137  2137 I crash_dump64: performing dump of process 456 (target tid = 456)
+11-12 13:10:15.478  1904  1925 D SystemServerInitThreadPool: Finished executing FontManagerService_create
+11-12 13:10:15.511  1904  1925 V SystemServerTimingAsync: InitThreadPoolExec:FontManagerService_create took to complete: 23315ms
+11-12 13:10:15.754  1904  1904 I WifiService: Registering wifi
+11-12 13:10:15.837     0     0 I init    : Untracked process (pid: 2137 name: (crash_dump64) ppid: 1 pgrp: 2135 state: Z) exited with status 0
+11-12 13:10:15.860     0     0 I init    : Untracked process (pid: 2137 name: (crash_dump64) ppid: 1 pgrp: 2135 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:15.892     0     0 I init    : Untracked process (pid: 2140 name: (android.hardwar) ppid: 1 pgrp: 2140 state: Z) exited with status 0
+11-12 13:10:15.892     0     0 I init    : Untracked process (pid: 2140 name: (android.hardwar) ppid: 1 pgrp: 2140 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:15.872  1904  1904 W SystemServiceManager: Service com.android.server.wifi.WifiService took 117 ms in onStart
+11-12 13:10:15.883  1904  1904 V SystemServerTiming: StartWifi took to complete: 17841ms
+11-12 13:10:15.889  1904  1904 D SystemServerTiming: StartWifiScanning
+11-12 13:10:15.933  1904  1904 I SystemServiceManager: Starting com.android.server.wifi.scanner.WifiScanningService
+11-12 13:10:15.944  1904  1904 I WifiScanningService: Creating wifiscanner
+11-12 13:10:16.030  1904  1904 I WifiScanningService: Publishing wifiscanner
+11-12 13:10:16.043  1904  1904 V SystemServerTiming: StartWifiScanning took to complete: 153ms
+11-12 13:10:16.047  1904  1904 D SystemServerTiming: StartWifiP2P
+11-12 13:10:16.059  1904  1904 I SystemServiceManager: Starting com.android.server.wifi.p2p.WifiP2pService
+11-12 13:10:16.192  1904  1904 I WifiContext: Got resolveInfos for com.android.server.wifi.intent.action.SERVICE_WIFI_RESOURCES_APK: [ResolveInfo{ac10a6 com.android.wifi.resources/android.app.Activity m=0x108000 userHandle=UserHandle{0}}]
+11-12 13:10:16.205  1904  1904 I WifiContext: Found Wifi Resources APK at: com.android.wifi.resources
+11-12 13:10:16.434  1904  1904 I WifiP2pService: Registering wifip2p
+11-12 13:10:16.458  1904  1904 V SystemServerTiming: StartWifiP2P took to complete: 410ms
+11-12 13:10:16.465  1904  1904 D SystemServerTiming: StartPacProxyService
+11-12 13:10:16.558  1904  1904 V SystemServerTiming: StartPacProxyService took to complete: 77ms
+11-12 13:10:16.565  1904  1904 D SystemServerTiming: StartConnectivityService
+11-12 13:10:16.583  1904  1904 I SystemServiceManager: Starting com.android.server.ConnectivityServiceInitializer
+11-12 13:10:16.950  1904  1904 D ConnectivityService: ConnectivityService starting up
+11-12 13:10:17.183  1904  1943 E system_server: libdebuggerd_client: failed to read status response from tombstoned: Try again
+11-12 13:10:17.205   310   310 I tombstoned: intercept for pid 266 and type kDebuggerdNativeBacktrace terminated: due to input
+11-12 13:10:17.226  1904  1943 E ActivityManager: Aborting stack trace dump (current native pid=266); deadline exceeded.
+11-12 13:10:17.294   464   464 I adbd    : adbd service requested 'sync:'
+11-12 13:10:17.354   464   464 I adbd    : adbd service requested 'shell,v2:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '300''
+11-12 13:10:17.441  2145  2145 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdNativeBacktrace
+11-12 13:10:17.466   310   310 I tombstoned: received crash request for pid 266
+11-12 13:10:17.483   310   310 E tombstoned: failed to get crash output for type kDebuggerdNativeBacktrace
+11-12 13:10:17.486  2145  2145 E libc    : failed to read response to DumpRequest packet: No message of desired type
+11-12 13:10:17.504  2145  2145 I crash_dump64: performing dump of process 266 (target tid = 266)
+11-12 13:10:17.646  1904  1904 D PermissionMonitor: setUidsPermissionBits in PermissionBpfMap took 135229 microseconds.
+11-12 13:10:18.109     0     0 I init    : Untracked process (pid: 2145 name: (crash_dump64) ppid: 1 pgrp: 2142 state: Z) exited with status 0
+11-12 13:10:18.117     0     0 I init    : Untracked process (pid: 2145 name: (crash_dump64) ppid: 1 pgrp: 2142 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:18.144     0     0 I init    : Untracked process (pid: 2147 name: (binder:266_2) ppid: 1 pgrp: 2147 state: Z) exited with status 0
+11-12 13:10:18.144     0     0 I init    : Untracked process (pid: 2147 name: (binder:266_2) ppid: 1 pgrp: 2147 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:10:18.189  1818  1835 I netd    : registerUnsolicitedEventListener(interface:0x725a61007870) <6.82ms>
+11-12 13:10:18.440  1904  2151 D MultinetworkPolicyTracker: registerTelephonyCallback for subId:-1
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: Failed to get config from carrier config
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: java.lang.IllegalStateException: Carrier config loader is not available.
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.telephony.CarrierConfigManager.getConfigForSubId(CarrierConfigManager.java:12800)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.ConnectivitySettingsManager.getConfigForSubId(ConnectivitySettingsManager.java:82)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.ConnectivitySettingsManager.getNetworkAvoidBadWifi(ConnectivitySettingsManager.java:1123)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker$Dependencies.getAvoidBadWifi(MultinetworkPolicyTracker.java:180)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.updateAvoidBadWifi(MultinetworkPolicyTracker.java:528)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.reevaluateInternal(MultinetworkPolicyTracker.java:495)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.lambda$start$1(MultinetworkPolicyTracker.java:347)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.$r8$lambda$J0VRLehDEkrp7-t64KUK3GLlVmY(MultinetworkPolicyTracker.java:0)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker$$ExternalSyntheticLambda2.run(R8$$SyntheticClass:0)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.handleCallback(Handler.java:1095)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.dispatchMessageImpl(Handler.java:135)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.dispatchMessage(Handler.java:125)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.Looper.loopOnce(Looper.java:296)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.Looper.loop(Looper.java:397)
+11-12 13:10:18.676  1904  2151 E ConnectivitySettingsManager: 	at android.os.HandlerThread.run(HandlerThread.java:139)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: Failed to get config from carrier config
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: java.lang.IllegalStateException: Carrier config loader is not available.
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.telephony.CarrierConfigManager.getConfigForSubId(CarrierConfigManager.java:12800)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.ConnectivitySettingsManager.getConfigForSubId(ConnectivitySettingsManager.java:82)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.ConnectivitySettingsManager.getNetworkAvoidBadWifi(ConnectivitySettingsManager.java:1123)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker$Dependencies.getAvoidBadWifi(MultinetworkPolicyTracker.java:180)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.updateAvoidBadWifi(MultinetworkPolicyTracker.java:528)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.reevaluateInternal(MultinetworkPolicyTracker.java:495)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker.$r8$lambda$WSW1vO9WABMnTtf67DH5gv898lk(MultinetworkPolicyTracker.java:0)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.net.connectivity.com.android.server.connectivity.MultinetworkPolicyTracker$$ExternalSyntheticLambda0.run(R8$$SyntheticClass:0)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.handleCallback(Handler.java:1095)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.dispatchMessageImpl(Handler.java:135)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.Handler.dispatchMessage(Handler.java:125)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.Looper.loopOnce(Looper.java:296)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.Looper.loop(Looper.java:397)
+11-12 13:10:18.820  1904  2151 E ConnectivitySettingsManager: 	at android.os.HandlerThread.run(HandlerThread.java:139)
+11-12 13:10:18.973  1904  1904 I MulticastRoutingCoordinatorService: socket created for multicast routing: java.io.FileDescriptor@1cd1d7f
+11-12 13:10:19.284  1904  1904 D CompatChangeReporter: Compat change id reported: 349487600; UID 1000; state: ENABLED
+11-12 13:10:19.334     0     0 I logd    : logdr: UID=2000 GID=2000 PID=2149 n tail=300 logMask=99 pid=0 start=0ns deadline=0ns

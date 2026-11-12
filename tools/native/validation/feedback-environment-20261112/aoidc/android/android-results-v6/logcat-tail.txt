@@ -1,0 +1,310 @@
+--------- beginning of system
+11-12 13:16:58.518  2579  2632 V DisplayManagerService: FrozenStateChangeCallback not supported for pid 2579
+11-12 13:16:58.745  2579  2579 V SystemServerTiming: StartWindowManagerService took to complete: 1102ms
+11-12 13:16:58.753  2579  2579 D SystemServerTiming: SetWindowManagerService
+--------- beginning of main
+11-12 13:16:59.096  2579  2579 I ProtoLogImpl: Setting up ProtoLogImpl with viewerConfigPath = /etc/core.protolog.pb
+11-12 13:17:00.436  2579  2579 D InsetsController: Setting requestedVisibleTypes to 240 (was 503)
+11-12 13:17:00.734  2579  2579 V SystemServerTiming: SetWindowManagerService took to complete: 1980ms
+11-12 13:17:00.735  2579  2579 D SystemServerTiming: WindowManagerServiceOnInitReady
+11-12 13:17:00.732  2579  2633 W system_server: Long monitor contention with owner main (2579) at void com.android.server.wm.ActivityTaskManagerService.setWindowManager(com.android.server.wm.WindowManagerService)(ActivityTaskManagerService.java:1087) waiters=0 in void com.android.server.wm.WindowAnimator.lambda$new$1(android.view.Choreographer$FrameData) for 1.379s
+11-12 13:17:00.755  2579  2629 W system_server: Long monitor contention with owner main (2579) at void com.android.server.wm.ActivityTaskManagerService.setWindowManager(com.android.server.wm.WindowManagerService)(ActivityTaskManagerService.java:1087) waiters=1 in void com.android.server.wm.RootWindowContainer.onDisplayChanged(int) for 205ms
+11-12 13:17:00.771  2579  2629 W ProtoLog: Trying to log a protolog message with hash -7429522233080137611 to logcat before the service is ready to accept such requests.
+11-12 13:17:00.840  2579  2629 W Looper  : Slow dispatch took 301ms android.ui app=system_server main=false group=TOP_APP h=android.os.Handler c=android.hardware.display.DisplayManagerGlobal$DisplayListenerDelegate$$ExternalSyntheticLambda0@99bf824 m=0
+11-12 13:17:01.423  2579  2579 V SystemServerTiming: WindowManagerServiceOnInitReady took to complete: 688ms
+11-12 13:17:01.431  2579  2629 W Looper  : Slow dispatch took 573ms android.ui app=system_server main=false group=TOP_APP h=android.os.Handler c=android.os.Handler$BlockingRunnable@430919e m=0
+11-12 13:17:01.469  2579  2600 D SystemServerTimingAsync: InitThreadPoolExec:StartISensorManagerService
+11-12 13:17:01.471  2579  2600 D SystemServerInitThreadPool: Started executing StartISensorManagerService
+11-12 13:17:01.471  2579  2600 D SystemServerTimingAsync: StartISensorManagerService
+11-12 13:17:01.490  2579  2579 D SystemServerTiming: StartInputManager
+11-12 13:17:01.514  2579  2579 I InputManager: Starting input manager
+11-12 13:17:01.533  2579  2579 D system_server: Initializing ProtoLog
+11-12 13:17:01.535  2579  2579 D ProtoLog: Initializing ProtoLog DataSource
+11-12 13:17:01.606  2579  2579 V SystemServerTiming: StartInputManager took to complete: 92ms
+11-12 13:17:01.617  2579  2579 D SystemServerTiming: DisplayManagerWindowManagerAndInputReady
+11-12 13:17:01.641  2579  2836 D EventHub: No input device configuration file found for device 'AT Translated Set 2 keyboard'.
+11-12 13:17:01.703  2579  2836 I EventHub: usingClockIoctl=true
+11-12 13:17:01.705  2579  2836 I EventHub: New device: id=1, fd=225, path='/dev/input/event1', name='AT Translated Set 2 keyboard', classes=KEYBOARD | ALPHAKEY, configuration='', keyLayout='/system/usr/keylayout/Generic.kl', keyCharacterMap='/system/usr/keychars/Generic.kcm', builtinKeyboard=false, 
+11-12 13:17:01.710  2579  2836 D EventHub: No input device configuration file found for device 'Power Button'.
+11-12 13:17:01.739  2579  2836 W EventHub: Unable to disable kernel key repeat for /dev/input/event0: Function not implemented
+11-12 13:17:01.739  2579  2836 I EventHub: usingClockIoctl=true
+11-12 13:17:01.739  2579  2836 I EventHub: New device: id=2, fd=226, path='/dev/input/event0', name='Power Button', classes=KEYBOARD, configuration='', keyLayout='/system/usr/keylayout/Generic.kl', keyCharacterMap='/system/usr/keychars/Generic.kcm', builtinKeyboard=false, 
+11-12 13:17:01.741  2579  2836 I EventHub: Found touch video device /dev/v4l-touch0
+11-12 13:17:01.743  2579  2836 I TouchVideoDevice: Opening video device: driver = vivid, card = vivid, bus_info = platform:vivid-000, version = 396369
+11-12 13:17:01.744  2579  2836 I TouchVideoDevice: Frame dimensions: height = 12 width = 21
+11-12 13:17:01.769  2579  2836 I EventHub: Adding video device vivid to list of unattached video devices
+11-12 13:17:01.803  2579  2836 I InputReader: Device added: id=-1, eventHubId=-1, name='Virtual', descriptor='a718a782d34bc767f4689c232d64d527998ea7fd',sources=KEYBOARD | DPAD
+11-12 13:17:01.816  2579  2836 I InputReader: Device added: id=2, eventHubId=2, name='Power Button', descriptor='26d13db3fa0f6bd5d05831266fb01ea6c500b88c',sources=KEYBOARD
+11-12 13:17:01.820  2579  2836 I InputReader: Device added: id=3, eventHubId=1, name='AT Translated Set 2 keyboard', descriptor='485d69228e24f5e46da1598745890b214130dbc4',sources=KEYBOARD
+11-12 13:17:02.039  2579  2579 D DisplayManagerService: Sending topology graph to Input Manager: DisplayTopologyGraph{mPrimaryDisplayId=0}
+11-12 13:17:02.039  2579  2579 D DisplayManagerService:   DisplayNode{displayId=0, density=420, bounds=RectF(0.0, 0.0, 182.85715, 304.7619)}
+11-12 13:17:02.154  2579  2635 I Watchdog: WAITED_UNTIL_PRE_WATCHDOG
+11-12 13:17:02.168  2579  2579 V SystemServerTiming: DisplayManagerWindowManagerAndInputReady took to complete: 415ms
+11-12 13:17:02.174  2579  2579 D SystemServerTiming: StartBluetoothService
+11-12 13:17:02.275  2579  2579 I SystemServiceManager: Starting com.android.server.bluetooth.BluetoothService
+11-12 13:17:02.413  2579  2600 I HidlServiceManagement: Registered android.frameworks.sensorservice@1.0::ISensorManager/default
+--------- beginning of kernel
+11-12 13:17:02.530     0     0 I servicemanager: Caller(pid=2579,uid=1000,sid=u:r:system_server:s0) Found android.frameworks.sensorservice.ISensorManager/default in framework VINTF manifest.
+11-12 13:17:02.521  2579  2600 V SystemServerTimingAsync: StartISensorManagerService took to complete: 1049ms
+11-12 13:17:02.530  2579  2600 D SystemServerInitThreadPool: Finished executing StartISensorManagerService
+11-12 13:17:02.541  2579  2600 V SystemServerTimingAsync: InitThreadPoolExec:StartISensorManagerService took to complete: 1070ms
+11-12 13:17:02.544  2579  2600 D SystemServerTimingAsync: InitThreadPoolExec:StartHidlServices
+11-12 13:17:02.557  2579  2600 D SystemServerInitThreadPool: Started executing StartHidlServices
+11-12 13:17:02.557  2579  2600 D SystemServerTimingAsync: StartHidlServices
+11-12 13:17:02.559  2579  2600 V SystemServerTimingAsync: StartHidlServices took to complete: 1ms
+11-12 13:17:02.559  2579  2600 D SystemServerInitThreadPool: Finished executing StartHidlServices
+11-12 13:17:02.559  2579  2600 V SystemServerTimingAsync: InitThreadPoolExec:StartHidlServices took to complete: 2ms
+11-12 13:17:02.930  2579  2579 D BluetoothSystemServer: BluetoothService: Booting now
+11-12 13:17:02.979  2579  2579 I BluetoothSystemServer: BluetoothComponent: Successfully found Bluetooth component: ComponentInfo{com.android.bluetooth/com.android.bluetooth.btservice.AdapterService}
+11-12 13:17:03.534  2579  2839 I BluetoothSystemServer: BluetoothHciInstance: Service manager declared bluetooth hci instances: [default]
+11-12 13:17:04.253  2579  2839 I BluetoothSystemServer: BleScanSettingListener: Settings not found. Default to false
+11-12 13:17:04.264  2579  2635 I android_os_HwBinder: HwBinder: Starting thread pool for getting: android.hidl.manager@1.0::IServiceManager/default
+11-12 13:17:04.392  2579  2839 I BluetoothSystemServer: BluetoothManagerService: BluetoothManagerService Start with: Name=Android SDK built for x86_64 Address=[address is null] HciInstance=default BluetoothAllowed=false PersistentState=1 EnableExternal=true AutoOnEnabled=false
+11-12 13:17:04.646  2579  2839 I BluetoothSystemServer: AirplaneModeListener: Initialized successfully with state: false
+11-12 13:17:04.680  2579  2839 D BluetoothSystemServer: BluetoothRadioModeListener: Not sensitive to satellite_mode_radios change. Forced to false
+11-12 13:17:04.708  2579  2839 I BluetoothSystemServer: SatelliteModeListener: Initialized successfully with state: false
+11-12 13:17:04.721  2579  2839 I BluetoothSystemServer: BluetoothSupervisorLegacy: Created BluetoothSupervisorLegacy
+11-12 13:17:04.822  2579  2579 D BluetoothSystemServer: PermissionChecker: SystemUi's UID successfully detected: 10124
+11-12 13:17:04.858  2579  2579 W SystemServiceManager: Service com.android.server.bluetooth.BluetoothService took 80 ms in onStart
+11-12 13:17:04.876  2579  2579 V SystemServerTiming: StartBluetoothService took to complete: 2671ms
+11-12 13:17:04.881  2579  2579 D SystemServerTiming: IpConnectivityMetrics
+11-12 13:17:04.882  2579  2579 I SystemServiceManager: Starting com.android.server.connectivity.IpConnectivityMetrics
+11-12 13:17:04.939  2579  2579 V SystemServerTiming: IpConnectivityMetrics took to complete: 35ms
+11-12 13:17:04.941  2579  2579 D SystemServerTiming: NetworkWatchlistService
+11-12 13:17:04.946  2579  2579 I SystemServiceManager: Starting com.android.server.net.watchlist.NetworkWatchlistService$Lifecycle
+11-12 13:17:05.126  2579  2579 I WatchlistSettings: Reload watchlist settings done
+11-12 13:17:05.166  2579  2579 W SystemServiceManager: Service com.android.server.net.watchlist.NetworkWatchlistService$Lifecycle took 207 ms in onStart
+11-12 13:17:05.168  2579  2579 V SystemServerTiming: NetworkWatchlistService took to complete: 223ms
+11-12 13:17:05.168  2579  2579 D SystemServerTiming: PinnerService
+11-12 13:17:05.178  2579  2579 I SystemServiceManager: Starting com.android.server.pinner.PinnerService
+11-12 13:17:05.219  2579  2840 I WatchlistLoggingHandler: No need to aggregate record yet.
+11-12 13:17:05.343  2579  2579 W SystemServiceManager: Service com.android.server.pinner.PinnerService took 56 ms in onStart
+11-12 13:17:05.351  2579  2579 V SystemServerTiming: PinnerService took to complete: 174ms
+11-12 13:17:05.359  2579  2635 I ActivityManager: dumpStackTraces pids={}
+11-12 13:17:05.386  2579  2579 D SystemServerTiming: SignedConfigService
+11-12 13:17:05.481  2579  2840 I WatchlistLoggingHandler: Milliseconds spent on tryAggregateRecords(): 263
+11-12 13:17:05.718  2579  2579 V SystemServerTiming: SignedConfigService took to complete: 309ms
+11-12 13:17:05.727  2579  2579 D SystemServerTiming: AppIntegrityService
+11-12 13:17:05.746  2579  2579 I SystemServiceManager: Starting com.android.server.integrity.AppIntegrityManagerService
+11-12 13:17:05.779  2579  2579 V SystemServerTiming: AppIntegrityService took to complete: 51ms
+11-12 13:17:05.785  2579  2579 D SystemServerTiming: StartLogcatManager
+11-12 13:17:05.786  2579  2579 I SystemServiceManager: Starting com.android.server.logcat.LogcatManagerService
+11-12 13:17:05.867  2579  2579 V SystemServerTiming: StartLogcatManager took to complete: 82ms
+11-12 13:17:05.889  2579  2579 D SystemServerTiming: StartIntrusionDetectionService
+11-12 13:17:05.892  2579  2579 I SystemServiceManager: Starting com.android.server.security.intrusiondetection.IntrusionDetectionService
+11-12 13:17:05.981     0     0 I logd    : logdr: UID=2000 GID=2000 PID=2820 n tail=500 logMask=8 pid=2760 start=0ns deadline=0ns
+11-12 13:17:06.037  2579  2579 V SystemServerTiming: StartIntrusionDetectionService took to complete: 146ms
+11-12 13:17:06.039  2579  2579 D SystemServerTiming: StartAppFunctionManager
+11-12 13:17:06.057  2579  2579 I SystemServiceManager: Starting com.android.server.appfunctions.AppFunctionManagerService
+11-12 13:17:06.130     0     0 I logd    : logdr: UID=2000 GID=2000 PID=2820 n tail=500 logMask=1 pid=2760 start=0ns deadline=0ns
+--------- beginning of crash
+11-12 13:17:06.417  2820  2820 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+11-12 13:17:06.418  2820  2820 F DEBUG   : Build fingerprint: 'Android/sdk_phone64_x86_64/emu64x:17/CE2A.260420.051.A3/16571990:userdebug/test-keys'
+11-12 13:17:06.419  2820  2820 F DEBUG   : Kernel Release: '6.12.81-android16-6-g4f69fc7b210c-ab16167562'
+11-12 13:17:06.419  2820  2820 F DEBUG   : Revision: '0'
+11-12 13:17:06.419  2820  2820 F DEBUG   : ABI: 'x86_64'
+11-12 13:17:06.420  2820  2820 F DEBUG   : Timestamp: 2026-11-12 13:16:51.507002651+0000
+11-12 13:17:06.420  2820  2820 F DEBUG   : Process uptime: 38s
+11-12 13:17:06.430  2820  2820 F DEBUG   : Executable: /system/bin/app_process64
+11-12 13:17:06.433  2820  2820 F DEBUG   : Cmdline: app_process -Xmx512m -Djava.library.path=/data/local/tmp/spk-feedback-20261112-v6 /data/local/tmp com.dearded.spektralab.FeedbackAndroid /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so /data/local/tmp/spk-feedback-20261112-v6/resources /data/local/tmp/spk-feedback-20261112-v6/pipeline-smoke 1281 855 pipeline
+11-12 13:17:06.434  2820  2820 F DEBUG   : pid: 2760, ppid: 2757, tid: 2760, name: main  >>> app_process <<<
+11-12 13:17:06.434  2820  2820 F DEBUG   : uid: 2000
+11-12 13:17:06.434  2820  2820 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+11-12 13:17:06.436  2820  2820 F DEBUG   :     rax 0000000000000000  rbx 0000000000000ac8  rcx 000078e1550edadd  rdx 0000000000000006
+11-12 13:17:06.454  2820  2820 F DEBUG   :     r8  0000000000000000  r9  0000000000000000  r10 00007ffc1f8ef130  r11 0000000000000217
+11-12 13:17:06.454  2820  2820 F DEBUG   :     r12 0000000000000000  r13 00007ffc1f8ef35c  r14 0000000000000ac8  r15 00007ffc1f8ef130
+11-12 13:17:06.455  2820  2820 F DEBUG   :     rdi 0000000000000ac8  rsi 0000000000000ac8
+11-12 13:17:06.455  2820  2820 F DEBUG   :     rbp 00007ffc1f8ef1e0  rsp 00007ffc1f8ef130  rip 000078e1550edadd  err 0000000000000000
+11-12 13:17:06.456  2820  2820 F DEBUG   : 31 total frames
+11-12 13:17:06.456  2820  2820 F DEBUG   : backtrace:
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: Unreadable libraries:
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE:   /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.474  2820  2820 F DEBUG   :       #00 pc 0000000000059add  /apex/com.android.runtime/lib64/bionic/libc.so (abort+189) (BuildId: aa76614279c09bc4bbbbbec6ba4a811e)
+11-12 13:17:06.475  2820  2820 F DEBUG   :       #01 pc 0000000000171ce4  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::createCoherentMemory(VkDevice_T*, VkDeviceMemory_T*, VkMemoryAllocateInfo const&, gfxstream::vk::VkEncoder*, VkResult&)+1636) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.475  2820  2820 F DEBUG   :       #02 pc 0000000000172770  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::allocateCoherentMemory(VkDevice_T*, VkMemoryAllocateInfo const*, gfxstream::vk::VkEncoder*, VkDeviceMemory_T**)+2384) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.476  2820  2820 F DEBUG   :       #03 pc 0000000000172d7a  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::getCoherentMemory(VkMemoryAllocateInfo const*, gfxstream::vk::VkEncoder*, VkDevice_T*, VkDeviceMemory_T**)+378) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.476  2820  2820 F DEBUG   :       #04 pc 00000000001736a2  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::on_vkAllocateMemory(void*, VkResult, VkDevice_T*, VkMemoryAllocateInfo const*, VkAllocationCallbacks const*, VkDeviceMemory_T**)+1810) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.479  2820  2820 F DEBUG   :       #05 pc 000000000019c2cc  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream_vk_AllocateMemory+140) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.480  2820  2820 F DEBUG   :       #06 pc 00000000002b6edd  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.480  2820  2820 F DEBUG   :       #07 pc 00000000002b24dc  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.487  2820  2820 F DEBUG   :       #08 pc 000000000023490d  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.487  2820  2820 F DEBUG   :       #09 pc 00000000001e1563  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.488  2820  2820 F DEBUG   :       #10 pc 0000000000048975  /system/framework/x86_64/boot-core-libart.oat (art_jni_trampoline+165) (BuildId: b37b702bbe413897f868d3b4d22224d553c8d104)
+11-12 13:17:06.488  2820  2820 F DEBUG   :       #11 pc 0000000000209889  /apex/com.android.art/lib64/libart.so (nterp_helper+3837) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.493  2820  2820 F DEBUG   :       #12 pc 00000000000011ce  [anon:dalvik-classes.dex extracte...a/local/tmp/spk-feedback-20261112-v6/feedback.jar] (com.dearded.spektralab.FeedbackAndroid.main+1138)
+11-12 13:17:06.493  2820  2820 F DEBUG   :       #13 pc 00000000002125d6  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+806) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.496  2820  2820 F DEBUG   :       #14 pc 0000000000476428  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+264) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #15 pc 00000000008e0b46  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, __va_list_tag*)+518) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #16 pc 00000000006ef86a  /apex/com.android.art/lib64/libart.so (art::JNI<false>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, __va_list_tag*)+602) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #17 pc 000000000011271e  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+126) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #18 pc 00000000001b65a3  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::callMain(android::String8 const&, _jclass*, android::Vector<android::String8> const&)+307) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #19 pc 0000000000004b0e  /system/bin/app_process64 (android::AppRuntime::onStarted()+78) (BuildId: c6a0c390f4368e9631b91bced410e104)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #20 pc 000000000082add9  /system/framework/x86_64/boot-framework.oat (art_jni_trampoline+121) (BuildId: 352c2c5738847a4a02974ce476488c8b226cafc1)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #21 pc 0000000000208a31  /apex/com.android.art/lib64/libart.so (nterp_helper+165) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #22 pc 0000000000398644  /system/framework/framework.jar (offset 0x2417000) (com.android.internal.os.RuntimeInit.main+48)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #23 pc 00000000002125d6  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+806) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.500  2820  2820 F DEBUG   :       #24 pc 0000000000476428  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+264) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.516  2820  2820 F DEBUG   :       #25 pc 00000000008e0b46  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, __va_list_tag*)+518) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.521  2820  2820 F DEBUG   :       #26 pc 00000000006ef86a  /apex/com.android.art/lib64/libart.so (art::JNI<false>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, __va_list_tag*)+602) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #27 pc 000000000011271e  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+126) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #28 pc 00000000001b6b74  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+964) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #29 pc 0000000000004728  /system/bin/app_process64 (main+1672) (BuildId: c6a0c390f4368e9631b91bced410e104)
+11-12 13:17:06.523  2820  2820 F DEBUG   :       #30 pc 00000000000cbca7  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+103) (BuildId: aa76614279c09bc4bbbbbec6ba4a811e)
+11-12 13:17:06.523  2820  2820 F DEBUG   : Note: To display stack pointer information, use the pbtombstone tool:
+11-12 13:17:06.523  2820  2820 F DEBUG   :         pbtombstone --display-sp tombstone_XX.pb
+11-12 13:17:06.530  2579  2579 V SystemServerTiming: StartAppFunctionManager took to complete: 487ms
+11-12 13:17:06.530  2579  2579 D SystemServerTiming: StartPccSandboxManagerService
+11-12 13:17:06.532  2579  2579 I SystemServiceManager: Starting com.android.server.privatecompute.PccSandboxManagerService
+11-12 13:17:06.704  2579  2579 V SystemServerTiming: StartPccSandboxManagerService took to complete: 173ms
+11-12 13:17:06.712  2579  2579 D SystemServerTiming: StartAdvancedProtectionService
+11-12 13:17:06.718  2579  2579 I SystemServiceManager: Starting com.android.server.security.advancedprotection.AdvancedProtectionService$Lifecycle
+11-12 13:17:06.821  2579  2844 D PccSandboxManagerInternal: Trusted PCC Packages: {com.android.providers.telephony, com.android.providers.calendar, com.android.externalstorage, com.android.providers.downloads, com.android.launcher3, com.android.settings.intelligence, com.android.providers.settings, com.android.sdksetup, com.android.providers.blockednumber, com.android.providers.media.module, com.android.systemui, com.android.providers.contacts}
+11-12 13:17:06.975  2579  2579 V SystemServerTiming: StartAdvancedProtectionService took to complete: 258ms
+11-12 13:17:06.985  2579  2579 D SystemServerTiming: StartTradeInModeService
+11-12 13:17:06.987  2579  2579 I SystemServiceManager: Starting com.android.server.TradeInModeService
+11-12 13:17:07.046  2579  2579 V SystemServerTiming: StartTradeInModeService took to complete: 60ms
+11-12 13:17:07.092  2579  2579 I WindowManager: SAFE MODE not enabled
+11-12 13:17:07.126  2579  2579 D SystemServerTiming: StartInputMethodManagerLifecycle
+11-12 13:17:07.147  2579  2579 I SystemServiceManager: Starting com.android.server.inputmethod.InputMethodManagerService$Lifecycle
+11-12 13:17:07.489  2579  2593 W system_server: Suspending all threads took: 6.572ms
+11-12 13:17:07.579  2579  2646 W PinnerService: Could not find pinlist.meta for "/system_ext/priv-app/SdkSetup/SdkSetup.apk": pinning as blob
+11-12 13:17:07.660  2579  2844 D PccSandboxManagerInternal: Updated allowed PCC Packages for user 0: {}
+11-12 13:17:07.980     0     0 W healthd : battery l=100 v=5000 t=25.0 h=2 st=2 c=900000 fc=3000000 cc=10 chg=a
+11-12 13:17:08.151  2579  2579 D InputMethodManagerService: Schedule initialization for users=[0]
+11-12 13:17:08.267  2579  2847 D InputMethodManagerService: Start initialization for user=0
+11-12 13:17:08.409  2579  2579 W SystemServiceManager: Service com.android.server.inputmethod.InputMethodManagerService$Lifecycle took 194 ms in onStart
+11-12 13:17:08.415  2579  2579 V SystemServerTiming: StartInputMethodManagerLifecycle took to complete: 1289ms
+11-12 13:17:08.418  2579  2579 D SystemServerTiming: StartAccessibilityManagerService
+11-12 13:17:08.422  2579  2579 I SystemServiceManager: Starting com.android.server.accessibility.AccessibilityManagerService$Lifecycle
+11-12 13:17:09.065  2820  2820 E crash_dump64: unable to connect to activity manager: Connection refused
+11-12 13:17:09.075  2820  2820 E crash_dump64: failed to notify tombstoned of completion
+11-12 13:17:09.447     0     0 I init    : Untracked process (pid: 2820 name: (crash_dump64) ppid: 1 pgrp: 2819 state: Z) exited with status 0
+11-12 13:17:09.448     0     0 I init    : Untracked process (pid: 2820 name: (crash_dump64) ppid: 1 pgrp: 2819 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:17:09.586     0     0 I init    : Untracked process (pid: 2822 name: (main) ppid: 1 pgrp: 2822 state: Z) exited with status 0
+11-12 13:17:09.587     0     0 I init    : Untracked process (pid: 2822 name: (main) ppid: 1 pgrp: 2822 state: Z) did not have an associated service entry and will not be reaped
+11-12 13:17:09.889  2579  2844 D PccSandboxManagerInternal: Populated PCC gateway app UIDs cache with UIDs: 2000,
+11-12 13:17:10.038  2579  2847 D InputMethodManagerService: Complete initialization for user=0
+11-12 13:17:10.192  2579  2579 V SystemServerTiming: StartAccessibilityManagerService took to complete: 1771ms
+11-12 13:17:10.193  2579  2579 D SystemServerTiming: MakeDisplayReady
+11-12 13:17:10.320  2579  2579 I ActivityTaskManager: Config changes=20005df8 {1.0 ?mcc0mnc [en_US] ldltr sw183dp w183dp h305dp 420dpi smll port ?uimode ?night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 480, 800) mAppBounds=Rect(0, 0 - 480, 800) mMaxBounds=Rect(0, 0 - 480, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 ?fontWeightAdjustment}
+11-12 13:17:10.382  2579  2579 I WindowManager: Override config changes=60007dfc {1.0 ?mcc0mnc [en_US] ldltr sw183dp w183dp h305dp 420dpi smll port ?uimode ?night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 480, 800) mAppBounds=Rect(0, 0 - 480, 800) mMaxBounds=Rect(0, 0 - 480, 800) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 ?fontWeightAdjustment} for displayId=0
+11-12 13:17:10.476  2579  2579 I DisplayDevice: [0] Layerstack set to 0 for local:4619827259835644672
+11-12 13:17:10.525  2579  2579 V SystemServerTiming: MakeDisplayReady took to complete: 332ms
+11-12 13:17:10.520  2579  2629 D WindowManager: DeferredDisplayUpdater: applying DisplayInfo(480 x 800) immediately
+11-12 13:17:10.536  2579  2579 D SystemServerTiming: StartStorageManagerService
+11-12 13:17:10.542  2579  2579 I SystemServiceManager: Starting com.android.server.StorageManagerService$Lifecycle
+11-12 13:17:10.558  2579  2632 W system_server: Long monitor contention with owner main (2579) at void com.android.server.wm.WindowManagerService.displayReady()(WindowManagerService.java:6076) waiters=1 in void com.android.server.wm.WindowManagerService.notifyHardKeyboardStatusChange() for 287ms
+11-12 13:17:10.562  2579  2629 W Looper  : Slow dispatch took 298ms android.ui app=system_server main=false group=TOP_APP h=android.os.Handler c=android.hardware.display.DisplayManagerGlobal$DisplayListenerDelegate$$ExternalSyntheticLambda0@338785b m=0
+11-12 13:17:10.582  2579  2633 W system_server: Long monitor contention with owner main (2579) at void com.android.server.wm.WindowManagerService.displayReady()(WindowManagerService.java:6076) waiters=2 in void com.android.server.wm.WindowAnimator.lambda$new$1(android.view.Choreographer$FrameData) for 160ms
+11-12 13:17:10.774     0     0 I init    : processing action (sys.sysctl.extra_free_kbytes=*) from (/system/etc/init/hw/init.rc:1246)
+11-12 13:17:10.863     0     0 I init    : starting service 'exec 22 (/system/bin/extra_free_kbytes.sh 4500)'...
+11-12 13:17:10.874  2579  2632 I InputManager-JNI: Viewport [0] to add: local:4619827259835644672, isActive: false
+11-12 13:17:10.898  2579  2836 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO
+11-12 13:17:11.052     0     0 I libprocessgroup: Created cgroup /sys/fs/cgroup/system/uid_0/pid_2852
+11-12 13:17:11.012   464   464 I adbd    : adbd service requested 'shell,v2,raw:getprop sys.boot_completed'
+11-12 13:17:11.191   501   501 D installd: Found quota mount /dev/block/dm-6 at /data
+11-12 13:17:11.202   501   501 D installd: Found quota mount /dev/block/dm-6 at /data/user/0
+11-12 13:17:11.411     0     0 I init    : ... started service 'exec 22 (/system/bin/extra_free_kbytes.sh 4500)' has pid 2852
+11-12 13:17:11.442     0     0 I init    : Command 'exec_background -- /system/bin/extra_free_kbytes.sh ${sys.sysctl.extra_free_kbytes}' action=sys.sysctl.extra_free_kbytes=* (/system/etc/init/hw/init.rc:1247) took 637ms and succeeded
+11-12 13:17:11.666  2579  2853 D StorageManagerService: Thinking about reset, mBootCompleted=false, mDaemonConnected=true
+11-12 13:17:11.787  2579  2579 D StorageManagerService: CE storage for users [0] is already unlocked
+11-12 13:17:11.817  2579  2579 W SystemServiceManager: Service com.android.server.StorageManagerService$Lifecycle took 1274 ms in onStart
+11-12 13:17:11.830  2579  2853 D StorageManagerService: Thinking about reset, mBootCompleted=false, mDaemonConnected=true
+11-12 13:17:11.834  2579  2579 V SystemServerTiming: StartStorageManagerService took to complete: 1293ms
+11-12 13:17:11.842  2579  2579 D SystemServerTiming: StartStorageStatsService
+11-12 13:17:11.850  2579  2579 I SystemServiceManager: Starting com.android.server.usage.StorageStatsService$Lifecycle
+11-12 13:17:12.018   501   501 D installd: Found quota mount /dev/block/dm-6 at /data
+11-12 13:17:12.030   501   501 D installd: Found quota mount /dev/block/dm-6 at /data/user/0
+11-12 13:17:12.189  2579  2635 W ProcessCpuTracker: Failed to stat(/proc/2757): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:17:12.211  2579  2635 W ProcessCpuTracker: Skipping unknown process pid 2757
+11-12 13:17:12.231   501   516 D installd: Found quota mount /dev/block/dm-6 at /data
+11-12 13:17:12.245   501   516 D installd: Found quota mount /dev/block/dm-6 at /data/user/0
+11-12 13:17:12.240  2579  2635 W ProcessCpuTracker: Failed to stat(/proc/2760): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:17:12.295  2579  2635 W ProcessCpuTracker: Skipping unknown process pid 2760
+11-12 13:17:12.349  2579  2635 W ProcessCpuTracker: Failed to stat(/proc/2820): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:17:12.361  2579  2635 W ProcessCpuTracker: Skipping unknown process pid 2820
+11-12 13:17:12.458  2579  2635 W ProcessCpuTracker: Failed to stat(/proc/2822): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:17:12.479  2579  2635 W ProcessCpuTracker: Skipping unknown process pid 2822
+11-12 13:17:12.578  2579  2579 W SystemServiceManager: Service com.android.server.usage.StorageStatsService$Lifecycle took 715 ms in onStart
+11-12 13:17:12.585  2579  2579 V SystemServerTiming: StartStorageStatsService took to complete: 736ms
+11-12 13:17:12.589  2579  2579 D SystemServerTiming: StartFileService
+11-12 13:17:12.590  2579  2579 I SystemServiceManager: Starting com.android.server.files.FileService
+11-12 13:17:12.552  2579  2593 I system_server: Background young concurrent mark compact GC freed 10MB AllocSpace bytes, 18(1364KB) LOS objects, 51% free, 10MB/22MB, paused 58.943ms,25.101ms total 11.024s
+11-12 13:17:12.806   501   516 D installd: Found quota mount /dev/block/dm-6 at /data
+11-12 13:17:12.816   501   516 D installd: Found quota mount /dev/block/dm-6 at /data/user/0
+11-12 13:17:12.939  2579  2579 D FileService: onStart: Publishing binder service: file
+11-12 13:17:12.996  2579  2579 V SystemServerTiming: StartFileService took to complete: 383ms
+11-12 13:17:13.003  2579  2579 D SystemServerTiming: StartUiModeManager
+11-12 13:17:13.041  2579  2579 I SystemServiceManager: Starting com.android.server.UiModeManagerService
+11-12 13:17:13.455  2579  2630 D ActivityManager: StatsPullAtomService not ready yet
+11-12 13:17:13.470  2579  2600 D SystemServerTimingAsync: InitThreadPoolExec:UiModeManager.onStart
+11-12 13:17:13.483  2579  2579 W SystemServiceManager: Service com.android.server.UiModeManagerService took 115 ms in onStart
+11-12 13:17:13.494  2579  2600 D SystemServerInitThreadPool: Started executing UiModeManager.onStart
+11-12 13:17:13.530  2579  2579 V SystemServerTiming: StartUiModeManager took to complete: 526ms
+11-12 13:17:13.533  2579  2579 D SystemServerTiming: StartLocaleManagerService
+11-12 13:17:13.535  2579  2579 I SystemServiceManager: Starting com.android.server.locales.LocaleManagerService
+11-12 13:17:13.586  2579  2630 W ActivityManager: Slow operation: 296ms so far, now at startProcess: done creating new process record
+11-12 13:17:13.605  2579  2600 D SystemServerInitThreadPool: Finished executing UiModeManager.onStart
+11-12 13:17:13.606  2579  2600 V SystemServerTimingAsync: InitThreadPoolExec:UiModeManager.onStart took to complete: 113ms
+11-12 13:17:13.607  2579  2630 W ActivityManager: Slow operation: 317ms so far, now at startProcess: returning with proc on hold
+11-12 13:17:13.693  2579  2630 W ActivityManager: Skipping saving the start info due to ongoing loading from storage
+11-12 13:17:14.002  2579  2579 V SystemServerTiming: StartLocaleManagerService took to complete: 468ms
+11-12 13:17:14.022  2579  2579 D SystemServerTiming: StartUAppWindowLayoutSettingsService
+11-12 13:17:14.024  2579  2579 I SystemServiceManager: Starting com.android.server.appwindowlayout.AppWindowLayoutSettingsService
+11-12 13:17:14.114  2579  2579 D AppWinLayoutSetService: Registered package monitor for restoring aspect ratios.
+11-12 13:17:14.133  2579  2579 W SystemServiceManager: Service com.android.server.appwindowlayout.AppWindowLayoutSettingsService took 53 ms in onStart
+11-12 13:17:14.137  2579  2579 V SystemServerTiming: StartUAppWindowLayoutSettingsService took to complete: 114ms
+11-12 13:17:14.137  2579  2579 D SystemServerTiming: StartGrammarInflectionService
+11-12 13:17:14.139  2579  2579 I SystemServiceManager: Starting com.android.server.grammaticalinflection.GrammaticalInflectionService
+11-12 13:17:14.235  2579  2579 W SystemServiceManager: Service com.android.server.grammaticalinflection.GrammaticalInflectionService took 54 ms in onStart
+11-12 13:17:14.245  2579  2579 V SystemServerTiming: StartGrammarInflectionService took to complete: 107ms
+11-12 13:17:14.258  2579  2579 D SystemServerTiming: StartAppHibernationService
+11-12 13:17:14.260  2579  2579 I SystemServiceManager: Starting com.android.server.apphibernation.AppHibernationService
+11-12 13:17:14.426  2579  2579 V SystemServerTiming: StartAppHibernationService took to complete: 168ms
+11-12 13:17:14.451  2579  2579 D SystemServerTiming: ArtManagerLocal
+11-12 13:17:14.495   464   464 I adbd    : adbd service requested 'sync:'
+11-12 13:17:14.727   464   464 I adbd    : adbd service requested 'shell,v2:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '300''
+11-12 13:17:14.765  2579  2579 V SystemServerTiming: ArtManagerLocal took to complete: 275ms
+11-12 13:17:14.770  2579  2579 D SystemServerTiming: UpdatePackagesIfNeeded
+11-12 13:17:14.771  2579  2579 I Watchdog: Pausing HandlerChecker: main thread for reason: dexopt. Pause count: 1
+11-12 13:17:14.919  2579  2579 I Watchdog: Resuming HandlerChecker: main thread for reason: dexopt. Pause count: 0
+11-12 13:17:14.925  2579  2579 V SystemServerTiming: UpdatePackagesIfNeeded took to complete: 155ms
+11-12 13:17:14.929  2579  2579 D SystemServerTiming: UpdateMetricsIfNeeded
+11-12 13:17:14.930  2579  2579 V SystemServerTiming: UpdateMetricsIfNeeded took to complete: 1ms
+11-12 13:17:14.931  2579  2579 D SystemServerTiming: PerformFstrimIfNeeded
+11-12 13:17:14.979  2579  2579 V SystemServerTiming: PerformFstrimIfNeeded took to complete: 48ms
+11-12 13:17:14.994  2579  2579 D SystemServerTiming: StartLockSettingsService
+11-12 13:17:15.012  2579  2579 I SystemServiceManager: Starting com.android.server.locksettings.LockSettingsService$Lifecycle
+11-12 13:17:15.252  2579  2635 W ProcessCpuTracker: Failed to stat(/proc/2854): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+11-12 13:17:15.271  2579  2635 W ProcessCpuTracker: Skipping unknown process pid 2854
+11-12 13:17:15.334  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2579
+11-12 13:17:15.338  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 462
+11-12 13:17:15.361  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 415
+11-12 13:17:15.364  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 421
+11-12 13:17:15.364  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 501
+11-12 13:17:15.370  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 464
+11-12 13:17:15.370  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 1
+11-12 13:17:15.370  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 252
+11-12 13:17:15.370  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 492
+11-12 13:17:15.370  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2421
+11-12 13:17:15.371  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 254
+11-12 13:17:15.371  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 53
+11-12 13:17:15.371  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 19
+11-12 13:17:15.371  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 20
+11-12 13:17:15.372  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 253
+11-12 13:17:15.372  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 266
+11-12 13:17:15.372  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 315
+11-12 13:17:15.372  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 398
+11-12 13:17:15.421  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 615
+11-12 13:17:15.426  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2837
+11-12 13:17:15.426  2579  2635 I ActivityManager: Skipping next CPU consuming process, not a java proc: 2852
+11-12 13:17:15.819  2579  2635 I ActivityManager: Dumping to /data/anr/anr_2026-11-12-13-17-15-449
+11-12 13:17:15.850  2579  2635 I ActivityManager: Collecting stacks for pid 2579
+11-12 13:17:17.007  2579  2635 I system_server: libdebuggerd_client: started dumping process 2579
+11-12 13:17:17.050   310   310 I tombstoned: registered intercept for pid 2579 and type kDebuggerdJavaBacktrace
+11-12 13:17:17.067  2579  2590 I system_server: Thread[2,tid=2590,WaitingInMainSignalCatcherLoop,Thread*=0x751a986057b0,peer=0x2007060,"Signal Catcher"]: reacting to signal 3
+11-12 13:17:17.086  2579  2590 I system_server: 

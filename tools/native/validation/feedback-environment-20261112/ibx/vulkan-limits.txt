@@ -1,0 +1,11 @@
+	maxStorageBufferRange                           = 134217728
+	maxPushConstantsSize                            = 256
+	maxMemoryAllocationCount                        = 4294967295
+	maxSamplerAllocationCount                       = 32768
+	bufferImageGranularity                          = 0x00000040
+--
+	maxComputeWorkGroupCount: count = 3
+		65535
+		65535
+		65535
+	maxComputeWorkGroupInvocations                  = 1024

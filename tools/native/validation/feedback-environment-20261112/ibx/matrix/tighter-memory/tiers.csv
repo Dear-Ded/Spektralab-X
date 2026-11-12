@@ -1,0 +1,3 @@
+tier,w,h,sample_w,sample_h,stride,cached,black_rows,white_rows,alpha_errors,fnv64_words
+live,1024,683,512,342,1024,0,0,0,0,2600294476324367314
+preview,3400,2267,567,378,3400,0,0,0,0,4962649382446668615

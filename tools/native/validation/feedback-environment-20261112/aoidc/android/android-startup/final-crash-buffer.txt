@@ -1,0 +1,55 @@
+--------- beginning of crash
+11-12 13:01:58.766   993  1019 E AndroidRuntime: FATAL EXCEPTION: wmshell.main
+11-12 13:01:58.766   993  1019 E AndroidRuntime: Process: com.android.systemui, PID: 993
+11-12 13:01:58.766   993  1019 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: FATAL EXCEPTION: pool-4-thread-1
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 1089
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: FATAL EXCEPTION: pool-3-thread-2
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 1754
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: Process: com.android.systemui, PID: 1690
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: PID: 2090
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: Couldn't report crash. Here's the crash:
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: Error reporting crash. Here's the error:
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:626)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService2(IServiceManager.java:589)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.checkService2(ServiceManagerNative.java:81)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService2(ServiceManagerNative.java:70)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:394)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:156)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6118)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6115)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.maybeCreate(Singleton.java:55)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:46)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:6106)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:166)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1098)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1093)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:3387)
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: FATAL EXCEPTION: pool-4-thread-2
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 2343
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: Process: com.android.systemui, PID: 2244
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: FATAL EXCEPTION: SysUiBg
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: Process: com.android.systemui, PID: 2244
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause

@@ -758,3 +758,21 @@ math, one/seven-workgroup caps, public negative/final comparisons, three native
 tiers, repeat/cache and print-edit restoration. Private input files supported
 by the session probe must remain local with their generated results. See
 [results and mobile limits](../../docs/ENGINE_FEEDBACK_DISPATCH_2026-11-12.md).
+
+## Cloud feedback environment simulation
+
+`run_feedback_environment.sh` reuses the session probe at the reported
+7028x4688 source and 6709x4475 working dimensions. Independent systemd scopes
+exercise 5 GiB and 2 GiB memory limits without swap, 1 MiB transfer staging,
+a smaller working image and strict advertised-buffer capacity. Expected
+negative controls retain their statuses in `cases.csv`; completing the matrix
+does not imply that every case succeeded. No private image is needed.
+
+`build_feedback_android.sh` builds the production JNI target for a disposable
+x86_64 cloud emulator plus a Java/dex caller. `run_feedback_android.sh` selects
+that emulator explicitly and tests real Bitmap/JPEG and JNI film exports.
+Actual Java heap and boot readiness are recorded; the requested `-Xmx512m`
+does not guarantee Android uses 512 MiB. A separate fixture library performs
+synthetic fill and row statistics without changing production JNI. These are
+diagnostic artifacts, not release APKs.
+See [cloud results, reproduction and limitations](../../docs/ENGINE_FEEDBACK_ENVIRONMENT_2026-11-12.md).

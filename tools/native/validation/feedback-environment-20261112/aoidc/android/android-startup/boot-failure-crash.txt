@@ -1,0 +1,59 @@
+--------- beginning of crash
+11-12 12:36:41.772  1362  1362 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:36:41.772  1362  1362 E AndroidRuntime: Process: com.android.systemui, PID: 1362
+11-12 12:36:41.772  1362  1362 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:36:42.014  1377  1377 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:36:42.014  1377  1377 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 1377
+11-12 12:36:42.014  1377  1377 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:41:38.821  1928  1948 E AndroidRuntime: FATAL EXCEPTION: wmshell.main
+11-12 12:41:38.821  1928  1948 E AndroidRuntime: Process: com.android.systemui, PID: 1928
+11-12 12:41:38.821  1928  1948 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:41:39.191  2030  2030 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:41:39.191  2030  2030 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 2030
+11-12 12:41:39.191  2030  2030 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: PID: 2507
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: java.lang.IllegalStateException: expected actual 512 MiB heap
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.check(FeedbackAndroid.java:34)
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:104)
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 12:45:03.655  2507  2507 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: Couldn't report crash. Here's the crash:
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: java.lang.IllegalStateException: expected actual 512 MiB heap
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.check(FeedbackAndroid.java:34)
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:104)
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 12:45:04.559  2507  2507 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: Error reporting crash. Here's the error:
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:626)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService2(IServiceManager.java:589)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.ServiceManagerProxy.checkService2(ServiceManagerNative.java:81)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService2(ServiceManagerNative.java:70)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:394)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:156)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6118)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6115)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.util.Singleton.maybeCreate(Singleton.java:55)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:46)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:6106)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:166)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1098)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1093)
+11-12 12:45:04.579  2507  2507 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:3387)
+11-12 12:45:55.492  2580  2580 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:45:55.492  2580  2580 E AndroidRuntime: Process: com.android.systemui, PID: 2580
+11-12 12:45:55.492  2580  2580 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:45:55.572  2650  2650 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:45:55.572  2650  2650 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 2650
+11-12 12:45:55.572  2650  2650 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:51:01.917  3179  3196 E AndroidRuntime: FATAL EXCEPTION: wmshell.main
+11-12 12:51:01.917  3179  3196 E AndroidRuntime: Process: com.android.systemui, PID: 3179
+11-12 12:51:01.917  3179  3196 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:51:01.949  3275  3275 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:51:01.949  3275  3275 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 3275
+11-12 12:51:01.949  3275  3275 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 12:51:02.041  3286  3286 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 12:51:02.041  3286  3286 E AndroidRuntime: Process: com.android.networkstack.process, PID: 3286
+11-12 12:51:02.041  3286  3286 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause

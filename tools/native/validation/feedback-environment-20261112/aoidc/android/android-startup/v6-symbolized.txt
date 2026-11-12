@@ -1,0 +1,5 @@
+spk::gpu::(anonymous namespace)::VulkanGpu::create_inline_ring() at /data/work/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp:467
+spk::gpu::(anonymous namespace)::VulkanGpu::initialize(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>&) at /data/work/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp:329
+ (inlined by) spk::gpu::Gpu::create_vulkan(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>&) at /data/work/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp:1608
+spk_engine_create at /data/work/gpt-iir-large-20261112/upstream/engine/src/pipeline/engine.cpp:649
+Java_com_dearded_spektralab_NativeEngine_create at /data/work/gpt-feedback-env-20261112/android-repo/app/src/main/cpp/spektralab_jni.cpp:679

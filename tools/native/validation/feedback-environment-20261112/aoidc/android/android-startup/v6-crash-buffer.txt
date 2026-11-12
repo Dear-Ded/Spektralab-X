@@ -1,0 +1,114 @@
+--------- beginning of crash
+11-12 13:01:58.766   993  1019 E AndroidRuntime: FATAL EXCEPTION: wmshell.main
+11-12 13:01:58.766   993  1019 E AndroidRuntime: Process: com.android.systemui, PID: 993
+11-12 13:01:58.766   993  1019 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: FATAL EXCEPTION: pool-4-thread-1
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 1089
+11-12 13:01:59.502  1089  1152 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: FATAL EXCEPTION: pool-3-thread-2
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 1754
+11-12 13:07:44.308  1754  1797 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: Process: com.android.systemui, PID: 1690
+11-12 13:07:44.415  1690  1690 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: PID: 2090
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:11.908  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: Couldn't report crash. Here's the crash:
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found: needed by /data/local/tmp/spk-feedback-20261112-v5/libfeedback_fixture.so in namespace clns-1
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.Runtime.load0(Runtime.java:962)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at java.lang.System.load(System.java:1729)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:88)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+11-12 13:10:14.061  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: Error reporting crash. Here's the error:
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:626)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService2(IServiceManager.java:589)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.checkService2(ServiceManagerNative.java:81)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService2(ServiceManagerNative.java:70)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:394)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:156)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6118)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager$4.create(ActivityManager.java:6115)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.maybeCreate(Singleton.java:55)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:46)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:6106)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:166)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1098)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1093)
+11-12 13:10:14.081  2090  2090 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:3387)
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: FATAL EXCEPTION: pool-4-thread-2
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: Process: com.android.permissioncontroller, PID: 2343
+11-12 13:13:16.873  2343  2440 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: FATAL EXCEPTION: main
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: Process: com.android.systemui, PID: 2244
+11-12 13:13:17.448  2244  2244 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: FATAL EXCEPTION: SysUiBg
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: Process: com.android.systemui, PID: 2244
+11-12 13:13:17.498  2244  2382 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+11-12 13:16:46.751  2760  2760 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 2760 (main), pid 2760 (main)
+11-12 13:17:06.417  2820  2820 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+11-12 13:17:06.418  2820  2820 F DEBUG   : Build fingerprint: 'Android/sdk_phone64_x86_64/emu64x:17/CE2A.260420.051.A3/16571990:userdebug/test-keys'
+11-12 13:17:06.419  2820  2820 F DEBUG   : Kernel Release: '6.12.81-android16-6-g4f69fc7b210c-ab16167562'
+11-12 13:17:06.419  2820  2820 F DEBUG   : Revision: '0'
+11-12 13:17:06.419  2820  2820 F DEBUG   : ABI: 'x86_64'
+11-12 13:17:06.420  2820  2820 F DEBUG   : Timestamp: 2026-11-12 13:16:51.507002651+0000
+11-12 13:17:06.420  2820  2820 F DEBUG   : Process uptime: 38s
+11-12 13:17:06.430  2820  2820 F DEBUG   : Executable: /system/bin/app_process64
+11-12 13:17:06.433  2820  2820 F DEBUG   : Cmdline: app_process -Xmx512m -Djava.library.path=/data/local/tmp/spk-feedback-20261112-v6 /data/local/tmp com.dearded.spektralab.FeedbackAndroid /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so /data/local/tmp/spk-feedback-20261112-v6/resources /data/local/tmp/spk-feedback-20261112-v6/pipeline-smoke 1281 855 pipeline
+11-12 13:17:06.434  2820  2820 F DEBUG   : pid: 2760, ppid: 2757, tid: 2760, name: main  >>> app_process <<<
+11-12 13:17:06.434  2820  2820 F DEBUG   : uid: 2000
+11-12 13:17:06.434  2820  2820 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+11-12 13:17:06.436  2820  2820 F DEBUG   :     rax 0000000000000000  rbx 0000000000000ac8  rcx 000078e1550edadd  rdx 0000000000000006
+11-12 13:17:06.454  2820  2820 F DEBUG   :     r8  0000000000000000  r9  0000000000000000  r10 00007ffc1f8ef130  r11 0000000000000217
+11-12 13:17:06.454  2820  2820 F DEBUG   :     r12 0000000000000000  r13 00007ffc1f8ef35c  r14 0000000000000ac8  r15 00007ffc1f8ef130
+11-12 13:17:06.455  2820  2820 F DEBUG   :     rdi 0000000000000ac8  rsi 0000000000000ac8
+11-12 13:17:06.455  2820  2820 F DEBUG   :     rbp 00007ffc1f8ef1e0  rsp 00007ffc1f8ef130  rip 000078e1550edadd  err 0000000000000000
+11-12 13:17:06.456  2820  2820 F DEBUG   : 31 total frames
+11-12 13:17:06.456  2820  2820 F DEBUG   : backtrace:
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE: Unreadable libraries:
+11-12 13:17:06.463  2820  2820 F DEBUG   :   NOTE:   /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.474  2820  2820 F DEBUG   :       #00 pc 0000000000059add  /apex/com.android.runtime/lib64/bionic/libc.so (abort+189) (BuildId: aa76614279c09bc4bbbbbec6ba4a811e)
+11-12 13:17:06.475  2820  2820 F DEBUG   :       #01 pc 0000000000171ce4  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::createCoherentMemory(VkDevice_T*, VkDeviceMemory_T*, VkMemoryAllocateInfo const&, gfxstream::vk::VkEncoder*, VkResult&)+1636) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.475  2820  2820 F DEBUG   :       #02 pc 0000000000172770  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::allocateCoherentMemory(VkDevice_T*, VkMemoryAllocateInfo const*, gfxstream::vk::VkEncoder*, VkDeviceMemory_T**)+2384) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.476  2820  2820 F DEBUG   :       #03 pc 0000000000172d7a  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::getCoherentMemory(VkMemoryAllocateInfo const*, gfxstream::vk::VkEncoder*, VkDevice_T*, VkDeviceMemory_T**)+378) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.476  2820  2820 F DEBUG   :       #04 pc 00000000001736a2  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream::vk::ResourceTracker::on_vkAllocateMemory(void*, VkResult, VkDevice_T*, VkMemoryAllocateInfo const*, VkAllocationCallbacks const*, VkDeviceMemory_T**)+1810) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.479  2820  2820 F DEBUG   :       #05 pc 000000000019c2cc  /vendor/lib64/hw/vulkan.ranchu.so (gfxstream_vk_AllocateMemory+140) (BuildId: 680306bd80d31e666057768b114568e8)
+11-12 13:17:06.480  2820  2820 F DEBUG   :       #06 pc 00000000002b6edd  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.480  2820  2820 F DEBUG   :       #07 pc 00000000002b24dc  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.487  2820  2820 F DEBUG   :       #08 pc 000000000023490d  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.487  2820  2820 F DEBUG   :       #09 pc 00000000001e1563  /data/local/tmp/spk-feedback-20261112-v6/libspektralab_jni.so
+11-12 13:17:06.488  2820  2820 F DEBUG   :       #10 pc 0000000000048975  /system/framework/x86_64/boot-core-libart.oat (art_jni_trampoline+165) (BuildId: b37b702bbe413897f868d3b4d22224d553c8d104)
+11-12 13:17:06.488  2820  2820 F DEBUG   :       #11 pc 0000000000209889  /apex/com.android.art/lib64/libart.so (nterp_helper+3837) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.493  2820  2820 F DEBUG   :       #12 pc 00000000000011ce  [anon:dalvik-classes.dex extracte...a/local/tmp/spk-feedback-20261112-v6/feedback.jar] (com.dearded.spektralab.FeedbackAndroid.main+1138)
+11-12 13:17:06.493  2820  2820 F DEBUG   :       #13 pc 00000000002125d6  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+806) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.496  2820  2820 F DEBUG   :       #14 pc 0000000000476428  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+264) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #15 pc 00000000008e0b46  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, __va_list_tag*)+518) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #16 pc 00000000006ef86a  /apex/com.android.art/lib64/libart.so (art::JNI<false>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, __va_list_tag*)+602) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.497  2820  2820 F DEBUG   :       #17 pc 000000000011271e  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+126) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #18 pc 00000000001b65a3  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::callMain(android::String8 const&, _jclass*, android::Vector<android::String8> const&)+307) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #19 pc 0000000000004b0e  /system/bin/app_process64 (android::AppRuntime::onStarted()+78) (BuildId: c6a0c390f4368e9631b91bced410e104)
+11-12 13:17:06.498  2820  2820 F DEBUG   :       #20 pc 000000000082add9  /system/framework/x86_64/boot-framework.oat (art_jni_trampoline+121) (BuildId: 352c2c5738847a4a02974ce476488c8b226cafc1)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #21 pc 0000000000208a31  /apex/com.android.art/lib64/libart.so (nterp_helper+165) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #22 pc 0000000000398644  /system/framework/framework.jar (offset 0x2417000) (com.android.internal.os.RuntimeInit.main+48)
+11-12 13:17:06.499  2820  2820 F DEBUG   :       #23 pc 00000000002125d6  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+806) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.500  2820  2820 F DEBUG   :       #24 pc 0000000000476428  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+264) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.516  2820  2820 F DEBUG   :       #25 pc 00000000008e0b46  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, __va_list_tag*)+518) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.521  2820  2820 F DEBUG   :       #26 pc 00000000006ef86a  /apex/com.android.art/lib64/libart.so (art::JNI<false>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, __va_list_tag*)+602) (BuildId: ee39087e94b33f52a6702ae4ffb86dc0)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #27 pc 000000000011271e  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+126) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #28 pc 00000000001b6b74  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+964) (BuildId: e2564b9361f25203d4d8bb218bfef57e)
+11-12 13:17:06.522  2820  2820 F DEBUG   :       #29 pc 0000000000004728  /system/bin/app_process64 (main+1672) (BuildId: c6a0c390f4368e9631b91bced410e104)
+11-12 13:17:06.523  2820  2820 F DEBUG   :       #30 pc 00000000000cbca7  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+103) (BuildId: aa76614279c09bc4bbbbbec6ba4a811e)
+11-12 13:17:06.523  2820  2820 F DEBUG   : Note: To display stack pointer information, use the pbtombstone tool:
+11-12 13:17:06.523  2820  2820 F DEBUG   :         pbtombstone --display-sp tombstone_XX.pb

@@ -1,0 +1,5 @@
+Nov 12 12:17:31 instabox-ai kernel: session-probe invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+Nov 12 12:17:31 instabox-ai kernel: CPU: 0 UID: 1000 PID: 539069 Comm: session-probe Not tainted 6.18.54-instabox #1 PREEMPT(none) 
+Nov 12 12:17:31 instabox-ai kernel: [ 539061]  1000 539061   694904   462119    10200    14066    437853  4009984        0             0 session-probe
+Nov 12 12:17:31 instabox-ai kernel: oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=user.slice,mems_allowed=0,oom_memcg=/user.slice/user-1000.slice/user@1000.service/app.slice/run-p539056-i539057.scope,task_memcg=/user.slice/user-1000.slice/user@1000.service/app.slice/run-p539056-i539057.scope,task=session-probe,pid=539061,uid=1000
+Nov 12 12:17:31 instabox-ai kernel: Memory cgroup out of memory: Killed process 539061 (session-probe) total-vm:2779616kB, anon-rss:40800kB, file-rss:56264kB, shmem-rss:1751412kB, UID:1000 pgtables:3916kB oom_score_adj:0

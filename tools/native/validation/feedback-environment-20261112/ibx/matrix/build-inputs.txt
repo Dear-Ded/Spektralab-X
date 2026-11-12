@@ -1,0 +1,9 @@
+Linux instabox-ai 6.18.54-instabox #1 SMP PREEMPT_DYNAMIC 2026-09-25 00:00:00 UTC x86_64 GNU/Linux
+c++ (Debian 14.2.0-19) 14.2.0
+11dbba66f293239e5222a79a2b2be4d4664f72d115f0f0417a01b217d69baa52  /data/home/gpt-feedback-env-20261112/tools/tools/native/feedback_session.cpp
+52693831a944a17f5a6a3d47a22bc24dc4220a96cc4f8a433787d9302c3f84fd  /data/home/gpt-feedback-env-20261112/tools/app/src/main/cpp/resize.cpp
+0fd4bf9403ef6bc451c19fff85e5bb0c173f65e0a09ea8e179bbaf4e69721a75  /data/home/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp
+d8d2b6e344b8d8ecea22059f3ff3f859813826cb7beb62cc700fadaff29c1a51  /data/home/gpt-iir-large-20261112/host/engine/libspektralab_engine.a
+               total        used        free      shared  buff/cache   available
+Mem:            7964         551        7291           0         351        7412
+Swap:           4095         386        3709

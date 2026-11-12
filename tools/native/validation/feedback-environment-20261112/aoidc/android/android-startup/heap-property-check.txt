@@ -1,0 +1,3 @@
+Failed to set property 'dalvik.vm.heapsize' to '512m'.
+See dmesg for error reason.
+576m
