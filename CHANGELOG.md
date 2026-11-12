@@ -14,6 +14,8 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 
 相对 `0.2.00-alpha-3`，内部安装版本码递增为 **124**，保留原发布签名，可覆盖安装。新 RAW 仍默认线性显示，主页保持原样。本轮共创：**GPT（OpenAI，AI 助手）**。
 
+已经注意到社区反馈的部分意见，将在最近的版本中进行优化和修复。
+
 ### RAW 读取和取消
 
 - 保留浮点精度的 LinearRaw 读取支持多个未压缩 float32 RGB 条带，兼容独立的 SHORT/LONG 偏移与长度、文件内乱序存放及不足整块的末条带；原有单条带输出保持逐字节一致。
