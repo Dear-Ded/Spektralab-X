@@ -8,6 +8,34 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 0.2.00-alpha-5 · 2026-11-12
+
+**省流：** 修复异常像素被当成正常照片保存，出错后重建引擎重算。未大规模真机验证，需要社区反馈。
+
+这次集中处理社区 [#17](https://github.com/Dear-Ded/Spektralab-X/issues/17) 反馈的窄条画面、黑块和紫色色块。暗房里算坏的底片，不能盖个“保存成功”就交卷。
+
+内部安装版本码递增为 **125**，沿用原发布签名，可覆盖安装。本轮共创：**GPT（OpenAI，AI 助手）**。
+
+### 修复异常像素被放行
+
+- 修复浮点 RGB 中的 NaN、正负无穷在转成整数时丢失错误信息的问题。这些值原来会变成黑色或偏色像素，alpha 和文件结构却仍然正常；只要局部还有画面，旧的纯色检查就可能放行。
+- 现在在整数转换和结果缓存前扫描全部 RGB 通道，记录首个异常像素的位置和通道；同时检查扫描工作组是否完整执行。异常结果停止交付，不进入后续保存。
+- 导出前还会核对 RGBA16 布局及每个有效像素的 alpha，拦截未完整写入的结果。普通 Bitmap 导出、胶片 JPEG 4:4:4 和 RGBA16 TIFF 共用这项检查。
+
+### 出错后重新开一间暗房
+
+- 异常帧重试先重建 GPU 引擎，丢弃出错引擎的缓存和池状态，再降低工作尺寸重算。修复原来降档后仍沿用同一个引擎的问题。
+- 第二次仍异常时停止保存，并替换异常引擎。诊断信息保留原始错误、像素坐标或缺失工作组数，便于后续定位。
+- 正常照片的成像计算保持原有路径；新 RAW 继续默认线性显示，递归模糊等实验模式仍默认关闭。
+
+### 验证与后续反馈
+
+云端真实 Vulkan 故障注入中，旧实现接受的 18 组异常全部被新实现拒绝；Android 17 / API 37 原生检查同样通过。6709×4475 的尾部异常、漏工作组检查，以及 26 张胶片卡片、切图、释放缓存和独立大图导出的 33 帧回归均通过。正常输出全像素哈希保持一致，Android JNI 的 sRGB、Display P3 与原生 4:4:4 JPEG 保存及解码通过。
+
+**未大规模真机验证，需要社区反馈。** Android 模拟器使用软件 Vulkan；Adreno 840 / HyperOS 4 的实际运行记录请继续通过“设置 → 复制诊断信息”反馈。
+
+技术记录：[异常 RGB 与恢复修复](docs/ENGINE_FINITE_OUTPUT_RECOVERY_2026-11-12.md)、[RGBA16 与导出验证](docs/ENGINE_FEEDBACK_RECOVERY_2026-11-12.md)。
+
 ## 0.2.00-alpha-4 · 2026-11-12
 
 **省流：** RAW 读取保留更多原始精度，修正部分 DNG 的亮度刻度，镜头校正可及时取消。未大规模真机验证，需要社区反馈。

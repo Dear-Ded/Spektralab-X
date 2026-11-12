@@ -63,6 +63,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0053 增加独立 `SPK_IIR_BOUNDARY=triggs-v2`，将同一递归滤波改为值、一阶差和二阶差状态，CPU 预合成小系数及边界坐标变换，减少大半径相消误差。实验 sigma 支持域为 `[3,1024]`，默认旧核与 triggs-v1 保持。双云大半径、混合 FIR/IIR、完整流程和冻结输出验证见 [大半径实验](ENGINE_IIR_LARGE_RADIUS_2026-11-12.md)。不是手机默认切换或物理模型升级。GPT（OpenAI）共创。
 
+0054 在 Vulkan 整数转换与结果缓存前检查完整 RGB 的 NaN/无穷，并核对验证工作组计数；CPU 只回读 8 字节，异常时返回首个像素坐标/通道或不完整扫描错误。接入胶片输出、源图、打印缓存和 view/proof，正常有限负值、HDR 与成像运算保持原有定义。Android 异常帧重试同步改为先重建引擎再降档，避免复用故障状态。云端旧/新故障对照、正常像素哈希、API 37、30MP 和完整 JNI 构建见 [异常 RGB 与恢复修复](ENGINE_FINITE_OUTPUT_RECOVERY_2026-11-12.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
