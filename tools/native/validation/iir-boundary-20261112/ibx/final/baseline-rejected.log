@@ -1,0 +1,4 @@
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+w=2 h=1 sigma=3 pattern=1 add=0 error=0.466495938599
+FAIL: GPU boundary disagrees with explicit-tail oracle

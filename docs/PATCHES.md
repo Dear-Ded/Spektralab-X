@@ -59,8 +59,10 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0051 修正整数三通道 LinearRaw 的均匀非零 RGB 黑点缩放：LibRaw 的未用第四黑点槽不再阻止 common maximum 同步降低。只改变这一受限输入的像素，不改源元数据、Bayer、浮点或非均匀黑点策略；RAW 默认保持线性。双云与 Windows 参考、冻结对照、取消和 ARM64 编译见 [黑点归一化验证](ENGINE_LINEAR_RAW_BLACK_2026-11-12.md)。GPT（OpenAI）共创。
 
+0052 新增显式 `SPK_IIR_BOUNDARY=triggs-v1` Vulkan 实验核，按常量延拓修正递归模糊的三个反向终态，保留完整 float-pair 状态与 float32 中间平面。仅接受有效 IIR sigma `[3,256]`，默认仍调用原 shader；这会有意改变实验图像，尚非手机默认算法或流式 IIR。双云独立延拓参考、默认冻结字节、alias 与 ARM64 编译见 [边界修正验证](ENGINE_IIR_BOUNDARY_2026-11-12.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
-[`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
+[`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
 ## LibRaw 补丁
 

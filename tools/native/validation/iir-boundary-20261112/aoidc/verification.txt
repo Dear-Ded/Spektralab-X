@@ -1,0 +1,11 @@
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+cmake version 3.22.1
+Glslang Version: 10:11.8.0
+69bd8e6294f036cd51b02792724dbe949496167b155d0fdbed7f08c90dd80568  /data/work/gpt-iir-boundary-20261112/0052.patch
+a1ef27b85deedee69135d01a7c05bd4d91f2b684a503c88420d8ff430af9d335  /data/work/gpt-iir-boundary-20261112/probes-final.tgz
+853250a84b2eebf3a5b53da596bfe3cf84b1efd66e711d7c9fedc13166837a7f  /data/work/gpt-iir-boundary-20261112/host/engine/resources/vulkan/spk_iir_boundary_df_acc.spv
+f76a0da2ef1a79ed3291be16b78eae5239cedc95c6fe222b0f814cac136ca3f0  /data/work/gpt-iir-boundary-20261112/host/engine/resources/vulkan/spk_iir_df_acc.spv
+f76a0da2ef1a79ed3291be16b78eae5239cedc95c6fe222b0f814cac136ca3f0  /data/work/gpt-iir-boundary-20261112/baseline-host/engine/resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-iir-boundary-20261112/android-object/blur.o:       ELF 64-bit LSB relocatable, ARM aarch64, version 1 (SYSV), not stripped
+/data/work/gpt-iir-boundary-20261112/android-object/vulkan_gpu.o: ELF 64-bit LSB relocatable, ARM aarch64, version 1 (SYSV), not stripped
+99 replayed source files match

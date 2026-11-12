@@ -1,0 +1,3 @@
+device: llvmpipe (LLVM 15.0.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+PASS: 0 corrected, 574 frozen; max oracle 0, reversal 0

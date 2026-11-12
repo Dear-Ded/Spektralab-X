@@ -108,6 +108,12 @@ Triggs / Sdika 的原论文专门分析了该启发式，并给出线性状态�
 移植前还需验证 float pair 精度、前向平面的 float32 舍入、混合通道、累加、两遍方向及 Adreno/Mali。
 更正边界会有意改变旧桌面输出，必须作为显式的算法修正验收，不能混进“逐字节等价”的优化。
 
+2026-11-12 后续：补丁 0052 已把常量延拓终态转换移植成独立 Vulkan 实验核，
+仅 `SPK_IIR_BOUNDARY=triggs-v1` 启用，默认仍保留上述原 shader。新 GPU oracle
+逐步量化前向平面并保留高精度递归状态，不能沿用本节 all-double 的 `1e-11` 误差结论。
+双云、混合通道、原地写入、默认冻结对照和 Android 编译的实际边界见
+[IIR 实验记录](ENGINE_IIR_BOUNDARY_2026-11-12.md)；仍未完成 Adreno/Mali 或真实胶片验收。
+
 原始数据：
 [`validation/android-engine-iir-reference-2026-11-08.csv`](validation/android-engine-iir-reference-2026-11-08.csv)。
 

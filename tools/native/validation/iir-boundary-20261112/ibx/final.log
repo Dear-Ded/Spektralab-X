@@ -1,0 +1,21 @@
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+PASS: 574 corrected, 574 frozen; max oracle 2.38418579102e-06, reversal 1.49011611938e-06
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+PASS: 574 corrected, 574 frozen; max oracle 2.38418579102e-06, reversal 1.49011611938e-06
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+PASS: 0 corrected, 574 frozen; max oracle 0, reversal 0
+PASS: auto default bytes match the pre-0052 engine
+device: llvmpipe (LLVM 19.1.7, 256 bits)
+math: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+PASS: 0 corrected, 574 frozen; max oracle 0, reversal 0
+PASS: split default bytes match the pre-0052 engine
+PASS: independent numerical gate rejects the pre-0052 boundary
+IIR alias device: llvmpipe (LLVM 19.1.7, 256 bits)
+IIR alias math mode: Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+IIR boundary alias: 640/640 passed, 640 planned; llvmpipe (LLVM 19.1.7, 256 bits)
+IIR alias device: llvmpipe (LLVM 19.1.7, 256 bits)
+IIR alias math mode: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+IIR boundary alias: 640/640 passed, 640 planned; llvmpipe (LLVM 19.1.7, 256 bits)

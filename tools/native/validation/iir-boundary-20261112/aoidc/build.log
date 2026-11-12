@@ -1,0 +1,137 @@
+[1/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/cam16.cpp.o
+[2/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/blob.cpp.o
+[3/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o
+[4/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+[5/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[6/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+[7/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+[8/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/json.cpp.o
+[9/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/numeric.cpp.o
+[10/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+[11/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/print_lut.cpp.o
+[12/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[13/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/spectral.cpp.o
+[14/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/profile.cpp.o
+[15/83] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+[16/83] Linking CXX static library engine/libspektralab_core.a
+[17/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/blur.cpp.o
+[18/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[19/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+[20/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[21/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[22/83] Building C object engine/CMakeFiles/spk_volk.dir/third_party/volk/volk.c.o
+[23/83] Linking C static library engine/libspk_volk.a
+[24/83] Generating resources/vulkan/spk_bw_correct.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[25/83] Generating resources/vulkan/spk_boost.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[26/83] Generating resources/vulkan/spk_affine3.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[27/83] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[28/83] Generating resources/vulkan/spk_cctf_decode.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[29/83] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[30/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/imprint_raster.cpp.o
+[31/83] Generating resources/vulkan/spk_couplers_correction.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[32/83] Generating resources/vulkan/spk_curves.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[33/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[34/83] Generating resources/vulkan/spk_di_encode.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[35/83] Generating resources/vulkan/spk_di_normalise.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[36/83] Generating resources/vulkan/spk_dir_finish.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[37/83] Generating resources/vulkan/spk_edr.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[38/83] Generating resources/vulkan/spk_geometry_resample_df.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[39/83] Generating resources/vulkan/spk_glare_add.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[40/83] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[41/83] Generating resources/vulkan/spk_grain_layers.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[42/83] Generating resources/vulkan/spk_grain_simple.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[43/83] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[44/83] Generating resources/vulkan/spk_iir_boundary_df_acc.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_iir_boundary_df_acc.comp
+[45/83] Generating resources/vulkan/spk_lincomb3.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[46/83] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[47/83] Generating resources/vulkan/spk_log10_guarded.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[48/83] Generating resources/vulkan/spk_lognormal_field.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[49/83] Generating resources/vulkan/spk_lut2d_cubic.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[50/83] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[51/83] Generating resources/vulkan/spk_math_probe.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[52/83] Generating resources/vulkan/spk_matmul3.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[53/83] Generating resources/vulkan/spk_mul.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[54/83] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+[55/83] Generating resources/vulkan/spk_overscan_canvas.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+[56/83] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[57/83] Generating resources/vulkan/spk_overscan_light.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[58/83] Generating resources/vulkan/spk_print_exposure.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[59/83] Generating resources/vulkan/spk_reduce_max.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[60/83] Generating resources/vulkan/spk_rng_probe.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[61/83] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[62/83] Generating resources/vulkan/spk_scene_latitude.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[63/83] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[64/83] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[65/83] Generating resources/vulkan/spk_spectral_epilogue.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[66/83] Generating resources/vulkan/spk_split_probe.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[67/83] Generating resources/vulkan/spk_stride_sample.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[68/83] Generating resources/vulkan/spk_tc_b.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[69/83] Generating resources/vulkan/spk_take_rgb.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[70/83] Generating resources/vulkan/spk_to_rgba16.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[71/83] Generating resources/vulkan/spk_view_cam16.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[72/83] Generating resources/vulkan/spk_view_geometry.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+[73/83] Generating resources/vulkan/spk_view_grade.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[74/83] Generating resources/vulkan/spk_view_grade_di.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[75/83] Generating resources/vulkan/spk_view_grade_float.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[76/83] Generating resources/vulkan/spk_view_pack.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[77/83] Generating resources/vulkan/spk_view_pair.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[78/83] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[79/83] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/work/gpt-iir-boundary-20261112/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[80/83] cd /data/work/gpt-iir-boundary-20261112/host/engine && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-boundary-20261112/upstream/engine/resources /data/work/gpt-iir-boundary-20261112/host/engine/resources && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/profiles /data/work/gpt-iir-boundary-20261112/host/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/NOTICE.md /data/work/gpt-iir-boundary-20261112/host/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/fonts/LICENSE /data/work/gpt-iir-boundary-20261112/host/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/gpt-iir-boundary-20261112/host/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/third_party/stb/LICENSE /data/work/gpt-iir-boundary-20261112/host/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/paper_grades.json /data/work/gpt-iir-boundary-20261112/host/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-boundary-20261112/upstream/engine/resources_product/neutral_print_filters.json /data/work/gpt-iir-boundary-20261112/host/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-boundary-20261112/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/gpt-iir-boundary-20261112/host/engine/resources/DI
+[81/83] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+[82/83] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[83/83] Linking CXX static library engine/libspektralab_engine.a

@@ -1,0 +1,3 @@
+IIR alias device: llvmpipe (LLVM 19.1.7, 256 bits)
+IIR alias math mode: Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device
+IIR boundary alias: 640/640 passed, 640 planned; llvmpipe (LLVM 19.1.7, 256 bits)

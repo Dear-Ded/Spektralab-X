@@ -1,0 +1,142 @@
+{
+  "date": "2026-11-12",
+  "upstream": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "engine_patch": "0052-iir-terminal-boundary-experiment.patch",
+  "patch_sha256": "69bd8e6294f036cd51b02792724dbe949496167b155d0fdbed7f08c90dd80568",
+  "default_mode": "legacy",
+  "experimental_mode": "SPK_IIR_BOUNDARY=triggs-v1",
+  "hosts": {
+    "aoidc": {
+      "auto": {
+        "gaussian": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 0.000002384185791015625,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 0.0000014901161193847656,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 0.0000018477439880371094
+          }
+        },
+        "alias": {
+          "passed": true,
+          "cases": 640,
+          "compared_float32_values": 16057920,
+          "different_bytes": 0,
+          "math_mode": "Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device"
+        }
+      },
+      "split": {
+        "gaussian": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 0.000002384185791015625,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 0.0000014901161193847656,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 0.0000018477439880371094
+          }
+        },
+        "alias": {
+          "passed": true,
+          "cases": 640,
+          "compared_float32_values": 16057920,
+          "different_bytes": 0,
+          "math_mode": "Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device"
+        }
+      },
+      "default_sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+      "default_bytes": 2581992,
+      "pre_0052_rejected": true
+    },
+    "ibx": {
+      "auto": {
+        "gaussian": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 0.000002384185791015625,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 0.0000014901161193847656,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 0.0000018477439880371094
+          }
+        },
+        "alias": {
+          "passed": true,
+          "cases": 640,
+          "compared_float32_values": 16057920,
+          "different_bytes": 0,
+          "math_mode": "Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device"
+        }
+      },
+      "split": {
+        "gaussian": {
+          "passed": true,
+          "corrected_cases": 574,
+          "frozen_cases": 574,
+          "maximum_oracle_error": 0.000002384185791015625,
+          "maximum_oracle_convergence": 0,
+          "maximum_reversal_error": 0.0000014901161193847656,
+          "maximum_legacy_oracle_error": 2.291047751903534,
+          "line_oracle_error_by_sigma": {
+            "3": 1.1920928955078125e-7,
+            "6": 1.1920928955078125e-7,
+            "24": 1.1920928955078125e-7,
+            "96": 2.384185791015625e-7,
+            "256": 0.0000018477439880371094
+          }
+        },
+        "alias": {
+          "passed": true,
+          "cases": 640,
+          "compared_float32_values": 16057920,
+          "different_bytes": 0,
+          "math_mode": "Vulkan probe passed (exact Dekker split product; forced split for validation; full shader parity pending); storage buffers past the advertised 128 MiB maxStorageBufferRange verified by probe on this CPU device"
+        }
+      },
+      "default_sha256": "0f800b9efa47c2cc36e4972cfcb582a3c66928d2307907cecdfbd830d9069a73",
+      "default_bytes": 2581992,
+      "pre_0052_rejected": true
+    }
+  },
+  "limits": [
+    "Linux software Vulkan only; both automatic probes selected Dekker split product.",
+    "No successful fused-FMA path, mobile GPU run, full-film parity, complete Android relink or package.",
+    "Boundary oracle shares YVV coefficient generator; it independently evaluates the extension, float32 plane and recurrence."
+  ],
+  "replay": {
+    "engine_patches": 52,
+    "fuzz": 0,
+    "affected_files_matching_tested_source": 99
+  },
+  "android": {
+    "ndk": "27.2.12479018",
+    "abi": "arm64-v8a",
+    "api": 26,
+    "objects": [
+      "blur.cpp",
+      "vulkan_gpu.cpp"
+    ],
+    "spirv_validation_target": "vulkan1.0",
+    "full_relink": false,
+    "device_execution": false
+  }
+}

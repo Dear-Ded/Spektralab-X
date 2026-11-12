@@ -677,3 +677,23 @@ Build the frozen executable from the same diagnostic source against patches
 through 0050. The optional baseline checks byte preservation outside the new
 uniform nonzero RGB-black case; matching worker settings are required when
 comparing diagnostic metadata. See [scope and evidence](../../docs/ENGINE_LINEAR_RAW_BLACK_2026-11-12.md).
+
+## Experimental IIR terminal boundary
+
+```bash
+UP=/path/to/upstream-through-0052 B=/path/to/current-build \
+BASELINE_UP=/path/to/upstream-through-0051 BASELINE_B=/path/to/frozen-build \
+BUILD_DIR=/outside-repo/iir-results bash tools/native/run_iir_boundary_gpu.sh
+```
+
+Build `spektralab_engine` and `spektralab_vulkan_resources` for both trees first.
+Uses C++20 and the actual engine/core/volk archives. The Gaussian probe compares
+574 public synthetic cases against an explicit-tail oracle with float32 forward
+storage, checks the original default payloads, and rejects the legacy boundary
+with the new gate. The direct shader probe separately compares alias and
+independent outputs in 640 cases. Both run automatic math selection and forced
+split product; logs report the actual probe decision. A test failure exits nonzero.
+
+The `SPK_IIR_BOUNDARY=triggs-v1` process switch is diagnostic and bounded to
+active IIR sigmas `[3,256]`. It does not invalidate session caches or define a
+saved editing mode. See [implementation and mobile limits](../../docs/ENGINE_IIR_BOUNDARY_2026-11-12.md).
