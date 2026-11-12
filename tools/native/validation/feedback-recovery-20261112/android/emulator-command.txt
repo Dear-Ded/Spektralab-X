@@ -1,0 +1,1 @@
+/opt/android/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless -avd spk_feedback_api37 -port 5560 -no-window -no-audio -no-boot-anim -no-snapshot -accel off -cores 1 -memory 5120 -skin 480x800 -gpu lavapipe -feature Vulkan,GLDirectMem

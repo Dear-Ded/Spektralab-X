@@ -1,0 +1,3 @@
+case,width,height,exit_code,boot_completed_before,boot_completed_after
+pipeline-smoke,1281,855,137,,
+pipeline-full,6709,4475,skipped-prerequisite,,

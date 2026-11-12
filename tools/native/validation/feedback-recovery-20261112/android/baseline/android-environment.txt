@@ -1,0 +1,51 @@
+Android/sdk_phone64_x86_64/emu64x:17/CE2A.260420.051.A3/16571990:userdebug/test-keys
+37
+576m
+192m
+4096
+MemTotal:        5033520 kB
+MemFree:         4184320 kB
+MemAvailable:    4560176 kB
+Buffers:            6368 kB
+Cached:           496496 kB
+SwapCached:            0 kB
+Active:           513528 kB
+Inactive:         164036 kB
+Active(anon):     183028 kB
+Inactive(anon):        0 kB
+Active(file):     330500 kB
+Inactive(file):   164036 kB
+Unevictable:        4564 kB
+Mlocked:            4564 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+Dirty:             60040 kB
+Writeback:             0 kB
+AnonPages:        179288 kB
+Mapped:           258376 kB
+Shmem:              4888 kB
+KReclaimable:      26292 kB
+Slab:              84292 kB
+SReclaimable:      26292 kB
+SUnreclaim:        58000 kB
+KernelStack:        5584 kB
+PageTables:        18132 kB
+SecPageTables:         0 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     2516760 kB
+Committed_AS:    5864020 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:       34404 kB
+VmallocChunk:          0 kB
+Percpu:             1380 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:     12288 kB
+FilePmdMapped:     12288 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+DirectMap4k:       48984 kB
+DirectMap2M:     5193728 kB

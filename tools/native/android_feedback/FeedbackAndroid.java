@@ -23,6 +23,7 @@ final class NativeEngine {
                            float headroom, int sourceWidth, int sourceHeight);
     native Bitmap beforeBitmap(long session);
     native Bitmap renderBitmap(long session, String tier);
+    native Bitmap renderReuse(long session, String tier, Bitmap reuse);
     native Bitmap exportBitmap(long session, String tier);
     native Bitmap repack(long session, Bitmap reuse);
     native boolean setOutput(long session, String target, boolean exporting);
@@ -74,7 +75,18 @@ public final class FeedbackAndroid {
         System.out.println("jpeg=" + name + " bytes=" + file.length());
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        try {
+            run(args);
+        } catch (Throwable error) {
+            // app_process otherwise logs only to logcat and self-kills (137),
+            // obscuring the actual failure as an apparent external kill.
+            error.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+
+    static void run(String[] args) throws Exception {
         check(args.length == 6, "expected LIB RESOURCES OUTPUT WIDTH HEIGHT codec|pipeline");
         long initialHeap = Runtime.getRuntime().maxMemory();
         // app_process does not perform ActivityThread's ordinary largeHeap setup.
@@ -127,7 +139,7 @@ public final class FeedbackAndroid {
                     Bitmap before = nativeEngine.beforeBitmap(session);
                     inspect(before, "before", csv, out); before.recycle();
                     for (String tier : new String[]{"live", "preview", "full"}) {
-                        Bitmap rendered = nativeEngine.renderBitmap(session, tier);
+                        Bitmap rendered = nativeEngine.renderReuse(session, tier, null);
                         check(rendered != null, tier + ": " + nativeEngine.lastError());
                         long hash = inspect(rendered, tier, csv, out);
                         Bitmap repacked = nativeEngine.repack(session, null);

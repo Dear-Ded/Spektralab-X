@@ -1,0 +1,195 @@
+-- The C compiler identification is Clang 18.0.3
+-- The CXX compiler identification is Clang 18.0.3
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE  
+-- Found OpenMP_CXX: -fopenmp=libomp  
+-- Found OpenMP: TRUE  found components: CXX 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /data/work/gpt-feedback-recovery-20261112/arm64
+[0/2] Re-checking globbed directories...
+[1/65] Creating directories for 'spk_jpeg_build'
+[2/65] No download step for 'spk_jpeg_build'
+[3/65] No update step for 'spk_jpeg_build'
+[4/65] No patch step for 'spk_jpeg_build'
+[5/65] Performing configure step for 'spk_jpeg_build'
+[6/65] Performing build step for 'spk_jpeg_build'
+[7/65] Performing install step for 'spk_jpeg_build'
+[8/65] Completed 'spk_jpeg_build'
+[9/65] Generating resources/vulkan/spk_affine3.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[10/65] Generating resources/vulkan/spk_boost.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[11/65] Generating resources/vulkan/spk_bw_correct.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[12/65] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[13/65] Generating resources/vulkan/spk_cctf_decode.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[14/65] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[15/65] Generating resources/vulkan/spk_couplers_correction.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[16/65] Generating resources/vulkan/spk_curves.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[17/65] Generating resources/vulkan/spk_di_encode.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[18/65] Generating resources/vulkan/spk_di_normalise.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[19/65] Generating resources/vulkan/spk_dir_finish.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[20/65] Generating resources/vulkan/spk_edr.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[21/65] Generating resources/vulkan/spk_geometry_resample_df.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[22/65] Generating resources/vulkan/spk_glare_add.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[23/65] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[24/65] Generating resources/vulkan/spk_grain_layers.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[25/65] Generating resources/vulkan/spk_grain_simple.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[26/65] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[27/65] Generating resources/vulkan/spk_iir_boundary_df_acc.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_boundary_df_acc.comp
+[28/65] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[29/65] Generating resources/vulkan/spk_iir_difference_df_acc.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+[30/65] Generating resources/vulkan/spk_lincomb3.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[31/65] Generating resources/vulkan/spk_log10_guarded.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[32/65] Generating resources/vulkan/spk_lognormal_field.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[33/65] Generating resources/vulkan/spk_lut2d_cubic.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[34/65] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[35/65] Generating resources/vulkan/spk_math_probe.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[36/65] Generating resources/vulkan/spk_matmul3.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[37/65] Generating resources/vulkan/spk_mul.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[38/65] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+[39/65] Generating resources/vulkan/spk_overscan_canvas.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+[40/65] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[41/65] Generating resources/vulkan/spk_overscan_light.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[42/65] Generating resources/vulkan/spk_print_exposure.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[43/65] Generating resources/vulkan/spk_reduce_max.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[44/65] Generating resources/vulkan/spk_rng_probe.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[45/65] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[46/65] Generating resources/vulkan/spk_scene_latitude.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[47/65] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[48/65] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[49/65] Generating resources/vulkan/spk_spectral_epilogue.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[50/65] Generating resources/vulkan/spk_split_probe.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[51/65] Generating resources/vulkan/spk_stride_sample.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[52/65] Generating resources/vulkan/spk_take_rgb.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[53/65] Generating resources/vulkan/spk_tc_b.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[54/65] Generating resources/vulkan/spk_to_rgba16.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[55/65] Generating resources/vulkan/spk_view_cam16.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[56/65] Generating resources/vulkan/spk_view_geometry.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+[57/65] Generating resources/vulkan/spk_view_grade.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[58/65] Generating resources/vulkan/spk_view_grade_di.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[59/65] Generating resources/vulkan/spk_view_grade_float.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[60/65] Generating resources/vulkan/spk_view_pack.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[61/65] Generating resources/vulkan/spk_view_pair.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[62/65] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[63/65] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/work/gpt-iir-large-20261112/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[64/65] cd /data/work/gpt-feedback-recovery-20261112/arm64/engine && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-large-20261112/upstream/engine/resources /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/profiles /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/NOTICE.md /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/fonts/LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/third_party/stb/LICENSE /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/paper_grades.json /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/gpt-iir-large-20261112/upstream/engine/resources_product/neutral_print_filters.json /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/gpt-iir-large-20261112/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/gpt-feedback-recovery-20261112/arm64/engine/resources/DI
+[65/65] Building CXX object CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o
+FAILED: CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o 
+/opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DLIBRAW_MAX_METADATA_ALLOC_SIZE_MB=16 -DLIBRAW_MAX_PROFILE_SIZE_MB=16 -DLIBRAW_MAX_TILE_STREAM_COUNT=131072 -DLIBRAW_NODLL -DSPEKTRALAB_RAW_OPENMP=1 -DUSE_ZLIB -Dspektralab_jni_EXPORTS -I/data/work/gpt-iir-large-20261112/upstream/engine/include -I/data/work/gpt-iir-large-20261112/upstream/engine/src -I/data/work/gpt-iir-large-20261112/upstream/engine/host -I/data/work/gpt-feedback-recovery-20261112/arm64/generated -I/data/work/gpt-iir-large-20261112/upstream/engine/src/core -I/data/work/gpt-iir-large-20261112/upstream/engine/third_party/volk -I/data/work/gpt-iir-large-20261112/upstream/build/deps/Vulkan-Headers/include -I/data/work/gpt-feedback-recovery-20261112/arm64/LibRaw-0.22.2-spk -isystem /data/work/gpt-feedback-recovery-20261112/arm64/jpeg-install/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O3 -DNDEBUG  -fPIC -pthread -fopenmp=libomp -std=gnu++20 -MD -MT CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o -MF CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o.d -o CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o -c /data/work/gpt-feedback-recovery-20261112/gradle-repo/app/src/main/cpp/spektralab_jni.cpp
+In file included from /data/work/gpt-feedback-recovery-20261112/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:33:
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:71:44: error: use of undeclared identifier 'LIBRAW_DNGFM_ASSHOTWHITEXY'; did you mean 'LIBRAW_DNGFM_ASSHOTNEUTRAL'?
+   71 |         if ((col.dng_levels.parsedfields & LIBRAW_DNGFM_ASSHOTWHITEXY) &&
+      |                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                            LIBRAW_DNGFM_ASSHOTNEUTRAL
+/data/work/gpt-feedback-recovery-20261112/arm64/LibRaw-0.22.2-spk/libraw/libraw_const.h:124:3: note: 'LIBRAW_DNGFM_ASSHOTNEUTRAL' declared here
+  124 |   LIBRAW_DNGFM_ASSHOTNEUTRAL = 1 << 12,
+      |   ^
+In file included from /data/work/gpt-feedback-recovery-20261112/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:33:
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:82:41: error: no member named 'calibration_signature_invalid' in 'libraw_dng_levels_t'
+   82 |         const bool calibrated = !levels.calibration_signature_invalid &&
+      |                                  ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:83:32: error: no member named 'camera_calibration_signature' in 'libraw_dng_levels_t'
+   83 |             std::strcmp(levels.camera_calibration_signature,
+      |                         ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:84:32: error: no member named 'profile_calibration_signature' in 'libraw_dng_levels_t'
+   84 |                         levels.profile_calibration_signature) == 0;
+      |                         ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:106:35: error: no member named 'calibration_signature_invalid' in 'libraw_dng_levels_t'
+  106 |             asn_source && !levels.calibration_signature_invalid;
+      |                            ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:238:20: error: no member named 'calibration_signature_invalid' in 'libraw_dng_levels_t'
+  238 |         if (levels.calibration_signature_invalid) return false;
+      |             ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:240:50: error: no member named 'camera_calibration_signature' in 'libraw_dng_levels_t'
+  240 |         const bool calibrated=std::strcmp(levels.camera_calibration_signature,
+      |                                           ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:241:50: error: no member named 'profile_calibration_signature' in 'libraw_dng_levels_t'
+  241 |                                           levels.profile_calibration_signature)==0;
+      |                                           ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:260:50: error: no member named 'asshotwhitexy' in 'libraw_dng_levels_t'
+  260 |         if(!dng_white_xy::prepare(profile,levels.asshotwhitexy[0],levels.asshotwhitexy[1],source)) return false;
+      |                                           ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:260:74: error: no member named 'asshotwhitexy' in 'libraw_dng_levels_t'
+  260 |         if(!dng_white_xy::prepare(profile,levels.asshotwhitexy[0],levels.asshotwhitexy[1],source)) return false;
+      |                                                                   ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:265:25: error: no member named 'asshotwhitexy' in 'libraw_dng_levels_t'
+  265 |         double x=levels.asshotwhitexy[0],y=levels.asshotwhitexy[1];
+      |                  ~~~~~~ ^
+/data/work/gpt-iir-large-20261112/upstream/engine/src/io/raw_camera.hpp:265:51: error: no member named 'asshotwhitexy' in 'libraw_dng_levels_t'
+  265 |         double x=levels.asshotwhitexy[0],y=levels.asshotwhitexy[1];
+      |                                            ~~~~~~ ^
+12 errors generated.
+ninja: build stopped: subcommand failed.

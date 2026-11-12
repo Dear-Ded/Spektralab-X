@@ -1,0 +1,4 @@
+
+Android/sdk_phone64_x86_64/emu64x:17/CE2A.260420.051.A3/16571990:userdebug/test-keys
+576m
+running

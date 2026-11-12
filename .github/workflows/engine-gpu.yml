@@ -26,6 +26,8 @@ jobs:
           key: upstream-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
       - name: Fetch upstream
         run: bash scripts/fetch-upstream.sh upstream
+      - name: Check RGBA16 export integrity
+        run: BUILD_DIR="$PWD/frame-tests" bash tools/native/run_rgba16_frame_check.sh
       - name: Build Vulkan engine
         run: |
           cmake -S upstream -B build-fir -G Ninja -DCMAKE_BUILD_TYPE=Release \

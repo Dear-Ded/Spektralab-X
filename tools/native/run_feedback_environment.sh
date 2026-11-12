@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 mkdir -p "$BUILD_DIR"
 "${CXX:-c++}" -std=c++20 -O2 -ffp-contract=off -pthread \
-  -I"$UP/engine/include" -I"$ROOT/app/src/main/cpp" \
+  -I"$UP/engine/include" -I"$UP/engine/src" -I"$UP/engine/src/core" -I"$ROOT/app/src/main/cpp" \
   "$ROOT/tools/native/feedback_session.cpp" "$ROOT/app/src/main/cpp/resize.cpp" \
   -Wl,--start-group "$B/engine/libspektralab_engine.a" "$B/engine/libspektralab_core.a" \
   "$B/engine/libspk_volk.a" -Wl,--end-group -ldl -o "$BUILD_DIR/session-probe"
@@ -15,6 +15,7 @@ mkdir -p "$BUILD_DIR"
   uname -a
   "${CXX:-c++}" --version | head -1
   sha256sum "$ROOT/tools/native/feedback_session.cpp" "$ROOT/app/src/main/cpp/resize.cpp" \
+    "$ROOT/app/src/main/cpp/rgba16_frame_check.hpp" \
     "$UP/engine/src/gpu/vulkan_gpu.cpp" "$B/engine/libspektralab_engine.a"
   free -m
 } > "$BUILD_DIR/build-inputs.txt"

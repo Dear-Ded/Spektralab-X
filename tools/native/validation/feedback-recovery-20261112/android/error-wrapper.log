@@ -1,0 +1,7 @@
+heap initial=201326592 expanded=603979776
+java.lang.IllegalStateException: invalid mode
+	at com.dearded.spektralab.FeedbackAndroid.check(FeedbackAndroid.java:39)
+	at com.dearded.spektralab.FeedbackAndroid.run(FeedbackAndroid.java:106)
+	at com.dearded.spektralab.FeedbackAndroid.main(FeedbackAndroid.java:80)
+	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)

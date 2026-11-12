@@ -1,0 +1,303 @@
+--------- beginning of system
+11-12 13:40:42.092   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.LooperStatsService$Lifecycle
+11-12 13:40:42.092   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.LooperStatsService$Lifecycle took to complete: 0ms
+11-12 13:40:42.093   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.rollback.RollbackManagerService
+11-12 13:40:42.093   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.rollback.RollbackManagerService took to complete: 0ms
+11-12 13:40:42.093   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.os.NativeTombstoneManagerService
+11-12 13:40:42.093   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.os.NativeTombstoneManagerService took to complete: 0ms
+11-12 13:40:42.110   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.os.BugreportManagerService
+11-12 13:40:42.110   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.os.BugreportManagerService took to complete: 0ms
+11-12 13:40:42.111   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.gpu.GpuService
+11-12 13:40:42.111   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.gpu.GpuService took to complete: 0ms
+11-12 13:40:42.111   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.rkp.RemoteProvisioningService
+11-12 13:40:42.111   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.rkp.RemoteProvisioningService took to complete: 0ms
+11-12 13:40:42.112   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.cpu.CpuMonitorService
+11-12 13:40:42.112   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.cpu.CpuMonitorService took to complete: 0ms
+11-12 13:40:42.112   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.KeyChainSystemService
+11-12 13:40:42.112   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.KeyChainSystemService took to complete: 0ms
+11-12 13:40:42.112   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.BinaryTransparencyService
+11-12 13:40:42.113   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.BinaryTransparencyService took to complete: 0ms
+11-12 13:40:42.113   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.telecom.TelecomLoaderService
+11-12 13:40:42.113   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.telecom.TelecomLoaderService took to complete: 0ms
+11-12 13:40:42.113   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.accounts.AccountManagerService$Lifecycle
+11-12 13:40:42.113   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.accounts.AccountManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.126   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.content.ContentService$Lifecycle
+11-12 13:40:42.126   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.content.ContentService$Lifecycle took to complete: 0ms
+11-12 13:40:42.127   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.deviceconfig.DeviceConfigInit$Lifecycle
+11-12 13:40:42.127   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.deviceconfig.DeviceConfigInit$Lifecycle took to complete: 0ms
+11-12 13:40:42.127   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.DropBoxManagerService
+11-12 13:40:42.127   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.DropBoxManagerService took to complete: 0ms
+11-12 13:40:42.127   667   667 D SystemServerTiming: OnBootPhase_520_com.android.ecm.EnhancedConfirmationService
+11-12 13:40:42.128   667   667 V SystemServerTiming: OnBootPhase_520_com.android.ecm.EnhancedConfirmationService took to complete: 0ms
+11-12 13:40:42.128   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.power.hint.HintManagerService
+11-12 13:40:42.128   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.power.hint.HintManagerService took to complete: 0ms
+11-12 13:40:42.129   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.allowlist.AllowlistService
+11-12 13:40:42.129   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.allowlist.AllowlistService took to complete: 0ms
+11-12 13:40:42.129   667   667 D SystemServerTiming: OnBootPhase_520_com.android.role.RoleService
+11-12 13:40:42.129   667   667 V SystemServerTiming: OnBootPhase_520_com.android.role.RoleService took to complete: 0ms
+11-12 13:40:42.129   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.supervision.SupervisionService$Lifecycle
+11-12 13:40:42.153   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.supervision.SupervisionService$Lifecycle took to complete: 0ms
+11-12 13:40:42.153   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.vibrator.VibratorManagerService$Lifecycle
+11-12 13:40:42.160   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.vibrator.VibratorManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.160   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.alarm.AlarmManagerService
+11-12 13:40:42.160   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.alarm.AlarmManagerService took to complete: 0ms
+11-12 13:40:42.161   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.input.InputManagerService$Lifecycle
+11-12 13:40:42.161   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.input.InputManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.161   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.devicestate.DeviceStateManagerService
+11-12 13:40:42.161   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.devicestate.DeviceStateManagerService took to complete: 0ms
+11-12 13:40:42.170   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.camera.CameraServiceProxy
+11-12 13:40:42.171   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.camera.CameraServiceProxy took to complete: 0ms
+11-12 13:40:42.171   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.bluetooth.BluetoothService
+11-12 13:40:42.171   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.bluetooth.BluetoothService took to complete: 0ms
+11-12 13:40:42.171   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.connectivity.IpConnectivityMetrics
+11-12 13:40:42.177   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.connectivity.IpConnectivityMetrics took to complete: 0ms
+11-12 13:40:42.177   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.net.watchlist.NetworkWatchlistService$Lifecycle
+11-12 13:40:42.182   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.net.watchlist.NetworkWatchlistService$Lifecycle took to complete: 0ms
+11-12 13:40:42.182   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pinner.PinnerService
+11-12 13:40:42.183   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pinner.PinnerService took to complete: 0ms
+11-12 13:40:42.183   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.integrity.AppIntegrityManagerService
+11-12 13:40:42.183   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.integrity.AppIntegrityManagerService took to complete: 0ms
+11-12 13:40:42.183   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.logcat.LogcatManagerService
+11-12 13:40:42.184   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.logcat.LogcatManagerService took to complete: 0ms
+11-12 13:40:42.184   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.intrusiondetection.IntrusionDetectionService
+11-12 13:40:42.184   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.intrusiondetection.IntrusionDetectionService took to complete: 0ms
+11-12 13:40:42.184   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.appfunctions.AppFunctionManagerService
+11-12 13:40:42.184   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.appfunctions.AppFunctionManagerService took to complete: 0ms
+11-12 13:40:42.185   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.privatecompute.PccSandboxManagerService
+11-12 13:40:42.185   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.privatecompute.PccSandboxManagerService took to complete: 0ms
+11-12 13:40:42.185   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.advancedprotection.AdvancedProtectionService$Lifecycle
+11-12 13:40:42.185   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.advancedprotection.AdvancedProtectionService$Lifecycle took to complete: 0ms
+11-12 13:40:42.199   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.TradeInModeService
+11-12 13:40:42.199   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.TradeInModeService took to complete: 0ms
+11-12 13:40:42.200   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.inputmethod.InputMethodManagerService$Lifecycle
+11-12 13:40:42.200   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.inputmethod.InputMethodManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.200   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.accessibility.AccessibilityManagerService$Lifecycle
+11-12 13:40:42.200   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.accessibility.AccessibilityManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.200   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.StorageManagerService$Lifecycle
+11-12 13:40:42.201   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.StorageManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.201   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.usage.StorageStatsService$Lifecycle
+11-12 13:40:42.201   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.usage.StorageStatsService$Lifecycle took to complete: 0ms
+11-12 13:40:42.201   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.files.FileService
+11-12 13:40:42.222   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.files.FileService took to complete: 0ms
+11-12 13:40:42.223   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.UiModeManagerService
+11-12 13:40:42.223   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.UiModeManagerService took to complete: 0ms
+11-12 13:40:42.223   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.locales.LocaleManagerService
+11-12 13:40:42.223   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.locales.LocaleManagerService took to complete: 0ms
+11-12 13:40:42.224   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.appwindowlayout.AppWindowLayoutSettingsService
+11-12 13:40:42.224   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.appwindowlayout.AppWindowLayoutSettingsService took to complete: 0ms
+11-12 13:40:42.224   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.grammaticalinflection.GrammaticalInflectionService
+11-12 13:40:42.224   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.grammaticalinflection.GrammaticalInflectionService took to complete: 0ms
+11-12 13:40:42.224   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.apphibernation.AppHibernationService
+11-12 13:40:42.225   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.apphibernation.AppHibernationService took to complete: 0ms
+11-12 13:40:42.225   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.locksettings.LockSettingsService$Lifecycle
+11-12 13:40:42.225   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.locksettings.LockSettingsService$Lifecycle took to complete: 0ms
+11-12 13:40:42.226   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.testharness.TestHarnessModeService
+11-12 13:40:42.246   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.testharness.TestHarnessModeService took to complete: 0ms
+11-12 13:40:42.247   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.DeviceIdleController
+11-12 13:40:42.247   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.DeviceIdleController took to complete: 0ms
+11-12 13:40:42.247   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle
+11-12 13:40:42.247   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.248   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.voiceinteraction.VoiceInteractionManagerService
+11-12 13:40:42.248   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.voiceinteraction.VoiceInteractionManagerService took to complete: 0ms
+11-12 13:40:42.248   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.texttospeech.TextToSpeechManagerService
+11-12 13:40:42.249   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.texttospeech.TextToSpeechManagerService took to complete: 0ms
+11-12 13:40:42.249   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.wearable.WearableSensingManagerService
+11-12 13:40:42.249   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.wearable.WearableSensingManagerService took to complete: 0ms
+11-12 13:40:42.249   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService
+11-12 13:40:42.249   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService took to complete: 0ms
+11-12 13:40:42.265   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.contentsafety.ContentSafetyManagerService
+11-12 13:40:42.270   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.contentsafety.ContentSafetyManagerService took to complete: 0ms
+11-12 13:40:42.270   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.speech.SpeechRecognitionManagerService
+11-12 13:40:42.271   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.speech.SpeechRecognitionManagerService took to complete: 0ms
+11-12 13:40:42.271   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.graphics.fonts.FontManagerService$Lifecycle
+11-12 13:40:42.271   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.graphics.fonts.FontManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.271   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.textservices.TextServicesManagerService$Lifecycle
+11-12 13:40:42.275   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.textservices.TextServicesManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.276   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.textclassifier.TextClassificationManagerService$Lifecycle
+11-12 13:40:42.276   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.textclassifier.TextClassificationManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.276   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.NetworkScoreService$Lifecycle
+11-12 13:40:42.276   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.NetworkScoreService$Lifecycle took to complete: 0ms
+11-12 13:40:42.277   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.NetworkStatsServiceInitializer
+11-12 13:40:42.277   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.NetworkStatsServiceInitializer took to complete: 0ms
+11-12 13:40:42.277   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.wifi.WifiService
+11-12 13:40:42.277   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.wifi.WifiService took to complete: 0ms
+11-12 13:40:42.288   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.wifi.scanner.WifiScanningService
+11-12 13:40:42.289   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.wifi.scanner.WifiScanningService took to complete: 0ms
+11-12 13:40:42.289   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.wifi.p2p.WifiP2pService
+11-12 13:40:42.289   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.wifi.p2p.WifiP2pService took to complete: 0ms
+11-12 13:40:42.301   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.ConnectivityServiceInitializer
+11-12 13:40:42.301   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.ConnectivityServiceInitializer took to complete: 0ms
+11-12 13:40:42.302   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.bitmapoffload.BitmapOffloadService
+11-12 13:40:42.305   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.bitmapoffload.BitmapOffloadService took to complete: 0ms
+11-12 13:40:42.305   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.modes.ContextualModeManagerService
+11-12 13:40:42.309   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.modes.ContextualModeManagerService took to complete: 0ms
+11-12 13:40:42.309   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.notification.NotificationManagerService
+11-12 13:40:42.314   667   667 I PackageManager: getInstalledPackages: callingUid=1000 flags=0 updatedFlags=524288 userId=0
+11-12 13:40:42.751   667   667 I PackageManager: getInstalledPackages: callingUid=1000 flags=131072 updatedFlags=655360 userId=0
+11-12 13:40:42.995   667   667 W SystemServiceManager: Service com.android.server.notification.NotificationManagerService took 685 ms in onBootPhase
+11-12 13:40:42.996   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.notification.NotificationManagerService took to complete: 686ms
+11-12 13:40:42.996   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.storage.DeviceStorageMonitorService
+11-12 13:40:42.996   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.storage.DeviceStorageMonitorService took to complete: 0ms
+11-12 13:40:42.996   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.timedetector.TimeDetectorService$Lifecycle
+11-12 13:40:42.996   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.timedetector.TimeDetectorService$Lifecycle took to complete: 0ms
+11-12 13:40:42.997   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.location.LocationManagerService$Lifecycle
+11-12 13:40:42.997   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.location.LocationManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:42.997   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle
+11-12 13:40:42.997   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle took to complete: 0ms
+11-12 13:40:42.998   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.location.altitude.AltitudeService$Lifecycle
+11-12 13:40:43.010   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.location.altitude.AltitudeService$Lifecycle took to complete: 0ms
+11-12 13:40:43.010   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.timezonedetector.location.LocationTimeZoneManagerService$Lifecycle
+11-12 13:40:43.011   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.timezonedetector.location.LocationTimeZoneManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.011   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.search.SearchManagerService$Lifecycle
+11-12 13:40:43.012   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.search.SearchManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.012   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.wallpaper.WallpaperManagerService$Lifecycle
+11-12 13:40:43.032   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.wallpaper.WallpaperManagerService$Lifecycle took to complete: 20ms
+11-12 13:40:43.042   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.audio.AudioService$Lifecycle
+11-12 13:40:43.043   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.audio.AudioService$Lifecycle took to complete: 0ms
+11-12 13:40:43.043   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService$Lifecycle
+11-12 13:40:43.043   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService$Lifecycle took to complete: 0ms
+11-12 13:40:43.043   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.DockObserver
+11-12 13:40:43.044   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.DockObserver took to complete: 0ms
+11-12 13:40:43.044   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.midi.MidiService$Lifecycle
+11-12 13:40:43.044   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.midi.MidiService$Lifecycle took to complete: 0ms
+11-12 13:40:43.044   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.adb.AdbService$Lifecycle
+11-12 13:40:43.045   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.adb.AdbService$Lifecycle took to complete: 0ms
+11-12 13:40:43.045   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.usb.UsbService$Lifecycle
+11-12 13:40:43.045   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.usb.UsbService$Lifecycle took to complete: 0ms
+11-12 13:40:43.045   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.serial.SerialManagerService$Lifecycle
+11-12 13:40:43.062   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.serial.SerialManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.063   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.twilight.TwilightService
+11-12 13:40:43.063   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.twilight.TwilightService took to complete: 0ms
+11-12 13:40:43.063   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.display.color.ColorDisplayService
+11-12 13:40:43.063   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.display.color.ColorDisplayService took to complete: 0ms
+11-12 13:40:43.063   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.job.JobSchedulerService
+11-12 13:40:43.064   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.job.JobSchedulerService took to complete: 0ms
+11-12 13:40:43.064   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.soundtrigger.SoundTriggerService
+11-12 13:40:43.064   667   667 D SoundTriggerService: onBootPhase: 520 : false
+11-12 13:40:43.065   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.soundtrigger.SoundTriggerService took to complete: 1ms
+11-12 13:40:43.065   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.trust.TrustManagerService
+11-12 13:40:43.065   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.trust.TrustManagerService took to complete: 0ms
+11-12 13:40:43.086   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.backup.BackupManagerService$Lifecycle
+11-12 13:40:43.087   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.backup.BackupManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.087   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.appwidget.AppWidgetService
+11-12 13:40:43.087   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.appwidget.AppWidgetService took to complete: 0ms
+11-12 13:40:43.087   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.GestureLauncherService
+11-12 13:40:43.088   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.GestureLauncherService took to complete: 0ms
+11-12 13:40:43.088   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.SensorNotificationService
+11-12 13:40:43.095   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.SensorNotificationService took to complete: 0ms
+11-12 13:40:43.095   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.ContextHubSystemService
+11-12 13:40:43.096   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.ContextHubSystemService took to complete: 0ms
+11-12 13:40:43.096   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.emergency.EmergencyAffordanceService
+11-12 13:40:43.096   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.emergency.EmergencyAffordanceService took to complete: 0ms
+11-12 13:40:43.096   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.blob.BlobStoreManagerService
+11-12 13:40:43.097   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.blob.BlobStoreManagerService took to complete: 0ms
+11-12 13:40:43.097   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.dreams.DreamManagerService
+11-12 13:40:43.097   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.dreams.DreamManagerService took to complete: 0ms
+11-12 13:40:43.097   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.print.PrintManagerService
+11-12 13:40:43.097   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.print.PrintManagerService took to complete: 0ms
+11-12 13:40:43.104   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.AttestationVerificationManagerService
+11-12 13:40:43.104   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.AttestationVerificationManagerService took to complete: 0ms
+11-12 13:40:43.105   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.companion.CompanionDeviceManagerService
+11-12 13:40:43.115   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.companion.CompanionDeviceManagerService took to complete: 0ms
+11-12 13:40:43.115   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.companion.datatransfer.continuity.TaskContinuityManagerService
+11-12 13:40:43.116   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.companion.datatransfer.continuity.TaskContinuityManagerService took to complete: 0ms
+11-12 13:40:43.116   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.companion.virtual.VirtualDeviceManagerService
+11-12 13:40:43.116   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.companion.virtual.VirtualDeviceManagerService took to complete: 0ms
+11-12 13:40:43.116   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.restrictions.RestrictionsManagerService
+11-12 13:40:43.117   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.restrictions.RestrictionsManagerService took to complete: 0ms
+11-12 13:40:43.117   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.media.MediaSessionService
+11-12 13:40:43.117   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.media.MediaSessionService took to complete: 0ms
+11-12 13:40:43.117   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.media.MediaResourceMonitorService
+11-12 13:40:43.117   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.media.MediaResourceMonitorService took to complete: 0ms
+11-12 13:40:43.134   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.sensors.fingerprint.FingerprintService
+11-12 13:40:43.135   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.sensors.fingerprint.FingerprintService took to complete: 0ms
+11-12 13:40:43.135   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.BiometricService
+11-12 13:40:43.135   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.BiometricService took to complete: 0ms
+11-12 13:40:43.136   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.AuthService
+11-12 13:40:43.136   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.biometrics.AuthService took to complete: 0ms
+11-12 13:40:43.136   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.SecureLockDeviceService$Lifecycle
+11-12 13:40:43.136   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.SecureLockDeviceService$Lifecycle took to complete: 0ms
+11-12 13:40:43.137   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.WatchRangingService$Lifecycle
+11-12 13:40:43.137   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.WatchRangingService$Lifecycle took to complete: 0ms
+11-12 13:40:43.137   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.agent.AgentAuthService$Lifecycle
+11-12 13:40:43.137   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.agent.AgentAuthService$Lifecycle took to complete: 0ms
+11-12 13:40:43.137   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.AuthenticationPolicyService
+11-12 13:40:43.155   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.security.authenticationpolicy.AuthenticationPolicyService took to complete: 0ms
+11-12 13:40:43.159   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pm.ShortcutService$Lifecycle
+11-12 13:40:43.160   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pm.ShortcutService$Lifecycle took to complete: 0ms
+11-12 13:40:43.160   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pm.LauncherAppsService
+11-12 13:40:43.160   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pm.LauncherAppsService took to complete: 0ms
+11-12 13:40:43.160   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pm.CrossProfileAppsService
+11-12 13:40:43.161   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pm.CrossProfileAppsService took to complete: 0ms
+11-12 13:40:43.161   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.people.PeopleService
+11-12 13:40:43.161   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.people.PeopleService took to complete: 0ms
+11-12 13:40:43.161   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.media.metrics.MediaMetricsManagerService
+11-12 13:40:43.166   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.media.metrics.MediaMetricsManagerService took to complete: 0ms
+11-12 13:40:43.166   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pm.BackgroundInstallControlService
+11-12 13:40:43.167   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pm.BackgroundInstallControlService took to complete: 0ms
+11-12 13:40:43.167   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.media.projection.MediaProjectionManagerService
+11-12 13:40:43.167   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.media.projection.MediaProjectionManagerService took to complete: 0ms
+11-12 13:40:43.167   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.slice.SliceManagerService$Lifecycle
+11-12 13:40:43.168   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.slice.SliceManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.168   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.stats.StatsCompanion$Lifecycle
+11-12 13:40:43.168   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.stats.StatsCompanion$Lifecycle took to complete: 0ms
+11-12 13:40:43.168   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+11-12 13:40:43.168   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.169   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.stats.pull.StatsPullAtomService
+11-12 13:40:43.169   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.stats.pull.StatsPullAtomService took to complete: 0ms
+11-12 13:40:43.169   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.stats.bootstrap.StatsBootstrapAtomService$Lifecycle
+11-12 13:40:43.169   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.stats.bootstrap.StatsBootstrapAtomService$Lifecycle took to complete: 0ms
+11-12 13:40:43.189   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.stats.binder.BinderStatsConsumerService$Lifecycle
+11-12 13:40:43.189   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.stats.binder.BinderStatsConsumerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.190   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.incident.IncidentCompanionService
+11-12 13:40:43.196   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.incident.IncidentCompanionService took to complete: 0ms
+11-12 13:40:43.196   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle
+11-12 13:40:43.196   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.197   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.adservices.AdServicesManagerService$Lifecycle
+11-12 13:40:43.197   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.adservices.AdServicesManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.197   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.ondevicepersonalization.OnDevicePersonalizationSystemService$Lifecycle
+11-12 13:40:43.197   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.ondevicepersonalization.OnDevicePersonalizationSystemService$Lifecycle took to complete: 0ms
+11-12 13:40:43.200   667   667 D SystemServerTiming: OnBootPhase_520_android.os.profiling.ProfilingService$Lifecycle
+11-12 13:40:43.200   667   667 V SystemServerTiming: OnBootPhase_520_android.os.profiling.ProfilingService$Lifecycle took to complete: 0ms
+11-12 13:40:43.200   667   667 D SystemServerTiming: OnBootPhase_520_com.android.os.profiling.anomaly.AnomalyDetectorService
+11-12 13:40:43.200   667   667 V SystemServerTiming: OnBootPhase_520_com.android.os.profiling.anomaly.AnomalyDetectorService took to complete: 0ms
+11-12 13:40:43.201   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.signalcollector.SignalCollectorService
+11-12 13:40:43.201   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.signalcollector.SignalCollectorService took to complete: 0ms
+11-12 13:40:43.201   667   667 D SystemServerTiming: OnBootPhase_520_com.android.uprobestats.UprobeStatsBridgeService
+11-12 13:40:43.201   667   667 V SystemServerTiming: OnBootPhase_520_com.android.uprobestats.UprobeStatsBridgeService took to complete: 0ms
+11-12 13:40:43.202   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.MmsServiceBroker
+11-12 13:40:43.218   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.MmsServiceBroker took to complete: 0ms
+11-12 13:40:43.219   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.autofill.AutofillManagerService
+11-12 13:40:43.224   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.autofill.AutofillManagerService took to complete: 0ms
+11-12 13:40:43.225   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.credentials.CredentialManagerService
+11-12 13:40:43.225   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.credentials.CredentialManagerService took to complete: 0ms
+11-12 13:40:43.227   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.clipboard.ClipboardService
+11-12 13:40:43.227   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.clipboard.ClipboardService took to complete: 0ms
+11-12 13:40:43.227   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.selectiontoolbar.SelectionToolbarManagerService
+11-12 13:40:43.227   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.selectiontoolbar.SelectionToolbarManagerService took to complete: 0ms
+11-12 13:40:43.227   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.appbinding.AppBindingService$Lifecycle
+11-12 13:40:43.228   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.appbinding.AppBindingService$Lifecycle took to complete: 0ms
+11-12 13:40:43.228   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.tracing.TracingServiceProxy
+11-12 13:40:43.228   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.tracing.TracingServiceProxy took to complete: 0ms
+11-12 13:40:43.228   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.os.instrumentation.DynamicInstrumentationManagerService
+11-12 13:40:43.229   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.os.instrumentation.DynamicInstrumentationManagerService took to complete: 0ms
+11-12 13:40:43.229   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.policy.PermissionPolicyService
+11-12 13:40:43.259   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.policy.PermissionPolicyService took to complete: 30ms
+11-12 13:40:43.270   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.pm.StagingManager$Lifecycle
+11-12 13:40:43.274   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.pm.StagingManager$Lifecycle took to complete: 0ms
+11-12 13:40:43.274   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.crashrecovery.CrashRecoveryModule$Lifecycle
+11-12 13:40:43.275   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.crashrecovery.CrashRecoveryModule$Lifecycle took to complete: 1ms
+11-12 13:40:43.275   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.app.GameManagerService$Lifecycle
+11-12 13:40:43.275   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.app.GameManagerService$Lifecycle took to complete: 0ms
+11-12 13:40:43.275   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.uwb.UwbService
+11-12 13:40:43.276   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.uwb.UwbService took to complete: 0ms
+11-12 13:40:43.276   667   667 D SystemServerTiming: OnBootPhase_520_com.android.server.ranging.RangingService
+11-12 13:40:43.276   667   667 V SystemServerTiming: OnBootPhase_520_com.android.server.ranging.RangingService took to complete: 0ms
+11-12 13:40:43.276   667   667 V SystemServerTiming: OnBootPhase_520 took to complete: 1289ms
+11-12 13:40:43.276   667   667 V SystemServerTiming: StartBootPhaseDeviceSpecificServicesReady took to complete: 1289ms
+11-12 13:40:43.314   667   667 D SystemServerTiming: StartSafetyCenterService
+11-12 13:40:43.317   667   667 I SystemServiceManager: Starting com.android.safetycenter.SafetyCenterService
+--------- beginning of main
+11-12 13:40:43.492   667   667 I SafetyCenterResApk: Found Safety Center resources APK at: com.android.safetycenter.resources
+--------- beginning of kernel
+11-12 13:40:43.943     0     0 I logd    : logdr: UID=2000 GID=2000 PID=1060 n tail=300 logMask=99 pid=0 start=0ns deadline=0ns

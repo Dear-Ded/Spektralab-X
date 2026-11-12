@@ -11,6 +11,7 @@ cmake -S "$ROOT/app/src/main/cpp" -B "$BUILD_DIR/native" -G Ninja \
   -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-29 -DANDROID_STL=c++_static \
   -DCMAKE_BUILD_TYPE=Release -DSPK_UPSTREAM="$UP"
 cmake --build "$BUILD_DIR/native" --target spektralab_jni -j4
+cp -R "$ROOT/profiles-extra/." "$BUILD_DIR/native/engine/resources/profiles/"
 "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android29-clang++" \
   -std=c++20 -O2 -fPIC -shared -static-libstdc++ "$ROOT/tools/native/android_feedback/fixture.cpp" \
   -ljnigraphics -o "$BUILD_DIR/libfeedback_fixture.so"
@@ -28,4 +29,5 @@ jar cf "$BUILD_DIR/feedback.jar" -C "$BUILD_DIR/dex" classes.dex
     "$BUILD_DIR/libfeedback_fixture.so" "$ROOT/tools/native/android_feedback/fixture.cpp" \
     "$ROOT/tools/native/android_feedback/FeedbackAndroid.java" "$UP/engine/src/gpu/vulkan_gpu.cpp"
   find "$ROOT/app/src/main/cpp" -type f -print0 | sort -z | xargs -0 sha256sum
+  find "$BUILD_DIR/native/engine/resources/profiles" -type f -print0 | sort -z | xargs -0 sha256sum
 } > "$BUILD_DIR/build-inputs.txt"

@@ -6,6 +6,11 @@ on cloud computers. Private RAW files and their derived measurements were
 not uploaded. Production algorithms, default parameters, app version and
 release artifacts are unchanged.
 
+Follow-up: `ENGINE_FEEDBACK_RECOVERY_2026-11-12.md` records the later Lavapipe
+AVD continuation, successful small-image Android film exports, the 30 MP
+storage-limit refusal, the 26-card shared-engine run, and production RGBA16
+export checks added afterward. The results below describe this earlier suite.
+
 ## What is being approximated
 
 The public report describes a 7028x4688 Sony input reduced to 6709x4475,

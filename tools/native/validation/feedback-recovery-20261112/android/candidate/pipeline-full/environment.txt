@@ -1,0 +1,2 @@
+sdk=37 release=17 fingerprint=Android/sdk_phone64_x86_64/emu64x:17/CE2A.260420.051.A3/16571990:userdebug/test-keys abi=x86_64 java_heap_initial=201326592 java_heap_max=603979776
+{"vulkan":true,"devices":[{"name":"Goldfish GFXStream (llvmpipe (LLVM 21.0.0, 256 bits))","api":"1.3.0","driver":109056099,"maxStorageBufferRange":134217728,"maxComputeWorkGroupCountX":65535}]}
