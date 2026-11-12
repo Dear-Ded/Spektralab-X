@@ -59,11 +59,8 @@ def check(probe, folder):
             assert row['mode'] == 'integer_compatible16' and not row['headroom_enabled'], row
             divisor = 2 if budget and not linear else 1
             assert [row['width'], row['height']] == [storage.WIDTH // divisor, storage.HEIGHT // divisor], row
-            # Frozen compatible16 behavior: three-channel LinearRaw retains
-            # per-channel black without lowering LibRaw's common maximum.
-            # Record its gap to (sample-black)/(white-black), do not present
-            # compatible-policy agreement as complete DNG normalization.
-            denominator = 4095 if linear else 4095 - 64
+            # Uniform RGB black must lower the common scaling maximum too.
+            denominator = 4095 - 64
             error = max(abs(v - (1024 - 64) / denominator) for v in pixels)
             assert error < 3 / 65535, (row, error)
             pattern = row['black_pattern']
@@ -81,6 +78,7 @@ def check(probe, folder):
         maximum_integer_compatible_error=max(r['maximum_independent_pixel_error'] for r in records[8:]),
         integer_linear_nonzero_black_reference_gap=max(
             r['maximum_dng_normalization_reference_gap'] for r in records[8:] if 'linear' in r['case']),
+        uniform_integer_linear_black_verified=True,
         complete_dng_normalization_claimed=False)
     (folder / 'results.json').write_text(json.dumps(dict(summary=summary, records=records), indent=2) + '\n')
     print(json.dumps(summary))

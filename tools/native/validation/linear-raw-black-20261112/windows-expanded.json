@@ -1,0 +1,250 @@
+{
+  "summary": {
+    "passed": true,
+    "oracle_cases": 48,
+    "frozen_controls": 20,
+    "maximum_error": 3.0517578125e-05
+  },
+  "records": [
+    {
+      "case": "uniform-64-4095-1",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-1",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-2",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-2",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-3",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-3",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-4",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-4",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-5",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-5",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-6",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-6",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-7",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-7",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-8",
+      "budget": 0,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-64-4095-8",
+      "budget": 1,
+      "maximum_error": 2.2006150186271167e-05
+    },
+    {
+      "case": "uniform-1024-16383-1",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-1",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-2",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-2",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-3",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-3",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-4",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-4",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-5",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-5",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-6",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-6",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-7",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-7",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-8",
+      "budget": 0,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-1024-16383-8",
+      "budget": 1,
+      "maximum_error": 2.4204240684139178e-05
+    },
+    {
+      "case": "uniform-0-4095-1",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-1",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-2",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-2",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-3",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-3",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-4",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-4",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-5",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-5",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-6",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-6",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-7",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-7",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-8",
+      "budget": 0,
+      "maximum_error": 3.0517578125e-05
+    },
+    {
+      "case": "uniform-0-4095-8",
+      "budget": 1,
+      "maximum_error": 3.0517578125e-05
+    }
+  ]
+}

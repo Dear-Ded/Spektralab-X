@@ -1,0 +1,2161 @@
+{
+  "summary": {
+    "passed": true,
+    "float_orientations": 8,
+    "integer_decodes": 4,
+    "rational_float_metadata_preserved": true,
+    "integer_black_and_white_preserved": true,
+    "bayer_half_size_and_linear_full_size_verified": true,
+    "maximum_float_error": 1.1920928955078125e-07,
+    "maximum_integer_compatible_error": 6.747361123771167e-06,
+    "integer_linear_nonzero_black_reference_gap": 6.747361123771167e-06,
+    "uniform_integer_linear_black_verified": true,
+    "complete_dng_normalization_claimed": false
+  },
+  "records": [
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 0,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.35253,
+      "case": "float-output-1",
+      "pixel_sha256": "3eccc118768825b9af16c67d9d920c18aae5f64638a8a931ad12e9764e2a623c",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 1,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.045678,
+      "case": "float-output-2",
+      "pixel_sha256": "29fd83361e18a68301a4711913965c62de3aff53c9b1311be80f0916d1c34a45",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 3,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.08002,
+      "case": "float-output-3",
+      "pixel_sha256": "ccf78d478485b143aa89497ed053e98d22cab8ce1921fb0788232aa6416df08b",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 2,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.017716,
+      "case": "float-output-4",
+      "pixel_sha256": "be8f7345c3a5f8c37c75dac889cee8662e490111fe87bcff69ee3fc13e72eb18",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 48,
+      "height": 64,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 4,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 0.985207,
+      "case": "float-output-5",
+      "pixel_sha256": "82d80c3119b33a2d8100adf92f3c7932bec63fb9418f7aa531bea9fe27dc1eb8",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 48,
+      "height": 64,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 6,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.010669,
+      "case": "float-output-6",
+      "pixel_sha256": "6b001e180567638ff86b3337eb5e8e5a85fb4ded0ad5093a66ca13ba830bbe36",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 48,
+      "height": 64,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 7,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 0.999204,
+      "case": "float-output-7",
+      "pixel_sha256": "b57436c7c2c452aacfc312fa4fadb5c67a46d11bc9c458f3346245ea55f8e34a",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "float_linear_v1",
+      "note": "",
+      "width": 48,
+      "height": 64,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Isolated float LinearRaw",
+      "decoder": "uncompressed_fp_dng_load_raw()",
+      "raw_flip": 5,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 0,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 0,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        0.8884832859039307,
+        0.07237186282873154,
+        0.039144884794950485,
+        0,
+        -0.07855895161628723,
+        1.0242592096328735,
+        0.0542997382581234,
+        0,
+        0.06059063971042633,
+        0.12118127942085266,
+        0.8182280659675598,
+        0
+      ],
+      "rgb_cam": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "float_neutral": [
+        0.5,
+        1,
+        0.75
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 6149.538438280701,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.699999988079071,
+        0.20000000298023224,
+        0.06421999633312225,
+        0.20000000298023224,
+        0.75,
+        0.05000000074505806,
+        0.05000000074505806,
+        0.10000000149011612,
+        0.6752099990844727
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": 0,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.011979,
+      "case": "float-output-8",
+      "pixel_sha256": "3866c2d0fdf87ac5dadcd3e86cb2e82a6e799b11b8e56dbc25752c612fa4bf5b",
+      "maximum_independent_pixel_error": 1.1920928955078125e-07
+    },
+    {
+      "schema": 1,
+      "mode": "integer_compatible16",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Float precision contract",
+      "decoder": "packed_dng_load_raw()",
+      "raw_flip": 0,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "black": 64,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "black_pattern_shape": [
+        1,
+        1
+      ],
+      "black_pattern": [
+        0
+      ],
+      "white": 4095,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 4031,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        1.000000238418579,
+        4.3618706513370853e-07,
+        -6.152324658614816e-07,
+        0,
+        -3.445809682034451e-07,
+        0.9999997019767761,
+        6.703572239530331e-07,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rgb_cam": [
+        3.0799551010131836,
+        -1.5371390581130981,
+        -0.5428161025047302,
+        0,
+        -0.9212586283683777,
+        1.8760111331939697,
+        0.04524751007556915,
+        0,
+        0.05288740247488022,
+        -0.20402587950229645,
+        1.151138424873352,
+        0
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 5458.951965970707,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.7976750135421753,
+        0.13519200682640076,
+        0.03135300055146217,
+        0.28804001212120056,
+        0.7118740081787109,
+        8.600000001024455e-05,
+        0,
+        0,
+        0.8252099752426147
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": -999,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 5.425919,
+      "case": "integer-bayer-full",
+      "pixel_sha256": "40a498d1a3bb5fdddf5f14892cb058598905dedaff4717b4833f7c626af0a243",
+      "maximum_independent_pixel_error": 6.747361123771167e-06,
+      "maximum_dng_normalization_reference_gap": 6.747361123771167e-06
+    },
+    {
+      "schema": 1,
+      "mode": "integer_compatible16",
+      "note": "",
+      "width": 32,
+      "height": 24,
+      "half_size_budget": 1,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Float precision contract",
+      "decoder": "packed_dng_load_raw()",
+      "raw_flip": 0,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "black": 64,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "black_pattern_shape": [
+        1,
+        1
+      ],
+      "black_pattern": [
+        0
+      ],
+      "white": 4095,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 4031,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        1.000000238418579,
+        4.3618706513370853e-07,
+        -6.152324658614816e-07,
+        0,
+        -3.445809682034451e-07,
+        0.9999997019767761,
+        6.703572239530331e-07,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rgb_cam": [
+        3.0799551010131836,
+        -1.5371390581130981,
+        -0.5428161025047302,
+        0,
+        -0.9212586283683777,
+        1.8760111331939697,
+        0.04524751007556915,
+        0,
+        0.05288740247488022,
+        -0.20402587950229645,
+        1.151138424873352,
+        0
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 5458.951965970707,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.7976750135421753,
+        0.13519200682640076,
+        0.03135300055146217,
+        0.28804001212120056,
+        0.7118740081787109,
+        8.600000001024455e-05,
+        0,
+        0,
+        0.8252099752426147
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": -999,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.193991,
+      "case": "integer-bayer-half",
+      "pixel_sha256": "9f9c89bb26ca0a3bcb9c973ba75755e53417e17dc1ee525e208a862ff92520c1",
+      "maximum_independent_pixel_error": 6.747361123771167e-06,
+      "maximum_dng_normalization_reference_gap": 6.747361123771167e-06
+    },
+    {
+      "schema": 1,
+      "mode": "integer_compatible16",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 0,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Float precision contract",
+      "decoder": "packed_dng_load_raw()",
+      "raw_flip": 0,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 4095,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 4031,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        1.000000238418579,
+        4.3618706513370853e-07,
+        -6.152324658614816e-07,
+        0,
+        -3.445809682034451e-07,
+        0.9999997019767761,
+        6.703572239530331e-07,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rgb_cam": [
+        3.0799551010131836,
+        -1.5371390581130981,
+        -0.5428161025047302,
+        0,
+        -0.9212586283683777,
+        1.8760111331939697,
+        0.04524751007556915,
+        0,
+        0.05288740247488022,
+        -0.20402587950229645,
+        1.151138424873352,
+        0
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 5458.951965970707,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.7976750135421753,
+        0.13519200682640076,
+        0.03135300055146217,
+        0.28804001212120056,
+        0.7118740081787109,
+        8.600000001024455e-05,
+        0,
+        0,
+        0.8252099752426147
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": -999,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.13903,
+      "case": "integer-linear-full",
+      "pixel_sha256": "40a498d1a3bb5fdddf5f14892cb058598905dedaff4717b4833f7c626af0a243",
+      "maximum_independent_pixel_error": 6.747361123771167e-06,
+      "maximum_dng_normalization_reference_gap": 6.747361123771167e-06
+    },
+    {
+      "schema": 1,
+      "mode": "integer_compatible16",
+      "note": "",
+      "width": 64,
+      "height": 48,
+      "half_size_budget": 1,
+      "libraw_version": "0.22.2-Release",
+      "make": "GPT",
+      "model": "Float precision contract",
+      "decoder": "packed_dng_load_raw()",
+      "raw_flip": 0,
+      "source_geometry": [
+        64,
+        48,
+        64,
+        48,
+        64,
+        48,
+        0,
+        0
+      ],
+      "inset_crop_0": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "inset_crop_1": [
+        65535,
+        65535,
+        0,
+        0
+      ],
+      "camera_wb_valid": true,
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "black": 0,
+      "black_per_channel": [
+        64,
+        64,
+        64,
+        0
+      ],
+      "black_pattern_shape": [
+        0,
+        0
+      ],
+      "black_pattern": [],
+      "white": 4095,
+      "white_per_channel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "postprocess_black": 0,
+      "postprocess_maximum": 4031,
+      "process_warnings": 0,
+      "camera_from_xyz": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "camera_to_output": [
+        1.000000238418579,
+        4.3618706513370853e-07,
+        -6.152324658614816e-07,
+        0,
+        -3.445809682034451e-07,
+        0.9999997019767761,
+        6.703572239530331e-07,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rgb_cam": [
+        3.0799551010131836,
+        -1.5371390581130981,
+        -0.5428161025047302,
+        0,
+        -0.9212586283683777,
+        1.8760111331939697,
+        0.04524751007556915,
+        0,
+        0.05288740247488022,
+        -0.20402587950229645,
+        1.151138424873352,
+        0
+      ],
+      "calibration_prepared": true,
+      "matrix_kelvin": 5458.951965970707,
+      "illuminant_0": 23,
+      "color_matrix_0": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "forward_matrix_0": [
+        0.7976750135421753,
+        0.13519200682640076,
+        0.03135300055146217,
+        0.28804001212120056,
+        0.7118740081787109,
+        8.600000001024455e-05,
+        0,
+        0,
+        0.8252099752426147
+      ],
+      "illuminant_1": 65535,
+      "color_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "forward_matrix_1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "headroom_enabled": false,
+      "baseline_exposure_present": false,
+      "baseline_exposure": -999,
+      "profile_tone_curve_points": 0,
+      "profile_tone_curve": [],
+      "openmp_enabled": true,
+      "workers": 4,
+      "total_ms": 1.042383,
+      "case": "integer-linear-half",
+      "pixel_sha256": "40a498d1a3bb5fdddf5f14892cb058598905dedaff4717b4833f7c626af0a243",
+      "maximum_independent_pixel_error": 6.747361123771167e-06,
+      "maximum_dng_normalization_reference_gap": 6.747361123771167e-06
+    }
+  ]
+}

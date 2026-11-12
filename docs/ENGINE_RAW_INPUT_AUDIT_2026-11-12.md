@@ -85,6 +85,11 @@ an untagged JPEG needs an explicitly chosen profile before this comparison.
 
 ## Verification and a retained limitation
 
+Historical checkpoint: the uniform integer LinearRaw gap below was subsequently
+corrected by patch 0051. See [the bounded fix and new checks](ENGINE_LINEAR_RAW_BLACK_2026-11-12.md).
+This section describes the original tool-only commit; the current regression
+expects the corrected scale, while this checkpoint's committed evidence is retained.
+
 AOIDC built the Windows executable from the current production sources with
 MinGW GCC 10 and the native Linux tool with GCC 11. Both ran eight float32
 LinearRaw orientation cases against the independent historical float/matrix

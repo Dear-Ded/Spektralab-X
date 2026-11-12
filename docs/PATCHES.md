@@ -57,6 +57,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0050 补齐 OpcodeList3 畸变、暗角及临时通道复制阶段的取消检查，OpenMP worker 汇合后才抛出；原数值保持。双云 80 组像素/完整元数据对照、取消/恢复和 ARM64 对象编译见 [RAW 镜头校正验证](ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md)。GPT（OpenAI）共创。
 
+0051 修正整数三通道 LinearRaw 的均匀非零 RGB 黑点缩放：LibRaw 的未用第四黑点槽不再阻止 common maximum 同步降低。只改变这一受限输入的像素，不改源元数据、Bayer、浮点或非均匀黑点策略；RAW 默认保持线性。双云与 Windows 参考、冻结对照、取消和 ARM64 编译见 [黑点归一化验证](ENGINE_LINEAR_RAW_BLACK_2026-11-12.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；数学候选尚未作为产品补丁应用。
 

@@ -662,3 +662,18 @@ workers and enumerates eight production cancellation/retry cases. A baseline
 requiring lens cancellation must fail. `SANITIZE=1 ASAN_OPTIONS=detect_leaks=0`
 instruments the probe and directly compiled adapter, not existing archives.
 See [implementation, evidence and Android limits](../../docs/ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md).
+
+## Integer LinearRaw black normalization
+
+With `raw_color_audit` built against engine patches through 0051:
+
+```bash
+python3 tools/native/raw_color_audit_regression.py /outside-repo/basic --probe /path/to/current/audit
+python3 tools/native/linear_raw_black_regression.py /outside-repo/expanded \
+  --probe /path/to/current/audit --baseline /path/to/frozen/audit
+```
+
+Build the frozen executable from the same diagnostic source against patches
+through 0050. The optional baseline checks byte preservation outside the new
+uniform nonzero RGB-black case; matching worker settings are required when
+comparing diagnostic metadata. See [scope and evidence](../../docs/ENGINE_LINEAR_RAW_BLACK_2026-11-12.md).

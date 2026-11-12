@@ -1,0 +1,44 @@
+# Co-created with GPT (OpenAI), 2026-11-12. See NOTICE.
+# Three-channel integer LinearRaw has no fourth sensor plane. Its unused zero
+# must not suppress a uniform RGB black offset in LibRaw's adjust_bl().
+# Preserve source metadata and every Bayer/float/nonuniform-black policy.
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -277,9 +277,35 @@
+ class CompatibleLibRaw final : public detail::CameraLibRaw {
+ public:
+-    CompatibleLibRaw() = default;
++    CompatibleLibRaw() {
++        callbacks.pre_subtractblack_cb = &CompatibleLibRaw::linear_uniform_black;
++    }
+     std::array<float, 12> matrix{};
+     bool calibrated = false;
+ protected:
++    static void linear_uniform_black(void* context) {
++        auto& raw = *static_cast<CompatibleLibRaw*>(context);
++        auto& d = raw.imgdata;
++        const auto& u = raw.libraw_internal_data.unpacker_data;
++        auto& c = d.color;
++        // raw2image_start() already restored processing colour state. Only
++        // equal RGB offsets with no spatial pattern have an unambiguous
++        // common black here. Source rawdata.color remains untouched.
++        if (!d.idata.dng_version || d.idata.colors != 3 || d.idata.filters ||
++            d.idata.is_foveon || (!d.rawdata.color3_image && !d.rawdata.color4_image) || u.tiff_samples != 3 ||
++            (u.tiff_sampleformat != 0 && u.tiff_sampleformat != 1) ||
++            u.tiff_bps == 0 || u.tiff_bps > 16 ||
++            c.cblack[4] || c.cblack[5] || c.cblack[3] || !c.cblack[0] ||
++            c.cblack[0] != c.cblack[1] || c.cblack[0] != c.cblack[2] ||
++            std::uint64_t(c.black) + c.cblack[0] >= c.maximum ||
++            d.params.user_black >= 0 || d.params.user_sat >= 0 || d.params.no_auto_scale)
++            return;
++        for (int i = 0; i < 4; ++i)
++            if (d.params.user_cblack[i] > -1000000) return;
++        // adjust_bl() now extracts the RGB common offset; scale_colors()
++        // lowers maximum by that same black, without another pixel transform.
++        c.cblack[3] = c.cblack[0];
++    }
++
+     void convert_to_rgb_loop(float out_cam[3][4]) override {
+         calibrated = !libraw_internal_data.internal_output_params.raw_color && imgdata.idata.colors == 3 && imgdata.image;
+         if (!calibrated) return;
