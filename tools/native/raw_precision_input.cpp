@@ -39,6 +39,9 @@ bool same(const spk::io::RawDngRenderMetadata& a, const spk::io::RawDngRenderMet
         a.default_black_render_invalid == b.default_black_render_invalid && a.default_black_render == b.default_black_render &&
         a.profile_tone_curve_present == b.profile_tone_curve_present &&
         a.profile_tone_curve_invalid == b.profile_tone_curve_invalid && a.profile_tone_curve == b.profile_tone_curve &&
+        a.profile_dynamic_range == b.profile_dynamic_range &&
+        a.profile_dynamic_range_present == b.profile_dynamic_range_present &&
+        a.profile_dynamic_range_invalid == b.profile_dynamic_range_invalid &&
         a.extra_camera_profiles == b.extra_camera_profiles && a.profile_source_mismatch == b.profile_source_mismatch;
 }
 bool same(const spk::io::RawMetadata& a, const spk::io::RawMetadata& b) {

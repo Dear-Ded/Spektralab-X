@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "host": "ibx",
+  "patch_count": 50,
+  "replay_files": 97,
+  "upstream_archive_sha256": "52ef254ffa7c70484a411c269f3f837f75d5a215ed7332d5fdab267317408f05",
+  "production_pairs": 80,
+  "helper_positions": [
+    161,
+    53,
+    212,
+    161,
+    53,
+    212
+  ],
+  "helper_total": 852,
+  "decoder_positions": [
+    234,
+    234,
+    137,
+    137,
+    233,
+    233,
+    233,
+    233
+  ],
+  "decoder_total": 1674,
+  "baseline_requires_cancellation_failed": true,
+  "worker_exception_and_retry_passed": true,
+  "all_metadata_including_profile_dynamic_range_equal": true
+}

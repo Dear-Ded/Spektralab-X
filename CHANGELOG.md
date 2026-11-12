@@ -15,6 +15,7 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 保留浮点精度的 LinearRaw 读取支持多个未压缩 float32 RGB 条带，兼容独立的 SHORT/LONG 偏移与长度、文件内乱序存放及不足整块的末条带；原有单条带输出保持逐字节一致。
 - 每次只读取一行，先检查条带计数、容量、重叠和文件范围；取消或读盘失败保留上一份有效结果。两云精度、故障与内存对照及 Android JNI 编译通过，尚非完整 RAW 分块或手机实测。
 - 在同一严格 LinearRaw 子集内，Deflate 压缩（Predictor 3）的 float32 RGB 条带现在也能保留浮点精度，避免进入整数兼容转换；负通道、高光与白平衡沿用原有计算。流式解压检查完整校验尾、输出长度和条带边界，坏流或取消不发布半份结果。
+- RAW 镜头畸变、暗角校正及其临时通道复制过程中也检查取消，工作线程汇合后再退出，保留上一张有效照片；未取消时的像素和元数据保持一致。双云及 Android 编译记录见 [镜头校正验证](docs/ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md)。
 
 详见[浮点条带适配与验证](docs/ENGINE_FLOAT_STRIPS_2026-11-12.md)及[压缩浮点读取与双云验证](docs/ENGINE_FLOAT_DEFLATE_2026-11-12.md)。
 

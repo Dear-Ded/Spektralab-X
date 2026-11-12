@@ -644,3 +644,21 @@ The decoder-only CMake project in `float_dng_deflate_host/` can build fresh
 Large-fixture generation exits before a separate memory measurement process
 starts. Output remains a complete float plane. Evidence, commands and limits:
 [Deflate report](../../docs/ENGINE_FLOAT_DEFLATE_2026-11-12.md).
+
+## RAW lens-correction cancellation
+
+```bash
+UP=/path/to/upstream-with-0050 OLD_UP=/path/to/upstream-through-0049 \
+  B=/path/to/decoder-build OLD_B=/path/to/previous-decoder-build \
+  FIXTURES=/path/to/synthetic-integer-fixtures BUILD_DIR=/path/to/lens-results \
+  bash tools/native/run_opcode_list3_cancellation.sh
+```
+
+The source fixtures are `integer-bayer.dng` and `integer-linear.dng` from
+`raw_precision_input_fixtures.py`. Uses C++20, Python 3 and matching patched
+LibRaw headers/archives with zlib. The runner compares 80 frozen production
+pixel/full-metadata pairs, exercises the actual camera callback with one/four
+workers and enumerates eight production cancellation/retry cases. A baseline
+requiring lens cancellation must fail. `SANITIZE=1 ASAN_OPTIONS=detect_leaks=0`
+instruments the probe and directly compiled adapter, not existing archives.
+See [implementation, evidence and Android limits](../../docs/ENGINE_RAW_LENS_CANCELLATION_2026-11-12.md).

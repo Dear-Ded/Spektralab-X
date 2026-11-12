@@ -1,0 +1,2 @@
+2c80a9c176bcb2c2fa2fcde78a9e0bebaf61b8d7d68ead340c988a8cf48729c0  raw_decoder-android.o
+ce282dd4082d4f420af57c427d282d799951c17c93cdf0bf589c5c4ae470e9ff  spektralab_jni-android.o

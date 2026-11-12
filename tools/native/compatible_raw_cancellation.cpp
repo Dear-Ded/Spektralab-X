@@ -40,6 +40,8 @@ Bytes metadata(const spk::io::RawMetadata& m) {
     add(b,r.default_black_render_present); add(b,r.default_black_render_invalid);
     add(b,r.default_black_render); add(b,r.profile_tone_curve_present);
     add(b,r.profile_tone_curve_invalid); add(b,r.profile_tone_curve);
+    add(b,r.profile_dynamic_range); add(b,r.profile_dynamic_range_present);
+    add(b,r.profile_dynamic_range_invalid);
     add(b,r.extra_camera_profiles); add(b,r.profile_source_mismatch);
     add(b,m.libraw_version); add(b,m.libraw_capabilities); add(b,m.make); add(b,m.model);
     add(b,m.decoder_name);

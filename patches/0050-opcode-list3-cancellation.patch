@@ -1,0 +1,155 @@
+diff --git a/engine/src/io/dng_opcode_list3.hpp b/engine/src/io/dng_opcode_list3.hpp
+--- a/engine/src/io/dng_opcode_list3.hpp
++++ b/engine/src/io/dng_opcode_list3.hpp
+@@ -32,6 +32,7 @@
+ #include <cstdint>
+ #include <cstring>
+ #include <vector>
++#include "raw_cancellation.hpp"
+ 
+ namespace spk::io::detail {
+ 
+@@ -86,7 +87,8 @@
+     return true;
+ }
+ 
+-inline void warp(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op) {
++inline void warp(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op,
++                 RawDecodeProgress* progress = nullptr) {
+     static const Bicubic bicubic;
+     const double ch = op.cx * width, cv = op.cy * height;
+     const double radius = std::sqrt(std::max({cv * cv + ch * ch, cv * cv + (width - ch) * (width - ch),
+@@ -94,15 +96,22 @@
+                                               (height - cv) * (height - cv) + (width - ch) * (width - ch)}));
+     if (!(radius > 0)) return;
+     const double inv = 1.0 / radius;
++    if (progress) progress->check();
+     std::vector<std::uint16_t> src(std::size_t(width) * height);
+     for (int c = 0; c < colors; ++c) {
+-        for (std::size_t i = 0; i < src.size(); ++i) src[i] = image[i][c];
++        if (progress) progress->check();
++        for (std::size_t i = 0; i < src.size(); ++i) {
++            if (progress && i % 65536 == 0) progress->check();
++            src[i] = image[i][c];
++        }
++        if (progress) progress->check();
+         const double* k = op.k[std::uint32_t(c) < op.planes ? c : 0];
+         const long long rows = height;
+ #if defined(_OPENMP)
+ #pragma omp parallel for schedule(static)
+ #endif
+         for (long long row = 0; row < rows; ++row) {
++            if (progress && progress->poll()) continue;
+             for (std::uint32_t col = 0; col < width; ++col) {
+                 const double dv = (double(row) - cv) * inv, dh = (double(col) - ch) * inv;
+                 const double dvdv = dv * dv, dhdh = dh * dh;
+@@ -133,10 +142,13 @@
+                     std::uint16_t(std::lround(std::clamp(total, 0.0f, 65535.0f)));
+             }
+         }
++        // Workers have joined before the initiating thread throws.
++        if (progress) progress->check();
+     }
+ }
+ 
+-inline void vignette(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op) {
++inline void vignette(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height, int colors, const Op& op,
++                     RawDecodeProgress* progress = nullptr) {
+     const double ch = op.cx * width, cv = op.cy * height;
+     const double radius = std::hypot(std::max(cv, height - cv), std::max(ch, width - ch));
+     if (!(radius > 0)) return;
+@@ -146,6 +158,7 @@
+ #pragma omp parallel for schedule(static)
+ #endif
+     for (long long row = 0; row < rows; ++row) {
++        if (progress && progress->poll()) continue;
+         const double y = (double(row) + 0.5 - cv) / radius;
+         for (std::uint32_t col = 0; col < width; ++col) {
+             const double x = (double(col) + 0.5 - ch) / radius;
+@@ -157,6 +170,7 @@
+                 px[c] = std::uint16_t(std::lround(std::clamp(px[c] * gain, 0.0, 65535.0)));
+         }
+     }
++    if (progress) progress->check();
+ }
+ }  // namespace ol3_detail
+ 
+@@ -164,9 +178,13 @@
+ // (width x height pixels, channels 0..colors-1 used). Returns how many
+ // opcodes changed the image; 0 when there is nothing to do or the list is
+ // malformed, and then no pixel is touched.
++// Cancellation may leave this private decoder image partially processed;
++// the initiating thread throws after workers join and the caller discards it.
+ inline int apply_dng_opcode_list3(std::uint16_t (*image)[4], std::uint32_t width, std::uint32_t height,
+-                                  int colors, const void* data, std::size_t len) {
++                                  int colors, const void* data, std::size_t len,
++                                  RawDecodeProgress* progress = nullptr) {
+     using namespace ol3_detail;
++    if (progress) progress->check();
+     if (!image || !data || len < 4 || width < 2 || height < 2 || colors < 1 || colors > 3) return 0;
+     const auto* b = static_cast<const unsigned char*>(data);
+     const std::uint32_t count = be32(b);
+@@ -174,6 +192,7 @@
+     std::vector<Op> ops;
+     std::size_t p = 4;
+     for (std::uint32_t n = 0; n < count; ++n) {
++        if (progress) progress->check();
+         if (len - p < 16) return 0;
+         const std::uint32_t id = be32(b + p), bytes = be32(b + p + 12);
+         p += 16;
+@@ -212,9 +231,11 @@
+         p += bytes;
+     }
+     for (const auto& op : ops) {
+-        if (op.id == 1) warp(image, width, height, colors, op);
+-        else vignette(image, width, height, colors, op);
++        if (progress) progress->check();
++        if (op.id == 1) warp(image, width, height, colors, op, progress);
++        else vignette(image, width, height, colors, op, progress);
+     }
++    if (progress) progress->check();
+     return int(ops.size());
+ }
+ 
+diff --git a/engine/src/io/raw_camera.hpp b/engine/src/io/raw_camera.hpp
+--- a/engine/src/io/raw_camera.hpp
++++ b/engine/src/io/raw_camera.hpp
+@@ -21,6 +21,10 @@
+         callbacks.pre_converttorgb_cb = &CameraLibRaw::opcode_list3;
+     }
+ 
++    void set_decode_progress(RawDecodeProgress* progress) noexcept {
++        decode_progress_ = progress;
++    }
++
+     // How many DNG OpcodeList3 opcodes changed the picture in the last
+     // dcraw_process() (dng_opcode_list3.hpp); 0 for files without one.
+     int dng_opcode_list3_applied = 0;
+@@ -292,6 +296,7 @@
+     }
+ 
+     dng_forward::Prepared forward_;
++    RawDecodeProgress* decode_progress_ = nullptr;
+     // OpcodeList3 on the demosaiced camera RGB, just before convert_to_rgb().
+     // Fuji's rotated layout and non-square pixels are not the image the
+     // opcodes describe, so those files are left alone.
+@@ -304,7 +309,7 @@
+             self->is_fuji_rotated() || id.sizes.pixel_aspect != 1.0 || id.idata.colors != 3)
+             return;
+         self->dng_opcode_list3_applied = apply_dng_opcode_list3(
+-            id.image, id.sizes.iwidth, id.sizes.iheight, id.idata.colors, ops.data, ops.len);
++            id.image, id.sizes.iwidth, id.sizes.iheight, id.idata.colors, ops.data, ops.len, self->decode_progress_);
+     }
+ 
+     double t1_ = 0, t2_ = 0, cm_[2][9] = {}, cc_[2][9] = {}, ab_[3] = {1, 1, 1};
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -371,6 +371,7 @@
+ 
+         // LibRaw carries substantial metadata; keep it off the Windows stack.
+         auto raw = std::make_unique<CompatibleLibRaw>();
++        raw->set_decode_progress(cancelled ? &progress : nullptr);
+         if (cancelled) {
+             raw->set_progress_handler([](void* context, enum LibRaw_progress, int, int) noexcept {
+                 return static_cast<detail::RawDecodeProgress*>(context)->poll() ? 1 : 0;

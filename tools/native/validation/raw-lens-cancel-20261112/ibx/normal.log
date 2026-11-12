@@ -1,0 +1,198 @@
+kind=0 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=1 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=2 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=0 helper_polls=161 camera_polls=161 cancellation_positions=161 PASS
+kind=1 helper_polls=53 camera_polls=53 cancellation_positions=53 PASS
+kind=2 helper_polls=212 camera_polls=212 cancellation_positions=212 PASS
+kind=0 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=1 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=2 helper_polls=0 camera_polls=0 missing_cancellation=1
+kind=0 helper_polls=161 camera_polls=161 cancellation_positions=161 PASS
+kind=1 helper_polls=53 camera_polls=53 cancellation_positions=53 PASS
+kind=2 helper_polls=212 camera_polls=212 cancellation_positions=212 PASS
+dng_opcode_list3: malformed, no-op, vignette and warp cases passed
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+decoder: 234 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+decoder: 234 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+decoder: 137 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+decoder: 137 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=0 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 32x24 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=0 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 24x32 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+decoder: 233 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+decoder: 233 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+decoder: 233 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+decoder: 233 cancellation positions, false callback, throwing callback, retry PASS
+gain map: 53 cancellation positions, exact output; 8 workers serialized/sticky PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=0 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=0 custom=1 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=0 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 64x48 half=1 custom=1 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=0 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=0 custom=1 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=0 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+compatible RAW 48x64 half=1 custom=1 PASS
+PASS: 80 production pixel/full-metadata comparisons; 8 decoder cancellation/retry runs
