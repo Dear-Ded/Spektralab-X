@@ -8,6 +8,15 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 未发布 · 源码优化
+
+沿用 alpha-3 的版本号与内部版本码，本节改动尚未打包发版。GPT（OpenAI）共创。
+
+- 保留浮点精度的 LinearRaw 读取支持多个未压缩 float32 RGB 条带，兼容独立的 SHORT/LONG 偏移与长度、文件内乱序存放及不足整块的末条带；原有单条带输出保持逐字节一致。
+- 每次只读取一行，先检查条带计数、容量、重叠和文件范围；取消或读盘失败保留上一份有效结果。两云精度、故障与内存对照及 Android JNI 编译通过，尚非完整 RAW 分块或手机实测。
+
+详见[浮点条带适配与验证](docs/ENGINE_FLOAT_STRIPS_2026-11-12.md)。
+
 ## 0.2.00-alpha-3 · 2026-11-11
 
 **省流：** 修 RAW 与 TIFF 色彩、预览和导出恢复。未大规模真机验证，需要社区反馈。

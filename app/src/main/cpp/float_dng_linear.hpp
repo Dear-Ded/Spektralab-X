@@ -79,7 +79,8 @@ struct Tag {
 
 struct StripInput {
     std::ifstream file;
-    std::uint64_t offset = 0;
+    std::uint32_t rows_per_strip = 0;
+    std::vector<std::uint64_t> offsets;
 };
 
 inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatDngLimits& limits,
@@ -189,14 +190,34 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     require(values(50829) == std::vector<double>({0,0,double(m.height),double(m.width)}),
             "unsupported float DNG: requires full ActiveArea");
     require(values(50713) == std::vector<double>({1,1}), "unsupported float DNG: requires constant black");
-    scalar(278, m.height);
+    const auto rows = values(278);
+    require(rows.size() == 1 && rows[0] >= 1 && rows[0] <= std::numeric_limits<std::uint32_t>::max(),
+            "invalid float DNG rows per strip");
+    const auto rows_per_strip = std::uint32_t(rows[0]);
+    const auto strip_count = (m.height - 1) / rows_per_strip + 1;
     const auto strip = values(273), strip_bytes = values(279);
-    require(tag(273).type == 4 && tag(279).type == 4 && strip.size() == 1 && strip_bytes.size() == 1 &&
-            strip_bytes[0] == double(pixels * 12), "unsupported float DNG strip layout");
-    const auto begin_pixels = std::uint64_t(strip[0]), end_pixels = begin_pixels + pixels * 12;
-    require(begin_pixels <= bytes && pixels * 12 <= bytes - begin_pixels, "float DNG strip outside file");
-    for (const auto& range : metadata_ranges)
-        require(end_pixels <= range.first || begin_pixels >= range.second, "float DNG pixels overlap metadata");
+    require((tag(273).type == 3 || tag(273).type == 4) &&
+            (tag(279).type == 3 || tag(279).type == 4) && strip_count <= 1024 &&
+            strip.size() == strip_count && strip_bytes.size() == strip_count,
+            "unsupported float DNG strip layout");
+    std::vector<std::pair<std::uint64_t, std::uint64_t>> pixel_ranges;
+    pixel_ranges.reserve(strip_count);
+    for (std::uint32_t i = 0; i < strip_count; ++i) {
+        check_cancel(cancelled);
+        const auto strip_rows = std::min<std::uint64_t>(rows_per_strip,
+            m.height - std::uint64_t(i) * rows_per_strip);
+        const auto length = strip_rows * m.width * 12;
+        require(strip_bytes[i] == double(length), "unsupported float DNG strip byte count");
+        const auto begin = std::uint64_t(strip[i]);
+        require(begin <= bytes && length <= bytes - begin, "float DNG strip outside file");
+        const auto end_strip = begin + length;
+        for (const auto& range : metadata_ranges)
+            require(end_strip <= range.first || begin >= range.second, "float DNG pixels overlap metadata");
+        pixel_ranges.emplace_back(begin, end_strip);
+    }
+    std::sort(pixel_ranges.begin(), pixel_ranges.end());
+    for (std::size_t i = 1; i < pixel_ranges.size(); ++i)
+        require(pixel_ranges[i - 1].second <= pixel_ranges[i].first, "float DNG pixel strips overlap");
     for (const unsigned id : {50721u, 50964u}) {
         require(tag(id).type == 10 && tag(id).count == 9, "unsupported float DNG: requires single CM/FM");
         (void)values(id); // Validate every SRATIONAL before LibRaw can treat a zero denominator as a default.
@@ -217,7 +238,8 @@ inline FloatDngMetadata metadata(const std::filesystem::path& path, const FloatD
     for (double v : m.neutral) require(v / maximum >= .001, "float DNG neutral outside supported FM domain");
     check_cancel(cancelled);
     if (input) {
-        input->offset = begin_pixels;
+        input->rows_per_strip = rows_per_strip;
+        input->offsets.assign(strip.begin(), strip.end());
         input->file = std::move(file);
     }
     return m;
@@ -338,15 +360,17 @@ inline bool decode_float_linear_dng(const std::filesystem::path& path, const Flo
         if (const char* name = raw->unpack_function_name()) candidate.decoder_name = name;
         check_cancel(cancelled);
         candidate.rgb.resize(std::size_t(m.width) * m.height * 3);
-        // The validated v1 strip is LE float32 chunky RGB without a predictor.
+        // Validated strips are LE float32 chunky RGB without a predictor.
         // LibRaw's matching unpacker only copies these words and scans fmaximum;
         // the scene-linear path does not use that maximum or convertFloatToInt.
         static_assert(sizeof(float) == 4 && std::numeric_limits<float>::is_iec559);
         std::vector<unsigned char> row(std::size_t(m.width) * 12);
-        input.file.seekg(std::streamoff(input.offset));
-        require(bool(input.file), "float DNG strip seek failed");
         for (unsigned y = 0; y < m.height; ++y) {
             check_cancel(cancelled);
+            if (y % input.rows_per_strip == 0) {
+                input.file.seekg(std::streamoff(input.offsets[y / input.rows_per_strip]));
+                require(bool(input.file), "float DNG strip seek failed");
+            }
             input.file.read(reinterpret_cast<char*>(row.data()), std::streamsize(row.size()));
             require(bool(input.file), "float DNG strip row read failed");
             for (unsigned x = 0; x < m.width; ++x) {

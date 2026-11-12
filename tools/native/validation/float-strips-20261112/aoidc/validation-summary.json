@@ -1,0 +1,166 @@
+{
+  "byte_identical_cases": 300,
+  "short_long_layout_cases": 8,
+  "cancellation_boundaries": 124,
+  "io_mutations": 8,
+  "maximum_strips": 1024,
+  "independent_absolute_tolerance": 2E-06,
+  "float_headroom_and_signed_words_preserved": true,
+  "layout_records": 288,
+  "malformed_cases": [
+    {
+      "case": "zero-rows",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: invalid float DNG rows per strip"
+    },
+    {
+      "case": "rational-rows",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: invalid float DNG dimension encoding"
+    },
+    {
+      "case": "rational-offsets",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip layout"
+    },
+    {
+      "case": "rational-counts",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip layout"
+    },
+    {
+      "case": "missing-strip",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip layout"
+    },
+    {
+      "case": "extra-strip",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip layout"
+    },
+    {
+      "case": "missing-count",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip layout"
+    },
+    {
+      "case": "short-last-count",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: unsupported float DNG strip byte count"
+    },
+    {
+      "case": "outside-last",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG strip outside file"
+    },
+    {
+      "case": "metadata-overlap",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG pixels overlap metadata"
+    },
+    {
+      "case": "strip-array-overlap",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG pixels overlap metadata"
+    },
+    {
+      "case": "duplicate-strips",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG pixel strips overlap"
+    },
+    {
+      "case": "partial-strip-overlap",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG pixel strips overlap"
+    },
+    {
+      "case": "truncated-file",
+      "support": "UnsupportedFloat",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": true,
+      "result_unchanged": true,
+      "error": "float LinearRaw: float DNG strip outside file"
+    },
+    {
+      "case": "last-row-nan",
+      "support": "Supported",
+      "ok": false,
+      "cancelled": false,
+      "metadata_unchanged": false,
+      "result_unchanged": true,
+      "error": "float LinearRaw: nonfinite float DNG sample"
+    }
+  ],
+  "historical": {
+    "passed": true,
+    "historical_cases": 26,
+    "historical_accepted": 17,
+    "malformed_cases": 18,
+    "limit_cases": 4,
+    "cancellation_cases": 88,
+    "maximum_absolute_error": 4.76837158203125E-07,
+    "independent_absolute_tolerance": 2E-06,
+    "unchanged_components": 8064,
+    "distant_maximum_byte_equal": true,
+    "scaled_AsShotNeutral_byte_equal": true,
+    "adjacent_float_preserved": true,
+    "signed_and_headroom_preserved": true,
+    "integer_no_read_no_cancel_no_mutation": true,
+    "atomic_failures": true,
+    "input_plus_output_payload_bytes_per_pixel": 24
+  },
+  "full_report_sha256": "16abe0286d19c35e7636b7c8c4641a33053e3d5c71b24159b3d3090c1710527b"
+}

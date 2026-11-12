@@ -1,0 +1,50 @@
+[
+  {
+    "alpha3_single": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152616,
+      "decode_ms": 159.656083
+    },
+    "current_multi": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152584,
+      "decode_ms": 158.152402
+    }
+  },
+  {
+    "current_multi": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152672,
+      "decode_ms": 153.406371
+    },
+    "alpha3_single": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152604,
+      "decode_ms": 171.134363
+    }
+  },
+  {
+    "alpha3_single": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152624,
+      "decode_ms": 161.415413
+    },
+    "current_multi": {
+      "width": 4096,
+      "height": 3072,
+      "hash64": "230b6b1056805b83",
+      "lifetime_peak_rss_kib": 152600,
+      "decode_ms": 160.380903
+    }
+  }
+]

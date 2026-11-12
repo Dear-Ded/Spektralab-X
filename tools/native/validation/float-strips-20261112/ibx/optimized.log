@@ -1,0 +1,10 @@
+PASS streaming --short-read: source rows=64,polls=85,mutation_at=21
+PASS streaming --replace-source: source rows=64,polls=85,mutation_at=21
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=32
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=32
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=32
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=32
+PASS streaming --short-read: source rows=64,polls=96,mutation_at=32
+PASS streaming --replace-source: source rows=64,polls=96,mutation_at=32
+{"byte_identical_cases": 300, "cancellation_boundaries": 124, "float_headroom_and_signed_words_preserved": true, "independent_absolute_tolerance": 2e-06, "io_mutations": 8, "large_fixture_generated": false, "maximum_strips": 1024, "short_long_layout_cases": 8}
+malformed_rejected=15
