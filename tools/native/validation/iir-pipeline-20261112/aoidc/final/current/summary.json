@@ -1,0 +1,1 @@
+{"passed":true,"scenarios":10,"stage_comparisons":140,"range_rejections":2,"legacy_dispatches":116,"corrected_dispatches":381,"oracle_values":1209390,"maximum_oracle_error":3.0517578125e-05,"maximum_scaled_oracle_error":1.0644281317285164e-07,"maximum_oracle_convergence":0,"maximum_sigma":27.496360109999969}

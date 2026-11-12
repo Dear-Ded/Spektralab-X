@@ -1,0 +1,3 @@
+kodak_portra_400 actual_back_reflection=false profile_antihalation=strong
+cinestill_800t actual_back_reflection=true profile_antihalation=no
+parameter_cases=120/120 assertions=1331 passed=true

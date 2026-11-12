@@ -697,3 +697,27 @@ split product; logs report the actual probe decision. A test failure exits nonze
 The `SPK_IIR_BOUNDARY=triggs-v1` process switch is diagnostic and bounded to
 active IIR sigmas `[3,256]`. It does not invalidate session caches or define a
 saved editing mode. See [implementation and mobile limits](../../docs/ENGINE_IIR_BOUNDARY_2026-11-12.md).
+
+## IIR correction in actual film and print stages
+
+```bash
+UP=/path/to/upstream-through-0052 B=/path/to/current-build \
+BASELINE_UP=/path/to/upstream-through-0051 BASELINE_B=/path/to/frozen-build \
+BUILD_DIR=/outside-repo/new-results bash tools/native/run_iir_pipeline.sh
+```
+
+Uses the same engine/core/volk and Vulkan dependencies as the boundary probe,
+plus initialized profile resources. `RESOURCES` and `BASELINE_RESOURCES` can
+override the matching build resources. C++20 `-fno-access-control` observes
+existing Pipeline stages; production code needs no diagnostic hooks.
+
+Ten synthetic cases compare fourteen snapshots each, check negative/final
+bytes against public Pipeline calls, and independently check real corrected
+IIR dispatches against explicit-tail recurrence. Fresh deterministic draw
+history controls grain and glare. With the optional frozen build, all default
+stage bytes must match or the runner exits nonzero. The CPU domain tool uses
+actual stock initialization and blur accessors for 120 parameter cases;
+two thin full-width Vulkan fixtures separately require transactional rejection
+above sigma 256. Output includes CSV, JSON and raw float streams; keep binaries
+and float payloads outside Git. These checks do not measure real-film fidelity
+or mobile performance. See [results and parameter limits](../../docs/ENGINE_IIR_PIPELINE_2026-11-12.md).

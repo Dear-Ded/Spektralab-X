@@ -1,0 +1,176 @@
+{
+  "date": "2026-11-12",
+  "co_created_with": "GPT (OpenAI)",
+  "production_engine_commit": "1b0e5bbaeff31167ff094c80054b2aa4fa3beeeb",
+  "production_changes": false,
+  "experimental_switch": "SPK_IIR_BOUNDARY=triggs-v1",
+  "tool_archive_sha256": "723b4227af2b6a45c01e2ea91407a4791e76b853c9a436dbb9257abcb00b778f",
+  "hosts": {
+    "aoidc": {
+      "summary": {
+        "passed": true,
+        "scenarios": 10,
+        "stage_comparisons": 140,
+        "range_rejections": 2,
+        "legacy_dispatches": 116,
+        "corrected_dispatches": 381,
+        "oracle_values": 1209390,
+        "maximum_oracle_error": 0.000030517578125,
+        "maximum_scaled_oracle_error": 1.0644281317285164e-7,
+        "maximum_oracle_convergence": 0,
+        "maximum_sigma": 27.49636010999997
+      },
+      "validated_dispatches": 58,
+      "channel_rows": 174,
+      "domain": {
+        "passed": true,
+        "cases": 120,
+        "assertions": 1331,
+        "boundary_checks": [
+          {
+            "M": 35,
+            "applicable": true,
+            "high_L": 7903,
+            "high_max_bounce_sigma": 256.02796341600003,
+            "low_L": 7902,
+            "low_max_bounce_sigma": 255.99556711542854,
+            "passed": true
+          },
+          {
+            "M": 36,
+            "applicable": true,
+            "high_L": 8128,
+            "high_max_bounce_sigma": 256.00276629333337,
+            "low_L": 8127,
+            "low_max_bounce_sigma": 255.97126989,
+            "passed": true
+          },
+          {
+            "M": 35,
+            "amount": 2,
+            "applicable": true,
+            "full6000_max_bounce_sigma": 274.8917258329772,
+            "passed": true,
+            "preview1600_max_bounce_sigma": 73.30446022212726
+          },
+          {
+            "M": 36,
+            "amount": 2,
+            "applicable": true,
+            "full6000_max_bounce_sigma": 267.255844559839,
+            "passed": true,
+            "preview1600_max_bounce_sigma": 71.26822521595706
+          }
+        ]
+      },
+      "frozen_equal": true,
+      "float_payload_bytes": 12689040,
+      "payloads": [
+        {
+          "sha256": "2ba2b47b6c4419ed54842ed90b140f1671079029b95f8b727d81f3691a00d6b1",
+          "path": "final/current/legacy.f32"
+        },
+        {
+          "sha256": "2ba2b47b6c4419ed54842ed90b140f1671079029b95f8b727d81f3691a00d6b1",
+          "path": "final/baseline/legacy.f32"
+        },
+        {
+          "sha256": "54e47fd0c12a47154bcf3caec6e37ec040fce6d5ee574231e4c6ad7fc90c368f",
+          "path": "final/current/corrected.f32"
+        }
+      ],
+      "environment": [
+        "Linux 5.15.0-30-generic",
+        "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+        "Glslang Version: 10:11.8.0",
+        "ESSL Version: OpenGL ES GLSL 3.20 glslang Khronos. 11.8.0",
+        "GLSL Version: 4.60 glslang Khronos. 11.8.0",
+        "SPIR-V Version 0x00010600, Revision 1"
+      ],
+      "evidence_archive_sha256": "8b5a38cf55e396e7f8b1ad61f36cfaa0b6d61c3dfd5bf5fd4a2925ac09eb0957"
+    },
+    "ibx": {
+      "summary": {
+        "passed": true,
+        "scenarios": 10,
+        "stage_comparisons": 140,
+        "range_rejections": 2,
+        "legacy_dispatches": 116,
+        "corrected_dispatches": 381,
+        "oracle_values": 1209390,
+        "maximum_oracle_error": 0.000030517578125,
+        "maximum_scaled_oracle_error": 1.0644281317285164e-7,
+        "maximum_oracle_convergence": 0,
+        "maximum_sigma": 27.49636010999997
+      },
+      "validated_dispatches": 58,
+      "channel_rows": 174,
+      "domain": {
+        "passed": true,
+        "cases": 120,
+        "assertions": 1331,
+        "boundary_checks": [
+          {
+            "M": 35,
+            "applicable": true,
+            "high_L": 7903,
+            "high_max_bounce_sigma": 256.02796341600003,
+            "low_L": 7902,
+            "low_max_bounce_sigma": 255.99556711542854,
+            "passed": true
+          },
+          {
+            "M": 36,
+            "applicable": true,
+            "high_L": 8128,
+            "high_max_bounce_sigma": 256.00276629333337,
+            "low_L": 8127,
+            "low_max_bounce_sigma": 255.97126989,
+            "passed": true
+          },
+          {
+            "M": 35,
+            "amount": 2,
+            "applicable": true,
+            "full6000_max_bounce_sigma": 274.8917258329772,
+            "passed": true,
+            "preview1600_max_bounce_sigma": 73.30446022212726
+          },
+          {
+            "M": 36,
+            "amount": 2,
+            "applicable": true,
+            "full6000_max_bounce_sigma": 267.255844559839,
+            "passed": true,
+            "preview1600_max_bounce_sigma": 71.26822521595706
+          }
+        ]
+      },
+      "frozen_equal": true,
+      "float_payload_bytes": 12689040,
+      "payloads": [
+        {
+          "sha256": "f2022a7dc2e3fa1628d0e0ceeb2d8aebd101d27e1f19bce05e5e17fa47249f78",
+          "path": "final/current/legacy.f32"
+        },
+        {
+          "sha256": "f2022a7dc2e3fa1628d0e0ceeb2d8aebd101d27e1f19bce05e5e17fa47249f78",
+          "path": "final/baseline/legacy.f32"
+        },
+        {
+          "sha256": "cb091e1fbd9115853d982f4d3b9830dc41318a59cc6d8a76a27bc784f9e8bc6a",
+          "path": "final/current/corrected.f32"
+        }
+      ],
+      "environment": [
+        "Linux 6.18.54-instabox",
+        "c++ (Debian 14.2.0-19) 14.2.0",
+        "Glslang Version: 11:15.2.0",
+        "ESSL Version: OpenGL ES GLSL 3.20 glslang Khronos. 15.2.0",
+        "GLSL Version: 4.60 glslang Khronos. 15.2.0",
+        "SPIR-V Version 0x00010600, Revision 1"
+      ],
+      "evidence_archive_sha256": "6be63e633cb3ed28369afc9dea3f629ae40eaa6718f45885bce47c9e945c2e84"
+    }
+  }
+}

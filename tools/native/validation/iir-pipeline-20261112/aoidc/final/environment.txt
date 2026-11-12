@@ -1,0 +1,6 @@
+Linux 5.15.0-30-generic
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Glslang Version: 10:11.8.0
+ESSL Version: OpenGL ES GLSL 3.20 glslang Khronos. 11.8.0
+GLSL Version: 4.60 glslang Khronos. 11.8.0
+SPIR-V Version 0x00010600, Revision 1

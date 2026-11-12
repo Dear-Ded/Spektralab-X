@@ -138,5 +138,8 @@ Constant extension differs from FIR's reflection policy. This patch does not
 solve the width discontinuity at sigma 3, re-fit halation PSFs, prove physical
 film/paper fidelity, or validate signed spectral projection. The full source and
 output planes remain resident; terminal-state correctness is not streamed IIR
-or a complete memory bound. The next acceptance boundary is staged full-film
-comparison and actual mobile GPU execution before any default change.
+or a complete memory bound. The subsequent
+[complete synthetic pipeline study](ENGINE_IIR_PIPELINE_2026-11-12.md) passed
+staged film/print comparisons and identified a full-resolution sigma ceiling.
+Actual mobile execution, broader radius support and a versioned mode remain
+acceptance gates before any default change.

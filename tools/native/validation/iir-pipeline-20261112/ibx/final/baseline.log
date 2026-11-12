@@ -1,0 +1,12 @@
+device=llvmpipe (LLVM 19.1.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+completed=spatial_off
+completed=portra_35mm
+completed=portra_4mm
+completed=cinestill_35mm
+completed=cinestill_4mm
+completed=sublayer_grain_glare
+completed=simple_grain_glare
+completed=preview_ratio
+completed=scan_negative
+completed=digital_intermediate
+PASS complete pipeline: 10 scenarios, 0 stage pairs, 0 IIR values

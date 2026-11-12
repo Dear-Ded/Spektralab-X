@@ -1,0 +1,4 @@
+12689040 final/current/legacy.f32
+12689040 final/baseline/legacy.f32
+12689040 final/current/corrected.f32
+38067120 total
