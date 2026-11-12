@@ -1,0 +1,8 @@
+tier=live shape=1024x658 cached=0 black_rows=0
+tier=preview shape=1537x989 cached=0 black_rows=0
+tier=full shape=1537x989 cached=0 black_rows=0
+tier=stable shape=1537x989 cached=1 black_rows=0
+tier=repeat shape=1537x989 cached=1 black_rows=0
+tier=edited shape=1537x989 cached=1 black_rows=0
+tier=restored shape=1537x989 cached=1 black_rows=0
+PASS session tiers=3 cache_checks=3 input=1537x989

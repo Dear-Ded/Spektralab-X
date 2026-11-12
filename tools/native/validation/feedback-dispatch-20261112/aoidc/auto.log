@@ -1,0 +1,7 @@
+device=llvmpipe (LLVM 15.0.7, 256 bits) math=Vulkan probe passed (exact Dekker split product; fma residual differs at index 0 (got 0, want 7.45057349e-11); full shader parity pending)
+completed=ultramax_sublayers
+completed=ultramax_simple
+completed=ultramax_preview
+completed=thin_horizontal
+completed=spatial_off
+PASS scenes=5 frames=170 float32_values=9596670 different_values=0 nonfinite=0

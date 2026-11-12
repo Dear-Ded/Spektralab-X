@@ -1,0 +1,6 @@
+c++ (Debian 14.2.0-19) 14.2.0
+9d7e74345689000545280d332f8311c07a81a387461784f9df3d5ff5ce0099a6  /data/home/gpt-feedback-dispatch-20261112/repo/tools/native/feedback_dispatch.cpp
+7c8944344ec9a5c68ec8d3000cc15e3354d1bf17a2aba11b52d52a095f0484c6  /data/home/gpt-feedback-dispatch-20261112/repo/tools/native/feedback_session.cpp
+52693831a944a17f5a6a3d47a22bc24dc4220a96cc4f8a433787d9302c3f84fd  /data/home/gpt-feedback-dispatch-20261112/repo/app/src/main/cpp/resize.cpp
+0fd4bf9403ef6bc451c19fff85e5bb0c173f65e0a09ea8e179bbaf4e69721a75  /data/home/gpt-iir-large-20261112/upstream/engine/src/gpu/vulkan_gpu.cpp
+d8d2b6e344b8d8ecea22059f3ff3f859813826cb7beb62cc700fadaff29c1a51  /data/home/gpt-iir-large-20261112/host/engine/libspektralab_engine.a

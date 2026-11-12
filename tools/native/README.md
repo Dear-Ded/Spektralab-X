@@ -742,3 +742,19 @@ checks both default and v1 stage payloads. All positive gates fail nonzero.
 `SPK_IIR_BOUNDARY=triggs-v2` accepts IIR sigmas `[3,1024]`, with no change to
 v1's `[3,256]`, the legacy default, or FIR routing. The mode remains diagnostic,
 without session-cache or sidecar integration. See [numerical results and limits](../../docs/ENGINE_IIR_LARGE_RADIUS_2026-11-12.md).
+
+## Film dispatch and actual session diagnostics
+
+```bash
+UP=/path/to/upstream-through-0053 B=/path/to/matching-build \
+BUILD_DIR=/outside-repo/new-results LP_NUM_THREADS=2 \
+bash tools/native/run_feedback_dispatch.sh
+```
+
+Compiles synthetic full-stage chunk comparisons and an actual C ABI session
+probe using the production app area resize. Requires C++20, initialized Vulkan
+resources and matching engine/core/volk archives. Runs normal and forced-split
+math, one/seven-workgroup caps, public negative/final comparisons, three native
+tiers, repeat/cache and print-edit restoration. Private input files supported
+by the session probe must remain local with their generated results. See
+[results and mobile limits](../../docs/ENGINE_FEEDBACK_DISPATCH_2026-11-12.md).
