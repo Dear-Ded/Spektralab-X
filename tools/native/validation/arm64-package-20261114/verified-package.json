@@ -1,0 +1,43 @@
+{
+  "source_commit": "51be487613f2bc5a57a04aead9f4ff62210b21ab",
+  "build_input_count": 323,
+  "variant": "release",
+  "abi": "arm64-v8a",
+  "version_name": "0.2.00-alpha-6",
+  "version_code": 126,
+  "apk_bytes": 38648798,
+  "apk_sha256": "17d2e2db08adfd563e1719fe3189796814e3bfe2d49180aed3bac03a2c338eb5",
+  "packaged_jni_sha256": "8087debc6bfe8619fccce1ac12a2e9247d06dfbb6efd6065c727e900633e478e",
+  "jni_method_count": 39,
+  "native_libraries": {
+    "lib/arm64-v8a/libandroidx.graphics.path.so": {
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "elf_load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    "lib/arm64-v8a/libspektralab_jni.so": {
+      "sha256": "8087debc6bfe8619fccce1ac12a2e9247d06dfbb6efd6065c727e900633e478e",
+      "elf_load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    }
+  },
+  "dynamic_dependencies": [
+    "libandroid.so",
+    "liblog.so",
+    "libjnigraphics.so",
+    "libz.so",
+    "libdl.so",
+    "libm.so",
+    "libc.so"
+  ],
+  "engine_asset_count": 113,
+  "engine_asset_stamp": "d30e84d1ab6026b65dab611cfdff4688",
+  "signing": "cloud debug certificate; research candidate",
+  "device_installation": "not performed; adb detected no connected device"
+}

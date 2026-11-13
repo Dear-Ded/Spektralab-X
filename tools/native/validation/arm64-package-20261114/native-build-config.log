@@ -1,0 +1,6 @@
+app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/CMakeCache.txt
+ANDROID_ABI:UNINITIALIZED=arm64-v8a
+CMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+CMAKE_CXX_FLAGS_RELEASE:STRING=
+CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+CMAKE_HOME_DIRECTORY:INTERNAL=/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp

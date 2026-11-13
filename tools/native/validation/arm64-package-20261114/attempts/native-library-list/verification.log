@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-arm64-package-20261114/verify-package.py", line 49, in <module>
+    assert native == ['lib/arm64-v8a/libspektralab_jni.so'], native
+AssertionError: ['lib/arm64-v8a/libandroidx.graphics.path.so', 'lib/arm64-v8a/libspektralab_jni.so']

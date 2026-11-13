@@ -89,3 +89,55 @@ are cached results, not another newly executed suite.
 The public scripts, raw logs, CSV measurements, XML and verification summaries
 are in `tools/native/validation/raw-algorithm-20261113`. Phone performance has
 not been measured in this change.
+
+## Installable ARM64 Candidate, 2026-11-14
+
+The production JNI target includes `raw_development.cpp`; the RAW opening and
+parameter-update paths call its statistics preparation and development-plan
+code, and preview child sessions inherit the complete-source statistics. The
+optimization is already in the application's native path. Standard development
+uses it when selected; the existing neutral default stays neutral.
+
+The cloud now also builds a complete ARM64 **Release variant** from production
+source commit `51be487613f2bc5a57a04aead9f4ff62210b21ab`. This replaces the earlier
+verification gap of an x86_64 APK plus a separately linked ARM64 library. All
+323 tracked application, resource, patch and Gradle inputs match local SHA-256
+before and after the build. AGP compiles the native target as `RelWithDebInfo`
+with `-O2 -g -DNDEBUG`; R8 and resource shrinking complete successfully. Version
+remains `0.2.00-alpha-6`, code 126.
+
+| Artifact | Size / SHA-256 |
+| --- | --- |
+| `Spektralab-X-alpha-6-arm64-raw-51be487.apk` | 38,648,798 bytes |
+| APK SHA-256 | `17d2e2db08adfd563e1719fe3189796814e3bfe2d49180aed3bac03a2c338eb5` |
+| Packaged, stripped JNI SHA-256 | `8087debc6bfe8619fccce1ac12a2e9247d06dfbb6efd6065c727e900633e478e` |
+
+The APK's JNI library matches the actual stripped Gradle output, exports all
+39 methods declared by `NativeEngine.kt`, and needs only Android system shared
+libraries. Both it and Compose's `libandroidx.graphics.path.so` are AArch64
+ELF64 libraries with 16 KiB load-segment alignment. APK ZIP alignment and v2
+signature verification pass. All 113 staged engine resource files match their
+APK entries byte for byte, with stamp `d30e84d1ab6026b65dab611cfdff4688`.
+
+The initial complete build succeeds in 5m 9s. Its evidence collector then stops
+on a mistaken `app/.cxx/Release` directory. After using AGP's actual
+`RelWithDebInfo` directory, the follow-up Gradle invocation succeeds in 20s,
+mostly `UP-TO-DATE`. The first package verifier incorrectly expects only the
+app's JNI library; it is corrected to include Compose's path library and
+verifies both libraries' architecture, alignment and packaged identity.
+Original attempts remain in the evidence. R8 emits a warning about the Compose
+`SkipToLookaheadSizeElement` constructor not type checking; no runtime behavior
+has been assessed on a phone. Algorithm tests above are prior cloud results,
+not newly executed tests during this packaging step.
+
+This candidate uses the cloud Android debug certificate, without release keys
+or publication. A device with a different signing certificate cannot accept it
+as an in-place update. ADB reports no connected devices at both checks, so no
+phone installation or phone performance acceptance has occurred. The local APK
+download has the same SHA-256 as the cloud artifact.
+
+Public evidence is in `tools/native/validation/arm64-package-20261114`. Its
+download archive has 31 unique safe paths, 34,876 bytes and SHA-256
+`ec1cab3485083f5121d57f4a35e58f317ffa49a89cf856e4a2ef6f3aefeae78d`.
+Checksum, traversal, duplicate and link checks passed before extraction; both
+verification scripts and all 323 build inputs still match local sources.
