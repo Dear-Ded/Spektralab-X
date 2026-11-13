@@ -260,26 +260,13 @@ class StyleImports(private val context: Context) {
      * effects, Layer 2 with the palette folded in, the colour table as imported,
      * and [thumbJpeg]. Per-photo geometry, white balance and borders stay out.
      */
-    fun exportLook(edit: Edit, catalog: Catalog, name: String, thumbJpeg: ByteArray?): File {
+    fun exportLook(edit: Edit, name: String, thumbJpeg: ByteArray?, scope: StyleScope = StyleScope.COMBINATION): File {
         val r = edit.look.resolved()
-        val original = r.lut.takeIf { it.isNotEmpty() }?.let(luts::original)
+        val original = r.lut.takeIf { it.isNotEmpty() && scope != StyleScope.FILM }?.let {
+            luts.original(it) ?: throw ImportException("风格的 LUT 文件缺失或损坏，请重新导入后再分享")
+        }
         val title = name.trim().ifEmpty { "我的风格" }.take(60)
-        val look = SpkLook(
-            name = title,
-            engine = SpkEngine(
-                film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
-                exposureEv = edit.exposureEv, printExposure = edit.printExposure,
-                sceneCurve = edit.sceneCurve,
-                yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
-                formatMm = edit.filmFormatMm,
-                grain = if (edit.grainActive) edit.grainAmount else 0.0,
-                halation = if (edit.halationActive) edit.halationAmount else 0.0,
-                glare = if (edit.glareActive) edit.glareAmount else 0.0,
-            ),
-            layer2 = r.copy(lut = "", lutStrength = 1.0),
-            lut = original?.let { SpkLut(strength = r.lutStrength, space = it.second) },
-            source = SpkSource("spektralab-x", "", catalog.film(edit.film)?.let { "Spektralab-X 导出" } ?: ""),
-        )
+        val look = edit.savedStyle(title, scope, original?.second ?: SpkLut.SPACE_SRGB)
         val dir = File(context.cacheDir, "share").apply { deleteRecursively(); mkdirs() }
         val file = File(dir, safeName(title) + ".spklook")
         file.outputStream().use { SpkPackage(look, original?.first, thumbJpeg).write(it) }
@@ -335,5 +322,6 @@ fun SpkLook.toStyle(id: String, edit: Edit, lutId: String): Style {
         inspiredBy = source?.note?.takeIf { it.isNotBlank() }
             ?: author.takeIf { it.isNotBlank() }?.let { "作者 $it" } ?: "导入的风格",
         keepFilmState = e.film == null,
+        scope = scope, engineOptions = e,
     )
 }

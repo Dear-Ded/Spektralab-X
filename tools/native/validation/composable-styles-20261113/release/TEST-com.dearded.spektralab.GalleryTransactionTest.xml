@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.GalleryTransactionTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T03:18:04.357Z" hostname="ser858255664526" time="0.011">
+  <properties/>
+  <testcase name="failedQueryIsUnknown" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.002"/>
+  <testcase name="zeroDeleteCanConfirmAnotherRemoval" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="missingEntryIsNotDeleted" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="unknownEntryIsNeverDeleted" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="zeroDeleteWhileStillPendingIsUnknown" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.0"/>
+  <testcase name="confirmedMissingEntryIsGone" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="publishedEntryIsNeverDeleted" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.0"/>
+  <testcase name="nullQueryIsUnknown" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.0"/>
+  <testcase name="failedDeleteRetainsUncertainty" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.0"/>
+  <testcase name="zeroDeleteCanObservePublicationWinning" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="positiveDeleteConfirmsGone" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <testcase name="queryFailureAfterZeroDeleteIsUnknown" classname="com.dearded.spektralab.GalleryTransactionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

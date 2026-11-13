@@ -771,7 +771,8 @@ private fun Controls(
                         0 -> {
                             PanelHeader(
                                 title = "风格",
-                                summary = if (e.noFilm) "原图" else ui.catalog.film(e.film)?.label.orEmpty(),
+                                summary = if (e.noFilm) { if (e.look.neutral) "无胶卷" else "无胶卷 · 已调色" }
+                                    else ui.catalog.film(e.film)?.label.orEmpty(),
                             )
                         StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)

@@ -1354,12 +1354,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     /** The open edit as a .spklook in the cache, for the share sheet; null when there is no photo. */
-    suspend fun exportLook(name: String): File? {
+    suspend fun exportLook(name: String, scope: StyleScope = StyleScope.COMBINATION): File? {
         val state = _ui.value
         if (!state.hasImage) return null
-        return withContext(Dispatchers.IO) {
+        return try { withContext(Dispatchers.IO) {
             val library = UserLibrary.get(app)
-            library.exportLook(state.edit, state.catalog, name, StyleImports.thumbnail(state.image))
+            library.exportLook(state.edit, name, StyleImports.thumbnail(state.image), scope)
+        } } catch (e: kotlinx.coroutines.CancellationException) { throw e
+        } catch (e: Exception) {
+            showMessage("分享风格失败：${e.message.orEmpty()}")
+            null
         }
     }
 

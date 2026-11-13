@@ -46,6 +46,27 @@ data class SpkEngine(
     val grain: Double? = null,
     val halation: Double? = null,
     val glare: Double? = null,
+    val noFilm: Boolean? = null,
+    val scanFilm: Boolean? = null,
+    val digitalIntermediate: Boolean? = null,
+    val autoExposure: Boolean? = null,
+    val aeMethod: String? = null,
+    val scatter: Double? = null,
+    val couplers: Double? = null,
+    val grainLayered: Boolean? = null,
+    val grainArea: Double? = null,
+    val unsharpSigma: Double? = null,
+    val unsharpAmount: Double? = null,
+    val preflash: Double? = null,
+    val negativeGamma: Double? = null,
+    val highlightBoostEv: Double? = null,
+    val lensBlurUm: Double? = null,
+    val noAntihalation: Boolean? = null,
+    val cameraFilter: String? = null,
+    val labLevels: Boolean? = null,
+    val grainActive: Boolean? = null,
+    val halationActive: Boolean? = null,
+    val glareActive: Boolean? = null,
 ) {
     val empty get() = this == SpkEngine()
 }
@@ -62,7 +83,7 @@ data class SpkLut(val strength: Double = 1.0, val space: String = SPACE_SRGB) {
 data class SpkSource(val kind: String = "", val file: String = "", val note: String = "")
 
 /**
- * `.spklook` version 1, this app's own style file (docs/STYLES.md section 7.1).
+ * `.spklook` version 2, this app's own style file (docs/STYLES.md section 7.1).
  * Fields go by name: missing ones take their defaults and unknown ones are
  * reported, so a file from a newer version still opens. Every number is clamped
  * to its slider's range. Plain Kotlin and org.json only.
@@ -76,6 +97,7 @@ data class SpkLook(
     val layer2: Look = Look.NEUTRAL,
     val lut: SpkLut? = null,
     val source: SpkSource? = null,
+    val scope: StyleScope = StyleScope.COMBINATION,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("format", FORMAT)
@@ -84,6 +106,7 @@ data class SpkLook(
         if (author.isNotEmpty()) put("author", author)
         if (license.isNotEmpty()) put("license", license)
         put("category", category)
+        put("scope", scope.key)
         if (!engine.empty) put("engine", engineJson(engine))
         put("layer2", layer2Json(layer2))
         lut?.let { put("lut", JSONObject().put("file", LUT_ENTRY).put("strength", it.strength).put("space", it.space)) }
@@ -98,16 +121,19 @@ data class SpkLook(
 
     companion object {
         const val FORMAT = "spklook"
-        const val VERSION = 1
+        const val VERSION = 2
         const val DEFAULT_CATEGORY = "导入"
         const val LOOK_ENTRY = "look.json"
         const val LUT_ENTRY = "lut.cube"
         const val THUMB_ENTRY = "thumb.jpg"
 
-        private val TOP = setOf("format", "version", "name", "author", "license", "category", "engine", "layer2", "lut", "source")
-        private val ENGINE = setOf("film", "paper", "exposure_ev", "scene_curve", "print_exposure", "y_cc", "m_cc", "format_mm", "grain", "halation", "glare")
+        private val TOP = setOf("format", "version", "name", "author", "license", "category", "engine", "layer2", "lut", "source", "scope")
+        private val ENGINE = setOf("film", "paper", "exposure_ev", "scene_curve", "print_exposure", "y_cc", "m_cc", "format_mm", "grain", "halation", "glare",
+            "no_film", "scan_film", "digital_intermediate", "auto_exposure", "ae_method", "scatter", "couplers", "grain_layered", "grain_area",
+            "unsharp_sigma", "unsharp_amount", "preflash", "negative_gamma", "highlight_boost_ev", "lens_blur_um", "no_antihalation", "camera_filter", "lab_levels",
+            "grain_active", "halation_active", "glare_active")
         private val LAYER2 = setOf("temperature", "tint", "exposure", "contrast", "brightness", "saturation", "vibrance",
-            "highlights", "shadows", "black_point", "white_point", "fade", "vignette", "vignette_mid", "wheels", "hsl", "curves")
+            "highlights", "shadows", "black_point", "white_point", "fade", "vignette", "vignette_mid", "wheels", "hsl", "curves", "dust")
         private val WHEELS = listOf("global", "shadows", "midtones", "highlights")
         /** Look.hsl order (layer2.cpp kBandHue), with Lightroom's band names. */
         val HSL_BANDS = listOf("red", "orange", "yellow", "green", "aqua", "blue", "purple", "magenta")
@@ -122,6 +148,8 @@ data class SpkLook(
             if (version > VERSION) report.ignored("version", "文件是第 $version 版，本应用只认识第 $VERSION 版，新字段可能没读到")
             val r = Fields(report)
             r.unknown(o, "", TOP)
+            val scope = if (!o.has("scope")) StyleScope.COMBINATION else StyleScope.of(o.optString("scope"))
+                ?: throw ImportException("不认识风格的应用范围，请更新应用后重试")
             val lut = o.optJSONObject("lut")?.let { l ->
                 r.unknown(l, "lut", setOf("file", "strength", "space"))
                 val file = l.optString("file", LUT_ENTRY)
@@ -148,6 +176,7 @@ data class SpkLook(
                 layer2 = r.obj(o, "layer2")?.let { readLayer2(it, r) } ?: Look.NEUTRAL,
                 lut = lut,
                 source = source,
+                scope = scope,
             )
         }
 
@@ -172,7 +201,27 @@ data class SpkLook(
                 formatMm = r.opt(e, "format_mm", "engine", 4.0, 200.0),
                 grain = r.opt(e, "grain", "engine", 0.0, 2.0),
                 halation = r.opt(e, "halation", "engine", 0.0, 4.0),
-                glare = r.opt(e, "glare", "engine", 0.0, 5.0),
+                glare = r.opt(e, "glare", "engine", 0.0, 30.0),
+                noFilm = r.bool(e, "no_film", "engine"), scanFilm = r.bool(e, "scan_film", "engine"),
+                digitalIntermediate = r.bool(e, "digital_intermediate", "engine"),
+                autoExposure = r.bool(e, "auto_exposure", "engine"),
+                aeMethod = r.choice(e, "ae_method", setOf("balanced", "center", "protect_highlights", "protect_shadows", "center_weighted", "average", "median")),
+                scatter = r.opt(e, "scatter", "engine", 0.0, 1.0),
+                couplers = r.opt(e, "couplers", "engine", 0.0, 1.5),
+                grainLayered = r.bool(e, "grain_layered", "engine"),
+                grainArea = r.opt(e, "grain_area", "engine", 0.05, 1.0),
+                unsharpSigma = r.opt(e, "unsharp_sigma", "engine", 0.2, 3.0),
+                unsharpAmount = r.opt(e, "unsharp_amount", "engine", 0.0, 2.0),
+                preflash = r.opt(e, "preflash", "engine", 0.0, 0.3),
+                negativeGamma = r.opt(e, "negative_gamma", "engine", 0.7, 1.4),
+                highlightBoostEv = r.opt(e, "highlight_boost_ev", "engine", 0.0, 3.0),
+                lensBlurUm = r.opt(e, "lens_blur_um", "engine", 0.0, 30.0),
+                noAntihalation = r.bool(e, "no_antihalation", "engine"),
+                cameraFilter = r.choice(e, "camera_filter", Edit.CAMERA_FILTERS.toSet()),
+                labLevels = r.bool(e, "lab_levels", "engine"),
+                grainActive = r.bool(e, "grain_active", "engine"),
+                halationActive = r.bool(e, "halation_active", "engine"),
+                glareActive = r.bool(e, "glare_active", "engine"),
             )
         }
 
@@ -211,6 +260,7 @@ data class SpkLook(
                 master = zone(0), shadowZone = zone(1), midZone = zone(2), highlightZone = zone(3),
                 hsl = List(8) { band(it) },
                 curves = readCurves(l, r),
+                dust = Dust.fromJson(r.obj(l, "dust", "layer2")),
             )
         }
 
@@ -243,6 +293,18 @@ data class SpkLook(
             e.grain?.let { put("grain", it) }
             e.halation?.let { put("halation", it) }
             e.glare?.let { put("glare", it) }
+            e.noFilm?.let { put("no_film", it) }; e.scanFilm?.let { put("scan_film", it) }
+            e.digitalIntermediate?.let { put("digital_intermediate", it) }
+            e.autoExposure?.let { put("auto_exposure", it) }; e.aeMethod?.let { put("ae_method", it) }
+            e.scatter?.let { put("scatter", it) }; e.couplers?.let { put("couplers", it) }
+            e.grainLayered?.let { put("grain_layered", it) }; e.grainArea?.let { put("grain_area", it) }
+            e.unsharpSigma?.let { put("unsharp_sigma", it) }; e.unsharpAmount?.let { put("unsharp_amount", it) }
+            e.preflash?.let { put("preflash", it) }; e.negativeGamma?.let { put("negative_gamma", it) }
+            e.highlightBoostEv?.let { put("highlight_boost_ev", it) }; e.lensBlurUm?.let { put("lens_blur_um", it) }
+            e.noAntihalation?.let { put("no_antihalation", it) }; e.cameraFilter?.let { put("camera_filter", it) }
+            e.labLevels?.let { put("lab_levels", it) }
+            e.grainActive?.let { put("grain_active", it) }; e.halationActive?.let { put("halation_active", it) }
+            e.glareActive?.let { put("glare_active", it) }
         }
 
         private fun layer2Json(l: Look) = JSONObject().apply {
@@ -263,12 +325,24 @@ data class SpkLook(
                 }
             })
             if (!l.curves.isIdentity) put("curves", l.curves.toJson())
+            if (l.dust != Dust()) put("dust", l.dust.toJson())
         }
     }
 }
 
 /** Typed, clamped reads that note every surprise in [report]. */
 internal class Fields(val report: ImportReport) {
+    fun bool(o: JSONObject, key: String, path: String): Boolean? {
+        if (!o.has(key) || o.isNull(key)) return null
+        return (o.opt(key) as? Boolean) ?: run { report.ignored(join(path, key), "应为布尔值"); null }
+    }
+
+    fun choice(o: JSONObject, key: String, allowed: Set<String>): String? {
+        if (!o.has(key) || o.isNull(key)) return null
+        return (o.opt(key) as? String)?.takeIf { it in allowed }
+            ?: run { report.ignored("engine.$key", "不是有效的选项"); null }
+    }
+
     fun unknown(o: JSONObject, path: String, known: Set<String>) {
         for (k in o.keys()) if (k !in known) report.ignored(join(path, k), "不认识的字段")
     }

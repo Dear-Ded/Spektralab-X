@@ -340,3 +340,19 @@ Fuji X Weekly 一类的配方是每行“键: 值”的纯文本（[示例](http
 | 用户胶片同步 | `EngineHost.build` | `EngineAssets.install` 之后调一次 `UserProfiles.syncInto(dir)` |
 | 设置入口 | `EditorScreen.kt` 设置面板，主会话 | 放 `ImportStylesButton` |
 | 外部打开 | manifest、`MainActivity.handleIntent` | 本线单独提交 |
+
+### 7.9 独立滤镜与组合（version 2，2026-11-13）
+
+GPT（OpenAI）共创。本节补充并更新 7.1、7.7 的旧格式说明。
+
+`scope` 指定应用范围：`combination`（默认，同时应用）、`filter`（只换全局数字调色）、`film`（只换胶卷、相纸和物理效果）。完整组合浏览模式尊重文件自身的范围；选择仅滤镜或仅胶卷时可以从内置组合提取对应部分。提取数字调色并不等于复现物理胶卷的外观，也不是多个 LUT 顺序叠加。
+
+- 纯滤镜：冲洗里胶卷选“无”，或风格页点“移除胶卷”，再选“仅滤镜”使用内置调色、导入 LUT 或自定义调色，直接保存图片。
+- 混搭：用“仅胶卷”选 A，再用“仅滤镜”选 B，两个操作互相保留另一部分。修改后在“我的 → 存为风格”选择仅滤镜、仅胶卷或完整组合。分享当前风格同样选择范围。
+- `engine.no_film`、`scan_film`、`digital_intermediate` 显式保存胶卷和相纸的旁路状态。完整组合保存“无胶卷”后，在有胶卷的照片上重新套用，也会移除胶卷。v1 缺省字段仍保留旧行为。
+- 引擎快照还保存 `auto_exposure`、`ae_method`、`scatter`、`couplers`、`grain_layered`、`grain_area`、`unsharp_sigma`、`unsharp_amount`、`preflash`、`negative_gamma`、`highlight_boost_ev`、`lens_blur_um`、`no_antihalation`、`camera_filter`、`lab_levels`。`grain_active`、`halation_active`、`glare_active` 分别保留关闭状态和记住的强度。缺省字段沿用当前设置，类型及数值按现有控件范围校验；眩光上限更新为现有控件的 30。
+- 全局数字调色含曲线、HSL、色轮、LUT 和灰尘 / 划痕；`layer2.dust` 使用 `Dust.toJson` 的命名字段。强度按中性值缩放数字调色和灰尘，不改变胶卷与相纸。0 强度回到中性。
+- 局部蒙版属于照片，应用风格保留当前蒙版，保存与分享时不携带。RAW 显影 / RAW 白平衡、裁切、旋转、边框和日期也不携带。普通胶卷选择仍保留原有的几何约束。
+- 保存风格和分享文件使用同一个 `Edit.savedStyle` 参数快照；图片导出仍走已有的完整 `Edit` + `lookJson` 队列。v2 文件不认识的 `scope` 拒绝应用，防止误按完整组合覆盖设置。
+
+格式写出为 v2，仍读取 v1。旧应用会报告新增字段未识别，无法保证正确还原 v2 的应用范围和旁路设置，需要升级后导入。`look.json` 当前实际限制为 3 MiB（较大的胶片前曲线），由 `SpkPackage.MAX_LOOK` 统一执行；整包仍不超过 16 MiB。

@@ -70,18 +70,26 @@ data class Style(
     val keepFilmState: Boolean = false,
     /** Missing from older styles: preserve the photo's film-input curve. */
     val sceneCurve: SceneCurve? = null,
+    /** Application scope and optional physical recipe, co-created with GPT (OpenAI). */
+    val scope: StyleScope = StyleScope.COMBINATION,
+    val engineOptions: SpkEngine = SpkEngine(),
 ) {
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
-        val stock = catalog.film(film) ?: return null
+        val finish = (PAD_HOMES[id] ?: (0.0 to 0.0)).let { (tH, cH) ->
+            look.copy(tone = tH, colour = cH, toneHome = tH, colourHome = cH, masks = edit.look.masks)
+        }
+        if (scope == StyleScope.FILTER) return edit.copy(look = finish)
+        val stock = catalog.film(film)
+        if (stock == null && engineOptions.noFilm != true) return null
         // A style is a film on a paper: 无 off, the paper chosen. Coming from 效果「无」
         // it develops with the scanner's own sharpening, as every style was tuned with.
-        val base = if (keepFilmState) edit.copy(film = film,
+        val base = if (keepFilmState || engineOptions.noFilm == true) edit.copy(film = film,
                 paper = if (catalog.paper(paper) != null) paper else edit.paper)
-            else edit.copy(film = film, scanFilm = stock.positive, noFilm = false, digitalIntermediate = false,
+            else edit.copy(film = film, scanFilm = stock!!.positive, noFilm = false, digitalIntermediate = false,
                 unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
                 paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
-        return catalog.normalize(base.copy(
+        return catalog.normalize(engineOptions.applyOptions(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
             sceneCurve = sceneCurve ?: edit.sceneCurve,
             yShift = (yCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
@@ -90,13 +98,16 @@ data class Style(
             grainActive = grain > 0, grainAmount = grain.coerceAtLeast(0.0),
             halationActive = halation > 0, halationAmount = halation.coerceAtLeast(0.0),
             glareActive = glare > 0, glareAmount = glare.coerceAtLeast(0.0),
-            look = (PAD_HOMES[id] ?: (0.0 to 0.0)).let { (tH, cH) ->
-                look.copy(tone = tH, colour = cH, toneHome = tH, colourHome = cH)
-            },
-        ))
+            look = if (scope == StyleScope.FILM) edit.look else finish,
+        )))
     }
 
     fun matches(edit: Edit, catalog: Catalog) = applyTo(edit, catalog) == edit
+
+    /** The combined browser honours a saved component's own scope. */
+    fun inScope(requested: StyleScope) = if (requested == StyleScope.COMBINATION) this else copy(scope = requested)
+
+    fun available(catalog: Catalog) = scope == StyleScope.FILTER || engineOptions.noFilm == true || catalog.film(film) != null
 
     /**
      * This style with its finish at [k] of full strength (0..1), linearly from
@@ -106,11 +117,11 @@ data class Style(
 
     /** This style as a .spklook (what a Fuji recipe builds on, and what export writes). */
     fun toSpkLook() = SpkLook(
-        name = name, category = group,
-        engine = SpkEngine(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
+        name = name, category = group, scope = scope,
+        engine = if (scope == StyleScope.FILTER) SpkEngine() else engineOptions.copy(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
             sceneCurve = sceneCurve,
             yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
-        layer2 = look.copy(lut = "", lutStrength = 1.0),
+        layer2 = if (scope == StyleScope.FILM) Look.NEUTRAL else look.copy(lut = "", lutStrength = 1.0, masks = emptyList()),
         source = SpkSource("style", id, inspiredBy),
     )
 
@@ -303,8 +314,9 @@ private fun StyleStripContent(
     val view = androidx.compose.ui.platform.LocalView.current
     val prefs = remember(context) { context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0) }
     val strengths = remember { mutableStateMapOf<String, Double>() }
+    var application by remember { mutableStateOf(StyleScope.of(prefs.getString("_application_scope", "").orEmpty()) ?: StyleScope.COMBINATION) }
     fun strengthOf(id: String) = strengths[id] ?: prefs.getFloat(id, 1f).toDouble().coerceIn(0.0, 1.0)
-    fun applied(s: Style) = s.atStrength(strengthOf(s.id)).matches(ui.edit, ui.catalog)
+    fun applied(s: Style) = s.inScope(application).atStrength(strengthOf(s.id)).matches(ui.edit, ui.catalog)
 
     // Imported styles (StyleImport.kt) after the built-in ones, under their own categories.
     val library = remember(context) { UserLibrary.get(context) }
@@ -344,12 +356,31 @@ private fun StyleStripContent(
     fun pick(s: Style, k: Double) {
         prefs.edit().putString(LAST_STYLE, s.id).putString(LAST_GROUP, s.group).putFloat(s.id, k.toFloat()).apply()
         picks.used(s.id)
-        onPick(s.atStrength(k))
+        onPick(s.inScope(application).atStrength(k))
     }
     var open by remember { mutableStateOf<String?>(null) }
     // Search across every group by name, inspiration, film and folk name (StyleTags.kt).
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    StepRow("应用范围", StyleScope.entries.map { it.label }, application.ordinal, enabled) { i ->
+        application = StyleScope.entries[i]
+        prefs.edit().putString("_application_scope", application.key).apply()
+        open = null
+    }
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(when (application) {
+            StyleScope.COMBINATION -> "按风格保存的范围应用。"
+            StyleScope.FILTER -> if (ui.edit.noFilm) "无胶卷，只使用调色滤镜。" else "只换调色，保留当前胶卷。"
+            StyleScope.FILM -> "只换胶卷和冲印，保留当前滤镜。"
+        }, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft, modifier = Modifier.weight(1f))
+        if (!ui.edit.noFilm) androidx.compose.material3.TextButton(enabled = enabled, onClick = {
+            application = StyleScope.FILTER
+            prefs.edit().putString("_application_scope", application.key).apply()
+            open = null
+            onEdit(ui.edit.copy(noFilm = true))
+        }) { Text("移除胶卷") }
+    }
     // The panel's title row and the group pills (UI2.md 7.2 point 2); search sits first, as a pill.
     PillRow {
         SelectPill(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
@@ -362,7 +393,9 @@ private fun StyleStripContent(
             placeholder = { Text("搜索风格、胶卷或相机") }, modifier = Modifier.fillMaxWidth())
     }
     val styles = all.filter { s ->
-        ui.catalog.film(s.film) != null &&
+        s.inScope(application).available(ui.catalog) &&
+            (application != StyleScope.FILTER || s.scope != StyleScope.FILM) &&
+            (application != StyleScope.FILM || (s.scope != StyleScope.FILTER && s.engineOptions.noFilm != true)) &&
             (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty())
              else when (group) {
                  HOT_GROUP -> s.id in HOT
@@ -386,8 +419,24 @@ private fun StyleStripContent(
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
         if (!searching) item(key = "_none") {
             val original = remember(ui.before) { ui.before?.asImageBitmap() }
-            NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "") {
-                if (!ui.edit.styleNone) { view.tick(); onNone() }
+            val none = when (application) {
+                StyleScope.COMBINATION -> ui.edit.styleNone
+                StyleScope.FILTER -> ui.edit.look.copy(masks = emptyList()).neutral
+                StyleScope.FILM -> ui.edit.noFilm
+            }
+            NoneCard(selected = none, original = original, enabled = enabled, subtitle = when (application) {
+                StyleScope.COMBINATION -> "清除全部风格"
+                StyleScope.FILTER -> "清除滤镜"
+                StyleScope.FILM -> "无胶卷"
+            }) {
+                if (!none) {
+                    view.tick()
+                    when (application) {
+                        StyleScope.COMBINATION -> onNone()
+                        StyleScope.FILTER -> onEdit(ui.edit.copy(look = Look.NEUTRAL.copy(masks = ui.edit.look.masks)))
+                        StyleScope.FILM -> onEdit(ui.edit.copy(noFilm = true))
+                    }
+                }
             }
         }
         // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
@@ -403,30 +452,27 @@ private fun StyleStripContent(
             ThumbCard(
                 selected = false, image = bitmap,
                 title = f.name.substringBeforeLast("."),
-                subtitle = if (car.edit.noFilm) "原图" else ui.catalog.film(car.edit.film)?.label ?: "原图",
+                subtitle = if (car.edit.noFilm) "无胶卷" else ui.catalog.film(car.edit.film)?.label ?: "原图",
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
-                val src = ui.source ?: return@ThumbCard
-                val here = Frame(id = "", uri = "", name = src.name, size = 0, date = 0, mime = "",
-                    raw = src.kind == "raw", width = src.width, height = src.height,
-                    exifDate = ui.exif.dateTimeOriginal.orEmpty())
-                val p = pasteLook(Sidecar(ui.edit, src.wbK, src.wbTint), here,
-                    CopiedLook(car.edit, car.wbK, car.wbTint, f.name),
-                    LookGroup.entries.toSet() - LookGroup.BORDER - LookGroup.WHITE_BALANCE, ui.catalog)
+                val saved = car.edit.savedStyle(f.name).toStyle("recent_edit", ui.edit, car.edit.look.resolved().lut)
+                val next = saved.inScope(application).applyTo(ui.edit, ui.catalog) ?: return@ThumbCard
                 view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                onEdit(p.edit)
+                onEdit(next)
             }
         }
         if (searching || group != EDITS_GROUP) items(styles, key = { it.id }) { s ->
             val on = applied(s)
-            val card = ui.filmCards[s.film]
+            // These are illustrative film cards, not previews of the isolated digital finish.
+            val card = if (s.inScope(application).scope == StyleScope.FILTER || s.engineOptions.noFilm == true) ui.before else ui.filmCards[s.film]
             val bitmap = remember(card) { card?.asImageBitmap() }
             // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
             ThumbCard(
                 selected = on,
                 image = bitmap,
                 title = s.name,
-                subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
+                subtitle = if (s.scope != StyleScope.COMBINATION) s.scope.label
+                    else s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
                 enabled = enabled,
                 placeholder = s.name,
                 starred = picks.isFavourite(s.id),
@@ -444,14 +490,21 @@ private fun StyleStripContent(
     }
     if (naming) {
         var name by remember { mutableStateOf("") }
+        val saveScopes = StyleScope.entries.filter { it != StyleScope.FILM || !ui.edit.noFilm }
+        var saveScope by remember { mutableStateOf(application.takeIf { it in saveScopes } ?: StyleScope.FILTER) }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { naming = false },
             title = { Text("存为风格") },
             text = {
                 Column {
+                    StepRow("保存范围", saveScopes.map { it.label }, saveScopes.indexOf(saveScope), true) { saveScope = saveScopes[it] }
                     OutlinedTextField(value = name, onValueChange = { name = it.take(30) }, singleLine = true,
                         placeholder = { Text("例如：傍晚暖调") }, modifier = Modifier.fillMaxWidth())
-                    Hint("不含边框、裁剪和白平衡。",
+                    Hint(when (saveScope) {
+                        StyleScope.COMBINATION -> "保存胶卷、相纸和调色，也记住无胶卷。"
+                        StyleScope.FILTER -> "保存调色和 LUT，套用时保留当前胶卷。"
+                        StyleScope.FILM -> "保存胶卷、相纸和冲印，套用时保留滤镜。"
+                    } + "不含裁剪、边框、局部蒙版和 RAW 显影。",
                         Modifier.padding(top = 6.dp))
                 }
             },
@@ -461,11 +514,17 @@ private fun StyleStripContent(
                     val edit = ui.edit
                     val photo = ui.image
                     val title = name.trim()
+                    val savedScope = saveScope
                     scope.launch {
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            saveAsStyle(library, edit, title, StyleImports.thumbnail(photo))
+                        try {
+                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                saveAsStyle(library, edit, title, StyleImports.thumbnail(photo), savedScope)
+                            }
+                            browse(MINE_GROUP)
+                        } catch (e: kotlinx.coroutines.CancellationException) { throw e
+                        } catch (e: Exception) {
+                            android.widget.Toast.makeText(context, "保存风格失败：${e.message.orEmpty()}", android.widget.Toast.LENGTH_LONG).show()
                         }
-                        browse(MINE_GROUP)
                     }
                 }) { Text("保存") }
             },
@@ -473,7 +532,7 @@ private fun StyleStripContent(
         )
     }
     // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
-    val current = all.firstOrNull { it.id == open }?.takeIf { applied(it) }
+    val current = all.firstOrNull { it.id == open }?.takeIf { applied(it) && it.inScope(application).scope != StyleScope.FILM }
     // UI2.md 3.7: the slider opens in place under the cards (height on defaultSpatial, faded in)
     // and, closing, keeps showing the style it belonged to until it has folded away. A plain
     // holder, not state: remembering the last style must not recompose anything.
@@ -484,6 +543,7 @@ private fun StyleStripContent(
     // they cannot cover the strip (a shared-bounds overlay would).
     Expandable(open = current != null, verticalArrangement = Arrangement.spacedBy(RowGap)) {
         val s = shown ?: return@Expandable
+        Hint("强度只调整调色滤镜，不改变胶卷和相纸。")
         // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
         // A step is chosen only while the strength sits exactly on it.
         val k = strengthOf(s.id)
@@ -507,24 +567,10 @@ private fun StyleStripContent(
  * same fields an exported .spklook carries; a colour table already in the
  * library is referenced by its id, not copied again. Runs on an IO thread.
  */
-internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJpeg: ByteArray?) {
+internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJpeg: ByteArray?, scope: StyleScope = StyleScope.COMBINATION) {
     val r = edit.look.resolved()
-    val table = r.lut.takeIf { it.isNotEmpty() }
-    val look = SpkLook(
-        name = name.take(60), category = MINE_GROUP,
-        engine = SpkEngine(
-            film = edit.film.takeUnless { edit.noFilm }, paper = edit.paper.takeUnless { edit.noFilm },
-            exposureEv = edit.exposureEv, printExposure = edit.printExposure,
-            sceneCurve = edit.sceneCurve,
-            yCc = edit.yShift * Edit.FILTER_SHIFT_CC, mCc = edit.mShift * Edit.FILTER_SHIFT_CC,
-            formatMm = edit.filmFormatMm,
-            grain = if (edit.grainActive) edit.grainAmount else 0.0,
-            halation = if (edit.halationActive) edit.halationAmount else 0.0,
-            glare = if (edit.glareActive) edit.glareAmount else 0.0,
-        ),
-        layer2 = r.copy(lut = "", lutStrength = 1.0),
-        lut = table?.let { SpkLut(strength = r.lutStrength, space = library.luts.original(it)?.second ?: SpkLut.SPACE_SRGB) },
-        source = SpkSource("spektralab-x", "", "存自这台手机"),
-    )
+    val table = r.lut.takeIf { it.isNotEmpty() && scope != StyleScope.FILM }
+    val look = edit.savedStyle(name, scope, table?.let { library.luts.original(it)?.second } ?: SpkLut.SPACE_SRGB)
+        .copy(category = MINE_GROUP)
     library.styles.save(UserStyle(library.styles.newId(), look, table.orEmpty(), System.currentTimeMillis()), thumbJpeg)
 }

@@ -67,7 +67,15 @@ data class Look(
     /** Scan dust and scratches (灰尘 / 划痕), last of all. Strength 0 is off. */
     val dust: Dust = Dust(),
 ) {
-    val neutral get() = resolved().copy(vignetteMid = 50.0) == NEUTRAL
+    val neutral get() = resolved().let { r ->
+        fun zone(z: Zone) = if (z.neutral) Zone() else z
+        val lutOn = r.lut.isNotEmpty() && r.lutStrength > 0
+        r.copy(vignetteMid = 50.0,
+            curves = if (r.curves.isIdentity) CurveSet.IDENTITY else r.curves,
+            master = zone(r.master), shadowZone = zone(r.shadowZone), midZone = zone(r.midZone), highlightZone = zone(r.highlightZone),
+            lut = if (lutOn) r.lut else "", lutStrength = if (lutOn) r.lutStrength else 1.0,
+            masks = r.masks.filter { it.active }, dust = if (r.dust.active) r.dust else Dust()) == NEUTRAL
+    }
 
     /**
      * What Layer 2 applies: the finish at [palette] percent, then the pad on top,
@@ -105,6 +113,8 @@ data class Look(
      * diagonal, which keeps x increasing as layer2.cpp requires.
      */
     fun finishAt(k: Double): Look {
+        if (k == 0.0) return NEUTRAL.copy(tone = tone, colour = colour, toneHome = toneHome,
+            colourHome = colourHome, palette = palette, masks = masks)
         fun zone(z: Zone) = z.copy(sat = z.sat * k, lum = z.lum * k)
         fun curve(c: Curve) = if (c.isIdentity) c else Curve(c.points.map { CurvePoint(it.x, it.x + k * (it.y - it.x)) })
         return copy(
@@ -115,6 +125,7 @@ data class Look(
             master = zone(master), shadowZone = zone(shadowZone), midZone = zone(midZone), highlightZone = zone(highlightZone),
             hsl = hsl.map { Band(it.hue * k, it.sat * k, it.lum * k) },
             curves = CurveSet(curve(curves.rgb), curve(curves.luma), curve(curves.red), curve(curves.green), curve(curves.blue)),
+            dust = dust.copy(strength = dust.strength * k),
         )
     }
 
