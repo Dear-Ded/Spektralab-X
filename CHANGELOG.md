@@ -8,6 +8,33 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 0.2.00-alpha-6 · 2026-11-13
+
+**省流：** 不选胶卷也能只用滤镜保存图片，自定义组合保存得更完整；RAW 少占一些内存，测光和曲线少做重复计算。界面保持原样，未大规模真机验证，需要社区反馈。
+
+内部安装版本码递增为 **126**，沿用原发布签名，可覆盖安装。本轮共创：**GPT（OpenAI，AI 助手）**。
+
+### 滤镜和胶卷自由搭配
+
+- 胶卷选“无”后，数字调色和 LUT 继续生效，可通过原有保存入口导出图片。胶卷、相纸和数字调整按用户现有选择组合，不增加模式或范围控件。
+- “存为风格”和“分享当前风格”记录当前完整选择，包括明确的无胶卷状态、物理细调、效果开关及记住的强度；重新套用时不再漏掉这些设置。局部蒙版留在当前照片，RAW 白平衡、裁切和边框不进入可复用风格。
+- 新版 `.spklook` 写出 version 2，并继续读取旧 version 1 文件。旧应用不能保证还原 v2 的全部新语义；自定义配方基于已有胶卷、相纸及参数，每张图仍使用一个物理方案和一个数字调色层 / LUT。
+
+### RAW 少复制，计算少重复
+
+- 对满足条件的整数 RAW，将解码结果直接转换到工作尺寸，避免先创建完整的浮点中间图；最终 Bitmap 分配前释放已用完的原始存储。
+- 对严格兼容的整数 LinearRaw 子集，一次性处理直接接管已有像素存储，减少一份整图复制。浮点精度路径、黑白点及方向处理保留原有约定，并检查取消和失败时的存储状态。
+- 同一次显示计算只准备一次曲线；自动测光和场景亮度统计复用已完成的精确分区，减少重复选择工作。逐项对照保留原有数值结果，没有更换胶片光谱、默认显影或成像公式。
+- 吸收上游 Sony Huffman 解码缓存索引保护，保留合法索引的既有计算；尚未用真实问题 Sony 原片完成复现验收。
+
+### 验证范围
+
+本轮分项云端验证包含 172 项 Release JVM 测试、3 项原有界面风格保存 / 导入测试、完整 LibRaw 的 ASan / UBSan 检查、ARM64 JNI 编译，以及测光和场景统计的 1460 项数值对照；真实 Vulkan 胶片与印放对照输出保持一致。发布仍须通过整包构建、原生回归、签名证书及 16 KiB 对齐检查。
+
+**未大规模真机验证，需要社区反馈。** 云端的耗时及内存改善不等于手机整张导出同比提速，也不保证所有 RAW 都降低峰值。新 RAW 仍默认线性显示，递归模糊、交互色表及完整外存分块实验继续默认关闭。
+
+技术记录：[滤镜与组合配方](docs/COMPOSABLE_STYLES_2026-11-13.md)、[工作尺寸转换](docs/ENGINE_RAW_WORKING_CONVERSION_2026-11-13.md)、[原始存储释放](docs/ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)、[LinearRaw 存储接管](docs/ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md)、[精确统计](docs/ENGINE_ORDER_STATISTICS_2026-11-13.md)、[曲线准备](docs/ENGINE_VIEW_CURVE_PREPARATION_2026-11-13.md)、[Sony 缓存保护](docs/ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md)。
+
 ## 0.2.00-alpha-5 · 2026-11-12
 
 **省流：** 修复异常像素被当成正常照片保存，出错后重建引擎重算。未大规模真机验证，需要社区反馈。

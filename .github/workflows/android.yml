@@ -183,6 +183,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           APP_VERSION: ${{ needs.apk.outputs.version }}
         run: |
+          # Alpha-6 is scheduled for 17:00 Asia/Shanghai on November 13, 2026.
+          if [[ "$APP_VERSION" == '0.2.00-alpha-6' ]]; then
+            not_before="$(date -u -d '2026-11-13 09:00:00 UTC' +%s)"
+            while (( $(date -u +%s) < not_before )); do
+              echo 'Alpha-6 checks passed; waiting for the scheduled release time.'
+              sleep 30
+            done
+          fi
           bash scripts/release-notes.sh "$APP_VERSION" dist "${{ github.repository }}" "${{ github.sha }}" > notes.md
           # --target: tag the commit that was built, not whatever main is now.
           gh release create "v$APP_VERSION" dist/*.apk dist/SHA256SUMS \
