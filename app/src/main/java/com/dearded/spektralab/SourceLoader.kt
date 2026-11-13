@@ -29,6 +29,19 @@ class SourceLoader(private val context: Context) {
         return uri.lastPathSegment?.substringAfterLast('/') ?: "image"
     }
 
+    /** External opens use provider metadata; explicit preset imports keep their own reader. */
+    fun isExternalPhoto(uri: Uri, declaredMime: String?): Boolean {
+        val name = displayName(uri)
+        val lowerName = name.lowercase(Locale.ROOT)
+        if (lowerName.contains("hald") && lowerName.endsWith(".png")) return false
+        val declared = declaredMime?.lowercase(Locale.ROOT)?.takeIf { it.isNotBlank() }
+        val mime = if (declared == null || declared == "application/octet-stream") {
+            runCatching { context.contentResolver.getType(uri) }.getOrNull()
+                ?.lowercase(Locale.ROOT)?.takeIf { it.isNotBlank() } ?: declared
+        } else declared
+        return mime?.startsWith("image/") == true || isRawByName(name, mime)
+    }
+
     fun isRaw(name: String, mime: String?, uri: Uri?): Boolean {
         if (isRawByName(name, mime)) return true
         val m = mime?.lowercase(Locale.ROOT)

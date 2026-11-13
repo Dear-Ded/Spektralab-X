@@ -34,17 +34,27 @@ int main() {
         for (uint32_t strip : {1u, 7u, 32u, 127u, h})
             require(check(rgb, w, h, strip, stride).empty(), "signed/HDR or stride regression");
 
-        // A sampled pixel after several strip boundaries must still fail.
-        const size_t sample = (size_t(132) * stride + 18) * 3;
+        // This valid pixel was outside the old sampling grid.
+        const size_t sample = (size_t(133) * stride + 19) * 3;
         const float saved = rgb[sample];
         for (float invalid : {std::numeric_limits<float>::quiet_NaN(),
-                              std::numeric_limits<float>::infinity()}) {
+                              std::numeric_limits<float>::infinity(),
+                              -std::numeric_limits<float>::infinity()}) {
             rgb[sample] = invalid;
             for (uint32_t strip : {1u, 7u, 32u, 127u, h})
                 require(check(rgb, w, h, strip, stride) == "non-finite float pixels",
-                        "sample grid changed across strips");
+                        "non-finite pixel escaped full or strip validation");
         }
         rgb[sample] = saved;
+
+        constexpr float flat = 16.0f / 65535.0f;
+        for (int c = 0; c < 3; ++c) {
+            std::vector<float> boundary(6, 0.0f);
+            boundary[3 + c] = flat;
+            require(!check(boundary, 2, 1, 1, 2).empty(), "flat tolerance boundary changed");
+            boundary[3 + c] = std::nextafter(flat, INFINITY);
+            require(check(boundary, 2, 1, 1, 2).empty(), "non-flat tolerance boundary rejected");
+        }
 
         std::fill(rgb.begin(), rgb.end(), 2.5f);
         rgb[(size_t(1028) * stride + 18) * 3] = 3.5f;
@@ -65,7 +75,21 @@ int main() {
         FloatFrameCheck overflow;
         require(!overflow.append(rgb.data(), std::numeric_limits<size_t>::max(), w, h, 0, 32),
                 "stride overflow accepted");
-        std::cout << "float frame check: full/strip grid, HDR, NaN, flat, incomplete and invalid strips PASS\n";
+        constexpr uint32_t pattern_w = 1024, pattern_h = 1024;
+        std::vector<float> pattern(size_t(pattern_w) * pattern_h * 3);
+        for (unsigned mode = 0; mode < 5; ++mode) {
+            for (uint32_t y = 0; y < pattern_h; ++y) for (uint32_t x = 0; x < pattern_w; ++x) {
+                const bool bright = mode == 0 ? x == 1 && y == 1 :
+                    mode == 1 ? x == pattern_w - 1 && y == pattern_h - 1 :
+                    mode == 2 ? y % 4 == 1 : x % 4 == (mode == 3 ? 0u : 1u);
+                const size_t p = (size_t(y) * pattern_w + x) * 3;
+                pattern[p] = pattern[p + 1] = pattern[p + 2] = bright ? 1.0f : 0.0f;
+            }
+            for (uint32_t strip : {1u, 7u, 64u, pattern_h})
+                require(check(pattern, pattern_w, pattern_h, strip, pattern_w).empty(),
+                        "non-flat pattern was mistaken for a solid colour");
+        }
+        std::cout << "float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS\n";
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
         return 1;

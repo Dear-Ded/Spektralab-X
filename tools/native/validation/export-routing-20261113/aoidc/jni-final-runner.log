@@ -1,0 +1,18 @@
+normal,0
+PASS pattern=0 Bitmap/JPEG/TIFF accepted
+PASS pattern=1 Bitmap/JPEG/TIFF accepted
+PASS pattern=2 Bitmap/JPEG/TIFF accepted
+PASS pattern=3 Bitmap/JPEG/TIFF accepted
+PASS pattern=4 Bitmap/JPEG/TIFF accepted
+PASS pattern=5 Bitmap/JPEG/TIFF flat refused
+PASS production JNI: 5 non-flat patterns x 3 exports; flat refusal x 3; exact Bitmap bytes; JPEG completion; TIFF ownership
+asan,0
+PASS pattern=0 Bitmap/JPEG/TIFF accepted
+PASS pattern=1 Bitmap/JPEG/TIFF accepted
+PASS pattern=2 Bitmap/JPEG/TIFF accepted
+PASS pattern=3 Bitmap/JPEG/TIFF accepted
+PASS pattern=4 Bitmap/JPEG/TIFF accepted
+PASS pattern=5 Bitmap/JPEG/TIFF flat refused
+PASS production JNI: 5 non-flat patterns x 3 exports; flat refusal x 3; exact Bitmap bytes; JPEG completion; TIFF ownership
+before,1
+FAIL Bitmap non-flat acceptance / true-flat refusal: export check: the float frame is one solid colour

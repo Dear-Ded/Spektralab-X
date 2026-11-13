@@ -507,7 +507,7 @@ and small contact-sheet thumbnails are outside the test. See
 `run_nofilm_rows.sh` requires patch 0034 and matching rebuilt engine archives.
 It compares full-vector and borrowed-row float/packed bytes across geometry and
 grading, and checks sink failure, exception, cancellation and recovery.
-`run_float_frame_check.sh` checks the shared full/strip sampled-frame validator;
+`run_float_frame_check.sh` checks every valid pixel in the full/strip frame validator;
 set `SANITIZE=1` for ASan/UBSan. `measure_nofilm_rows.py` runs both export paths
 in separate child executables and records sampled RSS and observed kernel HWM.
 Use the `synthetic` input for public evidence; camera files and derived outputs
@@ -517,6 +517,18 @@ Only no-film `exportJpeg444` consumes this row sink. Other exports and the
 preview cache are unchanged. A lower float readback allocation does not imply
 a lower whole-process peak or bounded RAW decoding. See
 [the implementation and reproduction steps](../../docs/NOFILM_ROW_READBACK_2026-11-09.md).
+
+The frame regressions also cover periodic rows/columns, isolated changed pixels,
+the original flat tolerance, invalid alpha after proven variation, and non-finite
+float components outside the former sampling grid. `run_rgba16_frame_check.sh`
+checks the integer path. `run_jni_frame_check.sh` exercises production Bitmap,
+streamed JPEG and TIFF exports with the same synthetic patterns; it requires
+`UP`, `B`, `CODEC`, `MATH_DIR`, `VULKAN_HEADERS` and `BUILD_DIR` as in the other
+JNI runners. `RAW_BUILD` can select a separate matching image-IO/LibRaw archive
+build, and `LIBRAW_SOURCE` overrides its recorded source directory. Set
+`APP_CPP` to a frozen adapter tree for the negative control and `SANITIZE=1`
+for adapter ASan/UBSan. `frame_check_benchmark.cpp` measures synthetic 30 MP
+validator time only. See [the fix and validation scope](../../docs/EXPORT_ROUTING_FIXES_2026-11-13.md).
 
 ## Bounded external-plane point chain
 

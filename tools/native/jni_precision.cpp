@@ -45,7 +45,7 @@ int AndroidBitmap_lockPixels(JNIEnv*, jobject object, void** pixels) {
     ++bitmap.locks; *pixels = bitmap.pixels.data(); return 0;
 }
 int AndroidBitmap_unlockPixels(JNIEnv*, jobject object) { --reinterpret_cast<PrecisionBitmap*>(object)->locks; return 0; }
-void kmp_set_blocktime(int) {}
+extern "C" void kmp_set_blocktime(int) {}
 #include "spektralab_jni.cpp"
 #define CALL(name) Java_com_dearded_spektralab_NativeEngine_##name
 

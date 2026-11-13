@@ -1,0 +1,4 @@
+test,exit_code
+normal,0
+asan,0
+before,1

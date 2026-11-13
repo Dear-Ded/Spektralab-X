@@ -104,12 +104,7 @@ class MainActivity : ComponentActivity() {
         }
         if (uris.isEmpty()) return
         // A photo opens in the editor; anything else is a style or film to import (StyleImport.kt).
-        val type = intent?.type ?: uris.firstOrNull()?.let(contentResolver::getType)
-        if (type?.startsWith("image/") == true && !isHaldName(uris.first())) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
+        if (SourceLoader(this).isExternalPhoto(uris.first(), intent?.type)) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
         else ImportRequests.add(uris)
     }
-
-    /** A HaldCLUT comes as a PNG; one whose name says so is imported, not opened. */
-    private fun isHaldName(uri: Uri): Boolean =
-        (uri.lastPathSegment ?: "").lowercase().let { it.contains("hald") && it.endsWith(".png") }
 }

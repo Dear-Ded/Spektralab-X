@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExportRetryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T12:19:45.947Z" hostname="ser858255664526" time="0.005">
+  <properties/>
+  <testcase name="sourceAboveDeviceCapShrinksFromTheActiveCap" classname="com.dearded.spektralab.ExportRetryTest" time="0.001"/>
+  <testcase name="knownSourceWithNoCapReceivesASmallerCap" classname="com.dearded.spektralab.ExportRetryTest" time="0.0"/>
+  <testcase name="subsequentRetryShrinksFromThePreviousCap" classname="com.dearded.spektralab.ExportRetryTest" time="0.002"/>
+  <testcase name="sourceBelowDeviceCapStillShrinksWhenFirstRetryEdgeExceedsSource" classname="com.dearded.spektralab.ExportRetryTest" time="0.0"/>
+  <testcase name="retryHasNoMemoryTierFloorAndDoesNotTurnPositiveCapOff" classname="com.dearded.spektralab.ExportRetryTest" time="0.0"/>
+  <testcase name="unknownOutputRetainsCapOnlyFallback" classname="com.dearded.spektralab.ExportRetryTest" time="0.0"/>
+  <testcase name="shareOutputHintSetsCapBelowShareAreaWithoutClaimingWorkingSourceSize" classname="com.dearded.spektralab.ExportRetryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

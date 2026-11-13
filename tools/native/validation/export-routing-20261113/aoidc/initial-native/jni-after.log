@@ -1,0 +1,11 @@
+In file included from /data/work/gpt-export-routing-fixes-20261113/repo/app/src/main/cpp/spektralab_jni.cpp:33,
+                 from /data/work/gpt-export-routing-fixes-20261113/repo/tools/native/jni_precision.cpp:49,
+                 from /data/work/gpt-export-routing-fixes-20261113/repo/tools/native/jni_frame_check.cpp:4:
+/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_camera.hpp:2:10: fatal error: libraw/libraw.h: No such file or directory
+    2 | #include <libraw/libraw.h>
+      |          ^~~~~~~~~~~~~~~~~
+compilation terminated.
+/data/work/gpt-rank-selection-20261113/upstream/engine/host/white_balance.cpp:7:10: fatal error: libraw/libraw.h: No such file or directory
+    7 | #include <libraw/libraw.h>
+      |          ^~~~~~~~~~~~~~~~~
+compilation terminated.

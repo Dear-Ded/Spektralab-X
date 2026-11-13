@@ -52,13 +52,38 @@ int main() try {
         "short stride accepted");
     require(check_rgba16_frame(frame.data(), w, h, std::numeric_limits<size_t>::max()) ==
         "invalid RGBA16 frame layout", "overflow accepted");
+    for (unsigned c = 0; c < 3; ++c) {
+        std::vector<uint16_t> boundary(8, 1000);
+        boundary[3] = boundary[7] = 65535;
+        boundary[4 + c] = 1016;
+        require(!check_rgba16_frame(boundary.data(), 2, 1, 2).empty(), "flat tolerance boundary changed");
+        boundary[4 + c] = 1017;
+        require(check_rgba16_frame(boundary.data(), 2, 1, 2).empty(), "non-flat tolerance boundary rejected");
+    }
+    constexpr uint32_t pattern_w = 1024, pattern_h = 1024;
+    std::vector<uint16_t> pattern(size_t(pattern_w) * pattern_h * 4, 65535);
+    for (unsigned mode = 0; mode < 5; ++mode) {
+        for (uint32_t y = 0; y < pattern_h; ++y) for (uint32_t x = 0; x < pattern_w; ++x) {
+            const bool bright = mode == 0 ? x == 1 && y == 1 :
+                mode == 1 ? x == pattern_w - 1 && y == pattern_h - 1 :
+                mode == 2 ? y % 4 == 1 : x % 4 == (mode == 3 ? 0u : 1u);
+            auto* p = pattern.data() + (size_t(y) * pattern_w + x) * 4;
+            p[0] = p[1] = p[2] = bright ? 65535 : 0;
+        }
+        require(check_rgba16_frame(pattern.data(), pattern_w, pattern_h, pattern_w).empty(),
+            "non-flat pattern was mistaken for sampled black or white");
+    }
+    pattern.back() = 0;
+    require(check_rgba16_frame(pattern.data(), pattern_w, pattern_h, pattern_w).find(
+        "invalid RGBA16 alpha at (1023, 1023)") != std::string::npos,
+        "alpha after proven RGB variation was skipped");
     constexpr uint32_t big_w = 6709, big_h = 4475;
     std::vector<uint16_t> big(size_t(big_w) * big_h * 4);
     fill(big, big_w, big_h, big_w);
     const auto start = std::chrono::steady_clock::now();
     require(check_rgba16_frame(big.data(), big_w, big_h, big_w).empty(), "30 MP frame rejected");
     const auto ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
-    std::cout << "PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout; "
+    std::cout << "PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; "
               << "30MP_check_ms=" << ms << '\n';
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';

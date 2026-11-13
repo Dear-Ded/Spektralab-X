@@ -1,0 +1,6 @@
+g++ (Debian 14.2.0-19) 14.2.0
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=9.80784
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=23.8517
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+2026-11-13T12:21:35+00:00

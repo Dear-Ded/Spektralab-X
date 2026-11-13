@@ -54,7 +54,8 @@
             <!-- Styles and films to import (StyleImport.kt): .spklook, .cube, HaldCLUT,
                  Lightroom .xmp / .dng presets, spektrafilm .json, Fuji recipe .txt.
                  File managers mostly send these as octet-stream, so that type is
-                 listed too; MainActivity routes anything not image/* to the import sheet. -->
+                 listed too; MainActivity also checks provider names for RAW and Hald.
+                 DNG presets remain available through the explicit import picker. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

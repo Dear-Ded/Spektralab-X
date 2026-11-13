@@ -1,0 +1,5 @@
+format,pattern,best_of_3_ms,result
+rgba16,gradient_30MP,45.9558,accepted
+float,gradient_30MP,119.441,accepted
+rgba16,flat_30MP,219.592,rejected
+float,flat_30MP,237.917,rejected

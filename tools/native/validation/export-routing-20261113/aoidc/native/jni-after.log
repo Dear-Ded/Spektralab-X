@@ -1,0 +1,3 @@
+/usr/bin/ld: /data/work/gpt-feedback-env-20261112/android-build/native/jpeg-install/lib/libjpeg.a(jmemmgr.c.o): in function `_ZL6strlenPKcU17pass_object_size0':
+/opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify/string.h:229: undefined reference to `__strlen_chk'
+collect2: error: ld returned 1 exit status

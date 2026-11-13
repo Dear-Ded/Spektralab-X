@@ -9,7 +9,7 @@
 
 namespace spk::android {
 
-// Uses the same full-frame sampling grid for a whole image or ordered strips.
+// Inspect every valid pixel, retaining only extrema across ordered strips.
 // Check before grading: signed/HDR values can still recover useful detail.
 class FloatFrameCheck {
 public:
@@ -25,13 +25,12 @@ public:
         }
         width_ = width;
         height_ = height;
-        const uint32_t sx = std::max(1u, width / 256);
-        const uint32_t sy = std::max(1u, height / 256);
+        constexpr float flat = 16.0f / 65535.0f;
         const uint64_t end = uint64_t(y0) + count;
-        const uint64_t first = uint64_t(y0) + (sy - y0 % sy) % sy;
-        for (uint64_t y = first; y < end; y += sy) {
+        for (uint64_t y = y0; y < end; ++y) {
             const float* row = rgb + size_t(y - y0) * stride_px * 3;
-            for (uint64_t x = 0; x < width; x += sx) {
+            uint32_t x = 0;
+            for (; !varied_ && x < width; ++x) {
                 for (int c = 0; c < 3; ++c) {
                     const float value = row[size_t(x) * 3 + c];
                     if (!std::isfinite(value)) {
@@ -40,6 +39,16 @@ public:
                     }
                     lo_[c] = std::min(lo_[c], value);
                     hi_[c] = std::max(hi_[c], value);
+                }
+                varied_ = hi_[0] - lo_[0] > flat || hi_[1] - lo_[1] > flat || hi_[2] - lo_[2] > flat;
+            }
+            // Variation is permanent, but every remaining component must still be finite.
+            for (; x < width; ++x) {
+                for (int c = 0; c < 3; ++c) {
+                    if (!std::isfinite(row[size_t(x) * 3 + c])) {
+                        error_ = "non-finite float pixels";
+                        return false;
+                    }
                 }
             }
         }
@@ -51,16 +60,14 @@ public:
         if (!error_.empty()) return error_;
         if (!width_ || !height_) return "no float pixels";
         if (next_y_ != height_) return "incomplete float frame";
-        constexpr float flat = 16.0f / 65535.0f;
-        if (hi_[0] - lo_[0] <= flat && hi_[1] - lo_[1] <= flat && hi_[2] - lo_[2] <= flat)
-            return "the float frame is one solid colour";
-        return {};
+        return varied_ ? std::string{} : "the float frame is one solid colour";
     }
 
 private:
     uint32_t width_ = 0, height_ = 0, next_y_ = 0;
     float lo_[3] = {INFINITY, INFINITY, INFINITY};
     float hi_[3] = {-INFINITY, -INFINITY, -INFINITY};
+    bool varied_ = false;
     std::string error_;
 };
 

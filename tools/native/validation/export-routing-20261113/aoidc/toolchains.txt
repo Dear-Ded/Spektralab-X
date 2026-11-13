@@ -1,0 +1,2 @@
+Ubuntu clang version 14.0.0-1ubuntu1.1
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0

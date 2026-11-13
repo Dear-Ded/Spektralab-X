@@ -1,0 +1,1 @@
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS

@@ -1,0 +1,14 @@
+test,exit_code
+g++-rgba16,0
+g++-rgba16-asan,0
+g++-float,0
+g++-float-asan,0
+clang++-14-rgba16,0
+clang++-14-rgba16-asan,0
+clang++-14-float,0
+clang++-14-float-asan,0
+nofilm,0
+output,0
+output-cancellation,0
+jni-after,1
+jni-after-asan,1

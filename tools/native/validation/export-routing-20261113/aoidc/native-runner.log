@@ -1,0 +1,37 @@
+g++-rgba16,0
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=50.5692
+g++-rgba16-asan,0
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=83.5198
+g++-float,0
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+g++-float-asan,0
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+clang++-14-rgba16,0
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=68.0063
+clang++-14-rgba16-asan,0
+PASS rgba16 frame: stride, incomplete pixel/rows, opaque dark content, flat, layout, 5 non-flat patterns; 30MP_check_ms=65.2885
+clang++-14-float,0
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+clang++-14-float-asan,0
+float frame check: full/strip pixels, HDR, unsampled NaN, flat, 5 non-flat patterns, incomplete and invalid strips PASS
+before-rgba16,exit=1 (expected 1)
+before-float,exit=1 (expected 1)
+nofilm,0
+matrix PASS cases=120 max16=3 max8=0 tiff_rows=780 repack=60 missing_transform=refused
+geometry PASS crop/turn/flip/resize invalid_requests=6
+no-film float PASS
+output,0
+output rows: 162 cases x 5 strip heights; RGB16 and complete TIFF byte-identical; provider failure passed
+output-cancellation,0
+cpu parity PASS float/integer full/strip rgba8/rgba16
+TIFF PASS cancelled_cleanup joined_workers cancel_classification complete_file_parity
+output cancellation PASS
+jni-after,1
+/usr/bin/ld: /data/work/gpt-feedback-env-20261112/android-build/native/jpeg-install/lib/libjpeg.a(jmemmgr.c.o): in function `_ZL6strlenPKcU17pass_object_size0':
+/opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify/string.h:229: undefined reference to `__strlen_chk'
+collect2: error: ld returned 1 exit status
+jni-after-asan,1
+void kmp_set_blocktime(int) {}
+     ^
+1 error generated.
+jni-before,exit=1 (expected 1)

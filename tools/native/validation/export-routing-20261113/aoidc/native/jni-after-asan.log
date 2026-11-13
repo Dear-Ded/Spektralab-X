@@ -1,0 +1,14 @@
+In file included from /data/work/gpt-export-routing-fixes-20261113/repo/tools/native/jni_frame_check.cpp:4:
+In file included from /data/work/gpt-export-routing-fixes-20261113/repo/tools/native/jni_precision.cpp:49:
+In file included from /data/work/gpt-export-routing-fixes-20261113/repo/app/src/main/cpp/spektralab_jni.cpp:33:
+In file included from /data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_camera.hpp:2:
+In file included from /data/work/gpt-raw-storage-20261113/libraw/libraw/libraw.h:77:
+In file included from /data/work/gpt-raw-storage-20261113/libraw/libraw/libraw_datastream.h:58:
+In file included from /data/work/gpt-raw-storage-20261113/libraw/libraw/libraw_types.h:76:
+/usr/lib/llvm-14/lib/clang/14.0.0/include/omp.h:252:42: error: declaration of 'kmp_set_blocktime' has a different language linkage
+    extern void   __KAI_KMPC_CONVENTION  kmp_set_blocktime          (int);
+                                         ^
+/data/work/gpt-export-routing-fixes-20261113/repo/tools/native/jni_precision.cpp:48:6: note: previous definition is here
+void kmp_set_blocktime(int) {}
+     ^
+1 error generated.

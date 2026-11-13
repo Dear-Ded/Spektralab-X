@@ -45,7 +45,8 @@ jobs:
         run: |
           ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest \
             --tests com.dearded.spektralab.Screenshots --tests com.dearded.spektralab.PhotoGeometryTest \
-            --tests com.dearded.spektralab.FrameRateBoostTest
+            --tests com.dearded.spektralab.FrameRateBoostTest \
+            --tests com.dearded.spektralab.ExternalFileRoutingTest
 
       # First, so a failing contact sheet never loses the PNGs.
       - name: Upload screenshots

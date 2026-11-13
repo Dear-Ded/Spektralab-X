@@ -95,8 +95,10 @@ jobs:
             bash tools/native/run_libraw_huffman_cache.sh > fir-evidence/huffman.log 2>&1
           cp huffman-tests/inputs.sha256 fir-evidence/huffman-inputs.sha256
           cat fir-evidence/huffman.log
-      - name: Check RGBA16 export integrity
-        run: BUILD_DIR="$PWD/frame-tests" bash tools/native/run_rgba16_frame_check.sh
+      - name: Check RGBA16 and float export integrity
+        run: |
+          BUILD_DIR="$PWD/frame-tests/rgba16" bash tools/native/run_rgba16_frame_check.sh
+          BUILD_DIR="$PWD/frame-tests/float" SANITIZE=1 bash tools/native/run_float_frame_check.sh
       - name: Compare streamed RGB16 working input
         run: |
           mkdir -p fir-evidence
