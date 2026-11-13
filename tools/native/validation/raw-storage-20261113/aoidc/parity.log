@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-raw-storage-20261113/repo/tools/native/raw_precision_input_fixtures.py", line 140, in <module>
+    main()
+  File "/data/work/gpt-raw-storage-20261113/repo/tools/native/raw_precision_input_fixtures.py", line 123, in main
+    assert row['cancelled'] and not row['ok'] and row['unchanged'] and row['float_metadata_unchanged'], row
+AssertionError: {'open_status': 0, 'mode': 'integer_compatible16', 'note': '', 'ok': True, 'cancelled': False, 'polls': 24, 'raw_unchanged': True, 'unchanged': False, 'float_metadata_unchanged': True, 'reference_ok': False, 'exact_pixels': False, 'exact_metadata': False, 'width': 64, 'height': 48, 'raw_flip': 0, 'error': '', 'float_black': [1, 2, 3], 'float_white': [4, 5, 6], 'selected_wb': [2, 1, 1.5, 1], 'camera_wb': [1, 1, 1, 0], 'applied_wb': [1, 1, 1, 1]}

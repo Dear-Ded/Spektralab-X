@@ -1,0 +1,16 @@
+phase=open,rss_kib=4960,peak_kib=4960,raw_owned=0,working_owned=0
+phase=unpack,rss_kib=192900,peak_kib=192900,raw_owned=1,working_owned=0
+phase=process,rss_kib=380340,peak_kib=380340,raw_owned=1,working_owned=1
+phase=before_bitmap,rss_kib=380340,peak_kib=380340,raw_owned=1,working_owned=1
+phase=bitmap,rss_kib=521352,peak_kib=521352,raw_owned=1,working_owned=1
+phase=destroy_raw,rss_kib=145624,peak_kib=521352,raw_owned=0,working_owned=0
+phase=destroy_bitmap,rss_kib=4996,peak_kib=521352,raw_owned=0,working_owned=0
+release=0,fnv1a=9c82eb5837134525
+phase=open,rss_kib=4928,peak_kib=4928,raw_owned=0,working_owned=0
+phase=unpack,rss_kib=192928,peak_kib=192928,raw_owned=1,working_owned=0
+phase=process,rss_kib=380368,peak_kib=380368,raw_owned=1,working_owned=1
+phase=before_bitmap,rss_kib=193412,peak_kib=380368,raw_owned=0,working_owned=1
+phase=bitmap,rss_kib=333856,peak_kib=380368,raw_owned=0,working_owned=1
+phase=destroy_raw,rss_kib=145652,peak_kib=380368,raw_owned=0,working_owned=0
+phase=destroy_bitmap,rss_kib=5024,peak_kib=380368,raw_owned=0,working_owned=0
+release=1,fnv1a=9c82eb5837134525

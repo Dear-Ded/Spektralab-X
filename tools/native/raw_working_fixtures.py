@@ -13,21 +13,25 @@ import sys
 from dng_float_precision_fixtures import FM, tag
 
 
-def fixture(path, width, height, orientation=1):
+def fixture(path, width, height, orientation=1, bayer=False):
     tags = {}
+    channels = 1 if bayer else 3
     fields = {254: (4, [0]), 256: (4, [width]), 257: (4, [height]),
-              258: (3, [16, 16, 16]), 259: (3, [1]), 262: (3, [34892]),
-              273: (4, [0]), 274: (3, [orientation]), 277: (3, [3]),
-              278: (4, [height]), 279: (4, [width * height * 6]),
-              284: (3, [1]), 339: (3, [1, 1, 1]),
+              258: (3, [16] * channels), 259: (3, [1]), 262: (3, [32803 if bayer else 34892]),
+              273: (4, [0]), 274: (3, [orientation]), 277: (3, [channels]),
+              278: (4, [height]), 279: (4, [width * height * channels * 2]),
+              284: (3, [1]), 339: (3, [1] * channels),
               50829: (4, [0, 0, height, width]),
               50706: (1, [1, 4, 0, 0]), 50707: (1, [1, 4, 0, 0]),
-              50713: (3, [1, 1]), 50714: (5, [0, 0, 0]),
-              50717: (4, [65535, 65535, 65535]),
+              50713: (3, [1, 1]), 50714: (5, [0] * channels),
+              50717: (4, [65535] * channels),
               50721: (10, [1, 0, 0, 0, 1, 0, 0, 0, 1]),
               50728: (5, [1, 1, 1]), 50778: (3, [23]), 50964: (10, FM),
               271: (2, b'GPT\0'), 272: (2, b'Working conversion fixture\0'),
               50708: (2, b'GPT Working conversion fixture\0')}
+    if bayer:
+        fields.update({33421: (3, [2, 2]), 33422: (1, [0, 1, 1, 2]),
+                       50710: (1, [0, 1, 2]), 50711: (3, [1])})
     for number, (kind, values) in fields.items():
         tag(tags, number, kind, values)
     extra_offset = 8 + 2 + 12 * len(tags) + 4
@@ -48,7 +52,7 @@ def fixture(path, width, height, orientation=1):
     assert len(header) == strip
     with path.open('wb') as file:
         file.write(header)
-        row = array('H', ((x * 59 + c * 179) % 65536 for x in range(width) for c in range(3)))
+        row = array('H', ((x * 59 + c * 179) % 65536 for x in range(width) for c in range(channels)))
         if sys.byteorder != 'little':
             row.byteswap()
         payload = row.tobytes()
@@ -64,6 +68,8 @@ if __name__ == '__main__':
     args.folder.mkdir(parents=True, exist_ok=True)
     for orientation in range(1, 9):
         fixture(args.folder / f'integer-orientation-{orientation}.dng', 97, 73, orientation)
+        fixture(args.folder / f'integer-bayer-orientation-{orientation}.dng', 97, 73, orientation, bayer=True)
     if args.large:
         fixture(args.folder / 'integer-linear-24mp.dng', 6000, 4000)
-    print('Generated public integer LinearRaw orientations 1..8' + (' and 24 MP' if args.large else ''))
+        fixture(args.folder / 'integer-bayer-24mp.dng', 6000, 4000, bayer=True)
+    print('Generated public integer LinearRaw/Bayer orientations 1..8' + (' and 24 MP' if args.large else ''))

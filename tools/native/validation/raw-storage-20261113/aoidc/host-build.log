@@ -1,0 +1,104 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.2.11") 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /data/work/gpt-raw-storage-20261113/host
+[0/2] Re-checking globbed directories...
+[1/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/canon_600.cpp.o
+[2/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/decoders_dcraw.cpp.o
+[3/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/crx.cpp.o
+[4/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/decoders_libraw_dcrdefs.cpp.o
+[5/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/decoders_libraw.cpp.o
+[6/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/dng.cpp.o
+[7/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/fp_dng.cpp.o
+[8/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/fuji_compressed.cpp.o
+[9/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/generic.cpp.o
+[10/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/kodak_decoders.cpp.o
+[11/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/load_mfbacks.cpp.o
+[12/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/olympus14.cpp.o
+[13/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/pana8.cpp.o
+[14/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/smal.cpp.o
+[15/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/sonycc.cpp.o
+[16/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/unpack.cpp.o
+[17/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/sony_arw6.cpp.o
+[18/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decoders/unpack_thumb.cpp.o
+[19/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/decompressors/losslessjpeg.cpp.o
+[20/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/aahd_demosaic.cpp.o
+[21/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/ahd_demosaic.cpp.o
+[22/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/dcb_demosaic.cpp.o
+[23/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/dht_demosaic.cpp.o
+[24/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/misc_demosaic.cpp.o
+[25/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/integration/dngsdk_glue.cpp.o
+[26/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/demosaic/xtrans_demosaic.cpp.o
+[27/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/integration/rawspeed_glue.cpp.o
+[28/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/libraw_c_api.cpp.o
+[29/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/libraw_datastream.cpp.o
+[30/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/adobepano.cpp.o
+[31/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/ciff.cpp.o
+[32/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/canon.cpp.o
+[33/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/epson.cpp.o
+[34/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/cr3_parser.cpp.o
+[35/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/exif_gps.cpp.o
+[36/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/fuji.cpp.o
+[37/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/hasselblad_model.cpp.o
+[38/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/identify_tools.cpp.o
+[39/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/kodak.cpp.o
+[40/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/identify.cpp.o
+[41/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/leica.cpp.o
+[42/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/makernotes.cpp.o
+[43/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/mediumformat.cpp.o
+[44/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/minolta.cpp.o
+[45/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/misc_parsers.cpp.o
+[46/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/nikon.cpp.o
+[47/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/normalize_model.cpp.o
+[48/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/olympus.cpp.o
+[49/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/p1.cpp.o
+[50/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/pentax.cpp.o
+[51/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/samsung.cpp.o
+[52/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/sony.cpp.o
+[53/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/metadata/tiff.cpp.o
+[54/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/aspect_ratio.cpp.o
+[55/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/dcraw_process.cpp.o
+[56/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/mem_image.cpp.o
+[57/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/postprocessing_utils.cpp.o
+[58/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/postprocessing_aux.cpp.o
+[59/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/postprocessing/postprocessing_utils_dcrdefs.cpp.o
+[60/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/preprocessing/ext_preprocess.cpp.o
+[61/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/preprocessing/subtract_black.cpp.o
+[62/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/preprocessing/raw2image.cpp.o
+[63/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/tables/cameralist.cpp.o
+[64/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/tables/colorconst.cpp.o
+[65/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/tables/colordata.cpp.o
+[66/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/tables/wblists.cpp.o
+[67/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/decoder_info.cpp.o
+[68/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/curves.cpp.o
+[69/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/init_close_utils.cpp.o
+[70/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/open.cpp.o
+[71/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/phaseone_processing.cpp.o
+[72/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/read_utils.cpp.o
+[73/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/thumb_utils.cpp.o
+[74/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/utils_dcraw.cpp.o
+[75/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/utils/utils_libraw.cpp.o
+[76/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/write/apply_profile.cpp.o
+[77/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/write/file_write.cpp.o
+[78/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/x3f/x3f_parse_process.cpp.o
+[79/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/x3f/x3f_utils_patched.cpp.o
+[80/85] Building CXX object CMakeFiles/spk_libraw.dir/data/work/gpt-raw-storage-20261113/libraw/src/write/tiff_writer.cpp.o
+[81/85] Building CXX object CMakeFiles/spk_image_io.dir/data/work/gpt-raw-storage-20261113/upstream/engine/src/io/raw_headroom.cpp.o
+[82/85] Building CXX object CMakeFiles/spk_image_io.dir/data/work/gpt-raw-storage-20261113/upstream/engine/src/io/image_writer.cpp.o
+[83/85] Linking CXX static library engine/libspk_libraw.a
+[84/85] Building CXX object CMakeFiles/spk_image_io.dir/data/work/gpt-raw-storage-20261113/upstream/engine/src/io/raw_decoder.cpp.o
+[85/85] Linking CXX static library engine/libspk_image_io.a

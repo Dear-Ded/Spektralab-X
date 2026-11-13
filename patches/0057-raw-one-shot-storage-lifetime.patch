@@ -1,0 +1,18 @@
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index c222f52..b5c35b9 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -497,6 +497,13 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         decoded.metadata.postprocess_maximum = color.maximum;
+         decoded.metadata.camera_to_output = raw->matrix;
+ 
++        // Co-created with GPT (OpenAI). This decoder processes each LibRaw
++        // instance once. Metadata is captured; output now reads only the
++        // processed image. Drop owned sensor storage before allocating RGB16.
++        // External decoder storage keeps its existing destructor lifetime.
++        raw->spk_release_rawdata();
++        progress.check();
++
+         // This also performs LibRaw's final orientation and identity gamma
+         // lookup. Reading imgdata.image directly would omit those semantics.
+         start = Clock::now();

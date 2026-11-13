@@ -1,0 +1,38 @@
+{
+  "decode-memory": {
+    "old_rss_kib": 521512,
+    "new_rss_kib": 380652,
+    "old_rss_mib": 509.2890625,
+    "new_rss_mib": 371.73046875,
+    "rss_reduction_percent": 27.00992498734449,
+    "old_ms": 1232.0,
+    "new_ms": 1186.11,
+    "time_change_percent": -3.7248376623376704,
+    "pairs": 3,
+    "fnv1a": "fce7da97652d8015"
+  },
+  "bayer-memory": {
+    "old_rss_kib": 380988,
+    "new_rss_kib": 334024,
+    "old_rss_mib": 372.05859375,
+    "new_rss_mib": 326.1953125,
+    "rss_reduction_percent": 12.326897435089819,
+    "old_ms": 1371.33,
+    "new_ms": 1377.92,
+    "time_change_percent": 0.4805553732507964,
+    "pairs": 3,
+    "fnv1a": "f5092a78d85552c1"
+  },
+  "full-float-memory": {
+    "old_rss_kib": 521648,
+    "new_rss_kib": 427872,
+    "old_rss_mib": 509.421875,
+    "new_rss_mib": 417.84375,
+    "rss_reduction_percent": 17.976873293868664,
+    "old_ms": 1613.43,
+    "new_ms": 1673.11,
+    "time_change_percent": 3.698951922302166,
+    "pairs": 3,
+    "fnv1a": "fce7da97652d8015"
+  }
+}

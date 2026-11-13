@@ -1,0 +1,1539 @@
+{
+  "passed": true,
+  "cases": 136,
+  "successful": 132,
+  "all_pixel_bytes_equal": true,
+  "all_metadata_fields_equal": true,
+  "records": [
+    {
+      "fixture": "bayer-max2-black0.dng",
+      "options": [],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 464,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "bayer-max2-black0.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 464,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "bayer-max2-black0.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 9216,
+      "metadata_bytes": 464,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "bayer-max2-black0.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 9216,
+      "metadata_bytes": 464,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-crop.dng",
+      "options": [],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-crop.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-crop.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-crop.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-opcode.dng",
+      "options": [],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-opcode.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-opcode.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-opcode.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-profile.dng",
+      "options": [],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-profile.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-profile.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-profile.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-repeat.dng",
+      "options": [],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 468,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-repeat.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 468,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-repeat.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 468,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fallback-repeat.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_legacy_quantized",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 468,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "fractional.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "fractional.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "fractional.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "fractional.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "integer-bayer.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 455,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-bayer.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 455,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-bayer.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 9216,
+      "metadata_bytes": 455,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-bayer.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 9216,
+      "metadata_bytes": 455,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-linear.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 451,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-linear.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 451,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-linear.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 451,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-linear.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 451,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "linear-max2-black0.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "linear-max2-black0.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "linear-max2-black0.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "linear-max2-black0.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max2.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max2.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max2.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max2.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max4.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max4.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max4.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "max4.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "nonunit-green-neutral.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "nonunit-green-neutral.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "nonunit-green-neutral.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "nonunit-green-neutral.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-2.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-2.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-2.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-2.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-3.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-3.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-3.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-3.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-4.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-4.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-4.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-4.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-5.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-5.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-5.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-5.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-6.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-6.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-6.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-6.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-7.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-7.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-7.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-7.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-8.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-8.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-8.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "orientation-8.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-black.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-black.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-black.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-black.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-orientation6.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-orientation6.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-orientation6.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-orientation6.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-permuted.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-permuted.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-permuted.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white-permuted.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "per-plane-white.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "rational-neutral-white.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "rational-neutral-white.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "rational-neutral-white.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "rational-neutral-white.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "scaled-neutral-white.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "scaled-neutral-white.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "scaled-neutral-white.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "scaled-neutral-white.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": true,
+      "pixel_bytes": 36864,
+      "metadata_bytes": 460,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "supported-bad-sample.dng",
+      "options": [],
+      "mode": "float_linear_v1",
+      "ok": false,
+      "pixel_bytes": 0,
+      "metadata_bytes": 0,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "supported-bad-sample.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "float_linear_v1",
+      "ok": false,
+      "pixel_bytes": 0,
+      "metadata_bytes": 0,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "supported-bad-sample.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": false,
+      "pixel_bytes": 0,
+      "metadata_bytes": 0,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "supported-bad-sample.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "float_linear_v1",
+      "ok": false,
+      "pixel_bytes": 0,
+      "metadata_bytes": 0,
+      "poll_delta": 0
+    },
+    {
+      "fixture": "integer-orientation-1.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-1.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-1.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-1.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-2.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-2.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-2.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-2.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-3.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-3.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-3.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-3.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-4.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-4.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-4.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-4.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-5.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-5.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-5.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-5.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-6.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-6.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-6.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-6.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-7.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-7.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-7.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-7.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-8.dng",
+      "options": [],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-8.dng",
+      "options": [
+        "--custom"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-8.dng",
+      "options": [
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    },
+    {
+      "fixture": "integer-orientation-8.dng",
+      "options": [
+        "--custom",
+        "--half-budget",
+        "1"
+      ],
+      "mode": "integer_compatible16",
+      "ok": true,
+      "pixel_bytes": 84972,
+      "metadata_bytes": 453,
+      "poll_delta": 1
+    }
+  ]
+}

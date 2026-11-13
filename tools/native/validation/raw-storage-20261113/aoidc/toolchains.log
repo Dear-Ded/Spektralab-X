@@ -1,0 +1,11 @@
+Linux 5.15.0-30-generic x86_64
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+cmake version 3.22.1
+/data/work/gpt-raw-storage-20261113/host/CMakeCache.txt:CMAKE_CXX_FLAGS:STRING=
+/data/work/gpt-raw-storage-20261113/host/CMakeCache.txt:CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+/data/work/gpt-raw-storage-20261113/host/CMakeCache.txt:CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+/data/work/gpt-raw-storage-20261113/host/CMakeCache.txt:SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON
+/data/work/gpt-raw-storage-20261113/asan/CMakeCache.txt:CMAKE_CXX_FLAGS:STRING=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffp-contract=off
+/data/work/gpt-raw-storage-20261113/asan/CMakeCache.txt:CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+/data/work/gpt-raw-storage-20261113/asan/CMakeCache.txt:CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+/data/work/gpt-raw-storage-20261113/asan/CMakeCache.txt:SPEKTRALAB_LIBRAW_OPENMP:BOOL=ON

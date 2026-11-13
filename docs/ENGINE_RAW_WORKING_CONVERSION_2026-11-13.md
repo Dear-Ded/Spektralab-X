@@ -1,5 +1,8 @@
 # RGB16 直接生成工作 float：实施与验证
 
+后续 0057 已继续处理更早的原始存储重叠，完整解码峰值测量见
+[RAW 生命周期改进](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。本页保留 0056 当时的结果。
+
 GPT（OpenAI）共创。固定引擎 `a46627d250545a394ca21522f8a28b0fb89e4c42` 加 0056，
 LibRaw 仍为 0.22.2 加 18 个 overlay。对应[外部调研](ENGINE_EXTERNAL_RESEARCH_2026-11-13.md)。
 本轮编译、可执行测试与计时全部在现有 AOIDC 云电脑运行，本机仅编辑、调研和整理证据。

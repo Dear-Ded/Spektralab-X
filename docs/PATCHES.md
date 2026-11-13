@@ -69,6 +69,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0056 在已定向 RGB16 bitmap、LibRaw 释放后的边界提供可选 host converter，保留原所有 overload。Android 将整数 RAW 的逐行 float 转换与原面积降采样合并，避免全尺寸 float 中间帧；标准显影完整统计、精确/legacy 浮点路径、相机处理和源尺寸保留。520 组缩放的 15,211,650 个值逐位相同，实际解码、自定义 WB、八方向、生产 JNI、取消及 ARM64 全链接通过。24MP 云端转换阶段与完整解码分别加速约 80%/27%，完整解码峰值 RSS 基本不变，不能称为消除 RAW OOM。见 [实施验证](ENGINE_RAW_WORKING_CONVERSION_2026-11-13.md) 与 [外部引擎调研](ENGINE_EXTERNAL_RESEARCH_2026-11-13.md)。GPT（OpenAI）共创。
 
+0057 在 compatible RAW 成功处理并提取元数据后，调用 LibRaw 0025 的一次性原始存储释放接口，避免原始样本与最终 RGB16 bitmap 重叠。保留原方向、gamma、所有像素和元数据；外部 RawSpeed 缓冲维持原寿命。168 组冻结对照、完整 LibRaw ASan/UBSan、生产 JNI、57/19 个补丁重放与 ARM64 全链接通过。24MP 合成 LinearRaw/Bayer 工作图完整解码峰值分别降低约 27%/12%；耗时未一致改善，尚非手机 OOM 验收。见 [所有权与测量](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
@@ -90,6 +92,7 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0022-dng-render-metadata` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保留有界主 profile 曝光、黑位与色调曲线元数据，标记 extra/mixed profile；不改变线性像素。见 [验证](../tools/native/validation/dng-render-metadata-20261109/README.md)。GPT（OpenAI）共创。 |
 | `0023-dng-profile-dynamic-range` | 本项目，依据 Adobe DNG 1.7.1 / 固定 SDK | 解析 UNDEFINED8 的 version/range/hint，区分缺失、SDR、HDR 与损坏值，沿用 selected-profile IFD 来源合同；不执行 HDR 曲线。内部结构改变，整个 archive 和消费者同步重编。GPT（OpenAI）共创。 |
 | `0024-sony-ycbcr-cache-index-mask` | LibRaw `d7e09495734c527c9fdcd154e6435e06d20bb942`，0.22.3 的两行维护修复 | HuffTable 的 8192 项缓存按低 13 位寻址，合法索引及解码/消费顺序不变。81,920 个合法组合与 24,576 个受控高位组合通过；ASan/UBSan、合成 DNG 对照、18 补丁重放和完整 ARM64 JNI 链接见 [实施报告](ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md)。未把局部索引测试称为真实 Sony 故障文件复现。GPT（OpenAI）共创。 |
+| `0025-one-shot-raw-storage-release` | 本项目，依据固定 LibRaw 的分配/处理/输出/回收实现 | 添加成功 RGB 处理后的受限一次性释放，清空原始所有者与样本视图，保留完整处理图、元数据和输出状态。拒绝提前、重复、外部所有者或 working-image alias 释放；需要新 open/unpack 才能再处理原始样本。没有改变原有结构布局。配套引擎 0057 与完整验证见 [报告](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。GPT（OpenAI）共创。 |
 
 `crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
 该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。

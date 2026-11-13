@@ -15,4 +15,7 @@ fi
 "${CXX:-c++}" "${flags[@]}" -I"$repo/app/src/main/cpp" -I"$up/engine/src" -I"$up/engine/host" -I"$lib" \
     "$repo/tools/native/raw_precision_input.cpp" "$up/engine/host/white_balance.cpp" -Wl,--start-group \
     "$b/engine/libspk_image_io.a" "$b/engine/libspk_libraw.a" -Wl,--end-group -ldl -lz -o "$build/raw_precision_input"
-python3 "$repo/tools/native/raw_precision_input_fixtures.py" "$build/fixtures" --probe "$build/raw_precision_input" "$@"
+# This suite indexes callbacks from an earlier successful decode. LibRaw AHD
+# reports progress only on worker 0 in a dynamically scheduled loop, so pin
+# this count-based test to one worker. Working/JNI test concurrent cancellation.
+SPEKTRALAB_RAW_THREADS=1 python3 "$repo/tools/native/raw_precision_input_fixtures.py" "$build/fixtures" --probe "$build/raw_precision_input" "$@"

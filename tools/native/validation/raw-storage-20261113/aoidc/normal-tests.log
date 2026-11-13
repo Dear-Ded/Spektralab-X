@@ -1,0 +1,42 @@
+PASS guards: empty, order, RawSpeed2/3, image_alias, cleanup
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-2.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-2.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-3.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-3.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-4.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-4.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-5.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-5.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-6.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-6.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-7.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-7.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-8.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-8.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/integer-bayer.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/integer-bayer.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/fallback-crop.dng: custom=0, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/fallback-crop.dng: custom=1, exact_RGB16, metadata_unchanged, repeat, reopen, independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng: mode=integer_compatible16,flip=0,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-2.dng: mode=integer_compatible16,flip=1,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-3.dng: mode=integer_compatible16,flip=3,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-4.dng: mode=integer_compatible16,flip=2,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-5.dng: mode=integer_compatible16,flip=4,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-6.dng: mode=integer_compatible16,flip=6,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-7.dng: mode=integer_compatible16,flip=7,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-8.dng: mode=integer_compatible16,flip=5,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/integer-bayer.dng: mode=integer_compatible16,flip=0,cases=9,exact_bits; full_statistics_gate; original_dimensions
+PASS converter boundary: invalid=4; cancellation_precedence; unchanged_output
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/max2.dng: mode=float_linear_v1,flip=0,cases=8,exact_bits; full_statistics_gate; original_dimensions
+PASS /data/work/gpt-working-decode-20261113/dispatch/fixtures/fallback-crop.dng: mode=float_legacy_quantized,flip=0,cases=8,exact_bits; full_statistics_gate; original_dimensions
+{"passed": true, "float_cases": 17, "custom_float_cases": 3, "fallback_cases": 5, "integer_cases": 4, "cancellation_cases": 77, "maximum_absolute_error": 4.76837158203125e-07, "independent_absolute_tolerance": 2e-06, "helper_pixels_byte_equal": true, "legacy_pixels_byte_equal": true, "legacy_metadata_equal": true, "all_eight_orientations_match_libraw_flip": true, "float_metadata_not_integer_truncated": true, "supported_bad_sample_does_not_fallback": true, "atomic_failures": true, "distant_maximum_byte_equal": true, "scaled_neutral_byte_equal": true}

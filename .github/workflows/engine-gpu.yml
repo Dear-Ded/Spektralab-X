@@ -8,6 +8,57 @@ permissions:
   contents: read
 
 jobs:
+  raw-storage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      SPEKTRALAB_RAW_THREADS: '4'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decoder tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build zlib1g-dev
+      - uses: actions/cache@v4
+        with:
+          path: upstream
+          key: upstream-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
+      - name: Fetch and patch decoder
+        run: |
+          bash scripts/fetch-upstream.sh upstream
+          cp -a upstream/build/deps/LibRaw-0.22.2 "$RUNNER_TEMP/raw-libraw"
+          sed -i 's/\r$//' "$RUNNER_TEMP/raw-libraw/src/decoders/crx.cpp"
+          for p in patches/libraw/*.patch; do
+            patch -d "$RUNNER_TEMP/raw-libraw" -p1 --fuzz=0 --forward --batch < "$p"
+          done
+      - name: Build complete sanitized decoder
+        run: |
+          cmake -S tools/native/float_dng_deflate_host -B raw-storage-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPK_UPSTREAM="$PWD/upstream" \
+            -DSPEKTRALAB_LIBRAW_SOURCE="$RUNNER_TEMP/raw-libraw" \
+            -DCMAKE_CXX_FLAGS="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffp-contract=off"
+          cmake --build raw-storage-build -j2
+      - name: Check decoder storage and cancellation
+        run: |
+          mkdir -p raw-storage-evidence
+          UP="$PWD/upstream" B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-dispatch" \
+            bash tools/native/run_raw_precision_input.sh > raw-storage-evidence/dispatch.log 2>&1
+          python3 tools/native/raw_working_fixtures.py raw-fixtures
+          B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-lifetime" \
+            bash tools/native/run_raw_storage_lifetime.sh raw-fixtures/*.dng \
+            raw-dispatch/fixtures/fallback-crop.dng > raw-storage-evidence/lifetime.log 2>&1
+          UP="$PWD/upstream" B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-working" \
+            bash tools/native/run_raw_working_decode.sh raw-fixtures/*.dng \
+            raw-dispatch/fixtures/max2.dng raw-dispatch/fixtures/fallback-crop.dng \
+            > raw-storage-evidence/working.log 2>&1
+          cp raw-dispatch/fixtures/results.json raw-storage-evidence/dispatch.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raw-storage
+          path: raw-storage-evidence/
   fir-rows:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

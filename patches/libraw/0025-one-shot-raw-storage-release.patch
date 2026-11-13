@@ -1,0 +1,50 @@
+diff --git a/libraw/libraw.h b/libraw/libraw.h
+index a1d2305..33bc643 100644
+--- a/libraw/libraw.h
++++ b/libraw/libraw.h
+@@ -228,6 +228,13 @@ public:
+   int raw2image_ex(int do_subtract_black);
+   void raw2image_start();
+   void free_image();
++  // Spektralab, co-created with GPT (OpenAI): one-shot processing only.
++  // After successful RGB conversion, discard LibRaw-owned raw pixels while
++  // retaining the processed image and metadata for copy_mem_image(). Returns
++  // false without mutation before conversion, for external decoder storage,
++  // or if no independent raw allocation remains. Reprocessing needs a fresh
++  // open/unpack cycle; this intentionally ends reuse of the unpacked source.
++  bool spk_release_rawdata();
+   int adjust_maximum();
+   int adjust_to_raw_inset_crop(unsigned mask, float maxcrop = 0.55f); 
+   void set_exifparser_handler(exif_parser_callback cb, void *data)
+diff --git a/src/utils/utils_libraw.cpp b/src/utils/utils_libraw.cpp
+index 5f47ca1..7fa7ea5 100644
+--- a/src/utils/utils_libraw.cpp
++++ b/src/utils/utils_libraw.cpp
+@@ -385,6 +385,27 @@ int LibRaw::is_curve_linear()
+   return 1;
+ }
+ 
++bool LibRaw::spk_release_rawdata()
++{
++  // Co-created with GPT (OpenAI). Use the same owner/allocator as recycle();
++  // never free RawSpeed-owned storage or the processed working image.
++  if (!(imgdata.progress_flags & LIBRAW_PROGRESS_CONVERT_RGB) || !imgdata.image ||
++      (imgdata.process_warnings &
++       (LIBRAW_WARN_RAWSPEED_PROCESSED | LIBRAW_WARN_RAWSPEED3_PROCESSED)) ||
++      !imgdata.rawdata.raw_alloc || imgdata.rawdata.raw_alloc == imgdata.image)
++    return false;
++
++  free(imgdata.rawdata.raw_alloc);
++  imgdata.rawdata.raw_alloc = NULL;
++  imgdata.rawdata.raw_image = NULL;
++  imgdata.rawdata.color3_image = NULL;
++  imgdata.rawdata.color4_image = NULL;
++  imgdata.rawdata.float_image = NULL;
++  imgdata.rawdata.float3_image = NULL;
++  imgdata.rawdata.float4_image = NULL;
++  return true;
++}
++
+ void LibRaw::free_image(void)
+ {
+   if (imgdata.image)

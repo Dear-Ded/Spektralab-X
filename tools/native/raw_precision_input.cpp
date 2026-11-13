@@ -4,8 +4,49 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <type_traits>
 
 namespace {
+// Frozen and candidate executables emit every metadata field separately;
+// object padding, pointers and timing are deliberately absent from the file.
+template<class T> requires std::is_arithmetic_v<T>
+void snapshot(std::ostream& out, const T& value) {
+    out.write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+void snapshot(std::ostream& out, const std::string& value) {
+    snapshot(out, std::uint64_t(value.size()));
+    out.write(value.data(), value.size());
+}
+template<class T, std::size_t N> void snapshot(std::ostream& out, const std::array<T,N>& values) {
+    for (const auto& value : values) snapshot(out, value);
+}
+template<class T> void snapshot(std::ostream& out, const std::vector<T>& values) {
+    snapshot(out, std::uint64_t(values.size()));
+    for (const auto& value : values) snapshot(out, value);
+}
+template<class... T> void fields(std::ostream& out, const T&... values) {
+    (snapshot(out, values), ...);
+}
+void metadata_snapshot(std::ostream& out, const spk::io::RawMetadata& m) {
+    fields(out, m.libraw_version, m.libraw_capabilities, m.make, m.model, m.decoder_name);
+    const auto& s = m.sizes_before_postprocess;
+    fields(out, s.raw_width, s.raw_height, s.width, s.height, s.iwidth, s.iheight,
+        s.top_margin, s.left_margin, s.pixel_aspect);
+    fields(out, m.raw_flip, m.colour_channels, m.camera_whitebalance_valid,
+        m.camera_whitebalance, m.camera_whitebalance_from_xy, m.camera_white_xy,
+        m.post_scale_pre_mul, m.as_shot_wb_applied, m.black, m.black_level_per_channel,
+        m.black_pattern_rows, m.black_pattern_cols, m.black_pattern, m.white_level,
+        m.camera_white_level_per_channel, m.postprocess_black, m.postprocess_maximum,
+        m.process_warnings, m.rgb_cam, m.camera_from_xyz, m.camera_to_output,
+        m.headroom_enabled, m.white_balance_exposure_restore);
+    const auto& r = m.dng_render;
+    fields(out, r.is_dng, r.baseline_exposure_present, r.baseline_exposure_invalid,
+        r.baseline_exposure, r.baseline_exposure_offset_present, r.baseline_exposure_offset_invalid,
+        r.baseline_exposure_offset, r.default_black_render_present, r.default_black_render_invalid,
+        r.default_black_render, r.profile_tone_curve_present, r.profile_tone_curve_invalid,
+        r.profile_tone_curve, r.profile_dynamic_range_present, r.profile_dynamic_range_invalid,
+        r.profile_dynamic_range, r.extra_camera_profiles, r.profile_source_mismatch);
+}
 void string(const std::string& value) {
     std::cout << '"';
     for (unsigned char c : value) {
@@ -73,6 +114,7 @@ int main(int argc, char** argv) {
     std::array<float,4> custom_mul{2,1,1.5,1};
     double temperature = 0, tint = 0;
     int cancel_at = 0;
+    std::uint64_t half_budget = 0;
     for (int i = 3; i < argc; ++i) {
         const std::string option = argv[i];
         if (option == "--custom") { custom = true; explicit_mul = true; temperature = 6500; }
@@ -89,6 +131,7 @@ int main(int argc, char** argv) {
         else if (option == "--bad-plan") bad_plan = true;
         else if (option == "--wrong-wb") wrong_wb = true;
         else if (option == "--cancel" && i + 1 < argc) cancel_at = std::stoi(argv[++i]);
+        else if (option == "--half-budget" && i + 1 < argc) half_budget = std::stoull(argv[++i]);
         else return 2;
     }
     auto raw = std::make_unique<spk::io::detail::CameraLibRaw>();
@@ -125,6 +168,7 @@ int main(int argc, char** argv) {
     FloatDngMetadata source{77,88,8,{1,2,3},{4,5,6},{7,8,9}};
     const auto previous_source = source;
     const auto* user_mul = custom || wrong_wb ? &custom_mul : nullptr;
+    spk::io::set_raw_half_size_budget(half_budget);
     std::string error;
     bool ok = false, cancelled = false;
     int polls = 0;
@@ -173,6 +217,9 @@ int main(int argc, char** argv) {
         std::ofstream file(argv[2],std::ios::binary);
         file.write(reinterpret_cast<const char*>(output.rgb.data()),output.rgb.size()*sizeof(float));
         if (!file) return 3;
+        std::ofstream metadata(std::string(argv[2]) + ".metadata", std::ios::binary);
+        metadata_snapshot(metadata, output.metadata);
+        if (!metadata) return 3;
     }
     std::cout << std::setprecision(17) << std::boolalpha << "{\"open_status\":0,\"mode\":"; string(plan.mode);
     std::cout << ",\"note\":"; string(plan.note);

@@ -1,5 +1,11 @@
 # RAW statistics and edit lifecycle
 
+The later compatible-decoder one-shot storage contract is documented in
+[RAW storage lifetime](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md). It releases
+owned original samples only after processing and metadata capture, retaining
+the processed image for LibRaw's original orientation/gamma output. Statistics
+readiness and candidate publication below keep their existing contracts.
+
 Co-created with GPT (OpenAI), 2026-11-10. No version, package or release change.
 This follow-up narrows the source/readiness and failure contracts described in
 [RAW development v1](RAW_DEVELOPMENT_V1_2026-11-09.md).
