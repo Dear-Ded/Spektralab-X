@@ -1,0 +1,22 @@
+{
+  "baseline": "2b32845299a264b219dd5163f9e24f7a13509f62",
+  "suites": {
+    "release": {
+      "classes": 28,
+      "tests": 212,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "debug": {
+      "classes": 3,
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "changedInputs": 11,
+  "debugApkSha256": "5528c32c77683d7f3b4911fd5c76f9f9acfdda1547afc189350d344900a2f837",
+  "finished": "2026-11-13T15:10:35+00:00"
+}

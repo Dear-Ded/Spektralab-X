@@ -12,8 +12,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,9 +120,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private val renders = Channel<Unit>(Channel.CONFLATED)
     // A Layer 2 change: the last render re-packed through the new look, no engine pass.
     private val repacks = Channel<Unit>(Channel.CONFLATED)
-    // The open photo and its edit for a new process (saveLoop); declared before init, which starts the loop.
+    // The open photo and its edit for a new process.
     private val stateFile = File(app.filesDir, "editor-state.json")
-    private val saves = Channel<Unit>(Channel.CONFLATED)
     /** The look the native session holds (engine thread). */
     private var appliedLook = Look.NEUTRAL
     // Diagnostics: the raw probe replies and the last events, for the copyable report.
@@ -132,19 +129,26 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var capabilitiesJson = ""
     // Process-lifetime engine, event log and thermal monitor (EngineHost).
     private val host = (app as SpektraLabApp).host
-    private val frameEdits = FrameEditAutosave(host.scope, onFailure = { log("sidecar save failed: ${it.message}") }) {
+    private val frameEdits = FrameEditAutosave(host.scope, onFailure = { saveFailed("sidecar", it) }) {
         FrameStore.of(app).saveEdit(it.id, it.edit, it.wbK, it.wbTint)
+    }
+    private val editorState = EditorStateAutosave(host.scope, onFailure = { saveFailed("editor state", it) }) {
+        writeAtomicText(stateFile, it.toJson())
     }
     private val loader = SourceLoader(app)
     private val history = EditHistory(kSettleMs, kMaxUndo)
 
     private fun log(event: String) = host.events.add(event)
+    private fun saveFailed(kind: String, error: Exception) {
+        log("$kind save failed: ${error.message}")
+        _ui.update { it.copy(message = "编辑保存失败，请检查存储空间；稍后会自动重试") }
+    }
     private var lastUri: Uri? = null
     // The edit this photo opened with, for 重置全部.
     private var openedEdit: Edit? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
-    private val cardMutex = Mutex()
+    private val cardScheduler = SelectionPreviewScheduler()
     private val cardCache = object : android.util.LruCache<SelectionPreviewKey, Bitmap>(12 * 1024 * 1024) {
         override fun sizeOf(key: SelectionPreviewKey, value: Bitmap) = maxOf(value.allocationByteCount, 256 * 1024)
     }
@@ -157,7 +161,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { startEngine() }
         viewModelScope.launch { renderLoop() }
         viewModelScope.launch { repackLoop() }
-        viewModelScope.launch { saveLoop() }
         // A lost GPU device (here or in an export) makes EngineHost build a new
         // engine and bump generation; the open photo is reopened on it with the
         // whole edit kept, the way a white-balance re-decode keeps it.
@@ -242,7 +245,11 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     internal suspend fun flushFrameEdits() = frameEdits.flush()
-    fun flushPendingEdits() = frameEdits.requestFlush()
+    fun flushPendingEdits() {
+        saveEditorState()
+        frameEdits.requestFlush()
+        editorState.requestFlush()
+    }
 
     private var openJob: kotlinx.coroutines.Job? = null
     private data class ReopenEdit(val edit: Edit, val record: Boolean, val moveHistory: (() -> Unit)?)
@@ -452,6 +459,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     }
                     frameEdits.opened(frameId, edit, nextUi.source!!.wbK, nextUi.source.wbTint, reopening = !resetHistory)
                     _ui.value = nextUi.copy(canUndo = history.canUndo, canRedo = history.canRedo)
+                    saveEditorState()
                     cardCache.evictAll()
                     committed = true
                 }
@@ -471,9 +479,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
             renders.trySend(Unit)
-            saves.trySend(Unit)
             if (frameId != null) host.scope.launch(Dispatchers.IO) {
-                FrameStore.of(app).setSize(frameId, ww, wh)
+                try { FrameStore.of(app).setSize(frameId, ww, wh) }
+                catch (e: Exception) {
+                    log("frame dimensions save failed: ${e.message}")
+                    showMessage("照片尺寸记录保存失败，请检查存储空间")
+                }
             }
             // The previous photo's read grant is retained until the new one lands.
             if (wb == null) withContext(NonCancellable + Dispatchers.IO) { holdGrant(uri) }
@@ -493,7 +504,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 // Requests skipped while opening still belong to the intact old session.
                 if (session != 0L) {
                     renders.trySend(Unit)
-                    saves.trySend(Unit)
+                    saveEditorState()
                 }
             }
         }
@@ -566,13 +577,13 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         moveHistory?.invoke()
         wanted = edit
         previewPublication.request(edit)
-        saves.trySend(Unit)
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
         _ui.update {
             it.copy(edit = edit, canUndo = history.canUndo, canRedo = history.canRedo,
                 detail = if (edit == it.edit) it.detail else null)
         }
         frameEdits.changed(edit)
+        saveEditorState()
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
         // Only the look moved: the print is the same, so re-pack it (a few ms)
@@ -742,19 +753,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (state.source == null || state.busy != null) return null
         val key = SelectionPreviewKey(state.previewSource, state.catalog.normalize(edit).forSelectionPreview(), DisplayColor.space)
         fun current() = _ui.value.previewSource == key.source && _ui.value.busy == null
+        fun shouldWait() = interacting || _ui.value.rendering || _ui.value.exporting ||
+            host.exportRenderPixels > 0 || thermalHeadroom() > kHotHeadroom ||
+            android.os.SystemClock.uptimeMillis() - host.lastInteraction < 300
         var output: Bitmap? = null
         try {
-            return cardMutex.withLock {
-                if (!current()) return@withLock null
-                cardCache.get(key)?.let { return@withLock it }
-                // Let a fling settle and the user's own live/sharp render go first.
-                kotlinx.coroutines.delay(120)
-                while (current() && (interacting || _ui.value.rendering || _ui.value.exporting ||
-                        host.exportRenderPixels > 0 || thermalHeadroom() > kHotHeadroom ||
-                        android.os.SystemClock.uptimeMillis() - host.lastInteraction < 300)) {
-                    kotlinx.coroutines.delay(150)
-                }
-                if (!current()) return@withLock null
+            return cardScheduler.load(::current, { cardCache.get(key) }, ::shouldWait) {
                 withContext(EngineThread.dispatcher) {
                     if (!current() || session == 0L) return@withContext
                     val params = Edit.openingParams(key.edit, INPUT_SPACE, linear = true).toString()
@@ -770,7 +774,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         NativeEngine.release(card)
                     }
                 }
-                if (!current()) return@withLock null
+                if (!current()) return@load null
                 output?.also { cardCache.put(key, it) }.also { output = null }
             }
         } catch (e: CancellationException) {
@@ -791,7 +795,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * 修改记录's 隐藏 (ui2_snapseed.md 4): an edit shown instead of [wanted] for a
      * moment, so one group can be looked at without it. Display only: it goes
      * through the same render and re-pack path, is never recorded for undo, never
-     * saved (sidecars and editor state read [wanted]), and exports read the
+     * saved (sidecars and editor state capture the accepted edit), and exports read the
      * current edit. Any real edit, a new open and an export start clear it.
      */
     @Volatile private var override: Edit? = null
@@ -1029,7 +1033,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             }
             if (current && _ui.value.busy == null && reverted != null) {
                 frameEdits.changed(_ui.value.edit)
-                saves.trySend(Unit)
+                saveEditorState()
             }
         }
         return bitmap != null
@@ -1171,26 +1175,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     // shortly after every edit; read once when a new process starts with
     // nothing to open, so a photo the system killed us under comes back as it was.
 
-    private suspend fun saveLoop() {
-        for (request in saves) {
-            kotlinx.coroutines.delay(400)
-            saves.tryReceive()
-            val uri = lastUri ?: continue
-            val state = _ui.value
-            if (state.busy != null) continue
-            val src = state.source ?: continue
-            val frame = Frame(id = "", uri = uri.toString(), name = src.name, size = 0, date = 0, mime = "",
-                raw = src.kind == "raw")
-            val json = Sidecar(wanted, src.wbK, src.wbTint, System.currentTimeMillis()).toJson(frame)
-                .put("uri", uri.toString()).put("frameId", frameEdits.frameId).toString()
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val part = File(stateFile.path + ".part")
-                    part.writeText(json)
-                    if (!part.renameTo(stateFile)) { stateFile.delete(); part.renameTo(stateFile) }
-                }
-            }
-        }
+    // Main only, in the same transaction as accepted source/edit/WB publication.
+    private fun saveEditorState() {
+        val state = _ui.value
+        if (state.busy != null) return
+        val uri = lastUri ?: return
+        val src = state.source ?: return
+        editorState.changed(EditorStateSave(uri.toString(), frameEdits.frameId, src.name,
+            src.kind == "raw", state.edit, src.wbK, src.wbTint))
     }
 
     /**
@@ -1404,7 +1396,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun dismissError() = _ui.update { it.copy(error = null) }
 
     override fun onCleared() {
-        frameEdits.requestFlush()
+        flushPendingEdits()
         // The engine stays warm in EngineHost for the next editor. The session
         // is released after a pending open has either committed or cleaned up.
         // A commit's NonCancellable section may still install its new session.
@@ -1415,6 +1407,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             opening?.join()
             try { frameEdits.close() }
             catch (e: Exception) { log("sidecar close failed: ${e.message}") }
+            try { editorState.close() }
+            catch (e: Exception) { log("editor state close failed: ${e.message}") }
             finally { withContext(EngineThread.dispatcher) { releaseSession() } }
         }
     }

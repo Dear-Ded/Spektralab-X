@@ -9,7 +9,6 @@ import androidx.compose.runtime.Immutable
 import androidx.exifinterface.media.ExifInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -167,8 +166,7 @@ class FrameStore private constructor(private val context: Context) {
     fun setSize(id: String, width: Int, height: Int): Unit = synchronized(lock) {
         val f = byId(id) ?: return
         if (width <= 0 || height <= 0 || (f.width == width && f.height == height)) return
-        _frames.update { list -> list.map { if (it.id == id) it.copy(width = width, height = height) else it } }
-        writeIndex()
+        commitIndex(_frames.value.map { if (it.id == id) it.copy(width = width, height = height) else it })
     }
 
     /**
@@ -205,8 +203,7 @@ class FrameStore private constructor(private val context: Context) {
                     byId[f.id] = old.copy(uri = f.uri, persisted = f.persisted)
                 }
             }
-            _frames.value = byId.values.sortedByDescending { it.date }
-            writeIndex()
+            commitIndex(byId.values.sortedByDescending { it.date })
         }
         return added
     }
@@ -265,19 +262,15 @@ class FrameStore private constructor(private val context: Context) {
         val frame = byId(id) ?: return
         val now = System.currentTimeMillis()
         val updated = frame.copy(edited = true, film = if (edit.noFilm) "" else edit.film, editedAt = now)
-        writeAtomically(File(dir, "$id.json"), Sidecar(edit, wbK, wbTint, now).toJson(updated).toString())
-        _frames.update { list -> list.map { if (it.id == id) updated else it } }
-        writeIndex()
+        writeAtomicText(File(dir, "$id.json"), Sidecar(edit, wbK, wbTint, now).toJson(updated).toString())
+        commitIndex(_frames.value.map { if (it.id == id) updated else it })
     }
 
     /** Picks, rejects or stars [ids]; null leaves that field alone. */
     fun rate(ids: Set<String>, pick: Int? = null, stars: Int? = null): Unit = synchronized(lock) {
-        _frames.update { list ->
-            list.map { f ->
-                if (f.id !in ids) f else f.copy(pick = pick ?: f.pick, stars = (stars ?: f.stars).coerceIn(0, 5))
-            }
-        }
-        writeIndex()
+        commitIndex(_frames.value.map { f ->
+            if (f.id !in ids) f else f.copy(pick = pick ?: f.pick, stars = (stars ?: f.stars).coerceIn(0, 5))
+        })
     }
 
     /**
@@ -288,8 +281,7 @@ class FrameStore private constructor(private val context: Context) {
     fun remove(ids: Set<String>, inUse: () -> Set<String>): Unit = synchronized(lock) {
         load()
         val gone = _frames.value.filter { it.id in ids }
-        _frames.update { list -> list.filter { it.id !in ids } }
-        writeIndex()
+        commitIndex(_frames.value.filter { it.id !in ids })
         val editorUri = context.getSharedPreferences("settings", 0).getString("editor_grant", null)
         val still = _frames.value.map { it.uri }.toSet() + inUse() + listOfNotNull(editorUri)
         for (f in gone) if (f.uri !in still && Uri.parse(f.uri).scheme != "file") {
@@ -301,20 +293,11 @@ class FrameStore private constructor(private val context: Context) {
         context.contentResolver.persistedUriPermissions.filter { it.isReadPermission }.map { it.uri.toString() }.toSet()
     }.getOrDefault(emptySet())
 
-    private fun writeIndex() {
+    private fun commitIndex(frames: List<Frame>) {
         val array = JSONArray()
-        _frames.value.forEach { array.put(it.toJson()) }
-        writeAtomically(indexFile, array.toString())
-    }
-
-    // A kill mid-write leaves the old file, never half of the new one.
-    private fun writeAtomically(file: File, text: String) {
-        runCatching {
-            dir.mkdirs()
-            val part = File(file.parentFile, file.name + ".part")
-            part.writeText(text)
-            if (!part.renameTo(file)) { file.delete(); part.renameTo(file) }
-        }
+        frames.forEach { array.put(it.toJson()) }
+        writeAtomicText(indexFile, array.toString())
+        _frames.value = frames
     }
 
     companion object {

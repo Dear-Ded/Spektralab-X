@@ -156,16 +156,21 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         if (uris.isEmpty()) return
         _state.update { it.copy(importing = uris.size) }
         viewModelScope.launch {
-            val added = withContext(Dispatchers.IO) {
-                store.import(uris) { done -> _state.update { it.copy(importing = uris.size - done) } }
+            try {
+                saveOrReport {
+                    val added = withContext(Dispatchers.IO) {
+                        store.import(uris) { done -> _state.update { it.copy(importing = uris.size - done) } }
+                    }
+                    val again = uris.size - added
+                    show(when {
+                        added == 0 -> "这些照片已经在观片台上"
+                        again > 0 -> "已加入 $added 张，$again 张原本就在"
+                        else -> "已加入 $added 张"
+                    })
+                }
+            } finally {
+                _state.update { it.copy(importing = 0) }
             }
-            val again = uris.size - added
-            show(when {
-                added == 0 -> "这些照片已经在观片台上"
-                again > 0 -> "已加入 $added 张，$again 张原本就在"
-                else -> "已加入 $added 张"
-            })
-            _state.update { it.copy(importing = 0) }
         }
     }
 
@@ -197,7 +202,9 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     /** Picks (1), rejects (-1) or clears (0) [ids], and/or sets their stars; null leaves that mark alone. */
     fun rate(ids: Set<String>, pick: Int? = null, stars: Int? = null) {
         if (ids.isEmpty() || (pick == null && stars == null)) return
-        viewModelScope.launch(Dispatchers.IO) { store.rate(ids, pick?.coerceIn(-1, 1), stars) }
+        viewModelScope.launch(Dispatchers.IO) {
+            saveOrReport { store.rate(ids, pick?.coerceIn(-1, 1), stars) }
+        }
     }
 
     // --- selection ----------------------------------------------------------------
@@ -218,12 +225,14 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         val ids = _state.value.selection
         if (ids.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
-            store.remove(ids) {
-                host.queue.jobs.value.filter { it.state != JobState.DONE }.map { it.uri }.toSet()
+            saveOrReport {
+                store.remove(ids) {
+                    host.queue.jobs.value.filter { it.state != JobState.DONE }.map { it.uri }.toSet()
+                }
+                _state.update { it.copy(selection = it.selection - ids) }
+                show("已从观片台移走 ${ids.size} 张（编辑记录保留）")
             }
         }
-        _state.update { it.copy(selection = emptySet()) }
-        show("已从观片台移走 ${ids.size} 张（编辑记录保留）")
     }
 
     // --- editing --------------------------------------------------------------------
@@ -257,11 +266,13 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     /** Writes [edit] (a style from 比较风格) as [frame]'s look, keeping its RAW white balance. */
     fun saveLook(frame: Frame, edit: Edit, label: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val car = store.sidecar(frame.id)
-                store.saveEdit(frame.id, edit, car?.wbK ?: 0.0, car?.wbTint ?: 0.0)
+            saveOrReport {
+                withContext(Dispatchers.IO) {
+                    val car = store.sidecar(frame.id)
+                    store.saveEdit(frame.id, edit, car?.wbK ?: 0.0, car?.wbTint ?: 0.0)
+                }
+                show("已把「$label」用到「${frame.name}」")
             }
-            show("已把「$label」用到「${frame.name}」")
         }
     }
 
@@ -301,18 +312,27 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         val from = _state.value.copied ?: return
         if (targets.isEmpty() || groups.isEmpty()) return
         viewModelScope.launch {
-            val skipped = withContext(Dispatchers.IO) {
-                var skipped = 0
-                for (f in targets) {
-                    val base = store.sidecar(f.id) ?: Sidecar(Edit.NONE)
-                    val p = pasteLook(base, f, from, groups, catalog)
-                    if (p.edgeSkipped) skipped++
-                    store.saveEdit(f.id, p.edit, p.wbK, p.wbTint)
+            var completed = 0
+            try {
+                val skipped = withContext(Dispatchers.IO) {
+                    var skipped = 0
+                    for (f in targets) {
+                        val base = store.sidecar(f.id) ?: Sidecar(Edit.NONE)
+                        val p = pasteLook(base, f, from, groups, catalog)
+                        store.saveEdit(f.id, p.edit, p.wbK, p.wbTint)
+                        completed++
+                        if (p.edgeSkipped) skipped++
+                    }
+                    skipped
                 }
-                skipped
+                show(if (skipped > 0) "已粘贴到 ${targets.size} 张；其中 $skipped 张尺寸未知，片边先没加，打开一次后再粘贴即可"
+                     else "已粘贴到 ${targets.size} 张")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                host.events.add("paste save failed: ${e.message}")
+                show("已粘贴 $completed/${targets.size} 张，其余保存失败，请检查存储空间后重试")
             }
-            show(if (skipped > 0) "已粘贴到 ${targets.size} 张；其中 $skipped 张尺寸未知，片边先没加，打开一次后再粘贴即可"
-                 else "已粘贴到 ${targets.size} 张")
         }
     }
 
@@ -380,6 +400,15 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     }
 
     // --- messages -------------------------------------------------------------------
+
+    private suspend fun saveOrReport(block: suspend () -> Unit) {
+        try { block() }
+        catch (e: kotlinx.coroutines.CancellationException) { throw e }
+        catch (e: Exception) {
+            host.events.add("light table save failed: ${e.message}")
+            show("保存失败，请检查存储空间后重试")
+        }
+    }
 
     fun show(text: String) = _state.update { it.copy(message = text) }
     fun consumeMessage() = _state.update { it.copy(message = null) }

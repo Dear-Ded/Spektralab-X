@@ -1,0 +1,11 @@
+app/src/main/java/com/dearded/spektralab/AtomicTextFile.kt: OK
+app/src/main/java/com/dearded/spektralab/EditorStateAutosave.kt: OK
+app/src/main/java/com/dearded/spektralab/EditorViewModel.kt: OK
+app/src/main/java/com/dearded/spektralab/FrameEditAutosave.kt: OK
+app/src/main/java/com/dearded/spektralab/FrameStore.kt: OK
+app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt: OK
+app/src/main/java/com/dearded/spektralab/SelectionPreviewScheduler.kt: OK
+app/src/test/java/com/dearded/spektralab/AtomicTextFileTest.kt: OK
+app/src/test/java/com/dearded/spektralab/EditorStateAutosaveTest.kt: OK
+app/src/test/java/com/dearded/spektralab/SelectionPreviewSchedulerTest.kt: OK
+app/src/testDebug/java/com/dearded/spektralab/FrameEditPersistenceTest.kt: OK

@@ -31,32 +31,34 @@ internal class FrameEditAutosave(
     val frameId: String? get() = accepted?.id
 
     private val worker = scope.launch(Dispatchers.IO) {
-            val pending = LinkedHashMap<String, FrameEditSave>()
-            fun persist() {
-                val iterator = pending.entries.iterator()
-                while (iterator.hasNext()) {
-                    write(iterator.next().value)
-                    iterator.remove()
-                }
+        val pending = LinkedHashMap<String, FrameEditSave>()
+        var reportedFailure = false
+        fun persist() {
+            val iterator = pending.entries.iterator()
+            while (iterator.hasNext()) {
+                write(iterator.next().value)
+                iterator.remove()
             }
-            while (true) {
-                val request = if (pending.isEmpty()) requests.receive() else select<Request?> {
-                    requests.onReceive { it }
-                    onTimeout(600) { null }
-                }
-                try {
-                    when (request) {
-                        is Request.Save -> pending[request.value.id] = request.value
-                        is Request.Flush -> { persist(); request.done?.complete(Unit) }
-                        null -> persist()
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    onFailure(e)
-                    (request as? Request.Flush)?.done?.completeExceptionally(e)
-                }
+            reportedFailure = false
+        }
+        while (true) {
+            val request = if (pending.isEmpty()) requests.receive() else select<Request?> {
+                requests.onReceive { it }
+                onTimeout(600) { null }
             }
+            try {
+                when (request) {
+                    is Request.Save -> pending[request.value.id] = request.value
+                    is Request.Flush -> { persist(); request.done?.complete(Unit) }
+                    null -> persist()
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (!reportedFailure) { reportedFailure = true; onFailure(e) }
+                (request as? Request.Flush)?.done?.completeExceptionally(e)
+            }
+        }
     }
 
     /** A new photo starts its baseline immediately; a successful re-decode saves WB/development changes. */
