@@ -67,13 +67,13 @@ class Screenshots {
     // --- editor -------------------------------------------------------------
 
     @Test fun editorEmpty() {
-        editor(Fake.ui().copy(source = null, image = null, before = null, filmCards = emptyMap(), canUndo = false))
+        editor(Fake.ui().copy(source = null, image = null, before = null, canUndo = false))
         shot("01_editor_empty")
     }
 
     @Test fun editorBusy() {
         editor(Fake.ui().copy(ready = false, busy = "正在准备引擎…", source = null, image = null, before = null,
-            filmCards = emptyMap(), canUndo = false))
+            canUndo = false))
         shot("02_editor_busy")
     }
 
@@ -200,7 +200,7 @@ class Screenshots {
         val e = Edit.withBorder(ui.edit, Borders.byId("gallery")!!, ui.source!!.width, ui.source!!.height)
             .copy(autoExposure = false, exposureEv = 0.7, look = ui.edit.look.copy(contrast = 12.0, saturation = -8.0))
         val vm = editorVm(ui.copy(edit = e))
-        content { EditorScreen(vm); ChangesSheet(vm.ui.value, vm, onGo = {}, onDismiss = {}) }
+        content { EditorScreen(vm, preview = Fake::preview); ChangesSheet(vm.ui.value, vm, onGo = {}, onDismiss = {}) }
         screenShot("61_changes")
     }
 
@@ -208,7 +208,7 @@ class Screenshots {
         val ui = Fake.ui()
         val vm = editorVm(ui)
         content {
-            EditorScreen(vm)
+            EditorScreen(vm, preview = Fake::preview)
             PasteSheet(CopiedLook(ui.edit, 0.0, 0.0, "DSC_4121.JPG"), count = 1,
                 initial = LookGroup.entries.toSet() - LookGroup.BORDER, onDismiss = {}, onPaste = {})
         }
@@ -228,7 +228,7 @@ class Screenshots {
             job(3, "DSC_4119.JPG", JobState.DONE, 1f),
             job(4, "DSC_4117.JPG", JobState.FAILED).copy(message = "内存不足：请调小工作尺寸后重试"),
         )
-        content { EditorScreen(vm); QueueSheet(jobs, {}, {}, {}, {}) }
+        content { EditorScreen(vm, preview = Fake::preview); QueueSheet(jobs, {}, {}, {}, {}) }
         screenShot("63_queue")
     }
 
@@ -240,7 +240,7 @@ class Screenshots {
             for (b in 0..1) for (g in 0..1) for (r in 0..1) append("${r * 0.95 + 0.03} ${g * 0.9 + 0.02} ${b * 0.8}\n")
         })
         ImportRequests.add(listOf(android.net.Uri.fromFile(cube)))
-        content { EditorScreen(vm); ImportHost(vm) }
+        content { EditorScreen(vm, preview = Fake::preview); ImportHost(vm) }
         // The file is read on Dispatchers.IO: real threads, so wait in real time.
         val main = shadowOf(Looper.getMainLooper())
         repeat(120) { compose.mainClock.advanceTimeBy(50); main.idle(); Thread.sleep(25) }
@@ -255,7 +255,7 @@ class Screenshots {
             page = Updater.RELEASES_PAGE, apkName = "Spektralab-X-0.1.20-alpha-arm64-v8a.apk",
             apkUrl = "https://example.invalid/app.apk", apkSize = 48L shl 20, sumsUrl = null))
         Updater.show()
-        content { EditorScreen(vm) }
+        content { EditorScreen(vm, preview = Fake::preview) }
         screenShot("65_update")
         Updater.later()
         Updater.state.value = Updater.State.Idle
@@ -383,7 +383,7 @@ class Screenshots {
 
     private fun editor(ui: UiState) {
         val vm = editorVm(ui)
-        content { EditorScreen(vm) }
+        content { EditorScreen(vm, preview = Fake::preview) }
     }
 
     /** The real EditorViewModel once its engine start has failed, showing [ui]. */
@@ -530,9 +530,12 @@ private object Fake {
         }.toMap()
     }
 
+    // Layout fixtures only; production selection rendering is covered by native integration.
+    suspend fun preview(edit: Edit): Bitmap? = if (edit.noFilm) before(lake) else cards[edit.film]
+
     fun ui() = UiState(
         ready = true, busy = null, catalog = catalog, edit = Edit(),
-        image = after(lake), imageTier = "preview", before = before(lake), filmCards = cards,
+        image = after(lake), imageTier = "preview", before = before(lake),
         source = SourceInfo("L1000412.DNG", 6000, 4000, 6000, 4000, "raw", "Leica Q (Typ 116)",
             asShotK = 5200.0, asShotTint = 4.0),
         canUndo = true,

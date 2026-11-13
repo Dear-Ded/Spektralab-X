@@ -1,0 +1,31 @@
+{
+  "release": {
+    "classes": 24,
+    "tests": 182,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "debug": {
+    "classes": 5,
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "gradle-final": {
+    "exit": 0
+  },
+  "native-normal": {
+    "exit": 0
+  },
+  "native-sanitized": {
+    "exit": 0
+  },
+  "arm64": {
+    "exit": 0
+  },
+  "input-check": {
+    "exit": 0
+  }
+}

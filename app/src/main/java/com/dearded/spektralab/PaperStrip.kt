@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 
 /*
@@ -22,7 +21,8 @@ import androidx.compose.ui.unit.dp
 private data class PaperCard(val id: String?, val name: String, val note: String)
 
 @Composable
-internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit) {
+internal fun PaperStrip(ui: UiState, enabled: Boolean,
+                       preview: suspend (Edit) -> android.graphics.Bitmap? = { null }, onChange: (Edit) -> Unit) {
     val e = ui.edit
     val view = androidx.compose.ui.platform.LocalView.current
     val film = ui.catalog.film(e.film)
@@ -48,13 +48,14 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean, onChange: (Edit) -> Unit)
             // 无 is the same card as in the style and film strips (the photo itself, tagged 原图),
             // a size down so it sits beside the text cards (UI2.md 7.2 point 5).
             if (c.id == null) {
-                val original = androidx.compose.runtime.remember(ui.before) { ui.before?.asImageBitmap() }
+                val candidate = if (positive) e.copy(scanFilm = true) else e.copy(scanFilm = false, digitalIntermediate = true)
+                val original = rememberSelectionPreview(ui, candidate, preview)
                 NoneCard(selected = on, original = original, size = 64.dp,
                     subtitle = if (positive) "直接扫描" else if (bw) "需要相纸" else "数字中间片",
                     enabled = enabled && !(bw && !positive)) {
                     if (!on) {
                         view.tick()
-                        onChange(if (positive) e.copy(scanFilm = true) else e.copy(scanFilm = false, digitalIntermediate = true))
+                        onChange(candidate)
                     }
                 }
                 return@items

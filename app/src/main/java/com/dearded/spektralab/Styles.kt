@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -278,7 +277,7 @@ private const val LAST_GROUP = "_last_group"
 
 /**
  * The 风格 row: the eight group chips over cards, each showing the open photo
- * through the style's film (the film card already rendered) with its name and
+ * through the complete style, including its stored strength, with its name and
  * what it is inspired by. One tap applies the style at the strength last used
  * for it; tapping the applied style again opens its strength slider, which
  * scales only the finish. Strengths are kept per style across photos and launches.
@@ -290,12 +289,13 @@ internal fun StyleStrip(
     onEdit: (Edit) -> Unit = {},
     /** 无: no film, no film effects, no adjustments. */
     onNone: () -> Unit = {},
+    preview: suspend (Edit) -> android.graphics.Bitmap? = { null },
     onPick: (Style) -> Unit,
 ) {
     // SharedTransitionLayout lays its children out in a Box, which stacked the
     // group pills, the cards and the strength panel on one spot. Keep them in
     // the editor column instead, one under the other.
-    StyleStripContent(ui, enabled, onEdit, onNone, onPick)
+    StyleStripContent(ui, enabled, onEdit, onNone, preview, onPick)
 }
 
 @Composable
@@ -303,6 +303,7 @@ private fun StyleStripContent(
     ui: UiState, enabled: Boolean,
     onEdit: (Edit) -> Unit,
     onNone: () -> Unit,
+    preview: suspend (Edit) -> android.graphics.Bitmap?,
     onPick: (Style) -> Unit,
 ) {
     val context = LocalContext.current
@@ -391,7 +392,7 @@ private fun StyleStripContent(
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
         if (!searching) item(key = "_none") {
-            val original = remember(ui.before) { ui.before?.asImageBitmap() }
+            val original = rememberSelectionPreview(ui, ui.edit.withoutStyle(), preview)
             NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "") {
                 if (!ui.edit.styleNone) { view.tick(); onNone() }
             }
@@ -403,30 +404,21 @@ private fun StyleStripContent(
         }
         // 最近编辑: another photo's settings onto this one; border and RAW white balance stay this photo's.
         if (!searching && group == EDITS_GROUP) items(recentEdits, key = { "_edit_" + it.first.id }) { (f, car) ->
-            // A 无 edit is shown as what it is, the photo itself (bughunt_main 7).
-            val card = if (car.edit.noFilm) ui.before else ui.filmCards[car.edit.film]
-            val bitmap = remember(card) { card?.asImageBitmap() }
+            val candidate = recentStyleEdit(ui, car, f.name)
+            val bitmap = rememberSelectionPreview(ui, candidate, preview)
             ThumbCard(
                 selected = false, image = bitmap,
                 title = f.name.substringBeforeLast("."),
                 subtitle = if (car.edit.noFilm) "原图" else ui.catalog.film(car.edit.film)?.label ?: "原图",
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
-                val src = ui.source ?: return@ThumbCard
-                val here = Frame(id = "", uri = "", name = src.name, size = 0, date = 0, mime = "",
-                    raw = src.kind == "raw", width = src.width, height = src.height,
-                    exifDate = ui.exif.dateTimeOriginal.orEmpty())
-                val p = pasteLook(Sidecar(ui.edit, src.wbK, src.wbTint), here,
-                    CopiedLook(car.edit, car.wbK, car.wbTint, f.name),
-                    LookGroup.entries.toSet() - LookGroup.BORDER - LookGroup.WHITE_BALANCE, ui.catalog)
                 view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
-                onEdit(p.edit)
+                candidate?.let(onEdit)
             }
         }
         if (searching || group != EDITS_GROUP) items(styles, key = { it.id }) { s ->
             val on = applied(s)
-            val card = ui.filmCards[s.film]
-            val bitmap = remember(card) { card?.asImageBitmap() }
+            val bitmap = rememberSelectionPreview(ui, s.atStrength(strengthOf(s.id)).applyTo(ui.edit, ui.catalog), preview)
             // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
             ThumbCard(
                 selected = on,
@@ -506,6 +498,17 @@ private fun StyleStripContent(
             pick(s, k)
         }
     }
+}
+
+/** The exact same pasted recipe is used for the recent card's image and tap. */
+private fun recentStyleEdit(ui: UiState, car: Sidecar, name: String): Edit? {
+    val src = ui.source ?: return null
+    val here = Frame(id = "", uri = "", name = src.name, size = 0, date = 0, mime = "",
+        raw = src.kind == "raw", width = src.width, height = src.height,
+        exifDate = ui.exif.dateTimeOriginal.orEmpty())
+    return pasteLook(Sidecar(ui.edit, src.wbK, src.wbTint), here,
+        CopiedLook(car.edit, car.wbK, car.wbTint, name),
+        LookGroup.entries.toSet() - LookGroup.BORDER - LookGroup.WHITE_BALANCE, ui.catalog).edit
 }
 
 /**

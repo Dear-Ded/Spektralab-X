@@ -923,3 +923,21 @@ Kotlin outputs through `Lut3d`, with a one-code 16-bit parity ceiling; measured
 GCC11/Clang14 results are exact. `SANITIZE=1` instruments the production header
 and test only. CI runs this after Release JVM tests and retains small evidence,
 excluding the generated binary LUT. See [research and measured costs](../../docs/EXPERT_COLOR_RESEARCH_2026-11-13.md).
+
+## Selection previews
+
+With the same patched host engine, RAW/codec libraries and generated math used
+by `run_jni_frame_check.sh`, run:
+
+```bash
+BUILD_DIR=/outside-repo/selection-preview bash tools/native/run_jni_selection_preview.sh
+CXX=clang++-14 SANITIZE=1 BUILD_DIR=/outside-repo/selection-preview-asan \
+  bash tools/native/run_jni_selection_preview.sh
+```
+
+This exercises actual production JNI with synthetic Android allocation shims:
+complete candidate sessions, look/LUT strength, sRGB/P3, DI, inherited RAW
+development state, parent cache isolation and session ownership. It compares
+against the ordinary pipeline at the same small input size. The required host
+variables are `UP`, `B`, `RAW_BUILD`, `CODEC`, `MATH_DIR` and `VULKAN_HEADERS`.
+See [results and limits](../../docs/SELECTION_PREVIEWS_2026-11-13.md).

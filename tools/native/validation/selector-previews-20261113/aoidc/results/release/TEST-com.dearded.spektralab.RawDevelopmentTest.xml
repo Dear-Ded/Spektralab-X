@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.RawDevelopmentTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:04:36.316Z" hostname="ser858255664526" time="0.034">
+  <properties/>
+  <testcase name="filmPresetsAndStyleRemovalPreservePerPhotoRawIntent" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.002"/>
+  <testcase name="resetProducesExplicitDeltasAndOnlyResetsRawDevelopment" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.01"/>
+  <testcase name="newPhotosAndOldRecordsRemainNeutral" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.002"/>
+  <testcase name="exposurePasteCopiesRawIntentOnlyOntoRawPhotos" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.003"/>
+  <testcase name="developmentCanRepackButFilmAndGeometryRequireANewFrame" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.0"/>
+  <testcase name="sidecarAndQueuePreserveTheCompleteIntent" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.012"/>
+  <testcase name="unknownModeAndUnrepresentableExposureAreRejected" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.003"/>
+  <testcase name="meteringIsRequiredOnlyForActiveRawDevelopment" classname="com.dearded.spektralab.RawDevelopmentTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

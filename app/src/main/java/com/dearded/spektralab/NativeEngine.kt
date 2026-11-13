@@ -89,6 +89,9 @@ object NativeEngine {
     /** The photo at 384 px through [paramsJson] (complete opening params), in a throwaway session. */
     external fun filmPreview(session: Long, paramsJson: String): Bitmap?
 
+    /** An isolated 384 px session on the open source, for a complete candidate edit and look. */
+    external fun openPreviewV1(session: Long, paramsJson: String): Long
+
     external fun sourceInfo(session: Long): String
     external fun setParams(session: Long, deltaJson: String): String?
     external fun getParams(session: Long): String?

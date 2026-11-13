@@ -583,11 +583,9 @@ internal fun Double.signedOrNull(default: Double): String? =
 
 /**
  * The 无 card that leads every strip of processing choices (风格, 胶卷, 相纸,
- * 边框; the no-film-default plan): the photo as it came in, so "no processing"
- * is shown, not described. Same [ThumbCard] and the same three selected
- * signals as every other card; the 原图 tag on the picture is what sets it
- * apart, never a colour. no-film-default owns the state it toggles; callers
- * pass [original] (UiState.before) and wire [onClick] to its "none" action.
+ * 边框; the no-film-default plan). Callers pass the result of this strip's
+ * "none" action: film keeps the finish, paper may show a DI, border keeps
+ * the photograph. Uses the same [ThumbCard] and selected signals.
  */
 @Composable
 internal fun NoneCard(

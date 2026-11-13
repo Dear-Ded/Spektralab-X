@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/tools/native/jni_selection_preview.cpp:3:10: fatal error: 'jni_precision.cpp' file not found
+#include "jni_precision.cpp"
+         ^~~~~~~~~~~~~~~~~~~
+1 error generated.

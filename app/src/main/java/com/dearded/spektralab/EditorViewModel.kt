@@ -12,6 +12,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,8 +57,8 @@ data class UiState(
     val imageTier: String = "",
     /** The frame before any film, shown while the preview is held down. */
     val before: Bitmap? = null,
-    /** Film id -> a 384 px preview of the open photo through that film. Filled in the background. */
-    val filmCards: Map<String, Bitmap> = emptyMap(),
+    /** Changes even when the same URI is reopened with a different decode or white balance. */
+    val previewSource: Long = 0,
     val source: SourceInfo? = null,
     val workingEdge: Int = 4096,
     /** JPEG exports in Display P3 (on by default: Xiaomi flagships have P3 screens). */
@@ -139,10 +141,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var openedEdit: Edit? = null
     private var sourceExif: ExifCopy = ExifCopy.NONE
     private var pendingOpen: Uri? = null
-    // The open photo's input space, so a film card opens on it the same way.
-    private var openSpace = "sRGB"
-    private var openLinear = false
-    private var cardsJob: kotlinx.coroutines.Job? = null
+    private val cardMutex = Mutex()
+    private val cardCache = object : android.util.LruCache<SelectionPreviewKey, Bitmap>(12 * 1024 * 1024) {
+        override fun sizeOf(key: SelectionPreviewKey, value: Bitmap) = maxOf(value.allocationByteCount, 256 * 1024)
+    }
     @Volatile private var detailRevision = 0L
     // 基准测试结果，用于诊断信息
     private var benchmarkResult: BenchmarkResult? = null
@@ -289,7 +291,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null, savedEdit: Edit? = null, change: ReopenEdit? = null) {
         _ui.update { it.copy(busy = "正在读取…", error = null, detail = null) }
-        cardsJob?.cancel()
         cancelStalePreview()
         // Drop idle bitmap references, but keep the old image and native session
         // usable until the replacement is fully prepared (also on OOM or cancel).
@@ -396,7 +397,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // Allocate the replacement UI before transferring native ownership.
             val nextUi = _ui.value.copy(
                     busy = null, edit = edit, image = null, imageTier = "", before = before, exif = nextExif,
-                    filmCards = emptyMap(), detail = null, loadingDetail = false,
+                    previewSource = _ui.value.previewSource + 1, detail = null, loadingDetail = false,
                     canUndo = if (resetHistory) false else history.canUndo,
                     canRedo = if (resetHistory) false else history.canRedo,
                     source = SourceInfo(
@@ -427,8 +428,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         previewPublication.replaceSource(replacement)
                         appliedIntent = previewPublication.request(edit)
                         sessionOutput = displaySpace
-                        openSpace = INPUT_SPACE
-                        openLinear = true
                     }
                     // No suspension between these fields and the UI publication:
                     // saving/exporting can never pair an old source with a new URI.
@@ -445,6 +444,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         rememberPair(_ui.value.edit, edit)
                     }
                     _ui.value = nextUi.copy(canUndo = history.canUndo, canRedo = history.canRedo)
+                    cardCache.evictAll()
                     committed = true
                 }
             } finally {
@@ -463,7 +463,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
             renders.trySend(Unit)
-            startFilmCards(handle)
             saves.trySend(Unit)
             // The previous photo's read grant is retained until the new one lands.
             if (wb == null) withContext(NonCancellable + Dispatchers.IO) { holdGrant(uri) }
@@ -484,7 +483,6 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 if (session != 0L) {
                     renders.trySend(Unit)
                     saves.trySend(Unit)
-                    startFilmCards(session)
                 }
             }
         }
@@ -726,37 +724,50 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     /** 风格「无」: no film, no film effects, no Layer 2; geometry and border stay. */
     fun clearStyle() = update(_ui.value.edit.withoutStyle())
 
-    /**
-     * One card per film, rendered after the photo opens: the open photo's small
-     * copy through that film, with the user's current paper and effects. One
-     * card per engine-thread hop, so the user's own renders get in between.
-     * Cancelled by the next open; a card that fails is simply left out.
-     */
-    private fun startFilmCards(handle: Long) {
-        cardsJob?.cancel()
-        cardsJob = viewModelScope.launch {
-            kotlinx.coroutines.delay(1500)   // let the first preview land first
-            val catalog = _ui.value.catalog
-            for (film in catalog.films) {
-                // Never ahead of the user's own drag renders on the one engine thread.
-                // Hold back while a finger is on a slider, and while the phone is hot:
-                // cards are optional, the preview the user is looking at is not.
-                while (interacting || thermalHeadroom() > kHotHeadroom) kotlinx.coroutines.delay(150)
-                // Cards show the film's colour, not the border or date: both cost a larger canvas.
-                val base = withFilm(wanted, catalog, film.id)?.copy(filmEdge = false, dateImprint = false) ?: continue
-                val params = Edit.openingParams(base, inputSpace = openSpace, linear = openLinear).toString()
-                val card = try {
-                    withContext(EngineThread.dispatcher) {
-                        if (session != handle) null else NativeEngine.filmPreview(handle, params)?.also(DisplayColor::tag)
+    /** Only composed cards request work. Cache exact recipes, including the finish and display space. */
+    suspend fun selectionPreview(edit: Edit): Bitmap? {
+        val state = _ui.value
+        if (state.source == null || state.busy != null) return null
+        val key = SelectionPreviewKey(state.previewSource, state.catalog.normalize(edit).forSelectionPreview(), DisplayColor.space)
+        fun current() = _ui.value.previewSource == key.source && _ui.value.busy == null
+        var output: Bitmap? = null
+        try {
+            return cardMutex.withLock {
+                if (!current()) return@withLock null
+                cardCache.get(key)?.let { return@withLock it }
+                // Let a fling settle and the user's own live/sharp render go first.
+                kotlinx.coroutines.delay(120)
+                while (current() && (interacting || _ui.value.rendering || _ui.value.exporting ||
+                        host.exportRenderPixels > 0 || thermalHeadroom() > kHotHeadroom ||
+                        android.os.SystemClock.uptimeMillis() - host.lastInteraction < 300)) {
+                    kotlinx.coroutines.delay(150)
+                }
+                if (!current()) return@withLock null
+                withContext(EngineThread.dispatcher) {
+                    if (!current() || session == 0L) return@withContext
+                    val params = Edit.openingParams(key.edit, INPUT_SPACE, linear = true).toString()
+                    val card = NativeEngine.openPreviewV1(session, params)
+                    if (card == 0L) return@withContext
+                    try {
+                        if (!NativeEngine.setOutput(card, key.output, false)) return@withContext
+                        UserLibrary.get(app).applyLut(card, key.edit.look, null)
+                        if (!NativeEngine.setLook(card, if (key.edit.look.neutral) null else key.edit.look.values())) return@withContext
+                        output = NativeEngine.renderBitmap(card, "full")
+                        output?.let { DisplayColor.tagOutput(it, key.output); it.prepareToDraw() }
+                    } finally {
+                        NativeEngine.release(card)
                     }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    throw e
-                } catch (e: Throwable) {
-                    null
-                } ?: continue
-                _ui.update { it.copy(filmCards = it.filmCards + (film.id to card)) }
+                }
+                if (!current()) return@withLock null
+                output?.also { cardCache.put(key, it) }.also { output = null }
             }
-            log("film cards ${_ui.value.filmCards.size}/${catalog.films.size}")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return null
+        } finally {
+            // A cancelled dispatcher return must not lose its newly allocated Bitmap.
+            output?.recycle()
         }
     }
 
@@ -1375,7 +1386,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         // The engine stays warm in EngineHost for the next editor. The session
         // is released after a pending open has either committed or cleaned up.
         // A commit's NonCancellable section may still install its new session.
-        cardsJob?.cancel()
+        cardCache.evictAll()
         val opening = openJob
         opening?.cancel()
         host.scope.launch {

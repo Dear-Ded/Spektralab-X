@@ -108,7 +108,8 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
+fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphics.Bitmap? = vm::selectionPreview,
+                 onLightTable: () -> Unit = {}) {
     val ui by vm.ui.collectAsState()
     val jobs by vm.jobs.collectAsState()
     val snackbar = remember { SnackbarHostState() }
@@ -359,7 +360,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome))
+                    if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome), preview)
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
@@ -451,7 +452,7 @@ fun EditorScreen(vm: EditorViewModel, onLightTable: () -> Unit = {}) {
                             Box(Modifier.width(36.dp).height(4.dp).background(Palette.Outline, RoundedCornerShape(2.dp)))
                         }
                         Controls(ui, vm, saveButton, panelOpen, { panelLevel = if (it) maxOf(1, panelLevel) else 0 },
-                            Modifier.fillMaxWidth().weight(1f))
+                            Modifier.fillMaxWidth().weight(1f), preview)
                     }
                 }
             }
@@ -743,6 +744,7 @@ private fun BusyOverlay(text: String) {
 private fun Controls(
     ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit,
     open: Boolean, onOpen: (Boolean) -> Unit, modifier: Modifier,
+    preview: suspend (Edit) -> android.graphics.Bitmap?,
 ) {
     // Held by the screen (ChangesSheet.kt), so 修改记录 can open an entry at its step.
     val nav = LocalEditorNav.current
@@ -773,7 +775,7 @@ private fun Controls(
                                 title = "风格",
                                 summary = if (e.noFilm) "原图" else ui.catalog.film(e.film)?.label.orEmpty(),
                             )
-                        StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle) { vm.applyStyle(it) }
+                        StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle, preview = preview) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
                         1 -> {
@@ -822,7 +824,7 @@ private fun Controls(
                             if (e.noFilm && step > 0) FoldHint("没有选胶卷，这一步不起作用。")
                             when (step) {
                                 0 -> {
-                                FilmStrip(ui, enabled, onNone = vm::pickNoFilm) { vm.pickFilm(it) }
+                                FilmStrip(ui, enabled, onNone = vm::pickNoFilm, preview = preview) { vm.pickFilm(it) }
                                 GroupLabel("画幅")
                                 // One set, one track (UI2.md 7.2 point 8); a size not in the list selects nothing.
                                 Segmented(
@@ -833,7 +835,7 @@ private fun Controls(
                                     NextStep("相纸") { step = 1 }
                                 }
                                 1 -> {
-                                PaperStrip(ui, enabled) { vm.update(it) }
+                                PaperStrip(ui, enabled, preview = preview) { vm.update(it) }
                                     NextStep("曝光") { step = 2 }
                                 }
                                 2 -> {
@@ -1327,7 +1329,8 @@ private const val RECENT = 11
 
 /** The film cards: each film on the open photo. Films whose card has not rendered yet show their name only. */
 @Composable
-private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, onPick: (String) -> Unit) {
+internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
+                      preview: suspend (Edit) -> android.graphics.Bitmap? = { null }, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
     // UI2.md 2.3 ①: four kinds of film, the current one's kind open first.
     val kinds = listOf("彩色负片", "反转片", "电影卷", "黑白")
@@ -1381,15 +1384,15 @@ private fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {}, on
     ) {
         // 无 leads the strip and is a new photo's default (tools/work/no_film_research.md).
         item(key = "_none") {
-            val original = remember(ui.before) { ui.before?.asImageBitmap() }
+            val original = rememberSelectionPreview(ui, ui.edit.copy(noFilm = true), preview)
             NoneCard(selected = ui.edit.noFilm, original = original, enabled = enabled, size = 88.dp) {
                 if (!ui.edit.noFilm) { view.tick(); onNone() }
             }
         }
         items(films, key = { it.id }) { film ->
             val selected = !ui.edit.noFilm && film.id == ui.edit.film
-            val card = ui.filmCards[film.id]
-            val bitmap = remember(card) { card?.asImageBitmap() }
+            val candidate = EditorViewModel.withFilm(ui.edit, ui.catalog, film.id)
+            val bitmap = rememberSelectionPreview(ui, candidate, preview)
             // UI2.md 7.2 points 3-4: a 104 dp square, the name, and ISO · balance · one trait.
             // Before its card renders, the stock's own name stands in for the picture.
             ThumbCard(

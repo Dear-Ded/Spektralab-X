@@ -1,0 +1,9 @@
+PASS candidate=0 output=sRGB exact_bytes=393216 main_state_preserved=true
+PASS candidate=1 output=sRGB exact_bytes=393216 main_state_preserved=true
+PASS candidate=2 output=sRGB exact_bytes=393216 main_state_preserved=true
+PASS candidate=3 output=sRGB exact_bytes=393216 main_state_preserved=true
+PASS candidate=0 output=Display P3 exact_bytes=393216 main_state_preserved=true
+PASS candidate=1 output=Display P3 exact_bytes=393216 main_state_preserved=true
+PASS candidate=2 output=Display P3 exact_bytes=393216 main_state_preserved=true
+PASS candidate=3 output=Display P3 exact_bytes=393216 main_state_preserved=true
+PASS 8 exact small-input pipeline comparisons; RAW metadata/refusal; parent isolation; ownership cleanup

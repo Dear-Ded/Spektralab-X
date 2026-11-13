@@ -1,0 +1,7 @@
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Ubuntu clang version 14.0.0-1ubuntu1.1
+openjdk version "21.0.13.0.3" 2026-10-24
+OpenJDK Runtime Environment (build 21.0.13.0.3+1-1-22.04.1-Ubuntu)
+OpenJDK 64-Bit Server VM (build 21.0.13.0.3+1-1-22.04.1-Ubuntu, mixed mode, sharing)
+cmake version 3.22.1
+LSan disabled for host Vulkan/driver integration; ASan/UBSan enabled for the production JNI translation unit and helpers. Engine/LibRaw archives remain Release.

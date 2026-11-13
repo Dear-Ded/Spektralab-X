@@ -1,0 +1,3 @@
+PASS candidate=0 output=sRGB exact_bytes=393216 main_state_preserved=true
+PASS candidate=1 output=sRGB exact_bytes=393216 main_state_preserved=true
+FAIL open independent preview session: open image: 'film_stock' expects str

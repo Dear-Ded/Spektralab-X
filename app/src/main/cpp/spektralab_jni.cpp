@@ -101,7 +101,7 @@ struct Session {
     std::vector<float> small_rgb;
     uint32_t small_w = 0, small_h = 0;
     // Layer 2, the adjustments to the finished print (layer2.hpp). Applied while
-    // a display or export render is packed; film cards show the film alone.
+    // a display or export render is packed, including selection preview sessions.
     spk::android::LookState look;
     const spk::android::Layer2* active_look() const { return look.active(); }
     // The last display render, kept so an adjustment re-packs it (repack)
@@ -1149,6 +1149,35 @@ JNI_FN(jobject, beforeBitmap)(JNIEnv* env, jobject, jlong handle) {
         fail("original: unknown failure");
     }
     return nullptr;
+}
+
+// Co-created with GPT (OpenAI). Use the ordinary look/LUT/render APIs on an
+// owned small session, without touching the editor's params or retained render.
+JNI_FN(jlong, openPreviewV1)(JNIEnv* env, jobject, jlong handle, jstring params_j) {
+    auto* source = reinterpret_cast<Session*>(handle);
+    if (!source || source->small_rgb.empty()) { fail("no preview source"); return 0; }
+    try {
+        SessionPtr card(open_pixels(source->engine, source->small_rgb, source->small_w,
+                                    source->small_h, str(env, params_j)));
+        if (!card) return 0;
+        card->kind = source->kind;
+        card->raw_metadata = source->raw_metadata;
+        card->raw_stats = source->raw_stats;
+        card->raw_stats_ready = source->raw_stats_ready;
+        auto options = card->view.raw_development;
+        options.enabled = options.enabled && card->view.no_film && card->kind == "raw";
+        if (options.enabled && !card->raw_stats_ready) {
+            fail("RAW standard development requires reopening the complete source"); return 0;
+        }
+        card->raw_development = spk::android::RawDevelopment::build(card->raw_metadata, card->raw_stats, options);
+        card->out = source->out;
+        return reinterpret_cast<jlong>(card.release());
+    } catch (const std::exception& e) {
+        fail(std::string("open preview: ") + e.what());
+    } catch (...) {
+        fail("open preview: unknown failure");
+    }
+    return 0;
 }
 
 // A film card: the current photo, 384 px, through `params_j` (complete opening
