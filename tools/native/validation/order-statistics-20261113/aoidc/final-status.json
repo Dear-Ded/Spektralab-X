@@ -1,0 +1,27 @@
+{
+  "author": "GPT (OpenAI)",
+  "date": "2026-11-13",
+  "cloud": "AOIDC",
+  "baseline": "pinned engine plus overlays 0001-0058",
+  "candidate": "pinned engine plus overlays 0001-0059",
+  "engine_overlays": 59,
+  "libraw_overlays_unchanged": 20,
+  "production_vectors_each": 1460,
+  "toolchain_variants": [
+    "GCC 11.4 Release",
+    "GCC 11.4 ASan/UBSan",
+    "NDK Clang 18.0.3 x86_64-unknown-linux-gnu"
+  ],
+  "gpu_cases": 48,
+  "gpu_complete_payloads_identical": true,
+  "spirv_files_identical": 56,
+  "arm64_full_build_steps": 189,
+  "release_engine_build_steps_each": 85,
+  "input_manifest_rows": 84,
+  "ci_run_blocks": 16,
+  "online_actions_run": false,
+  "phone_test": false,
+  "private_media_uploaded": false,
+  "sanitizer_scope": "changed production translation units plus test; support archives Release",
+  "attempts": "first ASan link needed support archives; corrected build passes"
+}

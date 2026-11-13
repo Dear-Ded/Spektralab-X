@@ -1,0 +1,3 @@
+PASS actual Vulkan: cases=24; seven meters; AE-off control; stride/full; negative/final bytes
+PASS actual Vulkan: cases=24; seven meters; AE-off control; stride/full; negative/final bytes
+PASS frozen/current complete Vulkan EV bits, negative and final float payloads

@@ -1,0 +1,161 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /data/work/gpt-rank-selection-20261113/frozen-host
+[1/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/cam16.cpp.o
+[2/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/blob.cpp.o
+[3/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/colour.cpp.o
+[4/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/curves.cpp.o
+[5/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/hanatos.cpp.o
+[6/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/digital_intermediate.cpp.o
+[7/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/numeric.cpp.o
+[8/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/json.cpp.o
+[9/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/latitude_fit.cpp.o
+[10/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/printing.cpp.o
+[11/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/print_lut.cpp.o
+[12/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/params.cpp.o
+[13/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/spectral.cpp.o
+[14/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/profile.cpp.o
+[15/85] Building CXX object engine/CMakeFiles/spektralab_core.dir/src/core/setup_cache.cpp.o
+[16/85] Linking CXX static library engine/libspektralab_core.a
+[17/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/blur.cpp.o
+[18/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/scene_latitude.cpp.o
+[19/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/windows_unported.cpp.o
+[20/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/pipeline.cpp.o
+[21/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[22/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/imprint_raster.cpp.o
+[23/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/engine.cpp.o
+[24/85] Generating resources/vulkan/spk_boost.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_boost.comp
+[25/85] Generating resources/vulkan/spk_affine3.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_affine3.comp
+[26/85] Generating resources/vulkan/spk_bw_correct.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_bw_correct.comp
+[27/85] Generating resources/vulkan/spk_cam16ucs_compress.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_cam16ucs_compress.comp
+[28/85] Generating resources/vulkan/spk_cctf_decode.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_cctf_decode.comp
+[29/85] Building C object engine/CMakeFiles/spk_volk.dir/third_party/volk/volk.c.o
+[30/85] Generating resources/vulkan/spk_cctf_encode_matrix.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_cctf_encode_matrix.comp
+[31/85] Linking C static library engine/libspk_volk.a
+[32/85] Generating resources/vulkan/spk_couplers_correction.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_couplers_correction.comp
+[33/85] Generating resources/vulkan/spk_curves.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_curves.comp
+[34/85] Generating resources/vulkan/spk_di_normalise.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_di_normalise.comp
+[35/85] Generating resources/vulkan/spk_di_encode.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_di_encode.comp
+[36/85] Generating resources/vulkan/spk_dir_finish.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_dir_finish.comp
+[37/85] Generating resources/vulkan/spk_edr.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_edr.comp
+[38/85] Generating resources/vulkan/spk_geometry_resample_df.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_geometry_resample_df.comp
+[39/85] Generating resources/vulkan/spk_glare_add.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_glare_add.comp
+[40/85] Generating resources/vulkan/spk_grain_layer_one.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_grain_layer_one.comp
+[41/85] Generating resources/vulkan/spk_grain_layers.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_grain_layers.comp
+[42/85] Generating resources/vulkan/spk_grain_simple.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_grain_simple.comp
+[43/85] Generating resources/vulkan/spk_highlight_headroom.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_highlight_headroom.comp
+[44/85] Generating resources/vulkan/spk_iir_boundary_df_acc.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_iir_boundary_df_acc.comp
+[45/85] Generating resources/vulkan/spk_iir_df_acc.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_iir_df_acc.comp
+[46/85] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/overscan.cpp.o
+[47/85] Generating resources/vulkan/spk_iir_difference_df_acc.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_iir_difference_df_acc.comp
+[48/85] Generating resources/vulkan/spk_lincomb3.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_lincomb3.comp
+[49/85] Generating resources/vulkan/spk_log10_guarded.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_log10_guarded.comp
+[50/85] Generating resources/vulkan/spk_lognormal_field.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_lognormal_field.comp
+[51/85] Generating resources/vulkan/spk_lut2d_cubic.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_lut2d_cubic.comp
+[52/85] Generating resources/vulkan/spk_lut3d_trilinear.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_lut3d_trilinear.comp
+[53/85] Generating resources/vulkan/spk_math_probe.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_math_probe.comp
+[54/85] Generating resources/vulkan/spk_matmul3.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_matmul3.comp
+[55/85] Generating resources/vulkan/spk_mul.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_mul.comp
+[56/85] Generating resources/vulkan/spk_overscan_add_mask.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_overscan_add_mask.comp
+[57/85] Generating resources/vulkan/spk_overscan_canvas.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_overscan_canvas.comp
+[58/85] Generating resources/vulkan/spk_overscan_film_present.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_overscan_film_present.comp
+[59/85] Generating resources/vulkan/spk_overscan_light.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_overscan_light.comp
+[60/85] Generating resources/vulkan/spk_print_exposure.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_print_exposure.comp
+[61/85] Generating resources/vulkan/spk_reduce_max.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_reduce_max.comp
+[62/85] Generating resources/vulkan/spk_rng_probe.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_rng_probe.comp
+[63/85] Generating resources/vulkan/spk_scene_curve.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_scene_curve.comp
+[64/85] Generating resources/vulkan/spk_scene_latitude.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_scene_latitude.comp
+[65/85] Generating resources/vulkan/spk_sep_fir_acc.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_sep_fir_acc.comp
+[66/85] Generating resources/vulkan/spk_sep_fir_rows.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_sep_fir_rows.comp
+[67/85] Generating resources/vulkan/spk_spectral_epilogue.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_spectral_epilogue.comp
+[68/85] Generating resources/vulkan/spk_split_probe.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_split_probe.comp
+[69/85] Generating resources/vulkan/spk_take_rgb.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_take_rgb.comp
+[70/85] Generating resources/vulkan/spk_stride_sample.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_stride_sample.comp
+[71/85] Generating resources/vulkan/spk_tc_b.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_tc_b.comp
+[72/85] Generating resources/vulkan/spk_to_rgba16.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_to_rgba16.comp
+[73/85] Generating resources/vulkan/spk_validate_finite.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_validate_finite.comp
+[74/85] Generating resources/vulkan/spk_view_cam16.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_cam16.comp
+[75/85] Generating resources/vulkan/spk_view_grade.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_grade.comp
+[76/85] Generating resources/vulkan/spk_view_geometry.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_geometry.comp
+[77/85] Generating resources/vulkan/spk_view_grade_di.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_grade_di.comp
+[78/85] Generating resources/vulkan/spk_view_grade_float.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_grade_float.comp
+[79/85] Generating resources/vulkan/spk_view_pack.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_pack.comp
+[80/85] Generating resources/vulkan/spk_view_pair.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_view_pair.comp
+[81/85] Generating resources/vulkan/spk_xyz_cam16_compress.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_xyz_cam16_compress.comp
+[82/85] Generating resources/vulkan/spk_zoom_bilinear_mirror.spv
+/data/work/gpt-linearraw-move-20261113/upstream/engine/src/shaders/vulkan/spk_zoom_bilinear_mirror.comp
+[83/85] cd /data/work/gpt-rank-selection-20261113/frozen-host/engine && /usr/bin/cmake -E copy_directory /data/work/gpt-linearraw-move-20261113/upstream/engine/resources /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources && /usr/bin/cmake -E copy_directory /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/profiles /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/profiles && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/NOTICE.md /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/Product-profiles-NOTICE.md && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/fonts/LICENSE /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/Imprint-fonts-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/fonts/DejaVu-LICENSE /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/Imprint-mono-font-DejaVu-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/third_party/stb/LICENSE /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/stb-LICENSE.txt && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/paper_grades.json /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/paper_grades.json && /usr/bin/cmake -E copy_if_different /data/work/gpt-linearraw-move-20261113/upstream/engine/resources_product/neutral_print_filters.json /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/product-neutral-print-filters.json && /usr/bin/cmake -E copy_directory /data/work/gpt-linearraw-move-20261113/upstream/engine/../modern_UI/Spektrafilm/Spektrafilm/Resources/DI /data/work/gpt-rank-selection-20261113/frozen-host/engine/resources/DI
+[84/85] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[85/85] Linking CXX static library engine/libspektralab_engine.a

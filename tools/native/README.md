@@ -861,3 +861,33 @@ precision/cancellation, storage lifetime, one-shot transfer and real working
 decode checks. The direct LibRaw runner does not execute the engine's black
 callback, so it cannot replace this production decoder oracle.
 See [fixed sources, results and limits](../../docs/ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md).
+
+## Exact meter and scene order statistics
+
+```bash
+UP=/path/to/upstream-through-0059 B=/path/to/matching-build \
+BASELINE_UP=/path/to/frozen-0058 BASELINE_B=/path/to/frozen-build \
+BUILD_DIR=/outside-repo/order-statistics SANITIZE=1 \
+  bash tools/native/run_order_statistics.sh
+UP=/path/to/upstream-through-0059 B=/path/to/matching-build \
+BASELINE_UP=/path/to/frozen-0058 BASELINE_B=/path/to/frozen-build \
+BUILD_DIR=/outside-repo/order-gpu LP_NUM_THREADS=2 \
+  bash tools/native/run_order_statistics_gpu.sh
+```
+
+The CPU runner directly compiles the actual production pipeline and latitude
+translation units with test-only access control disabled. It checks 1,460 vectors,
+an independent full-sort scene/rank/median oracle, duplicate ranks, signed zeros
+and empty public inputs. An optional frozen source requires exact EV-bit and
+complete scene-statistic-hash CSV parity. `SANITIZE=1` instruments both changed
+production units and the test, and requires `B` for otherwise unused stage-table
+support symbols; it does not instrument the Release support archives. The CI
+baseline is obtained by reversing only 0059 from a separate source copy.
+
+The GPU runner requires separately built frozen/current engine/core/volk
+archives and initialized resources. It exercises 48 real film/print cases across
+normal and forced-split math, seven meters and AE-off, comparing full/strided EV,
+applied EV and complete negative/final float payload bytes. Keep generated binary
+payloads outside Git. For stage timing, use the non-sanitized probes' `--benchmark`
+mode and the archived paired-process driver. See
+[external algorithms, measurements and limits](../../docs/ENGINE_ORDER_STATISTICS_2026-11-13.md).

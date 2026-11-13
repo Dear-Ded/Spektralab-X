@@ -1,0 +1,5 @@
+PASS verified official engine archive SHA-256
+PASS 59 engine overlays, zero fuzz
+PASS 148 engine/src files match tested candidate
+PASS reversing only 0059 matches frozen 0058 engine/src
+PASS reapplying only 0059 restores candidate engine/src

@@ -1,0 +1,1 @@
+Initial comparison included patch-generated .orig backup files; actual production source diff was empty. Final manifests exclude .orig and .rej.

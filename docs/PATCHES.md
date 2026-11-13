@@ -73,6 +73,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0058 与 LibRaw 0026 配套，将满足严格尺寸、stride、类型与所有权条件的整数 LinearRaw 原始 RGBA16 分配直接移交处理图，省去 raw2image 的第二份整图分配/复制。只用于每请求新建的一次性解码器，原 LibRaw 重复处理 API 保持；黑点回调在移交前保存存储类型。200 组冻结像素/完整元数据对照、48 组独立黑位公式、双云完整 LibRaw sanitizer、生产 JNI 与 ARM64 链接验证见 [缓冲移交研究](ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md)。仍有整图处理图和 RGB16，不是端到端恒定内存。GPT（OpenAI）共创。
 
+0059 为测光和场景统计复用已选 rank 的分区边界，传统 median 改为选择中间项和左半最大值；原整数分位点、均值/权重/直方图算序保持，NaN/正负零歧义走历史顺序。三种编译配置各 1,460 组真实生产统计与独立排序 oracle、48 组完整 Vulkan 输出、ARM64 全链接及 59 个补丁重放通过。云端统计阶段 median 耗时降低约 63%–80%，scene_stats 约 9%–22%，默认四种测光意图计算约 4%–6%；非整机导出或手机指标。见 [外部算法与精确次序统计](ENGINE_ORDER_STATISTICS_2026-11-13.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 

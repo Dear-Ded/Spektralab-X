@@ -115,6 +115,17 @@ jobs:
             -DSPEKTRALAB_BUILD_NATIVE_RAW=OFF -DSPEKTRALAB_BUILD_HOST=OFF \
             -DSPEKTRALAB_BUILD_DESKTOP=OFF -DSPEKTRALAB_BUILD_TEST_DLL=OFF
           cmake --build build-fir --target spektralab_engine -j2
+      - name: Compare exact meter and scene order statistics
+        run: |
+          mkdir -p fir-evidence
+          cp -a upstream "$RUNNER_TEMP/order-frozen"
+          patch -d "$RUNNER_TEMP/order-frozen" -p1 --reverse --fuzz=0 --batch \
+            < patches/0059-exact-multiple-order-statistics.patch
+          UP="$PWD/upstream" B="$PWD/build-fir" BASELINE_UP="$RUNNER_TEMP/order-frozen" \
+            BUILD_DIR="$PWD/order-tests" SANITIZE=1 \
+            bash tools/native/run_order_statistics.sh > fir-evidence/order-statistics.log 2>&1
+          sha256sum order-tests/baseline.csv order-tests/candidate.csv \
+            > fir-evidence/order-statistics.sha256
       - name: Exercise Vulkan view curves
         run: |
           UP="$PWD/upstream" B="$PWD/build-fir" BUILD_DIR="$PWD/curve-gpu-tests" \

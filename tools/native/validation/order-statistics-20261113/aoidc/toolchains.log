@@ -1,0 +1,24 @@
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/android/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+1.10.1
+Linux ser858255664526 5.15.0-30-generic #31-Ubuntu SMP Thu May 5 10:00:34 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+28:CMAKE_BUILD_TYPE:STRING=Release
+31:CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+51:CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+28:CMAKE_BUILD_TYPE:STRING=Release
+31:CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+51:CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+18:ANDROID_ABI:UNINITIALIZED=arm64-v8a
+21:ANDROID_PLATFORM:UNINITIALIZED=android-29
+45:CMAKE_BUILD_TYPE:STRING=Release
+63:CMAKE_CXX_FLAGS_RELEASE:STRING=

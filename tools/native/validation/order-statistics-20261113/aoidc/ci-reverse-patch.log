@@ -1,0 +1,6 @@
+patching file engine/src/core/order_statistics.hpp
+patching file engine/src/pipeline/pipeline.cpp
+patching file engine/src/core/latitude_fit.cpp
+patching file engine/src/core/order_statistics.hpp
+patching file engine/src/pipeline/pipeline.cpp
+patching file engine/src/core/latitude_fit.cpp

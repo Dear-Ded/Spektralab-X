@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-rank-selection-20261113/package_evidence.py", line 54, in <module>
+    assert tree(replay / 'engine/src') == candidate
+AssertionError

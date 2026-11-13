@@ -1,0 +1,155 @@
+--- /dev/null
++++ b/engine/src/core/order_statistics.hpp
+@@ -0,0 +1,68 @@
++// Co-created with GPT (OpenAI). Exact ranks without sorting every sample.
++#pragma once
++#include <algorithm>
++#include <array>
++#include <cmath>
++#include <cstddef>
++#include <vector>
++
++namespace spk::detail {
++
++inline bool rank_has_ambiguous_values(const std::vector<double>& values) {
++    bool positive_zero = false, negative_zero = false;
++    for (double value : values) {
++        if (std::isnan(value)) return true;
++        if (value == 0.0) {
++            if (std::signbit(value)) negative_zero = true;
++            else positive_zero = true;
++        }
++    }
++    return positive_zero && negative_zero;
++}
++
++// Preconditions: nonempty values; nondecreasing, valid zero-based ranks.
++// A selected pivot bounds both recursive searches; equal ranks share its value.
++// Keep the historical whole-range selection order for unordered values and
++// signed-zero ties, whose exact bits are not determined by numeric rank alone.
++template<size_t N>
++std::array<double, N> select_ranks(std::vector<double>& values,
++                                 const std::array<size_t, N>& ranks) {
++    static_assert(N > 0);
++    std::array<double, N> result{};
++    if (rank_has_ambiguous_values(values)) {
++        for (size_t i = 0; i < N; ++i) {
++            std::nth_element(values.begin(), values.begin() + ranks[i], values.end());
++            result[i] = values[ranks[i]];
++        }
++        return result;
++    }
++    const auto choose = [&](auto&& self, size_t first, size_t last,
++                            size_t lo, size_t hi) -> void {
++        if (first == last) return;
++        const size_t middle = first + (last - first - 1) / 2;
++        const size_t k = ranks[middle];
++        std::nth_element(values.begin() + lo, values.begin() + k, values.begin() + hi);
++        size_t a = middle, b = middle + 1;
++        while (a > first && ranks[a - 1] == k) --a;
++        while (b < last && ranks[b] == k) ++b;
++        for (size_t i = a; i < b; ++i) result[i] = values[k];
++        self(self, first, a, lo, k);
++        self(self, b, last, k + 1, hi);
++    };
++    choose(choose, 0, N, 0, values.size());
++    return result;
++}
++
++inline double median_in_place(std::vector<double>& values) {
++    const size_t n = values.size(), middle = n / 2;
++    if (rank_has_ambiguous_values(values)) {
++        std::sort(values.begin(), values.end());
++        return n % 2 ? values[middle] : 0.5 * (values[middle - 1] + values[middle]);
++    }
++    std::nth_element(values.begin(), values.begin() + middle, values.end());
++    if (n % 2) return values[middle];
++    const double lower = *std::max_element(values.begin(), values.begin() + middle);
++    return 0.5 * (lower + values[middle]);
++}
++
++}  // namespace spk::detail
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -1,6 +1,7 @@
+ #include "pipeline.hpp"
+ #include "timer.hpp"
+ #include "halation_psf.hpp"
++#include "core/order_statistics.hpp"
+ #if defined(__linux__)
+ #include "bounded_print_run.hpp"
+ #endif
+@@ -751,9 +752,7 @@
+         exposure = (sum / double(Y.size())) / kMidgray;
+     } else if (method == "median") {
+         std::vector<double> sorted = Y;
+-        std::sort(sorted.begin(), sorted.end());
+-        const size_t m = sorted.size();
+-        const double median = m % 2 ? sorted[m / 2] : 0.5 * (sorted[m / 2 - 1] + sorted[m / 2]);
++        const double median = detail::median_in_place(sorted);
+         exposure = median / kMidgray;
+     } else if (method == "center_weighted") {
+         // center_weighted: a Gaussian falloff from the centre, sigma 0.2 of
+@@ -801,12 +800,11 @@
+     // trap this avoids: 0.01 and 0.995 are not representable, and either can
+     // land one rank low, which the Python side will not do.
+     std::vector<double> sorted = y;
+-    auto rank = [&](int q10) {
+-        const size_t k = (size_t(q10) * (n - 1)) / 1000u;
+-        std::nth_element(sorted.begin(), sorted.begin() + k, sorted.end());
+-        return sorted[k];
+-    };
+-    const double p1 = rank(10), p5 = rank(50), p99 = rank(990), p995 = rank(995);
++    const std::array<size_t, 4> ranks = {
++        (size_t(10) * (n - 1)) / 1000u, (size_t(50) * (n - 1)) / 1000u,
++        (size_t(990) * (n - 1)) / 1000u, (size_t(995) * (n - 1)) / 1000u};
++    const auto selected = detail::select_ranks(sorted, ranks);
++    const double p1 = selected[0], p5 = selected[1], p99 = selected[2], p995 = selected[3];
+ 
+     ExposureEvs out;
+     // The trim set: P(1)..P(99) inclusive, by rank. The log mean is what a
+--- a/engine/src/core/latitude_fit.cpp
++++ b/engine/src/core/latitude_fit.cpp
+@@ -1,4 +1,5 @@
+ #include "latitude_fit.hpp"
++#include "order_statistics.hpp"
+ 
+ #include <algorithm>
+ #include <cmath>
+@@ -27,14 +28,6 @@
+ // relaxes to slope 1 once the gain reaches `L` (§15.5).
+ double bound_lift(double d, double L) { return d > 0.0 ? d * L / std::sqrt(L * L + d * d) : d; }
+ 
+-// `P(q)` at 0-based rank `q * (n - 1) / 10000` in exact integer division --
+-// the meter's discipline (`exposure_evs_from`), one decimal finer.
+-double rank(std::vector<double>& v, int per_ten_thousand) {
+-    const size_t k = (size_t(per_ten_thousand) * (v.size() - 1)) / 10000u;
+-    std::nth_element(v.begin(), v.begin() + std::ptrdiff_t(k), v.end());
+-    return v[k];
+-}
+-
+ }  // namespace
+ 
+ double delta(double E, const SceneLatitudeParams& p) {
+@@ -109,11 +102,16 @@
+         const int b = std::clamp(int(std::floor((e - SceneStats::kLo) / width)), 0, SceneStats::kBins - 1);
+         s.histogram[size_t(b)] += 1.0 / double(E.size());
+     }
+-    s.p01 = rank(E, 10);
+-    s.p1 = rank(E, 100);
+-    s.p50 = rank(E, 5000);
+-    s.p99 = rank(E, 9900);
+-    s.p999 = rank(E, 9990);
++    // Exact integer ranks, as before; only the partition work is shared.
++    const std::array<size_t, 5> ranks = {
++        (size_t(10) * (E.size() - 1)) / 10000u,
++        (size_t(100) * (E.size() - 1)) / 10000u,
++        (size_t(5000) * (E.size() - 1)) / 10000u,
++        (size_t(9900) * (E.size() - 1)) / 10000u,
++        (size_t(9990) * (E.size() - 1)) / 10000u};
++    const auto selected = detail::select_ranks(E, ranks);
++    s.p01 = selected[0]; s.p1 = selected[1]; s.p50 = selected[2];
++    s.p99 = selected[3]; s.p999 = selected[4];
+     return s;
+ }
+ 

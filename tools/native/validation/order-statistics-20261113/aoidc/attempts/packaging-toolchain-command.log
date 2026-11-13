@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-rank-selection-20261113/package_evidence.py", line 135, in <module>
+    run(['rg', '-n', 'CMAKE_BUILD_TYPE:|CMAKE_CXX_COMPILER:|CMAKE_CXX_FLAGS_RELEASE:|'
+  File "/data/work/gpt-rank-selection-20261113/package_evidence.py", line 30, in run
+    return subprocess.run(args, stdout=log, stderr=subprocess.STDOUT,
+  File "/usr/lib/python3.10/subprocess.py", line 503, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/usr/lib/python3.10/subprocess.py", line 971, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.10/subprocess.py", line 1863, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'rg'
