@@ -52,17 +52,20 @@ inline bool decode_raw_precision(const std::filesystem::path& path, const RawPre
                                  const std::array<float, 4>* user_mul, double white_temperature,
                                  io::DecodedRaw& out, std::string& error,
                                  FloatDngMetadata* float_source = nullptr,
-                                 const FloatDngCancel& cancelled = {}) {
+                                 const FloatDngCancel& cancelled = {},
+                                 const io::RawRgb16Converter& converter = {}) {
     error.clear();
     try {
         float_dng_detail::check_cancel(cancelled);
         float_dng_detail::require(plan.custom_whitebalance == bool(user_mul),
                                   "RAW precision plan white balance changed; inspect the source again");
         io::DecodedRaw candidate;
+        float_dng_detail::require(!converter || plan.mode == "integer_compatible16",
+                                  "working RAW conversion requires integer_compatible16");
         if (plan.mode == "integer_compatible16" || plan.mode == "float_legacy_quantized") {
             float_dng_detail::require((plan.mode == "integer_compatible16") ==
                                       (plan.support == FloatDngSupport::NotFloat), "invalid RAW precision plan");
-            if (!io::decode_raw_compatible(path, user_mul, candidate, error, white_temperature, cancelled)) return false;
+            if (!io::decode_raw_compatible(path, user_mul, candidate, error, white_temperature, cancelled, converter)) return false;
             float_dng_detail::check_cancel(cancelled);
             out = std::move(candidate);
             return true;

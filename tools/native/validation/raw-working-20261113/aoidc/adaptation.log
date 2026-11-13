@@ -1,0 +1,111 @@
+resize: 350 shapes/patterns byte-identical
+gainmap: 4100 scalar equations and bilinear/gamma order passed
+look: LUT retention and allocation-failure transactions passed
+brightness original range: 458759 float32 samples, fnv1a=8453ce96a5c26714
+brightness outside range: 64 legal-control/threshold cases passed
+local recovered channels: 6 masked HDR/signed cases passed
+local ordinary domain: 36873 RGB triplets byte-identical
+local bounded weights: 524 parsed integer/float mask cases passed
+float=0 ev=-2 linear_in=-4 linear_out=0 expected=-1 effective_ev=0 correct=0
+float=0 ev=-2 linear_in=-0.001 linear_out=0 expected=-0.00025 effective_ev=0 correct=0
+float=0 ev=-2 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=0 ev=-2 linear_in=0.0001 linear_out=5.325205348e-05 expected=2.5e-05 effective_ev=-0.9090909361 correct=0
+float=0 ev=-2 linear_in=0.001 linear_out=0.0005325205857 expected=0.00025 effective_ev=-0.9090907981 correct=0
+float=0 ev=-2 linear_in=0.001953125 linear_out=0.001040079165 expected=0.00048828125 effective_ev=-0.9090909419 correct=0
+float=0 ev=-2 linear_in=0.002 linear_out=0.001053873682 expected=0.0005 effective_ev=-0.9242980445 correct=0
+float=0 ev=-2 linear_in=0.01 linear_out=0.003216661896 expected=0.0025 effective_ev=-1.636363793 correct=0
+float=0 ev=-2 linear_in=0.18 linear_out=0.05789992138 expected=0.045 effective_ev=-1.636363612 correct=0
+float=0 ev=-2 linear_in=1 linear_out=0.3216662113 expected=0.25 effective_ev=-1.636363695 correct=0
+float=0 ev=-2 linear_in=4 linear_out=1.286664922 expected=1 effective_ev=-1.636363609 correct=0
+float=0 ev=0 linear_in=-4 linear_out=-4 expected=-4 effective_ev=0 correct=1
+float=0 ev=0 linear_in=-0.001 linear_out=-0.001000000047 expected=-0.001 effective_ev=0 correct=1
+float=0 ev=0 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=0 ev=0 linear_in=0.0001 linear_out=9.999999747e-05 expected=0.0001 effective_ev=-3.644554268e-08 correct=1
+float=0 ev=0 linear_in=0.001 linear_out=0.001000000047 expected=0.001 effective_ev=6.852433583e-08 correct=1
+float=0 ev=0 linear_in=0.001953125 linear_out=0.001953125 expected=0.001953125 effective_ev=-1.601713252e-16 correct=1
+float=0 ev=0 linear_in=0.002 linear_out=0.00199999984 expected=0.002 effective_ev=-1.152198802e-07 correct=1
+float=0 ev=0 linear_in=0.01 linear_out=0.009999999591 expected=0.01 effective_ev=-5.903327819e-08 correct=1
+float=0 ev=0 linear_in=0.18 linear_out=0.1800000057 expected=0.18 effective_ev=4.545976105e-08 correct=1
+float=0 ev=0 linear_in=1 linear_out=1 expected=1 effective_ev=0 correct=1
+float=0 ev=0 linear_in=4 linear_out=4.000000186 expected=4 effective_ev=6.702655557e-08 correct=1
+float=0 ev=2 linear_in=-4 linear_out=0 expected=-16 effective_ev=0 correct=0
+float=0 ev=2 linear_in=-0.001 linear_out=0 expected=-0.004 effective_ev=0 correct=0
+float=0 ev=2 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=0 ev=2 linear_in=0.0001 linear_out=0.000187786165 expected=0.0004 effective_ev=0.9090907778 correct=0
+float=0 ev=2 linear_in=0.001 linear_out=0.001877861796 expected=0.004 effective_ev=0.9090908896 correct=0
+float=0 ev=2 linear_in=0.001953125 linear_out=0.006071899054 expected=0.0078125 effective_ev=1.636363521 correct=0
+float=0 ev=2 linear_in=0.002 linear_out=0.006217624036 expected=0.008 effective_ev=1.636363383 correct=0
+float=0 ev=2 linear_in=0.01 linear_out=0.03108812108 expected=0.04 effective_ev=1.636363425 correct=0
+float=0 ev=2 linear_in=0.18 linear_out=0.5595862115 expected=0.72 effective_ev=1.636363508 correct=0
+float=0 ev=2 linear_in=1 linear_out=3.108812316 expected=4 effective_ev=1.636363521 correct=0
+float=0 ev=2 linear_in=4 linear_out=12.43525094 expected=16 effective_ev=1.636363716 correct=0
+float=1 ev=-2 linear_in=-4 linear_out=-1 expected=-1 effective_ev=0 correct=1
+float=1 ev=-2 linear_in=-0.001 linear_out=-0.0002500000119 expected=-0.00025 effective_ev=0 correct=1
+float=1 ev=-2 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=1 ev=-2 linear_in=0.0001 linear_out=2.499999937e-05 expected=2.5e-05 effective_ev=-2.000000036 correct=1
+float=1 ev=-2 linear_in=0.001 linear_out=0.0002500000119 expected=0.00025 effective_ev=-1.999999931 correct=1
+float=1 ev=-2 linear_in=0.001953125 linear_out=0.00048828125 expected=0.00048828125 effective_ev=-2 correct=1
+float=1 ev=-2 linear_in=0.002 linear_out=0.0004999999655 expected=0.0005 effective_ev=-2.000000099 correct=1
+float=1 ev=-2 linear_in=0.01 linear_out=0.002500000049 expected=0.0025 effective_ev=-1.999999972 correct=1
+float=1 ev=-2 linear_in=0.18 linear_out=0.04499999998 expected=0.045 effective_ev=-2.000000001 correct=1
+float=1 ev=-2 linear_in=1 linear_out=0.2499999989 expected=0.25 effective_ev=-2.000000006 correct=1
+float=1 ev=-2 linear_in=4 linear_out=1 expected=1 effective_ev=-2 correct=1
+float=1 ev=0 linear_in=-4 linear_out=-4 expected=-4 effective_ev=0 correct=1
+float=1 ev=0 linear_in=-0.001 linear_out=-0.001000000047 expected=-0.001 effective_ev=0 correct=1
+float=1 ev=0 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=1 ev=0 linear_in=0.0001 linear_out=9.999999747e-05 expected=0.0001 effective_ev=-3.644554268e-08 correct=1
+float=1 ev=0 linear_in=0.001 linear_out=0.001000000047 expected=0.001 effective_ev=6.852433583e-08 correct=1
+float=1 ev=0 linear_in=0.001953125 linear_out=0.001953125 expected=0.001953125 effective_ev=-1.601713252e-16 correct=1
+float=1 ev=0 linear_in=0.002 linear_out=0.00199999984 expected=0.002 effective_ev=-1.152198802e-07 correct=1
+float=1 ev=0 linear_in=0.01 linear_out=0.009999999591 expected=0.01 effective_ev=-5.903327819e-08 correct=1
+float=1 ev=0 linear_in=0.18 linear_out=0.1800000057 expected=0.18 effective_ev=4.545976105e-08 correct=1
+float=1 ev=0 linear_in=1 linear_out=1 expected=1 effective_ev=0 correct=1
+float=1 ev=0 linear_in=4 linear_out=4.000000186 expected=4 effective_ev=6.702655557e-08 correct=1
+float=1 ev=2 linear_in=-4 linear_out=-16 expected=-16 effective_ev=0 correct=1
+float=1 ev=2 linear_in=-0.001 linear_out=-0.00400000019 expected=-0.004 effective_ev=0 correct=1
+float=1 ev=2 linear_in=0 linear_out=0 expected=0 effective_ev=0 correct=1
+float=1 ev=2 linear_in=0.0001 linear_out=0.0003999999899 expected=0.0004 effective_ev=1.999999964 correct=1
+float=1 ev=2 linear_in=0.001 linear_out=0.004000000119 expected=0.004 effective_ev=2.000000043 correct=1
+float=1 ev=2 linear_in=0.001953125 linear_out=0.007812500363 expected=0.0078125 effective_ev=2.000000067 correct=1
+float=1 ev=2 linear_in=0.002 linear_out=0.007999999279 expected=0.008 effective_ev=1.99999987 correct=1
+float=1 ev=2 linear_in=0.01 linear_out=0.03999999781 expected=0.04 effective_ev=1.999999921 correct=1
+float=1 ev=2 linear_in=0.18 linear_out=0.7199999856 expected=0.72 effective_ev=1.999999971 correct=1
+float=1 ev=2 linear_in=1 linear_out=4.000000186 expected=4 effective_ev=2.000000067 correct=1
+float=1 ev=2 linear_in=4 linear_out=16.00000049 expected=16 effective_ev=2.000000044 correct=1
+mixed_toe ev=-2 input_g_over_r=10 output_g_over_r=10.00000073 input_b_over_g=10 output_b_over_g=9.99999972
+mixed_toe ev=2 input_g_over_r=10 output_g_over_r=10.00000055 input_b_over_g=10 output_b_over_g=9.999999156
+linear_exposure_violations=0 legacy_failures=0 global_local_parity_failures=0 neutral_failures=0 ratio_failures=0 roundtrip_failures=0 dense_sweep_cases=270369 dense_sweep_failures=0
+float=0 ev=0 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+float=0 ev=0 highlights=-100 linear_in=0.0625 encoded_out=0.2101756185 after_pack_clamp=0.2101756185
+float=0 ev=0 highlights=-100 linear_in=0.125 encoded_out=0.3018513024 after_pack_clamp=0.3018513024
+float=0 ev=0 highlights=-100 linear_in=0.25 encoded_out=0.4262706041 after_pack_clamp=0.4262706041
+float=0 ev=0 highlights=-100 linear_in=0.5 encoded_out=0.5872835517 after_pack_clamp=0.5872835517
+float=0 ev=0 highlights=-100 linear_in=1 encoded_out=0.75 after_pack_clamp=0.75
+float=0 ev=3 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+float=0 ev=3 highlights=-100 linear_in=0.0625 encoded_out=0.4959086478 after_pack_clamp=0.4959086478
+float=0 ev=3 highlights=-100 linear_in=0.125 encoded_out=0.6655865908 after_pack_clamp=0.6655865908
+float=0 ev=3 highlights=-100 linear_in=0.25 encoded_out=0.8934679031 after_pack_clamp=0.8934679031
+float=0 ev=3 highlights=-100 linear_in=0.5 encoded_out=1.313160658 after_pack_clamp=1
+float=0 ev=3 highlights=-100 linear_in=1 encoded_out=1.929997444 after_pack_clamp=1
+float=1 ev=0 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+float=1 ev=0 highlights=-100 linear_in=0.0625 encoded_out=0.2101756185 after_pack_clamp=0.2101756185
+float=1 ev=0 highlights=-100 linear_in=0.125 encoded_out=0.3018513024 after_pack_clamp=0.3018513024
+float=1 ev=0 highlights=-100 linear_in=0.25 encoded_out=0.4262706041 after_pack_clamp=0.4262706041
+float=1 ev=0 highlights=-100 linear_in=0.5 encoded_out=0.5872835517 after_pack_clamp=0.5872835517
+float=1 ev=0 highlights=-100 linear_in=1 encoded_out=0.75 after_pack_clamp=0.75
+float=1 ev=0 highlights=-100 linear_in=2 encoded_out=1.102300882 after_pack_clamp=1
+float=1 ev=0 highlights=-100 linear_in=4 encoded_out=1.62008965 after_pack_clamp=1
+float=1 ev=0 highlights=-100 linear_in=8 encoded_out=2.381101608 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=0 encoded_out=0 after_pack_clamp=0
+float=1 ev=3 highlights=-100 linear_in=0.0625 encoded_out=0.5872835517 after_pack_clamp=0.5872835517
+float=1 ev=3 highlights=-100 linear_in=0.125 encoded_out=0.75 after_pack_clamp=0.75
+float=1 ev=3 highlights=-100 linear_in=0.25 encoded_out=1.102300882 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=0.5 encoded_out=1.62008965 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=1 encoded_out=2.381101608 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=2 encoded_out=3.499587059 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=4 encoded_out=5.143464088 after_pack_clamp=1
+float=1 ev=3 highlights=-100 linear_in=8 encoded_out=7.559526443 after_pack_clamp=1
+ramp_reversals=0 negative_highlights=0 global_local_parity_failures=0 legacy_domain_failures=0 sdr_zero_ev_failures=0 hdr_shadow_failures=0 signed_highlight_failures=0 channel_ratio_failures=0 integer_cases=12 float_cases=18
+curves: 1787 curves, 1148285 double/float samples byte-identical
+curve wire: 32 row combinations, 40960 exact table floats, 32 active masks, 35 malformed rows rejected; old collision reproduced
+native tests passed (/data/work/gpt-working-decode-20261113/adaptation)

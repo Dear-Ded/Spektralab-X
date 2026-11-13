@@ -1,0 +1,5644 @@
+{
+  "summary": {
+    "passed": true,
+    "float_cases": 17,
+    "custom_float_cases": 3,
+    "fallback_cases": 5,
+    "integer_cases": 4,
+    "cancellation_cases": 77,
+    "maximum_absolute_error": 4.76837158203125e-07,
+    "independent_absolute_tolerance": 2e-06,
+    "helper_pixels_byte_equal": true,
+    "legacy_pixels_byte_equal": true,
+    "legacy_metadata_equal": true,
+    "all_eight_orientations_match_libraw_flip": true,
+    "float_metadata_not_integer_truncated": true,
+    "supported_bad_sample_does_not_fallback": true,
+    "atomic_failures": true,
+    "distant_maximum_byte_equal": true,
+    "scaled_neutral_byte_equal": true
+  },
+  "records": [
+    {
+      "case": "max2.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "max4.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fractional.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "float_white": [
+        4,
+        4,
+        4
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "per-plane-black.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        4,
+        4
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "per-plane-white.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "per-plane-white-orientation6.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 6,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "per-plane-white-permuted.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.125,
+        0.25,
+        0.375
+      ],
+      "float_white": [
+        2,
+        4,
+        3
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "nonunit-green-neutral.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ],
+      "applied_wb": [
+        4,
+        1.600000023841858,
+        1,
+        1.600000023841858
+      ]
+    },
+    {
+      "case": "scaled-neutral-white.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        4,
+        2,
+        2.6666667461395264,
+        2
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "rational-neutral-white.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ],
+      "applied_wb": [
+        3.0000030994415283,
+        1.1428571939468384,
+        1,
+        1.1428571939468384
+      ]
+    },
+    {
+      "case": "orientation-2.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 1,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-3.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 3,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-4.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 2,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-5.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 4,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-6.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 6,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-7.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 7,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "orientation-8.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 5,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fallback-crop.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fallback-opcode.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fallback-profile.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fallback-repeat.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG: requires constant black; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "bayer-max2-black0.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG camera layout or preapplied WB; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--custom"
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ]
+    },
+    {
+      "case": "per-plane-white.dng",
+      "options": [
+        "--custom"
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0.25,
+        0.375,
+        0.125
+      ],
+      "float_white": [
+        4,
+        3,
+        2
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ]
+    },
+    {
+      "case": "orientation-8.dng",
+      "options": [
+        "--custom"
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 48,
+      "height": 64,
+      "raw_flip": 5,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ]
+    },
+    {
+      "case": "supported-bad-sample.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": false,
+      "polls": 22,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "float LinearRaw: nonfinite float DNG sample",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [
+        "--custom"
+      ],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ]
+    },
+    {
+      "case": "integer-linear.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "integer-linear.dng",
+      "options": [
+        "--custom"
+      ],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": false,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        0,
+        0,
+        0
+      ],
+      "float_white": [
+        1,
+        1,
+        1
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        1
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 1,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        2
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 2,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        3
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 3,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        4
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 4,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        5
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 5,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        6
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 6,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        7
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 7,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        8
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 8,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        9
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 9,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        10
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 10,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        11
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 11,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        12
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 12,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        13
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 13,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        14
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 14,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        15
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 15,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        16
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 16,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        17
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 17,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        18
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 19,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        19
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 19,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        20
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 20,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        21
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 21,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        22
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 22,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        23
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        24
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        25
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 25,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        26
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 26,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        27
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 27,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        28
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 28,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        29
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 29,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        30
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 30,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        31
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 31,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        32
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 32,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        33
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 33,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        34
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 34,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        35
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 35,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        36
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 36,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        37
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 37,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        38
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 38,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        39
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 39,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        40
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 40,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        41
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 41,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        42
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 42,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        43
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 43,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        44
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 44,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        45
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 45,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        46
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 46,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        47
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 47,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        48
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 48,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        49
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 49,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        50
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 50,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        51
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 51,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        52
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 52,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        53
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 53,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        54
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 54,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        55
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 55,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        56
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 56,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        57
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 57,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        58
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 58,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        59
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 59,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        60
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 60,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        61
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 61,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        62
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 62,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        63
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 63,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        64
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 64,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        65
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 65,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        66
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 66,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        67
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 67,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        68
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 68,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        69
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 69,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        70
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 70,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--cancel",
+        71
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 71,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": true,
+      "cancelled": false,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "applied_wb": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [
+        "--cancel",
+        1
+      ],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 1,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [
+        "--cancel",
+        12
+      ],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 12,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "integer-bayer.dng",
+      "options": [
+        "--cancel",
+        24
+      ],
+      "open_status": 0,
+      "mode": "integer_compatible16",
+      "note": "",
+      "ok": false,
+      "cancelled": true,
+      "polls": 24,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "fallback-crop.dng",
+      "options": [],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": true,
+      "cancelled": false,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": false,
+      "float_metadata_unchanged": true,
+      "reference_ok": true,
+      "exact_pixels": true,
+      "exact_metadata": true,
+      "width": 64,
+      "height": 48,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        0
+      ],
+      "applied_wb": [
+        2,
+        1,
+        1.3333333730697632,
+        1
+      ]
+    },
+    {
+      "case": "fallback-crop.dng",
+      "options": [
+        "--cancel",
+        1
+      ],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": false,
+      "cancelled": true,
+      "polls": 1,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "fallback-crop.dng",
+      "options": [
+        "--cancel",
+        11
+      ],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": false,
+      "cancelled": true,
+      "polls": 11,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "fallback-crop.dng",
+      "options": [
+        "--cancel",
+        23
+      ],
+      "open_status": 0,
+      "mode": "float_legacy_quantized",
+      "note": "float LinearRaw: unsupported float DNG tag: crop, calibration, opcode or profile is not supported; legacy float conversion quantizes to integer",
+      "ok": false,
+      "cancelled": true,
+      "polls": 23,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--bad-plan"
+      ],
+      "open_status": 0,
+      "mode": "invalid-test-plan",
+      "note": "",
+      "ok": false,
+      "cancelled": false,
+      "polls": 1,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "RAW precision dispatch: invalid float LinearRaw precision plan",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "max2.dng",
+      "options": [
+        "--wrong-wb"
+      ],
+      "open_status": 0,
+      "mode": "float_linear_v1",
+      "note": "",
+      "ok": false,
+      "cancelled": false,
+      "polls": 1,
+      "raw_unchanged": true,
+      "unchanged": true,
+      "float_metadata_unchanged": true,
+      "reference_ok": false,
+      "exact_pixels": false,
+      "exact_metadata": false,
+      "width": 77,
+      "height": 88,
+      "raw_flip": 0,
+      "error": "RAW precision dispatch: RAW precision plan white balance changed; inspect the source again",
+      "float_black": [
+        1,
+        2,
+        3
+      ],
+      "float_white": [
+        4,
+        5,
+        6
+      ],
+      "selected_wb": [
+        2,
+        1,
+        1.5,
+        1
+      ],
+      "camera_wb": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "applied_wb": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

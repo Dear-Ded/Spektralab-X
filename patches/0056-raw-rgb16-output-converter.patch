@@ -1,0 +1,118 @@
+diff --git a/engine/src/io/raw_decoder.cpp b/engine/src/io/raw_decoder.cpp
+index 512e477..c222f52 100644
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -380,6 +380,12 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+ bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
+                            DecodedRaw& out, std::string& error, double white_temperature,
+                            const RawDecodeCancel& cancelled) {
++    return decode_raw_compatible(source, user_mul, out, error, white_temperature, cancelled, {});
++}
++
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                          DecodedRaw& out, std::string& error, double white_temperature,
++                          const RawDecodeCancel& cancelled, const RawRgb16Converter& converter) {
+     error.clear();
+     const auto total_start = Clock::now();
+     try {
+@@ -519,14 +525,39 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+         // so those full-size buffers do not overlap unnecessarily.
+         raw.reset();
+         progress.check();
+-        decoded.rgb.resize(static_cast<std::size_t>(samples));
+-        for (std::size_t i = 0; i < decoded.rgb.size(); ++i) {
+-            if (i % 65536 == 0) progress.check();
+-            std::uint16_t value;
+-            // LibRaw returns native-endian 16-bit samples. memcpy avoids
+-            // imposing alignment or aliasing assumptions on its byte array.
+-            std::memcpy(&value, image->data + i * sizeof(value), sizeof(value));
+-            decoded.rgb[i] = static_cast<float>(static_cast<double>(value) / 65535.0);
++        bool converted = false;
++        if (converter) {
++            RawFloatImage frame;
++            try {
++                converted = converter({image->data, image->data_size, image->width, image->height},
++                                      frame, [&] { return progress.poll(); });
++            } catch (...) {
++                progress.check();
++                throw;
++            }
++            progress.check();
++            if (converted) {
++                const std::uint64_t count = std::uint64_t(frame.width) * frame.height * 3;
++                if (!frame.width || !frame.height || frame.width > image->width ||
++                    frame.height > image->height || count != frame.rgb.size()) {
++                    error = "RAW output: converter returned an invalid float image";
++                    return false;
++                }
++                decoded.width = frame.width;
++                decoded.height = frame.height;
++                decoded.rgb = std::move(frame.rgb);
++            }
++        }
++        if (!converted) {
++            decoded.rgb.resize(static_cast<std::size_t>(samples));
++            for (std::size_t i = 0; i < decoded.rgb.size(); ++i) {
++                if (i % 65536 == 0) progress.check();
++                std::uint16_t value;
++                // LibRaw returns native-endian 16-bit samples. memcpy avoids
++                // imposing alignment or aliasing assumptions on its byte array.
++                std::memcpy(&value, image->data + i * sizeof(value), sizeof(value));
++                decoded.rgb[i] = static_cast<float>(static_cast<double>(value) / 65535.0);
++            }
+         }
+         decoded.timings.convert_ms = elapsed_ms(start);
+         decoded.timings.total_ms = elapsed_ms(total_start);
+diff --git a/engine/src/io/raw_decoder.hpp b/engine/src/io/raw_decoder.hpp
+index 7f5eeeb..0b556de 100644
+--- a/engine/src/io/raw_decoder.hpp
++++ b/engine/src/io/raw_decoder.hpp
+@@ -2,6 +2,8 @@
+ 
+ #include <array>
+ #include <cstdint>
++#include <cstddef>
++#include <functional>
+ #include <filesystem>
+ #include <string>
+ #include <vector>
+@@ -124,6 +126,26 @@ struct DecodedRaw {
+     RawDecodeTimings timings;
+ };
+ 
++// Co-created with GPT (OpenAI). A borrowed, oriented native-endian RGB16
++// bitmap. Valid only during the converter call, after LibRaw is released.
++struct RawRgb16View {
++    const std::uint8_t* data = nullptr;
++    std::size_t bytes = 0;
++    std::uint32_t width = 0, height = 0;
++};
++
++struct RawFloatImage {
++    std::uint32_t width = 0, height = 0;
++    std::vector<float> rgb;
++};
++
++// Return false to retain the normal full-size conversion. A true result must
++// contain packed float RGB, with nonzero dimensions no larger than the source.
++// The supplied cancellation poll is serialised, sticky and safe on workers;
++// workers must join before returning. Cancellation takes precedence over errors.
++using RawRgb16Converter = std::function<bool(const RawRgb16View&, RawFloatImage&,
++                                            const RawDecodeCancel&)>;
++
+ // Fixed compatibility policy matching tools/rawpy_to_f32.py: full-size AHD,
+ // valid camera/as-shot WB, ProPhoto, gamma=(1,1), output_bps=16, bright=1,
+ // no automatic brightening or maximum adjustment, highlight clipping, and
+@@ -160,6 +182,12 @@ bool decode_raw_compatible(const std::filesystem::path& source, const std::array
+                            DecodedRaw& out, std::string& error, double white_temperature,
+                            const RawDecodeCancel& cancelled);
+ 
++// Optional host conversion at the RGB16 ownership boundary. Camera processing,
++// metadata and default conversion stay unchanged. Publication remains atomic.
++bool decode_raw_compatible(const std::filesystem::path& source, const std::array<float, 4>* user_mul,
++                           DecodedRaw& out, std::string& error, double white_temperature,
++                           const RawDecodeCancel& cancelled, const RawRgb16Converter& converter);
++
+ // Experimental expanded-output policy for conventional three-colour Bayer
+ // RAW only. As-shot WB is normalised by its largest multiplier (highlight=1)
+ // before uint16 AHD demosaicing. LibRaw's actual ProPhoto matrix is evaluated

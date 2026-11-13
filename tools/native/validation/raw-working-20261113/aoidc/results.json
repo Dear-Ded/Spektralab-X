@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "utc": "2026-11-13T01:20:47.488685+00:00",
+  "engine_pin": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "engine_overlays": 56,
+  "libraw": "0.22.2",
+  "libraw_overlays": 18,
+  "rgb16_cases": 520,
+  "rgb16_exact_samples": 15211650,
+  "raw_fixtures": 11,
+  "raw_cases": 97,
+  "changed_decoder_adapter_sanitizer_cases": 34,
+  "libraw_fully_instrumented": false,
+  "jni_working_cases_per_run": 12,
+  "jni_runs": 2,
+  "old_jni_cancellation_checkpoints_per_run": 23,
+  "shaders_unchanged": 56,
+  "arm64_jni_sha256": "58cf3276f50f1cd54e3d74a5f98f328d5805e4d2582243afa5ecd12811ac4231",
+  "stage": {
+    "full": {
+      "median_ms": 578.316,
+      "median_peak_rss_kib": 424968,
+      "output_fnv1a": "6b5867b9fcd081fc",
+      "runs": 3
+    },
+    "fused": {
+      "median_ms": 113.817,
+      "median_peak_rss_kib": 162300,
+      "output_fnv1a": "6b5867b9fcd081fc",
+      "runs": 3
+    },
+    "median_time_reduction_percent": 80.31923723362314
+  },
+  "full_decode": {
+    "full": {
+      "median_ms": 1674.93,
+      "median_peak_rss_kib": 521588,
+      "output_fnv1a": "fce7da97652d8015",
+      "runs": 3
+    },
+    "fused": {
+      "median_ms": 1225.79,
+      "median_peak_rss_kib": 521640,
+      "output_fnv1a": "fce7da97652d8015",
+      "runs": 3
+    },
+    "median_time_reduction_percent": 26.815449003838975
+  },
+  "limitations": [
+    "warm-cache cloud CPU helpers",
+    "complete RAW peak RSS essentially unchanged",
+    "not physical Android performance",
+    "no new camera photograph acceptance",
+    "IBX not run during existing cooldown",
+    "online Actions not run"
+  ]
+}

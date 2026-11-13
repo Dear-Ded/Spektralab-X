@@ -36,6 +36,11 @@ jobs:
           cat fir-evidence/huffman.log
       - name: Check RGBA16 export integrity
         run: BUILD_DIR="$PWD/frame-tests" bash tools/native/run_rgba16_frame_check.sh
+      - name: Compare streamed RGB16 working input
+        run: |
+          mkdir -p fir-evidence
+          BUILD_DIR="$PWD/rgb16-tests" SANITIZE=1 bash tools/native/run_rgb16_resize.sh > fir-evidence/rgb16.log 2>&1
+          cat fir-evidence/rgb16.log
       - name: Compare prepared view curves
         run: |
           mkdir -p fir-evidence

@@ -33,7 +33,7 @@
 #include "io/raw_camera.hpp"
 #include "raw_white_balance.hpp"
 #include "raw_development.hpp"
-#include "raw_precision_input.hpp"
+#include "raw_working_input.hpp"
 #include "gainmap.hpp"
 #include "resize.hpp"
 #include "spektrafilm/spk_engine.h"
@@ -308,14 +308,7 @@ bool device_lost(const std::string& e) {
 // one storage buffer holds a whole plane, so a frame larger than the range
 // cannot be rendered at all.
 void fit(uint32_t w, uint32_t h, uint32_t max_edge, uint64_t max_pixels, uint32_t& nw, uint32_t& nh) {
-    double s = 1.0;
-    if (max_edge && std::max(w, h) > max_edge) s = double(max_edge) / double(std::max(w, h));
-    if (max_pixels && double(w) * h * s * s > double(max_pixels))
-        s = std::sqrt(double(max_pixels) / (double(w) * h));
-    nw = w; nh = h;
-    if (s >= 1.0) return;
-    nw = std::max<uint32_t>(1, uint32_t(std::floor(w * s)));
-    nh = std::max<uint32_t>(1, uint32_t(std::floor(h * s)));
+    spk::android::fit_rgb_size(w, h, max_edge, max_pixels, nw, nh);
 }
 
 spk::android::RawDevelopmentMetadata development_metadata(const spk::io::RawDngRenderMetadata& src) {
@@ -755,11 +748,16 @@ static jlong open_raw(JNIEnv* env, jlong engine_handle, jstring path_j, jint max
         configure_raw_threads();
         spk::io::DecodedRaw decoded;
         spk::android::FloatDngMetadata float_source;
+        uint32_t converted_source_w = 0, converted_source_h = 0;
+        const auto working_converter = spk::android::raw_working_converter(precision,
+            opening_view.no_film && opening_view.raw_development.enabled,
+            uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)),
+            converted_source_w, converted_source_h);
         bool ok;
         {
             RawHalfSizeBudget budget(binned ? 1 : 0);
             ok = spk::android::decode_raw_precision(path, precision, custom_wb ? &mul : nullptr,
-                custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source, cancelled);
+                custom_wb ? double(temperature_k) : 0.0, decoded, error, &float_source, cancelled, working_converter);
         }
         spk::android::float_dng_detail::check_cancel(cancelled);
         if (!ok) { fail("RAW decode: " + error); return 0; }
@@ -772,12 +770,13 @@ static jlong open_raw(JNIEnv* env, jlong engine_handle, jstring path_j, jint max
         auto development_options = opening_view.raw_development;
         development_options.enabled = development_options.enabled && opening_view.no_film;
         auto development = spk::android::RawDevelopment::build(raw_metadata, raw_stats, development_options);
-        const uint32_t sw = decoded.width, sh = decoded.height;
+        const uint32_t sw = converted_source_w ? converted_source_w : decoded.width;
+        const uint32_t sh = converted_source_h ? converted_source_h : decoded.height;
         uint32_t w = sw, h = sh;
         fit(sw, sh, uint32_t(std::max(0, int(max_edge))), uint64_t(std::max<jlong>(0, max_pixels)), w, h);
         std::vector<float> rgb;
-        if (w != sw || h != sh) {
-            spk::android::resize_area_rgb(decoded.rgb, sw, sh, w, h, rgb);
+        if (w != decoded.width || h != decoded.height) {
+            spk::android::resize_area_rgb(decoded.rgb, decoded.width, decoded.height, w, h, rgb);
             std::vector<float>().swap(decoded.rgb);
         } else {
             rgb.swap(decoded.rgb);

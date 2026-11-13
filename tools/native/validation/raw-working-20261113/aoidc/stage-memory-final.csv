@@ -1,0 +1,6 @@
+mode=full,shape=6000x4000->1500x1000,peak_rss_kib=424968,ms=583.707,fnv1a=6b5867b9fcd081fc
+mode=fused,shape=6000x4000->1500x1000,peak_rss_kib=162296,ms=113.34,fnv1a=6b5867b9fcd081fc
+mode=full,shape=6000x4000->1500x1000,peak_rss_kib=424892,ms=577.96,fnv1a=6b5867b9fcd081fc
+mode=fused,shape=6000x4000->1500x1000,peak_rss_kib=162300,ms=113.817,fnv1a=6b5867b9fcd081fc
+mode=full,shape=6000x4000->1500x1000,peak_rss_kib=425044,ms=578.316,fnv1a=6b5867b9fcd081fc
+mode=fused,shape=6000x4000->1500x1000,peak_rss_kib=162300,ms=138.558,fnv1a=6b5867b9fcd081fc

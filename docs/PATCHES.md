@@ -67,6 +67,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0055 将 view 五行曲线表的 Fritsch-Carlson 斜率与切线改为每条曲线只准备一次，保持 double 算序和 float 表项。双云各 286 条曲线、130,611 个采样点逐位一致；108 组实际 Vulkan view/几何/proof 的完整 23,387,688 字节与旧版一致。ARM64 JNI 和异常输出回归通过。性能数值、复现命令及原始证据见 [曲线预计算验证](ENGINE_VIEW_CURVE_PREPARATION_2026-11-13.md)。GPT（OpenAI）共创。
 
+0056 在已定向 RGB16 bitmap、LibRaw 释放后的边界提供可选 host converter，保留原所有 overload。Android 将整数 RAW 的逐行 float 转换与原面积降采样合并，避免全尺寸 float 中间帧；标准显影完整统计、精确/legacy 浮点路径、相机处理和源尺寸保留。520 组缩放的 15,211,650 个值逐位相同，实际解码、自定义 WB、八方向、生产 JNI、取消及 ARM64 全链接通过。24MP 云端转换阶段与完整解码分别加速约 80%/27%，完整解码峰值 RSS 基本不变，不能称为消除 RAW OOM。见 [实施验证](ENGINE_RAW_WORKING_CONVERSION_2026-11-13.md) 与 [外部引擎调研](ENGINE_EXTERNAL_RESEARCH_2026-11-13.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 

@@ -35,6 +35,54 @@ const char* JNICALL cancellable_get_string(JNIEnv* env, jstring value, jboolean*
     }
     return get_string(env, value, copied);
 }
+
+void working_input_tests(JNIEnv* env, jlong engine, char** files) {
+    using namespace spk::android;
+    int cases = 0;
+    for (int argument = 3; argument < 6; ++argument) {
+        auto probe = std::make_unique<spk::io::detail::CameraLibRaw>();
+        require(probe->open_file(files[argument]) == LIBRAW_SUCCESS, "working source metadata");
+        const auto plan = inspect_raw_precision(files[argument], *probe, false);
+        spk::io::DecodedRaw full;
+        std::string error;
+        require(decode_raw_precision(files[argument], plan, nullptr, 0, full, error), "full working reference");
+        for (const bool standard : {false, true}) for (const bool tiny : {false, true}) {
+            const uint32_t edge = tiny ? 8 : std::max(1u, std::max(full.width, full.height) * 3 / 4);
+            const bool binned = !standard && plan.mode != "float_linear_v1" && tiny;
+            spk::io::DecodedRaw reference = full;
+            if (binned) {
+                RawHalfSizeBudget budget(1);
+                require(decode_raw_precision(files[argument], plan, nullptr, 0, reference, error), "binned working reference");
+            }
+            uint32_t w, h;
+            fit_rgb_size(reference.width, reference.height, edge, 0, w, h);
+            std::vector<float> expected;
+            resize_area_rgb(reference.rgb, reference.width, reference.height, w, h, expected);
+            const auto params = text(std::string(R"({"input_color_space":"ProPhoto RGB","input_cctf_decoding":false,"output_color_space":"ProPhoto RGB","output_cctf_encoding":true,"product_defaults":true,"x_no_film":true,"x_raw_auto_exposure":false,"x_raw_development":")") +
+                (standard ? "standard_v1" : "neutral") + R"("})");
+            const jlong handle = CALL(openRaw)(env, nullptr, engine, text(files[argument]), edge, 0, params, 0, 0);
+            require(handle != 0, "production JNI working RAW open");
+            const auto* session = reinterpret_cast<Session*>(handle);
+            require(session->width == w && session->height == h && session->source_width == full.width &&
+                session->source_height == full.height && session->small_rgb.size() == expected.size() &&
+                std::memcmp(session->small_rgb.data(), expected.data(), expected.size() * sizeof(float)) == 0,
+                "JNI source provenance and every working float bit");
+            require(session->raw_stats_ready == standard && session->raw_stats_binned == binned,
+                "JNI full-source statistics readiness and binning policy");
+            if (standard) {
+                const auto stats = raw_development_stats(full.rgb.data(), full.width, full.width, full.height);
+                require(session->raw_stats.histogram == stats.histogram && session->raw_stats.log2_mean == stats.log2_mean &&
+                    session->raw_stats.valid_pixels == stats.valid_pixels && session->raw_stats.invalid_pixels == stats.invalid_pixels &&
+                    session->raw_stats.dark_pixels == stats.dark_pixels && session->raw_stats.available == stats.available,
+                    "standard AE-off statistics still meter complete unbinned source");
+            }
+            CALL(release)(env, nullptr, handle);
+            ++cases;
+        }
+    }
+    std::cout << "PASS production JNI working input: cases=" << cases
+              << "; exact_bits; full_source_dimensions; AE_off_full_statistics; integer_binning; float_routes\n";
+}
 }
 
 int main(int argc, char** argv) {
@@ -224,6 +272,7 @@ int main(int argc, char** argv) {
                 "retry token is independent and source bytes remain exact");
         CALL(release)(&env, nullptr, retry);
         CALL(releaseRawOpenCancellation)(&env, nullptr, retry_token);
+        working_input_tests(&env, engine, argv);
         CALL(release)(&env, nullptr, old);
         require(g_sessions.at(const_cast<spk_engine*>(native_engine)) == 0, "all JNI sessions released");
         CALL(destroy)(&env, nullptr, engine);

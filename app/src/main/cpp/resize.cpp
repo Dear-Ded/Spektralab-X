@@ -1,9 +1,12 @@
 #include "resize.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <cstring>
 #include <functional>
 #include <limits>
+#include <mutex>
 #include <stdexcept>
 #include <thread>
 
@@ -59,29 +62,23 @@ size_t rgb_count(uint32_t w, uint32_t h) {
     return size_t(w) * h * 3;
 }
 
-}  // namespace
+uint32_t worker_count(uint32_t nh) {
+    return std::min(nh, std::max(1u, std::min(8u, std::thread::hardware_concurrency())));
+}
 
-void resize_area_rgb(const std::vector<float>& src, uint32_t w, uint32_t h,
-                     uint32_t nw, uint32_t nh, std::vector<float>& dst) {
-    const size_t source_count = rgb_count(w, h), dest_count = rgb_count(nw, nh);
-    if (nw > w || nh > h || src.size() != source_count)
-        throw std::invalid_argument("resize: expected a packed RGB image and a downscale");
-    if (&src == &dst) {
-        std::vector<float> result;
-        resize_area_rgb(src, w, h, nw, nh, result);
-        dst = std::move(result);
-        return;
-    }
+template<class LoadRow, class Stop>
+void resize_rows(uint32_t w, uint32_t h, uint32_t nw, uint32_t nh,
+                 std::vector<float>& dst, const LoadRow& load_row, const Stop& stop) {
     const auto xt = area_taps(w, nw);
     const auto yt = area_taps(h, nh);
-    const uint32_t workers = std::min(nh, std::max(1u, std::min(8u, std::thread::hardware_concurrency())));
+    const uint32_t workers = worker_count(nh);
     constexpr uint32_t cache_rows = 4;
     const size_t row_size = size_t(nw) * 3;
     // Allocate before starting any worker: bad_alloc must unwind on the caller.
     if (row_size > std::numeric_limits<size_t>::max() / (cache_rows * workers))
         throw std::length_error("resize: row cache too large");
     std::vector<float> cache(row_size * cache_rows * workers);
-    dst.assign(dest_count, 0.0f);
+    dst.assign(rgb_count(nw, nh), 0.0f);
     parallel_workers(workers, [&](uint32_t worker) {
         const uint32_t y0 = uint32_t(uint64_t(nh) * worker / workers);
         const uint32_t y1 = uint32_t(uint64_t(nh) * (worker + 1) / workers);
@@ -89,13 +86,16 @@ void resize_area_rgb(const std::vector<float>& src, uint32_t w, uint32_t h,
         std::fill_n(tags, cache_rows, std::numeric_limits<uint32_t>::max());
         float* scratch = cache.data() + row_size * cache_rows * worker;
         for (uint32_t y = y0; y < y1; ++y) {
+            if (stop()) return;
             float* out = dst.data() + size_t(y) * row_size;
             const Taps& t = yt[y];
             for (size_t k = 0; k < t.weights.size(); ++k) {
+                if (stop()) return;
                 const uint32_t iy = t.first + uint32_t(k), slot = iy % cache_rows;
                 float* row = scratch + slot * row_size;
                 if (tags[slot] != iy) {
-                    const float* input = src.data() + size_t(iy) * w * 3;
+                    const float* input = load_row(iy, worker);
+                    if (!input) return;
                     for (uint32_t x = 0; x < nw; ++x) {
                         float acc[3] = {0, 0, 0};
                         const Taps& tx = xt[x];
@@ -115,6 +115,81 @@ void resize_area_rgb(const std::vector<float>& src, uint32_t w, uint32_t h,
             }
         }
     });
+}
+
+}  // namespace
+
+void fit_rgb_size(uint32_t w, uint32_t h, uint32_t max_edge, uint64_t max_pixels,
+                  uint32_t& nw, uint32_t& nh) {
+    double s = 1.0;
+    if (max_edge && std::max(w, h) > max_edge) s = double(max_edge) / double(std::max(w, h));
+    if (max_pixels && double(w) * h * s * s > double(max_pixels))
+        s = std::sqrt(double(max_pixels) / (double(w) * h));
+    nw = w; nh = h;
+    if (s >= 1.0) return;
+    nw = std::max<uint32_t>(1, uint32_t(std::floor(w * s)));
+    nh = std::max<uint32_t>(1, uint32_t(std::floor(h * s)));
+}
+
+void resize_area_rgb(const std::vector<float>& src, uint32_t w, uint32_t h,
+                     uint32_t nw, uint32_t nh, std::vector<float>& dst) {
+    const size_t source_count = rgb_count(w, h);
+    rgb_count(nw, nh);
+    if (nw > w || nh > h || src.size() != source_count)
+        throw std::invalid_argument("resize: expected a packed RGB image and a downscale");
+    if (&src == &dst) {
+        std::vector<float> result;
+        resize_area_rgb(src, w, h, nw, nh, result);
+        dst = std::move(result);
+        return;
+    }
+    resize_rows(w, h, nw, nh, dst,
+        [&](uint32_t y, uint32_t) { return src.data() + size_t(y) * w * 3; },
+        [] { return false; });
+}
+
+bool resize_area_rgb16(const uint8_t* src, size_t bytes, uint32_t w, uint32_t h,
+                       uint32_t nw, uint32_t nh, std::vector<float>& dst,
+                       const std::function<bool()>& cancelled) {
+    const size_t count = rgb_count(w, h);
+    rgb_count(nw, nh);
+    if (!src || nw > w || nh > h || count > std::numeric_limits<size_t>::max() / sizeof(uint16_t) ||
+        bytes != count * sizeof(uint16_t))
+        throw std::invalid_argument("resize: expected packed native-endian RGB16 and a downscale");
+    std::atomic<bool> stopped{false};
+    std::mutex poll_mutex;
+    const auto stop = [&]() noexcept {
+        if (stopped.load(std::memory_order_relaxed)) return true;
+        if (!cancelled) return false;
+        try {
+            std::lock_guard<std::mutex> guard(poll_mutex);
+            if (!stopped.load(std::memory_order_relaxed) && cancelled())
+                stopped.store(true, std::memory_order_relaxed);
+        } catch (...) {
+            stopped.store(true, std::memory_order_relaxed);
+        }
+        return stopped.load(std::memory_order_relaxed);
+    };
+    if (stop()) return false;
+    const size_t row_size = size_t(w) * 3;
+    const uint32_t workers = worker_count(nh);
+    if (row_size > std::numeric_limits<size_t>::max() / workers)
+        throw std::length_error("resize: RGB16 row cache too large");
+    std::vector<float> source_rows(row_size * workers), result;
+    resize_rows(w, h, nw, nh, result, [&](uint32_t y, uint32_t worker) -> const float* {
+        float* row = source_rows.data() + row_size * worker;
+        const uint8_t* input = src + size_t(y) * row_size * sizeof(uint16_t);
+        for (size_t i = 0; i < row_size; ++i) {
+            if (i % 65536 == 0 && stop()) return nullptr;
+            uint16_t value;
+            std::memcpy(&value, input + i * sizeof(value), sizeof(value));
+            row[i] = static_cast<float>(static_cast<double>(value) / 65535.0);
+        }
+        return row;
+    }, stop);
+    if (stop()) return false;
+    dst = std::move(result);
+    return true;
 }
 
 }  // namespace spk::android

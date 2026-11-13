@@ -817,3 +817,21 @@ production archive, then compares unpacked RAW and RGB16 using public Bayer
 controls. It is not a clean whole-library rebuild or a Sony YCbCr file runner.
 The helper is included in engine-gpu CI. See
 [results and limits](../../docs/ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md).
+
+## Streamed RGB16 working conversion
+
+`BUILD_DIR=/outside-repo/rgb16 bash tools/native/run_rgb16_resize.sh` compares
+both production resize paths with the frozen two-pass oracle. `SANITIZE=1`
+instruments the helper and resampler; `STRICT=0` checks normal contraction.
+The compiled helper accepts `--memory-full` / `--memory-fused` for independent
+24 MP conversion-stage RSS measurements with production bitmap release timing.
+
+`raw_working_fixtures.py /outside-repo/fixtures --large` generates eight public
+integer LinearRaw orientations and an optional 24 MP fixture. With matching
+`UP`, `B` and `BUILD_DIR`, `run_raw_working_decode.sh` exercises the real decoder,
+custom WB, precision/statistics gates, source provenance and converter failures.
+Its sanitizer mode also compiles the changed decoder sources; the supplied
+LibRaw archive remains the production build. The existing production JNI
+cancellation runner additionally checks scaled working pixels, source dimensions,
+Bayer binning and complete AE-off standard statistics.
+See [results and reproduction](../../docs/ENGINE_RAW_WORKING_CONVERSION_2026-11-13.md).
