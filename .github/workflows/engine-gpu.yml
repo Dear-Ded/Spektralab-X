@@ -26,8 +26,22 @@ jobs:
           key: upstream-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
       - name: Fetch upstream
         run: bash scripts/fetch-upstream.sh upstream
+      - name: Compare Sony Huffman cache indices
+        run: |
+          mkdir -p fir-evidence
+          LIBRAW_SOURCE="$PWD/upstream/build/deps/LibRaw-0.22.2" \
+            BUILD_DIR="$PWD/huffman-tests" SANITIZE=1 \
+            bash tools/native/run_libraw_huffman_cache.sh > fir-evidence/huffman.log 2>&1
+          cp huffman-tests/inputs.sha256 fir-evidence/huffman-inputs.sha256
+          cat fir-evidence/huffman.log
       - name: Check RGBA16 export integrity
         run: BUILD_DIR="$PWD/frame-tests" bash tools/native/run_rgba16_frame_check.sh
+      - name: Compare prepared view curves
+        run: |
+          mkdir -p fir-evidence
+          UP="$PWD/upstream" BUILD_DIR="$PWD/curve-tests" bash tools/native/run_view_curve.sh
+          cp curve-tests/curves.csv fir-evidence/curves.csv
+          cp curve-tests/curves.log fir-evidence/curves.log
       - name: Build Vulkan engine
         run: |
           cmake -S upstream -B build-fir -G Ninja -DCMAKE_BUILD_TYPE=Release \
@@ -35,6 +49,12 @@ jobs:
             -DSPEKTRALAB_BUILD_NATIVE_RAW=OFF -DSPEKTRALAB_BUILD_HOST=OFF \
             -DSPEKTRALAB_BUILD_DESKTOP=OFF -DSPEKTRALAB_BUILD_TEST_DLL=OFF
           cmake --build build-fir --target spektralab_engine -j2
+      - name: Exercise Vulkan view curves
+        run: |
+          UP="$PWD/upstream" B="$PWD/build-fir" BUILD_DIR="$PWD/curve-gpu-tests" \
+            bash tools/native/run_view_curve_gpu.sh
+          cp curve-gpu-tests/candidate.csv fir-evidence/curve-gpu.csv
+          cp curve-gpu-tests/inputs.sha256 fir-evidence/curve-gpu-inputs.sha256
       - name: Check probe resource lifetime
         run: |
           mkdir -p fir-evidence

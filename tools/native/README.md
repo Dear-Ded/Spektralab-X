@@ -776,3 +776,44 @@ does not guarantee Android uses 512 MiB. A separate fixture library performs
 synthetic fill and row statistics without changing production JNI. These are
 diagnostic artifacts, not release APKs.
 See [cloud results, reproduction and limitations](../../docs/ENGINE_FEEDBACK_ENVIRONMENT_2026-11-12.md).
+
+## Prepared view curves
+
+```bash
+UP=/path/to/upstream-through-0055 BUILD_DIR=/outside-repo/curve-results \
+  bash tools/native/run_view_curve.sh
+UP=/path/to/upstream-through-0055 B=/path/to/matching-build \
+BASELINE_UP=/path/to/frozen-0054 BASELINE_B=/path/to/frozen-0054-build \
+BUILD_DIR=/outside-repo/curve-gpu-results bash tools/native/run_view_curve_gpu.sh
+```
+
+The CPU runner compares the production prepared curve with the frozen original
+at every table sample and both sides of each knot, checks double/float bits and
+counts actual temporary allocations. `SANITIZE=1` enables ASan/UBSan.
+The GPU runner exercises 108 real view, geometry and proof cases with float and
+packed RGBA16 inputs under normal/one/seven-group dispatch limits. Supplying the
+optional frozen build requires complete output bytes and CSV rows to match.
+Keep generated `.bin` payloads outside Git. See the
+[cloud results](../../docs/ENGINE_VIEW_CURVE_PREPARATION_2026-11-13.md).
+
+## Sony Huffman cache maintenance
+
+```bash
+LIBRAW_SOURCE=/path/to/LibRaw-0.22.2 BUILD_DIR=/outside-repo/huffman SANITIZE=1 \
+  bash tools/native/run_libraw_huffman_cache.sh
+
+BEFORE_SOURCE=/path/to/17-overlay-libraw AFTER_SOURCE=/path/to/18-overlay-libraw \
+BEFORE_LIBRARY=/path/to/matching/libspk_libraw.a BUILD_DIR=/outside-repo/huffman-files \
+  bash tools/native/run_libraw_huffman_files.sh /path/to/public-bayer-control.dng
+```
+
+The helper accepts the pristine pin or the tree including overlay 0024, creates
+isolated before/after copies and compares the real HuffTable implementation.
+Legal cache, slow-path, DNG consumption and BitPumpJpeg cases must match. Controlled
+excess bits test only the cache index guard; they do not stand for a real Sony RAW.
+SANITIZE=1 also requires the pre-fix negative control to fail under ASan.
+The file runner replaces only losslessjpeg.cpp and sonycc.cpp in the supplied
+production archive, then compares unpacked RAW and RGB16 using public Bayer
+controls. It is not a clean whole-library rebuild or a Sony YCbCr file runner.
+The helper is included in engine-gpu CI. See
+[results and limits](../../docs/ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md).

@@ -1,0 +1,28 @@
+Back-port LibRaw d7e09495734c527c9fdcd154e6435e06d20bb942 (0.22.3):
+mask decodecache index in Sony YCbCr decoder.
+https://github.com/LibRaw/LibRaw/commit/d7e09495734c527c9fdcd154e6435e06d20bb942
+Original code: LibRaw LLC, LGPL-2.1 / CDDL-1.0.
+Integration and validation co-created with GPT (OpenAI), 2026-11-13.
+
+The cache has 8192 entries. Restrict its lookup to the requested 13 bits;
+all legal indices and the following decode/consume operations stay unchanged.
+diff --git a/internal/losslessjpeg.h b/internal/losslessjpeg.h
+--- a/internal/losslessjpeg.h
++++ b/internal/losslessjpeg.h
+@@ -133,6 +133,7 @@
+ 
+ 
+ const uint32_t LIBRAW_DECODE_CACHE_BITS = 13;
++const uint32_t LIBRAW_DECODE_CACHE_MASK = (1<< LIBRAW_DECODE_CACHE_BITS)-1;
+ const uint64_t LIBRAW_CACHE_PRESENT_FLAG = 0x100000000L;
+ 
+ struct HuffTable
+@@ -151,7 +152,7 @@
+ 
+ 	int32_t decode(BitPump& pump)
+     {
+-      uint64_t cached = disable_cache ? 0 : decodecache[pump.peek(LIBRAW_DECODE_CACHE_BITS)];
++      uint64_t cached = disable_cache ? 0 : decodecache[pump.peek(LIBRAW_DECODE_CACHE_BITS) & LIBRAW_DECODE_CACHE_MASK];
+       if (cached & LIBRAW_CACHE_PRESENT_FLAG)
+       {
+         uint32_t _bits = (cached >> 16) & 0xff;

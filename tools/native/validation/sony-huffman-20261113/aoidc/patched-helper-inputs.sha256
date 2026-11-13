@@ -1,0 +1,3 @@
+25a671e76581f8c977689c95a88d9147a9197ad8ee210c1b02c9412ac751427f  /data/work/gpt-huffman-maintenance-20261113/patched-input/before/internal/losslessjpeg.h
+4380c6312e0fb0faf6149197b65eda8a9f9bf6c09392a7b8bb6447ff2663a7b5  /data/work/gpt-huffman-maintenance-20261113/patched-input/after/internal/losslessjpeg.h
+a2c3583c1ebb530494b91cd671c2312e3d0d2d3c6051f930bd16356a1b3f340a  /data/work/gpt-huffman-maintenance-20261113/repo/tools/native/libraw_huffman_cache.cpp

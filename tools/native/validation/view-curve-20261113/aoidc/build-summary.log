@@ -1,0 +1,11 @@
+2026-11-12T16:21:07Z
+x86_64
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+[29/189] Building CXX object engine/CMakeFiles/spektralab_pipeline.dir/src/pipeline/view_process.cpp.o
+[187/189] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[188/189] Linking CXX static library engine/libspektralab_engine.a
+[189/189] Linking CXX shared library libspektralab_jni.so
+01a0788de90c1ad2990d44cd11b1e6d9204cec50d41ac47ebfcb1a833567dcfd  /data/work/gpt-view-curve-20261113/arm64/libspektralab_jni.so
+9b03c680b1b89ba274dd7663a32032be3ca40ff1bb506430cab4fd26b969f89b  /data/work/gpt-view-curve-20261113/gpu-tests/baseline.bin
+9b03c680b1b89ba274dd7663a32032be3ca40ff1bb506430cab4fd26b969f89b  /data/work/gpt-view-curve-20261113/gpu-tests/candidate.bin
+shader count: 56

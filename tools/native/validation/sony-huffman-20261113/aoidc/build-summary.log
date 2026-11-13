@@ -1,0 +1,8 @@
+2026-11-13T00:31:53Z
+c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+[186/189] Building CXX object engine/CMakeFiles/spektralab_engine.dir/src/gpu/vulkan_gpu.cpp.o
+[187/189] Linking CXX static library engine/libspektralab_engine.a
+[188/189] Building CXX object CMakeFiles/spektralab_jni.dir/spektralab_jni.cpp.o
+[189/189] Linking CXX shared library libspektralab_jni.so
+baed084e620b384f075d26892cf94308ac2b7e3f85b086f6352b3eaf81f8abde  /data/work/gpt-huffman-maintenance-20261113/arm64/libspektralab_jni.so
+78d02fa3e6fea5bed6857b44e0211bbf5b60cedf064a8abeefaa765426b3fd63  /data/work/gpt-huffman-maintenance-20261113/repo/patches/libraw/0024-sony-ycbcr-cache-index-mask.patch

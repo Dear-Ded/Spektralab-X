@@ -1,0 +1,58 @@
+=================================================================
+==692918==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x531000024800 at pc 0x0000004061c4 bp 0x7ffe0bb24e50 sp 0x7ffe0bb24e40
+READ of size 8 at 0x531000024800 thread T0
+    #0 0x4061c3 in HuffTable::decode(BitPump&) (/data/work/gpt-huffman-maintenance-20261113/ci-form/before.bin+0x4061c3)
+    #1 0x403866 in main /data/work/gpt-huffman-maintenance-20261113/repo/tools/native/libraw_huffman_cache.cpp:44
+    #2 0x7fe7a432fd8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x7fe7a432fe3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #4 0x4027b4 in _start (/data/work/gpt-huffman-maintenance-20261113/ci-form/before.bin+0x4027b4)
+
+0x531000024800 is located 0 bytes to the right of 65536-byte region [0x531000014800,0x531000024800)
+allocated by thread T0 here:
+    #0 0x7fe7a4f4d1e7 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:99
+    #1 0x40b443 in __gnu_cxx::new_allocator<unsigned long>::allocate(unsigned long, void const*) /usr/include/c++/11/ext/new_allocator.h:127
+    #2 0x40b443 in std::allocator<unsigned long>::allocate(unsigned long) /usr/include/c++/11/bits/allocator.h:185
+    #3 0x40b443 in std::allocator_traits<std::allocator<unsigned long> >::allocate(std::allocator<unsigned long>&, unsigned long) /usr/include/c++/11/bits/alloc_traits.h:464
+    #4 0x40b443 in std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_M_allocate(unsigned long) /usr/include/c++/11/bits/stl_vector.h:346
+    #5 0x40b443 in std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_M_create_storage(unsigned long) /usr/include/c++/11/bits/stl_vector.h:361
+    #6 0x40b443 in std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_Vector_base(unsigned long, std::allocator<unsigned long> const&) /usr/include/c++/11/bits/stl_vector.h:305
+    #7 0x40b443 in std::vector<unsigned long, std::allocator<unsigned long> >::vector(unsigned long, unsigned long const&, std::allocator<unsigned long> const&) /usr/include/c++/11/bits/stl_vector.h:524
+    #8 0x40b443 in HuffTable::initval(unsigned int*, unsigned int*, bool) /data/work/gpt-huffman-maintenance-20261113/ci-form/before/src/decompressors/losslessjpeg.cpp:388
+    #9 0x402ee1 in initialize /data/work/gpt-huffman-maintenance-20261113/repo/tools/native/libraw_huffman_cache.cpp:26
+    #10 0x403280 in main /data/work/gpt-huffman-maintenance-20261113/repo/tools/native/libraw_huffman_cache.cpp:37
+    #11 0x7fe7a432fd8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/data/work/gpt-huffman-maintenance-20261113/ci-form/before.bin+0x4061c3) in HuffTable::decode(BitPump&)
+Shadow bytes around the buggy address:
+  0x0a627fffc8b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0a627fffc8c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0a627fffc8d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0a627fffc8e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0a627fffc8f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0a627fffc900:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0a627fffc910: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0a627fffc920: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0a627fffc930: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0a627fffc940: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0a627fffc950: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==692918==ABORTING

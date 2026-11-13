@@ -65,6 +65,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0054 在 Vulkan 整数转换与结果缓存前检查完整 RGB 的 NaN/无穷，并核对验证工作组计数；CPU 只回读 8 字节，异常时返回首个像素坐标/通道或不完整扫描错误。接入胶片输出、源图、打印缓存和 view/proof，正常有限负值、HDR 与成像运算保持原有定义。Android 异常帧重试同步改为先重建引擎再降档，避免复用故障状态。云端旧/新故障对照、正常像素哈希、API 37、30MP 和完整 JNI 构建见 [异常 RGB 与恢复修复](ENGINE_FINITE_OUTPUT_RECOVERY_2026-11-12.md)。GPT（OpenAI）共创。
 
+0055 将 view 五行曲线表的 Fritsch-Carlson 斜率与切线改为每条曲线只准备一次，保持 double 算序和 float 表项。双云各 286 条曲线、130,611 个采样点逐位一致；108 组实际 Vulkan view/几何/proof 的完整 23,387,688 字节与旧版一致。ARM64 JNI 和异常输出回归通过。性能数值、复现命令及原始证据见 [曲线预计算验证](ENGINE_VIEW_CURVE_PREPARATION_2026-11-13.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
@@ -85,6 +87,7 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0021-dng-as-shot-white-xy` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保存 AsShotWhiteXY、完整有界校准签名与 parsed flags，按 selected RAW IFD/IFD0 回退传递，供引擎 0032 使用。超出 255 内容字节或 NUL 格式不支持时明确标记，不截断比较；不新增 Camera Profile IFD 选择。内部结构布局改变，头文件和整个 LibRaw archive 必须同步重编。GPT（OpenAI）共创。 |
 | `0022-dng-render-metadata` | 本项目，依据 Adobe DNG 1.7.1 / SDK | 保留有界主 profile 曝光、黑位与色调曲线元数据，标记 extra/mixed profile；不改变线性像素。见 [验证](../tools/native/validation/dng-render-metadata-20261109/README.md)。GPT（OpenAI）共创。 |
 | `0023-dng-profile-dynamic-range` | 本项目，依据 Adobe DNG 1.7.1 / 固定 SDK | 解析 UNDEFINED8 的 version/range/hint，区分缺失、SDR、HDR 与损坏值，沿用 selected-profile IFD 来源合同；不执行 HDR 曲线。内部结构改变，整个 archive 和消费者同步重编。GPT（OpenAI）共创。 |
+| `0024-sony-ycbcr-cache-index-mask` | LibRaw `d7e09495734c527c9fdcd154e6435e06d20bb942`，0.22.3 的两行维护修复 | HuffTable 的 8192 项缓存按低 13 位寻址，合法索引及解码/消费顺序不变。81,920 个合法组合与 24,576 个受控高位组合通过；ASan/UBSan、合成 DNG 对照、18 补丁重放和完整 ARM64 JNI 链接见 [实施报告](ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md)。未把局部索引测试称为真实 Sony 故障文件复现。GPT（OpenAI）共创。 |
 
 `crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
 该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。

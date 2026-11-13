@@ -1,0 +1,49 @@
+/data/work/gpt-huffman-maintenance-20261113/ci-form/before/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /data/work/gpt-huffman-maintenance-20261113/ci-form/before/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /data/work/gpt-huffman-maintenance-20261113/ci-form/before/src/decompressors/losslessjpeg.cpp:21:
+/data/work/gpt-huffman-maintenance-20261113/ci-form/before/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+/data/work/gpt-huffman-maintenance-20261113/ci-form/after/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /data/work/gpt-huffman-maintenance-20261113/ci-form/after/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /data/work/gpt-huffman-maintenance-20261113/ci-form/after/src/decompressors/losslessjpeg.cpp:21:
+/data/work/gpt-huffman-maintenance-20261113/ci-form/after/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+PASS pre-fix high-index negative control (exit 1)
+PASS legal cache/slow/DNG/real-pump cases=81920
+PASS high-index cache cases=24576
+/data/work/gpt-huffman-maintenance-20261113/patched-input/before/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /data/work/gpt-huffman-maintenance-20261113/patched-input/before/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /data/work/gpt-huffman-maintenance-20261113/patched-input/before/src/decompressors/losslessjpeg.cpp:21:
+/data/work/gpt-huffman-maintenance-20261113/patched-input/before/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+/data/work/gpt-huffman-maintenance-20261113/patched-input/after/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /data/work/gpt-huffman-maintenance-20261113/patched-input/after/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /data/work/gpt-huffman-maintenance-20261113/patched-input/after/src/decompressors/losslessjpeg.cpp:21:
+/data/work/gpt-huffman-maintenance-20261113/patched-input/after/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+PASS legal cache/slow/DNG/real-pump cases=81920
+PASS high-index cache cases=24576
+7b07bcd30b70875d1a329246fb58a872a245e3910df93feb7cec17ff0af5cf5c  /data/work/gpt-linear-black-20261112/regression/integer-bayer.dng
+GPT Float precision contract decoder=packed_dng_load_raw() raw=64x48
+RGB=32x24 colors=3 bits=16 bytes=4608
+ecfad05e49a3d137ffb517aa051c1e5981251744a106d17326788d641389c5e0  /data/work/gpt-huffman-maintenance-20261113/files/after-integer-bayer.dng.raw
+54941b3a2b7f74a338dbc9e075a293a704ccef543789ac0b24186827d9913e6e  /data/work/gpt-huffman-maintenance-20261113/files/after-integer-bayer.dng.rgb
+PASS byte-identical unpacked RAW and RGB16: integer-bayer.dng
+bde0791becc6afbae397876e73153d2ca4b39dc180f2163520186388c58d7ed5  /data/work/gpt-linear-black-20261112/regression/bayer-max2-black64.dng
+GPT Float precision contract decoder=uncompressed_fp_dng_load_raw() raw=64x48
+RGB=32x24 colors=3 bits=16 bytes=4608
+e44453a07f24641f54dacf8fde7b59fea59e526aead3179768821ea594377a09  /data/work/gpt-huffman-maintenance-20261113/files/after-bayer-max2-black64.dng.raw
+e889ae402f3435bec43f324141bc9d6603ba9b47a9d82aa94ecd5bd63ad5d2a2  /data/work/gpt-huffman-maintenance-20261113/files/after-bayer-max2-black64.dng.rgb
+PASS byte-identical unpacked RAW and RGB16: bayer-max2-black64.dng
