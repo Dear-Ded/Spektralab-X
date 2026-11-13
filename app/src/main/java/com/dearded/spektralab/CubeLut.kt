@@ -278,8 +278,8 @@ object HaldClut {
 
 /**
  * Turns a table made for display colours into one on the values Layer 2 sees:
- * the engine's print, ProPhoto RGB encoded with gamma 1.8 (layer2.hpp's
- * mid-grey 0.3857 is 0.18^(1/1.8)). For an sRGB table each grid point goes
+ * the engine's print, encoded ProPhoto RGB (linear toe, then gamma 1.8).
+ * For an sRGB table each grid point goes
  * ProPhoto -> linear -> sRGB linear (clipped to 0..1) -> sRGB encoded ->
  * the table -> back. Colours outside sRGB are clipped going in.
  */
@@ -295,25 +295,26 @@ object LutBake {
         0.0983743f, 0.8734610f, 0.0281646f,
         0.0168832f, 0.1176725f, 0.8654443f,
     )
-    private const val PRO_GAMMA = 1.8f
-
     /** The table Layer 2 gets for [lut] made in [space] (SpkLut.SPACE_*), at most [Lut3.NATIVE_SIDE] a side. */
     fun forLayer2(lut: Lut3, space: String): Lut3 {
-        val base = if (lut.size > Lut3.NATIVE_SIDE) lut.resampled(Lut3.NATIVE_SIDE) else lut
-        if (space == SpkLut.SPACE_PROPHOTO) return base
-        val side = base.size
+        if (space == SpkLut.SPACE_PROPHOTO)
+            return if (lut.size > Lut3.NATIVE_SIDE) lut.resampled(Lut3.NATIVE_SIDE) else lut
+        // The composed colour-space transform is nonlinear even for a 2^3
+        // source. Sample it once on the final grid; do not first shrink a
+        // larger source, or inherit a small source's coarse grid.
+        val side = Lut3.NATIVE_SIDE
         val out = FloatArray(side * side * side * 3)
         val px = FloatArray(3); val lin = FloatArray(3)
         val step = 1f / (side - 1)
         var i = 0
         for (b in 0 until side) for (g in 0 until side) for (r in 0 until side) {
-            lin[0] = (r * step).pow(PRO_GAMMA); lin[1] = (g * step).pow(PRO_GAMMA); lin[2] = (b * step).pow(PRO_GAMMA)
+            lin[0] = proDecode(r * step); lin[1] = proDecode(g * step); lin[2] = proDecode(b * step)
             mul(PRO_TO_SRGB, lin, px)
             for (k in 0 until 3) px[k] = srgbEncode(clamp01(px[k]))
-            base.sample(px)
+            lut.sample(px)
             for (k in 0 until 3) lin[k] = srgbDecode(clamp01(px[k]))
             mul(SRGB_TO_PRO, lin, px)
-            for (k in 0 until 3) out[i++] = clamp01(px[k]).pow(1 / PRO_GAMMA)
+            for (k in 0 until 3) out[i++] = proEncode(clamp01(px[k]))
         }
         return Lut3(side, out)
     }
@@ -324,6 +325,8 @@ object LutBake {
 
     private fun srgbEncode(x: Float) = if (x <= 0.0031308f) 12.92f * x else 1.055f * x.pow(1 / 2.4f) - 0.055f
     private fun srgbDecode(x: Float) = if (x <= 0.04045f) x / 12.92f else ((x + 0.055f) / 1.055f).pow(2.4f)
+    private fun proDecode(x: Float) = if (x < 16f / 512f) x / 16f else x.pow(1.8f)
+    private fun proEncode(x: Float) = if (x < 1f / 512f) 16f * x else x.pow(1f / 1.8f)
 }
 
 private fun clamp01(x: Float) = max(0f, min(1f, if (x.isNaN()) 0f else x))

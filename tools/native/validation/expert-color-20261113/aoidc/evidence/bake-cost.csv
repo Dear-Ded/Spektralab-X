@@ -1,0 +1,7 @@
+source_side,algorithm,best_of_3_ms,table_bytes
+2,legacy,0.00238,96
+2,piecewise65,103.83904,3295500
+33,legacy,13.18842,431244
+33,piecewise65,104.366824,3295500
+129,legacy,114.683017,3295500
+129,piecewise65,121.797392,3295500

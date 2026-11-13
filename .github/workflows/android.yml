@@ -112,7 +112,27 @@ jobs:
         env:
           SPK_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           SPK_UPSTREAM: ${{ github.workspace }}/upstream
+          SPK_LUT_EVIDENCE_DIR: ${{ github.workspace }}/lut-bake-evidence
         run: ./gradlew --no-daemon --stacktrace :app:assembleRelease :app:testReleaseUnitTest
+
+      - name: Check imported LUT interpolation
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: |
+          BUILD_DIR="$RUNNER_TEMP/lut-bake-parity" SANITIZE=1 \
+            bash tools/native/run_lut_bake_parity.sh lut-bake-evidence/native-parity.bin \
+            > lut-bake-evidence/native.log 2>&1
+          cat lut-bake-evidence/native.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: imported-lut-regression
+          path: |
+            lut-bake-evidence/*.csv
+            lut-bake-evidence/*.log
+            app/build/test-results/testReleaseUnitTest/TEST-com.dearded.spektralab.LutBakeTest.xml
 
       - name: Rename APK and checksum
         run: |

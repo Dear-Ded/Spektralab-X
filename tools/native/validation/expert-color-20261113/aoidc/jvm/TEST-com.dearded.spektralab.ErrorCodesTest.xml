@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ErrorCodesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T13:28:33.188Z" hostname="ser858255664526" time="0.004">
+  <properties/>
+  <testcase name="exception messages include error codes" classname="com.dearded.spektralab.ErrorCodesTest" time="0.0"/>
+  <testcase name="extract finds error code" classname="com.dearded.spektralab.ErrorCodesTest" time="0.003"/>
+  <testcase name="extract returns null when no code present" classname="com.dearded.spektralab.ErrorCodesTest" time="0.001"/>
+  <testcase name="extract handles null message" classname="com.dearded.spektralab.ErrorCodesTest" time="0.0"/>
+  <testcase name="format creates correct message" classname="com.dearded.spektralab.ErrorCodesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

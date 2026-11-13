@@ -91,6 +91,7 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.maxHeapSize = "2g"
+                System.getenv("SPK_LUT_EVIDENCE_DIR")?.let { dir -> it.outputs.dir(dir) }
             }
         }
     }

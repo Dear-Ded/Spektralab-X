@@ -39,7 +39,11 @@ class LutStore(private val dir: File) {
         val f = File(dir, "$id.lut")
         if (!f.isFile || f.length() > MAX_BYTES) return null
         val buf = ByteBuffer.wrap(f.readBytes()).order(ByteOrder.LITTLE_ENDIAN)
-        if (buf.remaining() < HEADER || buf.getInt() != MAGIC) return null
+        if (buf.remaining() < HEADER) return null
+        // Stored tables are finished pixel transforms. Keep legacy looks
+        // unchanged; only a fresh import uses the revised baking algorithm.
+        val magic = buf.getInt()
+        if (magic != MAGIC && magic != LEGACY_MAGIC) return null
         val side = buf.getInt()
         buf.getInt()
         if (side !in 2..Lut3.NATIVE_SIDE || buf.remaining() != side * side * side * 3 * 4) return null
@@ -76,7 +80,8 @@ class LutStore(private val dir: File) {
     }
 
     companion object {
-        private const val MAGIC = 0x4C4B5053   // "SPKL", little-endian
+        private const val MAGIC = 0x324B5053   // "SPK2", little-endian, piecewise ProPhoto bake
+        private const val LEGACY_MAGIC = 0x4C4B5053   // "SPKL", little-endian
         private const val HEADER = 12
         private val MAX_BYTES = HEADER + Lut3.NATIVE_SIDE.toLong() * Lut3.NATIVE_SIDE * Lut3.NATIVE_SIDE * 12
         val ID = Regex("lut_[a-z0-9_]{1,48}")

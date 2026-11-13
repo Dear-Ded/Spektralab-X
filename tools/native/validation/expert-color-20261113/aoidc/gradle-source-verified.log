@@ -1,0 +1,10 @@
+app/build.gradle.kts: OK
+.github/workflows/android.yml: OK
+app/src/main/java/com/dearded/spektralab/CubeLut.kt: OK
+app/src/main/java/com/dearded/spektralab/LutStore.kt: OK
+app/src/test/java/com/dearded/spektralab/LutBakeTest.kt: OK
+app/src/main/cpp/lut3d.hpp: OK
+app/src/main/cpp/layer2.hpp: OK
+app/src/main/cpp/output_cancel.hpp: OK
+tools/native/lut_bake_parity.cpp: OK
+tools/native/run_lut_bake_parity.sh: OK

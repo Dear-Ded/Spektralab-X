@@ -903,3 +903,23 @@ applied EV and complete negative/final float payload bytes. Keep generated binar
 payloads outside Git. For stage timing, use the non-sanitized probes' `--benchmark`
 mode and the archived paired-process driver. See
 [external algorithms, measurements and limits](../../docs/ENGINE_ORDER_STATISTICS_2026-11-13.md).
+
+## Imported look baking
+
+On a Linux cloud build host, generate the Kotlin production-bake fixture and
+check the real native interpolator:
+
+```bash
+SPK_LUT_EVIDENCE_DIR="$PWD/lut-bake-evidence" ./gradlew --no-daemon \
+  :app:testReleaseUnitTest --tests com.dearded.spektralab.LutBakeTest
+BUILD_DIR=/outside-repo/lut-parity SANITIZE=1 \
+  bash tools/native/run_lut_bake_parity.sh lut-bake-evidence/native-parity.bin
+```
+
+The JVM class compares independent Double XYZ/Bradford and sorted barycentric
+references, legacy/new caches, native ProPhoto identity and 81,920 off-grid
+synthetic colours. The C++ runner consumes the actual baked table and 16,384
+Kotlin outputs through `Lut3d`, with a one-code 16-bit parity ceiling; measured
+GCC11/Clang14 results are exact. `SANITIZE=1` instruments the production header
+and test only. CI runs this after Release JVM tests and retains small evidence,
+excluding the generated binary LUT. See [research and measured costs](../../docs/EXPERT_COLOR_RESEARCH_2026-11-13.md).

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LutBakeTest" tests="7" skipped="0" failures="1" errors="0" timestamp="2026-11-13T13:21:50.727Z" hostname="ser858255664526" time="4.56">
+  <properties/>
+  <testcase name="prophotoTablesRetainTheirExactOriginalSamples" classname="com.dearded.spektralab.LutBakeTest" time="0.366"/>
+  <testcase name="toeAndGamutBoundaryVerticesMatchIndependentReference" classname="com.dearded.spektralab.LutBakeTest" time="0.257"/>
+  <testcase name="denseOffGridSamplesReduceCompositionError" classname="com.dearded.spektralab.LutBakeTest" time="1.372"/>
+  <testcase name="largeSourceIsSampledDirectlyAtTheFinalGrid" classname="com.dearded.spektralab.LutBakeTest" time="0.189">
+    <failure message="java.lang.AssertionError: expected:&lt;0.541499289259387&gt; but was:&lt;0.5414968729019165&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;0.541499289259387&gt; but was:&lt;0.5414968729019165&gt;
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:555)
+	at org.junit.Assert.assertEquals(Assert.java:685)
+	at com.dearded.spektralab.LutBakeTest.largeSourceIsSampledDirectlyAtTheFinalGrid(LutBakeTest.kt:205)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.rules.ExternalResource$1.evaluate(ExternalResource.java:54)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestClass(Unknown Source)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:183)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:132)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:121)
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:71)
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+</failure>
+  </testcase>
+  <testcase name="smallSrgbTablesGetAFullResolutionComposedTransform" classname="com.dearded.spektralab.LutBakeTest" time="0.101"/>
+  <testcase name="newCachesRoundTripAndLegacyCachesRemainFrozen" classname="com.dearded.spektralab.LutBakeTest" time="0.161"/>
+  <testcase name="optionalCloudBakeCostRecord" classname="com.dearded.spektralab.LutBakeTest" time="2.11"/>
+  <system-out><![CDATA[source_side,group,pixels,old_mean_abs,new_mean_abs,old_max_abs,new_max_abs,old_srgb8_mean_codes,new_srgb8_mean_codes,old_srgb8_max_codes,new_srgb8_max_codes
+2,cube,4096,0.05108807840278489,6.689148871589143E-5,0.2778913724693664,0.005353062935540609,30.07177734375,0.052001953125,171,11
+2,shadows,4096,0.008502982959029673,3.8486411811541643E-4,0.023489542076189217,0.0037246614243651548,3.6133626302083335,0.13736979166666666,17,3
+2,neutrals,4096,0.0036654574428396903,1.0172957412166794E-5,0.013178122678094796,0.0017132795624219127,1.106689453125,0.00537109375,7,1
+2,saturated,4096,0.054770497154676384,4.017805180279742E-5,0.2853270227234293,0.007026654006548005,25.837565104166668,0.030110677083333332,177,16
+17,cube,4096,8.57950375431823E-4,6.807602879754268E-5,0.02070201502850738,0.005723863049606814,0.536376953125,0.05224609375,37,13
+17,shadows,4096,0.005566574399576595,4.2746247850384807E-4,0.01752703087558887,0.0036797692083372843,2.2137044270833335,0.16780598958333334,14,4
+17,neutrals,4096,2.498985843048454E-4,1.7048242203718948E-5,0.007259080879900508,0.0017998342127419423,0.08894856770833333,0.007975260416666666,5,1
+17,saturated,4096,6.075914837092316E-4,4.137344039096827E-5,0.02502349289448158,0.00781274077556704,0.3846842447916667,0.030598958333333332,44,18
+33,cube,4096,2.496562195234521E-4,6.798132534010263E-5,0.011412002068960064,0.005726708731541741,0.17268880208333334,0.052815755208333336,23,13
+33,shadows,4096,0.0018145592345406604,4.157808156485466E-4,0.009675908240767939,0.003732651981872781,0.59228515625,0.16227213541666666,7,4
+33,neutrals,4096,9.549390841604646E-5,1.7959883736981498E-5,0.006590265055493488,0.0018193947725502826,0.027180989583333332,0.008219401041666666,2,1
+33,saturated,4096,1.8497556098409133E-4,4.1332381381713276E-5,0.013364145096424807,0.007810648921056984,0.12483723958333333,0.030598958333333332,29,18
+65,cube,4096,7.016896090750737E-5,6.767095808167768E-5,0.005727386130227885,0.005727386130227885,0.053955078125,0.05322265625,13,13
+65,shadows,4096,0.0012133222358946508,4.2202814590064196E-4,0.007477924268162656,0.003735343965853004,0.4019368489583333,0.16357421875,4,4
+65,neutrals,4096,8.342271029871392E-5,1.9326083148985975E-5,0.006590265055493488,0.0020096597002273245,0.02685546875,0.0087890625,3,1
+65,saturated,4096,5.039295771170244E-5,4.1135822525120095E-5,0.007809309541122467,0.007809309541122467,0.032877604166666664,0.030029296875,18,18
+129,cube,4096,7.11694604834626E-5,6.788046672875824E-5,0.00572761485737272,0.005727316834148843,0.053955078125,0.052978515625,13,13
+129,shadows,4096,0.0012278719257629623,4.236505620533293E-4,0.007477794969380603,0.0037351636356886334,0.4051920572916667,0.1630859375,4,4
+129,neutrals,4096,9.46038170094234E-5,2.2958224217723587E-5,0.006590265055493488,0.0020563315679475377,0.028401692708333332,0.009195963541666666,3,1
+129,saturated,4096,5.270489599875515E-5,4.1560110321732864E-5,0.0078081242470599,0.007808541479573328,0.033284505208333336,0.0302734375,18,18
+
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
