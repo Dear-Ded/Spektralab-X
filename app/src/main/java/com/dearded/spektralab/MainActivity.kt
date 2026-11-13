@@ -81,6 +81,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        viewModel.flushPendingEdits()
         FrameRateBoost.onStop(this)
         super.onStop()
     }

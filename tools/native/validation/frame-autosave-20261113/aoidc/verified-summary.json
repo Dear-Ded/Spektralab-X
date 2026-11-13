@@ -1,0 +1,51 @@
+{
+  "baseline": "2a31fd4093bc8d3fc811c75e74e66e5530617a59",
+  "variants": {
+    "release": {
+      "classes": 25,
+      "tests": 194,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "debug": {
+      "classes": 2,
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "release_classes": {
+    "com.dearded.spektralab.BenchmarkPolicyTest": 12,
+    "com.dearded.spektralab.BenchmarkRunnerTest": 9,
+    "com.dearded.spektralab.CurveWireTest": 5,
+    "com.dearded.spektralab.EditHistoryTest": 2,
+    "com.dearded.spektralab.ErrorCodesTest": 5,
+    "com.dearded.spektralab.ExifFillTest": 3,
+    "com.dearded.spektralab.ExifLocationTest": 8,
+    "com.dearded.spektralab.ExportMemoryTest": 8,
+    "com.dearded.spektralab.ExportRetryTest": 7,
+    "com.dearded.spektralab.FrameEditAutosaveTest": 12,
+    "com.dearded.spektralab.FrameGeometryTest": 9,
+    "com.dearded.spektralab.GalleryTransactionTest": 12,
+    "com.dearded.spektralab.LutBakeTest": 7,
+    "com.dearded.spektralab.NewPhotoStocksTest": 9,
+    "com.dearded.spektralab.PreviewPublicationTest": 7,
+    "com.dearded.spektralab.RawDevelopmentTest": 8,
+    "com.dearded.spektralab.RawOpenCancellationTest": 6,
+    "com.dearded.spektralab.SceneCurveTest": 16,
+    "com.dearded.spektralab.SelectionPreviewRecipeTest": 3,
+    "com.dearded.spektralab.SessionCandidateTest": 8,
+    "com.dearded.spektralab.StyleRecipeTest": 17,
+    "com.dearded.spektralab.ThermalHeadroomSamplerTest": 5,
+    "com.dearded.spektralab.TiffColorSpaceTest": 3,
+    "com.dearded.spektralab.TransientSessionLeaseTest": 7,
+    "com.dearded.spektralab.VersionCompareTest": 6
+  },
+  "debug_classes": {
+    "com.dearded.spektralab.FrameEditPersistenceTest": 3,
+    "com.dearded.spektralab.ProcessingQueueGrantTest": 12
+  },
+  "apk_sha256": "2d531f9dee64b04da9b86b61377797ff0dc19ca0f52622fedaa65531c915dac4"
+}

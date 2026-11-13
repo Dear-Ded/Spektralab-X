@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ProcessingQueueGrantTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:40:17.090Z" hostname="ser858255664526" time="0.78">
+  <properties/>
+  <testcase name="unrelatedEditorGrantDoesNotRetainFinishedSource" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.205"/>
+  <testcase name="tableRemovalAfterQueueFinishesKeepsEditorGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.062"/>
+  <testcase name="finishedJobAloneDoesNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.044"/>
+  <testcase name="failedAndCancelledJobsKeepTheirSourceForRetry" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.042"/>
+  <testcase name="tableRemovalReleasesGrantWhenPreviouslyQueuedJobHasFinished" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.045"/>
+  <testcase name="tableRemovalAfterEditorMovesReleasesFinalGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.046"/>
+  <testcase name="anotherPendingJobKeepsGrantUntilItFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.046"/>
+  <testcase name="tableImportKeepsGrantWhenQueueCleanupRunsBeforeCommit" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.119"/>
+  <testcase name="removedJobsDoNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.038"/>
+  <testcase name="editorKeepsGrantWithoutStaleQueueOwnership" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.041"/>
+  <testcase name="tableRemovalReadsPendingJobPublishedAfterProviderWasCreated" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.045"/>
+  <testcase name="tableKeepsGrantAndCanReleaseItAfterQueueFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.043"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

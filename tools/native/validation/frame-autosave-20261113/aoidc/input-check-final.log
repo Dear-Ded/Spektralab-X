@@ -1,0 +1,7 @@
+app/src/main/java/com/dearded/spektralab/EditorViewModel.kt: OK
+app/src/main/java/com/dearded/spektralab/FrameEditAutosave.kt: OK
+app/src/main/java/com/dearded/spektralab/LightTableNav.kt: OK
+app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt: OK
+app/src/main/java/com/dearded/spektralab/MainActivity.kt: OK
+app/src/test/java/com/dearded/spektralab/FrameEditAutosaveTest.kt: OK
+app/src/testDebug/java/com/dearded/spektralab/FrameEditPersistenceTest.kt: OK

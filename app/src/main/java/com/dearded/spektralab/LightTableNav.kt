@@ -16,35 +16,46 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /** The app's screens. The editor stays the start screen; the light table is entered from it. */
 enum class Screen { EDITOR, TABLE }
 
 /**
- * The editor and the light table (观片台) under one activity. While the
- * editor has a light-table frame open, its edits are written back to that
- * frame's sidecar (debounced); opening any other photo ends the link.
+ * The editor and the light table (观片台) under one activity. The editor
+ * owns sidecar saving independently of the composed screens.
  */
-@OptIn(FlowPreview::class)
 @Composable
 fun AppScreens(editor: EditorViewModel) {
     val table: LightTableViewModel = viewModel()
     var screen by rememberSaveable { mutableStateOf(Screen.EDITOR) }
     // The editor was entered from the table, so back returns there.
     var fromTable by rememberSaveable { mutableStateOf(false) }
-    val link by table.editing.collectAsState()
+    val navigation = rememberCoroutineScope()
     val showQueue by remember(editor) { editor.ui.map { it.showQueue }.distinctUntilChanged() }.collectAsState(false)
+
+    fun returnToTable() {
+        navigation.launch {
+            try {
+                editor.flushFrameEdits()
+                fromTable = false
+                screen = Screen.TABLE
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                editor.showMessage("保存编辑记录失败：${e.message.orEmpty()}")
+            }
+        }
+    }
 
     // The 正在处理 sheet lives in the editor (the notification asks for it).
     LaunchedEffect(showQueue) { if (showQueue) screen = Screen.EDITOR }
@@ -52,30 +63,6 @@ fun AppScreens(editor: EditorViewModel) {
     // back no longer returns to the table, whose frame it did not come from (bughunt_main.md 4).
     LaunchedEffect(editor) {
         editor.externalOpens.collect { fromTable = false; screen = Screen.EDITOR }
-    }
-
-    LaunchedEffect(link) {
-        val l = link ?: return@LaunchedEffect
-        val frame = table.store.byId(l.id) ?: return@LaunchedEffect
-        var baseline: Pair<Edit, Pair<Double, Double>>? = null
-        editor.ui
-            // Only the frame itself: right after the open call the previous photo is still on screen.
-            .filter { it.busy == null && it.source?.name == frame.name }
-            .map { Triple(it.edit, it.source!!, editor.openUri?.toString()) }
-            .distinctUntilChanged()
-            .debounce(600)
-            .collect { (edit, src, open) ->
-                if (open != frame.uri) { table.unlink(l); return@collect }
-                val now = edit to (src.wbK to src.wbTint)
-                if (baseline == null) {
-                    // What it opened with: saving that would mark an untouched frame edited.
-                    baseline = now
-                    table.opened(l, src.width, src.height)
-                } else if (now != baseline) {
-                    baseline = now
-                    table.save(l, edit, src.wbK, src.wbTint)
-                }
-            }
     }
 
     // The light table's own state, read here so the back gesture knows which page is showing.
@@ -108,14 +95,14 @@ fun AppScreens(editor: EditorViewModel) {
         else -> null
     }
     SeekBack(outer, outerBack, onStart = { backward = true }) {
-        if (screen == Screen.EDITOR) { backward = true; fromTable = false; screen = Screen.TABLE } else leaveTable()
+        if (screen == Screen.EDITOR) { backward = true; returnToTable() } else leaveTable()
     }
     rememberTransition(outer, label = "screen").AnimatedContent(
         modifier = Modifier.fillMaxSize(),
         transitionSpec = { if (backward) backThrough() else forwardThrough() },
     ) { s ->
         when (s) {
-            Screen.EDITOR -> EditorScreen(editor, onLightTable = { backward = false; screen = Screen.TABLE })
+            Screen.EDITOR -> EditorScreen(editor, onLightTable = { backward = false; returnToTable() })
             Screen.TABLE -> TablePages(
                 table = table, editor = editor, page = page, rolls = rolls, catalog = catalog,
                 loupe = loupe, comparing = comparing, roll = roll,

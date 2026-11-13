@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.StyleRecipeTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:38:31.044Z" hostname="ser858255664526" time="0.042">
+  <properties/>
+  <testcase name="filterStrengthZeroDisablesDustAndGlobalAdjustments" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="filterAloneLeavesAllPhysicalAndPerPhotoSettingsUntouched" classname="com.dearded.spektralab.StyleRecipeTest" time="0.002"/>
+  <testcase name="savedComponentsKeepTheirScopeWhenConverted" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="optionsAreTypedAndClampedBeforeApplying" classname="com.dearded.spektralab.StyleRecipeTest" time="0.006"/>
+  <testcase name="mixFilmAWithFilterBInEitherOrder" classname="com.dearded.spektralab.StyleRecipeTest" time="0.008"/>
+  <testcase name="fullRecipeRetainsAllExposedPhysicalOptionsIncludingLargeGlare" classname="com.dearded.spektralab.StyleRecipeTest" time="0.003"/>
+  <testcase name="filterOverFilmDoesNotChooseNewStocksOrChangePrintSettings" classname="com.dearded.spektralab.StyleRecipeTest" time="0.002"/>
+  <testcase name="paperNoneSurvivesForNegativesAndSlides" classname="com.dearded.spektralab.StyleRecipeTest" time="0.003"/>
+  <testcase name="queuedImageExportKeepsNoFilmAndFilterIncludingLut" classname="com.dearded.spektralab.StyleRecipeTest" time="0.003"/>
+  <testcase name="disabledFilmEffectsRetainTheirRememberedStrengths" classname="com.dearded.spektralab.StyleRecipeTest" time="0.002"/>
+  <testcase name="filmRecipePreservesTheEntireCurrentFilterAndPerPhotoControls" classname="com.dearded.spektralab.StyleRecipeTest" time="0.002"/>
+  <testcase name="invalidScopeCannotAccidentallyApplyAFullCombination" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="v1Layer2OnlyStillPreservesThePhotosFilmAndMissingEngineOptions" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="snapshotsExcludeMasksGeometryAndRawDevelopment" classname="com.dearded.spektralab.StyleRecipeTest" time="0.0"/>
+  <testcase name="noFilmCombinationExplicitlyTurnsOffAPreviouslyActiveFilm" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="filterApplicationNeedsNoDormantFilmInTheCatalog" classname="com.dearded.spektralab.StyleRecipeTest" time="0.001"/>
+  <testcase name="userLibraryReloadPreservesScopesAndLutReference" classname="com.dearded.spektralab.StyleRecipeTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

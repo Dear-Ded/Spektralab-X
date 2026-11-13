@@ -1,0 +1,7 @@
+a96eea896aa8fab2c4918c18e159e49aa2ad9e799823db6e903902b34ba55f71  app/src/main/java/com/dearded/spektralab/EditorViewModel.kt
+ab2bd26e85321c7808ab2dbcce6ecfec586967872140adb431cf9ae5e15b5339  app/src/main/java/com/dearded/spektralab/FrameEditAutosave.kt
+0489622bfae8465abd5c2fa6fe4b69870e30d4831128b9ca7499c954697ddfae  app/src/main/java/com/dearded/spektralab/LightTableNav.kt
+cb76166f849bbe28851a023df25b5c982fcbecc06fe88f414eb2ddfcd02379df  app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt
+e79ff00e4ebb9f001d0152334adb6dfadf067c38f216ecbaf41a57b5f6ddb4d9  app/src/main/java/com/dearded/spektralab/MainActivity.kt
+e23f9701eb35f6246f77c4ae2b90e0a6cd49a6e2893e2e0aad0c23d4978dc5cc  app/src/test/java/com/dearded/spektralab/FrameEditAutosaveTest.kt
+ba10446ca9968efcd836776af8c4a3ca69628537ee7d852fa522776780b29e88  app/src/testDebug/java/com/dearded/spektralab/FrameEditPersistenceTest.kt

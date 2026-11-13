@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FrameEditAutosaveTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:38:26.558Z" hostname="ser858255664526" time="0.679">
+  <properties/>
+  <testcase name="firstEditBeforeAnyDebounceIsSavedEvenAfterSwitchingPhotos" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.027"/>
+  <testcase name="failedWriteReleasesTheWaitingReadAndCanBeRetried" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.008"/>
+  <testcase name="fastChangesCoalescePerFrameAndKeepTheFinalUndoValue" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.011"/>
+  <testcase name="backgroundFlushWritesWithoutWaitingForTheDebounce" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.003"/>
+  <testcase name="anEditArrivingDuringAFileWriteWinsAfterTheNextFlush" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.003"/>
+  <testcase name="closingTheEditorFlushesItsLastEditAndStopsItsWorker" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.005"/>
+  <testcase name="cancellingAReadDoesNotCancelItsAlreadyQueuedWrite" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.004"/>
+  <testcase name="ordinaryPhotoOpenDetachesSavingAndDoesNotStealPendingEdits" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.003"/>
+  <testcase name="flushWaitsForTheFileWriteBeforeAReopenCanReadIt" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.003"/>
+  <testcase name="successfulRawReopenSavesWbAndDevelopmentWhileNewOpensKeepTheirBaseline" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.004"/>
+  <testcase name="untouchedOpenDoesNotMarkAFrameEdited" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.002"/>
+  <testcase name="ordinaryEditingAlsoPersistsWithoutAnExplicitFlush" classname="com.dearded.spektralab.FrameEditAutosaveTest" time="0.604"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

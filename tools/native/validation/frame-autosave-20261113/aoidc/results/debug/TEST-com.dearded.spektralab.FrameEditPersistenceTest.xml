@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FrameEditPersistenceTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-13T14:40:14.002Z" hostname="ser858255664526" time="3.063">
+  <properties/>
+  <testcase name="openingAndReopeningAnUntouchedFrameDoesNotCreateASidecar" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="2.926"/>
+  <testcase name="rawReopenPersistsWhiteBalanceAndFullDevelopmentRecipe" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.094"/>
+  <testcase name="firstAdjustmentsOnSameNamedPhotosSurviveSwitchAndStoreReload" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.043"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

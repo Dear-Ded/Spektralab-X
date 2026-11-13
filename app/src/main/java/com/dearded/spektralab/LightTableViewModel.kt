@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -45,9 +46,6 @@ data class Loupe(val ids: List<String>, val start: Int)
 /** Where the table is: the roll list, one roll, and a frame being compared through styles (all optional). */
 data class TableNav(val rolls: Boolean = false, val roll: String? = null, val compare: String? = null)
 
-/** The frame the editor has open for the light table, so its edits go back to that frame's sidecar. */
-data class EditLink(val id: String, val name: String)
-
 /**
  * The light table's state. Process-lifetime data (frames, sidecars) lives in
  * [FrameStore]; this holds the screen's choices and runs the work that must
@@ -70,8 +68,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     ))
     val state: StateFlow<TableState> = _state
 
-    private val _editing = MutableStateFlow<EditLink?>(null)
-    val editing: StateFlow<EditLink?> = _editing
+    private var editRequest: kotlinx.coroutines.Job? = null
 
     private val _loupe = MutableStateFlow<Loupe?>(null)
     val loupe: StateFlow<Loupe?> = _loupe
@@ -238,25 +235,23 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
      */
     fun edit(frame: Frame, editor: EditorViewModel): Boolean {
         if (!editor.ui.value.ready) { show("引擎还在准备，稍等一下"); return false }
-        _editing.value = EditLink(frame.id, frame.name)
-        viewModelScope.launch {
-            val car = withContext(Dispatchers.IO) { store.sidecar(frame.id) }
-            val uri = Uri.parse(frame.uri)
-            if (car != null) editor.openSaved(uri, car.edit, car.wbK, car.wbTint) else editor.open(uri)
+        if (editor.ui.value.exporting) { show("正在导出，完成后再打开新照片"); return false }
+        val previous = editRequest
+        editRequest = viewModelScope.launch {
+            previous?.cancelAndJoin()
+            try {
+                editor.flushFrameEdits()
+                val car = withContext(Dispatchers.IO) { store.sidecar(frame.id) }
+                val uri = Uri.parse(frame.uri)
+                if (car != null) editor.openSaved(uri, car.edit, car.wbK, car.wbTint, frame.id)
+                else editor.open(uri, frame.id)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                show("读取编辑记录失败：${e.message.orEmpty()}")
+            }
         }
         return true
-    }
-
-    /** The editor opened another photo: its edits no longer belong to [link]'s frame. */
-    fun unlink(link: EditLink) = _editing.compareAndSet(link, null)
-
-    /** The editor has [link]'s frame open at [w] x [h] (its upright shape, which RAWs only tell once decoded). */
-    fun opened(link: EditLink, w: Int, h: Int) {
-        viewModelScope.launch(Dispatchers.IO) { store.setSize(link.id, w, h) }
-    }
-
-    fun save(link: EditLink, edit: Edit, wbK: Double, wbTint: Double) {
-        viewModelScope.launch(Dispatchers.IO) { store.saveEdit(link.id, edit, wbK, wbTint) }
     }
 
     /** Writes [edit] (a style from 比较风格) as [frame]'s look, keeping its RAW white balance. */
