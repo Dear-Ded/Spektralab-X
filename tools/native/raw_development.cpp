@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <chrono>
 #include <cstring>
 #include <iostream>
 #include <limits>
@@ -261,13 +262,112 @@ void cancellation() {
     catch (const std::runtime_error& e) { cancelled = std::string(e.what()) == "render cancelled"; }
     require(cancelled, "pre-cancelled histogram scan did work");
 }
+
+void parallel_histogram_parity() {
+    // A serial oracle, including padded/odd rows, both sides of the size gate
+    // and a large single row which cannot be partitioned by height.
+    for (const auto wh : {std::array<uint32_t,2>{1001,701}, {127,4100}, {600001,1}, {17,29411}, {17,29412}}) {
+        const auto [w,h] = wh;
+        const size_t stride = w + 3;
+        std::vector<float> source(stride*h*3, std::numeric_limits<float>::quiet_NaN());
+        RawDevelopmentStats expected;
+        for (uint32_t y = 0; y < h; ++y) for (uint32_t x = 0; x < w; ++x) {
+            const size_t i = size_t(y)*w+x;
+            float* c = source.data()+(size_t(y)*stride+x)*3;
+            c[0] = float(std::exp2(-30.0+double(i%1701)/28));
+            c[1] = c[0]*.7f; c[2] = c[0]*1.8f;
+            if (i%991 == 0) c[1] = std::numeric_limits<float>::infinity();
+            if (i%457 == 0) c[0] = c[1] = c[2] = -.1f;
+            if (!std::isfinite(c[0]) || !std::isfinite(c[1]) || !std::isfinite(c[2])) {
+                ++expected.invalid_pixels; continue;
+            }
+            const double l = .2880402*c[0]+.7118741*c[1]+.0000857*c[2];
+            if (l <= std::exp2(-24.0)) { ++expected.dark_pixels; continue; }
+            ++expected.histogram[size_t(std::clamp((std::log2(l)+24)*4096/48, 0.0, 4095.0))];
+            ++expected.valid_pixels;
+        }
+        const double lo = double(expected.valid_pixels)*.01, hi = double(expected.valid_pixels)*.99;
+        uint64_t count = 0;
+        double sum = 0, weights = 0;
+        for (size_t i = 0; i < expected.histogram.size(); ++i) {
+            const uint64_t before = count; count += expected.histogram[i];
+            const double weight = std::max(0.0,std::min(double(count),hi)-std::max(double(before),lo));
+            sum += weight*(-24+(double(i)+.5)*48/4096); weights += weight;
+        }
+        expected.log2_mean = sum/weights;
+        for (int repeat = 0; repeat < 3; ++repeat) {
+            const auto actual = raw_development_stats(source.data(),stride,w,h);
+            require(actual.histogram == expected.histogram && actual.valid_pixels == expected.valid_pixels &&
+                    actual.dark_pixels == expected.dark_pixels && actual.invalid_pixels == expected.invalid_pixels &&
+                    actual.available && actual.log2_mean == expected.log2_mean, "parallel histogram differs from serial oracle");
+        }
+    }
+}
+
+void sigmoid_reference_parity() {
+    const double log_a = std::log(std::pow(.1845,1.5)*(1/.1845-1));
+    auto old_tone = [&](double x) {
+        if (x <= 0) return 0.0;
+        const double u = 1.5*std::log(x)-log_a, z = std::exp(-std::abs(u));
+        return u >= 0 ? 1/(1+z) : z/(1+z);
+    };
+    uint32_t seed = 849103;
+    for (float ev : {-8.f,-1.25f,0.f,2.5f,8.f}) {
+        RawDevelopmentMetadata meta;
+        meta.baseline_exposure_present = true; meta.baseline_exposure = .25;
+        const auto p = plan(meta,ev);
+        const double gain = std::exp2(double(ev)+.25);
+        for (int sample = 0; sample < 65536; ++sample) {
+            float c[3];
+            double decoded[3];
+            for (int k = 0; k < 3; ++k) {
+                seed = seed*1664525+1013904223;
+                const uint32_t bits = seed & 0x7f7fffff;
+                std::memcpy(c+k,&bits,sizeof(float));
+                if (sample%7 == 0) c[k] = -c[k];
+                decoded[k] = c[k] <= 0 ? 0 : linear(c[k])*gain;
+            }
+            const double lo = std::min({decoded[0],decoded[1],decoded[2]});
+            const double hi = std::max({decoded[0],decoded[1],decoded[2]});
+            const double low = old_tone(lo), high = old_tone(hi);
+            float reference[3];
+            for (int k = 0; k < 3; ++k) {
+                const double ratio = hi > lo ? (decoded[k]-lo)/(hi-lo) : 0;
+                reference[k] = encoded(std::clamp(low+ratio*(high-low),0.0,1.0));
+            }
+            p.apply_encoded_prophoto(c);
+            for (int k = 0; k < 3; ++k) {
+                require(std::isfinite(c[k]) && c[k] >= 0 && c[k] <= 1, "sigmoid numeric range");
+                near(c[k],reference[k],6e-8,"sigmoid differs from original log/exp reference");
+            }
+        }
+    }
+}
+
+void large_scan_cancellation_preserves_previous_stats() {
+    constexpr uint32_t w = 4096, h = 4096;
+    std::vector<float> source(size_t(w)*h*3,.18f);
+    RawDevelopmentStats previous; previous.valid_pixels = 193; previous.log2_mean = -2.7;
+    std::atomic<uint64_t> generation{0};
+    OutputCancel token(generation);
+    std::thread canceller([&] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1)); ++generation;
+    });
+    bool cancelled = false;
+    try { prepare_raw_development_stats({true,true,0},true,source.data(),w,w,h,previous,token); }
+    catch (const std::runtime_error& e) { cancelled = std::string(e.what()) == "render cancelled"; }
+    canceller.join();
+    require(cancelled && previous.valid_pixels == 193 && previous.log2_mean == -2.7,
+            "cancelled parallel scan published partial stats or failed to join");
+}
 }  // namespace
 
 int main() {
     try {
         neutral_bypass(); technical_exposure_and_hdr(); fallback_curve(); embedded_shape();
         whole_frame_statistics(); frozen_plan_strip_and_thread_parity(); lazy_statistics(); metadata_rejection_and_status(); cancellation();
-        std::cout << "raw_development: 9 groups passed (synthetic; no Android acceptance)\n";
+        parallel_histogram_parity(); sigmoid_reference_parity(); large_scan_cancellation_preserves_previous_stats();
+        std::cout << "raw_development: 12 groups passed (synthetic; no Android acceptance)\n";
         return 0;
     } catch (const std::exception& e) {
         std::cerr << "raw_development: " << e.what() << '\n';

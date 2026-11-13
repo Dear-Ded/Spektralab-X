@@ -5,13 +5,13 @@
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <thread>
 
 namespace spk::android {
 namespace {
 constexpr double kGrey = 0.1845;
 constexpr double kLogMin = -24.0, kLogRange = 48.0;
-constexpr double kContrast = 1.5;
-const double kLogSigmoidA = std::log(std::pow(kGrey, kContrast) * (1.0 / kGrey - 1.0));
+const double kSigmoidA = std::pow(kGrey, 1.5) * (1.0 / kGrey - 1.0);
 
 double endpoint_slope(double ha, double hb, double da, double db) {
     const double value = ((2.0 * ha + hb) * da - ha * db) / (ha + hb);
@@ -35,26 +35,61 @@ RawDevelopmentStats raw_development_stats(const float* rgb, size_t stride,
         stride > std::numeric_limits<size_t>::max() / h / 3 / sizeof(float))
         throw std::invalid_argument("invalid RAW statistics source");
     RawDevelopmentStats stats;
-    for (uint32_t y = 0; y < h; ++y) {
+    auto scan = [&](RawDevelopmentStats& part, uint32_t y0, uint32_t y1) {
+        for (uint32_t y = y0; y < y1; ++y) {
+            if (cancel.cancelled()) return;
+            const float* row = rgb + size_t(y) * stride * 3;
+            for (uint32_t x = 0; x < w; ++x) {
+                const float* c = row + size_t(x) * 3;
+                if (!std::isfinite(c[0]) || !std::isfinite(c[1]) || !std::isfinite(c[2])) {
+                    ++part.invalid_pixels;
+                    continue;
+                }
+                const double luminance = 0.2880402 * c[0] + 0.7118741 * c[1] + 0.0000857 * c[2];
+                if (luminance <= std::exp2(kLogMin)) {
+                    ++part.dark_pixels;
+                    continue;
+                }
+                const double coordinate = (std::log2(luminance) - kLogMin) * 4096.0 / kLogRange;
+                const size_t bin = size_t(std::clamp(coordinate, 0.0, 4095.0));
+                ++part.histogram[bin];
+                ++part.valid_pixels;
+            }
+        }
+    };
+    const unsigned workers = uint64_t(w) * h < 500'000 ? 1u :
+        std::min({8u, h, std::max(1u, std::thread::hardware_concurrency())});
+    if (workers == 1) {
+        scan(stats, 0, h);
+    } else {
+        // Each worker owns its integer bins. Merge before the unchanged trimmed
+        // log mean, so scheduling cannot alter AE or make workers contend on atomics.
+        std::vector<RawDevelopmentStats> partial(workers - 1);
+        std::vector<std::thread> threads;
+        threads.reserve(workers - 1);
+        const uint32_t chunk = h / workers + (h % workers != 0);
+        uint32_t assigned = chunk;
+        try {
+            for (unsigned i = 1; i < workers && assigned < h; ++i) {
+                const uint32_t y0 = assigned, y1 = y0 + std::min(chunk, h - y0);
+                threads.emplace_back([&, i, y0, y1] { scan(partial[i - 1], y0, y1); });
+                assigned = y1;
+            }
+        } catch (...) {
+            // A failed thread start leaves its rows for this thread.
+        }
+        scan(stats, 0, chunk);
+        if (assigned < h) scan(stats, assigned, h);
+        for (auto& thread : threads) thread.join();
         cancel.check();
-        const float* row = rgb + size_t(y) * stride * 3;
-        for (uint32_t x = 0; x < w; ++x) {
-            const float* c = row + size_t(x) * 3;
-            if (!std::isfinite(c[0]) || !std::isfinite(c[1]) || !std::isfinite(c[2])) {
-                ++stats.invalid_pixels;
-                continue;
-            }
-            const double luminance = 0.2880402 * c[0] + 0.7118741 * c[1] + 0.0000857 * c[2];
-            if (luminance <= std::exp2(kLogMin)) {
-                ++stats.dark_pixels;
-                continue;
-            }
-            const double coordinate = (std::log2(luminance) - kLogMin) * 4096.0 / kLogRange;
-            const size_t bin = size_t(std::clamp(coordinate, 0.0, 4095.0));
-            ++stats.histogram[bin];
-            ++stats.valid_pixels;
+        for (const auto& part : partial) {
+            for (size_t i = 0; i < stats.histogram.size(); ++i) stats.histogram[i] += part.histogram[i];
+            stats.valid_pixels += part.valid_pixels;
+            stats.invalid_pixels += part.invalid_pixels;
+            stats.dark_pixels += part.dark_pixels;
         }
     }
+    cancel.check();
     if (stats.valid_pixels) {
         const double low = double(stats.valid_pixels) * 0.01;
         const double high = double(stats.valid_pixels) * 0.99;
@@ -177,9 +212,15 @@ double RawDevelopment::tone(double value) const noexcept {
         // contrast 1.5; see darktable sigmoid.c, fixed revision
         // 0c23f000db413843f385e402d53a796b71d4cba0. This is not an ACR3 replica.
         if (value <= 0.0) return 0.0;
-        const double u = kContrast * std::log(value) - kLogSigmoidA;
-        const double z = std::exp(-std::abs(u));
-        return u >= 0.0 ? 1.0 / (1.0 + z) : z / (1.0 + z);
+        // x^1.5 / (x^1.5 + A). Use reciprocal powers above one to
+        // avoid overflow, without a per-pixel log/exp or an approximate LUT.
+        if (value <= 1.0) {
+            const double p = value * std::sqrt(value);
+            return p / (p + kSigmoidA);
+        }
+        const double inverse = 1.0 / value;
+        const double p = inverse * std::sqrt(inverse);
+        return 1.0 / (1.0 + kSigmoidA * p);
     }
     if (value <= x_.front()) return y_.front();
     if (value >= x_.back()) return y_.back();

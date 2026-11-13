@@ -1,0 +1,12 @@
+2026-11-13T15:35:11+00:00
+Linux 5.15.0-30-generic
+4
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Ubuntu clang version 14.0.0-1ubuntu1.1
+CPU(s):                          4
+On-line CPU(s) list:             0-3
+Model name:                      Intel(R) Xeon(R) CPU E5-2667 v2 @ 3.30GHz
+Thread(s) per core:              1
+Core(s) per socket:              4
+Socket(s):                       1
+NUMA node0 CPU(s):               0-3

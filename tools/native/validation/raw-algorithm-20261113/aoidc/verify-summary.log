@@ -1,0 +1,96 @@
+{
+  "baseline": "12573927f6d9f4562843dc8673ebcb94ffa20353",
+  "pixels": 3145728,
+  "timings": {
+    "statistics_ms": {
+      "baseline": [
+        69.45791,
+        73.461601,
+        66.550801,
+        69.571139,
+        70.35666
+      ],
+      "candidate": [
+        27.878812,
+        23.938565,
+        17.033694,
+        18.352985,
+        28.311457
+      ],
+      "baselineMedian": 69.571139,
+      "candidateMedian": 23.938565,
+      "speedup": 2.9062368191242878,
+      "reductionPercent": 65.59124179352591
+    },
+    "sigmoid_ms": {
+      "baseline": [
+        732.495307,
+        754.836608,
+        732.012059,
+        719.580752,
+        737.921329
+      ],
+      "candidate": [
+        581.976001,
+        572.757018,
+        577.35919,
+        571.22467,
+        579.777109
+      ],
+      "baselineMedian": 732.495307,
+      "candidateMedian": 577.35919,
+      "speedup": 1.268699484977454,
+      "reductionPercent": 21.179127772896432
+    },
+    "embedded_ms": {
+      "baseline": [
+        564.322383,
+        583.164295,
+        563.420066,
+        574.908578,
+        573.211563
+      ],
+      "candidate": [
+        579.139782,
+        562.71973,
+        562.34282,
+        545.774164,
+        601.68372
+      ],
+      "baselineMedian": 573.211563,
+      "candidateMedian": 562.71973,
+      "speedup": 1.0186448642915007,
+      "reductionPercent": 1.8303596223860463
+    }
+  },
+  "statisticsBitExact": true,
+  "outputParity": {
+    "sigmoid": {
+      "channels": 9437184,
+      "changedChannels": 0,
+      "maxAbsoluteError": 0.0,
+      "maxUnorm16Difference": 0
+    },
+    "embedded": {
+      "channels": 9437184,
+      "changedChannels": 0,
+      "maxAbsoluteError": 0.0,
+      "maxUnorm16Difference": 0
+    }
+  },
+  "nativeGroupsPerBuild": 12,
+  "outputCasesPerBuild": 96,
+  "releaseJvm": {
+    "classes": 28,
+    "tests": 212,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "execution": "UP-TO-DATE; Kotlin unchanged; not newly executed"
+  },
+  "uploadedInputs": 6,
+  "nativeInputs": 37,
+  "apkSha256": "1037ed55f99c752f4fe22877b673e47a38ea84eea8ff33b1aa14fafd626543ae",
+  "arm64JniSha256": "b7101c3029ee4b8aa1716220c1c8e76df117a707742352cdf91f07d0e1155e47",
+  "finished": "2026-11-13T15:38:13+00:00"
+}
