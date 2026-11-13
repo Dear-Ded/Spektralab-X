@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/data/work/gpt-linearraw-move-20261113/repo/tools/native/raw_storage_parity.py", line 42, in <module>
+    main()
+  File "/data/work/gpt-linearraw-move-20261113/repo/tools/native/raw_storage_parity.py", line 31, in main
+    assert pixels[0] == pixels[1] and metadata[0] == metadata[1], (fixture, options)
+AssertionError: (PosixPath('/data/work/gpt-linearraw-move-20261113/fixtures/integer-lossless-orientation-1.dng'), ())

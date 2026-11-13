@@ -13,17 +13,29 @@ import sys
 from dng_float_precision_fixtures import FM, tag
 
 
-def fixture(path, width, height, orientation=1, bayer=False):
+def fixture(path, width, height, orientation=1, bayer=False, lossless=False):
     tags = {}
     channels = 1 if bayer else 3
+    jpeg = None
+    if lossless:
+        assert not bayer
+        def segment(marker, payload):
+            return b'\xff' + bytes([marker]) + struct.pack('>H', len(payload) + 2) + payload
+        # Constant RGB at the 16-bit initial predictor (32768), category-0
+        # differences. This exercises the actual lossless RGB DNG decoder.
+        dht = bytes([0, 1] + [0] * 15 + [0])
+        sof = struct.pack('>BHHB', 16, height, width, 3) + bytes([1, 0x11, 0, 2, 0x11, 0, 3, 0x11, 0])
+        sos = bytes([3, 1, 0, 2, 0, 3, 0, 1, 0, 0])
+        jpeg = (b'\xff\xd8' + segment(0xc4, dht) + segment(0xc3, sof) + segment(0xda, sos)
+                + b'\0' * ((width * height * 3 + 7) // 8) + b'\xff\xd9')
     fields = {254: (4, [0]), 256: (4, [width]), 257: (4, [height]),
-              258: (3, [16] * channels), 259: (3, [1]), 262: (3, [32803 if bayer else 34892]),
+              258: (3, [16] * channels), 259: (3, [7 if lossless else 1]), 262: (3, [32803 if bayer else 34892]),
               273: (4, [0]), 274: (3, [orientation]), 277: (3, [channels]),
-              278: (4, [height]), 279: (4, [width * height * channels * 2]),
+              278: (4, [height]), 279: (4, [len(jpeg) if jpeg is not None else width * height * channels * 2]),
               284: (3, [1]), 339: (3, [1] * channels),
               50829: (4, [0, 0, height, width]),
               50706: (1, [1, 4, 0, 0]), 50707: (1, [1, 4, 0, 0]),
-              50713: (3, [1, 1]), 50714: (5, [0] * channels),
+              50713: (3, [1, 1]), 50714: (5, [1024 if lossless else 0] * channels),
               50717: (4, [65535] * channels),
               50721: (10, [1, 0, 0, 0, 1, 0, 0, 0, 1]),
               50728: (5, [1, 1, 1]), 50778: (3, [23]), 50964: (10, FM),
@@ -52,6 +64,9 @@ def fixture(path, width, height, orientation=1, bayer=False):
     assert len(header) == strip
     with path.open('wb') as file:
         file.write(header)
+        if jpeg is not None:
+            file.write(jpeg)
+            return
         row = array('H', ((x * 59 + c * 179) % 65536 for x in range(width) for c in range(channels)))
         if sys.byteorder != 'little':
             row.byteswap()
@@ -69,7 +84,8 @@ if __name__ == '__main__':
     for orientation in range(1, 9):
         fixture(args.folder / f'integer-orientation-{orientation}.dng', 97, 73, orientation)
         fixture(args.folder / f'integer-bayer-orientation-{orientation}.dng', 97, 73, orientation, bayer=True)
+        fixture(args.folder / f'integer-lossless-orientation-{orientation}.dng', 97, 73, orientation, lossless=True)
     if args.large:
         fixture(args.folder / 'integer-linear-24mp.dng', 6000, 4000)
         fixture(args.folder / 'integer-bayer-24mp.dng', 6000, 4000, bayer=True)
-    print('Generated public integer LinearRaw/Bayer orientations 1..8' + (' and 24 MP' if args.large else ''))
+    print('Generated public integer LinearRaw/Bayer/lossless RGB orientations 1..8' + (' and 24 MP' if args.large else ''))

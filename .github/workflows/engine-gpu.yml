@@ -38,17 +38,27 @@ jobs:
           cmake -S tools/native/float_dng_deflate_host -B raw-storage-build -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSPK_UPSTREAM="$PWD/upstream" \
             -DSPEKTRALAB_LIBRAW_SOURCE="$RUNNER_TEMP/raw-libraw" \
+            -DSPK_BUILD_RAW_COLOR_AUDIT=ON \
             -DCMAKE_CXX_FLAGS="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffp-contract=off"
           cmake --build raw-storage-build -j2
       - name: Check decoder storage and cancellation
         run: |
           mkdir -p raw-storage-evidence
+          python3 tools/native/linear_raw_black_regression.py raw-black-oracle \
+            --probe "$PWD/raw-storage-build/raw_color_audit" \
+            > raw-storage-evidence/black-oracle.log 2>&1
+          cp raw-black-oracle/results.json raw-storage-evidence/black-oracle.json
           UP="$PWD/upstream" B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-dispatch" \
             bash tools/native/run_raw_precision_input.sh > raw-storage-evidence/dispatch.log 2>&1
           python3 tools/native/raw_working_fixtures.py raw-fixtures
           B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-lifetime" \
             bash tools/native/run_raw_storage_lifetime.sh raw-fixtures/*.dng \
             raw-dispatch/fixtures/fallback-crop.dng > raw-storage-evidence/lifetime.log 2>&1
+          B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-linear-move" \
+            bash tools/native/run_raw_linear_move.sh raw-fixtures/integer-orientation-*.dng \
+            raw-fixtures/integer-bayer-orientation-*.dng raw-fixtures/integer-lossless-orientation-*.dng \
+            raw-dispatch/fixtures/fallback-crop.dng \
+            > raw-storage-evidence/linear-move.log 2>&1
           UP="$PWD/upstream" B="$PWD/raw-storage-build" SANITIZE=1 BUILD_DIR="$PWD/raw-working" \
             bash tools/native/run_raw_working_decode.sh raw-fixtures/*.dng \
             raw-dispatch/fixtures/max2.dng raw-dispatch/fixtures/fallback-crop.dng \

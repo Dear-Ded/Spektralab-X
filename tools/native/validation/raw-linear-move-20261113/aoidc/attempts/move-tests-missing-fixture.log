@@ -1,0 +1,6 @@
+PASS guards=29, base transferred, raw views ended, exact samples, cleanup
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng,custom=0,crop=0,moved=1,RGB16_exact,normal_reusable,repeat_bitmap,reopen,independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng,custom=0,crop=1,moved=0,RGB16_exact,normal_reusable,repeat_bitmap,reopen,independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng,custom=1,crop=0,moved=1,RGB16_exact,normal_reusable,repeat_bitmap,reopen,independent_bitmap
+PASS /data/work/gpt-working-decode-20261113/fixtures/integer-orientation-1.dng,custom=1,crop=1,moved=0,RGB16_exact,normal_reusable,repeat_bitmap,reopen,independent_bitmap
+FAIL open/unpack

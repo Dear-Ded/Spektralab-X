@@ -1,0 +1,6 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /data/work/gpt-linearraw-move-20261113/asan
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object CMakeFiles/raw_color_audit.dir/data/work/gpt-linearraw-move-20261113/repo/tools/native/raw_color_audit.cpp.o
+[2/2] Linking CXX executable raw_color_audit

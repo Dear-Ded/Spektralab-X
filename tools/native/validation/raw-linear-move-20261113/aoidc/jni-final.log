@@ -1,0 +1,4 @@
+PASS integer_compatible16: source ABI parity; 6 cancellation stages (workers=1,inspect=0,standalone_decode=24,jni_decode=24,total=32)
+PASS float_legacy_quantized: source ABI parity; 6 cancellation stages (workers=1,inspect=11,standalone_decode=24,jni_decode=24,total=43)
+PASS production JNI working input: cases=12; exact_bits; full_source_dimensions; AE_off_full_statistics; integer_binning; float_routes
+PASS production RAW JNI cancellation: old/new ABI source parity; pre-cancel; 11 deterministic stages (inspect=17,decode=71,total=96); concurrent public token; candidate cleanup; old cache; retry

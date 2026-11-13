@@ -1,0 +1,29 @@
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+Linux 5.15.0-30-generic x86_64
+CPUs=4
+
+Release flags
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CMAKE_CXX_FLAGS:STRING=
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+
+Sanitizer flags
+CMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CMAKE_CXX_FLAGS:STRING=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffp-contract=off
+CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+
+ASan LibRaw compile command
+/usr/bin/c++ -DLIBRAW_MAX_METADATA_ALLOC_SIZE_MB=16 -DLIBRAW_MAX_PROFILE_SIZE_MB=16 -DLIBRAW_MAX_TILE_STREAM_COUNT=131072 -DLIBRAW_NODLL -DSPEKTRALAB_RAW_OPENMP=1 -DUSE_ZLIB -I/data/work/gpt-linearraw-move-20261113/libraw -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffp-contract=off -O2 -g -DNDEBUG -fPIC -w -fopenmp -MD -MT CMakeFiles/spk_libraw.dir/data/work/gpt-linearraw-move-20261113/libraw/src/decoders/canon_600.cpp.o -MF CMakeFiles/spk_libraw.dir/data/work/gpt-linearraw-move-20261113/libraw/src/decoders/canon_600.cpp.o.d -o CMakeFiles/spk_libraw.dir/data/work/gpt-linearraw-move-20261113/libraw/src/decoders/canon_600.cpp.o -c /data/work/gpt-linearraw-move-20261113/libraw/src/decoders/canon_600.cpp
+
+Android compiler
+ANDROID_ABI:UNINITIALIZED=arm64-v8a
+ANDROID_PLATFORM:UNINITIALIZED=android-29

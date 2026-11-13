@@ -1,0 +1,138 @@
+--- a/libraw/libraw.h
++++ b/libraw/libraw.h
+@@ -279,6 +279,11 @@
+   int dcraw_ppm_tiff_writer(const char *filename);
+   int dcraw_thumb_writer(const char *fname);
+   int dcraw_process(void);
++  // Spektralab, co-created with GPT (OpenAI): one-shot processing may move
++  // an owned, uncropped integer LinearRaw buffer into the working image.
++  // Raw sample views can end before processing callbacks. Reuse requires
++  // a fresh open/unpack; dcraw_process() keeps its original copy semantics.
++  int spk_dcraw_process_once();
+   /* information calls */
+   int is_fuji_rotated()
+   {
+@@ -357,6 +362,9 @@
+   void set_dng_host(void *);
+ 
+ protected:
++  int dcraw_process_impl(bool consume_raw);
++  int raw2image_ex_impl(int do_subtract_black, bool consume_raw);
++  bool spk_move_rawdata_to_image();
+   static void *memmem(char *haystack, size_t haystacklen, char *needle,
+                       size_t needlelen);
+   static char *strcasestr(char *h, const char *n);
+--- a/src/postprocessing/dcraw_process.cpp
++++ b/src/postprocessing/dcraw_process.cpp
+@@ -16,6 +16,16 @@
+ 
+ int LibRaw::dcraw_process(void)
+ {
++  return dcraw_process_impl(false);
++}
++
++int LibRaw::spk_dcraw_process_once()
++{
++  return dcraw_process_impl(true);
++}
++
++int LibRaw::dcraw_process_impl(bool consume_raw)
++{
+   int quality, i;
+ 
+   int iterations = -1, dcb_enhance = 1, noiserd = 0;
+@@ -44,7 +54,7 @@
+     int subtract_inline =
+         !O.bad_pixels && !O.dark_frame && is_bayer && !IO.zero_is_bad;
+ 
+-    int rc = raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!
++    int rc = raw2image_ex_impl(subtract_inline, consume_raw);
+ 	if (rc != LIBRAW_SUCCESS)
+ 		return rc;
+ 
+--- a/src/preprocessing/raw2image.cpp
++++ b/src/preprocessing/raw2image.cpp
+@@ -307,8 +307,43 @@
+   }
+ }
+ 
++bool LibRaw::spk_move_rawdata_to_image()
++{
++  // Co-created with GPT (OpenAI). The DNG decoders allocate this four-channel
++  // buffer with calloc in unpack(). Only transfer its base, never a view or
++  // external decoder allocation. No geometry or sample conversion is needed.
++  if (imgdata.image || !(imgdata.progress_flags & LIBRAW_PROGRESS_LOAD_RAW) ||
++      (imgdata.progress_flags & LIBRAW_PROGRESS_RAW2_IMAGE) ||
++      !P1.dng_version || P1.filters || P1.colors != 3 || P1.is_foveon ||
++      IO.shrink || IO.fuji_width || S.pixel_aspect != 1.0 ||
++      S.left_margin || S.top_margin || !S.width || !S.height ||
++      S.width != S.raw_width || S.height != S.raw_height ||
++      S.iwidth != S.width || S.iheight != S.height ||
++      S.raw_pitch != unsigned(S.width) * 8u ||
++      (load_raw != &LibRaw::packed_dng_load_raw &&
++       load_raw != &LibRaw::lossless_dng_load_raw) ||
++      (imgdata.process_warnings &
++       (LIBRAW_WARN_RAWSPEED_PROCESSED | LIBRAW_WARN_RAWSPEED3_PROCESSED)) ||
++      !imgdata.rawdata.raw_alloc ||
++      imgdata.rawdata.raw_alloc != imgdata.rawdata.color4_image ||
++      imgdata.rawdata.raw_image || imgdata.rawdata.color3_image ||
++      imgdata.rawdata.float_image || imgdata.rawdata.float3_image ||
++      imgdata.rawdata.float4_image)
++    return false;
++
++  imgdata.image = imgdata.rawdata.color4_image;
++  imgdata.rawdata.raw_alloc = NULL;
++  imgdata.rawdata.color4_image = NULL;
++  return true;
++}
++
+ int LibRaw::raw2image_ex(int do_subtract_black)
+ {
++  return raw2image_ex_impl(do_subtract_black, false);
++}
++
++int LibRaw::raw2image_ex_impl(int do_subtract_black, bool consume_raw)
++{
+ 
+   CHECK_ORDER_LOW(LIBRAW_PROGRESS_LOAD_RAW);
+   if (!imgdata.rawdata.raw_image && !imgdata.rawdata.color3_image && !imgdata.rawdata.color4_image)
+@@ -408,14 +443,19 @@
+     }
+     INT64 alloc_sz = INT64(alloc_width) * INT64(alloc_height);
+ 
+-    if (imgdata.image)
+-    {
+-      imgdata.image = (ushort(*)[4])realloc(imgdata.image,
+-                                            alloc_sz * sizeof(*imgdata.image));
+-      memset(imgdata.image, 0, alloc_sz * sizeof(*imgdata.image));
++    const bool moved = consume_raw && !do_crop && !do_subtract_black &&
++                       spk_move_rawdata_to_image();
++    if (!moved)
++    {
++      if (imgdata.image)
++      {
++        imgdata.image = (ushort(*)[4])realloc(imgdata.image,
++                                              alloc_sz * sizeof(*imgdata.image));
++        memset(imgdata.image, 0, alloc_sz * sizeof(*imgdata.image));
++      }
++      else
++        imgdata.image = (ushort(*)[4])calloc(alloc_sz, sizeof(*imgdata.image));
+     }
+-    else
+-      imgdata.image = (ushort(*)[4])calloc(alloc_sz, sizeof(*imgdata.image));
+ 
+     libraw_decoder_info_t decoder_info;
+     get_decoder_info(&decoder_info);
+@@ -435,7 +475,11 @@
+     int copywidth = MAX(0, MIN(int(S.width), int(S.raw_width) - int(S.left_margin)));
+ 
+     // Move saved bitmap to imgdata.image
+-    if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
++    if (moved)
++    {
++      // Already owned by imgdata.image; do not allocate, clear or copy it.
++    }
++    else if ((imgdata.idata.filters || P1.colors == 1) && imgdata.rawdata.raw_image)
+     {
+       if (IO.fuji_width)
+       {

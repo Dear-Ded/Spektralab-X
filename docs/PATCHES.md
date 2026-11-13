@@ -71,6 +71,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0057 在 compatible RAW 成功处理并提取元数据后，调用 LibRaw 0025 的一次性原始存储释放接口，避免原始样本与最终 RGB16 bitmap 重叠。保留原方向、gamma、所有像素和元数据；外部 RawSpeed 缓冲维持原寿命。168 组冻结对照、完整 LibRaw ASan/UBSan、生产 JNI、57/19 个补丁重放与 ARM64 全链接通过。24MP 合成 LinearRaw/Bayer 工作图完整解码峰值分别降低约 27%/12%；耗时未一致改善，尚非手机 OOM 验收。见 [所有权与测量](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。GPT（OpenAI）共创。
 
+0058 与 LibRaw 0026 配套，将满足严格尺寸、stride、类型与所有权条件的整数 LinearRaw 原始 RGBA16 分配直接移交处理图，省去 raw2image 的第二份整图分配/复制。只用于每请求新建的一次性解码器，原 LibRaw 重复处理 API 保持；黑点回调在移交前保存存储类型。200 组冻结像素/完整元数据对照、48 组独立黑位公式、双云完整 LibRaw sanitizer、生产 JNI 与 ARM64 链接验证见 [缓冲移交研究](ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md)。仍有整图处理图和 RGB16，不是端到端恒定内存。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
@@ -93,6 +95,7 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0023-dng-profile-dynamic-range` | 本项目，依据 Adobe DNG 1.7.1 / 固定 SDK | 解析 UNDEFINED8 的 version/range/hint，区分缺失、SDR、HDR 与损坏值，沿用 selected-profile IFD 来源合同；不执行 HDR 曲线。内部结构改变，整个 archive 和消费者同步重编。GPT（OpenAI）共创。 |
 | `0024-sony-ycbcr-cache-index-mask` | LibRaw `d7e09495734c527c9fdcd154e6435e06d20bb942`，0.22.3 的两行维护修复 | HuffTable 的 8192 项缓存按低 13 位寻址，合法索引及解码/消费顺序不变。81,920 个合法组合与 24,576 个受控高位组合通过；ASan/UBSan、合成 DNG 对照、18 补丁重放和完整 ARM64 JNI 链接见 [实施报告](ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md)。未把局部索引测试称为真实 Sony 故障文件复现。GPT（OpenAI）共创。 |
 | `0025-one-shot-raw-storage-release` | 本项目，依据固定 LibRaw 的分配/处理/输出/回收实现 | 添加成功 RGB 处理后的受限一次性释放，清空原始所有者与样本视图，保留完整处理图、元数据和输出状态。拒绝提前、重复、外部所有者或 working-image alias 释放；需要新 open/unpack 才能再处理原始样本。没有改变原有结构布局。配套引擎 0057 与完整验证见 [报告](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。GPT（OpenAI）共创。 |
+| `0026-one-shot-linearraw-buffer-move` | 本项目，依据 LibRaw 0.22.2 的内部所有权与处理顺序 | 添加受限一次性处理入口，将无裁切/边距的 owned RGBA16 LinearRaw 直接变成处理图，拒绝外部分配、其他样本视图与不匹配几何。原公开处理 API 仍复制、可重用；样本视图可在处理回调前结束。与引擎 0058 同步重编，具体条件、回归和测量见 [报告](ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md)。GPT（OpenAI）共创。 |
 
 `crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
 该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。

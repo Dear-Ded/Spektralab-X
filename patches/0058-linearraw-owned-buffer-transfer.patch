@@ -1,0 +1,39 @@
+--- a/engine/src/io/raw_decoder.cpp
++++ b/engine/src/io/raw_decoder.cpp
+@@ -279,9 +279,16 @@
+     CompatibleLibRaw() {
+         callbacks.pre_subtractblack_cb = &CompatibleLibRaw::linear_uniform_black;
+     }
++    int process_once() {
++        // Co-created with GPT (OpenAI). Ownership can end before callbacks;
++        // retain the unpacked storage kind for uniform RGB black handling.
++        linear_raw_store_ = imgdata.rawdata.color3_image || imgdata.rawdata.color4_image;
++        return spk_dcraw_process_once();
++    }
+     std::array<float, 12> matrix{};
+     bool calibrated = false;
+ protected:
++    bool linear_raw_store_ = false;
+     static void linear_uniform_black(void* context) {
+         auto& raw = *static_cast<CompatibleLibRaw*>(context);
+         auto& d = raw.imgdata;
+@@ -291,7 +298,7 @@
+         // equal RGB offsets with no spatial pattern have an unambiguous
+         // common black here. Source rawdata.color remains untouched.
+         if (!d.idata.dng_version || d.idata.colors != 3 || d.idata.filters ||
+-            d.idata.is_foveon || (!d.rawdata.color3_image && !d.rawdata.color4_image) || u.tiff_samples != 3 ||
++            d.idata.is_foveon || !raw.linear_raw_store_ || u.tiff_samples != 3 ||
+             (u.tiff_sampleformat != 0 && u.tiff_sampleformat != 1) ||
+             u.tiff_bps == 0 || u.tiff_bps > 16 ||
+             c.cblack[4] || c.cblack[5] || c.cblack[3] || !c.cblack[0] ||
+@@ -464,7 +471,9 @@
+ 
+         start = Clock::now();
+         progress.check();
+-        const int process_status = raw->dcraw_process();
++        // A fresh decoder owns each request; eligible LinearRaw transfers
++        // its raw buffer instead of allocating and copying a second frame.
++        const int process_status = raw->process_once();
+         decoded.timings.process_ms = elapsed_ms(start);
+         progress.check();
+         if (!libraw_ok(process_status, "RAW process", error)) return false;

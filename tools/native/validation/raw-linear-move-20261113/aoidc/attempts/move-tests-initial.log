@@ -1,0 +1,4 @@
+/data/work/gpt-linearraw-move-20261113/repo/tools/native/raw_linear_move.cpp: In member function ‘void {anonymous}::Probe::other_decoder()’:
+/data/work/gpt-linearraw-move-20261113/repo/tools/native/raw_linear_move.cpp:24:48: error: ‘unpacked_load_raw’ is not a member of ‘LibRaw’
+   24 |     void other_decoder() { load_raw = &LibRaw::unpacked_load_raw; }
+      |                                                ^~~~~~~~~~~~~~~~~

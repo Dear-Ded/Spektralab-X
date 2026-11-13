@@ -835,3 +835,29 @@ LibRaw archive remains the production build. The existing production JNI
 cancellation runner additionally checks scaled working pixels, source dimensions,
 Bayer binning and complete AE-off standard statistics.
 See [results and reproduction](../../docs/ENGINE_RAW_WORKING_CONVERSION_2026-11-13.md).
+
+## Owned LinearRaw buffer transfer
+
+```bash
+B=/path/to/complete-decoder-build BUILD_DIR=/outside-repo/raw-move SANITIZE=1 \
+  bash tools/native/run_raw_linear_move.sh /outside-repo/fixtures/integer-orientation-*.dng \
+  /outside-repo/fixtures/integer-bayer-orientation-*.dng \
+  /outside-repo/fixtures/integer-lossless-orientation-*.dng
+```
+
+Requires matching LibRaw 0.22.2 plus overlays through 0026. `SANITIZE=1` must
+link a complete instrumented LibRaw build to cover internal allocation and
+processing, as the `raw-storage` CI job does. The real-library runner checks
+29 rejected owner/layout/state cases, exact samples, default/custom WB, crop
+fallback, original API reuse, repeat bitmap, reopening and independent bitmap
+ownership. `raw_working_fixtures.py` now emits all eight orientations for
+uncompressed LinearRaw, Bayer and lossless RGB DNG; the last has nonzero black.
+`--large` still adds the two 24 MP memory fixtures.
+
+Build the existing `raw_color_audit` target with `SPK_BUILD_RAW_COLOR_AUDIT=ON`
+and run `linear_raw_black_regression.py /outside-repo/black --probe /path/to/raw_color_audit`
+for the independent 48-case mathematical black oracle. CI runs this alongside
+precision/cancellation, storage lifetime, one-shot transfer and real working
+decode checks. The direct LibRaw runner does not execute the engine's black
+callback, so it cannot replace this production decoder oracle.
+See [fixed sources, results and limits](../../docs/ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md).

@@ -1,0 +1,38 @@
+{
+  "linear_working": {
+    "baseline": {
+      "peak_rss_kib": 380652,
+      "ms": 1226.16
+    },
+    "candidate": {
+      "peak_rss_kib": 334080,
+      "ms": 996.777
+    },
+    "peak_reduction_percent": 12.234797137542952,
+    "time_reduction_percent": 18.707428068115096
+  },
+  "bayer_working": {
+    "baseline": {
+      "peak_rss_kib": 333988,
+      "ms": 1375.09
+    },
+    "candidate": {
+      "peak_rss_kib": 333896,
+      "ms": 1417.67
+    },
+    "peak_reduction_percent": 0.02754589985268785,
+    "time_reduction_percent": -3.0965245911176886
+  },
+  "linear_full": {
+    "baseline": {
+      "peak_rss_kib": 427920,
+      "ms": 1690.05
+    },
+    "candidate": {
+      "peak_rss_kib": 427936,
+      "ms": 1498.85
+    },
+    "peak_reduction_percent": -0.003739016638615311,
+    "time_reduction_percent": 11.313274755184766
+  }
+}

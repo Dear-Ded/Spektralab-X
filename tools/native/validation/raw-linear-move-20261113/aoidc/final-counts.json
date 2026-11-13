@@ -1,0 +1,11 @@
+{
+  "working_release_cases": 232,
+  "working_asan_cases": 232,
+  "direct_libraw_asan_cases": 100,
+  "owner_guard_cases": 29,
+  "black_oracle_cases": 48,
+  "frozen_cases": 200,
+  "frozen_successful": 196,
+  "spirv_unchanged": 56,
+  "final_checks_exit": 0
+}

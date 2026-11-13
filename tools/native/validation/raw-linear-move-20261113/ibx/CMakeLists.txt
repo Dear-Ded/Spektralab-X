@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.22)
+project(spk_raw_owner_second_compiler LANGUAGES C CXX)
+include("${CMAKE_CURRENT_SOURCE_DIR}/LibRaw.cmake")
+find_package(ZLIB REQUIRED)
+target_compile_definitions(spk_libraw PUBLIC USE_ZLIB LIBRAW_MAX_PROFILE_SIZE_MB=16
+    LIBRAW_MAX_METADATA_ALLOC_SIZE_MB=16 LIBRAW_MAX_TILE_STREAM_COUNT=131072)
+target_link_libraries(spk_libraw PUBLIC ZLIB::ZLIB)
+add_executable(raw_linear_move raw_linear_move.cpp)
+target_compile_features(raw_linear_move PRIVATE cxx_std_20)
+target_link_libraries(raw_linear_move PRIVATE spk_libraw)
