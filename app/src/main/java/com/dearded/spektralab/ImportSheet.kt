@@ -176,7 +176,7 @@ fun ImportHost(vm: EditorViewModel) {
                     }
                     OutlinedTextField(value = category, onValueChange = { category = it.take(20) }, singleLine = true,
                         label = { Text(if (categories.isEmpty()) "分类" else "或新建分类") }, modifier = Modifier.fillMaxWidth())
-                    if (before != null && pending.look.scope != StyleScope.FILM) {
+                    if (before != null) {
                         Spacer(Modifier.height(RowGap))
                         LabeledSlider("强度", strength * 100, 0.0, 100.0, 100.0, true, "%.0f%%") { v ->
                             strength = (v / 100).coerceIn(0.0, 1.0)
@@ -334,15 +334,12 @@ fun UserLibrarySection(vm: EditorViewModel) {
 
     if (sharing) {
         var name by remember { mutableStateOf("我的风格") }
-        val scopes = StyleScope.entries.filter { it != StyleScope.FILM || !ui.edit.noFilm }
-        var shareScope by remember { mutableStateOf(if (ui.edit.noFilm) StyleScope.FILTER else StyleScope.COMBINATION) }
         AlertDialog(
             onDismissRequest = { sharing = false },
             title = { Text("分享当前风格") },
             text = {
                 Column {
-                    StepRow("分享范围", scopes.map { it.label }, scopes.indexOf(shareScope), true) { shareScope = scopes[it] }
-                    Text("打包成 .spklook，可在另一张照片上继续使用。照片本身、裁切、边框、局部蒙版和 RAW 显影不会带上。",
+                    Text("胶片、相纸、冲印参数和冲印后调整会打包成 .spklook，照片本身、裁切和边框不会带上。",
                         style = MaterialTheme.typography.bodySmall)
                     OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
                         label = { Text("名称") })
@@ -351,9 +348,8 @@ fun UserLibrarySection(vm: EditorViewModel) {
             confirmButton = {
                 TextButton(onClick = {
                     sharing = false
-                    val selectedScope = shareScope
                     scope.launch {
-                        val file = vm.exportLook(name, selectedScope) ?: return@launch
+                        val file = vm.exportLook(name) ?: return@launch
                         val uri = FileProvider.getUriForFile(context, context.packageName + SHARE_AUTHORITY, file)
                         val send = Intent(Intent.ACTION_SEND).setType("application/octet-stream")
                             .putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

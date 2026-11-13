@@ -64,8 +64,6 @@ class StyleWorkflowUiTest {
         state = UiState(ready = true, catalog = catalog, edit = catalog.normalize(Edit()),
             image = photo, before = photo,
             source = SourceInfo("synthetic.png", 160, 120, 160, 120, "image", "synthetic"))
-        saveAsStyle(library, Edit(look = customFilter), "滤镜 B", null, StyleScope.FILTER)
-        saveAsStyle(library, Edit(film = "fujifilm_velvia_100", scanFilm = true, glareAmount = 20.0), "胶卷 A", null, StyleScope.FILM)
         File("build/outputs/roborazzi").mkdirs()
     }
 
@@ -102,31 +100,18 @@ class StyleWorkflowUiTest {
         else compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }
 
-    @Test fun filterOnlyThenFilmCombinationAndSavedRecipe() {
+    @Test fun existingSaveDialogRemembersTheCurrentCombination() {
+        val selected = catalog.normalize(Edit(film = "fujifilm_velvia_100", scanFilm = true,
+            glareAmount = 20.0, look = customFilter))
+        state = state.copy(edit = selected)
         show()
         tap("我的")
-        tap("仅滤镜")
-        tap("滤镜 B")
-        compose.runOnIdle {
-            assertFalse(state.edit.noFilm)
-            assertEquals("kodak_portra_400", state.edit.film)
-            assertEquals(customFilter, state.edit.look)
-        }
-        tap("移除胶卷")
-        compose.runOnIdle { assertTrue(state.edit.noFilm); assertEquals(customFilter, state.edit.look) }
-        shot("80_filter_only_393")
-        tap("仅胶卷")
-        tap("胶卷 A")
-        compose.runOnIdle {
-            assertFalse(state.edit.noFilm)
-            assertTrue(state.edit.scanFilm)
-            assertEquals("fujifilm_velvia_100", state.edit.film)
-            assertEquals(customFilter, state.edit.look)
-            assertEquals(20.0, state.edit.glareAmount, 0.0)
-        }
-        shot("81_custom_combination_393")
-        tap("完整组合")
+        compose.onNodeWithText("应用范围").assertDoesNotExist()
+        compose.onNodeWithText("移除胶卷").assertDoesNotExist()
+        shot("80_existing_styles_393")
         tap("+ 存为风格")
+        compose.onNodeWithText("保存范围").assertDoesNotExist()
+        compose.onNodeWithText("不含边框、裁剪和白平衡。").assertExists()
         compose.onNodeWithText("例如：傍晚暖调").performTextInput("混搭 C")
         tap("保存")
         compose.waitUntil(15_000) { library.styles.all.value.any { it.name == "混搭 C" } }
@@ -135,27 +120,36 @@ class StyleWorkflowUiTest {
             assertEquals(StyleScope.COMBINATION, saved.look.scope)
             assertEquals(true, saved.look.engine.scanFilm)
             assertEquals(customFilter, saved.look.layer2)
+            state = state.copy(edit = catalog.normalize(Edit()))
         }
+        settle()
+        tap("混搭 C")
+        compose.runOnIdle { assertEquals(selected, state.edit) }
     }
 
     @Test @Config(qualifiers = "w320dp-h640dp-normal-notround-port-night-mdpi-keyshidden-nonav")
-    fun narrowFilterAndSaveDialog() {
-        state = state.copy(edit = Edit.NONE.copy(look = customFilter))
+    fun existingSaveDialogRemembersNoFilmAndTheFilterOnANarrowScreen() {
+        val selected = catalog.normalize(Edit.NONE.copy(look = customFilter))
+        state = state.copy(edit = selected)
         show()
         tap("我的")
-        tap("仅滤镜")
-        shot("82_filter_only_320")
+        shot("81_existing_styles_320")
         tap("+ 存为风格")
         compose.onNodeWithText("例如：傍晚暖调").performTextInput("纯滤镜 D")
-        // The open edit has no film, so the save choices contain no film-only option.
-        shot("83_save_filter_320", dialog = true)
+        compose.onNodeWithText("保存范围").assertDoesNotExist()
+        shot("82_existing_save_dialog_320", dialog = true)
         tap("保存")
         compose.waitUntil(15_000) { library.styles.all.value.any { it.name == "纯滤镜 D" } }
         compose.runOnIdle {
             val saved = library.styles.all.value.single { it.name == "纯滤镜 D" }
-            assertEquals(StyleScope.FILTER, saved.look.scope)
-            assertTrue(saved.look.engine.empty)
+            assertEquals(StyleScope.COMBINATION, saved.look.scope)
+            assertEquals(true, saved.look.engine.noFilm)
+            assertEquals(customFilter, saved.look.layer2)
+            state = state.copy(edit = catalog.normalize(Edit()))
         }
+        settle()
+        tap("纯滤镜 D")
+        compose.runOnIdle { assertEquals(selected, state.edit) }
     }
 
     @Test fun sharedFilesRestoreScopeAndBypassWithTheirOriginalLut() {

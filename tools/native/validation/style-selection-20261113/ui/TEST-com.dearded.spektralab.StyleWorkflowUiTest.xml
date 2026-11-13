@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.StyleWorkflowUiTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-13T03:57:07.194Z" hostname="ser858255664526" time="11.663">
+  <properties/>
+  <testcase name="existingSaveDialogRemembersTheCurrentCombination" classname="com.dearded.spektralab.StyleWorkflowUiTest" time="10.793"/>
+  <testcase name="existingSaveDialogRemembersNoFilmAndTheFilterOnANarrowScreen" classname="com.dearded.spektralab.StyleWorkflowUiTest" time="0.726"/>
+  <testcase name="sharedFilesRestoreScopeAndBypassWithTheirOriginalLut" classname="com.dearded.spektralab.StyleWorkflowUiTest" time="0.143"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

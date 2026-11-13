@@ -131,10 +131,10 @@ class StyleRecipeTest {
         assertEquals(input.copy(look = Look(contrast = 8.0)), saved.toStyle("old", input, "").applyTo(input, catalog))
     }
 
-    @Test fun scopedComponentsRemainScopedInTheCombinedBrowser() {
+    @Test fun savedComponentsKeepTheirScopeWhenConverted() {
         for (scope in listOf(StyleScope.FILTER, StyleScope.FILM)) {
             val style = physical.savedStyle("component", scope).toStyle("us_test", target, "")
-            assertEquals(scope, style.inScope(StyleScope.COMBINATION).scope)
+            assertEquals(scope, style.scope)
         }
     }
 

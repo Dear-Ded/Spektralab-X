@@ -1,0 +1,10 @@
+978e131695c1341b68dc2dcfccce06ed296b3b9039491d64ee3e588f26b021c5  app/src/main/java/com/dearded/spektralab/EditorScreen.kt
+a01245e1a90d49599aa56ddd2cf1ccbe7e0dc34a81b777dc212462993e70bd60  app/src/main/java/com/dearded/spektralab/EditorViewModel.kt
+a996f43f619eed71ffb23bc8492425694ec3d5500c1b12f9f73c74d623e49f0c  app/src/main/java/com/dearded/spektralab/ImportSheet.kt
+13c0f8cd79bcc12d8d9666e5d177257b30876ad970fc0d5d4dd3b3c4f5abacc4  app/src/main/java/com/dearded/spektralab/Look.kt
+3a9f5377443ce8126266fbfa00723f57427b2e97b23dab0dc799470de56c13ac  app/src/main/java/com/dearded/spektralab/SpkLook.kt
+68d4e505ddc2a00618a73af510bf922edac88d27b30fe79990f861899cd57477  app/src/main/java/com/dearded/spektralab/StyleImport.kt
+ad6bdcc0b282f1ab9fe7be6f267352de8c0e6cbb3130b6d4fe870ad48fc761aa  app/src/main/java/com/dearded/spektralab/Styles.kt
+242f39cf50aa420c3a9862b04f7c0796d397323eba99248c3c7547db4a47306a  app/src/main/java/com/dearded/spektralab/StyleRecipe.kt
+13510def9f5f5135981a9a1e05291caf9bb7dcfce0d57734178fa4b9a3f679c1  app/src/test/java/com/dearded/spektralab/StyleRecipeTest.kt
+fdbb4e6c3dbef3eabf24ec089fcbd5d4a63404ac8eeb9b987a666acc6891b69a  app/src/testDebug/java/com/dearded/spektralab/StyleWorkflowUiTest.kt
