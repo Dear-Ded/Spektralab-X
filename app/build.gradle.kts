@@ -98,9 +98,9 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2026.01.00")
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
-    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.core:core-ktx:1.19.1")
     // Android 12+ system splash with a compat path back to API 29 (ui-motion_splash.md 2).
     implementation("androidx.core:core-splashscreen:1.2.0")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
@@ -115,7 +115,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     // Installs src/main/baseline-prof.txt on sideloaded installs (no Play to deliver it); see that file.
-    implementation("androidx.profileinstaller:profileinstaller:1.4.0")
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     testImplementation("junit:junit:4.13.2")
     // Execute the real sidecar/style JSON contract on the release JVM test path.
     testImplementation("org.json:json:20240303")
