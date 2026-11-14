@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExternalFileRoutingTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:53:32.231Z" hostname="runnervm8axu0" time="5.142">
+  <properties/>
+  <testcase name="explicitDngPresetImportStillReadsEmbeddedXmp" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="4.021"/>
+  <testcase name="nullProviderNameFallsBackToUri" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.092"/>
+  <testcase name="ordinaryImagesStillOpenAsPhotos" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.04"/>
+  <testcase name="unavailableMetadataFallsBackToUriAndDeclaredType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.038"/>
+  <testcase name="rawMimeWorksWithoutAnExtension" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.049"/>
+  <testcase name="genericOrMissingDeclaredTypeUsesTheProviderImageType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.061"/>
+  <testcase name="mainActivityQueuesHaldFromViewAndShare" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.611"/>
+  <testcase name="genericCameraRawUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.042"/>
+  <testcase name="stylesAndRecipesStillEnterTheImporter" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.034"/>
+  <testcase name="newerExternalOpenDiscardsTheSlowProviderResult" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.12"/>
+  <testcase name="numericHaldUriUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.03"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Robolectric] WARN: Android SDK 36 requires Java 21 (have Java 17). Tests won't be run on SDK 36 unless explicitly requested.
+[Robolectric] WARN: Android SDK 37 requires Java 21 (have Java 17). Tests won't be run on SDK 37 unless explicitly requested.
+]]></system-err>
+</testsuite>

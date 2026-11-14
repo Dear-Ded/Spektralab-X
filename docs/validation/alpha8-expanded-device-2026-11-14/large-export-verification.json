@@ -1,0 +1,61 @@
+{
+  "files": [
+    {
+      "name": "Spektralab-X_20261114_233827_977.jpg",
+      "bytes": 4103591,
+      "sha256": "98d8fb7979f954d5853901c189a9069378d3ea9ab5eb569543c2b5e10642f456",
+      "metadata": {
+        "IFD0:ImageWidth": 3547,
+        "File:ImageWidth": 3547,
+        "IFD0:ImageHeight": 2364,
+        "File:ImageHeight": 2364,
+        "ExifIFD:ExifImageWidth": 3547,
+        "ExifIFD:ExifImageHeight": 2364,
+        "File:YCbCrSubSampling": "YCbCr4:4:4 (1 1)",
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      },
+      "decodedDimensions": [
+        3547,
+        2364
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_234046_581.jpg",
+      "bytes": 1512671,
+      "sha256": "f10325f5194d23f96c75a9e263f5cf4e945ddef7c01aab2fead5030d5d958c1a",
+      "metadata": {
+        "IFD0:ImageWidth": 3547,
+        "File:ImageWidth": 3547,
+        "IFD0:ImageHeight": 2364,
+        "File:ImageHeight": 2364,
+        "ExifIFD:ExifImageWidth": 3547,
+        "ExifIFD:ExifImageHeight": 2364,
+        "File:YCbCrSubSampling": "YCbCr4:2:0 (2 2)",
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      },
+      "decodedDimensions": [
+        3547,
+        2364
+      ]
+    }
+  ],
+  "sourceDimensions": [
+    6000,
+    4000
+  ],
+  "outputDimensions": [
+    3547,
+    2364
+  ],
+  "outputPixels": 8385108,
+  "pixelCap": 8388608,
+  "encodedRgbDifference": {
+    "rmsPerChannel": [
+      2.035528249687042,
+      1.4553569848597996,
+      2.88536739506442
+    ],
+    "psnrDb": 41.26242057238791
+  },
+  "note": "Different JPEG quality/tier outputs; decoded RGB comparison is not shader parity evidence."
+}

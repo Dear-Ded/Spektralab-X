@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableGestureTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:11:04.611Z" hostname="ser858255664526" time="10.285">
+  <properties/>
+  <testcase name="nextTapCanClearSelectionThenOpenThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="8.421"/>
+  <testcase name="longPressDragSelectsAcrossRows" classname="com.dearded.spektralab.LightTableGestureTest" time="0.406"/>
+  <testcase name="longPressFirstRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.292"/>
+  <testcase name="longPressSecondRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.332"/>
+  <testcase name="crossRowDragSurvivesTheSelectionRecomposition" classname="com.dearded.spektralab.LightTableGestureTest" time="0.419"/>
+  <testcase name="shortTapStillOpensThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.168"/>
+  <testcase name="longPressNearBottomKeepsTheTouchedRow" classname="com.dearded.spektralab.LightTableGestureTest" time="0.245"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

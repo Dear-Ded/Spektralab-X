@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableGestureTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:48:32.801Z" hostname="ser858255664526" time="11.694">
+  <properties/>
+  <testcase name="firstDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="8.768"/>
+  <testcase name="nextTapCanClearSelectionThenOpenThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.477"/>
+  <testcase name="secondFingerEndsDragSelectionAndCanZoomTheGrid" classname="com.dearded.spektralab.LightTableGestureTest" time="0.347"/>
+  <testcase name="longPressDragSelectsAcrossRows" classname="com.dearded.spektralab.LightTableGestureTest" time="0.279"/>
+  <testcase name="longPressFirstRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.246"/>
+  <testcase name="longPressSecondRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.215"/>
+  <testcase name="crossRowDragSurvivesTheSelectionRecomposition" classname="com.dearded.spektralab.LightTableGestureTest" time="0.265"/>
+  <testcase name="shortTapStillOpensThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.188"/>
+  <testcase name="firstUpwardDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="0.228"/>
+  <testcase name="longPressNearBottomKeepsTheTouchedRow" classname="com.dearded.spektralab.LightTableGestureTest" time="0.199"/>
+  <testcase name="normalScrollingResumesAfterLongPressRelease" classname="com.dearded.spektralab.LightTableGestureTest" time="0.477"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

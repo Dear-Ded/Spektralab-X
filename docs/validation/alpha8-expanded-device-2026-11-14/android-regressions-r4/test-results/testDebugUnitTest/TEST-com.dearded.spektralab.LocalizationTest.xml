@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:21:41.428Z" hostname="runnervm8axu0" time="1.422">
+  <properties/>
+  <testcase name="defaultsToChineseEvenOnEnglishSystemAndUnknownPreference" classname="com.dearded.spektralab.LocalizationTest" time="0.056"/>
+  <testcase name="activityBaseAttachmentDoesNotReadTheUninitializedTheme" classname="com.dearded.spektralab.LocalizationTest" time="0.08"/>
+  <testcase name="switchingUpdatesPreviouslyInitializedLabelsWithoutChangingRecipeIdentity" classname="com.dearded.spektralab.LocalizationTest" time="0.124"/>
+  <testcase name="localizedContextRetainsActivityAndDoesNotMutateBaseResources" classname="com.dearded.spektralab.LocalizationTest" time="0.794"/>
+  <testcase name="failedPreferenceWriteDoesNotPublishLanguage" classname="com.dearded.spektralab.LocalizationTest" time="0.048"/>
+  <testcase name="translatedArgumentsKeepFilenamesAndBracesVerbatim" classname="com.dearded.spektralab.LocalizationTest" time="0.117"/>
+  <testcase name="selectionIsDurableAndReloadsAfterInMemoryLanguageChanges" classname="com.dearded.spektralab.LocalizationTest" time="0.094"/>
+  <testcase name="catalogKeepsAllNumberedArgumentsAndHasNoChineseTranslations" classname="com.dearded.spektralab.LocalizationTest" time="0.102"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "name": "Spektralab-X_20261115_000321_13.jpg",
+      "bytes": 80742,
+      "sha256": "314d69bedef22218c8691b0d3e727b10d8d2fb1fc25c6e7c5176e72976070e1d",
+      "decodedDimensions": [
+        1024,
+        768
+      ],
+      "metadata": {
+        "ExifIFD:ExifImageWidth": 1024,
+        "ExifIFD:ExifImageHeight": 768,
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      }
+    },
+    {
+      "name": "Spektralab-X_20261115_000322_15.jpg",
+      "bytes": 407315,
+      "sha256": "a79ab15c5898bd376a37ee8b6c4f5b5228a0392de4eeabf1c76856fd65f7826d",
+      "decodedDimensions": [
+        1600,
+        1000
+      ],
+      "metadata": {
+        "ExifIFD:ExifImageWidth": 1600,
+        "ExifIFD:ExifImageHeight": 1000,
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      }
+    }
+  ],
+  "sourceApplication": "87f6c1bd32424e0b5dd1591cde2f8582f67b9be0",
+  "selectionRoute": "actual phone horizontal long-press drag then batch JPEG"
+}

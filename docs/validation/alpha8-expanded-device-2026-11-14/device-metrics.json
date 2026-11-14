@@ -1,0 +1,1915 @@
+{
+  "device": {
+    "model": "Xiaomi 13 Ultra / 2304FPN6DC",
+    "android": 16,
+    "api": 36,
+    "gpu": "Adreno 740",
+    "displayPixels": [
+      1440,
+      3200
+    ],
+    "usbCharging": true
+  },
+  "baselineApplicationSource": "b1c61bdde739022fd6d6b60b49d8c57b1822dbdb",
+  "acceptedApplicationSource": "c4a45e576a1dd694371542adc663252b5ae56d1d",
+  "memorySnapshots": [
+    {
+      "sample": "e00-meminfo",
+      "time": "2026-11-14T23:10:39.2183931+08:00",
+      "pssKiB": 128140,
+      "rssKiB": 181172,
+      "swapPssKiB": 72750,
+      "activities": 1
+    },
+    {
+      "sample": "e04-meminfo",
+      "time": "2026-11-14T23:13:11.8093607+08:00",
+      "pssKiB": 215052,
+      "rssKiB": 264968,
+      "swapPssKiB": 65602,
+      "activities": 1
+    },
+    {
+      "sample": "e06-meminfo",
+      "time": "2026-11-14T23:13:50.1259401+08:00",
+      "pssKiB": 212942,
+      "rssKiB": 264912,
+      "swapPssKiB": 64204,
+      "activities": 1
+    },
+    {
+      "sample": "e07-mem-5",
+      "time": "2026-11-14T23:14:55.7434693+08:00",
+      "pssKiB": 206634,
+      "rssKiB": 258960,
+      "swapPssKiB": 63852,
+      "activities": 1
+    },
+    {
+      "sample": "e07-mem-10",
+      "time": "2026-11-14T23:14:59.4137810+08:00",
+      "pssKiB": 206659,
+      "rssKiB": 259108,
+      "swapPssKiB": 63836,
+      "activities": 1
+    },
+    {
+      "sample": "e07-mem-15",
+      "time": "2026-11-14T23:15:03.1173648+08:00",
+      "pssKiB": 206851,
+      "rssKiB": 259312,
+      "swapPssKiB": 63836,
+      "activities": 1
+    },
+    {
+      "sample": "e07-mem-20",
+      "time": "2026-11-14T23:15:06.8083571+08:00",
+      "pssKiB": 205581,
+      "rssKiB": 258076,
+      "swapPssKiB": 63836,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-1",
+      "time": "2026-11-14T23:18:08.8905649+08:00",
+      "pssKiB": 262984,
+      "rssKiB": 354304,
+      "swapPssKiB": 29891,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-2",
+      "time": "2026-11-14T23:18:20.0260556+08:00",
+      "pssKiB": 260435,
+      "rssKiB": 362572,
+      "swapPssKiB": 19207,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-3",
+      "time": "2026-11-14T23:18:28.4372553+08:00",
+      "pssKiB": 261741,
+      "rssKiB": 369036,
+      "swapPssKiB": 19022,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-4",
+      "time": "2026-11-14T23:18:38.2535121+08:00",
+      "pssKiB": 262645,
+      "rssKiB": 369856,
+      "swapPssKiB": 19008,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-5",
+      "time": "2026-11-14T23:18:47.0501433+08:00",
+      "pssKiB": 269141,
+      "rssKiB": 376352,
+      "swapPssKiB": 19008,
+      "activities": 1
+    },
+    {
+      "sample": "e13-export-mem-6",
+      "time": "2026-11-14T23:18:56.0917501+08:00",
+      "pssKiB": 263286,
+      "rssKiB": 370516,
+      "swapPssKiB": 19004,
+      "activities": 1
+    },
+    {
+      "sample": "e14-home-meminfo",
+      "time": "2026-11-14T23:20:25.3342578+08:00",
+      "pssKiB": 155942,
+      "rssKiB": 263196,
+      "swapPssKiB": 19004,
+      "activities": 1
+    },
+    {
+      "sample": "e16-style-mem-2",
+      "time": "2026-11-14T23:21:32.8421743+08:00",
+      "pssKiB": 257075,
+      "rssKiB": 364176,
+      "swapPssKiB": 19003,
+      "activities": 1
+    },
+    {
+      "sample": "e16-style-mem-4",
+      "time": "2026-11-14T23:21:44.9837076+08:00",
+      "pssKiB": 256897,
+      "rssKiB": 364020,
+      "swapPssKiB": 19003,
+      "activities": 1
+    },
+    {
+      "sample": "e16-style-mem-6",
+      "time": "2026-11-14T23:21:59.5991402+08:00",
+      "pssKiB": 265868,
+      "rssKiB": 373016,
+      "swapPssKiB": 19003,
+      "activities": 1
+    },
+    {
+      "sample": "e19-benchmark-meminfo",
+      "time": "2026-11-14T23:27:09.2900895+08:00",
+      "pssKiB": 399045,
+      "rssKiB": 511608,
+      "swapPssKiB": 17663,
+      "activities": 1
+    },
+    {
+      "sample": "e20-benchmark-meminfo",
+      "time": "2026-11-14T23:27:46.5305194+08:00",
+      "pssKiB": 417769,
+      "rssKiB": 530360,
+      "swapPssKiB": 17647,
+      "activities": 1
+    },
+    {
+      "sample": "e24-meminfo",
+      "time": "2026-11-14T23:30:52.1401832+08:00",
+      "pssKiB": 351120,
+      "rssKiB": 464148,
+      "swapPssKiB": 17491,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-before-meminfo",
+      "time": "2026-11-14T23:35:41.9210219+08:00",
+      "pssKiB": 185247,
+      "rssKiB": 283356,
+      "swapPssKiB": 28796,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-1",
+      "time": "2026-11-14T23:35:42.1555724+08:00",
+      "pssKiB": 234524,
+      "rssKiB": 337712,
+      "swapPssKiB": 23849,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-2",
+      "time": "2026-11-14T23:35:42.7477543+08:00",
+      "pssKiB": 441796,
+      "rssKiB": 547604,
+      "swapPssKiB": 21233,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-3",
+      "time": "2026-11-14T23:35:43.3700146+08:00",
+      "pssKiB": 500077,
+      "rssKiB": 606184,
+      "swapPssKiB": 20961,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-4",
+      "time": "2026-11-14T23:35:43.9168001+08:00",
+      "pssKiB": 392925,
+      "rssKiB": 499112,
+      "swapPssKiB": 20885,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-5",
+      "time": "2026-11-14T23:35:44.4578251+08:00",
+      "pssKiB": 391405,
+      "rssKiB": 497592,
+      "swapPssKiB": 20885,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-6",
+      "time": "2026-11-14T23:35:45.0097849+08:00",
+      "pssKiB": 359265,
+      "rssKiB": 465456,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-7",
+      "time": "2026-11-14T23:35:45.5670448+08:00",
+      "pssKiB": 353839,
+      "rssKiB": 460028,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-8",
+      "time": "2026-11-14T23:35:46.0980978+08:00",
+      "pssKiB": 353857,
+      "rssKiB": 460048,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-9",
+      "time": "2026-11-14T23:35:46.6432257+08:00",
+      "pssKiB": 355265,
+      "rssKiB": 461456,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-10",
+      "time": "2026-11-14T23:35:47.2193224+08:00",
+      "pssKiB": 353909,
+      "rssKiB": 460100,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-11",
+      "time": "2026-11-14T23:35:47.7853397+08:00",
+      "pssKiB": 353659,
+      "rssKiB": 459848,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e25-large-mem-12",
+      "time": "2026-11-14T23:35:48.3508463+08:00",
+      "pssKiB": 353641,
+      "rssKiB": 459832,
+      "swapPssKiB": 20881,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-1",
+      "time": "2026-11-14T23:38:30.4611165+08:00",
+      "pssKiB": 485366,
+      "rssKiB": 591920,
+      "swapPssKiB": 20249,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-2",
+      "time": "2026-11-14T23:38:31.0322240+08:00",
+      "pssKiB": 575030,
+      "rssKiB": 681712,
+      "swapPssKiB": 20109,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-3",
+      "time": "2026-11-14T23:38:31.5645869+08:00",
+      "pssKiB": 425262,
+      "rssKiB": 531204,
+      "swapPssKiB": 20013,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-4",
+      "time": "2026-11-14T23:38:32.0945961+08:00",
+      "pssKiB": 425138,
+      "rssKiB": 531080,
+      "swapPssKiB": 20013,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-5",
+      "time": "2026-11-14T23:38:32.6396404+08:00",
+      "pssKiB": 424930,
+      "rssKiB": 530784,
+      "swapPssKiB": 20001,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-6",
+      "time": "2026-11-14T23:38:33.1572998+08:00",
+      "pssKiB": 424961,
+      "rssKiB": 530816,
+      "swapPssKiB": 20001,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-7",
+      "time": "2026-11-14T23:38:33.7004660+08:00",
+      "pssKiB": 424906,
+      "rssKiB": 530756,
+      "swapPssKiB": 20001,
+      "activities": 1
+    },
+    {
+      "sample": "e27-background-mem-8",
+      "time": "2026-11-14T23:38:34.2135765+08:00",
+      "pssKiB": 536502,
+      "rssKiB": 642476,
+      "swapPssKiB": 19877,
+      "activities": 1
+    },
+    {
+      "sample": "e31-old-pid-meminfo",
+      "time": "2026-11-14T23:42:38.9833881+08:00",
+      "pssKiB": 336325,
+      "rssKiB": 442728,
+      "swapPssKiB": 20265,
+      "activities": 1
+    },
+    {
+      "sample": "e37-edge2048-meminfo",
+      "time": "2026-11-14T23:50:52.6826391+08:00",
+      "pssKiB": 301823,
+      "rssKiB": 370840,
+      "swapPssKiB": 52677,
+      "activities": 1
+    },
+    {
+      "sample": "e38-edge2048-styled-meminfo",
+      "time": "2026-11-14T23:52:58.1317190+08:00",
+      "pssKiB": 302691,
+      "rssKiB": 386260,
+      "swapPssKiB": 38267,
+      "activities": 1
+    },
+    {
+      "sample": "e39-edge3072-meminfo",
+      "time": "2026-11-14T23:53:15.1482758+08:00",
+      "pssKiB": 361914,
+      "rssKiB": 446104,
+      "swapPssKiB": 37659,
+      "activities": 1
+    },
+    {
+      "sample": "e72-final-meminfo",
+      "time": "2026-11-15T00:12:04.3065255+08:00",
+      "pssKiB": 253839,
+      "rssKiB": 389932,
+      "swapPssKiB": 205,
+      "activities": 1
+    },
+    {
+      "sample": "e77-retry-meminfo",
+      "time": "2026-11-15T00:23:59.4216341+08:00",
+      "pssKiB": 622504,
+      "rssKiB": 765156,
+      "swapPssKiB": 140,
+      "activities": 1
+    },
+    {
+      "sample": "e98-r6-meminfo",
+      "time": "2026-11-15T01:03:47.0748940+08:00",
+      "pssKiB": 332197,
+      "rssKiB": 470568,
+      "swapPssKiB": 200,
+      "activities": 1
+    },
+    {
+      "sample": "e105-r6-final-meminfo",
+      "time": "2026-11-15T01:08:08.2282762+08:00",
+      "pssKiB": 270246,
+      "rssKiB": 402528,
+      "swapPssKiB": 203,
+      "activities": 1
+    }
+  ],
+  "thermalSnapshots": [
+    {
+      "sample": "e00-thermal",
+      "time": "2026-11-14T23:10:39.3132332+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.0,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.447,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 40.2,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 42.2,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 43.0,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 50.8,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 39.4,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 39.8,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 39.4,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 47.6,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 39.4,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 48.0,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 57.6,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 46.9,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 46.9,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 46.0,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 40.6,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 47.7,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e07-thermal",
+      "time": "2026-11-14T23:15:06.9397961+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.3,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 33.685,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 35.1,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 34.8,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 35.1,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 35.6,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 35.2,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 36.3,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e13-thermal",
+      "time": "2026-11-14T23:19:01.1460532+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.5,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 35.634,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 38.8,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 39.8,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 39.8,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 39.4,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e16-thermal",
+      "time": "2026-11-14T23:21:59.7273329+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.8,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 35.657,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 38.4,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 38.4,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 37.2,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e20-thermal",
+      "time": "2026-11-14T23:27:46.5847204+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 32.1,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.567,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 40.2,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 40.6,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 42.0,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 43.6,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 44.4,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 44.0,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 43.0,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 43.0,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 44.4,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 39.8,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 43.4,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e25-large-thermal",
+      "time": "2026-11-14T23:35:51.9822308+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 32.0,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.573,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.0,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 36.0,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 37.4,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e28-thermal",
+      "time": "2026-11-14T23:38:42.1466330+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.9,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 35.296,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 39.4,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 38.4,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 40.0,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 40.0,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 39.4,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 40.2,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 39.4,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e31-old-pid-thermal",
+      "time": "2026-11-14T23:42:39.0397946+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.8,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.106,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.0,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 37.2,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 38.4,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 37.8,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e72-final-thermal",
+      "time": "2026-11-15T00:12:04.4401510+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.9,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.152,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 35.1,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.0,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 35.1,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 35.5,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 36.4,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 36.0,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 37.1,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e77-retry-thermal",
+      "time": "2026-11-15T00:23:59.4752793+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.6,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.418,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.4,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 37.2,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 39.0,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e98-r6-thermal",
+      "time": "2026-11-15T01:03:47.1321555+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 31.9,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 34.418,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 38.0,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 37.6,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 35.9,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 37.2,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 37.6,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 38.6,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 36.4,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 37.8,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "sample": "e105-r6-final-thermal",
+      "time": "2026-11-15T01:08:08.2867185+08:00",
+      "status": 0,
+      "sensors": [
+        {
+          "name": "battery",
+          "type": 2,
+          "celsius": 32.2,
+          "status": 0
+        },
+        {
+          "name": "skin",
+          "type": 3,
+          "celsius": 35.149,
+          "status": 0
+        },
+        {
+          "name": "GPU6",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "GPU5",
+          "type": 1,
+          "celsius": 37.4,
+          "status": 0
+        },
+        {
+          "name": "GPU4",
+          "type": 1,
+          "celsius": 37.8,
+          "status": 0
+        },
+        {
+          "name": "CPU6",
+          "type": 0,
+          "celsius": 36.4,
+          "status": 0
+        },
+        {
+          "name": "GPU1",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "GPU2",
+          "type": 1,
+          "celsius": 36.3,
+          "status": 0
+        },
+        {
+          "name": "GPU3",
+          "type": 1,
+          "celsius": 36.7,
+          "status": 0
+        },
+        {
+          "name": "CPU7",
+          "type": 0,
+          "celsius": 39.2,
+          "status": 0
+        },
+        {
+          "name": "GPU0",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU5",
+          "type": 0,
+          "celsius": 37.6,
+          "status": 0
+        },
+        {
+          "name": "CPU3",
+          "type": 0,
+          "celsius": 38.4,
+          "status": 0
+        },
+        {
+          "name": "CPU2",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        },
+        {
+          "name": "CPU1",
+          "type": 0,
+          "celsius": 39.0,
+          "status": 0
+        },
+        {
+          "name": "CPU4",
+          "type": 0,
+          "celsius": 36.8,
+          "status": 0
+        },
+        {
+          "name": "GPU7",
+          "type": 1,
+          "celsius": 37.1,
+          "status": 0
+        },
+        {
+          "name": "CPU0",
+          "type": 0,
+          "celsius": 38.2,
+          "status": 0
+        }
+      ]
+    }
+  ],
+  "repeatedExportObservations": [
+    {
+      "sequence": 1,
+      "format": "JPEG · 工作尺寸",
+      "time": "2026-11-14T23:18:08.7074432+08:00",
+      "adbObservedPublicationMs": 2648,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "sequence": 2,
+      "format": "16 位 TIFF · sRGB",
+      "time": "2026-11-14T23:18:19.8738036+08:00",
+      "adbObservedPublicationMs": 2693,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "sequence": 3,
+      "format": "HEIF · 工作尺寸（sRGB）",
+      "time": "2026-11-14T23:18:28.2887666+08:00",
+      "adbObservedPublicationMs": 2706,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "sequence": 4,
+      "format": "JPEG · 工作尺寸",
+      "time": "2026-11-14T23:18:38.1132146+08:00",
+      "adbObservedPublicationMs": 2630,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "sequence": 5,
+      "format": "16 位 TIFF · sRGB",
+      "time": "2026-11-14T23:18:46.9182498+08:00",
+      "adbObservedPublicationMs": 2624,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "sequence": 6,
+      "format": "HEIF · 工作尺寸（sRGB）",
+      "time": "2026-11-14T23:18:55.9564756+08:00",
+      "adbObservedPublicationMs": 2599,
+      "mediaStorePending": 0,
+      "width": 1024,
+      "height": 768
+    }
+  ],
+  "benchmark3072": {
+    "firstPreviewMs": [
+      534,
+      295,
+      168
+    ],
+    "styleSwitchMs": [
+      315,
+      290,
+      294
+    ],
+    "exportRenderMs": [
+      1429,
+      1347,
+      1370
+    ],
+    "peakRssGrowth": "unavailable",
+    "note": "First sample belongs to previous acceptance; subsequent two belong to this extension."
+  },
+  "largeInput": {
+    "sourcePixels": [
+      6000,
+      4000
+    ],
+    "originalSetting": "Original size",
+    "workingPixelsAtOriginal": [
+      3547,
+      2364
+    ],
+    "workingPixels2048": [
+      2048,
+      1365
+    ],
+    "workingPixels3072": [
+      3072,
+      2048
+    ],
+    "gpuPixelCap": 8388608,
+    "originalSettingRestored": true,
+    "backgroundNormalJpegPublished": true,
+    "observedAfterHomeMs": 6538
+  },
+  "queueCancellation": {
+    "savedBeforeCancel": 30,
+    "savedAfterCancel": 30,
+    "savedAfterRetry": 31,
+    "canceledHistoryEntries": 1,
+    "totalHistoryAfterRetry": 32,
+    "pendingResidueObserved": false
+  },
+  "queuePersistence": {
+    "finishedHistoryLimit": 30,
+    "savedAfterNextProcess": 29,
+    "canceledAfterNextProcess": 1,
+    "finishedAfterNextProcess": 30,
+    "allActiveOrUnresolvedEntriesRetained": true,
+    "largeGalleryFilesStillPresent": true,
+    "originalAndRetriedHighQualitySha256": "98d8fb7979f954d5853901c189a9069378d3ea9ab5eb569543c2b5e10642f456",
+    "historyManuallyCleared": false
+  },
+  "limits": [
+    "Memory snapshots are sampled values, not a true peak or proof of no leaks.",
+    "HWUI describes the interface, not native render FPS.",
+    "ADB publication observations include tap, transport and polling overhead.",
+    "The highly compressible 24 MP synthetic chart does not represent camera RAW performance.",
+    "Raw phone logs, history and UI captures remain local.",
+    "See the report for accepted gestures and unresolved experiments."
+  ]
+}

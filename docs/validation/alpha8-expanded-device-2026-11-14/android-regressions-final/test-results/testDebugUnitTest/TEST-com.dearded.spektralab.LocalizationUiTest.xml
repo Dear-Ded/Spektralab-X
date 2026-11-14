@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationUiTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:54:12.374Z" hostname="runnervm8axu0" time="5.677">
+  <properties/>
+  <testcase name="benchmarkResultsAreVisibleWithoutCopyingDiagnostics" classname="com.dearded.spektralab.LocalizationUiTest" time="3.488"/>
+  <testcase name="settingSwitchesBothWaysAndRetainsTheOpenEdit" classname="com.dearded.spektralab.LocalizationUiTest" time="2.187"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

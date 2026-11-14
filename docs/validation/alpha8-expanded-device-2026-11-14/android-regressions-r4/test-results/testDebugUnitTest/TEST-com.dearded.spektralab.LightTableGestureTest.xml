@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableGestureTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-14T16:21:33.057Z" hostname="runnervm8axu0" time="8.364">
+  <properties/>
+  <testcase name="nextTapCanClearSelectionThenOpenThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="4.937"/>
+  <testcase name="longPressDragSelectsAcrossRows" classname="com.dearded.spektralab.LightTableGestureTest" time="0.424"/>
+  <testcase name="longPressFirstRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.436"/>
+  <testcase name="longPressSecondRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.295"/>
+  <testcase name="crossRowDragSurvivesTheSelectionRecomposition" classname="com.dearded.spektralab.LightTableGestureTest" time="0.688"/>
+  <testcase name="shortTapStillOpensThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.28"/>
+  <testcase name="longPressNearBottomKeepsTheTouchedRow" classname="com.dearded.spektralab.LightTableGestureTest" time="0.374"/>
+  <testcase name="normalScrollingResumesAfterLongPressRelease" classname="com.dearded.spektralab.LightTableGestureTest" time="0.929"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

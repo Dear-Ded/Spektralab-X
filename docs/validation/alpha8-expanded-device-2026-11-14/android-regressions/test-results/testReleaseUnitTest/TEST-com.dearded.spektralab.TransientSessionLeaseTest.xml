@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.TransientSessionLeaseTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T15:41:32.987Z" hostname="runnervm8axu0" time="0.11">
+  <properties/>
+  <testcase name="eitherDispatcherWaitsUntilTheOtherNativeLifetimeEnds" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.025"/>
+  <testcase name="peakSamplingExcludesWaitingAndFinishesAfterRetryCleanupBeforeNextCandidate" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.028"/>
+  <testcase name="exportExceptionReleasesNativeBeforeCandidateStarts" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.009"/>
+  <testcase name="cancellationOnNativeReturnClosesCandidateBeforeExportEnters" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.011"/>
+  <testcase name="committedCandidateRetiresOldHandleBeforeExportEnters" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.011"/>
+  <testcase name="candidateMetadataFailureClosesCandidateBeforeNextAdmission" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.015"/>
+  <testcase name="cancelledWaiterDoesNotAllocateOrReleaseTheHoldersLease" classname="com.dearded.spektralab.TransientSessionLeaseTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

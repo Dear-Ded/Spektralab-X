@@ -1,0 +1,118 @@
+{
+  "files": [
+    {
+      "name": "Spektralab-X_20261114_231802_310.jpg",
+      "bytes": 80742,
+      "sha256": "314d69bedef22218c8691b0d3e727b10d8d2fb1fc25c6e7c5176e72976070e1d",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "File:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "File:ImageHeight": 768,
+        "ExifIFD:ExifImageWidth": 1024,
+        "ExifIFD:ExifImageHeight": 768,
+        "File:BitsPerSample": 8,
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      },
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_231814_431.tif",
+      "bytes": 3579058,
+      "sha256": "2c0f584f241c1128a2ec0c7c116db67fbdc5b2383b02848669a9e799db10133b",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "IFD0:BitsPerSample": "16 16 16",
+        "ICC_Profile:ProfileDescription": "sRGB built-in"
+      },
+      "decodedBytes": 4718592,
+      "rawPixelSha256": "058537e1ae8efbb0a0ee28c88687bc719ed77228a7b36b26aabc8cf58491ab6a",
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_231822_829.heic",
+      "bytes": 12980,
+      "sha256": "6d5fcc8c7574ab3bb1678444fefde01f320c831026774bbe626cfd44d54710c9",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "File:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "File:ImageHeight": 768,
+        "ExifIFD:ExifImageWidth": 1024,
+        "ExifIFD:ExifImageHeight": 768
+      },
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_231832_734.jpg",
+      "bytes": 80742,
+      "sha256": "314d69bedef22218c8691b0d3e727b10d8d2fb1fc25c6e7c5176e72976070e1d",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "File:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "File:ImageHeight": 768,
+        "ExifIFD:ExifImageWidth": 1024,
+        "ExifIFD:ExifImageHeight": 768,
+        "File:BitsPerSample": 8,
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer"
+      },
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_231840_540.tif",
+      "bytes": 3579058,
+      "sha256": "2c0f584f241c1128a2ec0c7c116db67fbdc5b2383b02848669a9e799db10133b",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "IFD0:BitsPerSample": "16 16 16",
+        "ICC_Profile:ProfileDescription": "sRGB built-in"
+      },
+      "decodedBytes": 4718592,
+      "rawPixelSha256": "058537e1ae8efbb0a0ee28c88687bc719ed77228a7b36b26aabc8cf58491ab6a",
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    },
+    {
+      "name": "Spektralab-X_20261114_231850_606.heic",
+      "bytes": 12980,
+      "sha256": "6d5fcc8c7574ab3bb1678444fefde01f320c831026774bbe626cfd44d54710c9",
+      "metadata": {
+        "IFD0:ImageWidth": 1024,
+        "File:ImageWidth": 1024,
+        "IFD0:ImageHeight": 768,
+        "File:ImageHeight": 768,
+        "ExifIFD:ExifImageWidth": 1024,
+        "ExifIFD:ExifImageHeight": 768
+      },
+      "decodedDimensions": [
+        1024,
+        768
+      ]
+    }
+  ],
+  "sameFormatRepeatByteIdentical": true,
+  "largeFixture": {
+    "name": "spektralab-a8-chart-6000.png",
+    "width": 6000,
+    "height": 4000,
+    "bytes": 82105,
+    "sha256": "a3ee36243aa6525587abc27667c92030f0717050a634baeede5f14b1fb754f46"
+  }
+}
