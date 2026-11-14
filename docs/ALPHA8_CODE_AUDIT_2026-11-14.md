@@ -109,5 +109,7 @@ or persistent credential was created.
 
 The fixed HEIF metadata, Chinese/English switching after process death, and
 the final candidate's device installation still require a connected phone.
+The [goal acceptance audit](ALPHA8_DEVICE_ACCEPTANCE_2026-11-14.md) maps each
+requirement to its existing evidence and lists the unexecuted phone cases.
 Existing user data and the two unrelated untracked worktree entries are
 preserved. Private device logs and queue/history screenshots are not uploaded.

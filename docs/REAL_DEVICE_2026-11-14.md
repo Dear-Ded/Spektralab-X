@@ -2,7 +2,8 @@
 
 Status: baseline testing completed on the installed official Alpha 7. The phone
 was disconnected by the user after capture. New source changes have not been
-installed or verified on the phone. The English-language feature is still in progress.
+installed or verified on the phone. Language implementation and cloud checks
+are complete; candidate language acceptance on the phone remains pending.
 
 ## Device and package
 
