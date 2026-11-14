@@ -1,13 +1,18 @@
 package com.dearded.spektralab
 
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
@@ -26,11 +31,11 @@ class LightTableGestureTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Suppress("UNCHECKED_CAST")
-    private fun show(): Pair<LightTableViewModel, () -> Int> {
+    private fun show(count: Int = 9): Pair<LightTableViewModel, () -> Int> {
         AppLocale.select(compose.activity, UiLanguage.CHINESE)
         val store = FrameStore.of(compose.activity)
         FrameStore::class.java.getDeclaredField("loaded").apply { isAccessible = true }.setBoolean(store, true)
-        val frames = (0..8).map { i ->
+        val frames = (0 until count).map { i ->
             Frame("gesture-$i", "file:///gesture-$i.jpg", "gesture-$i.jpg", 100, 0,
                 "image/jpeg", false, 160, 100)
         }
@@ -40,7 +45,15 @@ class LightTableGestureTest {
         var opened = 0
         compose.setContent {
             AppLocaleHost { SpektraTheme {
-                LightTableScreen(table, onBack = {}, onOpen = { _, _ -> opened++ }, onRolls = {})
+                SharedTransitionLayout {
+                    val shared = this
+                    AnimatedContent(targetState = 0) { page ->
+                        check(page == 0)
+                        CompositionLocalProvider(LocalSharedScope provides shared, LocalNavScope provides this) {
+                            LightTableScreen(table, onBack = {}, onOpen = { _, _ -> opened++ }, onRolls = {})
+                        }
+                    }
+                }
             } }
         }
         compose.waitForIdle()
@@ -108,5 +121,38 @@ class LightTableGestureTest {
         compose.onNodeWithContentDescription("gesture-2.jpg").performTouchInput { click() }
         compose.waitForIdle()
         assertEquals(1, opened())
+    }
+
+    @Test fun crossRowDragSurvivesTheSelectionRecomposition() {
+        val (table, opened) = show(60)
+        val start = compose.onNodeWithContentDescription("gesture-2.jpg").fetchSemanticsNode().boundsInRoot.center
+        val end = compose.onNodeWithContentDescription("gesture-3.jpg").fetchSemanticsNode().boundsInRoot.center
+        compose.onRoot().performTouchInput {
+            down(start)
+            advanceEventTime(800)
+            moveTo(start)
+        }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2"), table.state.value.selection)
+        repeat(12) { i ->
+            compose.onRoot().performTouchInput { moveTo(start + (end - start) * ((i + 1) / 12f)) }
+            compose.waitForIdle()
+        }
+        compose.onRoot().performTouchInput { up() }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2", "gesture-3"), table.state.value.selection)
+        assertEquals(0, opened())
+    }
+
+    @Test fun normalScrollingResumesAfterLongPressRelease() {
+        val (table, _) = show(60)
+        compose.onNodeWithContentDescription("gesture-2.jpg").performTouchInput { longClick() }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2"), table.state.value.selection)
+        compose.onRoot().performTouchInput {
+            swipe(Offset(centerX, height * 0.8f), Offset(centerX, height * 0.25f), 400)
+        }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("gesture-0.jpg").assertIsNotDisplayed()
     }
 }

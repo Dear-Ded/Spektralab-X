@@ -261,6 +261,9 @@ private fun FrameGrid(
         LazyVerticalGrid(
             columns = GridCells.Fixed(state.columns),
             state = gridState,
+            // The grid's vertical scroll recognizer must not take an active drag selection.
+            // Edge autoscroll still uses gridState.scrollBy directly.
+            userScrollEnabled = !dragSelecting,
             horizontalArrangement = Arrangement.spacedBy(gap),
             verticalArrangement = Arrangement.spacedBy(gap),
             contentPadding = PaddingValues(start = gap, end = gap, top = top, bottom = bottom),
