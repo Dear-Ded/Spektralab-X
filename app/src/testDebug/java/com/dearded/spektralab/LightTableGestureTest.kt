@@ -144,6 +144,58 @@ class LightTableGestureTest {
         assertEquals(0, opened())
     }
 
+    @Test fun firstDragEventCanCrossTheScrollTouchSlop() {
+        val (table, opened) = show()
+        val start = compose.onNodeWithContentDescription("gesture-2.jpg").fetchSemanticsNode().boundsInRoot.center
+        val end = compose.onNodeWithContentDescription("gesture-3.jpg").fetchSemanticsNode().boundsInRoot.center
+        compose.onRoot().performTouchInput {
+            down(start)
+            advanceEventTime(800)
+            moveTo(end)
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2", "gesture-3"), table.state.value.selection)
+        assertEquals(0, opened())
+    }
+
+    @Test fun firstUpwardDragEventCanCrossTheScrollTouchSlop() {
+        val (table, opened) = show()
+        val start = compose.onNodeWithContentDescription("gesture-3.jpg").fetchSemanticsNode().boundsInRoot.center
+        val end = compose.onNodeWithContentDescription("gesture-2.jpg").fetchSemanticsNode().boundsInRoot.center
+        compose.onRoot().performTouchInput {
+            down(start)
+            advanceEventTime(800)
+            moveTo(end)
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2", "gesture-3"), table.state.value.selection)
+        assertEquals(0, opened())
+    }
+
+    @Test fun secondFingerEndsDragSelectionAndCanZoomTheGrid() {
+        val (table, opened) = show()
+        val start = compose.onNodeWithContentDescription("gesture-2.jpg").fetchSemanticsNode().boundsInRoot.center
+        compose.onRoot().performTouchInput {
+            down(0, start)
+            advanceEventTime(800)
+            moveTo(0, start)
+        }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2"), table.state.value.selection)
+        compose.onRoot().performTouchInput {
+            down(1, start + Offset(40f, 0f))
+            moveTo(1, start + Offset(240f, 0f))
+            up(1)
+            up(0)
+        }
+        compose.waitForIdle()
+        assertEquals(setOf("gesture-2"), table.state.value.selection)
+        assertEquals(2, table.state.value.columns)
+        assertEquals(0, opened())
+    }
+
     @Test fun normalScrollingResumesAfterLongPressRelease() {
         val (table, _) = show(60)
         compose.onNodeWithContentDescription("gesture-2.jpg").performTouchInput { longClick() }

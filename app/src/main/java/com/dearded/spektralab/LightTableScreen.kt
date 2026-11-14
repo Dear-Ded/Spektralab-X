@@ -16,8 +16,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,7 +62,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -247,7 +246,6 @@ private fun FrameGrid(
 
     // Dragging near the top or bottom edge during a drag-select scrolls the grid.
     var autoScroll by remember { mutableFloatStateOf(0f) }
-    var dragSelecting by remember { mutableStateOf(false) }
     LaunchedEffect(autoScroll) {
         if (autoScroll != 0f) while (isActive) { gridState.scrollBy(autoScroll); delay(10) }
     }
@@ -273,10 +271,6 @@ private fun FrameGrid(
                         var zoom = 1f
                         do {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
-                            // A child click sees Main before the drag detector does: consume release first.
-                            if (dragSelecting) {
-                                event.changes.filter { it.previousPressed && !it.pressed }.forEach { it.consume() }
-                            }
                             if (event.changes.count { it.pressed } >= 2) {
                                 zoom *= event.calculateZoom()
                                 val cols = LightTableViewModel.COLUMNS
@@ -296,24 +290,22 @@ private fun FrameGrid(
                     }
                 }
                 .pointerInput(Unit) {
-                    var base = emptySet<String>()
-                    var start = -1
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = { at ->
-                            android.util.Log.i("SpkGridTrace", "start at=$at padding=${gridState.layoutInfo.beforeContentPadding} items=${gridState.layoutInfo.visibleItemsInfo.map { Triple(it.index, it.offset, it.size) }}")
-                            gridState.frameAt(at, currentIds, gap.toPx())?.let { i ->
-                                dragSelecting = true
-                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                start = i
-                                base = currentSelection
-                                table.selectRange(base, listOf(currentIds[i]))
-                            }
-                        },
-                        onDragEnd = { android.util.Log.i("SpkGridTrace", "end start=$start"); start = -1; autoScroll = 0f; dragSelecting = false },
-                        onDragCancel = { android.util.Log.i("SpkGridTrace", "cancel start=$start"); start = -1; autoScroll = 0f; dragSelecting = false },
-                        onDrag = { change, _ ->
-                            android.util.Log.i("SpkGridTrace", "move at=${change.position} start=$start hit=${gridState.frameAt(change.position, currentIds, gap.toPx())}")
-                            if (start >= 0) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val held = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
+                        val start = gridState.frameAt(held.position, currentIds, gap.toPx())
+                            ?: return@awaitEachGesture
+                        val base = currentSelection
+                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        table.selectRange(base, listOf(currentIds[start]))
+                        try {
+                            while (true) {
+                                // Claim the first movement before the grid's scroll recognizer sees it.
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                val change = event.changes.firstOrNull { it.id == held.id } ?: break
+                                if (event.changes.count { it.pressed } > 1 || change.isConsumed) break
+                                change.consume()
+                                if (!change.pressed) break
                                 val y = change.position.y
                                 val edge = 64.dp.toPx()
                                 autoScroll = when {
@@ -328,8 +320,10 @@ private fun FrameGrid(
                                     }
                                 }
                             }
-                        },
-                    )
+                        } finally {
+                            autoScroll = 0f
+                        }
+                    }
                 },
         ) {
             // The filters scroll away with the frames, as Google Photos' date pill does.
