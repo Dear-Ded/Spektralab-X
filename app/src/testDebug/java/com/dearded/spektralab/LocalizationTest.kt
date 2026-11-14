@@ -109,16 +109,22 @@ class LocalizationTest {
     }
 
     @Test fun activityBaseAttachmentDoesNotReadTheUninitializedTheme() {
+        var attachedConfiguration: Configuration? = null
         val unattached = object : ContextWrapper(context) {
             override fun getTheme(): android.content.res.Resources.Theme =
                 error("Activity theme is unavailable before attachment")
+            override fun createConfigurationContext(overrideConfiguration: Configuration): Context {
+                attachedConfiguration = Configuration(overrideConfiguration)
+                return super.createConfigurationContext(overrideConfiguration)
+            }
         }
         for (language in UiLanguage.entries) {
             AppLocale.select(context, language)
             val activity = MainActivity()
             MainActivity::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
                 .apply { isAccessible = true }.invoke(activity, unattached)
-            assertEquals(language.tag, activity.baseContext.resources.configuration.locales[0].toLanguageTag())
+            assertEquals(language.tag, attachedConfiguration!!.locales[0].toLanguageTag())
+            assertNotSame(unattached, activity.baseContext)
         }
     }
 
