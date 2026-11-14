@@ -75,12 +75,12 @@ class StyleImports(private val context: Context) {
             "json" -> FilmRecipe.MAX_DATA_BYTES.toLong()
             else -> PresetImport.MAX_XMP_BYTES.toLong()
         }
-        if (size > limit) throw ImportException("文件太大（超过 ${limit shr 20} MB）")
+        if (size > limit) throw ImportException(tr("文件太大（超过 {0} MB）", limit shr 20))
         val bytes = context.contentResolver.openInputStream(uri)?.use { SpkPackage.readBounded(it, limit, name) }
-            ?: throw ImportException("打不开这个文件")
-        if (bytes.isEmpty()) throw ImportException("文件是空的")
+            ?: throw ImportException(tr("打不开这个文件"))
+        if (bytes.isEmpty()) throw ImportException(tr("文件是空的"))
         val report = ImportReport()
-        val stem = PresetImport.stem(name).ifEmpty { "导入的风格" }
+        val stem = PresetImport.stem(name).ifEmpty { tr("导入的风格") }
         val latinHead = String(bytes, 0, minOf(bytes.size, 4096), Charsets.ISO_8859_1)
         return when {
             SpkPackage.isZip(bytes) -> fromPackage(SpkPackage.read(bytes, report, stem), name, catalog, report)
@@ -101,14 +101,14 @@ class StyleImports(private val context: Context) {
                 PresetImport.JsonKind.SPEKTRAFILM -> style(PresetImport.fromSpektrafilm(o, file, report), file, catalog, report)
                 PresetImport.JsonKind.FILM_RECIPE -> recipe(o, bytes.size, file, catalog, report)
                 PresetImport.JsonKind.FILM_DATA -> filmData(o, bytes.size, file, stem, catalog, report)
-                PresetImport.JsonKind.UNKNOWN -> throw ImportException("认不出这个 JSON：不是 .spklook、spektrafilm 预设、胶片方案或胶片数据")
+                PresetImport.JsonKind.UNKNOWN -> throw ImportException(tr("认不出这个 JSON：不是 .spklook、spektrafilm 预设、胶片方案或胶片数据"))
             }
         }
         if (PresetImport.looksLikeFujiRecipe(text)) {
             val look = PresetImport.fromFujiRecipe(text, stem, { id -> Style.ALL.firstOrNull { it.id == id }?.toSpkLook() }, report)
             return style(look, file, catalog, report)
         }
-        throw ImportException("不支持这种文件。可以导入 .spklook、.cube、HaldCLUT PNG、Lightroom XMP / DNG 预设、spektrafilm 预设、胶片方案、胶片数据和富士配方文本")
+        throw ImportException(tr("不支持这种文件。可以导入 .spklook、.cube、HaldCLUT PNG、Lightroom XMP / DNG 预设、spektrafilm 预设、胶片方案、胶片数据和富士配方文本"))
     }
 
     private fun fromPackage(pkg: SpkPackage, file: String, catalog: Catalog, report: ImportReport): PendingImport {
@@ -119,7 +119,7 @@ class StyleImports(private val context: Context) {
             try {
                 lutId = storeLut(CubeFile.parse(String(cube, Charsets.UTF_8)).toLut(report), look.lut!!.space)
             } catch (e: ImportException) {
-                report.ignored("lut.cube", e.message ?: "读不了")
+                report.ignored("lut.cube", e.message ?: tr("读不了"))
                 look = look.copy(lut = null)
             }
         }
@@ -129,9 +129,9 @@ class StyleImports(private val context: Context) {
     private fun fromCube(bytes: ByteArray, file: String, stem: String, catalog: Catalog, report: ImportReport): PendingImport {
         val cube = CubeFile.parse(String(bytes, Charsets.UTF_8))
         val lut = cube.toLut(report)
-        report.mapped("LUT", "${lut.size}³ 色表，放在冲印之后、调整之前")
+        report.mapped("LUT", tr("{0}³ 色表，放在冲印之后、调整之前", lut.size))
         val look = SpkLook(name = cube.title.ifBlank { stem }.take(60), lut = SpkLut(),
-            source = SpkSource("cube", file.take(120), "导入的 LUT"))
+            source = SpkSource("cube", file.take(120), tr("导入的 LUT")))
         return style(look, file, catalog, report, storeLut(lut, SpkLut.SPACE_SRGB))
     }
 
@@ -140,20 +140,20 @@ class StyleImports(private val context: Context) {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         val w = bounds.outWidth; val h = bounds.outHeight
-        if (HaldClut.level(w, h) == null) throw ImportException("图片 ${w}×$h 不是 HaldCLUT（边长须为 8、27、64…4096 的正方形）")
+        if (HaldClut.level(w, h) == null) throw ImportException(tr("图片 {0}×{1} 不是 HaldCLUT（边长须为 8、27、64…4096 的正方形）", w, h))
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply {
             inPreferredConfig = Bitmap.Config.ARGB_8888; inScaled = false; inPremultiplied = false
-        }) ?: throw ImportException("PNG 解码失败")
+        }) ?: throw ImportException(tr("PNG 解码失败"))
         val pixels = IntArray(w * h)
         try { bitmap.getPixels(pixels, 0, w, 0, 0, w, h) } finally { bitmap.recycle() }
         val lut = HaldClut.toLut(pixels, w, h, report)
-        report.mapped("HaldCLUT", "${lut.size}³ 色表，放在冲印之后、调整之前")
-        val look = SpkLook(name = stem.take(60), lut = SpkLut(), source = SpkSource("haldclut", file.take(120), "导入的 HaldCLUT"))
+        report.mapped("HaldCLUT", tr("{0}³ 色表，放在冲印之后、调整之前", lut.size))
+        val look = SpkLook(name = stem.take(60), lut = SpkLut(), source = SpkSource("haldclut", file.take(120), tr("导入的 HaldCLUT")))
         return style(look, file, catalog, report, storeLut(lut, SpkLut.SPACE_SRGB))
     }
 
     private fun recipe(o: JSONObject, size: Int, file: String, catalog: Catalog, report: ImportReport): PendingImport {
-        if (size > FilmRecipe.MAX_RECIPE_BYTES) throw ImportException("胶片方案超过 64 KB")
+        if (size > FilmRecipe.MAX_RECIPE_BYTES) throw ImportException(tr("胶片方案超过 64 KB"))
         val rec = FilmRecipe.parseRecipe(o, file, { id -> catalog.film(id) != null && !isAlias(id) }, { catalog.paper(it) != null }, report)
         val id = profiles.freeId(rec.id) { catalog.film(it) != null || catalog.paper(it) != null }
         val r = rec.copy(id = id)
@@ -161,20 +161,20 @@ class StyleImports(private val context: Context) {
     }
 
     private fun filmData(o: JSONObject, size: Int, file: String, stem: String, catalog: Catalog, report: ImportReport): PendingImport {
-        if (size > FilmRecipe.MAX_DATA_BYTES) throw ImportException("胶片数据超过 4 MB")
+        if (size > FilmRecipe.MAX_DATA_BYTES) throw ImportException(tr("胶片数据超过 4 MB"))
         val stage = FilmRecipe.validateData(o, report)
         val label = o.optJSONObject("info")?.optString("name").orEmpty().trim().ifEmpty { stem }.take(60)
         val id = profiles.freeId(FilmRecipe.stockId(label)) { catalog.film(it) != null || catalog.paper(it) != null }
         val engine = if (stage == "filming") SpkEngine(film = id) else SpkEngine(paper = id)
-        val look = SpkLook(name = label, category = "胶片方案", engine = engine, source = SpkSource("film-data", file.take(120), "导入的胶片数据"))
+        val look = SpkLook(name = label, category = tr("胶片方案"), engine = engine, source = SpkSource("film-data", file.take(120), tr("导入的胶片数据")))
         return PendingImport(file, ImportKind.FILM_DATA, look, "", report, id, FilmRecipe.storedData(o, id), stage)
     }
 
     /** A style whose stocks are checked against [catalog]: one this version lacks keeps the photo's own. */
     private fun style(look: SpkLook, file: String, catalog: Catalog, report: ImportReport, lutId: String = ""): PendingImport {
         var e = look.engine
-        e.film?.let { if (catalog.film(it) == null) { report.ignored("engine.film", "胶片“$it”不在当前版本里，套用时沿用照片的胶片"); e = e.copy(film = null) } }
-        e.paper?.let { if (catalog.paper(it) == null) { report.ignored("engine.paper", "相纸“$it”不在当前版本里，套用时沿用照片的相纸"); e = e.copy(paper = null) } }
+        e.film?.let { if (catalog.film(it) == null) { report.ignored("engine.film", tr("胶片“{0}”不在当前版本里，套用时沿用照片的胶片", it)); e = e.copy(film = null) } }
+        e.paper?.let { if (catalog.paper(it) == null) { report.ignored("engine.paper", tr("相纸“{0}”不在当前版本里，套用时沿用照片的相纸", it)); e = e.copy(paper = null) } }
         return PendingImport(file, ImportKind.STYLE, look.copy(engine = e, lut = if (lutId.isEmpty()) null else look.lut), lutId, report)
     }
 
@@ -188,7 +188,7 @@ class StyleImports(private val context: Context) {
     }
 
     private fun nameAndSize(uri: Uri): Pair<String, Long> {
-        var name = uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifEmpty { "导入" }
+        var name = uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifEmpty { tr("导入") }
         var size = -1L
         runCatching {
             context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use { c ->
@@ -247,10 +247,10 @@ class StyleImports(private val context: Context) {
         val p = previous?.resolved()
         if (p != null && p.lut == r.lut && (r.lut.isEmpty() || p.lutStrength == r.lutStrength)) return
         val id = r.lut.takeIf { it.isNotEmpty() && r.lutStrength > 0 }
-        val table = id?.let { luts.load(it) ?: throw EngineException("风格的 LUT 文件缺失或损坏，请重新导入风格") }
+        val table = id?.let { luts.load(it) ?: throw EngineException(tr("风格的 LUT 文件缺失或损坏，请重新导入风格")) }
         val accepted = if (table == null) NativeEngine.setLut(handle, null, 0, 0f)
         else NativeEngine.setLut(handle, table.data, table.size, r.lutStrength.toFloat())
-        if (!accepted) throw EngineException("应用 LUT 失败：${NativeEngine.lastError()}")
+        if (!accepted) throw EngineException(tr("应用 LUT 失败：{0}", NativeEngine.lastError()))
     }
 
     // --- exporting -------------------------------------------------------------
@@ -263,9 +263,9 @@ class StyleImports(private val context: Context) {
     fun exportLook(edit: Edit, name: String, thumbJpeg: ByteArray?, scope: StyleScope = StyleScope.COMBINATION): File {
         val r = edit.look.resolved()
         val original = r.lut.takeIf { it.isNotEmpty() && scope != StyleScope.FILM }?.let {
-            luts.original(it) ?: throw ImportException("风格的 LUT 文件缺失或损坏，请重新导入后再分享")
+            luts.original(it) ?: throw ImportException(tr("风格的 LUT 文件缺失或损坏，请重新导入后再分享"))
         }
-        val title = name.trim().ifEmpty { "我的风格" }.take(60)
+        val title = name.trim().ifEmpty { tr("我的风格") }.take(60)
         val look = edit.savedStyle(title, scope, original?.second ?: SpkLut.SPACE_SRGB)
         val dir = File(context.cacheDir, "share").apply { deleteRecursively(); mkdirs() }
         val file = File(dir, safeName(title) + ".spklook")
@@ -320,7 +320,7 @@ fun SpkLook.toStyle(id: String, edit: Edit, lutId: String): Style {
         glare = e.glare ?: if (edit.glareActive) edit.glareAmount else 0.0,
         look = layer2.copy(lut = lutId, lutStrength = if (lutId.isEmpty()) 1.0 else lut?.strength ?: 1.0),
         inspiredBy = source?.note?.takeIf { it.isNotBlank() }
-            ?: author.takeIf { it.isNotBlank() }?.let { "作者 $it" } ?: "导入的风格",
+            ?: author.takeIf { it.isNotBlank() }?.let { tr("作者 {0}", it) } ?: tr("导入的风格"),
         keepFilmState = e.film == null,
         scope = scope, engineOptions = e,
     )

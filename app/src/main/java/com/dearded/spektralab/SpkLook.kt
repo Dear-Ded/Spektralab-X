@@ -143,22 +143,22 @@ data class SpkLook(
         /** [o] read as look.json; [fallbackName] when it names nothing. */
         fun fromJson(o: JSONObject, report: ImportReport, fallbackName: String): SpkLook {
             val format = o.optString("format", FORMAT)
-            if (format != FORMAT) throw ImportException("不是 .spklook 文件（format 为 “${format.take(40)}”）")
+            if (format != FORMAT) throw ImportException(tr("不是 .spklook 文件（format 为 “{0}”）", format.take(40)))
             val version = o.optInt("version", VERSION)
-            if (version > VERSION) report.ignored("version", "文件是第 $version 版，本应用只认识第 $VERSION 版，新字段可能没读到")
+            if (version > VERSION) report.ignored("version", tr("文件是第 {0} 版，本应用只认识第 {1} 版，新字段可能没读到", version, VERSION))
             val r = Fields(report)
             r.unknown(o, "", TOP)
             val scope = if (!o.has("scope")) StyleScope.COMBINATION else StyleScope.of(o.optString("scope"))
-                ?: throw ImportException("不认识风格的应用范围，请更新应用后重试")
+                ?: throw ImportException(tr("不认识风格的应用范围，请更新应用后重试"))
             val lut = o.optJSONObject("lut")?.let { l ->
                 r.unknown(l, "lut", setOf("file", "strength", "space"))
                 val file = l.optString("file", LUT_ENTRY)
-                if (file != LUT_ENTRY) report.ignored("lut.file", "只认 $LUT_ENTRY，“${file.take(40)}”不会读")
+                if (file != LUT_ENTRY) report.ignored("lut.file", tr("只认 {0}，“{1}”不会读", LUT_ENTRY, file.take(40)))
                 val space = l.optString("space", SpkLut.SPACE_SRGB).lowercase()
                 SpkLut(
                     strength = r.num(l, "strength", "lut", 0.0, 1.0, 1.0),
                     space = if (space == SpkLut.SPACE_PROPHOTO) space else {
-                        if (space != SpkLut.SPACE_SRGB) report.ignored("lut.space", "不认识“${space.take(20)}”，按 sRGB 处理")
+                        if (space != SpkLut.SPACE_SRGB) report.ignored("lut.space", tr("不认识“{0}”，按 sRGB 处理", space.take(20)))
                         SpkLut.SPACE_SRGB
                     },
                 )
@@ -186,7 +186,7 @@ data class SpkLook(
                 if (!e.has(key) || e.isNull(key)) return null
                 val id = e.optString(key)
                 if (STOCK.matches(id)) return id
-                r.report.ignored("engine.$key", "不是有效的胶片 id")
+                r.report.ignored("engine.$key", tr("不是有效的胶片 id"))
                 return null
             }
             return SpkEngine(
@@ -194,7 +194,7 @@ data class SpkLook(
                 exposureEv = r.opt(e, "exposure_ev", "engine", -4.0, 4.0),
                 sceneCurve = if (!e.has("scene_curve") || e.isNull("scene_curve")) null else try {
                     SceneCurve.fromJson(e.get("scene_curve"))
-                } catch (_: Exception) { throw ImportException("engine.scene_curve 不是有效的胶片前曲线") },
+                } catch (_: Exception) { throw ImportException(tr("engine.scene_curve 不是有效的胶片前曲线")) },
                 printExposure = r.opt(e, "print_exposure", "engine", 0.2, 3.0),
                 yCc = r.opt(e, "y_cc", "engine", -Edit.FILTER_SHIFT_CC, Edit.FILTER_SHIFT_CC),
                 mCc = r.opt(e, "m_cc", "engine", -Edit.FILTER_SHIFT_CC, Edit.FILTER_SHIFT_CC),
@@ -276,7 +276,7 @@ data class SpkLook(
                     written.optJSONArray(0)?.let { it.optDouble(0) == 0.0 && it.optDouble(1) == 0.0 } == true &&
                     written.optJSONArray(1)?.let { it.optDouble(0) == 1.0 && it.optDouble(1) == 1.0 } == true
                 if (c.has(key) && set[i].isIdentity && !plain)
-                    r.report.ignored("layer2.curves.$key", "应为 2–256 个 [x, y]，x 严格递增，都在 0–1")
+                    r.report.ignored("layer2.curves.$key", tr("应为 2–256 个 [x, y]，x 严格递增，都在 0–1"))
             }
             return set
         }
@@ -334,31 +334,31 @@ data class SpkLook(
 internal class Fields(val report: ImportReport) {
     fun bool(o: JSONObject, key: String, path: String): Boolean? {
         if (!o.has(key) || o.isNull(key)) return null
-        return (o.opt(key) as? Boolean) ?: run { report.ignored(join(path, key), "应为布尔值"); null }
+        return (o.opt(key) as? Boolean) ?: run { report.ignored(join(path, key), tr("应为布尔值")); null }
     }
 
     fun choice(o: JSONObject, key: String, allowed: Set<String>): String? {
         if (!o.has(key) || o.isNull(key)) return null
         return (o.opt(key) as? String)?.takeIf { it in allowed }
-            ?: run { report.ignored("engine.$key", "不是有效的选项"); null }
+            ?: run { report.ignored("engine.$key", tr("不是有效的选项")); null }
     }
 
     fun unknown(o: JSONObject, path: String, known: Set<String>) {
-        for (k in o.keys()) if (k !in known) report.ignored(join(path, k), "不认识的字段")
+        for (k in o.keys()) if (k !in known) report.ignored(join(path, k), tr("不认识的字段"))
     }
 
     fun obj(o: JSONObject, key: String, path: String = ""): JSONObject? {
         if (!o.has(key) || o.isNull(key)) return null
-        return o.optJSONObject(key) ?: run { report.ignored(join(path, key), "应为对象"); null }
+        return o.optJSONObject(key) ?: run { report.ignored(join(path, key), tr("应为对象")); null }
     }
 
     /** [key] clamped to lo..hi, or null when absent. */
     fun opt(o: JSONObject, key: String, path: String, lo: Double, hi: Double): Double? {
         if (!o.has(key) || o.isNull(key)) return null
         val raw = o.optDouble(key, Double.NaN)
-        if (!raw.isFinite()) { report.ignored(join(path, key), "不是数字"); return null }
+        if (!raw.isFinite()) { report.ignored(join(path, key), tr("不是数字")); return null }
         val v = raw.coerceIn(lo, hi)
-        if (v != raw) report.approximated(join(path, key), "${fmt(raw)} 超出范围，已夹到 ${fmt(lo)}…${fmt(hi)}")
+        if (v != raw) report.approximated(join(path, key), tr("{0} 超出范围，已夹到 {1}…{2}", fmt(raw), fmt(lo), fmt(hi)))
         return v
     }
 
@@ -408,11 +408,11 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
          * written out by it, so a hostile entry name cannot reach the file system.
          */
         fun read(bytes: ByteArray, report: ImportReport, fallbackName: String): SpkPackage {
-            if (bytes.size > MAX_FILE) throw ImportException("文件太大（超过 ${MAX_FILE shr 20} MB）")
+            if (bytes.size > MAX_FILE) throw ImportException(tr("文件太大（超过 {0} MB）", MAX_FILE shr 20))
             if (!isZip(bytes)) {
-                if (bytes.size > MAX_LOOK) throw ImportException("look.json 太大（超过 ${MAX_LOOK shr 10} KB）")
+                if (bytes.size > MAX_LOOK) throw ImportException(tr("look.json 太大（超过 {0} KB）", MAX_LOOK shr 10))
                 val look = SpkLook.fromJson(parseJson(bytes, SpkLook.LOOK_ENTRY), report, fallbackName)
-                if (look.lut != null) report.ignored("lut", "单独的 look.json 带不了 LUT，需要用 .spklook 压缩包")
+                if (look.lut != null) report.ignored("lut", tr("单独的 look.json 带不了 LUT，需要用 .spklook 压缩包"))
                 return SpkPackage(look.copy(lut = null))
             }
             val entries = HashMap<String, ByteArray>()
@@ -421,11 +421,11 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
                 while (true) {
                     // Android 14+ refuses names with ".." or a leading "/" here.
                     val e = try { zip.nextEntry } catch (x: ZipException) {
-                        throw ImportException("压缩包损坏或含有不安全的路径")
+                        throw ImportException(tr("压缩包损坏或含有不安全的路径"))
                     } catch (x: IllegalArgumentException) {
-                        throw ImportException("压缩包里的文件名无法识别")
+                        throw ImportException(tr("压缩包里的文件名无法识别"))
                     } ?: break
-                    if (++count > MAX_ENTRIES) throw ImportException("压缩包条目太多（超过 $MAX_ENTRIES 个）")
+                    if (++count > MAX_ENTRIES) throw ImportException(tr("压缩包条目太多（超过 {0} 个）", MAX_ENTRIES))
                     val name = e.name
                     val limit = when (name) {
                         SpkLook.LOOK_ENTRY -> MAX_LOOK
@@ -435,17 +435,17 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
                     }
                     when {
                         e.isDirectory -> {}
-                        limit < 0 -> report.ignored(name.take(80), "不是 .spklook 的条目，未读取")
-                        name in entries -> report.ignored(name, "重复的条目，只用第一个")
+                        limit < 0 -> report.ignored(name.take(80), tr("不是 .spklook 的条目，未读取"))
+                        name in entries -> report.ignored(name, tr("重复的条目，只用第一个"))
                         else -> entries[name] = readBounded(zip, limit, name)
                     }
                 }
             }
-            val lookBytes = entries[SpkLook.LOOK_ENTRY] ?: throw ImportException("压缩包里没有 look.json")
+            val lookBytes = entries[SpkLook.LOOK_ENTRY] ?: throw ImportException(tr("压缩包里没有 look.json"))
             var look = SpkLook.fromJson(parseJson(lookBytes, SpkLook.LOOK_ENTRY), report, fallbackName)
             val lut = entries[SpkLook.LUT_ENTRY]
             if (look.lut != null && lut == null) {
-                report.ignored("lut", "压缩包里没有 ${SpkLook.LUT_ENTRY}")
+                report.ignored("lut", tr("压缩包里没有 {0}", SpkLook.LUT_ENTRY))
                 look = look.copy(lut = null)
             } else if (look.lut == null && lut != null) {
                 look = look.copy(lut = SpkLut())
@@ -462,7 +462,7 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
                 val n = input.read(buf)
                 if (n < 0) break
                 total += n
-                if (total > limit) throw ImportException("$what 太大（超过 ${sizeText(limit)}）")
+                if (total > limit) throw ImportException(tr("{0} 太大（超过 {1}）", what, sizeText(limit)))
                 out.write(buf, 0, n)
             }
             return out.toByteArray()
@@ -471,7 +471,7 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
         fun parseJson(bytes: ByteArray, what: String): JSONObject {
             var text = String(bytes, Charsets.UTF_8)
             if (text.startsWith("\uFEFF")) text = text.substring(1)
-            return try { JSONObject(text) } catch (x: JSONException) { throw ImportException("$what 不是有效的 JSON") }
+            return try { JSONObject(text) } catch (x: JSONException) { throw ImportException(tr("{0} 不是有效的 JSON", what)) }
         }
 
         private fun sizeText(bytes: Long) = if (bytes >= 1L shl 20) "${bytes shr 20} MB" else "${bytes shr 10} KB"

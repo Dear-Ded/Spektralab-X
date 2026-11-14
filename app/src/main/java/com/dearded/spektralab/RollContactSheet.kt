@@ -174,7 +174,7 @@ object RollContactSheet {
         val top = g.margin + g.header * 0.40f
         canvas.drawText(roll.title, g.margin.toFloat(), top, title)
         canvas.drawText(roll.edgeLine, g.margin.toFloat(), top + g.header * 0.34f, line)
-        val mark = "Spektralab-X · 印样"
+        val mark = tr("Spektralab-X · 印样")
         canvas.drawText(mark, g.width - g.margin - line.measureText(mark), top + g.header * 0.34f, line)
         // One continuous strip per row, as negatives laid on the paper.
         val strip = Paint().apply { color = Strip }
@@ -266,7 +266,7 @@ object RollContactSheet {
         val dir = File(app.cacheDir, "contact").apply { mkdirs() }
         val part = File(dir, "$name.part")
         try {
-            part.outputStream().use { if (!sheet.compress(Bitmap.CompressFormat.JPEG, 92, it)) throw EngineException("印样编码失败") }
+            part.outputStream().use { if (!sheet.compress(Bitmap.CompressFormat.JPEG, 92, it)) throw EngineException(tr("印样编码失败")) }
             MediaSaver.checkJpeg(part, sheet.width, sheet.height)
             MediaSaver.saveFile(app, part, name, "image/jpeg", onCreated)
             name

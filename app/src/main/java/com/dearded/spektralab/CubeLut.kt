@@ -102,11 +102,11 @@ class CubeFile(
         val plainDomain = threeDMin.all { it == 0f } && threeDMax.all { it == 1f }
         if (threeD != null && oneD == null && plainDomain && threeD.size <= Lut3.NATIVE_SIDE) return threeD
         val side = when {
-            threeD == null -> Lut3.EXPAND_SIDE.also { report.mapped("1D LUT", "展开成 ${it}³ 的 3D 表") }
-            threeD.size > Lut3.NATIVE_SIDE -> Lut3.NATIVE_SIDE.also { report.approximated("3D LUT", "边长 ${threeD.size} 重采样到 $it") }
+            threeD == null -> Lut3.EXPAND_SIDE.also { report.mapped("1D LUT", tr("展开成 {0}³ 的 3D 表", it)) }
+            threeD.size > Lut3.NATIVE_SIDE -> Lut3.NATIVE_SIDE.also { report.approximated("3D LUT", tr("边长 {0} 重采样到 {1}", threeD.size, it)) }
             else -> threeD.size
         }
-        if (oneD != null && threeD != null) report.mapped("1D 整形曲线", "并入 3D 表")
+        if (oneD != null && threeD != null) report.mapped(tr("1D 整形曲线"), tr("并入 3D 表"))
         val out = FloatArray(side * side * side * 3)
         val px = FloatArray(3)
         val step = 1f / (side - 1)
@@ -155,21 +155,21 @@ class CubeFile(
             var oneD: FloatArray? = null; var threeD: FloatArray? = null
             var filled1 = 0; var filled3 = 0
             var line = 0
-            fun fail(why: String): Nothing = throw ImportException(".cube 第 $line 行：$why")
+            fun fail(why: String): Nothing = throw ImportException(tr(".cube 第 {0} 行：{1}", line, why))
             fun triple(parts: List<String>, from: Int): FloatArray {
-                if (parts.size < from + 3) fail("需要三个数")
-                return FloatArray(3) { parts[from + it].toFloatOrNull()?.takeIf(Float::isFinite) ?: fail("“${parts[from + it]}”不是数") }
+                if (parts.size < from + 3) fail(tr("需要三个数"))
+                return FloatArray(3) { parts[from + it].toFloatOrNull()?.takeIf(Float::isFinite) ?: fail(tr("“{0}”不是数", parts[from + it])) }
             }
             fun range(parts: List<String>): Pair<Float, Float> {
-                if (parts.size < 3) fail("需要两个数")
-                fun num(s: String) = s.toFloatOrNull()?.takeIf(Float::isFinite) ?: fail("“${s.take(20)}”不是数")
+                if (parts.size < 3) fail(tr("需要两个数"))
+                fun num(s: String) = s.toFloatOrNull()?.takeIf(Float::isFinite) ?: fail(tr("“{0}”不是数", s.take(20)))
                 return num(parts[1]) to num(parts[2])
             }
             var domainMin: FloatArray? = null; var domainMax: FloatArray? = null
             var range1 = false; var range3 = false
             fun size(parts: List<String>, lo: Int, hi: Int): Int {
-                val n = parts.getOrNull(1)?.toIntOrNull() ?: fail("缺少尺寸")
-                if (n !in lo..hi) fail("尺寸 $n 不在 $lo…$hi")
+                val n = parts.getOrNull(1)?.toIntOrNull() ?: fail(tr("缺少尺寸"))
+                if (n !in lo..hi) fail(tr("尺寸 {0} 不在 {1}…{2}", n, lo, hi))
                 return n
             }
             for (raw in text.lineSequence()) {
@@ -184,16 +184,16 @@ class CubeFile(
                     when {
                         oneD != null && filled1 < size1 -> { v.copyInto(oneD, filled1 * 3); filled1++ }
                         threeD != null && filled3 < size3 * size3 * size3 -> { v.copyInto(threeD, filled3 * 3); filled3++ }
-                        else -> fail("数据比声明的多")
+                        else -> fail(tr("数据比声明的多"))
                     }
                     continue
                 }
                 val parts = s.split(WS)
                 when (parts[0].uppercase()) {
                     "TITLE" -> title = s.substringAfter(parts[0]).trim().trim('"').take(120)
-                    "LUT_1D_SIZE" -> { if (oneD != null) fail("重复的 LUT_1D_SIZE"); size1 = size(parts, 2, MAX_1D); oneD = FloatArray(size1 * 3) }
+                    "LUT_1D_SIZE" -> { if (oneD != null) fail(tr("重复的 LUT_1D_SIZE")); size1 = size(parts, 2, MAX_1D); oneD = FloatArray(size1 * 3) }
                     "LUT_3D_SIZE" -> {
-                        if (threeD != null) fail("重复的 LUT_3D_SIZE")
+                        if (threeD != null) fail(tr("重复的 LUT_3D_SIZE"))
                         size3 = size(parts, 2, Lut3.MAX_SIDE); threeD = FloatArray(size3 * size3 * size3 * 3)
                     }
                     // Adobe's per-channel domain: an Adobe file has one table, so it goes to
@@ -205,19 +205,19 @@ class CubeFile(
                     "LUT_3D_INPUT_RANGE" -> { range(parts).let { (a, b) -> min3.fill(a); max3.fill(b) }; range3 = true }
                     // Video-range flags: the data is still read; the report says the range is assumed full.
                     "LUT_IN_VIDEO_RANGE", "LUT_OUT_VIDEO_RANGE" -> Unit
-                    else -> fail("不认识的关键字 ${parts[0].take(40)}")
+                    else -> fail(tr("不认识的关键字 {0}", parts[0].take(40)))
                 }
             }
-            if (oneD == null && threeD == null) throw ImportException(".cube 里没有 LUT_1D_SIZE 或 LUT_3D_SIZE")
-            if (oneD != null && filled1 != size1) throw ImportException(".cube 的 1D 表只有 $filled1 / $size1 行")
-            if (threeD != null && filled3 != size3 * size3 * size3) throw ImportException(".cube 的 3D 表只有 $filled3 / ${size3 * size3 * size3} 行")
+            if (oneD == null && threeD == null) throw ImportException(tr(".cube 里没有 LUT_1D_SIZE 或 LUT_3D_SIZE"))
+            if (oneD != null && filled1 != size1) throw ImportException(tr(".cube 的 1D 表只有 {0} / {1} 行", filled1, size1))
+            if (threeD != null && filled3 != size3 * size3 * size3) throw ImportException(tr(".cube 的 3D 表只有 {0} / {1} 行", filled3, size3 * size3 * size3))
             // DOMAIN_* belongs to the 3D table when there is one (a shaper then has its own
             // range or none), otherwise to the 1D curve; an explicit *_INPUT_RANGE wins.
             val domainFor1 = threeD == null
             domainMin?.let { if (domainFor1) { if (!range1) it.copyInto(min1) } else if (!range3) it.copyInto(min3) }
             domainMax?.let { if (domainFor1) { if (!range1) it.copyInto(max1) } else if (!range3) it.copyInto(max3) }
             for (k in 0 until 3) {
-                if (max1[k] <= min1[k] || max3[k] <= min3[k]) throw ImportException(".cube 的定义域上限不大于下限")
+                if (max1[k] <= min1[k] || max3[k] <= min3[k]) throw ImportException(tr(".cube 的定义域上限不大于下限"))
             }
             return CubeFile(title, oneD, size1, min1, max1, threeD?.let { Lut3(size3, it) }, min3, max3)
         }
@@ -242,7 +242,7 @@ object HaldClut {
      * pixel i holds the entry r + g N + b N^2, N = L^2.
      */
     fun toLut(pixels: IntArray, width: Int, height: Int, report: ImportReport): Lut3 {
-        val l = level(width, height) ?: throw ImportException("图片 ${width}×$height 不是 HaldCLUT（边长须为 8、27、64…4096）")
+        val l = level(width, height) ?: throw ImportException(tr("图片 {0}×{1} 不是 HaldCLUT（边长须为 8、27、64…4096）", width, height))
         val n = l * l
         require(pixels.size == width * height)
         fun channel(p: Int, k: Int) = ((p shr (16 - 8 * k)) and 0xFF) / 255f
@@ -253,7 +253,7 @@ object HaldClut {
         }
         // Level 9 and up (81..256 a side): sampled straight from the pixels onto
         // 65^3 (trilinear), so a 256^3 float table is never built.
-        report.approximated("HaldCLUT", "${l} 级（${n}³）重采样到 ${Lut3.NATIVE_SIDE}³")
+        report.approximated("HaldCLUT", tr("{0} 级（{1}³）重采样到 {2}³", l, n, Lut3.NATIVE_SIDE))
         val side = Lut3.NATIVE_SIDE
         val out = FloatArray(side * side * side * 3)
         val n1 = n - 1

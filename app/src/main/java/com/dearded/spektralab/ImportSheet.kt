@@ -100,11 +100,11 @@ fun ImportHost(vm: EditorViewModel) {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: ImportException) {
-                ImportUi(error = e.message ?: "无法导入", left = ImportRequests.uris.value.size)
+                ImportUi(error = e.message ?: tr("无法导入"), left = ImportRequests.uris.value.size)
             } catch (e: Exception) {
-                ImportUi(error = "读取失败：${e.message ?: e.javaClass.simpleName}", left = ImportRequests.uris.value.size)
+                ImportUi(error = tr("读取失败：{0}", e.message ?: e.javaClass.simpleName), left = ImportRequests.uris.value.size)
             } catch (e: OutOfMemoryError) {
-                ImportUi(error = "文件太大，内存不够", left = ImportRequests.uris.value.size)
+                ImportUi(error = tr("文件太大，内存不够"), left = ImportRequests.uris.value.size)
             }
         }
     }
@@ -146,28 +146,28 @@ fun ImportHost(vm: EditorViewModel) {
                 .padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp),
         ) {
             // ui-screens_research.md 4: what is left in the batch, said plainly in the head's summary.
-            val left = if (state.left > 0) "后面还有 ${state.left} 个" else ""
+            val left = if (state.left > 0) tr("后面还有 {0} 个", state.left) else ""
             when {
                 state.busy -> {
-                    PanelHeader("正在读取", summary = left)
+                    PanelHeader(tr("正在读取"), summary = left)
                     // The working bar, never a spinner over the photo (UI2.md 1.1).
                     AuraBar(Modifier.padding(vertical = RowGap))
                 }
                 state.error != null -> {
-                    PanelHeader("没能导入", summary = left)
+                    PanelHeader(tr("没能导入"), summary = left)
                     Text(state.error.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
                     Spacer(Modifier.height(RowGap))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        PrimaryPill(if (state.left > 0) "下一个" else "好") { state = ImportUi() }
+                        PrimaryPill(if (state.left > 0) tr("下一个") else tr("好")) { state = ImportUi() }
                     }
                 }
                 pending != null && pending.kind == ImportKind.STYLE -> {
                     PanelHeader(
-                        "导入风格", summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
-                        hint = if (before != null) "已套用到当前照片。" else "打开一张照片后可以预览和调强度。",
+                        tr("导入风格"), summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
+                        hint = if (before != null) tr("已套用到当前照片。") else tr("打开一张照片后可以预览和调强度。"),
                     )
                     OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
-                        label = { Text("名称") }, modifier = Modifier.fillMaxWidth())
+                        label = { Text(tr("名称")) }, modifier = Modifier.fillMaxWidth())
                     // The categories already in use first, so a batch lands in one place; a new name below.
                     val known by library.styles.all.collectAsState()
                     val categories = remember(known) { known.map { it.category }.filter { it.isNotBlank() }.distinct() }
@@ -175,30 +175,30 @@ fun ImportHost(vm: EditorViewModel) {
                         for (c in categories) SelectPill(selected = category == c, onClick = { category = c }, label = { Text(c) })
                     }
                     OutlinedTextField(value = category, onValueChange = { category = it.take(20) }, singleLine = true,
-                        label = { Text(if (categories.isEmpty()) "分类" else "或新建分类") }, modifier = Modifier.fillMaxWidth())
+                        label = { Text(if (categories.isEmpty()) tr("分类") else tr("或新建分类")) }, modifier = Modifier.fillMaxWidth())
                     if (before != null) {
                         Spacer(Modifier.height(RowGap))
-                        LabeledSlider("强度", strength * 100, 0.0, 100.0, 100.0, true, "%.0f%%") { v ->
+                        LabeledSlider(tr("强度"), strength * 100, 0.0, 100.0, 100.0, true, "%.0f%%") { v ->
                             strength = (v / 100).coerceIn(0.0, 1.0)
                             preview(pending, strength)
                         }
                     }
                     ReportList(pending.report)
-                    Buttons(onCancel = ::cancel, keep = "保存") {
+                    Buttons(onCancel = ::cancel, keep = tr("保存")) {
                         if (state.busy) return@Buttons
                         val p = pending
                         state = state.copy(busy = true)
                         scope.launch {
                             try {
                                 withContext(Dispatchers.IO) { library.saveStyle(p, name, category, strength) }
-                                vm.showMessage("已保存风格「${name.trim().ifEmpty { p.look.name }}」")
+                                vm.showMessage(tr("已保存风格「{0}」", name.trim().ifEmpty { p.look.name }))
                                 before = null
                                 state = ImportUi()
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (e: Exception) {
                                 state = state.copy(busy = false)
-                                vm.showMessage("保存失败，请检查存储空间后重试")
+                                vm.showMessage(tr("保存失败，请检查存储空间后重试"))
                             }
                         }
                     }
@@ -206,19 +206,19 @@ fun ImportHost(vm: EditorViewModel) {
                 pending != null -> {
                     val recipe = pending.kind == ImportKind.FILM_RECIPE
                     PanelHeader(
-                        if (recipe) "导入胶片方案" else "导入胶片数据",
+                        if (recipe) tr("导入胶片方案") else tr("导入胶片数据"),
                         summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
                     )
                     Text(pending.look.name, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurface)
                     Hint(
                         when {
-                            recipe -> "基于 ${ui.catalog.film(pending.base)?.label ?: pending.base}，没有自己的光谱数据"
-                            pending.stage == "printing" -> "相纸 · 完整数据，保存前会在引擎里试开一次"
-                            else -> "胶片 · 完整数据，保存前会在引擎里试开一次"
+                            recipe -> tr("基于 {0}，没有自己的光谱数据", ui.catalog.film(pending.base)?.label ?: pending.base)
+                            pending.stage == "printing" -> tr("相纸 · 完整数据，保存前会在引擎里试开一次")
+                            else -> tr("胶片 · 完整数据，保存前会在引擎里试开一次")
                         },
                     )
                     ReportList(pending.report)
-                    Buttons(onCancel = ::cancel, keep = "保存") {
+                    Buttons(onCancel = ::cancel, keep = tr("保存")) {
                         if (state.busy) return@Buttons
                         val p = pending
                         state = state.copy(busy = true)
@@ -242,8 +242,8 @@ fun ImportHost(vm: EditorViewModel) {
                                 val removed = withContext(Dispatchers.IO) {
                                     runCatching { library.dropFilm(p.profileId) }.isSuccess
                                 }
-                                state = ImportUi(error = if (removed) "没能保存这份数据，已清理：$error"
-                                    else "没能保存这份数据，清理失败，请重试：$error", left = state.left)
+                                state = ImportUi(error = if (removed) tr("没能保存这份数据，已清理：{0}", error)
+                                    else tr("没能保存这份数据，清理失败，请重试：{0}", error), left = state.left)
                                 return@launch
                             }
                             // A recipe is also a one-tap style on its new film, under 胶片方案.
@@ -254,11 +254,11 @@ fun ImportHost(vm: EditorViewModel) {
                             } catch (e: Exception) {
                                 vm.reloadCatalog()
                                 state = state.copy(busy = false)
-                                vm.showMessage("胶片已保存，风格保存失败，请检查存储空间后重试")
+                                vm.showMessage(tr("胶片已保存，风格保存失败，请检查存储空间后重试"))
                                 return@launch
                             }
                             vm.reloadCatalog()
-                            vm.showMessage("已添加「${p.look.name}」")
+                            vm.showMessage(tr("已添加「{0}」", p.look.name))
                             state = ImportUi()
                         }
                     }
@@ -275,17 +275,17 @@ private fun ReportList(report: ImportReport) {
     val mapped = report.items.size - items.size
     Spacer(Modifier.height(RowGap))
     // One line says how it went; the item list is behind a row, so the sheet stays short (UI2.md 2.4).
-    Text(if (items.isEmpty()) "已转换 $mapped 项" else "${items.size} 项没能原样转换，另有 $mapped 项已对应",
+    Text(if (items.isEmpty()) tr("已转换 {0} 项", mapped) else tr("{0} 项没能原样转换，另有 {1} 项已对应", items.size, mapped),
         style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface)
     if (items.isEmpty()) return
     var open by remember(report) { mutableStateOf(false) }
-    QuietButton(if (open) "收起转换详情" else "查看转换详情", modifier = Modifier.padding(start = 0.dp)) { open = !open }
+    QuietButton(if (open) tr("收起转换详情") else tr("查看转换详情"), modifier = Modifier.padding(start = 0.dp)) { open = !open }
     if (open) {
         for (it in items.take(MAX_REPORT)) {
-            val tag = if (it.kind == ImportReport.Kind.APPROXIMATED) "近似" else "未转换"
+            val tag = if (it.kind == ImportReport.Kind.APPROXIMATED) tr("近似") else tr("未转换")
             Hint("$tag · ${it.what}" + if (it.why.isNotEmpty()) "：${it.why}" else "", Modifier.padding(top = 2.dp))
         }
-        if (items.size > MAX_REPORT) Hint("…还有 ${items.size - MAX_REPORT} 项")
+        if (items.size > MAX_REPORT) Hint(tr("…还有 {0} 项", items.size - MAX_REPORT))
     }
 }
 
@@ -294,7 +294,7 @@ private fun ReportList(report: ImportReport) {
 private fun Buttons(onCancel: () -> Unit, keep: String, onKeep: () -> Unit) {
     Spacer(Modifier.height(GroupGap))
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-        QuietButton("取消", onClick = onCancel)
+        QuietButton(tr("取消"), onClick = onCancel)
         Spacer(Modifier.width(8.dp))
         PrimaryPill(keep, onClick = onKeep)
     }
@@ -327,12 +327,12 @@ fun UserLibrarySection(vm: EditorViewModel) {
         ImportRequests.add(uris)
     }
     Text(
-        "支持 .spklook、.cube、Lightroom 预设等。",
+        tr("支持 .spklook、.cube、Lightroom 预设等。"),
         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TextButton(onClick = { pick.launch(arrayOf("*/*")) }) { Text("导入…") }
-        TextButton(onClick = { sharing = true }, enabled = ui.hasImage) { Text("分享当前风格") }
+        TextButton(onClick = { pick.launch(arrayOf("*/*")) }) { Text(tr("导入…")) }
+        TextButton(onClick = { sharing = true }, enabled = ui.hasImage) { Text(tr("分享当前风格")) }
     }
     for (s in styles) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -341,9 +341,9 @@ fun UserLibrarySection(vm: EditorViewModel) {
                 scope.launch {
                     try { withContext(Dispatchers.IO) { library.deleteStyle(s.id) } }
                     catch (e: CancellationException) { throw e }
-                    catch (e: Exception) { vm.showMessage("删除失败，请检查存储空间后重试") }
+                    catch (e: Exception) { vm.showMessage(tr("删除失败，请检查存储空间后重试")) }
                 }
-            }) { Text("删除") }
+            }) { Text(tr("删除")) }
         }
     }
     for (id in films) {
@@ -359,24 +359,24 @@ fun UserLibrarySection(vm: EditorViewModel) {
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        vm.showMessage("删除失败，请检查存储空间后重试")
+                        vm.showMessage(tr("删除失败，请检查存储空间后重试"))
                     }
                 }
-            }, enabled = ui.edit.film != id && ui.edit.paper != id) { Text("删除") }
+            }, enabled = ui.edit.film != id && ui.edit.paper != id) { Text(tr("删除")) }
         }
     }
 
     if (sharing) {
-        var name by remember { mutableStateOf("我的风格") }
+        var name by remember { mutableStateOf(tr("我的风格")) }
         AlertDialog(
             onDismissRequest = { sharing = false },
-            title = { Text("分享当前风格") },
+            title = { Text(tr("分享当前风格")) },
             text = {
                 Column {
-                    Text("胶片、相纸、冲印参数和冲印后调整会打包成 .spklook，照片本身、裁切和边框不会带上。",
+                    Text(tr("胶片、相纸、冲印参数和冲印后调整会打包成 .spklook，照片本身、裁切和边框不会带上。"),
                         style = MaterialTheme.typography.bodySmall)
                     OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
-                        label = { Text("名称") })
+                        label = { Text(tr("名称")) })
                 }
             },
             confirmButton = {
@@ -388,11 +388,11 @@ fun UserLibrarySection(vm: EditorViewModel) {
                         val send = Intent(Intent.ACTION_SEND).setType("application/octet-stream")
                             .putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             .apply { clipData = android.content.ClipData.newRawUri("", uri) }
-                        context.startActivity(Intent.createChooser(send, "分享风格"))
+                        context.startActivity(Intent.createChooser(send, tr("分享风格")))
                     }
-                }) { Text("分享") }
+                }) { Text(tr("分享")) }
             },
-            dismissButton = { TextButton(onClick = { sharing = false }) { Text("取消") } },
+            dismissButton = { TextButton(onClick = { sharing = false }) { Text(tr("取消")) } },
         )
     }
 }

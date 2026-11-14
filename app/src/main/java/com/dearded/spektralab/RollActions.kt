@@ -38,15 +38,15 @@ fun RollSelectionActions(table: LightTableViewModel, chosen: List<Frame>) {
         chosen.any { it.id in ids }
     }
     Box {
-        QuietButton("装卷", enabled = chosen.isNotEmpty()) { menu = true }
+        QuietButton(tr("装卷"), enabled = chosen.isNotEmpty()) { menu = true }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            DropdownMenuItem(text = { Text("装成一卷…") }, onClick = { menu = false; naming = true })
+            DropdownMenuItem(text = { Text(tr("装成一卷…")) }, onClick = { menu = false; naming = true })
             if (manual.isNotEmpty()) {
                 HorizontalDivider()
                 for (r in manual) {
                     val full = r.frames.size >= Roll.LENGTH
                     DropdownMenuItem(
-                        text = { Text("移到「${r.name}」 ${r.frames.size}/${Roll.LENGTH}") },
+                        text = { Text(tr("移到「{0}」 {1}/{2}", r.name, r.frames.size, Roll.LENGTH)) },
                         enabled = !full,
                         onClick = { menu = false; table.moveToRoll(chosen, r.id, r.name) },
                     )
@@ -54,16 +54,16 @@ fun RollSelectionActions(table: LightTableViewModel, chosen: List<Frame>) {
             }
             if (inManual) {
                 HorizontalDivider()
-                DropdownMenuItem(text = { Text("放回自动分卷") }, onClick = { menu = false; table.releaseFromRolls(chosen) })
+                DropdownMenuItem(text = { Text(tr("放回自动分卷")) }, onClick = { menu = false; table.releaseFromRolls(chosen) })
             }
         }
     }
     if (naming) {
         RollNameDialog(
-            title = "装成一卷",
-            hint = if (chosen.size > Roll.LENGTH) "${chosen.size} 张，超过 ${Roll.LENGTH} 张的部分续为卷 2" else "${chosen.size} 张",
-            initial = "我的卷",
-            confirm = "装卷",
+            title = tr("装成一卷"),
+            hint = if (chosen.size > Roll.LENGTH) tr("{0} 张，超过 {1} 张的部分续为卷 2", chosen.size, Roll.LENGTH) else tr("{0} 张", chosen.size),
+            initial = tr("我的卷"),
+            confirm = tr("装卷"),
             onDismiss = { naming = false },
             onDone = { name -> naming = false; table.packRoll(chosen, name) },
         )
@@ -87,13 +87,13 @@ fun RollNameDialog(title: String, hint: String, initial: String, confirm: String
                 }
                 OutlinedTextField(
                     value = name, onValueChange = { name = it.take(40) }, singleLine = true,
-                    label = { Text("卷名") },
+                    label = { Text(tr("卷名")) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { if (ok) onDone(name.trim()) }),
                 )
             }
         },
         confirmButton = { TextButton(onClick = { onDone(name.trim()) }, enabled = ok) { Text(confirm) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr("取消")) } },
     )
 }

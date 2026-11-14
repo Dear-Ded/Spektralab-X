@@ -110,7 +110,7 @@ class SourceLoader(private val context: Context) {
         dir.listFiles()?.forEach { it.delete() }
         val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80).ifEmpty { "image.raw" }
         val file = File(dir, safe)
-        val input = context.contentResolver.openInputStream(uri) ?: throw EngineException("无法读取该文件")
+        val input = context.contentResolver.openInputStream(uri) ?: throw EngineException(tr("无法读取该文件"))
         input.use { i -> file.outputStream().use { o -> i.copyTo(o, 1 shl 20) } }
         return file
     }
@@ -163,7 +163,7 @@ class SourceLoader(private val context: Context) {
                 val keepF16 = highPrecisionSdr && gain == null && out.config == Bitmap.Config.RGBA_F16
                 if (out.config != Bitmap.Config.ARGB_8888 && !keepF16) {
                     val copy = out.copy(Bitmap.Config.ARGB_8888, false)
-                        ?: throw EngineException("无法转换图像格式")
+                        ?: throw EngineException(tr("无法转换图像格式"))
                     out.recycle()
                     out = copy
                 }
@@ -174,7 +174,7 @@ class SourceLoader(private val context: Context) {
                     cs?.isSrgb == true && (!keepF16 || cs == ColorSpace.get(ColorSpace.Named.SRGB)) -> "sRGB"
                     cs == ColorSpace.get(ColorSpace.Named.DISPLAY_P3) -> "Display P3"
                     keepF16 && cs == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB) -> "sRGB"
-                    else -> throw EngineException("无法转换图像色彩空间：${cs?.name ?: "unknown"}")
+                    else -> throw EngineException(tr("无法转换图像色彩空间：{0}", cs?.name ?: "unknown"))
                 }
                 return Photo(out, space, gain?.first, gain?.second, sourceWidth, sourceHeight)
             } catch (failure: Throwable) {

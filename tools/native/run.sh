@@ -12,6 +12,7 @@ flags=(-std=c++20 -O2 -pthread)
 [[ "${STRICT:-1}" == 0 ]] || flags+=(-ffp-contract=off)
 [[ "${SANITIZE:-0}" == 0 ]] || flags+=(-g -fsanitize=address,undefined -fno-omit-frame-pointer)
 app="$repo/app/src/main/cpp"
+BUILD_DIR="$build/jni-text" bash "$repo/tools/native/run_jni_text.sh"
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/engine_adaptation.cpp" \
     "$repo/tools/native/resize_reference.cpp" "$app/resize.cpp" "$app/layer2.cpp" -o "$build/engine_adaptation"
 "$build/engine_adaptation" "$@"

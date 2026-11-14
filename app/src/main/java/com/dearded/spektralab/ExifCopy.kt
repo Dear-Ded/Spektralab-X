@@ -81,6 +81,10 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
             for ((tag, value) in values) runCatching { exif.setAttribute(tag, value) }
             exif.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL.toString())
             exif.setAttribute(ExifInterface.TAG_SOFTWARE, "Spektralab-X ${BuildConfig.VERSION_NAME}")
+            // HEIF borrows a 1x1 JPEG's APP1 block; its IFD0 dimensions must describe
+            // the final image too, because gallery scanners may prefer them.
+            exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, width.toString())
+            exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, height.toString())
             exif.setAttribute(ExifInterface.TAG_PIXEL_X_DIMENSION, width.toString())
             exif.setAttribute(ExifInterface.TAG_PIXEL_Y_DIMENSION, height.toString())
             // 1 = sRGB; 65535 = uncalibrated, i.e. read the embedded profile (P3).
@@ -208,14 +212,14 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
          */
         fun fillFromJpeg(context: Context, source: Uri, raw: ExifCopy, jpeg: Uri): Pair<ExifCopy, String> {
             val other = runCatching { read(context, jpeg) }.getOrDefault(NONE)
-            if (other.isEmpty) return raw to "这张照片读不到拍摄参数"
+            if (other.isEmpty) return raw to tr("这张照片读不到拍摄参数")
             val apart = secondsApart(raw.dateTimeOriginal, other.dateTimeOriginal)
-            if (apart != null && apart > 60) return raw to "两张照片的拍摄时间相差 ${apart} 秒，不像同一次拍摄，没有合并"
+            if (apart != null && apart > 60) return raw to tr("两张照片的拍摄时间相差 {0} 秒，不像同一次拍摄，没有合并", apart)
             val added = raw.missingFrom(other)
-            if (added.isEmpty()) return raw to "这张照片没有可补充的参数"
+            if (added.isEmpty()) return raw to tr("这张照片没有可补充的参数")
             val all = rememberedFill(context, source) + added
             rememberFill(context, source, all)
-            return raw.filledFrom(other) to "已从 JPEG 补充 ${added.size} 项拍摄参数"
+            return raw.filledFrom(other) to tr("已从 JPEG 补充 {0} 项拍摄参数", added.size)
         }
 
         /**

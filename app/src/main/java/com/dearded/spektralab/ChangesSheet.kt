@@ -56,25 +56,25 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     // A new photo opens on 无 (Edit.NONE): a film, a paper or the film's effects are each a change.
     val positive = catalog.film(e.film)?.positive == true
     if (e.rawDevelopmentChanged)
-        out += Change("RAW 显影", if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) "标准显色" else "线性显示", 1, step = 0) {
+        out += Change(tr("RAW 显影"), if (e.rawDevelopment == RawDevelopmentMode.STANDARD_V1) tr("标准显色") else tr("线性显示"), 1, step = 0) {
             it.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0)
         }
     if (!e.noFilm || e.filmFormatMm != d.filmFormatMm)
-        out += Change("胶卷", listOfNotNull(if (e.noFilm) "无" else catalog.film(e.film)?.label,
+        out += Change(tr("胶卷"), listOfNotNull(if (e.noFilm) tr("无") else catalog.film(e.film)?.label,
             FORMAT_NAMES[e.filmFormatMm]?.takeIf { e.filmFormatMm != d.filmFormatMm }).joinToString(" · "), 1, step = 0) {
             it.copy(noFilm = true, filmFormatMm = d.filmFormatMm)
         }
     if (!e.noFilm && !e.paperNone(positive))
-        out += Change("相纸", catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
+        out += Change(tr("相纸"), catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
             catalog.normalize(if (positive) it.copy(scanFilm = true) else it.copy(scanFilm = false, digitalIntermediate = true))
         }
     if (!e.autoExposure || e.exposureEv != d.exposureEv || !e.sceneCurve.isIdentity || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
-        out += Change("曝光", listOfNotNull(
+        out += Change(tr("曝光"), listOfNotNull(
             e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.1f EV", it) },
             e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
-            "滤镜".takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
-            "手动曝光".takeIf { !e.autoExposure },
-            "胶片前曲线".takeIf { !e.sceneCurve.isIdentity },
+            tr("滤镜").takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
+            tr("手动曝光").takeIf { !e.autoExposure },
+            tr("胶片前曲线").takeIf { !e.sceneCurve.isIdentity },
         ).joinToString(" · "), 1, step = 2) {
             it.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv, printExposure = d.printExposure,
                 sceneCurve = SceneCurve.IDENTITY,
@@ -83,38 +83,38 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
     val fxTuned = e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
         e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma
     if (!e.effectsNone || fxTuned)
-        out += Change("效果", listOfNotNull("颗粒".takeIf { e.grainActive }, "光晕".takeIf { e.halationActive },
-            "眩光".takeIf { e.glareActive }, "锐化".takeIf { e.unsharpAmount > 0 }).joinToString(" · ")
-            .ifEmpty { "更多参数" }, 1, step = 3) {
+        out += Change(tr("效果"), listOfNotNull(tr("颗粒").takeIf { e.grainActive }, tr("光晕").takeIf { e.halationActive },
+            tr("眩光").takeIf { e.glareActive }, tr("锐化").takeIf { e.unsharpAmount > 0 }).joinToString(" · ")
+            .ifEmpty { tr("更多参数") }, 1, step = 3) {
             it.withoutEffects().copy(grainArea = d.grainArea, grainLayered = d.grainLayered, scatterAmount = d.scatterAmount,
                 unsharpSigma = d.unsharpSigma, couplersAmount = d.couplersAmount)
         }
     adjustEdited(e.look).forEachIndexed { i, on ->
-        if (on) out += Change("调整 · ${ADJUST_SEGMENTS[i]}", "", 2, seg = i) { it.copy(look = resetAdjustSegment(it.look, i)) }
+        if (on) out += Change(tr("调整 · {0}", ADJUST_SEGMENTS[i]), "", 2, seg = i) { it.copy(look = resetAdjustSegment(it.look, i)) }
     }
     if (e.look.masks.isNotEmpty())
-        out += Change("蒙版", "${e.look.masks.size} 个", 2) { it.copy(look = it.look.copy(masks = emptyList())) }
+        out += Change(tr("蒙版"), tr("{0} 个", e.look.masks.size), 2) { it.copy(look = it.look.copy(masks = emptyList())) }
     if (e.look.dust.active)
-        out += Change("灰尘", "", 1, step = 3) { it.copy(look = it.look.copy(dust = Dust())) }
+        out += Change(tr("灰尘"), "", 1, step = 3) { it.copy(look = it.look.copy(dust = Dust())) }
     if (e.borderId != d.borderId || e.filmEdge || e.frame.perf != null || e.dateImprint)
-        out += Change("边框", listOfNotNull(Borders.byId(e.borderId)?.takeIf { it.id != "none" }?.label,
-            "片边".takeIf { e.filmEdge }, "齿孔".takeIf { e.frame.perf != null }, "日期".takeIf { e.dateImprint })
+        out += Change(tr("边框"), listOfNotNull(Borders.byId(e.borderId)?.takeIf { it.id != "none" }?.label,
+            tr("片边").takeIf { e.filmEdge }, tr("齿孔").takeIf { e.frame.perf != null }, tr("日期").takeIf { e.dateImprint })
             .joinToString(" · "), 3) {
             it.copy(borderId = d.borderId, frame = d.frame, filmEdge = false, dateImprint = false,
                 cropX = if (it.filmEdge) d.cropX else it.cropX, cropY = if (it.filmEdge) d.cropY else it.cropY,
                 cropW = if (it.filmEdge) d.cropW else it.cropW, cropH = if (it.filmEdge) d.cropH else it.cropH)
         }
     if (e.cropAspect != d.cropAspect || e.quarterTurns != d.quarterTurns || e.flipH != d.flipH)
-        out += Change("构图", listOfNotNull(
-            "裁剪".takeIf { e.cropAspect != d.cropAspect }, "转 ${e.quarterTurns * 90}°".takeIf { e.quarterTurns != 0 },
-            "翻转".takeIf { e.flipH }).joinToString(" · "), 4) {
+        out += Change(tr("构图"), listOfNotNull(
+            tr("裁剪").takeIf { e.cropAspect != d.cropAspect }, tr("转 {0}°", e.quarterTurns * 90).takeIf { e.quarterTurns != 0 },
+            tr("翻转").takeIf { e.flipH }).joinToString(" · "), 4) {
             it.copy(cropAspect = d.cropAspect, cropX = d.cropX, cropY = d.cropY, cropW = d.cropW, cropH = d.cropH,
                 quarterTurns = d.quarterTurns, flipH = d.flipH)
         }
     return out
 }
 
-private val FORMAT_NAMES = mapOf(24.0 to "半格", 36.0 to "135", 56.0 to "645", 70.0 to "6×7", 127.0 to "4×5")
+private val FORMAT_NAMES get() = mapOf(24.0 to tr("半格"), 36.0 to "135", 56.0 to "645", 70.0 to "6×7", 127.0 to "4×5")
 
 /**
  * 修改记录 (ui2_snapseed.md 4, after Snapseed's 查看修改): what is changed on this
@@ -138,11 +138,11 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 4.dp)
             .verticalScroll(rememberScrollState())) {
             PanelHeader(
-                title = "修改记录",
-                summary = if (changes.isEmpty()) "" else "${changes.size} 组",
+                title = tr("修改记录"),
+                summary = if (changes.isEmpty()) "" else tr("{0} 组", changes.size),
             )
             Spacer(Modifier.padding(top = RowGap))
-            if (changes.isEmpty()) Hint("没有改动", Modifier.padding(bottom = 24.dp))
+            if (changes.isEmpty()) Hint(tr("没有改动"), Modifier.padding(bottom = 24.dp))
             for (c in changes) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(Corners.m)
@@ -156,10 +156,10 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
                     Spacer(Modifier.width(8.dp))
                     val off = c.name in hidden
                     // Words, not an eye icon in a colour: 显示 while hidden, 隐藏 otherwise.
-                    QuietButton(if (off) "显示" else "隐藏", enabled = ui.hasImage && !ui.exporting) {
+                    QuietButton(if (off) tr("显示") else tr("隐藏"), enabled = ui.hasImage && !ui.exporting) {
                         hidden = if (off) hidden - c.name else hidden + c.name
                     }
-                    QuietButton("重置", enabled = ui.hasImage && !ui.exporting) { vm.update(c.reset(ui.edit)) }
+                    QuietButton(tr("重置"), enabled = ui.hasImage && !ui.exporting) { vm.update(c.reset(ui.edit)) }
                 }
             }
             Spacer(Modifier.padding(top = 8.dp))

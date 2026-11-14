@@ -9,6 +9,8 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -46,7 +48,7 @@ enum class TiffColorSpace(val displayName: String, val targetName: String) {
 
 data class UiState(
     val ready: Boolean = false,
-    val busy: String? = "正在准备引擎…",
+    val busy: String? = tr("正在准备引擎…"),
     val error: String? = null,
     val message: String? = null,
     val catalog: Catalog = Catalog.EMPTY,
@@ -141,7 +143,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun log(event: String) = host.events.add(event)
     private fun saveFailed(kind: String, error: Exception) {
         log("$kind save failed: ${error.message}")
-        _ui.update { it.copy(message = "编辑保存失败，请检查存储空间；稍后会自动重试") }
+        _ui.update { it.copy(message = tr("编辑保存失败，请检查存储空间；稍后会自动重试")) }
     }
     private var lastUri: Uri? = null
     // The edit this photo opened with, for 重置全部.
@@ -154,7 +156,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
     @Volatile private var detailRevision = 0L
     // 基准测试结果，用于诊断信息
-    private var benchmarkResult: BenchmarkResult? = null
+    private var benchmarkResult by androidx.compose.runtime.mutableStateOf<BenchmarkResult?>(null)
+
+    fun benchmarkLines(): List<String> = benchmarkResult?.let(BenchmarkPolicy::lines).orEmpty()
     private var benchmarkJob: kotlinx.coroutines.Job? = null
 
     init {
@@ -179,7 +183,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         clearPool()
         val uri = lastUri ?: return
         val src = _ui.value.source
-        _ui.update { it.copy(message = "GPU 重置了一下，已自动重新打开照片，编辑都还在") }
+        _ui.update { it.copy(message = tr("GPU 重置了一下，已自动重新打开照片，编辑都还在")) }
         launchOpen(uri, wb = (src?.wbK ?: 0.0) to (src?.wbTint ?: 0.0))
     }
 
@@ -228,7 +232,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     internal fun open(uri: Uri, frameId: String?) {
         if (!_ui.value.ready) { pendingOpen = uri; return }
         if (_ui.value.exporting) {
-            _ui.update { it.copy(message = "正在导出，完成后再打开新照片") }
+            _ui.update { it.copy(message = tr("正在导出，完成后再打开新照片")) }
             return
         }
         launchOpen(uri, wb = null, frameId = frameId)
@@ -304,7 +308,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun doOpen(uri: Uri, wb: Pair<Double, Double>? = null, savedEdit: Edit? = null,
         change: ReopenEdit? = null, frameId: String? = null) {
-        _ui.update { it.copy(busy = "正在读取…", error = null, detail = null) }
+        _ui.update { it.copy(busy = tr("正在读取…"), error = null, detail = null) }
         cancelStalePreview()
         // Drop idle bitmap references, but keep the old image and native session
         // usable until the replacement is fully prepared (also on OOM or cancel).
@@ -312,9 +316,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         var committed = false
         try {
           host.transientSessions.withLease(onWaiting = {
-              _ui.update { it.copy(busy = "等待当前处理…") }
+              _ui.update { it.copy(busy = tr("等待当前处理…")) }
           }) {
-            _ui.update { it.copy(busy = "正在读取…") }
+            _ui.update { it.copy(busy = tr("正在读取…")) }
           withSessionCandidate(EngineThread.dispatcher, NativeEngine::release) { candidate ->
             val resolver = app.contentResolver
             // A query plus a 4-byte header read: a cloud provider can block for seconds.
@@ -362,14 +366,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 handle = try {
                     withContext(Dispatchers.IO) { input = loader.rawInput(uri, name) }
                     val path = input!!.path
-                    _ui.update { it.copy(busy = "正在解码 RAW…") }
+                    _ui.update { it.copy(busy = tr("正在解码 RAW…")) }
                     withRawOpenCancellation { cancellation ->
                         withContext(EngineThread.dispatcher) {
                             val params = Edit.openingParams(look, inputSpace = INPUT_SPACE, linear = true).toString()
                             val h = NativeEngine.openRawCancellableV1(engine, path, edge, maxPixels, params, wbK, wbTint, cancellation)
                             if (h == 0L) {
                                 if (NativeEngine.lastWasCancelled()) throw kotlinx.coroutines.CancellationException("RAW open cancelled")
-                                throw EngineException("打开失败：${NativeEngine.lastError()}")
+                                throw EngineException(tr("打开失败：{0}", NativeEngine.lastError()))
                             }
                             candidate.own(h)
                             h
@@ -382,7 +386,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 var photo: Photo? = null
                 handle = try {
                     withContext(Dispatchers.IO) { photo = loader.decodePhoto(uri, edge, maxPixels) }
-                    _ui.update { it.copy(busy = if (photo!!.hdr) "正在恢复 HDR 高光…" else "正在打开…") }
+                    _ui.update { it.copy(busy = if (photo!!.hdr) tr("正在恢复 HDR 高光…") else tr("正在打开…")) }
                     withContext(EngineThread.dispatcher) {
                         val input = photo!!
                         photo = null // openPhotoSession owns and recycles it, including on failure.
@@ -390,7 +394,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                             Edit.openingParams(look, inputSpace = space, linear = linear).toString()
                         }
                         val h = opened.handle
-                        if (h == 0L) throw EngineException("打开失败：${NativeEngine.lastError()}")
+                        if (h == 0L) throw EngineException(tr("打开失败：{0}", NativeEngine.lastError()))
                         candidate.own(h)
                         if (opened.linear) log("ultra hdr gain map applied")
                         h
@@ -475,7 +479,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val ww = info.optInt("width"); val wh = info.optInt("height")
             if (wb == null && sw > 0 && (ww < sw || wh < sh)) {
                 _ui.update {
-                    it.copy(message = "原图 ${sw}×${sh}，按工作尺寸缩到 ${ww}×${wh} 处理；可在“设置”里调大")
+                    it.copy(message = tr("原图 {0}×{1}，按工作尺寸缩到 {2}×{3} 处理；可在“设置”里调大", sw, sh, ww, wh))
                 }
             }
             renders.trySend(Unit)
@@ -483,7 +487,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 try { FrameStore.of(app).setSize(frameId, ww, wh) }
                 catch (e: Exception) {
                     log("frame dimensions save failed: ${e.message}")
-                    showMessage("照片尺寸记录保存失败，请检查存储空间")
+                    showMessage(tr("照片尺寸记录保存失败，请检查存储空间"))
                 }
             }
             // The previous photo's read grant is retained until the new one lands.
@@ -494,7 +498,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             throw e   // superseded by a newer open, or the editor closed: not an error
         } catch (e: OutOfMemoryError) {
             log("open failed: out of memory")
-            _ui.update { it.copy(busy = null, error = "内存不足，请在“设置”里把工作尺寸调小后重试") }
+            _ui.update { it.copy(busy = null, error = tr("内存不足，请在“设置”里把工作尺寸调小后重试")) }
         } catch (e: Throwable) {
             log("open failed: ${e.message ?: e}")
             _ui.update { it.copy(busy = null, error = e.message ?: e.toString()) }
@@ -540,7 +544,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (edit.filmEdge && !_ui.value.edit.filmEdge && src != null && uri != null &&
             _ui.value.maxPixels > 0 && src.width.toLong() * src.height * 16 / 10 > _ui.value.maxPixels) {
             applyEdit(edit, record = true, render = false)
-            _ui.update { it.copy(message = "加边框后画布超出 GPU 单缓冲上限，已按更小尺寸重新打开") }
+            _ui.update { it.copy(message = tr("加边框后画布超出 GPU 单缓冲上限，已按更小尺寸重新打开")) }
             launchOpen(uri, wb = src.wbK to src.wbTint)
             return
         }
@@ -610,7 +614,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val src = state.source ?: return
         if (state.loadingDetail || state.detail != null || state.exporting || state.busy != null) return
         if (target == null && src.width.toLong() * src.height > kMaxDetailPixels) {
-            _ui.update { it.copy(message = "工作尺寸超过 1600 万像素，1:1 查看已关闭；导出不受影响") }
+            _ui.update { it.copy(message = tr("工作尺寸超过 1600 万像素，1:1 查看已关闭；导出不受影响")) }
             return
         }
         clearOverride(render = true)
@@ -626,7 +630,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             try {
                 val bitmap = withContext(EngineThread.dispatcher) {
                     if (!current() || session == 0L) return@withContext null
-                    applyWanted()?.let { throw EngineException("参数无效：$it") }
+                    applyWanted()?.let { throw EngineException(tr("参数无效：{0}", it)) }
                     identity = previewPublication.frame(session, appliedIntent,
                         if (target == null) "full" else "preview", target ?: sessionOutput)
                     inFlightTier = "detail"
@@ -635,7 +639,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                             else NativeEngine.renderProofBitmap(session, "preview", target)
                         if (rendered == null) {
                             if (NativeEngine.lastWasCancelled()) return@withContext null
-                            throw EngineException("渲染失败：${NativeEngine.lastError()}")
+                            throw EngineException(tr("渲染失败：{0}", NativeEngine.lastError()))
                         }
                         try {
                             DisplayColor.tagOutput(rendered, target ?: sessionOutput)
@@ -657,7 +661,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: OutOfMemoryError) {
-                if (current()) _ui.update { it.copy(message = "内存不足，无法打开图像预览") }
+                if (current()) _ui.update { it.copy(message = tr("内存不足，无法打开图像预览")) }
             } catch (e: Throwable) {
                 if (current()) _ui.update { it.copy(message = e.message ?: e.toString()) }
             } finally {
@@ -701,7 +705,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val uri = lastUri
         if (src != null && uri != null && src.kind == "raw" && (src.wbK != 0.0 || src.wbTint != 0.0))
             launchOpen(uri, wb = 0.0 to 0.0)
-        _ui.update { it.copy(message = "已重置为刚打开时的样子，可撤销") }
+        _ui.update { it.copy(message = tr("已重置为刚打开时的样子，可撤销")) }
     }
 
     // --- presets: film, paper and print/effects only, never per-photo settings ---
@@ -712,14 +716,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val clean = name.trim().take(40)
         if (clean.isEmpty()) return
         val list = presetStore.save(Preset.of(clean, _ui.value.edit))
-        _ui.update { it.copy(presets = list, message = "已保存预设“$clean”") }
+        _ui.update { it.copy(presets = list, message = tr("已保存预设“{0}”", clean)) }
     }
 
     fun applyPreset(preset: Preset) {
         val catalog = _ui.value.catalog
         // A preset saved on another build may name a stock this one does not ship.
         if (catalog.films.isNotEmpty() && catalog.film(preset.film) == null) {
-            _ui.update { it.copy(message = "预设里的胶片不存在：${preset.film}") }
+            _ui.update { it.copy(message = tr("预设里的胶片不存在：{0}", preset.film)) }
             return
         }
         update(preset.applyTo(_ui.value.edit))
@@ -728,7 +732,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     /** A one-tap style (Styles.kt): film, paper, print, effects and its finish together. */
     fun applyStyle(style: Style) {
         val next = style.applyTo(_ui.value.edit, _ui.value.catalog) ?: run {
-            _ui.update { it.copy(message = "这个风格用的胶片不在当前版本里") }
+            _ui.update { it.copy(message = tr("这个风格用的胶片不在当前版本里")) }
             return
         }
         update(next)
@@ -859,7 +863,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (look == appliedLook || session == 0L) return
         UserLibrary.get(app).applyLut(session, look, appliedLook)
         if (!NativeEngine.setLook(session, if (look.neutral) null else look.values()))
-            throw EngineException("应用调整失败：${NativeEngine.lastError()}")
+            throw EngineException(tr("应用调整失败：{0}", NativeEngine.lastError()))
         appliedLook = look
     }
 
@@ -875,7 +879,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     // A preceding film/geometry edit may still be waiting for a
                     // render. Its old cache cannot be repacked as the new input.
                     if (!target.sameRenderInputAs(applied)) return@withContext null
-                    applyWanted()?.let { throw EngineException("参数无效：$it") }
+                    applyWanted()?.let { throw EngineException(tr("参数无效：{0}", it)) }
                     identity = previewPublication.frame(session, appliedIntent, tier, sessionOutput)
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
                     val bitmap = NativeEngine.repack(session, reuse)?.also { DisplayColor.tagOutput(it, sessionOutput) }
@@ -978,7 +982,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 if (session == 0L || _ui.value.busy != null) return@withContext null
                 identity = previewPublication.frame(session, previewPublication.intent(), tier, sessionOutput)
                 applyWanted()?.let { error ->
-                    failure = "参数无效：$error"
+                    failure = tr("参数无效：{0}", error)
                     // Only if the user has not asked for something newer meanwhile.
                     if (wanted == rejected) {
                         wanted = applied
@@ -995,10 +999,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                         // Cancelled for a newer edit: not a failure, and the loop
                         // already has the newer request queued.
                         if (NativeEngine.lastWasDeviceLost()) {
-                            failure = "GPU 重置了，正在恢复…"
+                            failure = tr("GPU 重置了，正在恢复…")
                             val lost = engine
                             viewModelScope.launch { runCatching { host.recover(lost) } }
-                        } else if (!NativeEngine.lastWasCancelled()) failure = "渲染失败：${NativeEngine.lastError()}"
+                        } else if (!NativeEngine.lastWasCancelled()) failure = tr("渲染失败：{0}", NativeEngine.lastError())
                         null
                     }
                 } finally {
@@ -1010,9 +1014,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: OutOfMemoryError) {
-            failure = "内存不足，渲染失败；请在“设置”里调小工作尺寸"
+            failure = tr("内存不足，渲染失败；请在“设置”里调小工作尺寸")
         } catch (e: Throwable) {
-            failure = "渲染失败：${e.message ?: e}"
+            failure = tr("渲染失败：{0}", e.message ?: e)
         } finally {
             failure?.let { log("render $tier failed: $it") }
             val frame = identity
@@ -1087,7 +1091,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${src.width}x${src.height}")
-        _ui.update { it.copy(message = "已加入“正在处理”，可以继续编辑或切到后台") }
+        _ui.update { it.copy(message = tr("已加入“正在处理”，可以继续编辑或切到后台")) }
     }
 
     /**
@@ -1118,7 +1122,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         host.queue.enqueue(job)
         log("queued ${job.label} ${sw}x$sh")
-        _ui.update { it.copy(message = "已加入“正在处理”：优先原始尺寸，受设备与内存上限限制；可继续编辑或切到后台") }
+        _ui.update { it.copy(message = tr("已加入“正在处理”：优先原始尺寸，受设备与内存上限限制；可继续编辑或切到后台")) }
     }
 
     // --- settings ------------------------------------------------------------
@@ -1207,7 +1211,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
         log("restoring the last photo")
         openSaved(uri, car.edit, car.wbK, car.wbTint, frameId)
-        _ui.update { it.copy(message = "已回到上次的照片和编辑") }
+        _ui.update { it.copy(message = tr("已回到上次的照片和编辑")) }
     }
 
     /**
@@ -1288,9 +1292,10 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     /** 启动性能测试（在设置页面调用）*/
     fun startBenchmark() {
-        benchmarkJob?.cancel()
+        val previous = benchmarkJob
         benchmarkJob = viewModelScope.launch {
-            _ui.update { it.copy(busy = "正在准备性能测试…") }
+            previous?.cancelAndJoin()
+            _ui.update { it.copy(busy = tr("正在准备性能测试…")) }
             try {
                 val ui = _ui.value
                 val ready = host.start(wanted.film, wanted.paper)
@@ -1308,16 +1313,16 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     peakBudgetMb = 0L,
                 )
                 val outcome = host.transientSessions.withLease(
-                    onWaiting = { _ui.update { it.copy(busy = "等待当前处理") } },
+                    onWaiting = { _ui.update { it.copy(busy = tr("等待当前处理")) } },
                 ) { runner.run { phase, _ -> _ui.update { it.copy(busy = phase) } } }
                 when (outcome) {
                     is BenchmarkOutcome.Done -> {
                         benchmarkResult = outcome.result
                         log("benchmark completed: ${outcome.result.firstPreviewMs}ms preview, ${outcome.result.exportMs}ms export")
-                        _ui.update { it.copy(busy = null, message = "性能测试完成。结果已加入诊断信息。") }
+                        _ui.update { it.copy(busy = null, message = tr("性能测试完成。结果已显示在设置页。")) }
                     }
                     is BenchmarkOutcome.TooHot -> {
-                        val msg = "机身温度偏高（热余量 ${"%.2f".format(outcome.headroom)}），测试已停止在「${outcome.phase}」。降温后重试。"
+                        val msg = tr("机身温度偏高（热余量 {0}），测试已停止在「{1}」。降温后重试。", "%.2f".format(outcome.headroom), outcome.phase)
                         log("benchmark aborted: too hot at ${outcome.phase}")
                         _ui.update { it.copy(busy = null, message = msg) }
                     }
@@ -1331,7 +1336,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(busy = null) }
             } catch (e: Throwable) {
                 val code = ErrorCodes.extract(e.message) ?: ErrorCodes.ENGINE_EXCEPTION
-                val msg = ErrorCodes.format(code, "性能测试失败：${e.message}")
+                val msg = ErrorCodes.format(code, tr("性能测试失败：{0}", e.message))
                 log("benchmark exception: $msg")
                 _ui.update { it.copy(busy = null, error = msg) }
             }
@@ -1373,8 +1378,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * can be deleted again.
      */
     suspend fun trialStock(film: String, paper: String): String? = withContext(EngineThread.dispatcher) {
-        if (engine == 0L) return@withContext "引擎还没准备好"
-        if (NativeEngine.warmUp(engine, film, paper)) null else NativeEngine.lastError().ifEmpty { "未知错误" }
+        if (engine == 0L) return@withContext tr("引擎还没准备好")
+        if (NativeEngine.warmUp(engine, film, paper)) null else NativeEngine.lastError().ifEmpty { tr("未知错误") }
     }
 
     /** The open edit as a .spklook in the cache, for the share sheet; null when there is no photo. */
@@ -1386,7 +1391,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             library.exportLook(state.edit, name, StyleImports.thumbnail(state.image), scope)
         } } catch (e: kotlinx.coroutines.CancellationException) { throw e
         } catch (e: Exception) {
-            showMessage("分享风格失败：${e.message.orEmpty()}")
+            showMessage(tr("分享风格失败：{0}", e.message.orEmpty()))
             null
         }
     }

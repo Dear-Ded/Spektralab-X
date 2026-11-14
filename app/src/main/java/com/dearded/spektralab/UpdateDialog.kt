@@ -62,60 +62,60 @@ fun UpdateDialog(editing: Boolean) {
             when (s) {
                 Updater.State.Idle -> Unit
                 Updater.State.Checking -> {
-                    PanelHeader("正在检查更新", hint = "只连 GitHub 上本项目的发布页。")
+                    PanelHeader(tr("正在检查更新"), hint = tr("只连 GitHub 上本项目的发布页。"))
                     AuraBar(Modifier.padding(vertical = RowGap))
-                    Actions(primary = "后台检查", onPrimary = dismiss)
+                    Actions(primary = tr("后台检查"), onPrimary = dismiss)
                 }
                 Updater.State.UpToDate -> {
-                    PanelHeader("已是最新版本", summary = "当前 ${BuildConfig.VERSION_NAME}")
-                    Actions(primary = "好", onPrimary = dismiss)
+                    PanelHeader(tr("已是最新版本"), summary = tr("当前 {0}", BuildConfig.VERSION_NAME))
+                    Actions(primary = tr("好"), onPrimary = dismiss)
                 }
                 is Updater.State.Available -> {
-                    PanelHeader("新版本 ${s.release.version}",
-                        summary = "安装包 ${mb(s.release.apkSize)} · 当前 ${BuildConfig.VERSION_NAME}")
+                    PanelHeader(tr("新版本 {0}", s.release.version),
+                        summary = tr("安装包 {0} · 当前 {1}", mb(s.release.apkSize), BuildConfig.VERSION_NAME))
                     Notes(s.release)
                     Actions(
-                        primary = "下载并安装", onPrimary = { Updater.download(context, s.release) },
-                        quiet = listOf("以后再说" to dismiss, "跳过这个版本" to { Updater.skip(context, s.release) }),
+                        primary = tr("下载并安装"), onPrimary = { Updater.download(context, s.release) },
+                        quiet = listOf(tr("以后再说") to dismiss, tr("跳过这个版本") to { Updater.skip(context, s.release) }),
                     )
                 }
                 is Updater.State.Downloading -> {
-                    PanelHeader("正在下载 ${s.release.version}",
+                    PanelHeader(tr("正在下载 {0}", s.release.version),
                         summary = String.format(Locale.ROOT, "%.0f%% · %s", s.progress * 100, mb(s.release.apkSize)))
                     LinearProgressIndicator(
                         progress = { s.progress },
                         modifier = Modifier.fillMaxWidth().padding(vertical = RowGap),
                         color = Palette.Accent, trackColor = Palette.PanelHigh,
                     )
-                    Hint("可以收起，下载会在后台继续。")
-                    Actions(primary = "后台下载", onPrimary = dismiss)
+                    Hint(tr("可以收起，下载会在后台继续。"))
+                    Actions(primary = tr("后台下载"), onPrimary = dismiss)
                 }
                 is Updater.State.Ready -> {
                     val canInstall = context.packageManager.canRequestPackageInstalls()
-                    PanelHeader("${s.release.version} 已下载",
-                        hint = if (canInstall) "已核对校验和与签名。安装时应用会关闭，编辑记录不受影响。"
-                            else "需要先允许 Spektralab-X 安装应用（只用于自身更新），然后回来点安装。")
+                    PanelHeader(tr("{0} 已下载", s.release.version),
+                        hint = if (canInstall) tr("已核对校验和与签名。安装时应用会关闭，编辑记录不受影响。")
+                            else tr("需要先允许 Spektralab-X 安装应用（只用于自身更新），然后回来点安装。"))
                     Notes(s.release)
                     Actions(
-                        primary = if (canInstall) "安装" else "去允许",
+                        primary = if (canInstall) tr("安装") else tr("去允许"),
                         onPrimary = {
                             if (canInstall) Updater.install(context, s.file)
                             else context.startActivity(
                                 Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}")),
                             )
                         },
-                        quiet = listOf("稍后" to dismiss),
+                        quiet = listOf(tr("稍后") to dismiss),
                     )
                 }
                 is Updater.State.Failed -> {
-                    PanelHeader("更新没有完成", hint = "也可以到 GitHub Releases 页面手动下载。")
+                    PanelHeader(tr("更新没有完成"), hint = tr("也可以到 GitHub Releases 页面手动下载。"))
                     Text(s.message, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
                         modifier = Modifier.padding(vertical = 4.dp))
                     val r = s.release
                     Actions(
-                        primary = "重试",
+                        primary = tr("重试"),
                         onPrimary = { if (r != null) Updater.download(context, r) else Updater.check(context, manual = true) },
-                        quiet = listOf("打开发布页" to {
+                        quiet = listOf(tr("打开发布页") to {
                             dismiss()
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r?.page ?: Updater.RELEASES_PAGE)))
                         }),
@@ -130,7 +130,7 @@ fun UpdateDialog(editing: Boolean) {
 @Composable
 private fun Notes(r: Updater.Release) {
     Text(
-        r.notes.ifBlank { "（没有更新说明）" },
+        r.notes.ifBlank { tr("（没有更新说明）") },
         style = MaterialTheme.typography.bodySmall, color = Palette.OnSurface,
         modifier = Modifier.fillMaxWidth().padding(vertical = RowGap)
             .background(Palette.PanelHigh, Corners.l)

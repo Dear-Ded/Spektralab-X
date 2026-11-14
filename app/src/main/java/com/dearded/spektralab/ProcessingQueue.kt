@@ -31,10 +31,10 @@ import kotlin.math.roundToInt
 enum class JobState { QUEUED, RUNNING, DONE, FAILED, CANCELLED }
 
 /** A render integrity check failed; the retry must replace its GPU state. */
-class BlankFrameException(val what: String, val engine: Long) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, "导出画面异常（$what），未保存"))
+class BlankFrameException(val what: String, val engine: Long) : Exception(ErrorCodes.format(ErrorCodes.EXPORT_BLANK_FRAME, tr("导出画面异常（{0}），未保存", what)))
 
 /** The engine could not allocate (native heap or GPU memory); retried a size down like a Java OutOfMemoryError. */
-class OutOfMemoryException(detail: String) : Exception(ErrorCodes.format(ErrorCodes.OUT_OF_MEMORY, "内存不足：$detail"))
+class OutOfMemoryException(detail: String) : Exception(ErrorCodes.format(ErrorCodes.OUT_OF_MEMORY, tr("内存不足：{0}", detail)))
 
 /**
  * One export: a snapshot of the photo and its whole edit, so the editor is
@@ -107,12 +107,12 @@ data class ProcessingJob(
     val sheet get() = sheetJson.isNotEmpty()
 
     val label get() = when {
-        sheet -> "印样 · $name"
-        extreme -> "高质量导出"
-        format == ExportFormat.TIFF -> "16 位 TIFF · ${tiffColorSpace.displayName}"
-        format == ExportFormat.HEIF -> "HEIF · 工作尺寸"
-        size == ExportSize.SHARE -> "JPEG · 分享尺寸"
-        else -> "JPEG · 工作尺寸"
+        sheet -> tr("印样 · {0}", name)
+        extreme -> tr("高质量导出")
+        format == ExportFormat.TIFF -> tr("16 位 TIFF · {0}", tiffColorSpace.displayName)
+        format == ExportFormat.HEIF -> tr("HEIF · 工作尺寸")
+        size == ExportSize.SHARE -> tr("JPEG · 分享尺寸")
+        else -> tr("JPEG · 工作尺寸")
     }
 
     fun toJson(): JSONObject = JSONObject()
@@ -240,7 +240,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 set(id) { it.copy(state = JobState.CANCELLED, cancelledByUser = true, finishedAt = now(), etaSeconds = 0) }
                 persist(sync = true)
                 if (job.pendingUri.isNotEmpty()) host.scope.launch {
-                    finishUnsuccessful(id, JobState.CANCELLED, "已取消", expectedPendingUri = job.pendingUri)
+                    finishUnsuccessful(id, JobState.CANCELLED, tr("已取消"), expectedPendingUri = job.pendingUri)
                     persist()
                 }
                 releaseSourcesLater()
@@ -348,7 +348,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val id = queued.id
         if (queued.pendingUri.isNotEmpty() && withContext(Dispatchers.IO) { settle(queued) }) { persist(); return }
         if (_jobs.value.firstOrNull { it.id == id }?.cancelledByUser == true) {
-            set(id) { it.copy(state = JobState.CANCELLED, etaSeconds = 0, finishedAt = now(), message = "已取消") }
+            set(id) { it.copy(state = JobState.CANCELLED, etaSeconds = 0, finishedAt = now(), message = tr("已取消")) }
             persist()
             return
         }
@@ -356,13 +356,13 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         if (_jobs.value.firstOrNull { it.id == id }?.state != JobState.QUEUED) return
         if (queued.attempts >= 2) {
             set(id) { it.copy(state = JobState.FAILED, finishedAt = now(), etaSeconds = 0,
-                message = "处理时两次被系统中断，多半是内存不足；请调小工作尺寸后重试") }
+                message = tr("处理时两次被系统中断，多半是内存不足；请调小工作尺寸后重试")) }
             persist()
             return
         }
         val started = SystemClock.elapsedRealtime()
         val estimate = estimateSeconds(queued)
-        set(id) { it.copy(state = JobState.RUNNING, attempts = it.attempts + 1, progress = 0.02f, phase = "准备", etaSeconds = estimate) }
+        set(id) { it.copy(state = JobState.RUNNING, attempts = it.attempts + 1, progress = 0.02f, phase = tr("准备"), etaSeconds = estimate) }
         persist(sync = true)   // a kill from here on counts as an attempt
         val ticker = host.scope.launch {
             while (isActive) {
@@ -382,17 +382,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             runner = deferred
             val saved = deferred.await()
             learn(queued, (SystemClock.elapsedRealtime() - started) / 1000.0)
-            set(id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0, finishedAt = now(), message = saved, pendingUri = "") }
+            set(id) { it.copy(state = JobState.DONE, progress = 1f, phase = tr("完成"), etaSeconds = 0, finishedAt = now(), message = saved, pendingUri = "") }
             host.events.add("job $id done in ${(SystemClock.elapsedRealtime() - started) / 1000}s, $peakDiagnostic")
         } catch (e: CancellationException) {
             when {
                 // pause() already put it back in line and wrote the list.
                 pauseRequested == id -> Unit
-                cancelRequested == id -> finishUnsuccessful(id, JobState.CANCELLED, "已取消")
+                cancelRequested == id -> finishUnsuccessful(id, JobState.CANCELLED, tr("已取消"))
                 else -> throw e
             }
         } catch (e: OutOfMemoryError) {
-            finishUnsuccessful(id, JobState.FAILED, "内存不足；请调小工作尺寸后重试")
+            finishUnsuccessful(id, JobState.FAILED, tr("内存不足；请调小工作尺寸后重试"))
             host.events.add("job $id failed: out of memory, $peakDiagnostic")
         } catch (e: Throwable) {
             finishUnsuccessful(id, JobState.FAILED, failureMessage(e))
@@ -430,7 +430,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         progress = 0f, phase = "", etaSeconds = -1, message = "")
 
     private fun failureMessage(e: Throwable): String = when (e) {
-        is SecurityException -> "无法再读取原图（访问权限已失效）；请重新打开照片后导出"
+        is SecurityException -> tr("无法再读取原图（访问权限已失效）；请重新打开照片后导出")
         else -> e.message ?: e.toString()
     }
 
@@ -454,7 +454,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 sampled(peakText(rssBefore, peakReset))
             }
         }
-        return host.transientSessions.withLease(onWaiting = { step("等待当前处理", 0.02f) }) {
+        return host.transientSessions.withLease(onWaiting = { step(tr("等待当前处理"), 0.02f) }) {
             // Waiting candidates must finish before the export's learning window starts.
             val rssBefore = ProcMemory.statusKb("VmRSS")
             val peakReset = ProcMemory.resetPeak()
@@ -487,17 +487,17 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             host.events.add("job ${job.id}: ${e.message ?: e}")
             when (e) {
                 is DeviceLostException -> {
-                    step("GPU 被重置，正在重试", 0.05f)
+                    step(tr("GPU 被重置，正在重试"), 0.05f)
                     host.recover(e.engine)
                 }
                 is BlankFrameException -> {
-                    step("画面异常，重建引擎后重试", 0.05f)
+                    step(tr("画面异常，重建引擎后重试"), 0.05f)
                     host.recover(e.engine, "render integrity failure")
                 }
                 // Java heap or native allocation: what the failed attempt held is
                 // released by now (process's finally), and the retry trims the
                 // GPU pool before it opens.
-                else -> step("内存不足，降档重试", 0.05f)
+                else -> step(tr("内存不足，降档重试"), 0.05f)
             }
             val smaller = smaller(job)
             set(job.id) { it.copy(workingEdge = smaller.workingEdge, maxPixels = smaller.maxPixels) }
@@ -508,15 +508,15 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             } catch (again: DeviceLostException) {
                 host.events.add("job ${job.id}: device lost again: ${again.message}")
                 host.recover(again.engine)   // the editor still needs a working engine
-                throw EngineException("GPU 连续两次被系统重置；请调小工作尺寸后重试")
+                throw EngineException(tr("GPU 连续两次被系统重置；请调小工作尺寸后重试"))
             } catch (again: BlankFrameException) {
                 host.events.add("job ${job.id}: blank again: ${again.message}")
                 host.recover(again.engine, "repeated render integrity failure")
-                throw EngineException("导出画面两次异常（${again.what}），未保存；请调小工作尺寸后重试")
+                throw EngineException(tr("导出画面两次异常（{0}），未保存；请调小工作尺寸后重试", again.what))
             } catch (again: Throwable) {
                 if (!isOutOfMemory(again)) throw again
                 host.events.add("job ${job.id}: out of memory again: ${again.message ?: again}")
-                throw EngineException("内存不足，降档后仍失败；请调小工作尺寸后重试")
+                throw EngineException(tr("内存不足，降档后仍失败；请调小工作尺寸后重试"))
             }
         }
     }
@@ -646,14 +646,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         error.startsWith("cannot allocate a ") || "(VkResult -1)" in error || "(VkResult -2)" in error
 
     private fun blankReason(error: String): String = when {
-        "non-finite RGB" in error -> "像素计算异常"
-        "incomplete GPU validation" in error -> "GPU 计算不完整"
-        "RGBA16 alpha" in error -> "像素不完整"
-        "frame layout" in error || "RGB layout" in error -> "像素布局异常"
-        "black" in error -> "全黑"
-        "white" in error -> "全白"
-        "solid colour" in error -> "纯色"
-        else -> "无像素"
+        "non-finite RGB" in error -> tr("像素计算异常")
+        "incomplete GPU validation" in error -> tr("GPU 计算不完整")
+        "RGBA16 alpha" in error -> tr("像素不完整")
+        "frame layout" in error || "RGB layout" in error -> tr("像素布局异常")
+        "black" in error -> tr("全黑")
+        "white" in error -> tr("全白")
+        "solid colour" in error -> tr("纯色")
+        else -> tr("无像素")
     }
 
     /**
@@ -740,7 +740,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     /** Records the pending gallery entry before a byte is written. Any thread. */
     private fun markPending(id: Long, uri: Uri) {
         set(id) { it.copy(pendingUri = uri.toString()) }
-        if (!persist(sync = true)) throw EngineException("无法记录相册写入状态")
+        if (!persist(sync = true)) throw EngineException(tr("无法记录相册写入状态"))
     }
 
     /**
@@ -753,10 +753,10 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private suspend fun processSheet(job: ProcessingJob, step: (String, Float) -> Unit): String {
         val store = FrameStore.of(app)
         val roll = withContext(Dispatchers.IO) { store.load(); RollContactSheet.restore(store, job.sheetJson) }
-            ?: throw EngineException("这卷的照片都已从观片台移除，印样没有保存")
-        step("排版", 0.05f)
+            ?: throw EngineException(tr("这卷的照片都已从观片台移除，印样没有保存"))
+        step(tr("排版"), 0.05f)
         return RollContactSheet.export(app, store, roll, job.maxPixels,
-            progress = { done, total -> step("排版 $done / $total", 0.05f + 0.85f * done / max(1, total)) },
+            progress = { done, total -> step(tr("排版 {0} / {1}", done, total), 0.05f + 0.85f * done / max(1, total)) },
             onCreated = { markPending(job.id, it) })
     }
 
@@ -768,7 +768,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // The copy made at enqueue when the URI's grant could not be kept.
         val local = job.sourcePath.takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }
         val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
-        step("读取照片", 0.05f)
+        step(tr("读取照片"), 0.05f)
         val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri, fillKey = Uri.parse(job.uri)) }.withLocation(ExifLocation.decode(job.location))
         // The film edge lays the frame on a canvas up to CANVAS_AREA times its
         // area, and the canvas, not the frame, is the one GPU plane that has to
@@ -792,14 +792,14 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                 try {
                     if (local == null) withContext(Dispatchers.IO) { input = loader.rawInput(uri, job.name, "job") }
                     val path = local?.absolutePath ?: input!!.path
-                    step("解码 RAW", 0.12f)
+                    step(tr("解码 RAW"), 0.12f)
                     // trimMemory is engine-wide (EngineThread); the session is the export's own.
                     withContext(EngineThread.dispatcher) { NativeEngine.trimMemory(engine) }
                     withRawOpenCancellation { cancellation ->
                         withContext(ExportThread.dispatcher) {
                             val params = Edit.openingParams(edit, inputSpace = "ProPhoto RGB", linear = true).toString()
                             val h = NativeEngine.openRawCancellableV1(engine, path, job.workingEdge, maxPixels, params, job.wbK, job.wbTint, cancellation)
-                            if (h == 0L) engineFailure(engine, "打开失败")
+                            if (h == 0L) engineFailure(engine, tr("打开失败"))
                             handle = h
                             synchronized(handleLock) { runningHandle = h }
                         }
@@ -808,7 +808,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     input?.close()
                 }
             } else {
-                step("解码照片", 0.10f)
+                step(tr("解码照片"), 0.10f)
                 var photo: Photo? = null
                 try {
                     withContext(Dispatchers.IO) { photo = loader.decodePhoto(uri, job.workingEdge, maxPixels) }
@@ -819,7 +819,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                         val h = openPhotoSession(engine, opening, job.highlightStops) { space, linear ->
                             Edit.openingParams(edit, inputSpace = space, linear = linear).toString()
                         }.handle
-                        if (h == 0L) engineFailure(engine, "打开失败")
+                        if (h == 0L) engineFailure(engine, tr("打开失败"))
                         handle = h
                         synchronized(handleLock) { runningHandle = h }
                     }
@@ -830,19 +830,19 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             // The file's own space, through the CAM16 export path (upstream's export
             // transform, lightness shoulder off). TIFF selects a local transform below.
             withContext(ExportThread.dispatcher) {
-                if (!NativeEngine.setOutput(handle, outSpace, true)) engineFailure(engine, "导出失败")
+                if (!NativeEngine.setOutput(handle, outSpace, true)) engineFailure(engine, tr("导出失败"))
             }
             // Layer 2 rides on the job's own session: every pack below goes through it.
             Look.fromJson(job.lookJson.takeIf { it.isNotEmpty() }?.let { JSONObject(it) }).let { look ->
                 withContext(ExportThread.dispatcher) {
                     UserLibrary.get(app).applyLut(handle, look, null)
                     if (!NativeEngine.setLook(handle, if (look.neutral) null else look.values()))
-                        engineFailure(engine, "应用调整失败")
+                        engineFailure(engine, tr("应用调整失败"))
                 }
             }
             val stem = "Spektralab-X_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(Date()) + "_" + (job.id % 1000)
             yieldToEditor(render = true, extreme = job.extreme)
-            step(if (job.extreme) "高质量冲洗" else "冲洗", 0.25f)
+            step(if (job.extreme) tr("高质量冲洗") else tr("冲洗"), 0.25f)
             when (job.format) {
                 ExportFormat.TIFF -> {
                     // Rendered straight into a pending entry (the gallery hides it), so
@@ -867,7 +867,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                     if (fallback.isFile) {
                                         fallback.absolutePath to "Display P3"
                                     } else {
-                                        throw EngineException("Display P3 ICC 配置文件不可用")
+                                        throw EngineException(tr("Display P3 ICC 配置文件不可用"))
                                     }
                                 } else {
                                     val tmpIcc = File(app.cacheDir, "export_p3.icc")
@@ -891,18 +891,18 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                         }
 
                         withContext(Dispatchers.IO) {
-                            val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException("无法写入文件")
+                            val pfd = app.contentResolver.openFileDescriptor(target, "w") ?: throw EngineException(tr("无法写入文件"))
                             pfd.use {
                                 // engineFailure reads this thread's error, so it stays inside.
                                 rendering(job) {
                                     withContext(ExportThread.dispatcher) {
                                         if (!NativeEngine.exportTiffFd(handle, it.fd, iccPath, targetSpace, job.size.tier))
-                                            engineFailure(engine, "导出失败")
+                                            engineFailure(engine, tr("导出失败"))
                                     }
                                 }
                             }
                         }
-                        step("校验", 0.94f)
+                        step(tr("校验"), 0.94f)
                         withContext(Dispatchers.IO) {
                             MediaSaver.checkTiff(app, target)
                             MediaSaver.publish(app, target)
@@ -931,18 +931,18 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                             val shape = rendering(job) {
                                 withContext(ExportThread.dispatcher) {
                                     NativeEngine.exportJpeg444(handle, part.absolutePath, job.size.tier, 98, streamProfile)
-                                        .takeIf { it != 0L } ?: engineFailure(engine, "导出失败")
+                                        .takeIf { it != 0L } ?: engineFailure(engine, tr("导出失败"))
                                 }
                             }
                             val width = (shape ushr 32).toInt()
                             val height = (shape and 0xffffffffL).toInt()
-                            step("校验", 0.90f)
+                            step(tr("校验"), 0.90f)
                             val description = withContext(Dispatchers.IO) {
                                 exif.applyTo(part, width, height, wide = wide)
                                 MediaSaver.checkJpeg(part, width, height)
                                 "$name · ${width}×${height} · " + String.format(Locale.ROOT, "%.2f MB", part.length() / 1_000_000.0)
                             }
-                            step("写入相册", 0.92f)
+                            step(tr("写入相册"), 0.92f)
                             withContext(Dispatchers.IO) {
                                 MediaSaver.saveFile(app, part, name, "image/jpeg") { markPending(job.id, it) }
                             }
@@ -954,12 +954,12 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                     }
                     val bitmap: Bitmap = rendering(job) {
                         withContext(ExportThread.dispatcher) {
-                            NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, "导出失败")
+                            NativeEngine.exportBitmap(handle, job.size.tier) ?: engineFailure(engine, tr("导出失败"))
                         }
                     }
                     // The pixels are P3 already; tag them so compress embeds the profile.
                     if (wide) runCatching { bitmap.setColorSpace(android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.DISPLAY_P3)) }
-                    step("编码", 0.88f)
+                    step(tr("编码"), 0.88f)
                     val name = if (heif) "$stem.heic" else "$stem.jpg"
                     var savedDescription = name
                     try {
@@ -982,7 +982,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                         val full = job.extreme && encode444(job.id, out, part, wide, ready.dir)
                                         if (!full) {
                                             val encoded = part.outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, if (job.extreme) 98 else 95, it) }
-                                            if (!encoded) throw EngineException("JPEG 编码失败")
+                                            if (!encoded) throw EngineException(tr("JPEG 编码失败"))
                                         }
                                         exif.applyTo(part, out.width, out.height, wide = wide)
                                         MediaSaver.checkJpeg(part, out.width, out.height)
@@ -998,7 +998,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
                                 throw e
                             }
                         }
-                        step("写入相册", 0.92f)
+                        step(tr("写入相册"), 0.92f)
                         try {
                             withContext(Dispatchers.IO) {
                                 MediaSaver.saveFile(app, part, name, if (heif) "image/heic" else "image/jpeg") { markPending(job.id, it) }
@@ -1051,7 +1051,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             val file = File(sourcesDir, "${job.id}_$safe")
             val part = File(sourcesDir, "${job.id}_$safe.part")
             try {
-                (resolver.openInputStream(uri) ?: throw EngineException("无法读取该文件")).use { i ->
+                (resolver.openInputStream(uri) ?: throw EngineException(tr("无法读取该文件"))).use { i ->
                     part.outputStream().use { o -> i.copyTo(o, 1 shl 20) }
                 }
                 if (!part.renameTo(file)) throw EngineException("cannot keep a copy of the source")
@@ -1095,8 +1095,8 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         val entry = MediaSaver.discardIfPending(app, Uri.parse(latest.pendingUri))
         when (entry.state) {
             GalleryState.PUBLISHED -> {
-                set(job.id) { it.copy(state = JobState.DONE, progress = 1f, phase = "完成", etaSeconds = 0,
-                    finishedAt = now(), message = entry.name.ifEmpty { "已保存到相册" }, pendingUri = "") }
+                set(job.id) { it.copy(state = JobState.DONE, progress = 1f, phase = tr("完成"), etaSeconds = 0,
+                    finishedAt = now(), message = entry.name.ifEmpty { tr("已保存到相册") }, pendingUri = "") }
                 host.events.add("job ${job.id}: already saved as ${entry.name}")
                 true
             }
@@ -1106,7 +1106,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
             }
             GalleryState.UNKNOWN, GalleryState.PENDING -> {
                 set(job.id) { it.copy(state = JobState.FAILED, etaSeconds = 0, finishedAt = now(),
-                    message = "相册写入结果暂时无法确认；请稍后重试核对") }
+                    message = tr("相册写入结果暂时无法确认；请稍后重试核对")) }
                 host.events.add("job ${job.id}: gallery result unknown; URI retained")
                 true
             }
@@ -1294,9 +1294,9 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         }
 
         fun formatEta(seconds: Int): String = when {
-            seconds <= 0 -> "即将完成"
-            seconds < 60 -> "$seconds 秒"
-            else -> "${seconds / 60} 分 ${min(59, seconds % 60)} 秒"
+            seconds <= 0 -> tr("即将完成")
+            seconds < 60 -> tr("{0} 秒", seconds)
+            else -> tr("{0} 分 {1} 秒", seconds / 60, min(59, seconds % 60))
         }
     }
 }

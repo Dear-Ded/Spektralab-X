@@ -175,10 +175,10 @@ object FilmThumbs {
                 if (h == 0L) return@withContext
                 try {
                     if (!NativeEngine.setOutput(h, DisplayColor.space, false))
-                        throw EngineException("缩略图输出设置失败：${NativeEngine.lastError()}")
+                        throw EngineException(tr("缩略图输出设置失败：{0}", NativeEngine.lastError()))
                     UserLibrary.get(app).applyLut(h, edit.look, null)
                     if (!NativeEngine.setLook(h, if (edit.look.neutral) null else edit.look.values()))
-                        throw EngineException("缩略图调整失败：${NativeEngine.lastError()}")
+                        throw EngineException(tr("缩略图调整失败：{0}", NativeEngine.lastError()))
                     output = NativeEngine.renderBitmap(h, "full")
                     output?.let(DisplayColor::tag)
                 } finally {

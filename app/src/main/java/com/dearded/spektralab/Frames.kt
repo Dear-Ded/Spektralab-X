@@ -125,8 +125,8 @@ data class FrameSpec(
         }.getOrDefault(FrameSpec())
 
         /** Band layouts. All but "classic" have a logo slot (UI.md appendix E.2, data bars). */
-        val CAPTION_LAYOUTS = listOf(
-            "classic" to "纯文字", "split" to "双栏", "center" to "居中", "line" to "单行", "film" to "胶片信息",
+        val CAPTION_LAYOUTS get() = listOf(
+            "classic" to tr("纯文字"), "split" to tr("双栏"), "center" to tr("居中"), "line" to tr("单行"), "film" to tr("胶片信息"),
         )
 
         private fun luminance(c: Int): Float {
@@ -518,14 +518,17 @@ object BrandCaption {
  */
 data class BorderPreset(
     val id: String,
-    val label: String,
-    val hint: String,
+    private val labelText: String,
+    private val hintText: String,
     val edge: EdgeSpec?,
     val frame: FrameSpec,
     val crop: Double = 0.0,
     /** A date back the preset turns on (null leaves the date switch as it was). */
     val date: DateBack? = null,
-)
+) {
+    val label: String get() = tr(labelText)
+    val hint: String get() = tr(hintText)
+}
 
 /** The date back a preset sets: the face, the corner and how bright the LEDs burn in. */
 data class DateBack(

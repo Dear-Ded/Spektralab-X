@@ -122,7 +122,7 @@ fun RollView(
         TableHead(
             title = roll.title,
             subtitle = roll.edgeLine,
-            backLabel = "返回卷列表",
+            backLabel = tr("返回卷列表"),
             onBack = onBack,
             titleLeading = { Box(Modifier.size(6.dp).background(roll.process.color, CircleShape)); Spacer(Modifier.size(8.dp)) },
             trailing = {
@@ -133,17 +133,17 @@ fun RollView(
                     var naming by remember { mutableStateOf(false) }
                     Box {
                         IconButton(onClick = { menu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "卷操作")
+                            Icon(Icons.Default.MoreVert, contentDescription = tr("卷操作"))
                         }
                         androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                            androidx.compose.material3.DropdownMenuItem(text = { Text("改卷名") },
+                            androidx.compose.material3.DropdownMenuItem(text = { Text(tr("改卷名")) },
                                 onClick = { menu = false; naming = true })
-                            androidx.compose.material3.DropdownMenuItem(text = { Text("拆卷（照片回到自动分卷）") },
+                            androidx.compose.material3.DropdownMenuItem(text = { Text(tr("拆卷（照片回到自动分卷）")) },
                                 onClick = { menu = false; table.dissolveRoll(id) })
                         }
                     }
                     if (naming) RollNameDialog(
-                        title = "改卷名", hint = "最多 40 个字", initial = roll.name, confirm = "改名",
+                        title = tr("改卷名"), hint = tr("最多 40 个字"), initial = roll.name, confirm = tr("改名"),
                         onDismiss = { naming = false },
                         onDone = { name -> naming = false; table.renameRoll(id, name) },
                     )
@@ -159,11 +159,11 @@ fun RollView(
             },
         ) {
             Segmented(
-                options = listOf("片条", "印样"), selected = if (contact) 1 else 0,
+                options = listOf(tr("片条"), tr("印样")), selected = if (contact) 1 else 0,
                 modifier = Modifier.width(132.dp),
             ) { i -> contact = i == 1 }
-            QuietButton("比较风格") { table.compare(frames[at]) }
-            QuietButton("复制调整") { table.copyLook(frames[at]) }
+            QuietButton(tr("比较风格")) { table.compare(frames[at]) }
+            QuietButton(tr("复制调整")) { table.copyLook(frames[at]) }
         }
     }
 }
@@ -176,13 +176,13 @@ private fun ExportButton(onRoll: () -> Unit, onContactSheet: () -> Unit) {
         Box(
             Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
                 .clickable(role = androidx.compose.ui.semantics.Role.Button) { menu = true }
-                .semantics { contentDescription = "导出" },
+                .semantics { contentDescription = tr("导出") },
             contentAlignment = Alignment.Center,
-        ) { Text("导出", style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
+        ) { Text(tr("导出"), style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
         androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            androidx.compose.material3.DropdownMenuItem(text = { Text("导出本卷（每张一个 JPEG）") },
+            androidx.compose.material3.DropdownMenuItem(text = { Text(tr("导出本卷（每张一个 JPEG）")) },
                 onClick = { menu = false; onRoll() })
-            androidx.compose.material3.DropdownMenuItem(text = { Text("导出印样（整卷一张）") },
+            androidx.compose.material3.DropdownMenuItem(text = { Text(tr("导出印样（整卷一张）")) },
                 onClick = { menu = false; onContactSheet() })
         }
     }
@@ -264,7 +264,7 @@ private fun StripFrame(
     Column(
         Modifier.width(gateW + 4.dp)
             .clickable(onClick = onClick)
-            .semantics { contentDescription = "第 ${frameNumber(index)} 格，" + describe(f) },
+            .semantics { contentDescription = tr("第 {0} 格，", frameNumber(index)) + describe(f) },
     ) {
         EdgeText(if (index % 2 == 1 || index == 0) roll.edgeModel else "", "", ink)
         Sprockets(holes = if (wide) 8 else 4)
@@ -323,7 +323,7 @@ private fun Scrubber(count: Int, current: Int, onJump: (Int) -> Unit) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Canvas(
             Modifier.fillMaxWidth().height(32.dp)
-                .semantics { contentDescription = "第 ${current + 1} 格，共 $count 格" }
+                .semantics { contentDescription = tr("第 {0} 格，共 {1} 格", current + 1, count) }
                 .pointerInput(count) {
                     fun indexAt(x: Float) = ((x / size.width) * count).toInt().coerceIn(0, count - 1)
                     detectTapGestures { jump(indexAt(it.x)) }
@@ -368,7 +368,7 @@ private fun ContactSheet(table: LightTableViewModel, roll: Roll, onOpen: (Int) -
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             itemsIndexed(roll.frames, key = { _, f -> f.id }, contentType = { _, _ -> "frame" }) { i, f ->
-                Column(Modifier.clickable { onOpen(i) }.semantics { contentDescription = "第 ${frameNumber(i)} 格，" + describe(f) }) {
+                Column(Modifier.clickable { onOpen(i) }.semantics { contentDescription = tr("第 {0} 格，", frameNumber(i)) + describe(f) }) {
                     Box(Modifier.fillMaxWidth().aspectRatio(1.5f).clip(RoundedCornerShape(2.dp)).background(Color.Black)) {
                         FrameImage(table, f, px, { abs(i - grid.firstVisibleItemIndex) },
                             if (f.landscape) ContentScale.Crop else ContentScale.Fit)

@@ -57,8 +57,8 @@ fun QueueSheet(
         val done = jobs.filter { !it.active }.sortedByDescending { it.finishedAt }
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding()) {
             PanelHeader(
-                title = "正在处理",
-                hint = "可以切到后台，进度在实时通知里。",
+                title = tr("正在处理"),
+                hint = tr("可以切到后台，进度在实时通知里。"),
             )
             Spacer(Modifier.height(RowGap))
             Summary(active, saved = done.count { it.state == JobState.DONE },
@@ -67,12 +67,12 @@ fun QueueSheet(
             // Height follows the list, up to about half the screen; the sheet scrolls no further.
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
                 if (active.isNotEmpty()) {
-                    item(key = "h-active") { GroupHead("进行中", active.size) }
+                    item(key = "h-active") { GroupHead(tr("进行中"), active.size) }
                     items(active, key = { it.id }) { job -> JobRow(job, onCancel, onRetry) }
                 }
                 if (done.isNotEmpty()) {
                     item(key = "h-done") {
-                        GroupHead("已完成", done.size) { QuietButton("清除", onClick = onClear) }
+                        GroupHead(tr("已完成"), done.size) { QuietButton(tr("清除"), onClick = onClear) }
                     }
                     items(done, key = { it.id }) { job -> JobRow(job, onCancel, onRetry) }
                 }
@@ -95,18 +95,18 @@ private fun Summary(active: List<ProcessingJob>, saved: Int, failed: Int) {
             // Only what was saved counts as done; a failure is named, never folded in.
             Text(
                 when {
-                    failed > 0 -> "$failed 张没有完成" + if (saved > 0) " · $saved 张已保存" else ""
-                    saved > 0 -> "全部完成 · $saved 张已保存"
-                    else -> "没有进行中的任务"
+                    failed > 0 -> tr("{0} 张没有完成", failed) + if (saved > 0) tr(" · {0} 张已保存", saved) else ""
+                    saved > 0 -> tr("全部完成 · {0} 张已保存", saved)
+                    else -> tr("没有进行中的任务")
                 },
                 style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
             )
         } else {
             val left = ProcessingQueue.formatEta(ProcessingQueue.remainingSeconds(active))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${active.size} 张", style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
+                Text(tr("{0} 张", active.size), style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurface,
                     modifier = Modifier.weight(1f))
-                Text("还需约 $left", style = Readout, color = Palette.OnSurfaceSoft)
+                Text(tr("还需约 {0}", left), style = Readout, color = Palette.OnSurfaceSoft)
             }
             Spacer(Modifier.height(8.dp))
             // The whole queue, counting a running job by its own progress.
@@ -138,12 +138,12 @@ private fun GroupHead(title: String, count: Int, trailing: @Composable () -> Uni
 @Composable
 private fun JobRow(job: ProcessingJob, onCancel: (Long) -> Unit, onRetry: (Long) -> Unit) {
     val status = when (job.state) {
-        JobState.QUEUED -> "排队中 · ${job.label}"
-        JobState.RUNNING -> "${job.phase.ifEmpty { "处理中" }} · ${job.label} · 剩余约 " +
+        JobState.QUEUED -> tr("排队中 · {0}", job.label)
+        JobState.RUNNING -> tr("{0} · {1} · 剩余约 ", job.phase.ifEmpty { tr("处理中") }, job.label) +
             ProcessingQueue.formatEta(job.etaSeconds)
-        JobState.DONE -> "已保存 · ${job.label}"
-        JobState.FAILED -> "没有完成：${job.message}"
-        JobState.CANCELLED -> "已取消"
+        JobState.DONE -> tr("已保存 · {0}", job.label)
+        JobState.FAILED -> tr("没有完成：{0}", job.message)
+        JobState.CANCELLED -> tr("已取消")
     }
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 6.dp)
@@ -163,9 +163,9 @@ private fun JobRow(job: ProcessingJob, onCancel: (Long) -> Unit, onRetry: (Long)
             )
         }
         when {
-            job.active -> QuietButton("取消") { onCancel(job.id) }
+            job.active -> QuietButton(tr("取消")) { onCancel(job.id) }
             job.state == JobState.FAILED || job.state == JobState.CANCELLED ->
-                TonalButton("重试") { onRetry(job.id) }
+                TonalButton(tr("重试")) { onRetry(job.id) }
         }
     }
 }

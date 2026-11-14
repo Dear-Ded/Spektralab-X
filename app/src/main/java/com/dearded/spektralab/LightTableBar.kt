@@ -89,7 +89,7 @@ internal fun TableBar(rolls: Boolean, onGrid: () -> Unit, onRolls: () -> Unit, a
         AddButton(add)
     }) {
         Segmented(
-            options = listOf("网格", "按卷"), selected = if (rolls) 1 else 0,
+            options = listOf(tr("网格"), tr("按卷")), selected = if (rolls) 1 else 0,
             modifier = Modifier.weight(1f),
         ) { i -> if (i == 0) onGrid() else onRolls() }
     }
@@ -106,12 +106,12 @@ internal fun AddButton(add: AddPhotos) {
             colors = IconButtonDefaults.iconButtonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
         ) {
             Box(Modifier.size(64.dp).background(Palette.Accent, Corners.full), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Add, contentDescription = "添加照片", tint = Palette.OnAccent)
+                Icon(Icons.Default.Add, contentDescription = tr("添加照片"), tint = Palette.OnAccent)
             }
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            DropdownMenuItem(text = { Text("从相册添加") }, onClick = { menu = false; add.gallery() })
-            DropdownMenuItem(text = { Text("从文件添加（RAW / DNG）") }, onClick = { menu = false; add.files() })
+            DropdownMenuItem(text = { Text(tr("从相册添加")) }, onClick = { menu = false; add.gallery() })
+            DropdownMenuItem(text = { Text(tr("从文件添加（RAW / DNG）")) }, onClick = { menu = false; add.files() })
         }
     }
 }

@@ -50,8 +50,10 @@ data class MaskTone(
     }
 }
 
-enum class MaskKind(val key: String, val label: String) {
+enum class MaskKind(val key: String, private val message: String) {
     LINEAR("linear", "线性渐变"), RADIAL("radial", "径向渐变"), BRUSH("brush", "画笔");
+
+    val label get() = tr(message)
 
     companion object { fun of(key: String) = entries.firstOrNull { it.key == key } }
 }

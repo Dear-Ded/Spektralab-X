@@ -76,21 +76,21 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            String.format(Locale.ROOT, "色调 %+.0f · 色彩 %+.0f", look.tone, look.colour),
+            String.format(Locale.ROOT, tr("色调 %+.0f · 色彩 %+.0f"), look.tone, look.colour),
             style = Readout, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f),
         )
-        if (!talkBack) TextButton(onClick = { numbers = !numbers }) { Text(if (numbers) "调色盘" else "数值") }
+        if (!talkBack) TextButton(onClick = { numbers = !numbers }) { Text(if (numbers) tr("调色盘") else tr("数值")) }
         TextButton(
             onClick = { view.tick(strong = true); onChange(look.copy(tone = look.toneHome, colour = look.colourHome)) },
             enabled = enabled && !atHome,
-        ) { Text("复位") }
+        ) { Text(tr("复位")) }
     }
 
     if (talkBack || numbers) {
-        LabeledSlider("色调", look.tone, -100.0, 100.0, look.toneHome, enabled, "%+.0f", onDrag) {
+        LabeledSlider(tr("色调"), look.tone, -100.0, 100.0, look.toneHome, enabled, "%+.0f", onDrag) {
             onChange(lookLatest.copy(tone = it))
         }
-        LabeledSlider("色彩", look.colour, -100.0, 100.0, look.colourHome, enabled, "%+.0f", onDrag) {
+        LabeledSlider(tr("色彩"), look.colour, -100.0, 100.0, look.colourHome, enabled, "%+.0f", onDrag) {
             onChange(lookLatest.copy(colour = it))
         }
     } else {
@@ -117,10 +117,10 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
         Canvas(
             Modifier.fillMaxWidth().padding(vertical = 6.dp).height(116.dp).systemGestureExclusion()
                 .clearAndSetSemantics {
-                    contentDescription = "调色盘"
-                    stateDescription = String.format(Locale.ROOT, "色调 %+.0f，色彩 %+.0f", tone, colour)
+                    contentDescription = tr("调色盘")
+                    stateDescription = String.format(Locale.ROOT, tr("色调 %+.0f，色彩 %+.0f"), tone, colour)
                     if (enabled) customActions = listOf(
-                        CustomAccessibilityAction("回到默认") { send(homeT, homeC); true },
+                        CustomAccessibilityAction(tr("回到默认")) { send(homeT, homeC); true },
                     )
                 }
                 .pointerInput(enabled, homeT, homeC) {
@@ -213,14 +213,14 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
             if (fine) drawCircle(Palette.Accent, r + 5.dp.toPx(), p, style = Stroke(2.dp.toPx()))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("淡", style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
-            Text("上：通透 · 下：浓郁 · 长按后拖动可微调", style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
-            Text("浓", style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
+            Text(tr("淡"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
+            Text(tr("上：通透 · 下：浓郁 · 长按后拖动可微调"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
+            Text(tr("浓"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
         }
     }
 
     Spacer(Modifier.padding(top = 4.dp))
-    LabeledSlider("风格强度", look.palette, 0.0, 100.0, 100.0, enabled, "%.0f", onDrag) {
+    LabeledSlider(tr("风格强度"), look.palette, 0.0, 100.0, 100.0, enabled, "%.0f", onDrag) {
         onChange(lookLatest.copy(palette = it))
     }
 }

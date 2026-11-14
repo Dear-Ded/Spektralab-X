@@ -64,7 +64,7 @@ internal class BenchmarkRunner(
 ) {
     suspend fun run(onProgress: (String, Float) -> Unit = { _, _ -> }): BenchmarkOutcome = coroutineScope {
         val before = headroom()
-        if (BenchmarkPolicy.thermalGate(before) == ThermalGate.HOT) return@coroutineScope BenchmarkOutcome.TooHot(before, "开始前")
+        if (BenchmarkPolicy.thermalGate(before) == ThermalGate.HOT) return@coroutineScope BenchmarkOutcome.TooHot(before, tr("开始前"))
         val reset = resetPeak()
         val rss0 = rssKb()
         val edge = BenchmarkPolicy.TEST_EDGE
@@ -73,7 +73,7 @@ internal class BenchmarkRunner(
         // is blocked in native render. Join it before releasing the session.
         var watcher: kotlinx.coroutines.Job? = null
         try {
-            onProgress("准备合成图", 0.05f)
+            onProgress(tr("准备合成图"), 0.05f)
             backend.open(edge)
             watcher = launch(Dispatchers.Unconfined, start = CoroutineStart.UNDISPATCHED) {
                 try {
@@ -83,16 +83,16 @@ internal class BenchmarkRunner(
                 }
             }
 
-            hot("首次预览")?.let { return@coroutineScope it }
-            onProgress("首次预览", 0.2f)
+            hot(tr("首次预览"))?.let { return@coroutineScope it }
+            onProgress(tr("首次预览"), 0.2f)
             val firstMs = timed { backend.firstPreview() }
 
-            hot("切换风格")?.let { return@coroutineScope it }
-            onProgress("切换风格", 0.45f)
+            hot(tr("切换风格"))?.let { return@coroutineScope it }
+            onProgress(tr("切换风格"), 0.45f)
             val samples = List(STYLE_SAMPLES) { i -> timed { backend.switchStyle(i) } }
 
-            hot("导出")?.let { return@coroutineScope it }
-            onProgress("导出", 0.7f)
+            hot(tr("导出"))?.let { return@coroutineScope it }
+            onProgress(tr("导出"), 0.7f)
             val exportMs = timed { backend.export() }
 
             val after = headroom()
@@ -100,7 +100,7 @@ internal class BenchmarkRunner(
             val growthMb = if (reset && rss0 >= 0 && peak >= rss0) (peak - rss0) / 1024 else -1L
             val switchMs = median(samples)
             val advice = BenchmarkPolicy.advise(edge, switchMs, exportMs, growthMb, after, maxPixels, peakBudgetMb)
-            onProgress("完成", 1f)
+            onProgress(tr("完成"), 1f)
             BenchmarkOutcome.Done(BenchmarkResult(edge, firstMs, switchMs, exportMs, growthMb, before, after, advice, wallClockMs()))
         } catch (e: CancellationException) {
             throw e

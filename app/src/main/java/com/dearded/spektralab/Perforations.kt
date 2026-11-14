@@ -116,7 +116,7 @@ data class Perforation(
         const val HOLE_LIGHT = 0xFFF3F1EB.toInt()      // light through the holes
         const val HOLE_DARK = 0xFF0E0D0C.toInt()
 
-        val BASES = listOf(BASE_BLACK to "黑 · 扫描", BASE_C41 to "橙 · 负片", BASE_E6 to "透明 · 反转", BASE_BW to "灰 · 黑白")
+        val BASES get() = listOf(BASE_BLACK to tr("黑 · 扫描"), BASE_C41 to tr("橙 · 负片"), BASE_E6 to tr("透明 · 反转"), BASE_BW to tr("灰 · 黑白"))
 
         /** Holes that show against [base]: light on a dark base, dark on a light one. */
         fun holesFor(base: Int) = if (luma(base) < 0.5f) HOLE_LIGHT else HOLE_DARK

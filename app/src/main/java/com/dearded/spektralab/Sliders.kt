@@ -138,7 +138,7 @@ internal fun LabeledSlider(
             Box(
                 Modifier.heightIn(min = 48.dp).clip(Corners.m)
                     .clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.Button) { typing = true }
-                    .semantics { contentDescription = "输入$label" }
+                    .semantics { contentDescription = tr("输入{0}", label) }
                     .padding(horizontal = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -151,7 +151,7 @@ internal fun LabeledSlider(
                 if (changed && enabled) {
                     Box(
                         Modifier.size(48.dp).clip(CircleShape).clickable(role = androidx.compose.ui.semantics.Role.Button) { reset() }
-                            .semantics { contentDescription = "重置$label" },
+                            .semantics { contentDescription = tr("重置{0}", label) },
                         contentAlignment = Alignment.Center,
                     ) { Text("↺", fontSize = 18.sp, color = Palette.OnSurface) }
                 }
@@ -169,7 +169,7 @@ internal fun LabeledSlider(
                     if (!enabled) disabled()
                     else {
                         setProgress { target -> moveTo(snapToStep(target, lo, hi, step)); true }
-                        customActions = listOf(CustomAccessibilityAction("重置") { reset(); true })
+                        customActions = listOf(CustomAccessibilityAction(tr("重置")) { reset(); true })
                     }
                 }
                 .pointerInput(enabled, lo, hi, def, step) {
@@ -275,7 +275,7 @@ internal fun LabeledSlider(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Text("范围 ${text(lo)} 到 ${text(hi)}，默认 ${text(def)}",
+                    Text(tr("范围 {0} 到 {1}，默认 {2}", text(lo), text(hi), text(def)),
                         style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
                         modifier = Modifier.padding(top = 6.dp))
                 }
@@ -284,9 +284,9 @@ internal fun LabeledSlider(
                 androidx.compose.material3.TextButton(enabled = parsed != null, onClick = {
                     parsed?.let { moveTo(it.coerceIn(lo, hi)) }
                     typing = false
-                }) { Text("确定") }
+                }) { Text(tr("确定")) }
             },
-            dismissButton = { androidx.compose.material3.TextButton(onClick = { typing = false }) { Text("取消") } },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { typing = false }) { Text(tr("取消")) } },
         )
     }
 }
@@ -314,15 +314,15 @@ val LocalSliderDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean
  * well-exposed print sits around the middle.
  */
 internal fun exposureVerdict(h: Histogram): String {
-    if (h.clippedHigh > 0.05f && h.clippedHigh > h.clippedLow) return "偏亮，高光有溢出"
-    if (h.clippedLow > 0.10f && h.clippedLow > h.clippedHigh) return "偏暗，暗部有溢出"
+    if (h.clippedHigh > 0.05f && h.clippedHigh > h.clippedLow) return tr("偏亮，高光有溢出")
+    if (h.clippedLow > 0.10f && h.clippedLow > h.clippedHigh) return tr("偏暗，暗部有溢出")
     var n = 0L; var sum = 0.0
     h.y.forEachIndexed { i, c -> n += c; sum += c * (i + 0.5) }
-    if (n == 0L) return "正常"
+    if (n == 0L) return tr("正常")
     val mean = sum / n / Histogram.BINS
     return when {
-        mean < 0.28 -> "偏暗"
-        mean > 0.68 -> "偏亮"
-        else -> "正常"
+        mean < 0.28 -> tr("偏暗")
+        mean > 0.68 -> tr("偏亮")
+        else -> tr("正常")
     }
 }

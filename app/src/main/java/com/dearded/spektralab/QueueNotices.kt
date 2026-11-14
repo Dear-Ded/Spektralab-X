@@ -51,12 +51,12 @@ fun QueueNotices() {
         // A settings button records the hint as seen but keeps the card up, so
         // the other button is still there on return; 知道了 hides it.
         NoticeCard(
-            "上次导出被系统中断了。把省电策略设为“无限制”" + (if (KeepAlive.xiaomi) "、打开自启动" else "") +
-                "，切到后台时就不容易被打断。未完成的任务会自动继续。",
+            tr("上次导出被系统中断了。把省电策略设为“无限制”") + (if (KeepAlive.xiaomi) tr("、打开自启动") else "") +
+                tr("，切到后台时就不容易被打断。未完成的任务会自动继续。"),
             buildList<Pair<String, () -> Unit>> {
-                add("省电策略" to { KeepAlive.shown(context); KeepAlive.openBattery(context); Unit })
-                if (KeepAlive.xiaomi) add("自启动" to { KeepAlive.shown(context); KeepAlive.openAutostart(context); Unit })
-                add("知道了" to { KeepAlive.shown(context); keepAlive = false })
+                add(tr("省电策略") to { KeepAlive.shown(context); KeepAlive.openBattery(context); Unit })
+                if (KeepAlive.xiaomi) add(tr("自启动") to { KeepAlive.shown(context); KeepAlive.openAutostart(context); Unit })
+                add(tr("知道了") to { KeepAlive.shown(context); keepAlive = false })
             },
         )
     }
@@ -82,9 +82,12 @@ internal fun NoticeCard(text: String, actions: List<Pair<String, () -> Unit>>) {
  * The processing notice is off (all notifications) or kept out of the status
  * bar and lock screen (Android 16 Live Updates turned off for this app).
  */
-internal enum class NotificationNotice(val text: String, val action: String) {
+internal enum class NotificationNotice(private val message: String, private val actionMessage: String) {
     ALL_OFF("通知已关闭：后台处理时看不到进度，完成时也不会提醒。", "打开通知"),
     LIVE_OFF("实时通知已关闭：进度不会出现在状态栏、锁屏和超级岛，只在通知栏里。", "打开实时通知");
+
+    val text get() = tr(message)
+    val action get() = tr(actionMessage)
 
     companion object {
         fun of(context: Context): NotificationNotice? {

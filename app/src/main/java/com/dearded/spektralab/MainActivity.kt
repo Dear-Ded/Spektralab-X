@@ -12,18 +12,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(AppLocale.wrap(newBase))
+    }
+
     companion object {
         /** From the processing notification: open the 正在处理 list. */
         const val ACTION_SHOW_QUEUE = "com.dearded.spektralab.SHOW_QUEUE"
     }
 
     private val viewModel: EditorViewModel by viewModels()
+    private var incoming: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // ui-motion_splash.md 6: the system splash, then LaunchIntro from the same strip.
@@ -55,7 +65,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) { handleIntent(intent); Updater.onLaunch(this) }
         setContent {
             // Always dark: judging a print against a white UI skews it.
-            SpektraTheme {
+            AppLocaleHost { SpektraTheme {
                 CoachHost { AppScreens(viewModel) }; ImportHost(viewModel)
                 // Over everything, until the engine is ready (600 ms to 1.6 s) or a tap skips it.
                 var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
@@ -63,7 +73,7 @@ class MainActivity : ComponentActivity() {
                     val ui by viewModel.ui.collectAsState()
                     LaunchIntro(ready = ui.ready, onDone = { showIntro = false })
                 }
-            }
+            } }
         }
     }
 
@@ -88,10 +98,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent?) {
+        incoming?.cancel()
         if (intent?.action == ACTION_SHOW_QUEUE) { viewModel.showQueue(true); return }
         val uris: List<Uri> = when (intent?.action) {
             Intent.ACTION_SEND -> listOfNotNull(
@@ -105,7 +117,13 @@ class MainActivity : ComponentActivity() {
         }
         if (uris.isEmpty()) return
         // A photo opens in the editor; anything else is a style or film to import (StyleImport.kt).
-        if (SourceLoader(this).isExternalPhoto(uris.first(), intent?.type)) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
-        else ImportRequests.add(uris)
+        incoming = lifecycleScope.launch {
+            // A document provider can perform network IO even for its name or MIME type.
+            val photo = withContext(Dispatchers.IO) {
+                SourceLoader(applicationContext).isExternalPhoto(uris.first(), intent?.type)
+            }
+            if (photo) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
+            else ImportRequests.add(uris)
+        }
     }
 }

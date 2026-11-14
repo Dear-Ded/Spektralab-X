@@ -17,7 +17,7 @@ data class ManualRoll(val id: String, val name: String, val frames: List<String>
     companion object {
         fun fromJson(o: JSONObject): ManualRoll? = runCatching {
             val a = o.getJSONArray("frames")
-            ManualRoll(o.getString("id"), o.optString("name", "我的卷"),
+            ManualRoll(o.getString("id"), o.optString("name", tr("我的卷")),
                 (0 until a.length()).map { a.getString(it) }.distinct().take(Roll.LENGTH), o.optLong("created"))
         }.getOrNull()
     }
@@ -58,7 +58,7 @@ class ManualRolls private constructor(context: Context) {
         val now = System.currentTimeMillis()
         val chunks = take.chunked(Roll.LENGTH)
         val made = chunks.mapIndexed { i, c ->
-            ManualRoll("r$now-$i", if (chunks.size > 1) "$name · 卷 ${i + 1}" else name, c, now + i)
+            ManualRoll("r$now-$i", if (chunks.size > 1) tr("{0} · 卷 {1}", name, i + 1) else name, c, now + i)
         }
         withoutFrames(list, take.toSet()) + made to made.size
     }

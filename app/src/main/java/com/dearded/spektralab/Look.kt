@@ -175,8 +175,8 @@ data class Look(
         val NEUTRAL = Look()
 
         /** The eight HSL bands, as layer2.cpp's kBandHue. */
-        val BANDS = listOf("红" to 0xFFE0524A, "橙" to 0xFFE8913A, "黄" to 0xFFE8D24A, "绿" to 0xFF5EB65A,
-            "青" to 0xFF4AC0C8, "蓝" to 0xFF4A74E0, "紫" to 0xFF8A5AD8, "品红" to 0xFFD25AB0)
+        val BANDS get() = listOf(tr("红") to 0xFFE0524A, tr("橙") to 0xFFE8913A, tr("黄") to 0xFFE8D24A, tr("绿") to 0xFF5EB65A,
+            tr("青") to 0xFF4AC0C8, tr("蓝") to 0xFF4A74E0, tr("紫") to 0xFF8A5AD8, tr("品红") to 0xFFD25AB0)
 
         // The pad's reach at a full throw (|tone| or |colour| = 100), in the units of the
         // fields it moves. Up lifts the shadows, holds the highlights and lowers contrast;

@@ -52,7 +52,7 @@ fun AppScreens(editor: EditorViewModel) {
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
-                editor.showMessage("保存编辑记录失败：${e.message.orEmpty()}")
+                editor.showMessage(tr("保存编辑记录失败：{0}", e.message.orEmpty()))
             }
         }
     }
@@ -73,7 +73,7 @@ fun AppScreens(editor: EditorViewModel) {
     val editorUi = editor.ui.collectAsState()
     val catalog by remember(editorUi) { androidx.compose.runtime.derivedStateOf { editorUi.value.catalog } }
     val manual by table.manualRolls.rolls.collectAsState()
-    val rolls = remember(frames, catalog, manual) { rollsOf(frames, catalog, manual) }
+    val rolls = remember(frames, catalog, manual, AppLocale.language) { rollsOf(frames, catalog, manual) }
     val comparing = nav.compare?.let { id -> frames.firstOrNull { it.id == id } }
     val roll = nav.roll?.let { id -> rolls.firstOrNull { it.id == id } }
     val page = pageOf(nav.rolls, roll != null, loupe != null, comparing != null)

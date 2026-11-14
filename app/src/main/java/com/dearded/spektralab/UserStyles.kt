@@ -31,7 +31,7 @@ data class UserStyle(val id: String, val look: SpkLook, val lutId: String = "", 
             val look = o.optJSONObject("look") ?: return null
             val lut = o.optString("lut").takeIf(LutStore.ID::matches).orEmpty()
             return runCatching {
-                UserStyle(id, SpkLook.fromJson(look, ImportReport(), "风格"), lut, o.optLong("added"))
+                UserStyle(id, SpkLook.fromJson(look, ImportReport(), tr("风格")), lut, o.optLong("added"))
             }.getOrNull()
         }
     }

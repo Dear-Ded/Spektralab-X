@@ -51,9 +51,9 @@ object FilmRecipe {
         }
 
         /** This recipe as a one-tap look on its own film. */
-        fun toLook() = SpkLook(name = name, category = "胶片方案",
+        fun toLook() = SpkLook(name = name, category = tr("胶片方案"),
             engine = engine.copy(film = id, paper = engine.paper ?: targetPrint),
-            source = SpkSource(kind = "film-recipe", note = "基于 $base 的胶片方案"))
+            source = SpkSource(kind = "film-recipe", note = tr("基于 {0} 的胶片方案", base)))
     }
 
     /** `user_` plus [name] cut down to what the engine's valid_stock_name takes; never empty. */
@@ -73,21 +73,21 @@ object FilmRecipe {
         val f = Fields(report)
         f.unknown(o, "", setOf("derived_from", "metadata", "info", "spektralab_x"))
         val base = o.optString("derived_from")
-        if (!STOCK.matches(base)) throw ImportException("derived_from 不是有效的胶片 id")
-        if (!isBase(base)) throw ImportException("胶片方案基于的“$base”不在当前版本里，或者它自己就是别名")
+        if (!STOCK.matches(base)) throw ImportException(tr("derived_from 不是有效的胶片 id"))
+        if (!isBase(base)) throw ImportException(tr("胶片方案基于的“{0}”不在当前版本里，或者它自己就是别名", base))
         val info = f.obj(o, "info") ?: JSONObject()
         f.unknown(info, "info", setOf("name", "target_print", "antihalation", "stock"))
         val name = info.optString("name").trim().take(60).ifEmpty { PresetImport.stem(fileName).ifEmpty { base } }
         val target = info.optString("target_print").takeIf { it.isNotEmpty() }?.let {
-            if (STOCK.matches(it) && isPaper(it)) it else { report.ignored("info.target_print", "“${it.take(40)}”不是当前版本的相纸"); null }
+            if (STOCK.matches(it) && isPaper(it)) it else { report.ignored("info.target_print", tr("“{0}”不是当前版本的相纸", it.take(40))); null }
         }
         val anti = info.optString("antihalation").takeIf { it.isNotEmpty() }?.let {
-            if (it in ANTIHALATION) it else { report.ignored("info.antihalation", "应为 strong / weak / no"); null }
+            if (it in ANTIHALATION) it else { report.ignored("info.antihalation", tr("应为 strong / weak / no")); null }
         }
         val x = f.obj(o, "spektralab_x")
         x?.let { f.unknown(it, "spektralab_x", setOf("recipe")) }
         val engine = x?.let { f.obj(it, "recipe", "spektralab_x") }?.let { SpkLook.readEngine(it, f) } ?: SpkEngine()
-        val paper = engine.paper?.takeIf { isPaper(it).also { ok -> if (!ok) report.ignored("recipe.paper", "不是当前版本的相纸") } }
+        val paper = engine.paper?.takeIf { isPaper(it).also { ok -> if (!ok) report.ignored("recipe.paper", tr("不是当前版本的相纸")) } }
         return Recipe(stockId(name), name, base, target, anti, engine.copy(film = null, paper = paper))
     }
 
@@ -97,47 +97,47 @@ object FilmRecipe {
      * The bundled profiles all pass (nulls in the spectral arrays included).
      */
     fun validateData(o: JSONObject, report: ImportReport): String {
-        val info = o.optJSONObject("info") ?: throw ImportException("没有 info")
+        val info = o.optJSONObject("info") ?: throw ImportException(tr("没有 info"))
         val type = info.optString("type")
-        if (type != "negative" && type != "positive") throw ImportException("info.type 应为 negative 或 positive")
+        if (type != "negative" && type != "positive") throw ImportException(tr("info.type 应为 negative 或 positive"))
         val stage = info.optString("stage")
-        if (stage != "filming" && stage != "printing") throw ImportException("info.stage 应为 filming 或 printing")
+        if (stage != "filming" && stage != "printing") throw ImportException(tr("info.stage 应为 filming 或 printing"))
         val model = info.optString("channel_model", "color")
-        if (model != "color" && model != "bw") throw ImportException("info.channel_model 应为 color 或 bw")
-        val d = o.optJSONObject("data") ?: throw ImportException("没有 data")
+        if (model != "color" && model != "bw") throw ImportException(tr("info.channel_model 应为 color 或 bw"))
+        val d = o.optJSONObject("data") ?: throw ImportException(tr("没有 data"))
 
         val wl = numbers(d, "wavelengths", nullable = false)
-        if (wl.size != WAVELENGTHS) throw ImportException("wavelengths 有 ${wl.size} 点，应为 81（380–780 nm，步长 5）")
+        if (wl.size != WAVELENGTHS) throw ImportException(tr("wavelengths 有 {0} 点，应为 81（380–780 nm，步长 5）", wl.size))
         for (i in wl.indices) if (kotlin.math.abs(wl[i] - (380.0 + 5 * i)) > 1e-6)
-            throw ImportException("wavelengths 第 ${i + 1} 点是 ${wl[i]}，应为 ${380 + 5 * i}")
+            throw ImportException(tr("wavelengths 第 {0} 点是 {1}，应为 {2}", i + 1, wl[i], 380 + 5 * i))
         matrix(d, "log_sensitivity", WAVELENGTHS, 3, nullable = true)
         matrix(d, "channel_density", WAVELENGTHS, 3, nullable = true)
-        if (numbers(d, "base_density", nullable = true).size != WAVELENGTHS) throw ImportException("base_density 应为 81 点")
+        if (numbers(d, "base_density", nullable = true).size != WAVELENGTHS) throw ImportException(tr("base_density 应为 81 点"))
         if (d.has("midscale_neutral_density") && numbers(d, "midscale_neutral_density", nullable = true).size != WAVELENGTHS)
-            throw ImportException("midscale_neutral_density 应为 81 点")
+            throw ImportException(tr("midscale_neutral_density 应为 81 点"))
 
         val le = numbers(d, "log_exposure", nullable = false)
-        if (le.size < 2) throw ImportException("log_exposure 至少要 2 点")
-        for (i in 1 until le.size) if (le[i] <= le[i - 1]) throw ImportException("log_exposure 不是严格递增（第 ${i + 1} 点）")
+        if (le.size < 2) throw ImportException(tr("log_exposure 至少要 2 点"))
+        for (i in 1 until le.size) if (le[i] <= le[i - 1]) throw ImportException(tr("log_exposure 不是严格递增（第 {0} 点）", i + 1))
         val dc = matrix(d, "density_curves", le.size, 3, nullable = false)
         val sign = if (type == "positive") -1.0 else 1.0
         for (c in 0 until 3) for (i in 1 until le.size) {
             val step = sign * (dc[i][c] - dc[i - 1][c])
             if (step < -MONOTONE_TOLERANCE)
-                throw ImportException("density_curves 第 ${c + 1} 通道在第 ${i + 1} 点${if (sign > 0) "下降" else "回升"}（${"%.4f".format(java.util.Locale.ROOT, -step)}）")
+                throw ImportException(tr("density_curves 第 {0} 通道在第 {1} 点{2}（{3}）", c + 1, i + 1, if (sign > 0) tr("下降") else tr("回升"), "%.4f".format(java.util.Locale.ROOT, -step)))
         }
         if (d.has("density_curves_layers")) {
-            val layers = d.optJSONArray("density_curves_layers") ?: throw ImportException("density_curves_layers 不是列表")
-            if (layers.length() != le.size) throw ImportException("density_curves_layers 应有 ${le.size} 行")
+            val layers = d.optJSONArray("density_curves_layers") ?: throw ImportException(tr("density_curves_layers 不是列表"))
+            if (layers.length() != le.size) throw ImportException(tr("density_curves_layers 应有 {0} 行", le.size))
             for (i in 0 until layers.length()) {
-                val row = layers.optJSONArray(i) ?: throw ImportException("density_curves_layers 第 ${i + 1} 行不是列表")
-                if (row.length() != 3) throw ImportException("density_curves_layers 应为 n×3×3")
+                val row = layers.optJSONArray(i) ?: throw ImportException(tr("density_curves_layers 第 {0} 行不是列表", i + 1))
+                if (row.length() != 3) throw ImportException(tr("density_curves_layers 应为 n×3×3"))
                 for (k in 0 until 3) row(row, k, 3, "density_curves_layers", nullable = false)
             }
         }
         if (o.optJSONObject("metadata")?.optString("license").isNullOrEmpty())
-            report.approximated("metadata.license", "文件没有写许可，分享前请确认数据来源")
-        report.mapped("胶片数据", "81 点光谱、${le.size} 点特性曲线，校验通过")
+            report.approximated("metadata.license", tr("文件没有写许可，分享前请确认数据来源"))
+        report.mapped(tr("胶片数据"), tr("81 点光谱、{0} 点特性曲线，校验通过", le.size))
         return stage
     }
 
@@ -149,28 +149,28 @@ object FilmRecipe {
     }
 
     private fun numbers(d: JSONObject, key: String, nullable: Boolean): DoubleArray {
-        val a = d.optJSONArray(key) ?: throw ImportException("data.$key 缺失或不是列表")
+        val a = d.optJSONArray(key) ?: throw ImportException(tr("data.{0} 缺失或不是列表", key))
         return row(a, -1, a.length(), key, nullable)
     }
 
     private fun row(a: JSONArray, index: Int, n: Int, key: String, nullable: Boolean): DoubleArray {
-        val arr = if (index < 0) a else a.optJSONArray(index) ?: throw ImportException("data.$key 的第 ${index + 1} 项不是列表")
-        if (arr.length() != n) throw ImportException("data.$key 的形状不对（应为 $n 列）")
+        val arr = if (index < 0) a else a.optJSONArray(index) ?: throw ImportException(tr("data.{0} 的第 {1} 项不是列表", key, index + 1))
+        if (arr.length() != n) throw ImportException(tr("data.{0} 的形状不对（应为 {1} 列）", key, n))
         return DoubleArray(n) { i ->
             if (arr.isNull(i)) {
-                if (!nullable) throw ImportException("data.$key 里有空值")
+                if (!nullable) throw ImportException(tr("data.{0} 里有空值", key))
                 Double.NaN
             } else {
                 val v = arr.optDouble(i, Double.NaN)
-                if (!v.isFinite()) throw ImportException("data.$key 里有不是数的值")
+                if (!v.isFinite()) throw ImportException(tr("data.{0} 里有不是数的值", key))
                 v
             }
         }
     }
 
     private fun matrix(d: JSONObject, key: String, rows: Int, cols: Int, nullable: Boolean): Array<DoubleArray> {
-        val a = d.optJSONArray(key) ?: throw ImportException("data.$key 缺失或不是列表")
-        if (a.length() != rows) throw ImportException("data.$key 应为 $rows×$cols，实际 ${a.length()} 行")
+        val a = d.optJSONArray(key) ?: throw ImportException(tr("data.{0} 缺失或不是列表", key))
+        if (a.length() != rows) throw ImportException(tr("data.{0} 应为 {1}×{2}，实际 {3} 行", key, rows, cols, a.length()))
         return Array(rows) { row(a, it, cols, key, nullable) }
     }
 

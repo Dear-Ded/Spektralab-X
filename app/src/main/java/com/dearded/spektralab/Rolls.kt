@@ -52,12 +52,14 @@ import java.util.Locale
  * (docs/UI.md appendix B). The process carries the film feel, not any maker's
  * colours or type.
  */
-enum class FilmProcess(val label: String, val color: Color) {
+enum class FilmProcess(private val message: String, val color: Color) {
     C41("C–41", Color(0xFFB07A4E)),
     E6("E–6", Color(0xFF8FA0B2)),
     BW("B&W", Color(0xFF8E8E8E)),
     ECN2("ECN–2", Color(0xFF4A4A4A)),
     NONE("未冲洗", Color(0xFF3A3A40));
+
+    val label get() = tr(message)
 
     companion object {
         fun of(stock: Stock?): FilmProcess = when {
@@ -92,13 +94,13 @@ data class Roll(
     /** A roll the user packed (ManualRolls.kt); null for an automatic one. */
     val manualId: String? = null,
 ) {
-    val title get() = if (part > 1) "$name · 卷 $part" else name
+    val title get() = if (part > 1) tr("{0} · 卷 {1}", name, part) else name
     val manual get() = manualId != null
 
     /** The card's edge line: process, speed, date, frames used ("C–41 · 400 · 11.03 · 24/36"). */
     val edgeLine get() = listOf(
         process.label, iso, SimpleDateFormat("MM.dd", Locale.ROOT).format(Date(day)), "${frames.size}/$LENGTH",
-        if (manual) "手动" else "",
+        if (manual) tr("手动") else "",
     ).filter { it.isNotEmpty() }.joinToString(" · ")
 
     /** The model as the strip's edge prints it ("" for an undeveloped roll). */
@@ -165,7 +167,7 @@ fun rollsOf(frames: List<Frame>, catalog: Catalog, manual: List<ManualRoll> = em
         val (film, day) = key
         val stock = catalog.film(film)
         val model = modelOf(film, stock)
-        val name = if (film.isEmpty()) "未冲洗" else "$model 风格"
+        val name = if (film.isEmpty()) tr("未冲洗") else tr("{0} 风格", model)
         val ordered = members.sortedWith(compareBy<Frame>({ it.date }, { it.addedAt }))
         ordered.chunked(Roll.LENGTH).forEachIndexed { i, chunk ->
             rolls += Roll("$film|$day|${i + 1}", film, name, FilmProcess.of(stock), isoOf(stock),
@@ -199,9 +201,9 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("观片台上还没有照片", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                Text(tr("观片台上还没有照片"), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
-                Hint("用右下角的“+”放上来，冲洗过的照片会按胶片和日期自动分卷。")
+                Hint(tr("用右下角的“+”放上来，冲洗过的照片会按胶片和日期自动分卷。"))
             }
         } else {
             LazyColumn(
@@ -213,8 +215,8 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
             }
         }
         TableHead(
-            title = "按卷查看",
-            subtitle = "${rolls.size} 卷 · 按胶片和日期自动分卷",
+            title = tr("按卷查看"),
+            subtitle = tr("{0} 卷 · 按胶片和日期自动分卷", rolls.size),
             onBack = onBack,
         )
         TableBar(rolls = true, onGrid = onGrid, onRolls = {}, add = add, modifier = Modifier.align(Alignment.BottomCenter))
@@ -226,7 +228,7 @@ private fun RollCard(roll: Roll, onClick: () -> Unit) {
     Surface(
         color = Palette.Panel, shape = Corners.l,
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
-            .semantics { contentDescription = "${roll.title}，${roll.frames.size} 张，${roll.edgeLine}" },
+            .semantics { contentDescription = tr("{0}，{1} 张，{2}", roll.title, roll.frames.size, roll.edgeLine) },
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

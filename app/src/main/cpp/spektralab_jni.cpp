@@ -50,6 +50,7 @@
 #include "passthrough.hpp"
 #include "input_transform.hpp"
 #include "bitmap_f16.hpp"
+#include "jni_text.hpp"
 #include "pipeline/view.hpp"
 #include "volk.h"
 #include "white_balance.hpp"
@@ -250,20 +251,7 @@ void run_rows(uint32_t rows, uint32_t workers, F&& body) {
     for (auto& t : threads) t.join();
 }
 
-// LibRaw's make/model are raw bytes; NewStringUTF aborts (under CheckJNI) on
-// anything that is not valid modified UTF-8. Keep valid UTF-8, replace the rest.
-std::string utf8_clean(const std::string& s) {
-    std::string out;
-    for (size_t i = 0; i < s.size();) {
-        const unsigned char c = static_cast<unsigned char>(s[i]);
-        size_t n = c < 0x80 ? 1 : (c >> 5) == 0x6 ? 2 : (c >> 4) == 0xE ? 3 : (c >> 3) == 0x1E ? 4 : 0;
-        bool ok = n > 0 && i + n <= s.size() && c != 0;
-        for (size_t k = 1; ok && k < n; ++k) ok = (static_cast<unsigned char>(s[i + k]) >> 6) == 0x2;
-        if (ok) { out.append(s, i, n); i += n; }
-        else { out += '?'; i += 1; }
-    }
-    return out;
-}
+std::string utf8_clean(const std::string& s) { return spk::android::sanitized_utf8(s); }
 
 std::string str(JNIEnv* env, jstring s) {
     if (!s) return {};
@@ -273,7 +261,7 @@ std::string str(JNIEnv* env, jstring s) {
     return out;
 }
 
-jstring jstr(JNIEnv* env, const std::string& s) { return env->NewStringUTF(utf8_clean(s).c_str()); }
+jstring jstr(JNIEnv* env, const std::string& s) { return env->NewStringUTF(spk::android::jni_modified_utf8(s).c_str()); }
 
 std::string json_escape(const std::string& s) {
     std::string out;

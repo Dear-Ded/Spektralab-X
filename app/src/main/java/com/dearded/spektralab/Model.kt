@@ -480,7 +480,7 @@ data class Edit(
         /** Gate long / short edge, mm, as engine/src/pipeline/overscan.cpp's kFormats. */
         val EDGE_FORMATS = listOf(
             Triple("135", "135", 36.25 / 24.3),
-            Triple("135_half", "半格", 24.0 / 18.0),
+            Triple("135_half", tr("半格"), 24.0 / 18.0),
             Triple("135_xpan", "XPan", 65.0 / 24.0),
             Triple("120_645", "645", 56.0 / 41.5),
             Triple("120_6x6", "6×6", 1.0),

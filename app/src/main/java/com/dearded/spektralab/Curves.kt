@@ -188,11 +188,11 @@ data class CurveSet(
 }
 
 /** The editor's channels: CurveSet row, label, colour. Luma stays in the model (imports) but not on screen. */
-private val CHANNELS = listOf(
+private val CHANNELS get() = listOf(
     Triple(0, "RGB", Palette.OnSurface),
-    Triple(2, "红", Color(0xFFE5584A)),
-    Triple(3, "绿", Color(0xFF5EB65A)),
-    Triple(4, "蓝", Color(0xFF4A8AE8)),
+    Triple(2, tr("红"), Color(0xFFE5584A)),
+    Triple(3, tr("绿"), Color(0xFF5EB65A)),
+    Triple(4, tr("蓝"), Color(0xFF4A8AE8)),
 )
 
 /**
@@ -208,7 +208,7 @@ internal fun CurveEditor(
     includeLuma: Boolean = false, editable: Boolean = true,
     onDrag: (Boolean) -> Unit, onChange: (CurveSet) -> Unit,
 ) {
-    val channels = if (includeLuma) listOf(CHANNELS[0], Triple(1, "明度", Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
+    val channels = if (includeLuma) listOf(CHANNELS[0], Triple(1, tr("明度"), Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
     val view = LocalView.current
     var channel by remember { mutableIntStateOf(0) }
     val row = channels[channel].first
@@ -229,16 +229,16 @@ internal fun CurveEditor(
         }
         androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
         TextButton(onClick = { view.tick(strong = true); onChange(curves.with(row, Curve.IDENTITY)) },
-            enabled = enabled && editable && !curve.isIdentity) { Text("重置") }
+            enabled = enabled && editable && !curve.isIdentity) { Text(tr("重置")) }
     }
 
     val color = channels[channel].third
     Canvas(
         Modifier.fillMaxWidth().height(124.dp).padding(vertical = 6.dp).systemGestureExclusion()
             .semantics {
-                contentDescription = "${channels[channel].second} 曲线，${curve.points.size} 个${if (editable) "控制点" else "采样点"}"
+                contentDescription = tr("{0} 曲线，{1} 个{2}", channels[channel].second, curve.points.size, if (editable) tr("控制点") else tr("采样点"))
                 if (enabled && editable && !curve.isIdentity)
-                    customActions = listOf(CustomAccessibilityAction("重置") { onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)); true })
+                    customActions = listOf(CustomAccessibilityAction(tr("重置")) { onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)); true })
             }
             .pointerInput(enabled, editable, row) {
                 if (!enabled || !editable) return@pointerInput
@@ -353,8 +353,8 @@ internal fun CurveEditor(
         }
     }
     Text(
-        if (!editable) "导入的采样曲线按原样保留；重置后可编辑控制点。"
-        else "轻点添加控制点，拖动调整，双击控制点删除。" + if (image != null) "直方图是当前画面。" else "",
+        if (!editable) tr("导入的采样曲线按原样保留；重置后可编辑控制点。")
+        else tr("轻点添加控制点，拖动调整，双击控制点删除。") + if (image != null) tr("直方图是当前画面。") else "",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

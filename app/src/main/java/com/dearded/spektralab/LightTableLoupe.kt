@@ -141,7 +141,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回网格", tint = Palette.OnSurface)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("返回网格"), tint = Palette.OnSurface)
             }
             Column(Modifier.weight(1f)) {
                 Text(current.name, style = MaterialTheme.typography.titleMedium, color = Palette.OnSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -162,7 +162,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
                         else -> HapticFeedbackConstants.TOGGLE_OFF
                     })
                 },
-                label = { Text("自动下一张") },
+                label = { Text(tr("自动下一张")) },
             )
         }
 
@@ -175,17 +175,17 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
                         Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
                             .clickable(role = Role.Button) { onEdit(current) },
                         contentAlignment = Alignment.Center,
-                    ) { Text("编辑", style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
+                    ) { Text(tr("编辑"), style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
                 },
             ) {
-                MarkButton("✕", "淘汰", on = current.pick < 0) { mark(current, if (current.pick < 0) 0 else -1) }
+                MarkButton("✕", tr("淘汰"), on = current.pick < 0) { mark(current, if (current.pick < 0) 0 else -1) }
                 Spacer(Modifier.weight(1f))
                 Stars(current.stars) { n ->
                     table.rate(setOf(current.id), stars = if (n == current.stars) 0 else n)
                     view.tick()
                 }
                 Spacer(Modifier.weight(1f))
-                MarkButton("✓", "选中", on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
+                MarkButton("✓", tr("选中"), on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
             }
         }
     }
@@ -205,8 +205,8 @@ private fun LoupePage(frame: Frame, px: Int, shared: Boolean, onTap: () -> Unit,
                 contentDescription = describe(frame)
                 // Swipes are not reachable under TalkBack: the marks are actions too.
                 customActions = listOf(
-                    CustomAccessibilityAction("选中") { onPick(); true },
-                    CustomAccessibilityAction("淘汰") { onReject(); true },
+                    CustomAccessibilityAction(tr("选中")) { onPick(); true },
+                    CustomAccessibilityAction(tr("淘汰")) { onReject(); true },
                 )
             }
             .pointerInput(frame.id) { detectTapGestures(onTap = { onTap() }) }
@@ -245,8 +245,8 @@ private fun LoupePage(frame: Frame, px: Int, shared: Boolean, onTap: () -> Unit,
         // A frame already marked says so in the corner, as in the grid.
         Box(Modifier.align(Alignment.TopStart).padding(top = 72.dp, start = 12.dp)) {
             when {
-                frame.pick > 0 -> LoupeBadge("✓ 选中")
-                frame.pick < 0 -> LoupeBadge("✕ 淘汰")
+                frame.pick > 0 -> LoupeBadge(tr("✓ 选中"))
+                frame.pick < 0 -> LoupeBadge(tr("✕ 淘汰"))
             }
         }
     }
@@ -265,7 +265,7 @@ private fun LoupeBadge(text: String) {
 @Composable
 private fun MarkButton(glyph: String, label: String, on: Boolean, onClick: () -> Unit) {
     Column(
-        Modifier.size(56.dp).clickable(onClick = onClick).semantics { contentDescription = if (on) "$label，已开启" else label },
+        Modifier.size(56.dp).clickable(onClick = onClick).semantics { contentDescription = if (on) tr("{0}，已开启", label) else label },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -284,7 +284,7 @@ private fun Stars(stars: Int, onSet: (Int) -> Unit) {
         for (n in 1..5) {
             Box(
                 Modifier.size(width = 32.dp, height = 48.dp).clickable { onSet(n) }
-                    .semantics { contentDescription = "$n 星" + if (n == stars) "，当前" else "" },
+                    .semantics { contentDescription = tr("{0} 星", n) + if (n == stars) tr("，当前") else "" },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(if (n <= stars) "★" else "☆", fontSize = 20.sp,

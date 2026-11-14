@@ -17,7 +17,9 @@ val Style.tags: List<String> get() = TAGS[id].orEmpty() + GROUP_TAGS[group].orEm
 fun Style.matchesQuery(query: String, filmLabel: String = ""): Boolean {
     val words = query.trim().lowercase(Locale.ROOT).split(Regex("\\s+")).filter { it.isNotEmpty() }
     if (words.isEmpty()) return true
-    val hay = (listOf(name, inspiredBy, group, filmLabel) + tags).joinToString("\u0000").lowercase(Locale.ROOT)
+    val labels = listOf(name, inspiredBy, group) + tags
+    val hay = (labels + labels.map { EnglishCatalog.text[it] ?: it } + filmLabel)
+        .joinToString("\u0000").lowercase(Locale.ROOT)
     return words.all { it in hay }
 }
 

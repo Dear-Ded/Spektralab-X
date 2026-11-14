@@ -30,6 +30,11 @@ import java.util.Locale
 class SpektraLabApp : Application() {
     val host: EngineHost by lazy { EngineHost(this) }
 
+    override fun attachBaseContext(base: Context) {
+        AppLocale.load(base)
+        super.attachBaseContext(AppLocale.wrap(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
         host.startUp()
@@ -48,7 +53,7 @@ class SpektraLabApp : Application() {
 }
 
 /** The GPU device behind [engine] is lost (VkResult -4): only a new engine renders again. */
-class DeviceLostException(val engine: Long, detail: String) : Exception(ErrorCodes.format(ErrorCodes.GPU_DEVICE_LOST, "GPU 被系统重置：$detail"))
+class DeviceLostException(val engine: Long, detail: String) : Exception(ErrorCodes.format(ErrorCodes.GPU_DEVICE_LOST, tr("GPU 被系统重置：{0}", detail)))
 
 /**
  * Process-lifetime owner of the native engine: its resources, setup caches and
@@ -224,7 +229,7 @@ class EngineHost(private val app: Application) {
         val handle = NativeEngine.create(dir.absolutePath, tmp.absolutePath)
         if (handle == 0L) {
             throw EngineException(
-                "引擎启动失败：${NativeEngine.lastError()}\n\nGPU：${DeviceProfile.summary(DeviceProfile.gpu(device))}"
+                tr("引擎启动失败：{0}\n\nGPU：{1}", NativeEngine.lastError(), DeviceProfile.summary(DeviceProfile.gpu(device)))
             )
         }
         // The default stock pair's tables and every compute pipeline now, so

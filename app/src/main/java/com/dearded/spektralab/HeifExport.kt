@@ -38,7 +38,7 @@ object HeifExport {
     /** IO. Encodes [bitmap] into [part] with [exif] (from [exifBlock]); throws on any failure. */
     fun encode(bitmap: Bitmap, part: File, exif: ByteArray?) {
         val src = if (bitmap.config == Bitmap.Config.ARGB_8888) bitmap else bitmap.copy(Bitmap.Config.ARGB_8888, false)
-            ?: throw EngineException("HEIF 编码失败：无法转换像素格式")
+            ?: throw EngineException(tr("HEIF 编码失败：无法转换像素格式"))
         try {
             val writer = try {
                 HeifWriter.Builder(part.absolutePath, src.width, src.height, HeifWriter.INPUT_MODE_BITMAP)
@@ -48,7 +48,7 @@ object HeifExport {
                     .setPrimaryIndex(0)
                     .build()
             } catch (e: Exception) {
-                throw EngineException("这台手机没有可用的 HEIF 编码器（${e.message ?: e.javaClass.simpleName}）")
+                throw EngineException(tr("这台手机没有可用的 HEIF 编码器（{0}）", e.message ?: e.javaClass.simpleName))
             }
             try {
                 writer.start()
@@ -56,7 +56,7 @@ object HeifExport {
                 if (exif != null) writer.addExifData(0, exif, 0, exif.size)
                 writer.stop(STOP_TIMEOUT_MS)
             } catch (e: Exception) {
-                throw EngineException("HEIF 编码失败：${e.message ?: e.javaClass.simpleName}")
+                throw EngineException(tr("HEIF 编码失败：{0}", e.message ?: e.javaClass.simpleName))
             } finally {
                 // HeifWriter is AutoCloseable; WriterBase.close itself is library-internal.
                 (writer as AutoCloseable).close()

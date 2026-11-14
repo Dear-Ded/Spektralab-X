@@ -71,18 +71,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CancellationException
 
-private val WORKING_EDGES = listOf(
+private val WORKING_EDGES get() = listOf(
     2048 to "2048 px",
     3072 to "3072 px",
-    4096 to "4096 px（默认）",
+    4096 to tr("4096 px（默认）"),
     6144 to "6144 px",
-    0 to "原始尺寸",
+    0 to tr("原始尺寸"),
 )
 
 /** 照片四周's names, keyed as Theme.kt SURROUNDS. */
-private val SURROUND_LABELS = mapOf("dark" to "深灰（默认）", "grey18" to "18% 灰", "black" to "黑", "white" to "白")
+private val SURROUND_LABELS get() = mapOf("dark" to tr("深灰（默认）"), "grey18" to tr("18% 灰"), "black" to tr("黑"), "white" to tr("白"))
 
-private val HIGHLIGHT_STOPS = listOf(0f to "关（默认）", 1f to "1 档", 2f to "2 档")
+private val HIGHLIGHT_STOPS get() = listOf(0f to tr("关（默认）"), 1f to tr("1 档"), 2f to tr("2 档"))
 
 /**
  * 设置 (ui-screens_research.md 2): a full page over the editor, not a sheet,
@@ -125,30 +125,41 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
         ) {
             Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回编辑器")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("返回编辑器"))
                 }
             }
-            Text("设置", style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface,
+            Text(tr("设置"), style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 8.dp))
+
+            var languageError by remember { mutableStateOf(false) }
+            SettingsGroup(tr("语言 / Language"), listOf<@Composable () -> Unit>({
+                ChoiceRow(tr("语言 / Language"), tr("应用界面语言。切换后保留当前照片和编辑。"),
+                    AppLocale.language.nativeName) {
+                    Segmented(options = UiLanguage.entries.map { it.nativeName }, selected = AppLocale.language.ordinal) { i ->
+                        languageError = !AppLocale.select(context, UiLanguage.entries[i])
+                    }
+                }
+                if (languageError) Hint(tr("无法保存语言设置，请重试。"))
+            }))
 
             // 编辑: how the editor starts.
             // UI2.md 0.1: the key is ui-visual's (Pill.kt EXPAND_ALL); the editor reads it with rememberExpandAll().
             val prefs = remember(context) { context.getSharedPreferences("settings", 0) }
             var expandAll by remember { mutableStateOf(prefs.getBoolean(EXPAND_ALL, false)) }
             val coach = LocalCoach.current
-            SettingsGroup("编辑", buildList<@Composable () -> Unit> {
+            SettingsGroup(tr("编辑"), buildList<@Composable () -> Unit> {
                 add {
                     SettingRow(
-                        "默认展开全部参数", expandAll, true,
-                        note = "冲洗和调整直接显示全部参数。",
+                        tr("默认展开全部参数"), expandAll, true,
+                        note = tr("冲洗和调整直接显示全部参数。"),
                     ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
                 }
                 // ui-visual's key (Theme.kt SURROUND_KEY / SURROUNDS); the editor follows it while it changes.
                 add {
                     var surround by remember { mutableStateOf(prefs.getString(SURROUND_KEY, "dark") ?: "dark") }
                     ChoiceRow(
-                        "照片四周",
-                        "判断颜色用 18% 灰。",
+                        tr("照片四周"),
+                        tr("判断颜色用 18% 灰。"),
                         value = SURROUND_LABELS[surround] ?: SURROUND_LABELS.getValue("dark"),
                     ) {
                         PillRow {
@@ -175,21 +186,21 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     var intro by remember { mutableStateOf(prefs.getBoolean(LAUNCH_INTRO, true)) }
                     val motion = remember { motionAllowed() }
                     SettingRow(
-                        "启动动画", intro && motion, motion,
-                        disabledReason = "系统已关闭动画，启动动画不会播放。",
+                        tr("启动动画"), intro && motion, motion,
+                        disabledReason = tr("系统已关闭动画，启动动画不会播放。"),
                     ) { intro = it; prefs.edit().putBoolean(LAUNCH_INTRO, it).apply() }
                 }
                 if (coach != null) add {
-                    ActionRow("重新查看引导", "回到编辑器时再显示一次。") { coach.replay(); onClose() }
+                    ActionRow(tr("重新查看引导"), tr("回到编辑器时再显示一次。")) { coach.replay(); onClose() }
                 }
             })
 
             // 画质与导出: size, colour, what goes into the file.
-            SettingsGroup("画质与导出", listOf<@Composable () -> Unit>(
+            SettingsGroup(tr("画质与导出"), listOf<@Composable () -> Unit>(
                 {
                     ChoiceRow(
-                        "工作尺寸（长边）",
-                        "预览和导出都用这个尺寸，越大越慢。",
+                        tr("工作尺寸（长边）"),
+                        tr("预览和导出都用这个尺寸，越大越慢。"),
                         value = WORKING_EDGES.firstOrNull { it.first == ui.workingEdge }?.second ?: "${ui.workingEdge} px",
                     ) {
                         PillRow {
@@ -202,15 +213,15 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 },
                 {
                     SettingRow(
-                        "广色域导出（Display P3）", ui.wideGamut, true,
-                        note = "仅用于 JPEG；TIFF 色彩空间在保存菜单中选择。",
+                        tr("广色域导出（Display P3）"), ui.wideGamut, true,
+                        note = tr("仅用于 JPEG；TIFF 色彩空间在保存菜单中选择。"),
                     ) { vm.setWideGamut(it) }
                 },
                 {
                     ChoiceRow(
-                        "手机照片高光恢复",
-                        "展开手机照片中灰以上的高光，结果更亮更浓，和桌面版不同。",
-                        value = HIGHLIGHT_STOPS.firstOrNull { it.first == ui.highlightStops }?.second ?: "${ui.highlightStops} 档",
+                        tr("手机照片高光恢复"),
+                        tr("展开手机照片中灰以上的高光，结果更亮更浓，和桌面版不同。"),
+                        value = HIGHLIGHT_STOPS.firstOrNull { it.first == ui.highlightStops }?.second ?: tr("{0} 档", ui.highlightStops),
                     ) {
                         Segmented(
                             options = HIGHLIGHT_STOPS.map { it.second },
@@ -220,46 +231,52 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 },
                 {
                     var on by remember { mutableStateOf(LocationSetting.enabled(context)) }
-                    SettingRow("导出保留拍摄位置", on, true) {
+                    SettingRow(tr("导出保留拍摄位置"), on, true) {
                         on = it; LocationSetting.set(context, it)
                     }
                 },
             ))
 
             // 我的风格: what the user brought in.
-            SettingsGroup("我的风格", listOf<@Composable () -> Unit>({ Column(Modifier.padding(vertical = 8.dp)) { UserLibrarySection(vm) } }))
+            SettingsGroup(tr("我的风格"), listOf<@Composable () -> Unit>({ Column(Modifier.padding(vertical = 8.dp)) { UserLibrarySection(vm) } }))
 
             // 更新
-            SettingsGroup("更新", listOf<@Composable () -> Unit>(
+            SettingsGroup(tr("更新"), listOf<@Composable () -> Unit>(
                 {
                     var auto by remember { mutableStateOf(Updater.autoCheck(context)) }
                     var wifi by remember { mutableStateOf(Updater.wifiDownload(context)) }
                     Column {
-                        SettingRow("自动检查更新", auto, true,
-                            note = "只连 GitHub 上本项目的发布页，不上传任何内容。") { auto = it; Updater.setAutoCheck(context, it) }
-                        SettingRow("Wi-Fi 下自动下载新版本", wifi, auto) { wifi = it; Updater.setWifiDownload(context, it) }
+                        SettingRow(tr("自动检查更新"), auto, true,
+                            note = tr("只连 GitHub 上本项目的发布页，不上传任何内容。")) { auto = it; Updater.setAutoCheck(context, it) }
+                        SettingRow(tr("Wi-Fi 下自动下载新版本"), wifi, auto) { wifi = it; Updater.setWifiDownload(context, it) }
                     }
                 },
                 {
-                    ActionRow("立即检查更新", "当前 ${BuildConfig.VERSION_NAME}") {
+                    ActionRow(tr("立即检查更新"), tr("当前 {0}", BuildConfig.VERSION_NAME)) {
                         onClose(); Updater.show(); Updater.check(context, manual = true)
                     }
                 },
             ))
 
             // 关于与诊断
-            SettingsGroup("关于与诊断", listOf<@Composable () -> Unit>(
-                { InfoRow("设备", ui.deviceSummary.ifEmpty { "—" }) },
-                { InfoRow("引擎", ui.engineSummary.ifEmpty { "—" }) },
+            SettingsGroup(tr("关于与诊断"), listOf<@Composable () -> Unit>(
+                { InfoRow(tr("设备"), ui.deviceSummary.ifEmpty { "—" }) },
+                { InfoRow(tr("引擎"), ui.engineSummary.ifEmpty { "—" }) },
                 {
-                    ActionRow("性能测试", "测量本机的预览、切换风格、导出速度，给出工作尺寸建议。") {
+                    ActionRow(tr("性能测试"), tr("测量本机的预览、切换风格、导出速度，给出工作尺寸建议。")) {
                         vm.startBenchmark()
+                    }
+                },
+                {
+                    val lines = vm.benchmarkLines()
+                    if (lines.isNotEmpty()) Column(Modifier.padding(vertical = 12.dp)) {
+                        lines.forEach { Hint(it, Modifier.padding(vertical = 3.dp)) }
                     }
                 },
                 {
                     val clipboard = LocalClipboardManager.current
                     var copied by remember { mutableStateOf(false) }
-                    ActionRow(if (copied) "已复制诊断信息" else "复制诊断信息", "报告问题时一起贴上，里面没有照片和位置。") {
+                    ActionRow(if (copied) tr("已复制诊断信息") else tr("复制诊断信息"), tr("报告问题时一起贴上，里面没有照片和位置。")) {
                         clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true
                     }
                 },
@@ -324,7 +341,7 @@ private fun ChoiceRow(label: String, note: String, value: String, choices: @Comp
         Row(
             Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 .clickable(role = Role.Button) { open = !open }
-                .semantics { stateDescription = if (open) "已展开" else "已收起" }
+                .semantics { stateDescription = if (open) tr("已展开") else tr("已收起") }
                 .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -362,13 +379,13 @@ private fun Chevron(degrees: Float) {
 private fun NewPhotoStocks(ui: UiState, vm: EditorViewModel) {
     val mode = ui.newPhotoMode
     val fixed = mode == EditorViewModel.NEW_FIXED
-    val value = if (mode == EditorViewModel.NEW_NONE) "无，打开就是原图" else if (!fixed) "记住上次用的" else listOf(
+    val value = if (mode == EditorViewModel.NEW_NONE) tr("无，打开就是原图") else if (!fixed) tr("记住上次用的") else listOf(
         ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm,
         ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper,
     ).joinToString(" · ")
     var picking by remember { mutableStateOf<String?>(null) }
-    ChoiceRow("新照片的胶片和相纸", "只对没编辑过的照片生效。", value) {
-        Segmented(options = listOf("无", "记住上次用的", "固定为"),
+    ChoiceRow(tr("新照片的胶片和相纸"), tr("只对没编辑过的照片生效。"), value) {
+        Segmented(options = listOf(tr("无"), tr("记住上次用的"), tr("固定为")),
             selected = when (mode) { EditorViewModel.NEW_NONE -> 0; EditorViewModel.NEW_REMEMBER -> 1; else -> 2 }) { i ->
             if (i == 0) vm.setNewPhotoNone()
             else if (i == 1) vm.setNewPhotoStocks("", "")
@@ -377,18 +394,18 @@ private fun NewPhotoStocks(ui: UiState, vm: EditorViewModel) {
         if (fixed) {
             Spacer(Modifier.height(RowGap))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TonalButton("胶片：" + (ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm),
+                TonalButton(tr("胶片：") + (ui.catalog.film(ui.defaultFilm)?.label ?: ui.defaultFilm),
                     modifier = Modifier.weight(1f)) { picking = "film" }
-                TonalButton("相纸：" + (ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper),
+                TonalButton(tr("相纸：") + (ui.catalog.paper(ui.defaultPaper)?.label ?: ui.defaultPaper),
                     modifier = Modifier.weight(1f)) { picking = "paper" }
             }
         }
     }
     when (picking) {
-        "film" -> StockSheet("新照片的胶片", ui.catalog.films, ui.defaultFilm, { picking = null }) {
+        "film" -> StockSheet(tr("新照片的胶片"), ui.catalog.films, ui.defaultFilm, { picking = null }) {
             vm.setNewPhotoStocks(it, ui.defaultPaper)
         }
-        "paper" -> StockSheet("新照片的相纸", ui.catalog.papers, ui.defaultPaper, { picking = null }) {
+        "paper" -> StockSheet(tr("新照片的相纸"), ui.catalog.papers, ui.defaultPaper, { picking = null }) {
             vm.setNewPhotoStocks(ui.defaultFilm, it)
         }
     }
@@ -408,14 +425,14 @@ private fun StockSheet(title: String, stocks: List<Stock>, selected: String, onD
                         Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(Corners.m)
                             .background(if (on) Palette.Accent else Palette.Panel)
                             .clickable(role = Role.RadioButton) { onPick(s.id); onDismiss() }
-                            .semantics { contentDescription = s.label + if (on) "，当前" else "" }
+                            .semantics { contentDescription = s.label + if (on) tr("，当前") else "" }
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(s.label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (on) androidx.compose.ui.text.font.FontWeight.Medium else androidx.compose.ui.text.font.FontWeight.Normal,
                             color = if (on) Palette.OnAccent else Palette.OnSurface)
-                        val tags = listOfNotNull(if (s.positive) "反转" else null, if (s.bw) "黑白" else null)
+                        val tags = listOfNotNull(if (s.positive) tr("反转") else null, if (s.bw) tr("黑白") else null)
                         if (tags.isNotEmpty()) Text(tags.joinToString(" "), style = MaterialTheme.typography.labelSmall,
                             color = if (on) Palette.OnAccent else Palette.OnSurfaceSoft)
                     }

@@ -104,7 +104,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                         val shape = Corners.m
                         Column(
                             Modifier.clip(Corners.l).clickable { chosen = s?.id; view.tick() }
-                                .semantics { contentDescription = s?.name ?: "当前效果"; selected = on },
+                                .semantics { contentDescription = s?.name ?: tr("当前效果"); selected = on },
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Box(
@@ -119,7 +119,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                             }
                             Spacer(Modifier.height(6.dp))
                             // The chosen card's name sits on the inverted fill.
-                            Text(s?.name ?: "当前", style = MaterialTheme.typography.labelLarge, maxLines = 1,
+                            Text(s?.name ?: tr("当前"), style = MaterialTheme.typography.labelLarge, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
                                 color = if (on) Palette.OnAccent else Palette.OnSurface,
@@ -133,7 +133,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                 }
             }
         }
-        TableHead(title = "比较风格", subtitle = frame.name, backLabel = "返回", onBack = onClose)
+        TableHead(title = tr("比较风格"), subtitle = frame.name, backLabel = tr("返回"), onBack = onClose)
         FloatingBar(
             Modifier.align(Alignment.BottomCenter),
             trailing = {
@@ -152,15 +152,15 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                         .padding(horizontal = 22.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("用这个", style = MaterialTheme.typography.labelLarge,
+                    Text(tr("用这个"), style = MaterialTheme.typography.labelLarge,
                         color = if (can) Palette.OnAccent else Palette.OnSurfaceSoft)
                 }
             },
         ) {
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                Text(picked?.name ?: "当前效果", style = MaterialTheme.typography.bodyMedium, maxLines = 1,
+                Text(picked?.name ?: tr("当前效果"), style = MaterialTheme.typography.bodyMedium, maxLines = 1,
                     overflow = TextOverflow.Ellipsis)
-                Hint(picked?.let { it.inspiredBy.ifEmpty { it.group } } ?: "点一张卡片，在上面看大图")
+                Hint(picked?.let { it.inspiredBy.ifEmpty { it.group } } ?: tr("点一张卡片，在上面看大图"))
             }
         }
     }

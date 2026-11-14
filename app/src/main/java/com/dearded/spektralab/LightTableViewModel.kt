@@ -12,8 +12,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-enum class FrameFilter(val label: String) {
+enum class FrameFilter(private val message: String) {
     ALL("全部"), PICKS("选中"), REJECTS("淘汰"), EDITED("已编辑");
+
+    val label get() = tr(message)
 
     fun keeps(f: Frame) = when (this) {
         ALL -> true
@@ -92,12 +94,12 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     /** 装成一卷: [frames] (in grid order) into a new roll called [name]; past 36 the rest start 卷 2. */
     fun packRoll(frames: List<Frame>, name: String) {
         if (frames.isEmpty()) return
-        val label = name.trim().take(40).ifEmpty { "我的卷" }
+        val label = name.trim().take(40).ifEmpty { tr("我的卷") }
         viewModelScope.launch {
             saveOrReport {
                 val made = withContext(Dispatchers.IO) { manualRolls.pack(frames.map { it.id }, label) }
                 _state.update { it.copy(selection = emptySet()) }
-                show(if (made > 1) "已装成 $made 卷「$label」（每卷最多 ${Roll.LENGTH} 张）" else "已装成一卷「$label」")
+                show(if (made > 1) tr("已装成 {0} 卷「{1}」（每卷最多 {2} 张）", made, label, Roll.LENGTH) else tr("已装成一卷「{0}」", label))
             }
         }
     }
@@ -111,9 +113,9 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
                 _state.update { it.copy(selection = emptySet()) }
                 val left = frames.size - moved
                 show(when {
-                    moved == 0 -> "「$toName」已满 ${Roll.LENGTH} 张，没有移动"
-                    left > 0 -> "已移 $moved 张到「$toName」，$left 张放不下，留在原卷"
-                    else -> "已移 $moved 张到「$toName」"
+                    moved == 0 -> tr("「{0}」已满 {1} 张，没有移动", toName, Roll.LENGTH)
+                    left > 0 -> tr("已移 {0} 张到「{1}」，{2} 张放不下，留在原卷", moved, toName, left)
+                    else -> tr("已移 {0} 张到「{1}」", moved, toName)
                 })
             }
         }
@@ -126,7 +128,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             saveOrReport {
                 val n = withContext(Dispatchers.IO) { manualRolls.release(frames.map { it.id }) }
                 _state.update { it.copy(selection = emptySet()) }
-                show(if (n == 0) "这些照片不在手动卷里" else "已把 $n 张放回自动分卷")
+                show(if (n == 0) tr("这些照片不在手动卷里") else tr("已把 {0} 张放回自动分卷", n))
             }
         }
     }
@@ -137,7 +139,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             saveOrReport {
                 withContext(Dispatchers.IO) { manualRolls.dissolve(id) }
                 _nav.update { if (it.roll == "m|$id") it.copy(roll = null) else it }
-                show("已拆卷，照片回到自动分卷")
+                show(tr("已拆卷，照片回到自动分卷"))
             }
         }
     }
@@ -173,9 +175,9 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
                     }
                     val again = uris.size - added
                     show(when {
-                        added == 0 -> "这些照片已经在观片台上"
-                        again > 0 -> "已加入 $added 张，$again 张原本就在"
-                        else -> "已加入 $added 张"
+                        added == 0 -> tr("这些照片已经在观片台上")
+                        again > 0 -> tr("已加入 {0} 张，{1} 张原本就在", added, again)
+                        else -> tr("已加入 {0} 张", added)
                     })
                 }
             } finally {
@@ -240,7 +242,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
                     host.queue.jobs.value.filter { it.state != JobState.DONE }.map { it.uri }.toSet()
                 }
                 _state.update { it.copy(selection = it.selection - ids) }
-                show("已从观片台移走 ${ids.size} 张（编辑记录保留）")
+                show(tr("已从观片台移走 {0} 张（编辑记录保留）", ids.size))
             }
         }
     }
@@ -253,8 +255,8 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
      * does, carrying the editor's current look. False while the engine starts.
      */
     fun edit(frame: Frame, editor: EditorViewModel): Boolean {
-        if (!editor.ui.value.ready) { show("引擎还在准备，稍等一下"); return false }
-        if (editor.ui.value.exporting) { show("正在导出，完成后再打开新照片"); return false }
+        if (!editor.ui.value.ready) { show(tr("引擎还在准备，稍等一下")); return false }
+        if (editor.ui.value.exporting) { show(tr("正在导出，完成后再打开新照片")); return false }
         val previous = editRequest
         editRequest = viewModelScope.launch {
             previous?.cancelAndJoin()
@@ -267,7 +269,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
-                show("读取编辑记录失败：${e.message.orEmpty()}")
+                show(tr("读取编辑记录失败：{0}", e.message.orEmpty()))
             }
         }
         return true
@@ -281,7 +283,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
                     val car = store.sidecar(frame.id)
                     store.saveEdit(frame.id, edit, car?.wbK ?: 0.0, car?.wbTint ?: 0.0)
                 }
-                show("已把「$label」用到「${frame.name}」")
+                show(tr("已把「{0}」用到「{1}」", label, frame.name))
             }
         }
     }
@@ -293,7 +295,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
      */
     fun exportContactSheet(roll: Roll, maxPixels: Long) {
         host.queue.enqueue(RollContactSheet.job(roll, host.queue.nextId(), maxPixels))
-        show("印样已加入“正在处理”，冲洗完缩略图后存进相册")
+        show(tr("印样已加入“正在处理”，冲洗完缩略图后存进相册"))
     }
 
     // --- batch ---------------------------------------------------------------------
@@ -302,9 +304,9 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun copyLook(frame: Frame) {
         viewModelScope.launch {
             val car = withContext(Dispatchers.IO) { store.sidecar(frame.id) }
-            if (car == null) { show("这张还没有编辑过，没有可复制的调整"); return@launch }
+            if (car == null) { show(tr("这张还没有编辑过，没有可复制的调整")); return@launch }
             _state.update { it.copy(copied = CopiedLook(car.edit, car.wbK, car.wbTint, frame.name)) }
-            show("已复制「${frame.name}」的调整")
+            show(tr("已复制「{0}」的调整", frame.name))
         }
     }
 
@@ -335,13 +337,13 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
                     }
                     skipped
                 }
-                show(if (skipped > 0) "已粘贴到 ${targets.size} 张；其中 $skipped 张尺寸未知，片边先没加，打开一次后再粘贴即可"
-                     else "已粘贴到 ${targets.size} 张")
+                show(if (skipped > 0) tr("已粘贴到 {0} 张；其中 {1} 张尺寸未知，片边先没加，打开一次后再粘贴即可", targets.size, skipped)
+                     else tr("已粘贴到 {0} 张", targets.size))
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
                 host.events.add("paste save failed: ${e.message}")
-                show("已粘贴 $completed/${targets.size} 张，其余保存失败，请检查存储空间后重试")
+                show(tr("已粘贴 {0}/{1} 张，其余保存失败，请检查存储空间后重试", completed, targets.size))
             }
         }
     }
@@ -361,7 +363,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
             // One at a time: nextId() is unique only once the previous job is in the list.
             for ((f, car) in cars) host.queue.enqueue(jobFor(f, car, format, size, editor))
             val fresh = cars.count { (_, car) -> car.updated == 0L }
-            show("已把 ${cars.size} 张加入“正在处理”" + if (fresh > 0) "（$fresh 张未编辑，按默认胶片冲洗）" else "")
+            show(tr("已把 {0} 张加入“正在处理”", cars.size) + if (fresh > 0) tr("（{0} 张未编辑，按默认胶片冲洗）", fresh) else "")
         }
     }
 
@@ -416,7 +418,7 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         catch (e: kotlinx.coroutines.CancellationException) { throw e }
         catch (e: Exception) {
             host.events.add("light table save failed: ${e.message}")
-            show("保存失败，请检查存储空间后重试")
+            show(tr("保存失败，请检查存储空间后重试"))
         }
     }
 

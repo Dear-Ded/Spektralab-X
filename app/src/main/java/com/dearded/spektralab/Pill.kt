@@ -174,7 +174,7 @@ internal fun PanelHeader(
     title: String,
     summary: String = "",
     hint: String = "",
-    resetLabel: String = "重置",
+    resetLabel: String = tr("重置"),
     changed: Boolean = false,
     enabled: Boolean = true,
     onReset: (() -> Unit)? = null,
@@ -360,7 +360,7 @@ internal fun MoreRow(open: Boolean, edited: Boolean, onToggle: () -> Unit) {
             .padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(if (open) "收起" else "更多参数", style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface)
+        Text(if (open) tr("收起") else tr("更多参数"), style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface)
         if (edited && !open) { Spacer(Modifier.width(8.dp)); EditedDot() }
         Spacer(Modifier.weight(1f))
         Canvas(Modifier.size(20.dp).graphicsLayer { rotationZ = turn }) {
@@ -409,7 +409,7 @@ internal fun ThumbCard(
             .clip(outer)
             .combinedClickable(
                 enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton,
-                onLongClickLabel = if (onLongClick != null) (if (starred) "取消收藏" else "收藏") else null,
+                onLongClickLabel = if (onLongClick != null) (if (starred) tr("取消收藏") else tr("收藏")) else null,
                 onLongClick = onLongClick, onClick = onClick,
             )
             .semantics { this.selected = chosen },
@@ -596,6 +596,6 @@ internal fun NoneCard(
     size: Dp = 104.dp,
     onClick: () -> Unit,
 ) = ThumbCard(
-    selected = selected, image = original, title = "无", subtitle = subtitle,
-    enabled = enabled, size = size, placeholder = "原图", badge = null, onClick = onClick,
+    selected = selected, image = original, title = tr("无"), subtitle = subtitle,
+    enabled = enabled, size = size, placeholder = tr("原图"), badge = null, onClick = onClick,
 )

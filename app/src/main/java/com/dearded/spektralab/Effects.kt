@@ -32,9 +32,9 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
     // ui2_colorfulcam.md 1: four stops per effect in reach; 关 is the old switch. The
     // continuous strengths are behind 更多参数, and a strength between stops chooses none.
     // Stop values are first guesses, to be tuned against real prints.
-    EffectStops("颗粒", e.grainActive, e.grainAmount, GRAIN_STOPS, enabled) { on, k -> onChange(e.copy(grainActive = on, grainAmount = k)) }
-    EffectStops("光晕", e.halationActive, e.halationAmount, HALATION_STOPS, enabled) { on, k -> onChange(e.copy(halationActive = on, halationAmount = k)) }
-    EffectStops("相纸眩光", e.glareActive, e.glareAmount, GLARE_STOPS, enabled) { on, k -> onChange(e.copy(glareActive = on, glareAmount = k)) }
+    EffectStops(tr("颗粒"), e.grainActive, e.grainAmount, GRAIN_STOPS, enabled) { on, k -> onChange(e.copy(grainActive = on, grainAmount = k)) }
+    EffectStops(tr("光晕"), e.halationActive, e.halationAmount, HALATION_STOPS, enabled) { on, k -> onChange(e.copy(halationActive = on, halationAmount = k)) }
+    EffectStops(tr("相纸眩光"), e.glareActive, e.glareAmount, GLARE_STOPS, enabled) { on, k -> onChange(e.copy(glareActive = on, glareAmount = k)) }
 
     val tuned = e.grainAmount != fxd.grainAmount || e.halationAmount != fxd.halationAmount ||
         e.glareAmount != fxd.glareAmount || e.grainArea != 0.2 || !e.grainLayered || e.scatterAmount != 1.0 ||
@@ -43,110 +43,110 @@ internal fun EffectsSection(e: Edit, enabled: Boolean, onDrag: (Boolean) -> Unit
         e.lensBlurUm != fxd.lensBlurUm || e.noAntihalation != fxd.noAntihalation || e.cameraFilter != fxd.cameraFilter ||
         e.preflash != fxd.preflash || e.labLevels != fxd.labLevels
     MoreRow(open = more, edited = tuned) { more = !more }
-    if (!more) Hint(moreSummary("15 项",
-        "颗粒强度" to e.grainAmount.takeIf { e.grainActive && it != fxd.grainAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "光晕强度" to e.halationAmount.takeIf { e.halationActive && it != fxd.halationAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "眩光强度" to e.glareAmount.takeIf { e.glareActive && it != fxd.glareAmount }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
-        "负片反差" to e.negativeGamma.takeIf { it != fxd.negativeGamma }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "高光能量" to e.highlightBoostEv.takeIf { it != fxd.highlightBoostEv }?.let { String.format(java.util.Locale.ROOT, "%.1f EV", it) },
-        "柔化" to e.lensBlurUm.takeIf { it != fxd.lensBlurUm }?.let { String.format(java.util.Locale.ROOT, "%.0f µm", it) },
-        "去防光晕层" to if (e.noAntihalation) "开" else null,
-        "滤镜" to e.cameraFilter.takeIf { it.isNotEmpty() && e.monoPrint }?.let { filterLabel(it) },
-        "预闪" to e.preflash.takeIf { it != fxd.preflash }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "黑白场" to if (e.labLevels && !e.scanFilm) "开" else null,
-        "颗粒尺寸" to e.grainArea.takeIf { it != 0.2 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "分层颗粒" to if (!e.grainLayered) "关" else null,
-        "散射" to e.scatterAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "锐化" to e.unsharpAmount.takeIf { it != fxd.unsharpAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
-        "半径" to e.unsharpSigma.takeIf { it != fxd.unsharpSigma }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
-        "色彩分离" to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+    if (!more) Hint(moreSummary(tr("15 项"),
+        tr("颗粒强度") to e.grainAmount.takeIf { e.grainActive && it != fxd.grainAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("光晕强度") to e.halationAmount.takeIf { e.halationActive && it != fxd.halationAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("眩光强度") to e.glareAmount.takeIf { e.glareActive && it != fxd.glareAmount }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
+        tr("负片反差") to e.negativeGamma.takeIf { it != fxd.negativeGamma }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("高光能量") to e.highlightBoostEv.takeIf { it != fxd.highlightBoostEv }?.let { String.format(java.util.Locale.ROOT, "%.1f EV", it) },
+        tr("柔化") to e.lensBlurUm.takeIf { it != fxd.lensBlurUm }?.let { String.format(java.util.Locale.ROOT, "%.0f µm", it) },
+        tr("去防光晕层") to if (e.noAntihalation) tr("开") else null,
+        tr("滤镜") to e.cameraFilter.takeIf { it.isNotEmpty() && e.monoPrint }?.let { filterLabel(it) },
+        tr("预闪") to e.preflash.takeIf { it != fxd.preflash }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("黑白场") to if (e.labLevels && !e.scanFilm) tr("开") else null,
+        tr("颗粒尺寸") to e.grainArea.takeIf { it != 0.2 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("分层颗粒") to if (!e.grainLayered) tr("关") else null,
+        tr("散射") to e.scatterAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("锐化") to e.unsharpAmount.takeIf { it != fxd.unsharpAmount }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
+        tr("半径") to e.unsharpSigma.takeIf { it != fxd.unsharpSigma }?.let { String.format(java.util.Locale.ROOT, "%.1f", it) },
+        tr("色彩分离") to e.couplersAmount.takeIf { it != 1.0 }?.let { String.format(java.util.Locale.ROOT, "%.2f", it) },
     ))
     Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
-        LabeledSlider("颗粒强度", e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag,
+        LabeledSlider(tr("颗粒强度"), e.grainAmount, 0.0, 2.0, 1.0, enabled && e.grainActive, "%.2f", onDrag = onDrag,
             disabledReason = "") {
             onChange(e.copy(grainAmount = it))
         }
-        LabeledSlider("光晕强度", e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
+        LabeledSlider(tr("光晕强度"), e.halationAmount, 0.0, 4.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
             disabledReason = "") {
             onChange(e.copy(halationAmount = it))
         }
         // Upstream's 0..30 (RFC-034): the paper's own veil is 1, and nothing under ~4 is visible.
-        LabeledSlider("眩光强度", e.glareAmount, 0.0, 30.0, 1.0, enabled && e.glareActive, "%.1f", onDrag = onDrag,
+        LabeledSlider(tr("眩光强度"), e.glareAmount, 0.0, 30.0, 1.0, enabled && e.glareActive, "%.1f", onDrag = onDrag,
             disabledReason = "") {
             onChange(e.copy(glareAmount = it))
         }
-        LabeledSlider("颗粒尺寸", e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
+        LabeledSlider(tr("颗粒尺寸"), e.grainArea, 0.05, 1.0, 0.2, enabled && e.grainActive, "%.2f µm²", onDrag = onDrag,
             disabledReason = "") {
             onChange(e.copy(grainArea = it))
         }
-        Toggle("分层颗粒", e.grainLayered, enabled && e.grainActive && !e.monoPrint, reason = when {
+        Toggle(tr("分层颗粒"), e.grainLayered, enabled && e.grainActive && !e.monoPrint, reason = when {
             !enabled -> ""
-            e.monoPrint -> "黑白片只有一层银盐颗粒。"
-            !e.grainActive -> "颗粒已关闭。"
+            e.monoPrint -> tr("黑白片只有一层银盐颗粒。")
+            !e.grainActive -> tr("颗粒已关闭。")
             else -> ""
         }) { onChange(e.copy(grainLayered = it)) }
-        Note(if (e.monoPrint) "黑白片只有一层银盐颗粒。颗粒细节在 1:1 下看得最清楚。"
-             else "关闭后每个色层只画一层颗粒，颗粒更匀、更细。颗粒细节在 1:1 下看得最清楚。")
-        LabeledSlider("乳剂散射", e.scatterAmount, 0.0, 1.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
-            disabledReason = if (enabled && !e.halationActive) "光晕已关闭，散射跟着光晕一起关。" else "") {
+        Note(if (e.monoPrint) tr("黑白片只有一层银盐颗粒。颗粒细节在 1:1 下看得最清楚。")
+             else tr("关闭后每个色层只画一层颗粒，颗粒更匀、更细。颗粒细节在 1:1 下看得最清楚。"))
+        LabeledSlider(tr("乳剂散射"), e.scatterAmount, 0.0, 1.0, 1.0, enabled && e.halationActive, "%.2f", onDrag = onDrag,
+            disabledReason = if (enabled && !e.halationActive) tr("光晕已关闭，散射跟着光晕一起关。") else "") {
             onChange(e.copy(scatterAmount = it))
         }
-        Note("光晕是片基反射回来的红晕；散射是光在乳剂里的扩散，调低画面更锐。")
-        LabeledSlider("扫描锐化", e.unsharpAmount, 0.0, 2.0, fxd.unsharpAmount, enabled, "%.2f", onDrag = onDrag) {
+        Note(tr("光晕是片基反射回来的红晕；散射是光在乳剂里的扩散，调低画面更锐。"))
+        LabeledSlider(tr("扫描锐化"), e.unsharpAmount, 0.0, 2.0, fxd.unsharpAmount, enabled, "%.2f", onDrag = onDrag) {
             onChange(e.copy(unsharpAmount = it))
         }
-        LabeledSlider("锐化半径", e.unsharpSigma, 0.2, 3.0, fxd.unsharpSigma, enabled && e.unsharpAmount > 0, "%.1f px", onDrag = onDrag,
-            disabledReason = if (enabled && e.unsharpAmount <= 0) "扫描锐化为 0，半径不起作用。" else "") {
+        LabeledSlider(tr("锐化半径"), e.unsharpSigma, 0.2, 3.0, fxd.unsharpSigma, enabled && e.unsharpAmount > 0, "%.1f px", onDrag = onDrag,
+            disabledReason = if (enabled && e.unsharpAmount <= 0) tr("扫描锐化为 0，半径不起作用。") else "") {
             onChange(e.copy(unsharpSigma = it))
         }
-        Note("扫描仪的 USM 锐化；半径按原图像素算，各档预览按比例缩放。0 为不锐化。")
-        LabeledSlider("色彩分离", e.couplersAmount, 0.0, 1.5, 1.0, enabled, "%.2f", onDrag = onDrag) {
+        Note(tr("扫描仪的 USM 锐化；半径按原图像素算，各档预览按比例缩放。0 为不锐化。"))
+        LabeledSlider(tr("色彩分离"), e.couplersAmount, 0.0, 1.5, 1.0, enabled, "%.2f", onDrag = onDrag) {
             onChange(e.copy(couplersAmount = it))
         }
-        Note("胶片层间的 DIR 抑制：调高颜色更分明，调低更柔和；1 是这款胶片自己的。")
+        Note(tr("胶片层间的 DIR 抑制：调高颜色更分明，调低更柔和；1 是这款胶片自己的。"))
 
         // engine_deepdive 1.1-1.2: upstream controls the app did not have.
-        GroupLabel("负片")
-        LabeledSlider("负片反差", e.negativeGamma, 0.7, 1.4, fxd.negativeGamma, enabled, "%.2f", onDrag = onDrag,
-            ends = "更平" to "更硬") {
+        GroupLabel(tr("负片"))
+        LabeledSlider(tr("负片反差"), e.negativeGamma, 0.7, 1.4, fxd.negativeGamma, enabled, "%.2f", onDrag = onDrag,
+            ends = tr("更平") to tr("更硬")) {
             onChange(e.copy(negativeGamma = it))
         }
-        Note("负片冲洗的反差：调高曲线更陡，暗部更沉、高光更亮；1 是这款胶片自己的。")
-        LabeledSlider("高光能量", e.highlightBoostEv, 0.0, 3.0, fxd.highlightBoostEv, enabled, "%.1f EV", onDrag = onDrag) {
+        Note(tr("负片冲洗的反差：调高曲线更陡，暗部更沉、高光更亮；1 是这款胶片自己的。"))
+        LabeledSlider(tr("高光能量"), e.highlightBoostEv, 0.0, 3.0, fxd.highlightBoostEv, enabled, "%.1f EV", onDrag = onDrag) {
             onChange(e.copy(highlightBoostEv = it))
         }
-        Note("把中灰以上 4 档的高光再推亮，光晕和胶片肩部跟着更明显。0 为不加。")
-        LabeledSlider("镜头柔化", e.lensBlurUm, 0.0, 30.0, fxd.lensBlurUm, enabled, "%.0f µm", onDrag = onDrag) {
+        Note(tr("把中灰以上 4 档的高光再推亮，光晕和胶片肩部跟着更明显。0 为不加。"))
+        LabeledSlider(tr("镜头柔化"), e.lensBlurUm, 0.0, 30.0, fxd.lensBlurUm, enabled, "%.0f µm", onDrag = onDrag) {
             onChange(e.copy(lensBlurUm = it))
         }
-        Note("相机镜头在胶片上的模糊，按胶片上的微米算，画幅越小越明显。0 为不柔化。")
-        Toggle("去掉防光晕层", e.noAntihalation, enabled && e.halationActive,
-            reason = if (enabled && !e.halationActive) "光晕已关闭。" else "") {
+        Note(tr("相机镜头在胶片上的模糊，按胶片上的微米算，画幅越小越明显。0 为不柔化。"))
+        Toggle(tr("去掉防光晕层"), e.noAntihalation, enabled && e.halationActive,
+            reason = if (enabled && !e.halationActive) tr("光晕已关闭。") else "") {
             onChange(e.copy(noAntihalation = it))
         }
-        Note("像拆掉防光晕层的电影胶片（CineStill 那样）：亮处周围出现明显的红晕。")
+        Note(tr("像拆掉防光晕层的电影胶片（CineStill 那样）：亮处周围出现明显的红晕。"))
         if (e.monoPrint) {
-            GroupLabel("镜前滤镜")
+            GroupLabel(tr("镜前滤镜"))
             PillRow {
                 Edit.CAMERA_FILTERS.forEach { f ->
                     SelectPill(selected = e.cameraFilter == f, enabled = enabled,
                         onClick = { onChange(e.copy(cameraFilter = f)) }, label = { Text(filterLabel(f)) })
                 }
             }
-            Note("黄、橙、红逐级压暗蓝天；绿提亮植物。")
+            Note(tr("黄、橙、红逐级压暗蓝天；绿提亮植物。"))
         }
 
-        GroupLabel("相纸与扫描")
-        LabeledSlider("预闪", e.preflash, 0.0, 0.3, fxd.preflash, enabled && !e.scanFilm, "%.2f", onDrag = onDrag,
-            disabledReason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有预闪。" else "") {
+        GroupLabel(tr("相纸与扫描"))
+        LabeledSlider(tr("预闪"), e.preflash, 0.0, 0.3, fxd.preflash, enabled && !e.scanFilm, "%.2f", onDrag = onDrag,
+            disabledReason = if (enabled && e.scanFilm) tr("直接扫描不经过相纸，没有预闪。") else "") {
             onChange(e.copy(preflash = it))
         }
-        Note("印相前先给相纸一点均匀曝光：高光变灰、细节回来，整体反差降低。")
-        Toggle("冲扫黑白场", e.labLevels, enabled && !e.scanFilm,
-            reason = if (enabled && e.scanFilm) "直接扫描不经过相纸，没有黑白场校正。" else "") {
+        Note(tr("印相前先给相纸一点均匀曝光：高光变灰、细节回来，整体反差降低。"))
+        Toggle(tr("冲扫黑白场"), e.labLevels, enabled && !e.scanFilm,
+            reason = if (enabled && e.scanFilm) tr("直接扫描不经过相纸，没有黑白场校正。") else "") {
             onChange(e.copy(labLevels = it))
         }
-        Note("像冲扫店那样把相纸的白和黑拉到满幅：黑更沉、白更干净。")
+        Note(tr("像冲扫店那样把相纸的白和黑拉到满幅：黑更沉、白更干净。"))
     }
 }
 
@@ -162,15 +162,15 @@ internal fun Edit.withExtraEffectsReset(d: Edit = Edit()) = copy(negativeGamma =
 
 /** A lens filter's name in the pill row ("" is none). */
 private fun filterLabel(f: String) = when (f) {
-    "" -> "无"
-    "w8" -> "8 黄"
-    "w11" -> "11 黄绿"
-    "w12" -> "12 深黄"
-    "w15" -> "15 深黄"
-    "w21" -> "21 橙"
-    "w25" -> "25 红"
-    "w47" -> "47 蓝"
-    "w58" -> "58 绿"
+    "" -> tr("无")
+    "w8" -> tr("8 黄")
+    "w11" -> tr("11 黄绿")
+    "w12" -> tr("12 深黄")
+    "w15" -> tr("15 深黄")
+    "w21" -> tr("21 橙")
+    "w25" -> tr("25 红")
+    "w47" -> tr("47 蓝")
+    "w58" -> tr("58 绿")
     else -> f
 }
 
@@ -191,7 +191,7 @@ private val GLARE_STOPS = listOf(1.0, 4.0, 10.0)
 private fun EffectStops(label: String, on: Boolean, amount: Double, stops: List<Double>, enabled: Boolean,
                         onPick: (Boolean, Double) -> Unit) {
     val chosen = if (!on) 0 else stops.indexOfFirst { kotlin.math.abs(amount - it) < 0.005 }.let { if (it < 0) -1 else it + 1 }
-    StepRow(if (chosen < 0) "$label · 自定义" else label, listOf("关", "轻", "中", "强"), chosen, enabled) { i ->
+    StepRow(if (chosen < 0) tr("{0} · 自定义", label) else label, listOf(tr("关"), tr("轻"), tr("中"), tr("强")), chosen, enabled) { i ->
         if (i == 0) onPick(false, amount) else onPick(true, stops[i - 1])
     }
 }

@@ -604,10 +604,10 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val dim = MaterialTheme.colorScheme.onSurfaceVariant
     val small = MaterialTheme.typography.bodySmall
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("品牌标识", style = MaterialTheme.typography.labelLarge)
+        Text(tr("品牌标识"), style = MaterialTheme.typography.labelLarge)
         val mode = when (f.brand) { "", "none" -> "none"; "auto", "custom" -> f.brand; else -> "pick" }
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for ((v, label) in listOf("auto" to "自动", "pick" to "选择品牌", "custom" to "自定义文字", "none" to "无")) {
+            for ((v, label) in listOf("auto" to tr("自动"), "pick" to tr("选择品牌"), "custom" to tr("自定义文字"), "none" to tr("无"))) {
                 SelectPill(
                     selected = mode == v, enabled = enabled, label = { Text(label) },
                     onClick = {
@@ -619,9 +619,9 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         when (mode) {
             "auto" -> Text(
                 when {
-                    caption.make.isBlank() && caption.exifModel.isBlank() -> "照片没有相机信息，不显示品牌"
-                    detected != null -> "按照片 EXIF 识别为 ${detected.name}（${caption.camera}）"
-                    else -> "没有 ${caption.make} 的 logo，写出厂商名"
+                    caption.make.isBlank() && caption.exifModel.isBlank() -> tr("照片没有相机信息，不显示品牌")
+                    detected != null -> tr("按照片 EXIF 识别为 {0}（{1}）", detected.name, caption.camera)
+                    else -> tr("没有 {0} 的 logo，写出厂商名", caption.make)
                 },
                 style = small, color = dim,
             )
@@ -643,15 +643,15 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = text, onValueChange = { text = it.take(24) }, singleLine = true, enabled = enabled,
-                        label = { Text("文字") }, modifier = Modifier.weight(1f),
+                        label = { Text(tr("文字")) }, modifier = Modifier.weight(1f),
                     )
                     TextButton(onClick = { set(f.copy(brandText = text.trim())) }, enabled = enabled && text.trim() != f.brandText) {
-                        Text("应用")
+                        Text(tr("应用"))
                     }
                 }
             }
         }
-        Text("版式", style = MaterialTheme.typography.labelLarge)
+        Text(tr("版式"), style = MaterialTheme.typography.labelLarge)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for ((v, label) in FrameSpec.CAPTION_LAYOUTS) {
                 SelectPill(selected = f.captionLayout == v, enabled = enabled, onClick = { set(f.copy(captionLayout = v)) },
@@ -659,15 +659,15 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             }
         }
         val filmBrand = Brands.filmBrand(caption.film)
-        ToggleRow(if (filmBrand != null) "胶片厂牌 logo（${filmBrand.name}）" else "胶片厂牌 logo", f.filmLogo, enabled && filmBrand != null) {
+        ToggleRow(if (filmBrand != null) tr("胶片厂牌 logo（{0}）", filmBrand.name) else tr("胶片厂牌 logo"), f.filmLogo, enabled && filmBrand != null) {
             set(f.copy(filmLogo = it))
         }
-        ToggleRow("彩色 logo", f.logoColor, enabled && f.lightPaper) { set(f.copy(logoColor = it)) }
+        ToggleRow(tr("彩色 logo"), f.logoColor, enabled && f.lightPaper) { set(f.copy(logoColor = it)) }
         Text(
-            if (f.lightPaper) "彩色只用于浅色纸；深色纸自动换成单色。" else "深色纸上 logo 一律用单色。",
+            if (f.lightPaper) tr("彩色只用于浅色纸；深色纸自动换成单色。") else tr("深色纸上 logo 一律用单色。"),
             style = small, color = dim,
         )
-        Text("各品牌 logo 为其权利人的商标，仅用于标识拍摄器材，与本应用无隶属或背书关系。", style = small, color = dim)
+        Text(tr("各品牌 logo 为其权利人的商标，仅用于标识拍摄器材，与本应用无隶属或背书关系。"), style = small, color = dim)
     }
 }
 

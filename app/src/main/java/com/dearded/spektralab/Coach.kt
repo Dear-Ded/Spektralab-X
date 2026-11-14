@@ -64,11 +64,13 @@ import kotlin.math.roundToInt
  * bounds through [coachAnchor]; a control scrolled away, on another page or
  * faded out by immersive mode simply has no hint until it is back.
  */
-enum class CoachStep(val text: String) {
+enum class CoachStep(private val message: String) {
     STYLE("点风格套用，再点一次调强度"),
     HOLD("按住照片看原图"),
     RESET("双击滑杆归零"),
-    SAVE("导出到相册"),
+    SAVE("导出到相册");
+
+    val text get() = tr(message)
 }
 
 class CoachState(context: Context) {
@@ -201,7 +203,7 @@ private fun CoachMark(step: CoachStep, target: Rect, index: Int, onNext: () -> U
                 Text("$index/${CoachStep.entries.size}",
                     style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
                 Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onSkip) { Text("跳过", color = Palette.OnSurface) }
+                TextButton(onClick = onSkip) { Text(tr("跳过"), color = Palette.OnSurface) }
             }
         }
     }

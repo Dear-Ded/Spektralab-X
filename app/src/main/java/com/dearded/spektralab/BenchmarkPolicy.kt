@@ -72,8 +72,8 @@ internal object BenchmarkPolicy {
     ): BenchmarkAdvice {
         val caveats = mutableListOf<String>()
         val gate = thermalGate(thermalAfter, hotLine)
-        if (gate == ThermalGate.HOT) caveats += "测试结束时机身已偏热，耗时可能偏长，降温后重测更可靠。"
-        if (gate == ThermalGate.UNKNOWN) caveats += "这台机器读不到热状态，无法判断测试时是否发热。"
+        if (gate == ThermalGate.HOT) caveats += tr("测试结束时机身已偏热，耗时可能偏长，降温后重测更可靠。")
+        if (gate == ThermalGate.UNKNOWN) caveats += tr("这台机器读不到热状态，无法判断测试时是否发热。")
 
         val live = when {
             switchStyleMs <= LIVE_OK_MS -> LivePreviewAdvice.ON
@@ -89,27 +89,27 @@ internal object BenchmarkPolicy {
             val memOk = peakGrowthMb < 0 || peakBudgetMb <= 0 || peakGrowthMb * scale <= peakBudgetMb
             timeOk && memOk
         }.maxOrNull() ?: DeviceProfile.EDGES.first()
-        if (edge != testEdge) caveats += "${edge} px 的耗时和内存是按像素数从 ${testEdge} px 的结果换算的，不是实测。"
+        if (edge != testEdge) caveats += tr("{0} px 的耗时和内存是按像素数从 {1} px 的结果换算的，不是实测。", edge, testEdge)
         return BenchmarkAdvice(live, edge, caveats)
     }
 
-    private fun headroom(h: Float) = if (h.isFinite()) String.format(Locale.ROOT, "%.2f", h) else "未知"
+    private fun headroom(h: Float) = if (h.isFinite()) String.format(Locale.ROOT, "%.2f", h) else tr("未知")
 
     /** 设置页里给用户看的文字，每行一条。 */
     fun lines(r: BenchmarkResult): List<String> = buildList {
-        add("首次预览 ${r.firstPreviewMs} ms")
-        add("切换风格 ${r.switchStyleMs} ms")
-        add("导出 ${r.exportMs} ms（${r.testEdge} px 合成图，不写入相册）")
-        add(if (r.peakGrowthMb >= 0) "峰值内存增加 ${r.peakGrowthMb} MB" else "峰值内存 读不到")
-        add("热余量 ${headroom(r.thermalBefore)} → ${headroom(r.thermalAfter)}")
+        add(tr("首次预览 {0} ms", r.firstPreviewMs))
+        add(tr("切换风格 {0} ms", r.switchStyleMs))
+        add(tr("导出 {0} ms（{1} px 合成图，不写入相册）", r.exportMs, r.testEdge))
+        add(if (r.peakGrowthMb >= 0) tr("峰值内存增加 {0} MB", r.peakGrowthMb) else tr("峰值内存 读不到"))
+        add(tr("热余量 {0} → {1}", headroom(r.thermalBefore), headroom(r.thermalAfter)))
         add(when (r.advice.livePreview) {
-            LivePreviewAdvice.ON -> "实时预览：可以开"
-            LivePreviewAdvice.OFF -> "实时预览：这次测下来偏慢，建议关"
-            LivePreviewAdvice.UNSURE -> "实时预览：这次数据不足以判断"
+            LivePreviewAdvice.ON -> tr("实时预览：可以开")
+            LivePreviewAdvice.OFF -> tr("实时预览：这次测下来偏慢，建议关")
+            LivePreviewAdvice.UNSURE -> tr("实时预览：这次数据不足以判断")
         })
-        add("工作尺寸：这次测下来 ${r.advice.edge} px 比较合适")
-        addAll(r.advice.caveats)
-        add(DISCLAIMER)
+        add(tr("工作尺寸：这次测下来 {0} px 比较合适", r.advice.edge))
+        addAll(r.advice.caveats.map { tr(it) })
+        add(tr(DISCLAIMER))
     }
 
     /** 并入「复制诊断信息」的几行，沿用诊断里的英文风格。 */

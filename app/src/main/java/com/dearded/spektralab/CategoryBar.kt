@@ -47,7 +47,7 @@ import kotlin.math.sin
  * The selected entry sits on an inverted near-white pill with dark ink and a
  * filled icon, so "selected" is told by tone and shape, never by colour alone.
  */
-private val CATEGORIES = listOf("风格", "冲洗", "调整", "边框", "构图")
+private val CATEGORIES get() = listOf(tr("风格"), tr("冲洗"), tr("调整"), tr("边框"), tr("构图"))
 /** Which drawn icon each entry uses: a highlight, the enlarger, sliders, a film frame, crop corners. */
 private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 

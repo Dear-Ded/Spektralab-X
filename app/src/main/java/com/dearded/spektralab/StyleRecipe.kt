@@ -1,8 +1,10 @@
 package com.dearded.spektralab
 
 /** Reusable global effects, co-created with GPT (OpenAI). Geometry and RAW development belong to the photo. */
-enum class StyleScope(val key: String, val label: String) {
+enum class StyleScope(val key: String, private val message: String) {
     COMBINATION("combination", "完整组合"), FILTER("filter", "仅滤镜"), FILM("film", "仅胶卷");
+
+    val label get() = tr(message)
 
     companion object { fun of(key: String) = entries.firstOrNull { it.key == key } }
 }
@@ -10,10 +12,10 @@ enum class StyleScope(val key: String, val label: String) {
 /** A shared snapshot for the local library and .spklook export. No per-photo masks or RAW white balance. */
 internal fun Edit.savedStyle(name: String, scope: StyleScope = StyleScope.COMBINATION,
                              lutSpace: String = SpkLut.SPACE_SRGB): SpkLook {
-    require(scope != StyleScope.FILM || !noFilm) { "请先选择胶卷，再保存胶卷效果" }
+    require(scope != StyleScope.FILM || !noFilm) { tr("请先选择胶卷，再保存胶卷效果") }
     val r = look.resolved()
     return SpkLook(
-        name = name.trim().take(60).ifEmpty { "我的风格" }, scope = scope,
+        name = name.trim().take(60).ifEmpty { tr("我的风格") }, scope = scope,
         engine = if (scope == StyleScope.FILTER) SpkEngine() else SpkEngine(
             film = film.takeUnless { noFilm }, paper = paper.takeUnless { noFilm },
             exposureEv = exposureEv, sceneCurve = sceneCurve, printExposure = printExposure,
@@ -31,7 +33,7 @@ internal fun Edit.savedStyle(name: String, scope: StyleScope = StyleScope.COMBIN
         ),
         layer2 = if (scope == StyleScope.FILM) Look.NEUTRAL else r.copy(lut = "", lutStrength = 1.0, masks = emptyList()),
         lut = if (scope != StyleScope.FILM && r.lut.isNotEmpty()) SpkLut(r.lutStrength, lutSpace) else null,
-        source = SpkSource("spektralab-x", "", "Spektralab-X 自定义效果"),
+        source = SpkSource("spektralab-x", "", tr("Spektralab-X 自定义效果")),
     )
 }
 

@@ -308,13 +308,15 @@ class FrameStore private constructor(private val context: Context) {
 }
 
 /** What 复制调整 / 粘贴 can carry, in the order of the darkroom chain. */
-enum class LookGroup(val label: String) {
+enum class LookGroup(private val message: String) {
     FILM_PAPER("胶片与相纸"),
     EXPOSURE("曝光"),
     WHITE_BALANCE("白平衡（RAW）"),
     EFFECTS("胶片效果"),
     LAYER2("调整层"),
-    BORDER("边框"),
+    BORDER("边框");
+
+    val label get() = tr(message)
 }
 
 /** A copied edit and the RAW white balance it was decoded with. */

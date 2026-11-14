@@ -95,7 +95,7 @@ object Updater {
         scope.launch {
             state.value = State.Checking
             val r = try { latest() } catch (e: Exception) {
-                state.value = if (manual) State.Failed("检查更新失败：${reason(e)}", null) else State.Idle
+                state.value = if (manual) State.Failed(tr("检查更新失败：{0}", reason(e)), null) else State.Idle
                 prompt.value = manual
                 return@launch
             }
@@ -130,8 +130,8 @@ object Updater {
         scope.launch {
             state.value = State.Downloading(r, 0f, background)
             try {
-                val sums = r.sumsUrl ?: throw IOException("这个版本没有附带校验文件")
-                val want = sha256From(sums, r.apkName) ?: throw IOException("校验文件里没有这个安装包")
+                val sums = r.sumsUrl ?: throw IOException(tr("这个版本没有附带校验文件"))
+                val want = sha256From(sums, r.apkName) ?: throw IOException(tr("校验文件里没有这个安装包"))
                 val dir = File(app.cacheDir, "update").apply { mkdirs() }
                 dir.listFiles()?.forEach { if (!it.name.startsWith(r.apkName)) it.delete() }
                 val dest = File(dir, r.apkName)
@@ -139,14 +139,14 @@ object Updater {
                     dest.delete()
                     val part = File(dir, r.apkName + ".part")
                     fetch(r.apkUrl, part) { p -> state.value = State.Downloading(r, p, background) }
-                    if (sha256(part) != want) { part.delete(); throw IOException("校验和不符，安装包不完整或被改动") }
-                    if (!part.renameTo(dest)) throw IOException("无法保存安装包")
+                    if (sha256(part) != want) { part.delete(); throw IOException(tr("校验和不符，安装包不完整或被改动")) }
+                    if (!part.renameTo(dest)) throw IOException(tr("无法保存安装包"))
                 }
                 checkSigner(app, dest)
                 state.value = State.Ready(r, dest)
                 prompt.value = true
             } catch (e: Exception) {
-                state.value = State.Failed("下载失败：${reason(e)}", r)
+                state.value = State.Failed(tr("下载失败：{0}", reason(e)), r)
                 prompt.value = true
             }
         }
@@ -183,7 +183,7 @@ object Updater {
                 }
             } catch (e: Exception) {
                 pendingSession?.let { id -> runCatching { installer.abandonSession(id) } }
-                failed("安装失败：${reason(e)}")
+                failed(tr("安装失败：{0}", reason(e)))
             }
         }
     }
@@ -288,16 +288,16 @@ object Updater {
     private fun checkSigner(context: Context, apk: File) {
         val pm = context.packageManager
         val theirs = pm.getPackageArchiveInfo(apk.path, PackageManager.GET_SIGNING_CERTIFICATES)
-            ?: throw IOException("安装包无法解析")
-        if (theirs.packageName != context.packageName) throw IOException("安装包不是 Spektralab-X")
+            ?: throw IOException(tr("安装包无法解析"))
+        if (theirs.packageName != context.packageName) throw IOException(tr("安装包不是 Spektralab-X"))
         val ours = pm.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-        if (theirs.longVersionCode <= ours.longVersionCode) throw IOException("安装包版本不高于当前应用")
-        val info = theirs.applicationInfo ?: throw IOException("安装包缺少应用信息")
+        if (theirs.longVersionCode <= ours.longVersionCode) throw IOException(tr("安装包版本不高于当前应用"))
+        val info = theirs.applicationInfo ?: throw IOException(tr("安装包缺少应用信息"))
         if ((info.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)
-            throw IOException("安装包为调试版本，请下载正式签名的发布版本")
+            throw IOException(tr("安装包为调试版本，请下载正式签名的发布版本"))
         val a = theirs.signingInfo?.apkContentsSigners?.toSet()
         val b = ours.signingInfo?.apkContentsSigners?.toSet()
-        if (a.isNullOrEmpty() || a != b) throw IOException("安装包签名和当前应用不同（当前是自行编译的版本？）")
+        if (a.isNullOrEmpty() || a != b) throw IOException(tr("安装包签名和当前应用不同（当前是自行编译的版本？）"))
     }
 
     private fun unmetered(c: Context): Boolean {
@@ -306,8 +306,8 @@ object Updater {
     }
 
     private fun reason(e: Exception): String = when (e) {
-        is java.net.UnknownHostException -> "没有网络"
-        is java.net.SocketTimeoutException -> "连接超时"
+        is java.net.UnknownHostException -> tr("没有网络")
+        is java.net.SocketTimeoutException -> tr("连接超时")
         else -> e.message ?: e.javaClass.simpleName
     }
 }
@@ -323,9 +323,9 @@ class UpdateReceiver : BroadcastReceiver() {
                 confirm?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)?.let(context::startActivity)
             }
             PackageInstaller.STATUS_SUCCESS -> Unit
-            PackageInstaller.STATUS_FAILURE_ABORTED -> Updater.failed("已取消安装")
+            PackageInstaller.STATUS_FAILURE_ABORTED -> Updater.failed(tr("已取消安装"))
             else -> Updater.failed(
-                "安装失败（$status）：" + (intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "未知原因"),
+                tr("安装失败（{0}）：", status) + (intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: tr("未知原因")),
             )
         }
     }

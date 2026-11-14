@@ -10,6 +10,8 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.test.core.app.ApplicationProvider
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -33,6 +35,10 @@ class ExternalFileRoutingTest {
         var name: String? = "camera.dng"
         var mime: String? = "application/octet-stream"
         var unavailable = false
+        @Volatile var queryThread: Thread? = null
+        var blockedUri: Uri? = null
+        val entered = CountDownLatch(1)
+        val release = CountDownLatch(1)
         override fun onCreate() = true
         override fun getType(uri: Uri): String? {
             if (unavailable) throw SecurityException("Synthetic unavailable metadata")
@@ -40,6 +46,11 @@ class ExternalFileRoutingTest {
         }
         override fun query(uri: Uri, projection: Array<out String>?, selection: String?,
             args: Array<out String>?, order: String?): Cursor {
+            queryThread = Thread.currentThread()
+            if (uri == blockedUri) {
+                entered.countDown()
+                check(release.await(5, TimeUnit.SECONDS))
+            }
             if (unavailable) throw SecurityException("Synthetic unavailable metadata")
             return MatrixCursor(projection ?: arrayOf(OpenableColumns.DISPLAY_NAME)).apply {
                 addRow(columnNames.map { if (it == OpenableColumns.DISPLAY_NAME) name else null }.toTypedArray())
@@ -124,9 +135,39 @@ class ExternalFileRoutingTest {
             val intent = Intent(action).setDataAndType(uri, "image/png")
                 .putExtra(Intent.EXTRA_STREAM, uri)
             route.invoke(activity, intent)
+            await { ImportRequests.uris.value.isNotEmpty() }
             assertEquals(listOf(uri), ImportRequests.uris.value)
+            assertNotSame(Thread.currentThread(), provider.queryThread)
             clearQueue()
         }
+    }
+
+    @Test fun newerExternalOpenDiscardsTheSlowProviderResult() {
+        provider.name = "neutral-hald.png"
+        provider.blockedUri = uri
+        val activity = Robolectric.buildActivity(MainActivity::class.java).get()
+        val route = MainActivity::class.java.getDeclaredMethod("handleIntent", Intent::class.java)
+            .apply { isAccessible = true }
+        val job = MainActivity::class.java.getDeclaredField("incoming").apply { isAccessible = true }
+        route.invoke(activity, Intent(Intent.ACTION_VIEW).setDataAndType(uri, "image/png"))
+        assertTrue(provider.entered.await(5, TimeUnit.SECONDS))
+        val first = job.get(activity) as kotlinx.coroutines.Job
+        val newest = Uri.parse("content://external-routing/document/413")
+        try {
+            route.invoke(activity, Intent(Intent.ACTION_VIEW).setDataAndType(newest, "image/png"))
+            await { ImportRequests.uris.value == listOf(newest) }
+        } finally { provider.release.countDown() }
+        await { first.isCompleted }
+        assertEquals(listOf(newest), ImportRequests.uris.value)
+    }
+
+    private fun await(done: () -> Boolean) {
+        val until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (!done() && System.nanoTime() < until) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            Thread.sleep(10)
+        }
+        assertTrue("Asynchronous provider operation did not finish", done())
     }
 
     @Test fun explicitDngPresetImportStillReadsEmbeddedXmp() {

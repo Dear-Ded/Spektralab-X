@@ -33,6 +33,7 @@
         android:theme="@style/Theme.SpektraLab">
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.SpektraLab.Starting"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"

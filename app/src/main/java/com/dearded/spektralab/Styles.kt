@@ -73,6 +73,10 @@ data class Style(
     val scope: StyleScope = StyleScope.COMBINATION,
     val engineOptions: SpkEngine = SpkEngine(),
 ) {
+    /** Localize built-ins at display time; imported names and recipe fields stay verbatim. */
+    val displayName: String get() = if (id in BUILTIN_IDS) tr(name) else name
+    val displayInspiration: String get() = if (id in BUILTIN_IDS) tr(inspiredBy) else inspiredBy
+
     /** [edit] in this style; per-photo geometry, white balance and borders stay. */
     fun applyTo(edit: Edit, catalog: Catalog): Edit? {
         val finish = (PAD_HOMES[id] ?: (0.0 to 0.0)).let { (tH, cH) ->
@@ -120,6 +124,8 @@ data class Style(
     )
 
     companion object {
+        private val BUILTIN_IDS by lazy { ALL.map { it.id }.toSet() }
+
         // Lab scanner signatures, as the labs describe them (Carmencita, theFINDlab,
         // Richard Photo Lab): Frontier punchy and golden with cyan shadows, Noritsu
         // flatter with lifted blacks, neutral shadows and more highlight room.
@@ -360,13 +366,13 @@ private fun StyleStripContent(
     // The panel's title row and the group pills (UI2.md 7.2 point 2); search sits first, as a pill.
     PillRow {
         SelectPill(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
-            label = { Text("搜索") })
+            label = { Text(tr("搜索")) })
         for (g in groups) SelectPill(selected = !searching && group == g,
-            onClick = { searching = false; query = ""; browse(g) }, label = { Text(g) })
+            onClick = { searching = false; query = ""; browse(g) }, label = { Text(if (g in Style.GROUPS || g in listOf(HOT_GROUP, FAV_GROUP, RECENT_GROUP, EDITS_GROUP, MINE_GROUP)) tr(g) else g) })
     }
     if (searching) {
         OutlinedTextField(value = query, onValueChange = { query = it.take(30) }, singleLine = true,
-            placeholder = { Text("搜索风格、胶卷或相机") }, modifier = Modifier.fillMaxWidth())
+            placeholder = { Text(tr("搜索风格、胶卷或相机")) }, modifier = Modifier.fillMaxWidth())
     }
     val styles = all.filter { s ->
         ui.catalog.film(s.film) != null &&
@@ -387,7 +393,7 @@ private fun StyleStripContent(
         }
     }
     if (searching && styles.isEmpty()) {
-        Text("没有找到“${query.trim()}”", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
+        Text(tr("没有找到“{0}”", query.trim()), style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
@@ -399,7 +405,7 @@ private fun StyleStripContent(
         }
         // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
         if (!searching && group == MINE_GROUP) item(key = "_save") {
-            TextCard(selected = false, title = "+ 存为风格", subtitle = "",
+            TextCard(selected = false, title = tr("+ 存为风格"), subtitle = "",
                 enabled = enabled) { naming = true }
         }
         // 最近编辑: another photo's settings onto this one; border and RAW white balance stay this photo's.
@@ -409,7 +415,7 @@ private fun StyleStripContent(
             ThumbCard(
                 selected = false, image = bitmap,
                 title = f.name.substringBeforeLast("."),
-                subtitle = if (car.edit.noFilm) "原图" else ui.catalog.film(car.edit.film)?.label ?: "原图",
+                subtitle = if (car.edit.noFilm) tr("原图") else ui.catalog.film(car.edit.film)?.label ?: tr("原图"),
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
                 view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
@@ -423,10 +429,10 @@ private fun StyleStripContent(
             ThumbCard(
                 selected = on,
                 image = bitmap,
-                title = s.name,
-                subtitle = s.inspiredBy.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
+                title = s.displayName,
+                subtitle = s.displayInspiration.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
                 enabled = enabled,
-                placeholder = s.name,
+                placeholder = s.displayName,
                 starred = picks.isFavourite(s.id),
                 onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
                 onClick = {
@@ -444,12 +450,12 @@ private fun StyleStripContent(
         var name by remember { mutableStateOf("") }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { naming = false },
-            title = { Text("存为风格") },
+            title = { Text(tr("存为风格")) },
             text = {
                 Column {
                     OutlinedTextField(value = name, onValueChange = { name = it.take(30) }, singleLine = true,
-                        placeholder = { Text("例如：傍晚暖调") }, modifier = Modifier.fillMaxWidth())
-                    Hint("不含边框、裁剪和白平衡。",
+                        placeholder = { Text(tr("例如：傍晚暖调")) }, modifier = Modifier.fillMaxWidth())
+                    Hint(tr("不含边框、裁剪和白平衡。"),
                         Modifier.padding(top = 6.dp))
                 }
             },
@@ -465,9 +471,9 @@ private fun StyleStripContent(
                         }
                         browse(MINE_GROUP)
                     }
-                }) { Text("保存") }
+                }) { Text(tr("保存")) }
             },
-            dismissButton = { androidx.compose.material3.TextButton(onClick = { naming = false }) { Text("取消") } },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { naming = false }) { Text(tr("取消")) } },
         )
     }
     // The slider belongs to the applied style only; changing photo, style or finish elsewhere hides it.
@@ -485,14 +491,14 @@ private fun StyleStripContent(
         // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
         // A step is chosen only while the strength sits exactly on it.
         val k = strengthOf(s.id)
-        val steps = listOf("轻" to 0.4, "中" to 0.7, "重" to 1.0)
+        val steps = listOf(tr("轻") to 0.4, tr("中") to 0.7, tr("重") to 1.0)
         StepRow(null, steps.map { it.first }, steps.indexOfFirst { kotlin.math.abs(k - it.second) < 0.005 },
             enabled && current != null) { i ->
             view.tick()
             strengths[s.id] = steps[i].second
             pick(s, steps[i].second)
         }
-        LabeledSlider("强度 · ${s.name}", k * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
+        LabeledSlider(tr("强度 · {0}", s.displayName), k * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
             strengths[s.id] = k
             pick(s, k)

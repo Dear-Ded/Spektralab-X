@@ -136,19 +136,19 @@ fun LightTableScreen(
             FrameGrid(table, visible, state, onOpen, top) {
                 FilterRow(frames, state.filter, table::setFilter, state.filmThumbs, table::setFilmThumbs)
                 if (visible.isEmpty()) {
-                    Text("没有${state.filter.label}的照片", Modifier.fillMaxWidth().padding(32.dp),
+                    Text(tr("没有{0}的照片", state.filter.label), Modifier.fillMaxWidth().padding(32.dp),
                         color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center)
                 }
             }
         }
 
         TableHead(
-            title = if (selecting) "已选 ${state.selection.size}" else "观片台",
-            subtitle = if (selecting || frames.isEmpty()) "" else "${frames.size} 张 · 双指缩放改列数",
+            title = if (selecting) tr("已选 {0}", state.selection.size) else tr("观片台"),
+            subtitle = if (selecting || frames.isEmpty()) "" else tr("{0} 张 · 双指缩放改列数", frames.size),
             selecting = selecting,
             onBack = { if (selecting) table.clearSelection() else onBack() },
             trailing = {
-                if (selecting) QuietButton("全选") { table.selectAll(visible.map { it.id }) }
+                if (selecting) QuietButton(tr("全选")) { table.selectAll(visible.map { it.id }) }
             },
         )
         // Reading photos in: the working bar under the head, never a halo round a photo (UI2.md 1.1).
@@ -164,7 +164,7 @@ fun LightTableScreen(
                 val chosen = visible.filter { it.id in state.selection }
                 FloatingBar(scroll = true) {
                     selectionActions(chosen)
-                    QuietButton("移出观片台", onClick = table::removeSelected)
+                    QuietButton(tr("移出观片台"), onClick = table::removeSelected)
                 }
             }
         }
@@ -190,7 +190,7 @@ internal fun TableHead(
     title: String,
     subtitle: String,
     selecting: Boolean = false,
-    backLabel: String = "返回编辑器",
+    backLabel: String = tr("返回编辑器"),
     onBack: () -> Unit,
     /** Drawn before the title on its line, e.g. a roll's process dot. */
     titleLeading: @Composable () -> Unit = {},
@@ -208,7 +208,7 @@ internal fun TableHead(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-            if (selecting) Icon(Icons.Default.Close, contentDescription = "取消选择", tint = Palette.OnSurface)
+            if (selecting) Icon(Icons.Default.Close, contentDescription = tr("取消选择"), tint = Palette.OnSurface)
             else Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = Palette.OnSurface)
         }
         Column(Modifier.weight(1f)) {
@@ -379,7 +379,7 @@ private fun FrameCell(
             .semantics {
                 contentDescription = describe(frame)
                 this.selected = selected
-                onLongClick(label = "多选") { onSelect(); true }
+                onLongClick(label = tr("多选")) { onSelect(); true }
             }
             // A plain click: a long press belongs to the grid, which drag-selects from it.
             .clickable(onClick = onClick),
@@ -433,11 +433,11 @@ private fun MarkBadge(glyph: String, modifier: Modifier) {
 internal fun describe(f: Frame): String = buildString {
     append(f.name)
     when {
-        f.pick > 0 -> append("，已选中")
-        f.pick < 0 -> append("，已淘汰")
+        f.pick > 0 -> append(tr("，已选中"))
+        f.pick < 0 -> append(tr("，已淘汰"))
     }
-    if (f.stars > 0) append("，${f.stars} 星")
-    if (f.edited) append("，已编辑")
+    if (f.stars > 0) append(tr("，{0} 星", f.stars))
+    if (f.edited) append(tr("，已编辑"))
 }
 
 /**
@@ -457,7 +457,7 @@ private fun FilterRow(
         }
         Spacer(Modifier.width(8.dp))
         // UI.md 2.9: thumbnails as shot, or through each frame's own film (developed only when idle).
-        SelectPill(selected = filmThumbs, onClick = { onFilmThumbs(!filmThumbs) }, label = { Text("胶片缩略图") })
+        SelectPill(selected = filmThumbs, onClick = { onFilmThumbs(!filmThumbs) }, label = { Text(tr("胶片缩略图")) })
     }
 }
 
@@ -471,10 +471,10 @@ private fun EmptyTable(add: AddPhotos) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("把要挑的照片放上观片台", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+            Text(tr("把要挑的照片放上观片台"), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
             Text(
-                "在这里挑片、打星、按卷整理，再批量冲洗导出。放上来不会冲洗任何照片；编辑记录只存在本应用里，不往相册写文件。",
+                tr("在这里挑片、打星、按卷整理，再批量冲洗导出。放上来不会冲洗任何照片；编辑记录只存在本应用里，不往相册写文件。"),
                 style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(28.dp))
@@ -483,9 +483,9 @@ private fun EmptyTable(add: AddPhotos) {
                 modifier = Modifier.height(56.dp),
                 contentPadding = PaddingValues(horizontal = 28.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-            ) { Text("从相册添加", style = MaterialTheme.typography.titleSmall) }
+            ) { Text(tr("从相册添加"), style = MaterialTheme.typography.titleSmall) }
             Spacer(Modifier.height(8.dp))
-            QuietButton("从文件添加（RAW / DNG）", onClick = add.files)
+            QuietButton(tr("从文件添加（RAW / DNG）"), onClick = add.files)
         }
     }
 }

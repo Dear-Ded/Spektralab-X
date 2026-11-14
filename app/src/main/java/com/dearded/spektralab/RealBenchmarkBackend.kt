@@ -24,7 +24,7 @@ internal class RealBenchmarkBackend(
             val params = Edit.openingParams(Edit.NONE, INPUT_SPACE, linear = true).toString()
             val opened = openPhotoSession(engine, photo, 0f) { _, _ -> params }
             session = opened.handle
-            if (session == 0L) throw EngineException("合成图会话打开失败", ErrorCodes.ENGINE_INIT_FAILED)
+            if (session == 0L) throw EngineException(tr("合成图会话打开失败"), ErrorCodes.ENGINE_INIT_FAILED)
         } catch (e: Throwable) {
             bitmap.recycle()
             throw e
@@ -32,37 +32,37 @@ internal class RealBenchmarkBackend(
     }
 
     override suspend fun firstPreview() = withContext(EngineThread.dispatcher) {
-        check(session != 0L) { "会话未打开" }
+        check(session != 0L) { tr("会话未打开") }
         val result = NativeEngine.renderBitmap(session, "preview")
         if (result == null) {
             if (NativeEngine.lastWasCancelled()) return@withContext
-            throw EngineException("首次预览失败：${NativeEngine.lastError()}", ErrorCodes.ENGINE_EXCEPTION)
+            throw EngineException(tr("首次预览失败：{0}", NativeEngine.lastError()), ErrorCodes.ENGINE_EXCEPTION)
         }
         result.recycle()
     }
 
     override suspend fun switchStyle(index: Int) = withContext(EngineThread.dispatcher) {
-        check(session != 0L) { "会话未打开" }
-        check(films.isNotEmpty()) { "性能测试需要至少一款彩色胶卷" }
+        check(session != 0L) { tr("会话未打开") }
+        check(films.isNotEmpty()) { tr("性能测试需要至少一款彩色胶卷") }
         val film = films[Math.floorMod(index, films.size)].id
         val delta = benchmarkFilmParams(film)
         if (NativeEngine.setParams(session, delta.toString()) == null) {
-            throw EngineException("切换风格失败：${NativeEngine.lastError()}", ErrorCodes.ENGINE_EXCEPTION)
+            throw EngineException(tr("切换风格失败：{0}", NativeEngine.lastError()), ErrorCodes.ENGINE_EXCEPTION)
         }
         val result = NativeEngine.renderBitmap(session, "live")
         if (result == null) {
             if (NativeEngine.lastWasCancelled()) return@withContext
-            throw EngineException("实时预览失败：${NativeEngine.lastError()}", ErrorCodes.ENGINE_EXCEPTION)
+            throw EngineException(tr("实时预览失败：{0}", NativeEngine.lastError()), ErrorCodes.ENGINE_EXCEPTION)
         }
         result.recycle()
     }
 
     override suspend fun export() = withContext(EngineThread.dispatcher) {
-        check(session != 0L) { "会话未打开" }
+        check(session != 0L) { tr("会话未打开") }
         val result = NativeEngine.exportBitmap(session, "full")
         if (result == null) {
             if (NativeEngine.lastWasCancelled()) return@withContext
-            throw EngineException("导出渲染失败：${NativeEngine.lastError()}", ErrorCodes.ENGINE_EXCEPTION)
+            throw EngineException(tr("导出渲染失败：{0}", NativeEngine.lastError()), ErrorCodes.ENGINE_EXCEPTION)
         }
         result.recycle()
     }

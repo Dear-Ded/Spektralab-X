@@ -48,13 +48,13 @@ object MediaSaver {
         }.getOrNull() ?: run {
             values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/$FOLDER")
             resolver.insert(MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
-        } ?: throw EngineException("无法在相册中创建文件")
+        } ?: throw EngineException(tr("无法在相册中创建文件"))
     }
 
     /** Makes a checked entry visible. */
     fun publish(context: Context, uri: Uri) {
         val values = ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }
-        if (context.contentResolver.update(uri, values, null, null) != 1) throw EngineException("无法发布到相册")
+        if (context.contentResolver.update(uri, values, null, null) != 1) throw EngineException(tr("无法发布到相册"))
     }
 
     /** Null cursors and provider failures are unknown; a successful empty query confirms absence. */
@@ -93,9 +93,9 @@ object MediaSaver {
         try {
             onCreated(uri)
             resolver.openOutputStream(uri, "w")?.use { out -> file.inputStream().use { it.copyTo(out, 1 shl 20) } }
-                ?: throw EngineException("无法写入文件")
+                ?: throw EngineException(tr("无法写入文件"))
             val written = resolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1L
-            if (written != file.length()) throw EngineException("写入相册不完整（$written / ${file.length()} 字节）")
+            if (written != file.length()) throw EngineException(tr("写入相册不完整（{0} / {1} 字节）", written, file.length()))
             publish(context, uri)
             return uri
         } catch (e: Throwable) {
@@ -109,9 +109,9 @@ object MediaSaver {
         val resolver = context.contentResolver
         val uri = create(context, name, mime)
         try {
-            resolver.openOutputStream(uri, "w")?.use(write) ?: throw EngineException("无法写入文件")
+            resolver.openOutputStream(uri, "w")?.use(write) ?: throw EngineException(tr("无法写入文件"))
             val written = resolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1L
-            if (written <= 0L) throw EngineException("写入相册失败：文件为空")
+            if (written <= 0L) throw EngineException(tr("写入相册失败：文件为空"))
             publish(context, uri)
         } catch (e: Throwable) {
             discardIfPending(context, uri)
@@ -161,12 +161,12 @@ object MediaSaver {
         val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.absolutePath, opts)
         if (opts.outWidth != width || opts.outHeight != height) {
-            throw EngineException("JPEG 校验失败：${opts.outWidth}×${opts.outHeight}，应为 ${width}×$height")
+            throw EngineException(tr("JPEG 校验失败：{0}×{1}，应为 {2}×{3}", opts.outWidth, opts.outHeight, width, height))
         }
         val tail = RandomAccessFile(file, "r").use { f ->
             if (f.length() < 4) null else ByteArray(2).also { f.seek(f.length() - 2); f.readFully(it) }
         }
-        if (tail == null || tail[0] != 0xFF.toByte() || tail[1] != 0xD9.toByte()) throw EngineException("JPEG 校验失败：文件不完整")
+        if (tail == null || tail[0] != 0xFF.toByte() || tail[1] != 0xD9.toByte()) throw EngineException(tr("JPEG 校验失败：文件不完整"))
     }
 
     /**
@@ -176,14 +176,14 @@ object MediaSaver {
     fun checkHeif(file: File, width: Int, height: Int) {
         val head = RandomAccessFile(file, "r").use { f ->
             if (f.length() < 12) null else ByteArray(12).also { f.readFully(it) }
-        } ?: throw EngineException("HEIF 校验失败：文件不完整")
+        } ?: throw EngineException(tr("HEIF 校验失败：文件不完整"))
         val box = String(head, 4, 4, Charsets.US_ASCII)
         val brand = String(head, 8, 4, Charsets.US_ASCII)
-        if (box != "ftyp" || brand !in setOf("heic", "heix", "mif1")) throw EngineException("HEIF 校验失败：不是 HEIF 文件（$box $brand）")
+        if (box != "ftyp" || brand !in setOf("heic", "heix", "mif1")) throw EngineException(tr("HEIF 校验失败：不是 HEIF 文件（{0} {1}）", box, brand))
         val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.absolutePath, opts)
         if (opts.outWidth != width || opts.outHeight != height) {
-            throw EngineException("HEIF 校验失败：${opts.outWidth}×${opts.outHeight}，应为 ${width}×$height")
+            throw EngineException(tr("HEIF 校验失败：{0}×{1}，应为 {2}×{3}", opts.outWidth, opts.outHeight, width, height))
         }
     }
 
@@ -194,23 +194,23 @@ object MediaSaver {
      * Uncompressed strips (older builds) are checked for size only.
      */
     fun checkTiff(context: Context, uri: Uri) {
-        fun bad(why: String): Nothing = throw EngineException("TIFF 校验失败：$why")
-        val pfd = context.contentResolver.openFileDescriptor(uri, "r") ?: bad("无法读取")
+        fun bad(why: String): Nothing = throw EngineException(tr("TIFF 校验失败：{0}", why))
+        val pfd = context.contentResolver.openFileDescriptor(uri, "r") ?: bad(tr("无法读取"))
         pfd.use {
             // Not closed itself: the descriptor belongs to pfd.
             val channel = FileInputStream(pfd.fileDescriptor).channel
             val size = channel.size()
             fun read(at: Long, n: Int): ByteBuffer {
-                if (at < 0 || n < 0 || at + n > size) bad("文件不完整（$size 字节）")
+                if (at < 0 || n < 0 || at + n > size) bad(tr("文件不完整（{0} 字节）", size))
                 val buf = ByteBuffer.allocate(n).order(ByteOrder.LITTLE_ENDIAN)
-                while (buf.hasRemaining()) if (channel.read(buf, at + buf.position()) < 0) bad("读取中断")
+                while (buf.hasRemaining()) if (channel.read(buf, at + buf.position()) < 0) bad(tr("读取中断"))
                 buf.flip()
                 return buf
             }
             val head = read(0, 8)
-            if (head.get(0) != 'I'.code.toByte() || head.get(1) != 'I'.code.toByte() || head.getShort(2).toInt() != 42) bad("文件头")
+            if (head.get(0) != 'I'.code.toByte() || head.get(1) != 'I'.code.toByte() || head.getShort(2).toInt() != 42) bad(tr("文件头"))
             val ifd = head.getInt(4).toLong() and 0xFFFFFFFFL
-            if (ifd < 8) bad("目录缺失，文件未写完")
+            if (ifd < 8) bad(tr("目录缺失，文件未写完"))
             val entries = read(ifd, 2).getShort(0).toInt() and 0xFFFF
             val dir = read(ifd + 2, entries * 12)
             val tags = HashMap<Int, LongArray>()
@@ -220,7 +220,7 @@ object MediaSaver {
                 val type = dir.getShort(at + 2).toInt()
                 if (type != 3 && type != 4) continue
                 val count = dir.getInt(at + 4).toLong() and 0xFFFFFFFFL
-                if (count > 1_000_000) bad("目录项 $tag 过大")
+                if (count > 1_000_000) bad(tr("目录项 {0} 过大", tag))
                 val unit = if (type == 3) 2 else 4
                 val bytes = (count * unit).toInt()
                 val data = if (bytes <= 4) {
@@ -232,19 +232,19 @@ object MediaSaver {
                     if (type == 3) data.getShort(k * 2).toLong() and 0xFFFF else data.getInt(k * 4).toLong() and 0xFFFFFFFFL
                 }
             }
-            fun one(tag: Int): Long = tags[tag]?.singleOrNull() ?: bad("缺少标签 $tag")
+            fun one(tag: Int): Long = tags[tag]?.singleOrNull() ?: bad(tr("缺少标签 {0}", tag))
             val width = one(256)
             val height = one(257)
-            if (width <= 0 || height <= 0) bad("尺寸 ${width}×$height")
-            if (tags[258]?.toList() != listOf(16L, 16L, 16L) || one(277) != 3L) bad("不是 16 位 RGB")
+            if (width <= 0 || height <= 0) bad(tr("尺寸 {0}×{1}", width, height))
+            if (tags[258]?.toList() != listOf(16L, 16L, 16L) || one(277) != 3L) bad(tr("不是 16 位 RGB"))
             val compression = one(259)
             val rows = tags[278]?.singleOrNull() ?: height
-            val offsets = tags[273] ?: bad("缺少数据位置")
-            val counts = tags[279] ?: bad("缺少数据长度")
-            if (rows <= 0 || offsets.size.toLong() != (height + rows - 1) / rows || counts.size != offsets.size) bad("分条信息不一致")
+            val offsets = tags[273] ?: bad(tr("缺少数据位置"))
+            val counts = tags[279] ?: bad(tr("缺少数据长度"))
+            if (rows <= 0 || offsets.size.toLong() != (height + rows - 1) / rows || counts.size != offsets.size) bad(tr("分条信息不一致"))
             val rowBytes = width * 6
             val stripBytes = rowBytes * minOf(rows, height)
-            if (stripBytes >= Int.MAX_VALUE) bad("分条过大")
+            if (stripBytes >= Int.MAX_VALUE) bad(tr("分条过大"))
             // One byte spare, so a strip that inflates to more than its rows is caught.
             val out = ByteArray(stripBytes.toInt() + 1)
             val inflater = java.util.zip.Inflater()
@@ -252,7 +252,7 @@ object MediaSaver {
                 for (s in offsets.indices) {
                     val expect = rowBytes * minOf(rows, height - s * rows)
                     when (compression) {
-                        1L -> if (counts[s] != expect || offsets[s] + counts[s] > size) bad("第 ${s + 1} 条不完整")
+                        1L -> if (counts[s] != expect || offsets[s] + counts[s] > size) bad(tr("第 {0} 条不完整", s + 1))
                         8L, 32946L -> {
                             val input = read(offsets[s], counts[s].toInt())
                             inflater.reset()
@@ -263,13 +263,13 @@ object MediaSaver {
                                 if (k == 0 && (inflater.needsInput() || inflater.needsDictionary())) break
                                 got += k
                             }
-                            if (!inflater.finished() || got.toLong() != expect) bad("第 ${s + 1} 条数据损坏")
+                            if (!inflater.finished() || got.toLong() != expect) bad(tr("第 {0} 条数据损坏", s + 1))
                         }
-                        else -> bad("压缩方式 $compression")
+                        else -> bad(tr("压缩方式 {0}", compression))
                     }
                 }
             } catch (e: java.util.zip.DataFormatException) {
-                bad("数据损坏")
+                bad(tr("数据损坏"))
             } finally {
                 inflater.end()
             }

@@ -99,7 +99,7 @@ internal fun DetailViewer(bitmap: android.graphics.Bitmap, onClose: () -> Unit,
                         style = MaterialTheme.typography.labelSmall)
                 }
                 // Back to the fitted photo: 适应 / 1:1 as a visible pair (ui2_icecream.md 6.9).
-                TextButton(onClick = onClose) { Text("适应", color = Color.White) }
+                TextButton(onClick = onClose) { Text(tr("适应"), color = Color.White) }
             }
         }
     }

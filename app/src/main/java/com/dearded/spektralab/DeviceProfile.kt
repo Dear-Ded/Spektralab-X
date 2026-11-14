@@ -98,11 +98,11 @@ object DeviceProfile {
         EDGES.filter { it <= RECOMMENDED_CEILING && it.toLong() * it * 3 / 4 <= maxPixels }.maxOrNull() ?: EDGES.first()
 
     fun summary(gpu: GpuInfo?): String {
-        gpu ?: return "未检测到 Vulkan 设备"
+        gpu ?: return tr("未检测到 Vulkan 设备")
         val range = gpu.storageRange
-        val how = if (gpu.verifiedStorageRange > 0) "实测" else "未实测，按保守值"
-        return "${gpu.name} · Vulkan ${gpu.api} · 单缓冲上限 ${range shr 20} MB（$how，驱动报告 ${gpu.maxStorageBufferRange shr 20} MB）" +
-            " · 约 ${(range / BYTES_PER_PLANE_PIXEL / 1_000_000.0 * 10).roundToInt() / 10.0} MP"
+        val how = if (gpu.verifiedStorageRange > 0) tr("实测") else tr("未实测，按保守值")
+        return tr("{0} · Vulkan {1} · 单缓冲上限 {2} MB（{3}，驱动报告 {4} MB）", gpu.name, gpu.api, range shr 20, how, gpu.maxStorageBufferRange shr 20) +
+            tr(" · 约 {0} MP", (range / BYTES_PER_PLANE_PIXEL / 1_000_000.0 * 10).roundToInt() / 10.0)
     }
 
     fun summarizeCapabilities(caps: String): String = runCatching {

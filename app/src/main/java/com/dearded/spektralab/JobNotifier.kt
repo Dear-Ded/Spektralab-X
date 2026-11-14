@@ -39,12 +39,12 @@ object JobNotifier {
 
     fun ensureChannels(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, "正在处理", NotificationManager.IMPORTANCE_LOW).apply {
-            description = "后台冲洗与导出的进度"
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, tr("正在处理"), NotificationManager.IMPORTANCE_LOW).apply {
+            description = tr("后台冲洗与导出的进度")
             setShowBadge(false)
         })
-        nm.createNotificationChannel(NotificationChannel(CHANNEL_DONE, "处理完成", NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "后台任务完成或失败时提醒"
+        nm.createNotificationChannel(NotificationChannel(CHANNEL_DONE, tr("处理完成"), NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = tr("后台任务完成或失败时提醒")
         })
     }
 
@@ -74,13 +74,13 @@ object JobNotifier {
         val position = if (running == null) 0 else jobs.filter { it.active || it.state == JobState.DONE }
             .sortedBy { it.id }.indexOfFirst { it.id == running.id } + 1
         val total = active.size + jobs.count { it.state == JobState.DONE && it.finishedAt > (active.minOfOrNull { a -> a.createdAt } ?: Long.MAX_VALUE) }
-        val title = if (running == null) "等待处理 · ${active.size} 张" else "正在冲洗 ${running.name}"
+        val title = if (running == null) tr("等待处理 · {0} 张", active.size) else tr("正在冲洗 {0}", running.name)
         val text = buildString {
-            if (running != null) append(running.phase.ifEmpty { "处理中" }).append(" · ")
-            append("剩余约 ").append(etaText)
-            if (active.size > 1) append(" · 还有 ").append(active.size - 1).append(" 张")
+            if (running != null) append(running.phase.ifEmpty { tr("处理中") }).append(" · ")
+            append(tr("剩余约 ")).append(etaText)
+            if (active.size > 1) append(tr(" · 还有 ")).append(active.size - 1).append(tr(" 张"))
         }
-        val shortText = if (eta < 60) "${eta}秒" else "${eta / 60}分"
+        val shortText = if (eta < 60) tr("{0}秒", eta) else tr("{0}分", eta / 60)
 
         val b = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_film)
@@ -121,8 +121,8 @@ object JobNotifier {
         ensureChannels(context)
         return NotificationCompat.Builder(context, CHANNEL_DONE)
             .setSmallIcon(R.drawable.ic_stat_film)
-            .setContentTitle("后台处理已暂停 · $waiting 张待处理")
-            .setContentText("系统限制了后台运行时间；打开应用即可继续")
+            .setContentTitle(tr("后台处理已暂停 · {0} 张待处理", waiting))
+            .setContentText(tr("系统限制了后台运行时间；打开应用即可继续"))
             .setColor(ACCENT)
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
@@ -133,14 +133,14 @@ object JobNotifier {
     fun finished(context: Context, done: Int, failed: Int): Notification {
         ensureChannels(context)
         val title = when {
-            failed == 0 -> "已冲洗完成 $done 张"
-            done == 0 -> "$failed 张处理失败"
-            else -> "完成 $done 张，失败 $failed 张"
+            failed == 0 -> tr("已冲洗完成 {0} 张", done)
+            done == 0 -> tr("{0} 张处理失败", failed)
+            else -> tr("完成 {0} 张，失败 {1} 张", done, failed)
         }
         return NotificationCompat.Builder(context, CHANNEL_DONE)
             .setSmallIcon(R.drawable.ic_stat_film)
             .setContentTitle(title)
-            .setContentText(if (failed == 0) "已保存到 相册 · Pictures/Spektralab-X" else "打开“正在处理”查看原因")
+            .setContentText(if (failed == 0) tr("已保存到 相册 · Pictures/Spektralab-X") else tr("打开“正在处理”查看原因"))
             .setColor(ACCENT)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))
@@ -164,7 +164,7 @@ object JobNotifier {
             .put("enableFloat", false)
             .put("ticker", "$title · $pct%")
             .put("tickerPic", pic)
-            .put("aodTitle", "冲洗 $pct%")
+            .put("aodTitle", tr("冲洗 {0}%", pct))
             .put("baseInfo", JSONObject().put("type", 1).put("title", title).put("content", text))
             .put("progressInfo", JSONObject().put("progress", pct).put("colorProgress", "#F2F2F2"))
             .put("param_island", JSONObject()

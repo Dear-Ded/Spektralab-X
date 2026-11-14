@@ -169,7 +169,7 @@ object RemoteBackends {
     /** This build: remote processing is planned for the first stable release (docs/ROADMAP.md M4). */
     object Disabled : RemoteBackend {
         override val enabled = false
-        private fun off(): Nothing = throw RemoteException("unsupported", "远程处理将在正式版提供")
+        private fun off(): Nothing = throw RemoteException("unsupported", tr("远程处理将在正式版提供"))
         override fun info() = off()
         override fun capabilities() = off()
         override fun uploadedBytes(sha256: String) = off()

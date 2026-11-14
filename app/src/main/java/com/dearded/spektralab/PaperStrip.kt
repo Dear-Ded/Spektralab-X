@@ -33,13 +33,13 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean,
     val positive = film?.positive == true
     val none = e.paperNone(positive)
     val cards = buildList {
-        add(PaperCard(null, "无", when {
-            positive -> "直接扫描"
-            bw -> "需要相纸"
-            else -> "数字中间片"
+        add(PaperCard(null, tr("无"), when {
+            positive -> tr("直接扫描")
+            bw -> tr("需要相纸")
+            else -> tr("数字中间片")
         }))
         for (p in papers) add(PaperCard(p.id, p.label,
-            if (p.id == recommended) "推荐" else if (p.bw) "黑白相纸" else "彩色相纸"))
+            if (p.id == recommended) tr("推荐") else if (p.bw) tr("黑白相纸") else tr("彩色相纸")))
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)) {
@@ -51,7 +51,7 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean,
                 val candidate = if (positive) e.copy(scanFilm = true) else e.copy(scanFilm = false, digitalIntermediate = true)
                 val original = rememberSelectionPreview(ui, candidate, preview)
                 NoneCard(selected = on, original = original, size = 64.dp,
-                    subtitle = if (positive) "直接扫描" else if (bw) "需要相纸" else "数字中间片",
+                    subtitle = if (positive) tr("直接扫描") else if (bw) tr("需要相纸") else tr("数字中间片"),
                     enabled = enabled && !(bw && !positive)) {
                     if (!on) {
                         view.tick()
