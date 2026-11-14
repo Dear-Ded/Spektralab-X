@@ -1,0 +1,2 @@
+PASS production_vectors=1460; scene_sorted_oracle; median_sorted_oracle; duplicate_ranks; signed_zero; empty
+PASS frozen/candidate production EV bits and complete scene-statistic hash

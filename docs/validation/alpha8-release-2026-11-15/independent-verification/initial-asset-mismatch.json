@@ -1,0 +1,293 @@
+{
+  "initial_verifier": "rejected different-toolchain generated assets",
+  "aoidc_glslang": "11.8.0",
+  "production_glslang": "15.1.0",
+  "non_shader_resources_match": true,
+  "differences": [
+    {
+      "path": "stamp.txt",
+      "aoidc_sha256": "33567e03cc7d7002bbe90998e5418e98cebababc2d1228af0859cce808f5cecc",
+      "release_sha256": "94751844b921aac6b31b47d4c9cbc8be61cb1a05937fb81a08b6cf1c9d7969dc"
+    },
+    {
+      "path": "vulkan/spk_affine3.spv",
+      "aoidc_sha256": "9ee78f6fefb3b51cbb28fd51b127afa62e204f0ea148a674b137fd38d63f9ea1",
+      "release_sha256": "fe94af84a38966da00bd708924028ebb6a8d6f0716497e0b41b07888151114a7"
+    },
+    {
+      "path": "vulkan/spk_boost.spv",
+      "aoidc_sha256": "444707e1bed64c6081925141b552526f03400b1aad34fd61ce1d38585780092c",
+      "release_sha256": "6549e55a41fbcfd58a3860ae9338edb490c7cf15ebb7692bd313c6ae3a0ddf77"
+    },
+    {
+      "path": "vulkan/spk_bw_correct.spv",
+      "aoidc_sha256": "233e8280a9c0fb51781cdbeb6f58864fe98c28ceec32dcea150863e9ce5341d1",
+      "release_sha256": "b20994a79702400ddb2dde085ef52f65fe8d22904ce016a1d8562b42e30646f6"
+    },
+    {
+      "path": "vulkan/spk_cam16ucs_compress.spv",
+      "aoidc_sha256": "a71a27bbacf7c628711f2ee5ba323b08fdf6f90db3d6ea4b7a4e9c358b7ab1a3",
+      "release_sha256": "312120dea2bb99ed711f4be0bcd83d00a77352455f2ba51b63e5c058ae5f7752"
+    },
+    {
+      "path": "vulkan/spk_cctf_decode.spv",
+      "aoidc_sha256": "038b604690d58b570834b1f47097b0e7fe4a0dc386eaf1bd119929aed21a7b06",
+      "release_sha256": "3ee11e2e93e3c465d10fdaa2fa426791979b6d4683166cead1165dcb70d509e5"
+    },
+    {
+      "path": "vulkan/spk_cctf_encode_matrix.spv",
+      "aoidc_sha256": "648c6c20421229a8fd78b3634348b0b7655a4e74e13e32de71be062ea7ff6f51",
+      "release_sha256": "1d48d75f3e1b4c269ac0e21c995173031a5879b3f515f621d40a91ff8a57b775"
+    },
+    {
+      "path": "vulkan/spk_couplers_correction.spv",
+      "aoidc_sha256": "f432e3de2e5d3b718e59257ca978f94682e15eb5fbe3387a95fd01af9657da68",
+      "release_sha256": "47b0e88691d036045f0ee2a4745ff31ec5c526d42a24763ec5a659c3c054cc35"
+    },
+    {
+      "path": "vulkan/spk_curves.spv",
+      "aoidc_sha256": "eed03a499a96fa456da03c0d10b6e841cedb45f6e564ff494b8190e8421af743",
+      "release_sha256": "b8b04f6ef0e2238ac960f02a41b6bf6c1e46c421588d00acf154eff160f1b69c"
+    },
+    {
+      "path": "vulkan/spk_di_encode.spv",
+      "aoidc_sha256": "736012644e58850f071830e1fefbe7f0851b2fea9cfa5729cfa30b157cac60b7",
+      "release_sha256": "2e9632a6d4d741c0e1e4aa1da96913fdb57221ef4adf02a41fdd679d60cd953f"
+    },
+    {
+      "path": "vulkan/spk_di_normalise.spv",
+      "aoidc_sha256": "187b6b1f5424648917d522ca5a7f4ee9878cef168e1c99ad0684d094f5f53f17",
+      "release_sha256": "f0308f429df6f2059d2951e7824b3192659ffa02685df19aed3cd57dbafa789b"
+    },
+    {
+      "path": "vulkan/spk_dir_finish.spv",
+      "aoidc_sha256": "00debeab8b3d6519536a5f2b4a077571fe8acb5c5cfc858346282360da39b4da",
+      "release_sha256": "9880d58700805dca25a47a676c04812c4fd7efadd6ac50e5dd30b32f915c5965"
+    },
+    {
+      "path": "vulkan/spk_edr.spv",
+      "aoidc_sha256": "539b03db3dfb152e7520e07fc9ce17291c9a1d24270224a39f5706066d6f68a7",
+      "release_sha256": "0301a369d3bed4d9531c3a5a820de5582ae1124d43e6b82dfed94fb424030148"
+    },
+    {
+      "path": "vulkan/spk_geometry_resample_df.spv",
+      "aoidc_sha256": "d32ba004c278076bf5d54f2aa4d9d773363a26aaa543bdf723b5ad545379504f",
+      "release_sha256": "3ce5f73b3f70ab04cd3dd949cf9e1e6be539726fbeda6ebbc0ca46f0b638810e"
+    },
+    {
+      "path": "vulkan/spk_glare_add.spv",
+      "aoidc_sha256": "6caa09a9fc167818d82391a23b89905fb3fade11473c5c2d10298dc419e58f66",
+      "release_sha256": "44fca33a5bcb355c352b784231c1750814f64ec2ab6c228c6cf66885b44def79"
+    },
+    {
+      "path": "vulkan/spk_grain_layer_one.spv",
+      "aoidc_sha256": "7c225ddec4dc1a195058bcd5cc94dcf23cdedbac246588e93836f08eab1f7ee9",
+      "release_sha256": "c3a1442812f89439dd8c297b1e8e1558070bc8e1e56e326d2ddf15e1af2d7527"
+    },
+    {
+      "path": "vulkan/spk_grain_layers.spv",
+      "aoidc_sha256": "90d1cec0eac10984152397eb226e982b5a87d874cb111558b7b55478504da19a",
+      "release_sha256": "8ece0cfa430afb732b9c124e98ab41dc8bb2368e399214977ca75a5162b1c77f"
+    },
+    {
+      "path": "vulkan/spk_grain_simple.spv",
+      "aoidc_sha256": "df12e8f7e044e89c6118e3661704b982e8882c8685474a1d4c5714485fc88ae5",
+      "release_sha256": "cf728b1ad911f8bcb62997a3679b2b560067671c3a5f44a4d6b7a79b76cb848b"
+    },
+    {
+      "path": "vulkan/spk_highlight_headroom.spv",
+      "aoidc_sha256": "2671e120a91e0235bc6151bbe21e0a31157de40879c6df06fe6aa01f7f37362a",
+      "release_sha256": "d517e9073973a0c04a2ec40fc2b613b3b6756ebf7c760c14663d29fcbf3fbfbf"
+    },
+    {
+      "path": "vulkan/spk_iir_boundary_df_acc.spv",
+      "aoidc_sha256": "853250a84b2eebf3a5b53da596bfe3cf84b1efd66e711d7c9fedc13166837a7f",
+      "release_sha256": "5b2da0b6a44f82ce0f3d9d130b1d053b2c3b50fc4c838bd3d2ac4ae8005ae0de"
+    },
+    {
+      "path": "vulkan/spk_iir_df_acc.spv",
+      "aoidc_sha256": "f76a0da2ef1a79ed3291be16b78eae5239cedc95c6fe222b0f814cac136ca3f0",
+      "release_sha256": "7ad73bb9bff79fe701f8e99baf3e81b2e0953dd41815bfe393dae2c08db25664"
+    },
+    {
+      "path": "vulkan/spk_iir_difference_df_acc.spv",
+      "aoidc_sha256": "7104912c520aff8aefc9138684a7380a81702c8c45d1ad8d187405a4bdc573b1",
+      "release_sha256": "96aed44d2f736ca72f2b187d5d494ee6f655a4b58fd90a15fa5f5021ffa2bcbb"
+    },
+    {
+      "path": "vulkan/spk_lincomb3.spv",
+      "aoidc_sha256": "5b281685233644d235dbf8eb9c31ab9c690c79c7665b5f3a9ee6db7b0d953653",
+      "release_sha256": "9bcf788bede01671eec7f8cdff8d39d308d331fcb481fcdac765e700503aadc0"
+    },
+    {
+      "path": "vulkan/spk_log10_guarded.spv",
+      "aoidc_sha256": "a0fb28ec2b877650d9c2f64f6c1860df41a185e635bc0c68aa8ed86f8fbe6511",
+      "release_sha256": "1f91854d1b45f185e9f51fe722b85d39b57a0b3a6184430f3afd5e194b487365"
+    },
+    {
+      "path": "vulkan/spk_lognormal_field.spv",
+      "aoidc_sha256": "b8596551022c7e6a8eb2fb90c7e1b48faa554b51ed8ceadc662845d1f1c60bc4",
+      "release_sha256": "9d17a2f62a551723bb2ad8e0e3d693d26b9e685c065c0c6e5582d1557de6cc62"
+    },
+    {
+      "path": "vulkan/spk_lut2d_cubic.spv",
+      "aoidc_sha256": "54ec6e3335e03277a62068344057de6ca04b0cfe4565dd1218c19b801020b4e8",
+      "release_sha256": "7234a48598696ed997d68f390f5cbf7caf990716b3f0b502e40946e91ad35b19"
+    },
+    {
+      "path": "vulkan/spk_lut3d_trilinear.spv",
+      "aoidc_sha256": "839ea542bc388d08236960100e0ee259251336e2425b661a9855053904efe33c",
+      "release_sha256": "9c58c5baf6519cc1f8073b23a0af7885cf6d49ea92a37ee694f00d9540f9a5e6"
+    },
+    {
+      "path": "vulkan/spk_math_probe.spv",
+      "aoidc_sha256": "33e36b4543d8a0a90a92b446242a52c16c193394673c20560fb488b80974a9ef",
+      "release_sha256": "17784bb3daf6444a69f979048bfe688961e8d82b00d67af555d7fc9b901ed248"
+    },
+    {
+      "path": "vulkan/spk_matmul3.spv",
+      "aoidc_sha256": "66bb93a4bb2de0121815032d9dd4a38b795737a2c9dbc85cf03c64d85e53744a",
+      "release_sha256": "c78a7000a8134537e3937835801a4c6c7d063b733d7af97ca7bdfa22ede9a6f4"
+    },
+    {
+      "path": "vulkan/spk_mul.spv",
+      "aoidc_sha256": "63d6b8ae68566caffc451364f9a9e02b5c5fabbfa0b1b38e9b8c750ec72b5279",
+      "release_sha256": "579b2bccf41e41e7c4bcc0305b9680f91e4489756d4bedabedbf8d85b3edec0c"
+    },
+    {
+      "path": "vulkan/spk_overscan_add_mask.spv",
+      "aoidc_sha256": "f18ae3af439edc9164dfba5a87e805476cc635a577beae55ab3707038a7d69f6",
+      "release_sha256": "6243bac8a1653241e4228c2099b07bcfa498d140f4a60006ecb80453ea1df008"
+    },
+    {
+      "path": "vulkan/spk_overscan_canvas.spv",
+      "aoidc_sha256": "fafbd95961073fdfe8b3688f86928fb3f1d2159bd150c6883af796ed3ab44191",
+      "release_sha256": "38d1433d84838a5e9766df290f884bb11ec142e869c5fafcecb237276835bfcf"
+    },
+    {
+      "path": "vulkan/spk_overscan_film_present.spv",
+      "aoidc_sha256": "977ce4c824b9ed6fa7a2c9135bdf519d87bcc5a07ac2eda9a82f919f4438ecc5",
+      "release_sha256": "c0bd91c243b118de165a1fdb65cd79fbc4f6bf9d6b1b78baf80fda555c4aec45"
+    },
+    {
+      "path": "vulkan/spk_overscan_light.spv",
+      "aoidc_sha256": "c5d2ce0e4672aca77a19453a8d2a41d6d2bec94a26cfb9763857c6009f16479e",
+      "release_sha256": "dd8ee87eda7ccf8c4cad0f8eb0b54f5ccea439a6a71b1c4bb6559520c4c0b5da"
+    },
+    {
+      "path": "vulkan/spk_print_exposure.spv",
+      "aoidc_sha256": "03e7b2305e448d0b5baf1b40dedbe48a116ecfce580190be498443234d98ac8a",
+      "release_sha256": "06e8800ab9bb8521f8d4521fe2ce68753c351be914cbc6944638f3c4d17ecd1a"
+    },
+    {
+      "path": "vulkan/spk_reduce_max.spv",
+      "aoidc_sha256": "17dc8dc032da1b73dc9e07e8d1746dad2018414be401a587ee12e8be4920b7ea",
+      "release_sha256": "0c45e0d59efe84d52a3346c3be10a2c3bbf3082993ee90418a40bf17dc964761"
+    },
+    {
+      "path": "vulkan/spk_rng_probe.spv",
+      "aoidc_sha256": "7d89dcb3bf2aa0715d3256321dde184bf25dfd4438d47562d7ebfc5eb611a141",
+      "release_sha256": "f62ec12d714a887ee8df32128757e5ae89cd28932b1b779cde9e74d51b24248e"
+    },
+    {
+      "path": "vulkan/spk_scene_curve.spv",
+      "aoidc_sha256": "157db58f5ff32c09a9b195869e865822a2cdd3e937d9556482dd8e2065beec60",
+      "release_sha256": "b2dcbde2cd466364e6ec8b50619866fc20accb1f0f00889ceeb3dfe8d0239481"
+    },
+    {
+      "path": "vulkan/spk_scene_latitude.spv",
+      "aoidc_sha256": "1ef1ab805d2444d5f653b8bf296a65ef844fe376169a8d569adb5ec2b5104c0d",
+      "release_sha256": "968221c508b2c690b04876ec042bfa15d347f0b4f84739a25f42d5eed8351972"
+    },
+    {
+      "path": "vulkan/spk_sep_fir_acc.spv",
+      "aoidc_sha256": "a2d7a3361785ee2bff16094ed761e8f27f512b8283db7cac8bd79a51f1db01ae",
+      "release_sha256": "bd706bdda37bab58c47ba8fe5878120f33dc8e279866844ca7e96f7a025ac0c3"
+    },
+    {
+      "path": "vulkan/spk_sep_fir_rows.spv",
+      "aoidc_sha256": "3f7a1794a3611c8186a3b733302a49bad3bfde2c2e88c60b43e1e1589bd9aff4",
+      "release_sha256": "d99184f033d9cfeb8318219e86f55f460cf77aebf84e14cfa511af88013c3ab7"
+    },
+    {
+      "path": "vulkan/spk_spectral_epilogue.spv",
+      "aoidc_sha256": "4a8a48000df74669113091700a9af71c5bf0cd6e7ca06fc3e5fd56a6224bd9ea",
+      "release_sha256": "add1f3b679de47d65a87e1254a15e012fdda71745c7b169035c2234bc323f762"
+    },
+    {
+      "path": "vulkan/spk_split_probe.spv",
+      "aoidc_sha256": "b474e589aa2379d049a4652d04167881911486da34b7914604a829bed379b80d",
+      "release_sha256": "18ecd055a75b738208df165c23d76787f203500afa4db08b263b8ece792757d1"
+    },
+    {
+      "path": "vulkan/spk_stride_sample.spv",
+      "aoidc_sha256": "1dbcdeca70bd8e59741dd9f61532400b7e062d60f569cde82dcc747131e305a1",
+      "release_sha256": "f80ef92f0fe564eae73685d566e38e5b9c86a7fdba59b0d774bfd1d5502ab40e"
+    },
+    {
+      "path": "vulkan/spk_take_rgb.spv",
+      "aoidc_sha256": "ca04e0597f4dfd65607eb17c47b009c5f27e0a8256d443e91c5f859be08519f2",
+      "release_sha256": "3693160da34bd6fdf758f877190b65ac820ddbaf72acaeddee7043a18102227b"
+    },
+    {
+      "path": "vulkan/spk_tc_b.spv",
+      "aoidc_sha256": "7d59c9d15489ea61d43636525c8b39513caee3aa7350041669894c9e1747fd6d",
+      "release_sha256": "4511f33f7837acd106c991a099926dc8cc329882e678e822f51fbb8cbce4ec10"
+    },
+    {
+      "path": "vulkan/spk_to_rgba16.spv",
+      "aoidc_sha256": "3e4759751c16bbf0bca5a7bb609fdc54fde201670a035e848d1e80f517031030",
+      "release_sha256": "e9c4125f37168549f8e418dfd544315cf6fa2c38470775a08cd4d76c26fca3d2"
+    },
+    {
+      "path": "vulkan/spk_validate_finite.spv",
+      "aoidc_sha256": "11032c0d528b530b1bbebdecd227b20f17b1bbba15128ae667113020c141248f",
+      "release_sha256": "bc93448b44f4076be85c0d268e9a4b75de6b9a95cd3904ac8a4f5ee187ff9e21"
+    },
+    {
+      "path": "vulkan/spk_view_cam16.spv",
+      "aoidc_sha256": "f82e1c535a80e73ddef70d448f6718f1ffca54db53a63489a23656dbae7580d1",
+      "release_sha256": "9e240ee8f40494803c844d49b62bff85e68cd48032d3b951296e6c418497639d"
+    },
+    {
+      "path": "vulkan/spk_view_geometry.spv",
+      "aoidc_sha256": "ec2fa4d538863593982f6ed668b1ae51a21d8143dc3f431c2940610f1ece356a",
+      "release_sha256": "a60cb38b923c7ec090f5594b566078ac1059ffa4085dcde4657498e591fb2170"
+    },
+    {
+      "path": "vulkan/spk_view_grade.spv",
+      "aoidc_sha256": "b5df10b7367a1719e55dfe070ce92d34fe1dc25427c78440b6da9d311f38115a",
+      "release_sha256": "a1eeac1a3817d91ef0f20f5af81aa31ffbb2eef772e17f63882ead26a76f2f8e"
+    },
+    {
+      "path": "vulkan/spk_view_grade_di.spv",
+      "aoidc_sha256": "b880178f53cf6baddb0021288d9ba6c4caac75d6698d686d1d096c3e71aaa236",
+      "release_sha256": "fd4b475520bffc97849aeece1731038e76d39b3869ef76e2eb8cd77a50b2ad2a"
+    },
+    {
+      "path": "vulkan/spk_view_grade_float.spv",
+      "aoidc_sha256": "5a2fb8da865b5f4d63d6f9c6e791c9af0d7a9f5c6bf84d7d741cafcc9634c44b",
+      "release_sha256": "24e0f04d544544a042e297d852d7edeb91ebb4bcd61a8a87a45905c4134e2256"
+    },
+    {
+      "path": "vulkan/spk_view_pack.spv",
+      "aoidc_sha256": "df0bfccb6db8dc52055ef5270666947fd3be86510bbfab12e92c790c3edfa7fc",
+      "release_sha256": "fc8f910434f0e8cc6cd52fa74af8ea1c304a3fc7a2f44e4a59ae139bff486c13"
+    },
+    {
+      "path": "vulkan/spk_view_pair.spv",
+      "aoidc_sha256": "a21fba8038f3d7e1353200b894738710b1db415ba6960f35978ea977ed9aba8c",
+      "release_sha256": "05e300c3881b86780ba6ab71acc35c923b19c57c7e2cf4e11b1f5b94bb84b9e5"
+    },
+    {
+      "path": "vulkan/spk_xyz_cam16_compress.spv",
+      "aoidc_sha256": "c2e153b1f4e617583f293f7d8896c3655855c3a16aa65b160f217bac07f8fe5c",
+      "release_sha256": "3632e5a9db43f410d4f4d48ba770a1aeca757ad9b3df4ed03ba27e4fccbf1adc"
+    },
+    {
+      "path": "vulkan/spk_zoom_bilinear_mirror.spv",
+      "aoidc_sha256": "19571ff1ea417d1e423aba20fb24324d29359c78c073209eb457f89fcff4fb40",
+      "release_sha256": "f1c8401b610b5fb8fb60a049a8eca62f492f8c74ec0985a78e82c27f1dbe3b45"
+    }
+  ]
+}

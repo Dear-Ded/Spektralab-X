@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FilmThumbnailColorTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:20:08.684Z" hostname="ip-10-0-141-193" time="6.277">
+  <properties/>
+  <testcase name="sizingNeverUpscalesAndStillFitsTheRequestedLongEdge" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="5.9"/>
+  <testcase name="linearSrgbActuallyConvertsToEncodedSrgb" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="0.051"/>
+  <testcase name="thumbnailDecoderCanPreserveAnUnsupportedInputSpace" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="0.121"/>
+  <testcase name="supportedSpacesKeepTheirCodes" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="0.068"/>
+  <testcase name="adobeRgbActuallyConvertsToP3" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="0.059"/>
+  <testcase name="customP3TransferActuallyConvertsToNamedP3" classname="com.dearded.spektralab.FilmThumbnailColorTest" time="0.078"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

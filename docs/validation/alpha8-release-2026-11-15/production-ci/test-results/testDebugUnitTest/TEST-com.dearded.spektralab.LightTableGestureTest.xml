@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableGestureTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:20:35.781Z" hostname="ip-10-0-141-193" time="9.291">
+  <properties/>
+  <testcase name="firstDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="5.13"/>
+  <testcase name="nextTapCanClearSelectionThenOpenThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.62"/>
+  <testcase name="secondFingerEndsDragSelectionAndCanZoomTheGrid" classname="com.dearded.spektralab.LightTableGestureTest" time="0.526"/>
+  <testcase name="longPressDragSelectsAcrossRows" classname="com.dearded.spektralab.LightTableGestureTest" time="0.518"/>
+  <testcase name="longPressFirstRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.24"/>
+  <testcase name="longPressSecondRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.489"/>
+  <testcase name="crossRowDragSurvivesTheSelectionRecomposition" classname="com.dearded.spektralab.LightTableGestureTest" time="0.484"/>
+  <testcase name="shortTapStillOpensThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.241"/>
+  <testcase name="firstUpwardDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="0.358"/>
+  <testcase name="longPressNearBottomKeepsTheTouchedRow" classname="com.dearded.spektralab.LightTableGestureTest" time="0.211"/>
+  <testcase name="normalScrollingResumesAfterLongPressRelease" classname="com.dearded.spektralab.LightTableGestureTest" time="0.471"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

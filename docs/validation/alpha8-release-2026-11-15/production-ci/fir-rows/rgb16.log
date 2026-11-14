@@ -1,0 +1,1 @@
+PASS RGB16: cases=520 samples=15211650 exact_bits; all_65536_codes; unaligned_input; cancel=5; invalid=5

@@ -1,0 +1,22 @@
+{
+  "testReleaseUnitTest": {
+    "suites": 30,
+    "tests": 230,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testDebugUnitTest": {
+    "suites": 52,
+    "tests": 378,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 111,
+    "hints": 6,
+    "source": "lint-results-release.xml"
+  }
+}

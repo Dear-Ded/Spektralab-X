@@ -1,0 +1,159 @@
+Collecting cmake==3.31.6
+  Downloading cmake-3.31.6-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (27.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 27.8/27.8 MB 425.0 kB/s eta 0:00:00
+Installing collected packages: cmake
+Successfully installed cmake-3.31.6
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /data/work/gpt-alpha8-release-20261115/glslang-production/build
+[1/57] Building CXX object glslang/CMakeFiles/GenericCodeGen.dir/stub.cpp.o
+[2/57] Building CXX object SPIRV/CMakeFiles/SPIRV.dir/__/glslang/stub.cpp.o
+[3/57] Building CXX object glslang/CMakeFiles/MachineIndependent.dir/stub.cpp.o
+[4/57] Linking CXX static library glslang/libGenericCodeGen.a
+[5/57] Building CXX object glslang/CMakeFiles/glslang-default-resource-limits.dir/ResourceLimits/resource_limits_c.cpp.o
+[6/57] Building CXX object glslang/OSDependent/Unix/CMakeFiles/OSDependent.dir/__/__/stub.cpp.o
+[7/57] Linking CXX static library glslang/OSDependent/Unix/libOSDependent.a
+[8/57] Building CXX object glslang/CMakeFiles/glslang-default-resource-limits.dir/ResourceLimits/ResourceLimits.cpp.o
+[9/57] Linking CXX static library glslang/libglslang-default-resource-limits.a
+[10/57] Building CXX object glslang/CMakeFiles/glslang.dir/cmake_pch.hxx.gch
+[11/57] Building CXX object glslang/CMakeFiles/glslang.dir/GenericCodeGen/CodeGen.cpp.o
+[12/57] Building CXX object glslang/CMakeFiles/glslang.dir/GenericCodeGen/Link.cpp.o
+[13/57] Building CXX object glslang/CMakeFiles/glslang.dir/CInterface/glslang_c_interface.cpp.o
+[14/57] Building CXX object glslang/CMakeFiles/glslang.dir/OSDependent/Unix/ossource.cpp.o
+[15/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/attribute.cpp.o
+[16/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/Constant.cpp.o
+[17/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/InfoSink.cpp.o
+[18/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/iomapper.cpp.o
+[19/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/IntermTraverse.cpp.o
+[20/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/Initialize.cpp.o
+[21/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/glslang_tab.cpp.o
+[22/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/ParseContextBase.cpp.o
+[23/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/PoolAlloc.cpp.o
+[24/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/Intermediate.cpp.o
+[25/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/RemoveTree.cpp.o
+[26/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/Scan.cpp.o
+[27/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/ShaderLang.cpp.o
+[28/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/SpirvIntrinsics.cpp.o
+[29/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/SymbolTable.cpp.o
+[30/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/Versions.cpp.o
+[31/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/limits.cpp.o
+[32/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/ParseHelper.cpp.o
+[33/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/intermOut.cpp.o
+[34/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/parseConst.cpp.o
+[35/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/reflection.cpp.o
+[36/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/preprocessor/Pp.cpp.o
+[37/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/preprocessor/PpAtom.cpp.o
+[38/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/preprocessor/PpContext.cpp.o
+[39/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/linkValidate.cpp.o
+[40/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/preprocessor/PpTokens.cpp.o
+[41/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/preprocessor/PpScanner.cpp.o
+[42/57] Building CXX object glslang/CMakeFiles/glslang.dir/MachineIndependent/propagateNoContraction.cpp.o
+[43/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/InReadableOrder.cpp.o
+[44/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/Logger.cpp.o
+[45/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/SpvPostProcess.cpp.o
+[46/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/doc.cpp.o
+[47/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/SpvBuilder.cpp.o
+[48/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/SpvTools.cpp.o
+[49/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/CInterface/spirv_c_interface.cpp.o
+[50/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/disassemble.cpp.o
+[51/57] Building CXX object glslang/CMakeFiles/glslang.dir/__/SPIRV/GlslangToSpv.cpp.o
+[52/57] Linking CXX static library glslang/libglslang.a
+[53/57] Generating /data/work/gpt-alpha8-release-20261115/glslang-production/build/include/glslang/glsl_intrinsic_header.h
+[54/57] Linking CXX static library SPIRV/libSPIRV.a
+[55/57] Linking CXX static library glslang/libMachineIndependent.a
+[56/57] Building CXX object StandAlone/CMakeFiles/glslang-standalone.dir/StandAlone.cpp.o
+[57/57] Linking CXX executable StandAlone/glslang
+Glslang Version: 11:15.1.0
+ESSL Version: OpenGL ES GLSL 3.20 glslang Khronos. 15.1.0
+GLSL Version: 4.60 glslang Khronos. 15.1.0
+SPIR-V Version 0x00010600, Revision 1
+GLSL.std.450 Version 100, Revision 1
+Khronos Tool ID 8
+SPIR-V Generator Version 11
+GL_KHR_vulkan_glsl version 100
+ARB_GL_gl_spirv version 100
+staged 56 kernels and resources in /data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/assets/engine (24M)
+{
+  "package_name": "com.dearded.spektralab",
+  "version_name": "0.2.00-alpha-8",
+  "version_code": 128,
+  "apk_bytes": 38780914,
+  "apk_sha256": "bafa2eedb2c0ec4edee284e4d11632acbc43994eb6b976f306577d49dfceb129",
+  "native_libraries": {
+    "lib/arm64-v8a/libandroidx.graphics.path.so": {
+      "bytes": 10096,
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "relro": true,
+      "non_executable_stack": true
+    },
+    "lib/arm64-v8a/libspektralab_jni.so": {
+      "bytes": 4573056,
+      "sha256": "58917eb45670273867c0d32c7714cd428696083942964c28cb7d1c6113886957",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "relro": true,
+      "non_executable_stack": true
+    }
+  },
+  "dex": {
+    "classes.dex": {
+      "bytes": 4147848,
+      "sha256": "7bb7a65fcd9c6943621e824771b0445de429c2d84ff875b29cdd8861eb45342e"
+    }
+  },
+  "spirv_count": 56,
+  "engine_asset_count": 113,
+  "engine_stamp": "ae0291630fc4f07708f735bffd3ed6a2",
+  "phone_installation": "not performed",
+  "installation_warning": "not verified on a phone",
+  "certificate_sha256": "cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3",
+  "matches_published_certificate": true,
+  "jni_method_count": 39,
+  "dynamic_dependencies": [
+    "libandroid.so",
+    "liblog.so",
+    "libjnigraphics.so",
+    "libz.so",
+    "libdl.so",
+    "libm.so",
+    "libc.so"
+  ],
+  "declared_permissions": [
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.ACCESS_MEDIA_LOCATION",
+    "android.permission.POST_PROMOTED_NOTIFICATIONS",
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.REQUEST_INSTALL_PACKAGES",
+    "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION",
+    "com.dearded.spektralab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ]
+}

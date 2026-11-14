@@ -1,0 +1,9 @@
+apk	Host tools	2026-11-14T18:15:40.7521289Z ^[[36;1msudo apt-get install -y --no-install-recommends glslang-tools unzip^[[0m
+apk	Host tools	2026-11-14T18:15:54.2286872Z   glslang-tools spirv-tools
+apk	Host tools	2026-11-14T18:15:54.3799617Z Get:2 http://us-east-2.ec2.archive.ubuntu.com/ubuntu noble-updates/universe amd64 spirv-tools amd64 2025.1~rc1-1~ubuntu0.24.04.2 [4410 kB]
+apk	Host tools	2026-11-14T18:15:54.9635539Z Get:3 http://us-east-2.ec2.archive.ubuntu.com/ubuntu noble-updates/universe amd64 glslang-tools amd64 15.1.0-2~ubuntu0.24.04.2 [2395 kB]
+apk	Host tools	2026-11-14T18:16:02.2835585Z Selecting previously unselected package glslang-tools.
+apk	Host tools	2026-11-14T18:16:02.2936385Z Preparing to unpack .../glslang-tools_15.1.0-2~ubuntu0.24.04.2_amd64.deb ...
+apk	Host tools	2026-11-14T18:16:02.2941394Z Unpacking glslang-tools (15.1.0-2~ubuntu0.24.04.2) ...
+apk	Host tools	2026-11-14T18:16:02.3898084Z Setting up glslang-tools (15.1.0-2~ubuntu0.24.04.2) ...
+apk	Stage engine assets	2026-11-14T18:16:56.1299517Z staged 56 kernels and resources in /home/runner/work/Spektralab-X/Spektralab-X/app/src/main/assets/engine (24M)

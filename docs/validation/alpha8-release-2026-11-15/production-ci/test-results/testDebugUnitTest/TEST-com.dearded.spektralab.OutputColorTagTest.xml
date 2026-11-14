@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.OutputColorTagTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:20:56.507Z" hostname="ip-10-0-141-193" time="0.068">
+  <properties/>
+  <testcase name="unknownTargetPreservesExistingTagAndPackedPixels" classname="com.dearded.spektralab.OutputColorTagTest" time="0.026"/>
+  <testcase name="srgbThenP3PreservesPackedPixels" classname="com.dearded.spektralab.OutputColorTagTest" time="0.018"/>
+  <testcase name="p3ThenSrgbPreservesPackedPixels" classname="com.dearded.spektralab.OutputColorTagTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

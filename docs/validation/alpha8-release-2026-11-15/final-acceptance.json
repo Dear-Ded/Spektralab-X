@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-11-15T02:41:15.7297845+08:00",
+  "status": "published-and-independently-verified",
+  "version": "0.2.00-alpha-8",
+  "version_code": 128,
+  "source_commit": "430d7f3069d322a0d7964aeac6a95c9e168f4465",
+  "application_commit": "0f9d6656c4562d3293941a2a3485f212c8031282",
+  "published_at": "2026-11-15T02:23:33+08:00",
+  "android_run_id": 43625578747,
+  "android_run_number": 285,
+  "screenshots_run_id": 43625578680,
+  "screenshots_run_number": 93,
+  "maintained_source_files": 662,
+  "maintained_source_bytes": 4363797,
+  "canonical_git_bytes_match": true,
+  "source_inventory_sha256": "f43fddfdd5c7747f13a11fb4a46690b93d08bdcb971accb898bfd12cfd6f0e80",
+  "production_tests": {
+    "testReleaseUnitTest": {
+      "suites": 30,
+      "tests": 230,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "testDebugUnitTest": {
+      "suites": 52,
+      "tests": 378,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 111,
+      "hints": 6,
+      "source": "lint-results-release.xml"
+    }
+  },
+  "apk": {
+    "bytes": 38780914,
+    "sha256": "bafa2eedb2c0ec4edee284e4d11632acbc43994eb6b976f306577d49dfceb129",
+    "certificate_sha256": "cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3",
+    "public_download_matches_artifact_and_checksum": true,
+    "engine_assets": 113,
+    "engine_stamp": "ae0291630fc4f07708f735bffd3ed6a2",
+    "spirv_count": 56,
+    "jni_methods": 39
+  },
+  "provenance": {
+    "verified": true,
+    "exact_source_commit": "430d7f3069d322a0d7964aeac6a95c9e168f4465",
+    "source_ref": "refs/heads/main",
+    "signer_workflow": "Dear-Ded/Spektralab-X/.github/workflows/android.yml",
+    "runner_environment": "github-hosted",
+    "deny_self_hosted_runners": true
+  },
+  "independent_cloud_checks": {
+    "verification_exit": 0,
+    "toolchain_reproduction_exit": 0,
+    "glslang": "15.1.0",
+    "all_113_independently_generated_asset_bytes_match": true,
+    "first_glslang_118_asset_comparison": "failed; retained",
+    "initial_cmake_322_attempt": "failed; retained",
+    "assertions_relaxed": false
+  },
+  "device": {
+    "phone_disconnected": true,
+    "final_changes_reinstalled": false,
+    "last_accepted_candidate": "c4a45e576a1dd694371542adc663252b5ae56d1d",
+    "unexplained_immediate_navigation_gesture": "retained as unconfirmed",
+    "private_evidence_uploaded": false
+  }
+}

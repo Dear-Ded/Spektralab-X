@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FrameRateBoostTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:20:26.990Z" hostname="ip-10-0-141-193" time="8.492">
+  <properties/>
+  <testcase name="stoppedActivityRestoresPreferenceAndRemovesPendingIdleReset" classname="com.dearded.spektralab.FrameRateBoostTest" time="7.93"/>
+  <testcase name="liftRestoresPreviousPreference" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.097"/>
+  <testcase name="missingForecastDoesNotOverrideKnownPowerAndThermalStatus" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.084"/>
+  <testcase name="severeThermalStateReleasesEvenWithoutCoordinateChange" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.117"/>
+  <testcase name="powerSaverDuringDragRestoresPreviousPreference" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.106"/>
+  <testcase name="idleFingerRestoresPreviousPreference" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.081"/>
+  <testcase name="cancellationRestoresPreviousPreference" classname="com.dearded.spektralab.FrameRateBoostTest" time="0.067"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+]]></system-err>
+</testsuite>

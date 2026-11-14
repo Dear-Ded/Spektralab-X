@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FrameEditPersistenceTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:20:15.678Z" hostname="ip-10-0-141-193" time="0.469">
+  <properties/>
+  <testcase name="openingAndReopeningAnUntouchedFrameDoesNotCreateASidecar" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.084"/>
+  <testcase name="rawReopenPersistsWhiteBalanceAndFullDevelopmentRecipe" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.101"/>
+  <testcase name="indexFailureDoesNotPublishASuccessfulEditAndRetryFinishesTheIndex" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.065"/>
+  <testcase name="firstAdjustmentsOnSameNamedPhotosSurviveSwitchAndStoreReload" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.078"/>
+  <testcase name="failedSidecarWritePreservesTheOldRecipeAndCanBeRetried" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.047"/>
+  <testcase name="failedRatingAndDimensionsKeepPublishedAndPersistedFramesUnchanged" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.025"/>
+  <testcase name="failedRemovalKeepsTheFrameAndNeverStartsGrantRelease" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.031"/>
+  <testcase name="editorStateFlushKeepsLastGoodJsonOnFailureAndRestoresTheLatestSnapshotAfterRetry" classname="com.dearded.spektralab.FrameEditPersistenceTest" time="0.038"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
