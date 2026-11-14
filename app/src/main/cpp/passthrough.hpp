@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
 #include <utility>
@@ -160,15 +161,12 @@ inline bool render_view(spk_session* session, const std::string& tier, bool no_f
     if (!result.width || !result.height || result.pixels.size() != bytes) {
         error = "view returned no pixels"; return false;
     }
-    void* pixels = std::malloc(bytes);
+    std::unique_ptr<void, decltype(&std::free)> pixels(std::malloc(bytes), std::free);
     if (!pixels) { error = "cannot allocate the view's pixels"; return false; }
-    std::memcpy(pixels, result.pixels.data(), bytes);
-    if (cancel.cancelled()) {
-        std::free(pixels);
-        cancel.check();
-    }
-    out.texture = pixels;
-    out.rgba16 = static_cast<const uint16_t*>(pixels);
+    std::memcpy(pixels.get(), result.pixels.data(), bytes);
+    cancel.check();
+    out.texture = pixels.release();
+    out.rgba16 = static_cast<const uint16_t*>(out.texture);
     out.width = result.width;
     out.height = result.height;
     out.row_stride_px = result.width;

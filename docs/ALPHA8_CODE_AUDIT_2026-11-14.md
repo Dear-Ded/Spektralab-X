@@ -42,6 +42,11 @@ and decoder regressions also run in the candidate GitHub Actions workflow.
   safely. Invalid, overlong, surrogate and out-of-range byte sequences are
   replaced. This fixes an encoding contract defect found by source review;
   no phone crash is attributed to it without reproduction.
+- The integer view adapter retains its allocated pixels in an owning pointer
+  until the final cancellation check succeeds. Cancellation unwinds that
+  ownership before the public result is published. This also removes the
+  analyzer's ambiguous free-then-second-atomic-check path; the diagnostic
+  alone did not establish a reproduced use-after-free on the phone.
 
 ## Validation
 
