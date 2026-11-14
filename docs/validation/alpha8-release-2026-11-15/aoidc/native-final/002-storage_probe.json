@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/storage_probe.cpp",
+  "source_sha256": "b93d13b126dc191f60fe256133bb8753edf6c66038611c81dc93b347a87b74a1",
+  "exit": 0,
+  "seconds": 6.2,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "002-storage_probe"
+}

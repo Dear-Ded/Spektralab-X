@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/image_writer.cpp",
+  "source_sha256": "38e6c6c2be1ab0e6174481453d6e44a84ce06127a5e516d4eef41e6691b86e3a",
+  "exit": 0,
+  "seconds": 2.029,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "117-image_writer"
+}

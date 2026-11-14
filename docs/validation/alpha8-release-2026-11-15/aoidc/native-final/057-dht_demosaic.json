@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp",
+  "source_sha256": "6203338d108919868ee8ad4d514712dbc3e438d150b608a7d6859a32a2a7f45c",
+  "exit": 0,
+  "seconds": 11.707,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'l' during its initialization is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp",
+      "line": 785
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp:785:9: warning: Value stored to 'l' during its initialization is never read [deadcode.DeadStores]"
+  ],
+  "report": "057-dht_demosaic"
+}

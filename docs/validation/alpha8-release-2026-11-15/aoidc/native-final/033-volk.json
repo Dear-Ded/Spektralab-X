@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/third_party/volk/volk.c",
+  "source_sha256": "a70a715023a6ff03654994239787c7e57e84b8151f4ba6e7a4d0f7e910100dbe",
+  "exit": 0,
+  "seconds": 3.442,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "033-volk"
+}

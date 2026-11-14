@@ -1,0 +1,53 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+  "source_sha256": "589692bb16137640e24f2c6a340f9455d174e1b10fd0d90fd735989f27c98ad2",
+  "exit": 0,
+  "seconds": 8.028,
+  "diagnostics": [
+    {
+      "checker": "unix.MallocSizeof",
+      "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 574
+    },
+    {
+      "checker": "unix.MallocSizeof",
+      "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 576
+    },
+    {
+      "checker": "unix.MallocSizeof",
+      "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 664
+    },
+    {
+      "checker": "unix.MallocSizeof",
+      "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 668
+    },
+    {
+      "checker": "core.NullDereference",
+      "description": "Array access (from variable 'pixel') results in a null pointer dereference",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 833
+    },
+    {
+      "checker": "unix.Malloc",
+      "description": "Potential leak of memory pointed to by 'pixel'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "line": 848
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:574:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:576:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:664:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:668:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:833:41: warning: Array access (from variable 'pixel') results in a null pointer dereference [core.NullDereference]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:848:1: warning: Potential leak of memory pointed to by 'pixel' [unix.Malloc]"
+  ],
+  "report": "045-load_mfbacks"
+}

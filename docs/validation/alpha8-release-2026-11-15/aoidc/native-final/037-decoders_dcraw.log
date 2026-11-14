@@ -1,0 +1,16 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:658:5: warning: Value stored to 'jhigh' is never read [deadcode.DeadStores]
+  658 |     jhigh *= 2;
+      |     ^        ~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:987:24: warning: Although the value stored to 'max' is used in the enclosing expression, the value is never actually read from 'max' [deadcode.DeadStores]
+  987 |     read_shorts(curve, max = csize);
+      |                        ^     ~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1205:19: warning: Array access (from variable 'bytes') results in a null pointer dereference [core.NullDereference]
+ 1205 |       bytes[byte] = buf[vpos++];
+      |       ~~~~~       ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1546:16: warning: Value stored to 'bit' is never read [deadcode.DeadStores]
+ 1546 |           for (bit = 30, i = 0; i < 16; i++)
+      |                ^     ~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1605:42: warning: The left operand of '<<' is a garbage value [core.UndefinedBinaryOperatorResult]
+ 1605 |             RAW(row, col) = curve[pix[i] << 1];
+      |                                   ~~~~~~ ^
+5 warnings generated.

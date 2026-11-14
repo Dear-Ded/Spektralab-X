@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw_dcrdefs.cpp",
+  "source_sha256": "aa13da70a50d177d5c5ce4ff1aac101ca5c5a84a950541802c64cf63a7f42ced",
+  "exit": 0,
+  "seconds": 8.569,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "039-decoders_libraw_dcrdefs"
+}

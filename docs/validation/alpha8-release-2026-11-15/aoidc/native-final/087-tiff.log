@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp:1729:17: warning: Value stored to 'MakN_length' is never read [deadcode.DeadStores]
+ 1729 |                 MakN_length = get4();
+      |                 ^             ~~~~~~
+1 warning generated.

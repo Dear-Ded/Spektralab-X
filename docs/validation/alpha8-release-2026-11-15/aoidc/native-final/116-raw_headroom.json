@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_headroom.cpp",
+  "source_sha256": "77b98b3f298abedfe8bec823da5b78f4a2b6b863cfca9046e9c1354e2d40dfe3",
+  "exit": 0,
+  "seconds": 1.881,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "116-raw_headroom"
+}

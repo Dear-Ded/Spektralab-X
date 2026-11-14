@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/scene_latitude.cpp",
+  "source_sha256": "ecfe8003fc6cfdd07327cbf18889776b5e784817517b861842605db3aa0d66c6",
+  "exit": 0,
+  "seconds": 9.26,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "028-scene_latitude"
+}

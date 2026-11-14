@@ -1,0 +1,25 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/imprint_raster.cpp",
+  "source_sha256": "fbb416d8fe3de97cc82e4bf95a07176b9b9d419d5aeb2edc21f67469f9a1d4d2",
+  "exit": 0,
+  "seconds": 27.148,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'dx' is never read",
+      "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h",
+      "line": 3151
+    },
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Although the value stored to 'xb' is used in the enclosing expression, the value is never actually read from 'xb'",
+      "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h",
+      "line": 3153
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3151:19: warning: Value stored to 'dx' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3153:36: warning: Although the value stored to 'xb' is used in the enclosing expression, the value is never actually read from 'xb' [deadcode.DeadStores]"
+  ],
+  "report": "032-imprint_raster"
+}

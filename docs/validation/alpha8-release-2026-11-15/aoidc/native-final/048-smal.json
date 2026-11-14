@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/smal.cpp",
+  "source_sha256": "da85bad70142dc1f5bb7803f65f7d1c7388037d3cac417980ae4efe4954d523e",
+  "exit": 0,
+  "seconds": 3.633,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "048-smal"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/layer2.cpp",
+  "source_sha256": "f55ad1488bebb8e1f89c6d574931136bddb62af88f8adcfbf82becb192f4f77d",
+  "exit": 0,
+  "seconds": 13.451,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "005-layer2"
+}

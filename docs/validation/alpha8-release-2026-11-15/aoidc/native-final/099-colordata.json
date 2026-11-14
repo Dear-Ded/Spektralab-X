@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/colordata.cpp",
+  "source_sha256": "db2c5648071a3076d771d6eb7fa7324d5b4399e631858d24d3485635544f90eb",
+  "exit": 0,
+  "seconds": 10.294,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "099-colordata"
+}

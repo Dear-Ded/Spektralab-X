@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/file_write.cpp",
+  "source_sha256": "27106f663b6fb6a297d0aa3497506f69b210f70fccf5cd6052433f9afdff2ad9",
+  "exit": 0,
+  "seconds": 4.396,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "111-file_write"
+}

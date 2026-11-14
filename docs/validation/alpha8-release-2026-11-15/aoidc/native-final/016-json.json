@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/json.cpp",
+  "source_sha256": "cb37dc91238845e574234832a8ec52a3c78476d2c196f38c3ab26caad82cfc98",
+  "exit": 0,
+  "seconds": 9.742,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "016-json"
+}

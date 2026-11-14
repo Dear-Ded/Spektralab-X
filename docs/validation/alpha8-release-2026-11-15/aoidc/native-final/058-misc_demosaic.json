@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/misc_demosaic.cpp",
+  "source_sha256": "09598759f8f7c882c5ee755772f91aa4cd1bb4e0fb6763a967eac0436c0dfac1",
+  "exit": 0,
+  "seconds": 4.491,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "058-misc_demosaic"
+}

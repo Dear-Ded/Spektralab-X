@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:352:5: warning: Value stored to 'bwide' is never read [deadcode.DeadStores]
+  352 |     bwide = bwide * 16 / 15;
+      |     ^       ~~~~~~~~~~~~~~~
+1 warning generated.

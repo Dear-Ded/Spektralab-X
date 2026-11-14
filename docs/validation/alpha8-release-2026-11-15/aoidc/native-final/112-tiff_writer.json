@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/tiff_writer.cpp",
+  "source_sha256": "830a24b827e7913f522f43b34162164fa30c392d1450ea17b985aefcba181f4c",
+  "exit": 0,
+  "seconds": 1.43,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "112-tiff_writer"
+}

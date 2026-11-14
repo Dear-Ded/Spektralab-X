@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/exif_gps.cpp",
+  "source_sha256": "a751dcb863eb3564c39b0c080dc23db43089f42014496bc106412cd4e4cec401",
+  "exit": 0,
+  "seconds": 4.886,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "069-exif_gps"
+}

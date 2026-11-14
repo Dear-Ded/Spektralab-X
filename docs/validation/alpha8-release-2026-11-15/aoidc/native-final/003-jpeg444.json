@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/jpeg444.cpp",
+  "source_sha256": "744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a",
+  "exit": 0,
+  "seconds": 2.439,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "003-jpeg444"
+}

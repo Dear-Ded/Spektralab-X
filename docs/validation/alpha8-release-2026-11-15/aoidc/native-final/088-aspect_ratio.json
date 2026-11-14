@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/aspect_ratio.cpp",
+  "source_sha256": "5a6e0e52ecb187d56e6e83ac62bd08112e3b6da24d023c1e1ce293519cd7b49d",
+  "exit": 0,
+  "seconds": 1.83,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "088-aspect_ratio"
+}

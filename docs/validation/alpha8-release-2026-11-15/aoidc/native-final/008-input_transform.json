@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/input_transform.cpp",
+  "source_sha256": "05fe025f77674e99651aae024e113b750fede9b5a715a8077bb873ba06a5fb94",
+  "exit": 0,
+  "seconds": 1.72,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "008-input_transform"
+}

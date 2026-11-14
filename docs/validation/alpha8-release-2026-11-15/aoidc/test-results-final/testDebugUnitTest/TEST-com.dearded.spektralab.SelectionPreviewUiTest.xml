@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.SelectionPreviewUiTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:07:20.445Z" hostname="ser858255664526" time="0.965">
+  <properties/>
+  <testcase name="filmNonePreviewKeepsTheCurrentFinishAndUsesTheTapRecipe" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.145"/>
+  <testcase name="existingCardLayoutDisplaysDistinctPreviewImages" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.243"/>
+  <testcase name="styleCardRequestsTheSameFullRecipeAsItsTapIncludingStoredStrength" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.21"/>
+  <testcase name="changingRecipeClearsTheOldImageAndCancelledWorkCannotPublish" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.164"/>
+  <testcase name="paperNonePreviewShowsTheIntermediateWithCurrentFinish" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.117"/>
+  <testcase name="reopeningIdenticalSourceMetadataStillRequestsNewPixels" classname="com.dearded.spektralab.SelectionPreviewUiTest" time="0.084"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

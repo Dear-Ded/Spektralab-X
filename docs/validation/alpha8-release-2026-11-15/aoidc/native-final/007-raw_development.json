@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/raw_development.cpp",
+  "source_sha256": "91098e983c7c605ecb24b307f3ec895e75d3a5e6bddc5f214820bdaf38cc4bf1",
+  "exit": 0,
+  "seconds": 7.043,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "007-raw_development"
+}

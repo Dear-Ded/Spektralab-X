@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/colour.cpp",
+  "source_sha256": "2e507db29568cf798958bb242fb1174303a469ebca072243a30070a76f6b4243",
+  "exit": 0,
+  "seconds": 5.832,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "012-colour"
+}

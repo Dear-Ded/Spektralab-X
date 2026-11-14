@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp",
+  "source_sha256": "e02a3626c5794c40221bde1be4bd55ee0cad15c860013319969f0cbec682410f",
+  "exit": 0,
+  "seconds": 13.769,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Although the value stored to 'd' is used in the enclosing expression, the value is never actually read from 'd'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp",
+      "line": 338
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp:338:35: warning: Although the value stored to 'd' is used in the enclosing expression, the value is never actually read from 'd' [deadcode.DeadStores]"
+  ],
+  "report": "056-dcb_demosaic"
+}

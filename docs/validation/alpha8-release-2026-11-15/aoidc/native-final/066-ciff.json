@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/ciff.cpp",
+  "source_sha256": "837aa51751e86eac2d9084f6f889eaf38393bd668abced8fc3c0fa9e6beb8faa",
+  "exit": 0,
+  "seconds": 4.14,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "066-ciff"
+}

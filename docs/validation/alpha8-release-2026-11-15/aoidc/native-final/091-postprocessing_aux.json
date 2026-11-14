@@ -1,0 +1,39 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+  "source_sha256": "35e12fff82f6b60c55553b9e29b94c8be27143e13ca447aee306f2d3f1d00013",
+  "exit": 0,
+  "seconds": 6.294,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'temp' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+      "line": 152
+    },
+    {
+      "checker": "core.UndefinedBinaryOperatorResult",
+      "description": "The left operand of '>' is a garbage value",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+      "line": 271
+    },
+    {
+      "checker": "core.UndefinedBinaryOperatorResult",
+      "description": "The right operand of '>' is a garbage value",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+      "line": 271
+    },
+    {
+      "checker": "core.UndefinedBinaryOperatorResult",
+      "description": "The right operand of '/' is a garbage value",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+      "line": 356
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:152:3: warning: Value stored to 'temp' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:271:27: warning: The left operand of '>' is a garbage value [core.UndefinedBinaryOperatorResult]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:271:27: warning: The right operand of '>' is a garbage value [core.UndefinedBinaryOperatorResult]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:356:26: warning: The right operand of '/' is a garbage value [core.UndefinedBinaryOperatorResult]"
+  ],
+  "report": "091-postprocessing_aux"
+}

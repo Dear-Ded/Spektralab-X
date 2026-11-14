@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp",
+  "source_sha256": "b31324db64e5ddb194d214f519547700ae880a886732d75b98f4bbe9543eb596",
+  "exit": 0,
+  "seconds": 14.585,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'offset' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp",
+      "line": 2441
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp:2441:7: warning: Value stored to 'offset' is never read [deadcode.DeadStores]"
+  ],
+  "report": "086-sony"
+}

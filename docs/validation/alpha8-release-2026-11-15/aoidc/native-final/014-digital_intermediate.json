@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/digital_intermediate.cpp",
+  "source_sha256": "ffcef5cc42b63f39b2233f56a411b08cf30c01307a1eaad0ae43b27fa203c289",
+  "exit": 0,
+  "seconds": 1.97,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "014-digital_intermediate"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/sonycc.cpp",
+  "source_sha256": "35e5077e11699ac26266258e5fc13ad9c09f416db66e8fad53f43d8103f310c3",
+  "exit": 0,
+  "seconds": 6.298,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "050-sonycc"
+}

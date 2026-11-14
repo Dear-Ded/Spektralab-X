@@ -1,0 +1,3485 @@
+{
+  "files": 651,
+  "bytes": 4338516,
+  "syntax_checked": 222,
+  "credentials": "No matching credential markers; heuristic only",
+  "results": [
+    {
+      "path": ".github/dependabot.yml",
+      "bytes": 827,
+      "sha256": "7f555e62fae50a2bdd734b8e65b1791fb271dfd2d292450a2af6612088eb05a5"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "bytes": 2572,
+      "sha256": "51f376dc70fc199f88588842706f241e18ebd27bd70af44d62188ded75ec5cb6"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "bytes": 961,
+      "sha256": "ace483f13317c77395da3972c3e933b190a62c0bf47c4f3ecf92a173a186fd30"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "bytes": 1180,
+      "sha256": "8240cc76b40813ab022bfcd1e98cd442b2fbef7bb5271bca685a8dd8ab195a9c"
+    },
+    {
+      "path": ".github/workflows/android.yml",
+      "bytes": 9715,
+      "sha256": "042f549267ff0e8d4854e4d0bbe8072fecda01442ff427da56f01c4d19a2cdc1"
+    },
+    {
+      "path": ".github/workflows/engine-gpu.yml",
+      "bytes": 8913,
+      "sha256": "e6322de7d091a3f6ac6fbf417a1ae12d9a3eb43a1c44943ba7d9f8301adeaf84"
+    },
+    {
+      "path": ".github/workflows/screenshots.yml",
+      "bytes": 3254,
+      "sha256": "95deaed153229fdc358e3aa388d0ea0f04018f79e5a52c32388b8c1983e15f7d"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "bytes": 6043,
+      "sha256": "56031a4d1e26a55c6c2a415e25559eb77297b60cdac2fc6a362dfc344bc7fb2f"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "bytes": 5874,
+      "sha256": "bf0853a1170b0e95860f1695384efd9c5a9942efbfbd8bcbd1709492b980a08c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_agfa_color.xml",
+      "bytes": 3130,
+      "sha256": "61f89123802573ece1d6874354dd377852488673d9170aa425f4b928ed9cafc2",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_agfa_mono.xml",
+      "bytes": 3032,
+      "sha256": "b4d5a709981ebdd1411a83d11fc3aa6f8b97eddce7423464ca5c1ee04ee6364a",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_apple_color.xml",
+      "bytes": 1163,
+      "sha256": "d58c062abc70bc19d5437099ba118e1c4bb43a0821c64c47f4bc3d1248aa0494",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_apple_mono.xml",
+      "bytes": 1163,
+      "sha256": "d58c062abc70bc19d5437099ba118e1c4bb43a0821c64c47f4bc3d1248aa0494",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_canon_color.xml",
+      "bytes": 2461,
+      "sha256": "c7174fc36bed2800b7c27e7a48ca56f0fa07dd1de017686762d2ec147075f087",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_canon_mono.xml",
+      "bytes": 2461,
+      "sha256": "c7b53ee4cbd7e8915d702dd5f12718dcaaa4ab508614fefa9a93a1a93c5e47a4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_cinestill_color.xml",
+      "bytes": 3785,
+      "sha256": "f53f9ecb1d0109dab9f07adf0e28bdef06ea7b8516234b40642e0de9984de640",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_cinestill_mono.xml",
+      "bytes": 3785,
+      "sha256": "e8a1d4e41d00a22059e6fe78361795fa174f72c80a2025fa322ec2ef95d171cd",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_dji_color.xml",
+      "bytes": 2537,
+      "sha256": "e086541a9bfba9b7547475aa06029e1e9a4d6cfeceff4500a08e2584a1f9c06c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_dji_mono.xml",
+      "bytes": 2537,
+      "sha256": "e086541a9bfba9b7547475aa06029e1e9a4d6cfeceff4500a08e2584a1f9c06c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_fujifilm_color.xml",
+      "bytes": 2835,
+      "sha256": "3cfb8b3972033b506886ef153f4e1960cf6ce12ed5a61070316a83949e4403fe",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_fujifilm_mono.xml",
+      "bytes": 2835,
+      "sha256": "ad34d91406f732eae7b5d3345b6bdd73693b12394eb88ca711436d5704170f23",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_harman_color.xml",
+      "bytes": 2171,
+      "sha256": "38985c1ee31b5740c1389c65995b1f8b57ba8aa7008dfbd295a81b8b70c075b4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_harman_mono.xml",
+      "bytes": 2171,
+      "sha256": "b5ec3158b4636e32e355516f0ad0eb11dd403fed9f2cbddd1557b0730e05d0ad",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_hasselblad_color.xml",
+      "bytes": 2705,
+      "sha256": "8850da52b780047352785bddcae91ae62efa7c69a61287f961f115244e0163de",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_hasselblad_mono.xml",
+      "bytes": 2705,
+      "sha256": "614dd7c550fe2c7ef59e4b9ac615ad613eca398cf96cc3c130cf088cb96adf13",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_honor_color.xml",
+      "bytes": 2725,
+      "sha256": "aa8be87aaee98940b3e8f3bc66c95316b0aa4a4e6abb54cb26245a72800a5a00",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_honor_mono.xml",
+      "bytes": 2725,
+      "sha256": "aa8be87aaee98940b3e8f3bc66c95316b0aa4a4e6abb54cb26245a72800a5a00",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_huawei_color.xml",
+      "bytes": 2601,
+      "sha256": "957e830730809126d3304e2f4d8e7905be779a35d3b8d79d5f96dc29907e0511",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_huawei_mono.xml",
+      "bytes": 2601,
+      "sha256": "5d0b0ceb5b9efd3bd74c401f726c359ead7fbdb158058f5ddf1839cdf65308d5",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_ilford_color.xml",
+      "bytes": 2381,
+      "sha256": "096616381d9997873c34b6c6d79704854ce88f11601961893a40207de660c28c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_ilford_mono.xml",
+      "bytes": 2381,
+      "sha256": "096616381d9997873c34b6c6d79704854ce88f11601961893a40207de660c28c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_insta360_color.xml",
+      "bytes": 2880,
+      "sha256": "178ed1218042ba9b53befaa4722ba060b59679a688199ca38e18c2e68c9fde88",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_insta360_mono.xml",
+      "bytes": 2880,
+      "sha256": "7a50311943514f16678f6e121d71dded61138cc5ba9cc1677d992173490eead3",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_kodak_color.xml",
+      "bytes": 2852,
+      "sha256": "73852273e17b60d341fffc24463a54d5d5b0b7369477d2b19ff24ff23aefe18a",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_kodak_mono.xml",
+      "bytes": 2852,
+      "sha256": "dacc1b3cdef9f551726fa61e4cc4bc1dfc660189d6e99ebfbaaa468280829876",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_leica_color.xml",
+      "bytes": 3309,
+      "sha256": "e3971be05ea003a39e69818aa6f46d1657354d46241e34e77d29988a87dd45ab",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_leica_mono.xml",
+      "bytes": 3309,
+      "sha256": "eec42e36d679877a1fd7914f1b7b522857815404fd525842c6e01eefeb199946",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_lomography_color.xml",
+      "bytes": 4088,
+      "sha256": "8df3a0f32a3473db4adfc5cfa72f8c52409cc5ec04d792c6905ab706714751df",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_lomography_mono.xml",
+      "bytes": 4088,
+      "sha256": "4471674301b2fc4ed646889c8fb6f8e293f0b50bcf0695752dc4448b51dfc477",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_lumix_color.xml",
+      "bytes": 1392,
+      "sha256": "948e520bfb3c535f037f651a4666db4a355944e7757c522dbacd85c533327c26",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_lumix_mono.xml",
+      "bytes": 1392,
+      "sha256": "948e520bfb3c535f037f651a4666db4a355944e7757c522dbacd85c533327c26",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_nikon_color.xml",
+      "bytes": 1790,
+      "sha256": "855671073460b2347b7124e7b6d762e389ce55efcd927ff8a7a3b84c4283f664",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_nikon_mono.xml",
+      "bytes": 1790,
+      "sha256": "4de7040eb9f96ebe527a0f50d838ee638e2a357dea0df6c1c0879a75bc6a4899",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_olympus_color.xml",
+      "bytes": 3197,
+      "sha256": "b8f67c38cb0dd50b9a54ca8f50e4326142a8198f5df9b4f06d17bdfddd679d14",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_olympus_mono.xml",
+      "bytes": 3099,
+      "sha256": "6c28d7985398c37f094c497421a6ec972139561b6256f73eaff66d03e642ca4c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_omsystem_color.xml",
+      "bytes": 3972,
+      "sha256": "aa8304477c966056fcdca206f0bce0962a316570304a6de58af065d3bc494c6c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_omsystem_mono.xml",
+      "bytes": 3972,
+      "sha256": "aa8304477c966056fcdca206f0bce0962a316570304a6de58af065d3bc494c6c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_oneplus_color.xml",
+      "bytes": 857,
+      "sha256": "bfa01f9b7bbd14293e3b5b84aa7be60ed2a56118de898a45efc3373b86321cfd",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_oneplus_mono.xml",
+      "bytes": 857,
+      "sha256": "dba300bad4e53eb9c840b3c21410b06366c045e71c63a6e1fc8de94594909391",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_oppo_color.xml",
+      "bytes": 1997,
+      "sha256": "06cea1c1b2c97547a6d06bdba345a174c9a4b3c803271a898433b469b6163610",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_oppo_mono.xml",
+      "bytes": 1997,
+      "sha256": "51dfb28ddb6f8b41b6e2ff5c4062b63aff0c2fd42afdbf2c698ca0da4742e205",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_panasonic_color.xml",
+      "bytes": 11033,
+      "sha256": "bac78ece9fd20fdc130a9f0d0a662db114c7bf341dd93a7e7d97397a6e97100d",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_panasonic_mono.xml",
+      "bytes": 11033,
+      "sha256": "ef2b87471834dc8d33b6cca37060473a85c3c9a7da338d71a957b2a94b694c2e",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_pentax_color.xml",
+      "bytes": 1427,
+      "sha256": "1c98bfd5a3bd66eb96fe04ab27963df505bb755020c92f6afa45abd686ab3d94",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_pentax_mono.xml",
+      "bytes": 1427,
+      "sha256": "04a844fa81ce1655a282b6903c533bc89219b993015ccbcfab2574d65940ce66",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_pixel_color.xml",
+      "bytes": 1616,
+      "sha256": "8e60b07a51c5ee9bd6b1e0570c0c4cc4ab273ac99c359fc0b1f7ce0558089035",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_pixel_mono.xml",
+      "bytes": 1616,
+      "sha256": "ea629481d6ee5d35d71dce6e80fa70e86d5746aee95435ff32e39c8a2eeef500",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_polaroid_color.xml",
+      "bytes": 8688,
+      "sha256": "88d85b7e9914a79583784429605a03efb93b26a4cc0bcb9b68ddd7e3166df702",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_polaroid_mono.xml",
+      "bytes": 5086,
+      "sha256": "9589e11b844fcd083eb731674b766ccd8f6471bcc20c7d274c69a5b7245ab426",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_ricoh_color.xml",
+      "bytes": 1662,
+      "sha256": "412f3f651c8c076a97f8b6ca31cba7e77a63e7a2faa6b506c7bf6c9aa418d9e4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_ricoh_mono.xml",
+      "bytes": 1662,
+      "sha256": "743be3741cac5897b7be6c10105d87095843e86f0f53b31333d1c07cc2f774b9",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_samsung_color.xml",
+      "bytes": 3209,
+      "sha256": "9fe185206b22a73f42ef0530e02f9a8529c40255a96c1e4c1869d3c2c043b905",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_samsung_mono.xml",
+      "bytes": 3209,
+      "sha256": "7e27becf5e5e4597c79db7d624e471302e148956a4af3e66e233aae403202cd6",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_sigma_color.xml",
+      "bytes": 1769,
+      "sha256": "797873e5a677829082c43c6b0259c500bf83f42d4f1ee57503ac3dd1c3281614",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_sigma_mono.xml",
+      "bytes": 1769,
+      "sha256": "a8f980aa40e0f716f7caf8c71e3af96c13e02f9daa46bfefdb284e1c74d95ddf",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_sony_color.xml",
+      "bytes": 4163,
+      "sha256": "63dad0ce288c3c6eb2ad87e2b1c223943917be5987d88b518b09d633911622bd",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_sony_mono.xml",
+      "bytes": 4163,
+      "sha256": "51a68c75afd12e5fc69a1b46323b6c9db4ccf3762384f98d0da00bca3ec112c2",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_vivo_color.xml",
+      "bytes": 2092,
+      "sha256": "fbbd63dfebb7572eec18f7e6548d1bc8405bf63475e7d6155eff470388019f0c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_vivo_mono.xml",
+      "bytes": 2092,
+      "sha256": "a078e8e345ac7273dda539eb18129b3695d26590576a24bf8ff9d18d72534525",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_xiaomi_color.xml",
+      "bytes": 2578,
+      "sha256": "e283b5967a92bec09f5f4d9a50a1def8e9a2df2e5b2669fc1eb1100cc5c384ba",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_xiaomi_mono.xml",
+      "bytes": 2578,
+      "sha256": "0689dd5cc198ffd59c2b64941c6164f8f90bd5f4a6ec6e8f0c94cbda9923c4d1",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_xmage_color.xml",
+      "bytes": 1952,
+      "sha256": "f2b036da50226c62880fe5f7075e34c02cb450d3d0befca57e7575bdccb23ca1",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_xmage_mono.xml",
+      "bytes": 1952,
+      "sha256": "07a7bce5a75b38af43defeed5abfd2694e32bed004f3d4237875a552f9a27a98",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_zeiss_color.xml",
+      "bytes": 2201,
+      "sha256": "bc0f43a6cd5c936a47d18c081e6fbc6adcb593f49d392e97a600b9fedbd2bdb4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/assets/logos/logo_zeiss_mono.xml",
+      "bytes": 2201,
+      "sha256": "e4d6cd870a6f90389ea66cb01500ed9a3170c7a7be27d1921399dcae624786b4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/cpp/bitmap_f16.hpp",
+      "bytes": 2892,
+      "sha256": "c221cdd71fe820ac18f66e158ad71010f3f57b535b6b361e9d4967b164a28df5"
+    },
+    {
+      "path": "app/src/main/cpp/CMakeLists.txt",
+      "bytes": 9832,
+      "sha256": "e21407a44e5fc7b4d2fed6b7aec52d824a3bd37fab3d2fa00aff726406c3007a"
+    },
+    {
+      "path": "app/src/main/cpp/float_dng_linear.hpp",
+      "bytes": 27550,
+      "sha256": "f2a30d40fc679b78c84bc7e991c5d26f229bb2a22d147d279e4924d4be9534d9"
+    },
+    {
+      "path": "app/src/main/cpp/float_frame_check.hpp",
+      "bytes": 2742,
+      "sha256": "944817d3f3ac4109c3a9ffa57d841961dbdad9eaff14d2f2a9f5551b916e7124"
+    },
+    {
+      "path": "app/src/main/cpp/gainmap.hpp",
+      "bytes": 1677,
+      "sha256": "ca2d404728dd9d80fcf36c3a9acda7860c248d34bb99a33e5db3f837314fca6d"
+    },
+    {
+      "path": "app/src/main/cpp/input_transform.cpp",
+      "bytes": 1313,
+      "sha256": "05fe025f77674e99651aae024e113b750fede9b5a715a8077bb873ba06a5fb94"
+    },
+    {
+      "path": "app/src/main/cpp/input_transform.hpp",
+      "bytes": 1596,
+      "sha256": "7591c57e36ca01761d1fd84fbd740ebcc4a814579c6a1360eba29ad5a2d00654"
+    },
+    {
+      "path": "app/src/main/cpp/jni_exports.map",
+      "bytes": 307,
+      "sha256": "e3d335cf410bdb8986169d21d30ea1545c92d25226c835b4ca95750363792422"
+    },
+    {
+      "path": "app/src/main/cpp/jni_text.hpp",
+      "bytes": 2391,
+      "sha256": "4471ac6c4f107bd6617efcae001bb674c0eb7097a4ad18fc9e2298dcbcfa8b69"
+    },
+    {
+      "path": "app/src/main/cpp/jpeg444.cpp",
+      "bytes": 4639,
+      "sha256": "744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a"
+    },
+    {
+      "path": "app/src/main/cpp/jpeg444.hpp",
+      "bytes": 1382,
+      "sha256": "7201558159afe4b7c87da0ef99161629c2c723eb42660a6625162a90b934c70d"
+    },
+    {
+      "path": "app/src/main/cpp/layer2_local.hpp",
+      "bytes": 25489,
+      "sha256": "943fd7bcbd7656ad53178c0e887b0296787a56a1f764142195e3a9033303568f"
+    },
+    {
+      "path": "app/src/main/cpp/layer2.cpp",
+      "bytes": 15981,
+      "sha256": "f55ad1488bebb8e1f89c6d574931136bddb62af88f8adcfbf82becb192f4f77d"
+    },
+    {
+      "path": "app/src/main/cpp/layer2.hpp",
+      "bytes": 5258,
+      "sha256": "7932ce0b782857ddf19e91f0f411351b3c4582c02bb23b8d5e51c846fcd5f976"
+    },
+    {
+      "path": "app/src/main/cpp/look_state.hpp",
+      "bytes": 1444,
+      "sha256": "9add6135a1a2524c1b540c62289de9ed8e2b4c8562ba9531dd9c4f346454b744"
+    },
+    {
+      "path": "app/src/main/cpp/lut3d.hpp",
+      "bytes": 3217,
+      "sha256": "de03a761379ad1ce37ab50f0bbc77467414ab538da819cc05191687119e0f58d"
+    },
+    {
+      "path": "app/src/main/cpp/output_cancel.hpp",
+      "bytes": 814,
+      "sha256": "ec0c15c5d9cd05028b80389d64053389b846b307f0e4c37542e696cd41ff8f0f"
+    },
+    {
+      "path": "app/src/main/cpp/output_transform.cpp",
+      "bytes": 18200,
+      "sha256": "aa281d374c90ebb2ad209a6040e522e53e41466daa62b4877700367126a2684d"
+    },
+    {
+      "path": "app/src/main/cpp/output_transform.hpp",
+      "bytes": 6085,
+      "sha256": "e300bfdee049054d491be836cdaf3ba49b1ada0548ba2669afeed87db6092708"
+    },
+    {
+      "path": "app/src/main/cpp/passthrough.hpp",
+      "bytes": 11679,
+      "sha256": "22c4c39b45bcf97f9696cf61029818a2166c5814a8e819a0c22ba480ac9be7d9"
+    },
+    {
+      "path": "app/src/main/cpp/prophoto_exposure.hpp",
+      "bytes": 857,
+      "sha256": "1e810ac309ffc1e020983cb1ff1a4ee76654e42f9f73dd0887bb8b72ee8fa5b5"
+    },
+    {
+      "path": "app/src/main/cpp/raw_development.cpp",
+      "bytes": 12289,
+      "sha256": "91098e983c7c605ecb24b307f3ec895e75d3a5e6bddc5f214820bdaf38cc4bf1"
+    },
+    {
+      "path": "app/src/main/cpp/raw_development.hpp",
+      "bytes": 3833,
+      "sha256": "5f0aaabf81365b7436497e948d32835b4bd518bd07c2f932ab9115a9e3a68b02"
+    },
+    {
+      "path": "app/src/main/cpp/raw_precision_input.hpp",
+      "bytes": 7460,
+      "sha256": "4777575ca69546d01eb2ecdaa626242ad9f17fff75ce0aad1ca4a1ec31989ca3"
+    },
+    {
+      "path": "app/src/main/cpp/raw_white_balance.hpp",
+      "bytes": 1371,
+      "sha256": "ab7f18735bd86a27e5f74c6d14ff87ac1957e812e0ba7c6f471a9ebebe01f401"
+    },
+    {
+      "path": "app/src/main/cpp/raw_working_input.hpp",
+      "bytes": 1261,
+      "sha256": "f1a3c39864cf2d2d1bb2a8d935db4f10bfa8a59e54a3e240f2d2b24625fa8bf7"
+    },
+    {
+      "path": "app/src/main/cpp/resize.cpp",
+      "bytes": 8070,
+      "sha256": "db9658b45d56a703fc920b6049cd2f34db3dcc63ebb62646eeee9998c9da5d10"
+    },
+    {
+      "path": "app/src/main/cpp/resize.hpp",
+      "bytes": 1295,
+      "sha256": "e45639fe3e9a9d0f002cc0a66d428bfa373873b84f64bfbdaac4abf3afa0fb0a"
+    },
+    {
+      "path": "app/src/main/cpp/rgba16_frame_check.hpp",
+      "bytes": 2199,
+      "sha256": "295c19cfd3c3c167bdb7dc5699381b5aa5b060cb7081aa5a75e35f1fc86def95"
+    },
+    {
+      "path": "app/src/main/cpp/rgba8_spool.hpp",
+      "bytes": 4155,
+      "sha256": "4c5dbd6e1493b6c2d5b77e7acf9ab488e6d5133dba1b690ca6399fdb4fac0a7c"
+    },
+    {
+      "path": "app/src/main/cpp/spektralab_jni.cpp",
+      "bytes": 90176,
+      "sha256": "e6595d28848e732c28b135871dcfde80e42843e33ee7b34df3e319965ef5593d"
+    },
+    {
+      "path": "app/src/main/cpp/storage_probe_spv.inc",
+      "bytes": 5047,
+      "sha256": "d460dcb8da5ef2dba4c609a6b291565a376358d7b824f35159a5df8a97c8dcf0"
+    },
+    {
+      "path": "app/src/main/cpp/storage_probe.comp",
+      "bytes": 1037,
+      "sha256": "8e6aba8871c998fb98d1f20d656652488600acb4dc9f82bf53a8f52d0aad4458"
+    },
+    {
+      "path": "app/src/main/cpp/storage_probe.cpp",
+      "bytes": 22380,
+      "sha256": "b93d13b126dc191f60fe256133bb8753edf6c66038611c81dc93b347a87b74a1"
+    },
+    {
+      "path": "app/src/main/cpp/storage_probe.hpp",
+      "bytes": 526,
+      "sha256": "604443b33bce0bcbc9ba09ce90957e63366826223086e33791402ccc095ccb06"
+    },
+    {
+      "path": "app/src/main/cpp/tiff16.cpp",
+      "bytes": 9801,
+      "sha256": "bffe64d1b22c28529b34f2700e0ed8573ae71f1a8ee14edc10dbc075e94cec38"
+    },
+    {
+      "path": "app/src/main/cpp/tiff16.hpp",
+      "bytes": 1697,
+      "sha256": "cf6269ff369ed34632530312990fdced98a51d5fd8a4ed17515c00ae957fd309"
+    },
+    {
+      "path": "app/src/main/cpp/tone_curve.hpp",
+      "bytes": 1894,
+      "sha256": "7c0c937fbc359b6f4f088594d4c7aa8dd5b227be35f97000166d9d26909ea813"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/AboutSection.kt",
+      "bytes": 6091,
+      "sha256": "e0590d5017f9363be8c4fc0948b46ab112b6f8b35f2b3eec8f7738b4e8327661"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/AdjustPanel.kt",
+      "bytes": 14178,
+      "sha256": "cd33b6fb34a3e1f79521e37907a06abf52466abd796ea83cd4081e21543462d3"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/AtomicTextFile.kt",
+      "bytes": 869,
+      "sha256": "1a4fa606cfb2388ed717b2ed1c8cb72468222116ee198c5d16d841a2b98af181"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Aura.kt",
+      "bytes": 20798,
+      "sha256": "c3cab679069799b02f9d6a7c3b36ca1c3e148dea9d9391ba62d156f0d3b1f219"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/BenchmarkPolicy.kt",
+      "bytes": 6489,
+      "sha256": "bc5e4c7dbb5be844d13c353c6076255bb46777d1a51891ce2c7058ebca24a601"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/BenchmarkRunner.kt",
+      "bytes": 7068,
+      "sha256": "a34503839052b8cc21069fe807a64957c69a2c234f71fd42b708593130f3be8f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/BorderGroups.kt",
+      "bytes": 3409,
+      "sha256": "11de90d0b2ed9b29be1a8d57ec5bf72dcb694b09b5c0cc8d36591ccbc0f09f15"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Brands.kt",
+      "bytes": 45668,
+      "sha256": "e8ea29e737d08c18f42f8d0954912c351f74fb835631fb13fe33f3c67f7ebbc1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/CategoryBar.kt",
+      "bytes": 7694,
+      "sha256": "373d4b0e7626be142586c31dbd6bf16d1d06f239e9ffabb919201e2e7d4a2cdb"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ChangesSheet.kt",
+      "bytes": 9897,
+      "sha256": "61224ca5ff797be6a3b22f3754fefa33ce59d77e56babb87aa8635ce4acc7f27"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Coach.kt",
+      "bytes": 9183,
+      "sha256": "12532a3bf155e3f43b2af7ea3e4f8c97ef9a8911551f411f46b544bf86985085"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Corners.kt",
+      "bytes": 7520,
+      "sha256": "5c69a1e96d307958a1e8d5a938089dfea3088d85507e3a4ec7ea556c22ad164b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/CubeLut.kt",
+      "bytes": 18165,
+      "sha256": "36e37fcdef14e828b544293bb3d4669363f0ecdabae43e98d423343bea867378"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Curves.kt",
+      "bytes": 18005,
+      "sha256": "e876f3a8229a624a6f14149b6aef3e59cd485c92d591321d2091076526254ab1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/DetailViewer.kt",
+      "bytes": 5557,
+      "sha256": "e132c49832ddefe856e813e21785540db242d4246d15578c2895d74c8e5418ae"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/DeviceProfile.kt",
+      "bytes": 6324,
+      "sha256": "bc8be0db40714e08e8e47ce3ac7c26046ae4e955acc2d3fb71c32f8e8a76582a"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/DisplayColor.kt",
+      "bytes": 1814,
+      "sha256": "508af74b81851d42ed58b4fef1c973fab1d71f07fcf6aa0aa8ac0741eb572f6d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EditHistory.kt",
+      "bytes": 1498,
+      "sha256": "2f7c95c40c2fc1077f6b104c6e7a0793def7262a033b45e918b312a030127755"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EditorScreen.kt",
+      "bytes": 97761,
+      "sha256": "37da0c8d803e8baa861ac48c2b7e385048c577e705addaaf8c633217475f0008"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EditorStateAutosave.kt",
+      "bytes": 2865,
+      "sha256": "b9c88c8a3b5a38ad6cb26dc1aeb61869dcb83ed326d950e33a82f0b4df3d0e29"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EditorViewModel.kt",
+      "bytes": 76536,
+      "sha256": "9e45b9e5c54c5965ecebe8b932b9c076fa7f42e709cf8d5dbeef55e68e3c80b7"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Effects.kt",
+      "bytes": 12909,
+      "sha256": "da43c7be9573805dc68bcd15a6d2f626da8613cf2659ce4f16f0856dd53880db"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EngineAssets.kt",
+      "bytes": 1464,
+      "sha256": "ca103f2ab2484544129b5a39ac75db20bf2a50079977a6496aabaa2b93453feb"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EngineHost.kt",
+      "bytes": 18226,
+      "sha256": "7df892ec6990340ecd51e1f620f6c74070d54f887a305bbc793daf4eb4c673e2"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EngineThread.kt",
+      "bytes": 561,
+      "sha256": "0c658be41838d7f8af55e2c3f1aedd488ac7217b9ec18abee49bc5066cdf4f50"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EnglishCatalog.kt",
+      "bytes": 101559,
+      "sha256": "c679b3d373afadf415d6f7d524201eda0650b1155b47a99091f525dcb66e79e4"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ErrorCodes.kt",
+      "bytes": 1427,
+      "sha256": "045e7567bda66c63696c2b1d4c2348397d780729cb23294ac71a5517af08cf65"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EventLog.kt",
+      "bytes": 1099,
+      "sha256": "4e671911c3720e6d5a40a4df1119d0594d51d8e01336fd0840627975066fba23"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExifCopy.kt",
+      "bytes": 17319,
+      "sha256": "728d96f469804bc5415faa11c7b8aa0aec855e19d052b1f498da11729ef2c9c7"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExportMemory.kt",
+      "bytes": 1385,
+      "sha256": "5f375c5b43c98547e5f01e1b0c5a8ead06fee6b31fce3f87c8e67a6dea326f4f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExportPacer.kt",
+      "bytes": 5742,
+      "sha256": "fae81be248e1c4e85ab21c0c03389fb6307ec1a1b705f22c0762f0f7e1bbe8a1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExportRetry.kt",
+      "bytes": 856,
+      "sha256": "04ee4b6f6c8524fd52025af5ffbfb0fe66e232e7d67e4d3564bfb90b892256e1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExportService.kt",
+      "bytes": 4288,
+      "sha256": "da17440b8ecc9cb2cbce2b18c90e43979c6448086d99226a07b4754b898f29b5"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ExportThread.kt",
+      "bytes": 1128,
+      "sha256": "e7a3bf25a679ac87a8afb735224cb3a126c6a53a1110f9a9d2ffe60e94e626cb"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FilmNotes.kt",
+      "bytes": 4812,
+      "sha256": "44ac0ac3562237da0472bcd6c44ceb85bdc65d9b9316b9d16102e5521db7393f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FilmRecipe.kt",
+      "bytes": 12508,
+      "sha256": "d18608eca2e17d82e8ea92ddf4f0c45f4e3d567f30c342df3d5a4f46e59b3720"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FrameEditAutosave.kt",
+      "bytes": 3569,
+      "sha256": "42904b0f0c4e05963a2235dd67f9a67cff090e528d1f0f6a837be3d6b9e7ba7c"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FrameGeometry.kt",
+      "bytes": 2597,
+      "sha256": "f14e9b1bc71fd6ab134cb97408e610f1dde1dad93b75609fc7f4e1866fafc98d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FrameRateBoost.kt",
+      "bytes": 5128,
+      "sha256": "455e2d813adbe6398fb4dbc90e14d0b4d2f3af94ab5c5020b4500766797fb2e0"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Frames.kt",
+      "bytes": 40339,
+      "sha256": "18d6ec99ba3926008190af80a40ce1e0d949e3f1979d35d2318b0346751b3866"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/FrameStore.kt",
+      "bytes": 18464,
+      "sha256": "d2d8c817ab460871e39f425845bbcc674f1c3300ddbcdb51913f1d5fa260dc91"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/GalleryTransaction.kt",
+      "bytes": 1055,
+      "sha256": "a36d8da9cadbad84500f4943db53b253c9314d20a1a03cb689d8c3867817aea2"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/HeifExport.kt",
+      "bytes": 4690,
+      "sha256": "2b626ca50330d7730bb0965546e81927b6998af1a2122dbb60857c2e75981e6f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Histogram.kt",
+      "bytes": 4146,
+      "sha256": "3ef4acb71dfb1a3cd1e921934e6133b2c605cb10cb861c400bb6be74fd14f9df"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/IccProfile.kt",
+      "bytes": 4661,
+      "sha256": "3318dd0d73817c8abc417a110a2be80df35e1767d37e5082a899fe908fc8c3b3"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Immersive.kt",
+      "bytes": 3714,
+      "sha256": "5eb393e6bd71bb85f9cff154829a0c521699bd2f5c04f3b8c57965eb08c2501b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ImportSheet.kt",
+      "bytes": 20905,
+      "sha256": "e52dfbbb29f2abdc9a6cdf5d21bab6556c5ef198f9d16b411dd28bdcfae6cb5f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Interactions.kt",
+      "bytes": 19143,
+      "sha256": "59803c7759b8522f66d5677b17f37a6b8247ddbdb36c35225aab558bcd91de9c"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/JobNotifier.kt",
+      "bytes": 11470,
+      "sha256": "03e93bb699a4e80de0bd8d68e80e0022accb7c8af791e112966f2aed5eaaae35"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/KeepAlive.kt",
+      "bytes": 3567,
+      "sha256": "cd6ab454a34c3f931238e704839604b1a7a8e182833b9211c7bf6bd4ee8b585b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LaunchIntro.kt",
+      "bytes": 9323,
+      "sha256": "2ea64c0923f619ed6860ac6ac158586b0e38dc1e4acac650c8bf0bc04e700b1b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableBar.kt",
+      "bytes": 6038,
+      "sha256": "36e4296279fc3e75d6c290a1a43fbc2b1ce0e94c8314ef2ebefced20eaf4a441"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableBatch.kt",
+      "bytes": 7192,
+      "sha256": "cda4a599740b916045a499cdeb268d4dbf62dc0be44d12ba483e4b5742076e61"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableFilm.kt",
+      "bytes": 12137,
+      "sha256": "9736d0acf4984e0c39e6126691381edd9959567858c5a32be314ee785371eae5"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableLoupe.kt",
+      "bytes": 14277,
+      "sha256": "592be79e55390b443740cc9ca3619934cb30f24e1574c5268ea31cd03a060eb0"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableNav.kt",
+      "bytes": 12527,
+      "sha256": "465a2c487c27197bd6500cc63a878b7a3a191e110e258fb2493f2c02bcda8ac9"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableScreen.kt",
+      "bytes": 23867,
+      "sha256": "3667d403afd8fbbbd1a903bb004a5f2a692e6b39029b066eb1dd61b33f702225"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableThumbs.kt",
+      "bytes": 4684,
+      "sha256": "bc85bd5f8056e04f20ebcfde8a49644b00f8745f235dcd3913dee8601a27bb4d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt",
+      "bytes": 19779,
+      "sha256": "27ff807d8275036c6c93ba9b7583d8005f3a6b26fffe6ac674818e62372bf0b1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LocalEdits.kt",
+      "bytes": 12453,
+      "sha256": "2376c0abcb62dd6b41c1b28c55bd89f6e995f19089f4719fd609a16b10fd1a8f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Localization.kt",
+      "bytes": 3385,
+      "sha256": "bda8a10acc766e4285c7daf8fd15b9f23ae5001c0a4a04d5ba49d80f1fbe57d4"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Look.kt",
+      "bytes": 15302,
+      "sha256": "d8feeeb2410e1d302faadb2177d516541f0063bffc444950495b38ab7b0a0a66"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LutStore.kt",
+      "bytes": 5016,
+      "sha256": "d564c919445e00dd4a3e3b38242f866bf25edc949768fe53c99cec12ef339add"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/MainActivity.kt",
+      "bytes": 6055,
+      "sha256": "e324a4e6c37cfac9a35cdcc9d494082de99ee51ab8b982b1e90e2a4588888658"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ManualRolls.kt",
+      "bytes": 5142,
+      "sha256": "04b323eab571156e20559c2ffea3ddc93bb99f6a311532497a11833c743ac5dc"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/MaskPanel.kt",
+      "bytes": 26926,
+      "sha256": "d9f1efa354c9b00f8f8f9c9c13a57c18d260386bca6011367d2fc10971cd0ef1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/MediaSaver.kt",
+      "bytes": 14835,
+      "sha256": "6dc79998c548f3d0dd11580fb4d4d6a0b459d6522567fb58a607b12dc31c3208"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Model.kt",
+      "bytes": 38448,
+      "sha256": "87c8f2c1d3c9eab3b5e2c69c7e578c24f0eb4b90533d28fb28fd342f61137254"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Moments.kt",
+      "bytes": 13634,
+      "sha256": "fd6cc82b99569f3a07dcd336313bc461235444b861830b4a50add378dc7ec70e"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/NativeEngine.kt",
+      "bytes": 8497,
+      "sha256": "cdea6ea3e7556ba9ce60f005e0627ae7423c97e227713546a73bab6459f0a7bf"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/PalettePad.kt",
+      "bytes": 12446,
+      "sha256": "5fc328e33c2b0a9430cbe7a44b51b98846d225a89fb3310c4585f2650b238438"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/PaperStrip.kt",
+      "bytes": 3850,
+      "sha256": "6339a2ff3e653439fa7197164bc53655d07836810d7c702183f48455b66d5fde"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Perforations.kt",
+      "bytes": 7078,
+      "sha256": "d13bda121c5a35456e0e48b7bb6d2c00406674afc5f7a2dd68a35a2e3bb85b44"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Photo.kt",
+      "bytes": 4262,
+      "sha256": "7db1e01a4f1fa9e4609b29381ca760472984743d64b7986c3d63ff173d0e09e7"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Pill.kt",
+      "bytes": 27906,
+      "sha256": "04b85eb35fe7e70f9a271ea52a8aa25e99b8aa3fdd6c29b7cd6ddc7ebb63d094"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/PresetImport.kt",
+      "bytes": 25044,
+      "sha256": "bb319fc2d3d9d25ed86277b82061c278738b23504b94e04e4ad43f490a144a9c"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Presets.kt",
+      "bytes": 5314,
+      "sha256": "e619a4fc5a96805468c15c6dcb68c647bc75564eb2c7fb9d8d0cc897ab19c02c"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/PreviewPublication.kt",
+      "bytes": 2560,
+      "sha256": "67dccc27a386e537adbcb4b71b3e53ee459b6581165ab7527383be1179f8fb2a"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt",
+      "bytes": 68541,
+      "sha256": "3695029208bc3183f327d1ebd985d21d8ad35f129ad9e8c609b120299bda2501"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/QueueNotices.kt",
+      "bytes": 6334,
+      "sha256": "205eb87ff04026d59b7ecc06caab46a50ad368cd36cfa6f3176f1f14cc4224c9"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/QueueSheet.kt",
+      "bytes": 10189,
+      "sha256": "c0d0489faa5b44956ea449be56493fd2d04e70888cecbcd476980f34aede325d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RawOpenCancellation.kt",
+      "bytes": 1570,
+      "sha256": "56a59758c2ec37528ac66d1405bce10d1c506567f59ef91fae56d8f59f56c959"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RealBenchmarkBackend.kt",
+      "bytes": 4370,
+      "sha256": "380e34bfa49344a918f7d7b40b2e6dd7b933166ea06cb1e9fa863c017e116c3d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RemoteApi.kt",
+      "bytes": 7700,
+      "sha256": "e4755e110f6077a0d5b6165bce9359cfdaac78520d181cf225822426049a7127"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RollActions.kt",
+      "bytes": 4464,
+      "sha256": "7af22cd326303c41f3c7ff47dffbb03e524f72c36f478babe4092b8e50a7852f"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RollCompare.kt",
+      "bytes": 10359,
+      "sha256": "c3b350dd829c99124c4fa54fb09b52c184d65c4cb95bc59a737a2f6083e9f82b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RollContactSheet.kt",
+      "bytes": 13471,
+      "sha256": "5ec2cd70dd2497d61309ea274065d07501faec08aa7d5e85541aef098689ff35"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Rolls.kt",
+      "bytes": 11771,
+      "sha256": "edc80a19d8fc7bd3811beff5a794341784b3504a37f12b3609f613570781a2c2"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/RollView.kt",
+      "bytes": 18839,
+      "sha256": "fb5f6ec686b37a94072dfe20fa499ec57a0f9a84466b496163894954604a8140"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SceneCurve.kt",
+      "bytes": 4868,
+      "sha256": "db71d18eb844ee66a24a3ccdf5e095108f93b128a21ee7546e478a212c6e9343"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SelectionPreview.kt",
+      "bytes": 1454,
+      "sha256": "cf4d67c503bdf6a7d16361b5b3bf0ff4e5cad6cdf8cc125708d59cd2fd68eb67"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SelectionPreviewScheduler.kt",
+      "bytes": 1115,
+      "sha256": "baf40aa4e2e6a239da9aec35ebc4f40314a0bdb58db0284ce3a12725dfa37236"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SessionCandidate.kt",
+      "bytes": 1534,
+      "sha256": "7b1309e822329e01d465812bf93d76de9308e28e0f478719719f6d2d717b8803"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SettingsScreen.kt",
+      "bytes": 22973,
+      "sha256": "fff03f1b17223464d631eac63a3024471823ba787ce59bba60102b31522abcb2"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Sliders.kt",
+      "bytes": 17286,
+      "sha256": "89426ceb0d2b82180606bd28e76a61d3cf92ed03e414952dd4bd442be0c354c1"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SourceGrantLock.kt",
+      "bytes": 177,
+      "sha256": "b088adf16bcacd569fe9f33c2af66092485d866b47af0b8279cb7925e01185ad"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SourceLoader.kt",
+      "bytes": 14357,
+      "sha256": "e41e4dc7018f41453d0ac67bdde39ddd8bae6932814340b2ee131e79b30bdf33"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SpkLook.kt",
+      "bytes": 27249,
+      "sha256": "a0725312ba87af25e478f09dfc122b763c03b8fc8023cdacd641744f4508cd57"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/SplitFlap.kt",
+      "bytes": 8235,
+      "sha256": "7d75619e6bea3b94b7f9dccc204f47c84b9441df4e347990b42cc65eed0587c8"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StorageProbe.kt",
+      "bytes": 3138,
+      "sha256": "a9d10d086d536d90bf202d1a42621c3f397dd8f5decfc125ee4ff03b77d673a0"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StyleImport.kt",
+      "bytes": 18181,
+      "sha256": "058022534808b925f373f10e68f94f98599df498b0439edbafd3ec99e1ad7f23"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StyleRecipe.kt",
+      "bytes": 3666,
+      "sha256": "b6cf231b29f0fce5bde40c62fbaa4e21d81b38651910ca825c9984fcf5dfe169"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Styles.kt",
+      "bytes": 47613,
+      "sha256": "f8e738e7c17a4d688f9a87c3ec6d8b44bf68edba74939fc4fbd53b7c0bc82d30"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StyleTags.kt",
+      "bytes": 6821,
+      "sha256": "cd5be16fe7bddf6cb8021d56d87fca13ac24bd030c990ca80bd0245af7acc50b"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Theme.kt",
+      "bytes": 11678,
+      "sha256": "eddf15ecd49a1ea190bf4c226bac4c373a9b9e7ffe6025b878b499b801c5c274"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/ThermalHeadroomSampler.kt",
+      "bytes": 1866,
+      "sha256": "caa29f560cdb0764c386409725781b8e7118512a429e0d38c24c66551787c50d"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/TopBarIcons.kt",
+      "bytes": 1531,
+      "sha256": "ab6a66cf598eb10c5cbbdd800c7a096a64c106fe36a2d6ae69a5a7b4e78d4070"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/TransientSessionLease.kt",
+      "bytes": 738,
+      "sha256": "6d8253768aca5aebc7de0e861b969b76e0c3433ef7e039b99751d67fd7ca4cc9"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Transitions.kt",
+      "bytes": 5245,
+      "sha256": "3c2feb3a0684e90931ea1be458abf182f7fb2508113e89bf7cf8f547d47f01b8"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/UpdateDialog.kt",
+      "bytes": 8177,
+      "sha256": "935b4fb73b6e719146258c623a57198cc3a2a65d593a7343d0449e99c02b4175"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Updater.kt",
+      "bytes": 17506,
+      "sha256": "692411b84ecfd611daef88765b71e85801cffb5ad766daade4d230b00512d051"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/UserStyles.kt",
+      "bytes": 3378,
+      "sha256": "bae709b0b1fe09414ed4c72d473780c58ab9a510639eba30da2e6bef2e38bbd3"
+    },
+    {
+      "path": "app/src/main/res/drawable-v31/splash_strip.xml",
+      "bytes": 2453,
+      "sha256": "307282ded54e3a008f4b768ab440f9be323665df0219fae0a0dbb24bc945888d",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_background.xml",
+      "bytes": 417,
+      "sha256": "6e4649786d781f4d94d1a8bf8b88e91458d29ea3c74c6caa102326fa6bb05d92",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_foreground.xml",
+      "bytes": 1643,
+      "sha256": "912a626caf7cab0a9aa0b32ce9495856f0f64515171a197058647930dcc7fb7f",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_monochrome.xml",
+      "bytes": 839,
+      "sha256": "89b1067775155d2b3272bbae159f86e0ab86e8dab452571e0b3c4cd74e944b33",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_stat_film.xml",
+      "bytes": 589,
+      "sha256": "a9ffe1d3d04d4a5e6bb8204fbb36418ec02667c5c995d7c0f95e6e1b03e08198",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/drawable/splash_strip.xml",
+      "bytes": 1517,
+      "sha256": "80990fc79dc8e4327e394532b63f0fcd6a767297aa3a17f43d6957bc2b0e2f0b",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "bytes": 344,
+      "sha256": "ada31da9e23f4520f3753e71ca23799a107431473daa3774b6cecac26847260c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "bytes": 344,
+      "sha256": "ada31da9e23f4520f3753e71ca23799a107431473daa3774b6cecac26847260c",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/values-v31/themes.xml",
+      "bytes": 1087,
+      "sha256": "bf54caeb29c65aabbabc26408633f557b512ab5b9482e1bff24b934705d411ee",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/values/strings.xml",
+      "bytes": 114,
+      "sha256": "c3b2d5cb5e0e74d03d5d5bde7bcea1a6b83f37cca00c0e2df29ebf19829aa891",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/values/themes.xml",
+      "bytes": 872,
+      "sha256": "5653810740047eb2cd5352dfb107a820b93d3d077b2c7927f625b3345393e0d4",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/main/res/xml/share_paths.xml",
+      "bytes": 256,
+      "sha256": "9f0aa0a7bfa59e2f7e0d1062f22aa8a6b4a5938d250bab4d7d66a48bb190edae",
+      "syntax": "XML"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/AtomicTextFileTest.kt",
+      "bytes": 1252,
+      "sha256": "de56b2dea8aff5fa1bb4e32d4eb39edebccf43ebbc0970175b1ee1734bbe624b"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/BenchmarkPolicyTest.kt",
+      "bytes": 5375,
+      "sha256": "a79dfa490a54e87654e5ab29d290761e10522f64d9f85ca198cda5a434bdb4b6"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/BenchmarkRunnerTest.kt",
+      "bytes": 10696,
+      "sha256": "4bedd5c3ed6be63942ba2b9fd22d74485110370b40076cc584072998c408b2d5"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/CurveWireTest.kt",
+      "bytes": 3550,
+      "sha256": "fbe3d54039316dffe7a6e899daa9cc62ba71373f7c17dfe331349849e2c782f9"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/EditHistoryTest.kt",
+      "bytes": 1570,
+      "sha256": "b418e4285461e6d4f279e65e2986448227704afed0ee7e66be87140778fa43d1"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/EditorStateAutosaveTest.kt",
+      "bytes": 5406,
+      "sha256": "33165824d10882ad4390a63b7f6bc1600d2d57fd3708d692f2a5147f2ec92410"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ErrorCodesTest.kt",
+      "bytes": 1038,
+      "sha256": "bb6f3e337c6eeba853d06aef4899c0b115353703cb88984d8e46b64d52604390"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ExifFillTest.kt",
+      "bytes": 1854,
+      "sha256": "8081c115127ca15bf02203e17e2a253d8739f8a98aacb4b724c2f2c59b545932"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ExifLocationTest.kt",
+      "bytes": 2688,
+      "sha256": "b5b139f5ed6a5ed39fcc6c0322447de4446fc5daeeb278696bc321af08a0ab40"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ExportMemoryTest.kt",
+      "bytes": 3922,
+      "sha256": "4c427c25e41a00e520dc10a58c969c86bb51197e8575e02a984ad4ab83578c48"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ExportRetryTest.kt",
+      "bytes": 2121,
+      "sha256": "58d2e177cb378c2d0da19770fd09d172899a7ca4fb0fa67e93b30b89ae9c7ed1"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/FrameEditAutosaveTest.kt",
+      "bytes": 8873,
+      "sha256": "e23f9701eb35f6246f77c4ae2b90e0a6cd49a6e2893e2e0aad0c23d4978dc5cc"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/FrameGeometryTest.kt",
+      "bytes": 10145,
+      "sha256": "3529b533f6a3674d4c0ea9dc0354aad21246d071b40dd6ccecbc3fb4039209ed"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/GalleryTransactionTest.kt",
+      "bytes": 2353,
+      "sha256": "5c4e63d1c13b23224f20ff398a611dac3fc687a81b18ba29cffcbb99f99e0d7c"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/LutBakeTest.kt",
+      "bytes": 15081,
+      "sha256": "e8f951b9a5fe871e919dc2567137cdcb69e5b13c8b1637dfe9b5a68030aa5211"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/NewPhotoStocksTest.kt",
+      "bytes": 5480,
+      "sha256": "2735ee468dcd600de9f8a9078486beba562525a70406241564a84dd8a7b3aea7"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/PreviewPublicationTest.kt",
+      "bytes": 2648,
+      "sha256": "3ff536d83c4ee4b82fbed2d668d09587a55461f2b5b0a1b16541307c725258fd"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/RawDevelopmentTest.kt",
+      "bytes": 5218,
+      "sha256": "3500ffc9fd584bb70b67b91ea00d11d9ab70f6b423adb028b144e21f7f3e1d3a"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/RawOpenCancellationTest.kt",
+      "bytes": 6452,
+      "sha256": "d85f545d7c01b0ed6e13d6a976725851e16c0ea2e5b30f111d29218ad2235fba"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/SceneCurveTest.kt",
+      "bytes": 9760,
+      "sha256": "d4bfbb5a3269250c7c7cd0304953f64319e7888bdf94a34302960497b0c619d1"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/SelectionPreviewRecipeTest.kt",
+      "bytes": 2337,
+      "sha256": "579fac07ec9750c8f17660854ab7255857a48ae28212e90234eedbc92852ccfd"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/SelectionPreviewSchedulerTest.kt",
+      "bytes": 6361,
+      "sha256": "65fcc06014a62cf8a0cf5d7b57e28eb8f0dbb6d0fe615bbd0dc9a00557196168"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/SessionCandidateTest.kt",
+      "bytes": 8890,
+      "sha256": "3fe217eaf5bf6e98ca0020b7650febaead5d19b30a9c81231c8b09202d1276f7"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/SpkPackageBoundsTest.kt",
+      "bytes": 2649,
+      "sha256": "971ad7b453e21ad643d93761ba0109a10d965a85b1882808f64602e79aa89caf"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/StyleRecipeTest.kt",
+      "bytes": 9880,
+      "sha256": "13510def9f5f5135981a9a1e05291caf9bb7dcfce0d57734178fa4b9a3f679c1"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/ThermalHeadroomSamplerTest.kt",
+      "bytes": 4271,
+      "sha256": "a7f23fe0b9084ef03a0ae2ebb7d20faf5de90dbe89a17eadad797d5967e83f3a"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/TiffColorSpaceTest.kt",
+      "bytes": 2421,
+      "sha256": "b78a71c4005c997112f0f3f5a142ebf8a8476b79101163f6ec90f306b8c96cda"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/TransientSessionLeaseTest.kt",
+      "bytes": 15852,
+      "sha256": "b49057327eb71f7458f46e04b38e08fc794b49f506e01a8347e6e76e6e0610b6"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/UserLibraryPersistenceTest.kt",
+      "bytes": 7325,
+      "sha256": "7be4b7f523cbeaba29d229a2fc0a15b87f3fc4de2c0c327b91916bb0a7cdc0b3"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/VersionCompareTest.kt",
+      "bytes": 2027,
+      "sha256": "8293f35ebd9eef1d0ccf31ce1e49ac32c56386f51860d08924a8b54beacffe3a"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/ExternalFileRoutingTest.kt",
+      "bytes": 8759,
+      "sha256": "3a366241260ecacea55fdf5151546a99e883db9727a2e8cb8b997b21b9f49854"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/ExternalOpenActivityTest.kt",
+      "bytes": 1269,
+      "sha256": "fc5776e4b2f513380eeea36b983f031c543e1ee9c4555c80205a7d88557f7457"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/FilmThumbnailColorTest.kt",
+      "bytes": 7006,
+      "sha256": "af989d385bab7e3b5861832305061fa1348bbd95bafab6842423884b97b63949"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/FrameEditPersistenceTest.kt",
+      "bytes": 10487,
+      "sha256": "d66bdbafc2f02259efa3679c586682ee6a87ce5867a578b1178ed4bad16302fa"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/FrameRateBoostTest.kt",
+      "bytes": 5107,
+      "sha256": "7c8ce3ed377b606984d1b407860152683fc0f601bcc8d7bf0a33f07dc876f108"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/HeifExifTest.kt",
+      "bytes": 1692,
+      "sha256": "95ba4deecdaaa8b93288d3986f53455a1e2facd2982024ed80a1131a5750e4f9"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/LightTableGestureTest.kt",
+      "bytes": 9152,
+      "sha256": "15a30c516b89267740ba4dda575062aa7c99a7c6169bac5db9f164b559428102"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/LightTableNavigationTest.kt",
+      "bytes": 3925,
+      "sha256": "1aa96f3456e66b6a492fae9cc9c2a0f015010d25691f9ce7385b3b6b4d31dc08"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/LocalizationTest.kt",
+      "bytes": 6824,
+      "sha256": "694dcc32ce586834ae3583501570889369cfbb06fc92aa7f4d43f6b09604e545"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/LocalizationUiTest.kt",
+      "bytes": 5409,
+      "sha256": "22675b0ce7c48c8c9c1c4a48c0fd5da5c23ac8b4456137bce00423ccf692d60b"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/ManualRollPersistenceTest.kt",
+      "bytes": 2718,
+      "sha256": "6b70fed84ebc78c963d3d54480e64211e20221e6c0a1a21c1e6abdde32044b81"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/OutputColorTagTest.kt",
+      "bytes": 2824,
+      "sha256": "21e02d0f8ed2d20b47a4859457d058c6acbf092e8c6348381fd3253257e58e16"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/PhotoGeometryTest.kt",
+      "bytes": 3128,
+      "sha256": "b892def177121e2cb921d2b4dc1e3a1a5fc4a56069dd514cafbbfcc58f18bdbd"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/PhotoInputColorTest.kt",
+      "bytes": 4912,
+      "sha256": "5d8698172e32e187bff99414d9249ddaf25729905018352adc7248447d5487be"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/PhotoInputF16Test.kt",
+      "bytes": 6337,
+      "sha256": "479e26dab119121541362066990dfee76d508f0059557764d80c0b86d0d29c3c"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/ProcessingQueueGrantTest.kt",
+      "bytes": 9174,
+      "sha256": "34cf00a21d20e65b8783ac5f0e39cc926f55fac90c27f779d52a1a25d766c8d1"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/QueueSheetUiTest.kt",
+      "bytes": 2505,
+      "sha256": "7b5f20b857b6943905a0767bd5392a57053909839bb288a9a449ae594256d69f"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/Screenshots.kt",
+      "bytes": 26262,
+      "sha256": "dd7cc7e690487117e3c406ea980a785dbc01655abe1f27f89fee257b2da9d9ae"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/SelectionPreviewUiTest.kt",
+      "bytes": 7455,
+      "sha256": "dfe51541007d2639e7a90fa724375f1c6a17ca8eeeb0831e459cbd70b0d60f39"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/SourceGamutRoutingTest.kt",
+      "bytes": 6410,
+      "sha256": "3aa473cad53ffe3f0d971e7545c2cafcc4b174c93583d1ddd261cdfd261d1335"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/StyleWorkflowUiTest.kt",
+      "bytes": 8347,
+      "sha256": "fdbb4e6c3dbef3eabf24ec089fcbd5d4a63404ac8eeb9b987a666acc6891b69a"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/UpdaterIdentityTest.kt",
+      "bytes": 3862,
+      "sha256": "05344cbe44eb9f6cf5e758badb6e6906a5f2fe44518155e086b5eb7e7c85f78c"
+    },
+    {
+      "path": "build.gradle.kts",
+      "bytes": 218,
+      "sha256": "ed0ecc38b4a8e4d90b26052ec016065c835da6b51acc04ecfbb1a1c79864497e"
+    },
+    {
+      "path": "docs/images/make-banners.py",
+      "bytes": 4933,
+      "sha256": "06fac2d07b03f27f7b2e285dbca6a817daccede3d37e49943c4d34cabdb18067",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "docs/images/make-social-preview.py",
+      "bytes": 5442,
+      "sha256": "d95b4b6ee9ee756c32eabc3cbcfd892f491d9a2c95f569aa469b79a2cd539a93",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "gradle.properties",
+      "bytes": 133,
+      "sha256": "1989ce44d3e46ad3ba76539a5d04f2e94603d84add6a5c01e9dbb2537a68e4bd"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.properties",
+      "bytes": 338,
+      "sha256": "3b6b8df392b92f86332d907707f3d952a32c8d6e1fedabafe2b5ec3d933a78c4"
+    },
+    {
+      "path": "gradlew",
+      "bytes": 8784,
+      "sha256": "9cbbb4d68ff7fb5211c4d58f598ac9d8664c05fdcd1e5f59b7f2c3ac1ee00af0"
+    },
+    {
+      "path": "patches/0001-iir-chunked-launches.patch",
+      "bytes": 4394,
+      "sha256": "44f9d7adbcfab6a547f3d8343fdec33dec2abda7f746c0772ac54aa1c4124ef0"
+    },
+    {
+      "path": "patches/0002-dispatch-chunks-under-2-24.patch",
+      "bytes": 65099,
+      "sha256": "5a97edf4ebc0c57e381a12e1b35ba30725be5bd2fd76fb3c019d451435635a4e"
+    },
+    {
+      "path": "patches/0003-raw-half-size-budget.patch",
+      "bytes": 2155,
+      "sha256": "077cc6a32d8ce9182d9135b05d7ca1de29a2aa9321e1f9d0c57e072c00bcfadc"
+    },
+    {
+      "path": "patches/0004-dng-dual-illuminant-matrix.patch",
+      "bytes": 8896,
+      "sha256": "090379c4c9cc381856f7758f02db8dcc77a39af201798b5d7a15f33e87b91bad"
+    },
+    {
+      "path": "patches/0005-lock-print-lut-caches.patch",
+      "bytes": 3997,
+      "sha256": "ac73313b46a641dda081b71c3510a7646e0d52e6a2a52dae3778b6f4f36a97ad"
+    },
+    {
+      "path": "patches/0006-dng-opcode-gain-map.patch",
+      "bytes": 9865,
+      "sha256": "18985abff79b9c8a0a619210882a3b94bbfda51df8d3844400466078383a4c68"
+    },
+    {
+      "path": "patches/0007-grain-size-and-unsharp-on-the-wire.patch",
+      "bytes": 3241,
+      "sha256": "974851526cf81103d3230583cbb45696b408ff09e75911dada01afb107a86a72"
+    },
+    {
+      "path": "patches/0008-latch-device-lost.patch",
+      "bytes": 3519,
+      "sha256": "fdf72c1e9bcb4fcc68d7b06a4a2ff339550507a54095000e62786ceab1216224"
+    },
+    {
+      "path": "patches/0009-dng-opcode-list-3.patch",
+      "bytes": 20118,
+      "sha256": "5c00df8cd1a9cc2733d27c27875edc0b72e870df03a69ab39c61514bb3f0f699"
+    },
+    {
+      "path": "patches/0010-storage-range-by-requested-size.patch",
+      "bytes": 2255,
+      "sha256": "3132b74c5ed14d5632a6f123efaaa5795340edae7b3587af2fb37b043fd86edf"
+    },
+    {
+      "path": "patches/0011-atomic-cancel-flag.patch",
+      "bytes": 2294,
+      "sha256": "35f089b757ea90b12e52ddef9a1a6c78105130792068d0c51541105d0a0eebd0"
+    },
+    {
+      "path": "patches/0012-persistent-descriptor-pool.patch",
+      "bytes": 5297,
+      "sha256": "7d2a1b43f46c80b735aa318f6cab041a2289cd4d9c82da34c24aff1c1e4385c8"
+    },
+    {
+      "path": "patches/0013-reprint-reuses-print-constants.patch",
+      "bytes": 5983,
+      "sha256": "626e1770652c5bb0efbd82c2c23cc063d9b067547ac9b8736f8c22437962de45"
+    },
+    {
+      "path": "patches/0014-inline-args-mapped-ring.patch",
+      "bytes": 8783,
+      "sha256": "667950c647c9cb3af492ceab6d09dd68c0deb1437ebec671eb2095142c3f3fa7"
+    },
+    {
+      "path": "patches/0015-vulkan-pipeline-cache.patch",
+      "bytes": 9522,
+      "sha256": "e4b354faa8d2c17ba4837acaf7889d80c0c241594226d78f94939c2a7dedd4df"
+    },
+    {
+      "path": "patches/0016-setup-cache-shared-lut.patch",
+      "bytes": 4205,
+      "sha256": "40814d74f96f00abcb0e192a585ac8eee6e210f1ea4d926d236ce9fcf148f4ce"
+    },
+    {
+      "path": "patches/0017-setup-cache-complete-gamut-key.patch",
+      "bytes": 1215,
+      "sha256": "608281bfab6ef1b7417e6e275369bb7e54e48ed07468d3056ccee0ab63a488a6"
+    },
+    {
+      "path": "patches/0018-fir-demand-without-kernel-allocation.patch",
+      "bytes": 2561,
+      "sha256": "89e058ee819e20fe04c637620684aae5f01ec6f4284be974e658421f39a338a9"
+    },
+    {
+      "path": "patches/0019-bounded-fir-row-scratch.patch",
+      "bytes": 9267,
+      "sha256": "97e76bb79aee6edb9e0e8547f3f47169ddd3bbc5cecd9e559e4764e87397bac8"
+    },
+    {
+      "path": "patches/0020-small-vulkan-pool-requests.patch",
+      "bytes": 823,
+      "sha256": "24ccf4ea08b06314715fbbf16451d925a34849d60c253811cca4dcbeab08d035"
+    },
+    {
+      "path": "patches/0021-dng-forward-matrix.patch",
+      "bytes": 16659,
+      "sha256": "511aef41432ceb6cfdd02c17ecaa7c175816421ddc2c0895aabbb4f38f4b7cbd"
+    },
+    {
+      "path": "patches/0022-raw-white-balance-temperature.patch",
+      "bytes": 860,
+      "sha256": "8eb40d43403b9a87a83b915c92ad6ad5f75e5ee8bd98a0b51d19d724c795e43b"
+    },
+    {
+      "path": "patches/0023-raw-explicit-white-temperature.patch",
+      "bytes": 5548,
+      "sha256": "711b6e25a54c7a18910e8f60c19b9336a8bfd40eb594dd4f95dde94bceb1ae43"
+    },
+    {
+      "path": "patches/0024-raw-custom-without-as-shot.patch",
+      "bytes": 5843,
+      "sha256": "8d7724049704a3b24e99f9f211a6f3f0dbd96d53c198be38986be1443c7a470f"
+    },
+    {
+      "path": "patches/0025-vulkan-device-lost-preparation-guards.patch",
+      "bytes": 22266,
+      "sha256": "1f18bae6aeed39722d94f1f3d0365a6c3227ec61dc798d5a7ddefdbc47d59a8e"
+    },
+    {
+      "path": "patches/0026-cam16-hoist-table-invariants.patch",
+      "bytes": 3933,
+      "sha256": "1d76d6963e2c37fcd2e23d0439310f87bd88415bda9a249810585fdc1025a08f"
+    },
+    {
+      "path": "patches/0027-di-precompute-channel-curves.patch",
+      "bytes": 2965,
+      "sha256": "cbd29f1359dc6799a3870acb73a425c890c5ae9358c4ab69120ec26dcf1bb01d"
+    },
+    {
+      "path": "patches/0028-vulkan-pointwise-fusions.patch",
+      "bytes": 13174,
+      "sha256": "40266f7a1acdce1d8a8bc7022267a16c1d3a55d0365a5e357cd563125637fe40"
+    },
+    {
+      "path": "patches/0029-scene-curve-vulkan.patch",
+      "bytes": 16540,
+      "sha256": "5502228a281536b850594342995eeea179b131d409bb5dca809963c2fee8fbf1"
+    },
+    {
+      "path": "patches/0030-nofilm-float-grade-boundary.patch",
+      "bytes": 7310,
+      "sha256": "8e94ddea29a4422b8b6b097c885dc4465891798a76b488fdb4ec8982590094b4"
+    },
+    {
+      "path": "patches/0031-view-output-cancellation.patch",
+      "bytes": 4982,
+      "sha256": "496c6e90a23a61ddeb9ea24b31db670a4d4a1bef06c37dfda08e077b5bde4a31"
+    },
+    {
+      "path": "patches/0032-dng-as-shot-white-xy.patch",
+      "bytes": 13329,
+      "sha256": "a471396998a330d32d22244bb80c35466e58b8698930f2f6653ffab2ee275791"
+    },
+    {
+      "path": "patches/0033-integer-view-readback-cancellation.patch",
+      "bytes": 2209,
+      "sha256": "b5183f723a14589bdce043fd196c5d56d410795a2291c05b0e1992de3e1e0ac7"
+    },
+    {
+      "path": "patches/0034-nofilm-float-row-readback.patch",
+      "bytes": 3650,
+      "sha256": "f00dd2f481bc64fed9e6a899c4572dd0d916e461e46bed0e0186a6fc123c3ffd"
+    },
+    {
+      "path": "patches/0035-dng-render-metadata.patch",
+      "bytes": 3806,
+      "sha256": "19df6dabc2f66cb5a45f900e121b7d488945b4d91e7f22e5ae3de340cfbbea8d"
+    },
+    {
+      "path": "patches/0036-setup-cache-reference-illuminant.patch",
+      "bytes": 742,
+      "sha256": "11974cb35228b3d2d4bc35bca98821917d5ae3f2030ee3e294d24d6b0eb7d13b"
+    },
+    {
+      "path": "patches/0037-raw-compatible-progress-cancellation.patch",
+      "bytes": 11889,
+      "sha256": "8da1c7e6810e82b72537e3f1501074c82096bb1a04556c43922749788986f368"
+    },
+    {
+      "path": "patches/0038-gain-map-whole-list-validation.patch",
+      "bytes": 2923,
+      "sha256": "831a23e3353aca81505564415725e41e484234d17feb4969245e0675b55f147d"
+    },
+    {
+      "path": "patches/0039-bounded-point-chain.patch",
+      "bytes": 9949,
+      "sha256": "928dd5270411fc917e9e987be6e149b7fa8b1aaef3bd27b231eb3d19e5f8c476"
+    },
+    {
+      "path": "patches/0040-bounded-print-run.patch",
+      "bytes": 8797,
+      "sha256": "ba18bb0e5782cd468afcf65b923522eaa55e1710a38b50b6958d829fd2a33d7c"
+    },
+    {
+      "path": "patches/0041-bounded-execution-contracts.patch",
+      "bytes": 10363,
+      "sha256": "b553016005b756d2319f27d0cb2b0f610128ce9942b7807bd3104d4919f365b7"
+    },
+    {
+      "path": "patches/0042-external-plane-publication.patch",
+      "bytes": 28547,
+      "sha256": "5cd45ec4d1d871071e88477460624af79bc4a87b39f06f25a0c41303f859c513"
+    },
+    {
+      "path": "patches/0043-dng-asn-calibration-signature.patch",
+      "bytes": 4377,
+      "sha256": "6f8a15dbc56bcbc00d272fd2a87dc518d166bde26323bfcde108f89d5bc0a896"
+    },
+    {
+      "path": "patches/0044-pipeline-failure-recovery.patch",
+      "bytes": 5572,
+      "sha256": "66febea20f0004a60cf83916232adeb564cb6a37846ed2e10e1bfd776462dcd4"
+    },
+    {
+      "path": "patches/0045-bounded-window-payload.patch",
+      "bytes": 26743,
+      "sha256": "02cfdc14088e81ae5309b96e5bee9f6c7b4cf760e2bd8a74e458b8f99a77cf9f"
+    },
+    {
+      "path": "patches/0046-vulkan-transfer-memory-ledger.patch",
+      "bytes": 7532,
+      "sha256": "1574c9b90acef9eb364f5efd383459b6eecdcb52f3914a96fdb4e7d5c2e2f265"
+    },
+    {
+      "path": "patches/0047-params-build-transaction.patch",
+      "bytes": 2822,
+      "sha256": "1422efdf4a2f9be18094e80f7a3df7f2934d7db380c1f7023deb2641a73eec15"
+    },
+    {
+      "path": "patches/0048-production-bounded-print-tail.patch",
+      "bytes": 11370,
+      "sha256": "69e9e17cf33ec7d235c13d8380f06c2cd491c7f583ad0e5dbe41f40f8efc08f7"
+    },
+    {
+      "path": "patches/0049-dng-profile-dynamic-range.patch",
+      "bytes": 1838,
+      "sha256": "5055b0b94b62dba156aeeb22219395ebecafca81020e86b5e6d1ea19bc6d1936"
+    },
+    {
+      "path": "patches/0050-opcode-list3-cancellation.patch",
+      "bytes": 7044,
+      "sha256": "3f345cafdcab2fe2fc365832bd130b4441685bcffb025829f0238e7f80261dd5"
+    },
+    {
+      "path": "patches/0051-linearraw-uniform-black-normalization.patch",
+      "bytes": 2371,
+      "sha256": "e30db5e523b39422644af95adbf6634963581353379eacb77798f9b79a534fb2"
+    },
+    {
+      "path": "patches/0052-iir-terminal-boundary-experiment.patch",
+      "bytes": 10964,
+      "sha256": "69bd8e6294f036cd51b02792724dbe949496167b155d0fdbed7f08c90dd80568"
+    },
+    {
+      "path": "patches/0053-iir-difference-state-experiment.patch",
+      "bytes": 11092,
+      "sha256": "c737329cf6ca4ba0ec4607fa08278a4cc254a9bcac01e77565c50a30f4ac89c4"
+    },
+    {
+      "path": "patches/0054-vulkan-finite-output-boundary.patch",
+      "bytes": 9173,
+      "sha256": "77d9e564c77a5772219b44d4ff66bcb377670decb33157afe00b3a10ad6aeb4c"
+    },
+    {
+      "path": "patches/0055-prepare-view-curve-tangents.patch",
+      "bytes": 4854,
+      "sha256": "8d9a66718721303b65f2c2aa30a04aea9820751db7e459eae33e0a54ec29338b"
+    },
+    {
+      "path": "patches/0056-raw-rgb16-output-converter.patch",
+      "bytes": 5996,
+      "sha256": "553a36a1b7fef44029bdb8c8bc9c94a22bdcc0bb9bff406592dba3545f8111ac"
+    },
+    {
+      "path": "patches/0057-raw-one-shot-storage-lifetime.patch",
+      "bytes": 964,
+      "sha256": "4c70e89d7f039738bfcf57d5bfe5f9d28fede92cca9d2de92206ddd64888e548"
+    },
+    {
+      "path": "patches/0058-linearraw-owned-buffer-transfer.patch",
+      "bytes": 1941,
+      "sha256": "3a9a58a62b72b87b8c810017f947acb409bd4e92d3084f55dd9a6b2fff38ada8"
+    },
+    {
+      "path": "patches/0059-exact-multiple-order-statistics.patch",
+      "bytes": 6318,
+      "sha256": "c9d22b383cdc5c377dc2befa821ab7ab655db63851c89a6815e01147d6e2dc20"
+    },
+    {
+      "path": "patches/0060-stage-member-call-sequencing.patch",
+      "bytes": 1354,
+      "sha256": "b9e5143e8595c2b27cdd0761a73d83699e0d33610f73054fcd82e9a00b3bf065"
+    },
+    {
+      "path": "patches/libraw/0001-openmp-wavelet-denoise-size.patch",
+      "bytes": 759,
+      "sha256": "9af5c329fea9974fc146285334f53c353c687bbe63affba2717f442de83ae034"
+    },
+    {
+      "path": "patches/libraw/0002-ljpeg-idct-table-once.patch",
+      "bytes": 1543,
+      "sha256": "9ae3f9f1bfd4c798b5489667330acf5fecf19268f8e8d7c253c291929ada1610"
+    },
+    {
+      "path": "patches/libraw/0003-xtrans-serial-tiles.patch",
+      "bytes": 1325,
+      "sha256": "7260ea834188cbdb1d64259401077669606b99f84948637d7d9bc5ecb607de41"
+    },
+    {
+      "path": "patches/libraw/0010-newsubfiletype-unsigned.patch",
+      "bytes": 1058,
+      "sha256": "b7c81ca6e5312eee34bfc13c58e5a70bbab8ced2e909bd71337eddf1f930848e"
+    },
+    {
+      "path": "patches/libraw/0011-ljpeg-zero-category.patch",
+      "bytes": 734,
+      "sha256": "39aee4955b7191de980375e2c0c9c54a97b3a9f9c886d304403d86ee92f2e860"
+    },
+    {
+      "path": "patches/libraw/0012-bound-tiff-metadata-allocations.patch",
+      "bytes": 7355,
+      "sha256": "770fcf9f45c82a142c571718e1d4dc13ae09bae342dec3bcd477bd36b036aa4c"
+    },
+    {
+      "path": "patches/libraw/0013-bound-lossless-jpeg-work.patch",
+      "bytes": 2992,
+      "sha256": "1f31762c6881bb419c8a37d3da8939ca46054071018b11a5ca07aca224b557ff"
+    },
+    {
+      "path": "patches/libraw/0014-bound-dng-tile-streams.patch",
+      "bytes": 6431,
+      "sha256": "78975fe4675bb3fddb779b8bbc7fb8ffb2e6dde225e43492cc64f42f2d9c73ea"
+    },
+    {
+      "path": "patches/libraw/0015-bound-ljpeg-segments.patch",
+      "bytes": 5572,
+      "sha256": "1a5ce17edcfee1d0849d3e838b0b98c94915d7991f37b971ace0386e5e0ef4c4"
+    },
+    {
+      "path": "patches/libraw/0016-harden-ljpeg-idct.patch",
+      "bytes": 1308,
+      "sha256": "0f1db1f35236906a4af5845d169028bde16d8c0f824d90a9b51304908f4d870f"
+    },
+    {
+      "path": "patches/libraw/0017-normalize-model-orig-on-stack.patch",
+      "bytes": 759,
+      "sha256": "262558168cae274757ddec38cba79482735fd7fb987e325375a38e6e1272f42e"
+    },
+    {
+      "path": "patches/libraw/0018-lossy-dng-curve-init.patch",
+      "bytes": 1208,
+      "sha256": "d25e9a489821dc701c76cfe13e8545c4374cc33bdb2cce5d59ad8728823b0a8b"
+    },
+    {
+      "path": "patches/libraw/0019-sony-arw6.patch",
+      "bytes": 77368,
+      "sha256": "75024c94104f5550468ed20a003f2d60fd69daf1a88ea6dcbb53accc53d319dd"
+    },
+    {
+      "path": "patches/libraw/0020-crx-signed-quantizer-index.patch",
+      "bytes": 2314,
+      "sha256": "7b9fb18b58212b626bed585795462f33c4bd57c86b877cd98c2b23422692473b"
+    },
+    {
+      "path": "patches/libraw/0021-dng-as-shot-white-xy.patch",
+      "bytes": 5063,
+      "sha256": "7721c943c88a743322d39dfb7a238b0e2457fe1dcdd6226d243433669c285f74"
+    },
+    {
+      "path": "patches/libraw/0022-dng-render-metadata.patch",
+      "bytes": 9305,
+      "sha256": "f3abd7eed0cfae8b83913b8d1406ab66e1fb5c928c5098cb697d39aed936fa43"
+    },
+    {
+      "path": "patches/libraw/0023-dng-profile-dynamic-range.patch",
+      "bytes": 4551,
+      "sha256": "bb0d3e76a2aadb5b56cbd8cfff0e8d81c5acc986c629918550c741a98401edd2"
+    },
+    {
+      "path": "patches/libraw/0024-sony-ycbcr-cache-index-mask.patch",
+      "bytes": 1197,
+      "sha256": "78d02fa3e6fea5bed6857b44e0211bbf5b60cedf064a8abeefaa765426b3fd63"
+    },
+    {
+      "path": "patches/libraw/0025-one-shot-raw-storage-release.patch",
+      "bytes": 2014,
+      "sha256": "cac4665a1cee4a6db88b1b6fe795d3cb800c78030f26b79abc91478dfd0cc452"
+    },
+    {
+      "path": "patches/libraw/0026-one-shot-linearraw-buffer-move.patch",
+      "bytes": 5059,
+      "sha256": "cf0739399b8092b6d7fc89486e8256e85294514bae9b6df95e3d7dc1d590e2cb"
+    },
+    {
+      "path": "patches/libraw/0027-crx-defined-quantizer-arithmetic.patch",
+      "bytes": 3823,
+      "sha256": "6885024afc53b72c20aefa2f985339e5264206ff7cd826737f1fbc2b3b89ea72"
+    },
+    {
+      "path": "patches/libraw/0028-phaseone-s-bitstream-bounds.patch",
+      "bytes": 3400,
+      "sha256": "2b360f19a069cfecf08f68198f526719679397e7f105dcae11f535af74d2ecbd"
+    },
+    {
+      "path": "patches/libraw/0029-olympus-bitstream-bounds.patch",
+      "bytes": 4290,
+      "sha256": "e8a1d76e56875674f4477cbb81ea4a4c45dc8aea334238ed9ea5d60dd8744707"
+    },
+    {
+      "path": "scripts/fetch-upstream.sh",
+      "bytes": 3754,
+      "sha256": "b889695b7fcc40b574ee8d587afa0fea2db59a57b77d828b9dfd6b734734a223",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "scripts/parity.sh",
+      "bytes": 8108,
+      "sha256": "0b0436fa4e9d87aad80b41899c83949a31572547f3c560dcc7800a4418e02795",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "scripts/release-notes.sh",
+      "bytes": 1105,
+      "sha256": "f0705b761b8fb034170d75baddcac56d0b204cbd345eec0e5ee7fc0350ce0318",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "scripts/stage-assets.sh",
+      "bytes": 3666,
+      "sha256": "d59ff1d13468c650b4ecac318548e311a334a5c693dc4fbbac27ba9767a50a36",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "settings.gradle.kts",
+      "bytes": 332,
+      "sha256": "647c38e18317ab45418b489e05b9a244a3bce329b1a21ec2a6a2313e8b6c88a7"
+    },
+    {
+      "path": "tools/android-cloud-native-probe.cpp",
+      "bytes": 3649,
+      "sha256": "a4ffd60d18166cb7e61ce867431f77c4d2b7d03ebeb54db57a5409f7167f48bb"
+    },
+    {
+      "path": "tools/android-cloud-preflight.sh",
+      "bytes": 1384,
+      "sha256": "94802bf3bc8e02e67ec7d0f3e81bc3e741c204fe727d794ab2f98eefdde503b2",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/audit/analyze_native.py",
+      "bytes": 3583,
+      "sha256": "7b7cff8c763c02bd9be8b25e8e4072b51ad8587e18c8bfa190f5e2c46dc619cc",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/audit/query_osv.py",
+      "bytes": 1735,
+      "sha256": "5a3e5f8c330b2f74341cda77ace437beb025a538c35bc9d9721aef8ac2e488ad",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/audit/source_checks.py",
+      "bytes": 2114,
+      "sha256": "d4a07d9be37ab6a799f67a01adc927ba271a1024d5fbad899c804e6265b3db14",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/jvm/AdobeIccContract.kt",
+      "bytes": 2821,
+      "sha256": "b98808d0e4feba90c5f17edf3f015696fbc18d35e98695df6a2f57f2f94b2c5f"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidBitmap.kt",
+      "bytes": 225,
+      "sha256": "9c10accc97e6b926dff1e9d5c72f41fbe559b1c06d78f96583f30204f9dad03e"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidContent.kt",
+      "bytes": 1354,
+      "sha256": "ebd2bc54ee737d1c4912f3bd359be7bb289190c0688e8635d9c3a4c8c441ff6d"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidCursor.kt",
+      "bytes": 264,
+      "sha256": "0e901aac3b1d25f876a3110d5936da9040557442bf0e41cc26705d3ac313173c"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidMedia.kt",
+      "bytes": 743,
+      "sha256": "fc9feddbb14d2194661ae4477f43607656e9576e54a813493508cb0e3eff6a6e"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidOs.kt",
+      "bytes": 462,
+      "sha256": "34ea9716927840f2303b1773eedfd7f7da397bf912ba2be460dc9844d199f485"
+    },
+    {
+      "path": "tools/jvm/gallery/AndroidUri.kt",
+      "bytes": 166,
+      "sha256": "3223c99fc86423939a24555260a2b220f1d0bd73589ae6e99248994313012077"
+    },
+    {
+      "path": "tools/jvm/gallery/GalleryQueueContract.kt",
+      "bytes": 21588,
+      "sha256": "82bbc18986293f7b521539dadfd5e10971f11d3af788fac50635cea341b0a0dc"
+    },
+    {
+      "path": "tools/jvm/gallery/QueueHarness.kt.in",
+      "bytes": 3745,
+      "sha256": "921f43da0e3e76701a1308b6bab94466ac2630f9fe28ae468d5708c00aaaa9fe"
+    },
+    {
+      "path": "tools/jvm/IccProfileContract.kt",
+      "bytes": 2805,
+      "sha256": "eb7c729f79361d0bf041ba1234ac01ca3b6ae44a37f0052205704c4f967ef126"
+    },
+    {
+      "path": "tools/jvm/preview/Bitmap.kt",
+      "bytes": 184,
+      "sha256": "6c92ce2ddbd096da4989bc66090ed65fa8dc6adda4d5cb5aba2c10427d8b3076"
+    },
+    {
+      "path": "tools/jvm/preview/PreviewEditorContract.kt",
+      "bytes": 5731,
+      "sha256": "22f349371d6427750d573d3592207c5f3dc1cf91cd09ffe5677bcb2fdfb56883"
+    },
+    {
+      "path": "tools/jvm/preview/PreviewHarness.kt.in",
+      "bytes": 3914,
+      "sha256": "6af30d6dc30d90f48dd3f8bcecf85422e28bcf1e41afe63af2f90f3ebee452a7"
+    },
+    {
+      "path": "tools/jvm/preview/SystemClock.kt",
+      "bytes": 97,
+      "sha256": "5b0e39a4eab4225b2a8cc3a97d5f454010dcd3e90771e875d9e4a2111d16f2d9"
+    },
+    {
+      "path": "tools/jvm/ProfileCmm.java",
+      "bytes": 1836,
+      "sha256": "83752fd2b6d2fd6bca61867f4219bae8d8213093aaeadbbfab98432bbf8156ce"
+    },
+    {
+      "path": "tools/jvm/run_gallery_transaction.ps1",
+      "bytes": 4113,
+      "sha256": "ee7ada712c1cba9deb505b95c743026477e8ad84410853fb2ecd8870d0cf4719"
+    },
+    {
+      "path": "tools/jvm/run_icc_profile.sh",
+      "bytes": 1486,
+      "sha256": "da179b88dddb3c3d9998714b3458937a1cb508544c1108a8ecfa5234d3a18ffc",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/jvm/run_preview_publication.ps1",
+      "bytes": 3614,
+      "sha256": "d46b84d8ffeb9dafc74bcbbf588893c677c765f7430128e06fd2dc9ca8595873"
+    },
+    {
+      "path": "tools/jvm/run_tiff_targets.ps1",
+      "bytes": 4266,
+      "sha256": "4be3bc5b20933402308f73400e6e3fcabf2a873f7f2d284c98fd8e9295428739"
+    },
+    {
+      "path": "tools/jvm/run_tiff_targets.sh",
+      "bytes": 2023,
+      "sha256": "f0cfc5442c0007d478c1c93e885524ba8c99d4a47debb6f8bf8e22c186ba9de3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/jvm/stubs/android/graphics/Bitmap.java",
+      "bytes": 133,
+      "sha256": "a52d18e4cd621744a63d20f0226727dc521e72fdd57a48b92f05f9e4400dd8a7"
+    },
+    {
+      "path": "tools/jvm/TiffJniContract.kt",
+      "bytes": 2354,
+      "sha256": "939be7187704e98318ba44734e63e46bc51d5428ca02f35d8a58bf95e9c9c63c"
+    },
+    {
+      "path": "tools/lut_experiment/check_signed_evidence.py",
+      "bytes": 12466,
+      "sha256": "82168a3f0eb5a345c8f90f9df7e24f0dfed85ae183166e83239d9e7416db7f62",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/lut_experiment/ciede2000_reference.py",
+      "bytes": 7036,
+      "sha256": "84b99d76b85e23abbbb64e08d6ebba9a1abbd66c88a11adbea04d71805542c2c",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/lut_experiment/compare_negative_denominator.py",
+      "bytes": 9220,
+      "sha256": "9ce6cb2e1e93c4e75b0022f7b4cade03d3cbfa8b8985d37176af7ee5be7a0d24",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/lut_experiment/gate_report.py",
+      "bytes": 10825,
+      "sha256": "7e1ddf2391aeff5fa9789b6a256de796bc1e77b012702bafd9863a2877bfd9b8",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/lut_experiment/prepare_negative_denominator.py",
+      "bytes": 3420,
+      "sha256": "cb656b674fbaf22344ac1206380ddd38dca4b47c4fd4cc4cad8f936e33906c2c",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/lut_experiment/run_negative_denominator.sh",
+      "bytes": 2274,
+      "sha256": "cebe066f38864ea64a08503d2c84b77b436db25645d3d16eaee691fb20d45c87",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/lut_experiment/signed_report.py",
+      "bytes": 9533,
+      "sha256": "875804c623651e1c3f8e4c0f28dc64178f76f640ff9b9c6d527df61251fe7650",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/adobe_fixture.py",
+      "bytes": 5253,
+      "sha256": "e1db511bcb4edec1fc070d6179081f05f0032990b9d857c51fce5a48329a8948",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/adobe_legacy.cpp",
+      "bytes": 2215,
+      "sha256": "e623f1daabcdfa53718fecb7f4d5b0b58d0ef3ebc83d101f153992cf7ccce18c"
+    },
+    {
+      "path": "tools/native/adobe_metadata_fixture.cpp",
+      "bytes": 1755,
+      "sha256": "e40574fc65bd177cafd6d8c4c05f7171d73e15bee66901acc9c32db19c51b758"
+    },
+    {
+      "path": "tools/native/adobe_tiff_cmm.py",
+      "bytes": 8377,
+      "sha256": "935c3ce8614be164beeddbef9c793a469707a237d4744b2f47778a49a1f45217",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/adobe_tiff.cpp",
+      "bytes": 4927,
+      "sha256": "75ee717fe4581a63d9c645c754d844099f44850ab994dd1d74f9d369db6e5bba"
+    },
+    {
+      "path": "tools/native/android_feedback/FeedbackAndroid.java",
+      "bytes": 10699,
+      "sha256": "1b733f8b1a2350628679f519916cba51104f3a9b89514ee416768f618a93fd09"
+    },
+    {
+      "path": "tools/native/android_feedback/fixture.cpp",
+      "bytes": 2685,
+      "sha256": "989f7f2d1e7733526133655097cd3f5136ec1804c57a8f38f4c138d010b89da7"
+    },
+    {
+      "path": "tools/native/bitmap_f16.cpp",
+      "bytes": 6233,
+      "sha256": "4e198a1cbcf70ad389d22a2000f0d0f7aa9fd3bb13bc708b8ee90c104b4821d7"
+    },
+    {
+      "path": "tools/native/blur_boundary.cpp",
+      "bytes": 5792,
+      "sha256": "b6c799982c9f8b7a0ab302f131cd944f3bbaac498703a52f4dc6a41916bcd02e"
+    },
+    {
+      "path": "tools/native/bounded_budget.cpp",
+      "bytes": 7512,
+      "sha256": "315c2181439c02e58a2718669ea04f863ceab5689fca3eeb50218f1e9d40b743"
+    },
+    {
+      "path": "tools/native/bounded_contract.cpp",
+      "bytes": 3821,
+      "sha256": "126f7ee82627c9185014d6e4330f20537bd00f624a299b065cdcf62096e43129"
+    },
+    {
+      "path": "tools/native/bounded_point_chain.cpp",
+      "bytes": 16921,
+      "sha256": "e1b3ae26b0e973b5e94fc7fe20a1ecd662ec193353c6c41946a99367f7d35a56"
+    },
+    {
+      "path": "tools/native/bounded_print_run.cpp",
+      "bytes": 15393,
+      "sha256": "151d70d47e1b88b98e5c675246cb545d59bab7cf5f438b15c4bcc17959aaf67c"
+    },
+    {
+      "path": "tools/native/brightness_range.cpp",
+      "bytes": 5154,
+      "sha256": "ebe9b38fd9e8fa85bfc5343647a8b319c25ef9eff8f32cc44aa5088ba3be8d45"
+    },
+    {
+      "path": "tools/native/build_feedback_android.sh",
+      "bytes": 2129,
+      "sha256": "16bdb41ad3985ed4a6d83b2658524dc89bde2072ee45531ebcdad41f7f929bae",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/cam16_setup.cpp",
+      "bytes": 8353,
+      "sha256": "8293881bec20c2b156f564a61646b3d22a411ffba0e9a0f4d784d9ca170e7c9e"
+    },
+    {
+      "path": "tools/native/compatible_raw_cancellation.cpp",
+      "bytes": 10450,
+      "sha256": "da720f4e5d46f2b8b4c55e5cace6e87240c9040a82a26a0e862365187fcdde94"
+    },
+    {
+      "path": "tools/native/curve_regression.cpp",
+      "bytes": 3395,
+      "sha256": "7002f1ae9471578fbb6fac835d8d6e2cb4a166ce05eb129c46a93bff172501cd"
+    },
+    {
+      "path": "tools/native/curve_wire.cpp",
+      "bytes": 6025,
+      "sha256": "830ae9fba2e7de94f3339a6d9fbf049f2bd0c21fdeef1fe33b9c3399401f524d"
+    },
+    {
+      "path": "tools/native/di_setup.cpp",
+      "bytes": 12495,
+      "sha256": "44e25059d30feae8ffb0a340d2af27c4ddcd0bcdeb3ed3b6d17549f1538e8e90"
+    },
+    {
+      "path": "tools/native/dng_asn_calibration_gate.cpp",
+      "bytes": 2085,
+      "sha256": "8f79631465237cc0080923de7b23c9558154bb99990f9507ec6c097045d14e7f"
+    },
+    {
+      "path": "tools/native/dng_asn_signature_audit.py",
+      "bytes": 9956,
+      "sha256": "9ad54163c0de1d7be83befe02516e3f5763ef5dc394884e9c0ea743861bbbbbd",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_float_linear_fixtures.py",
+      "bytes": 10921,
+      "sha256": "ad5f84f4d1f5c9f40c8ad27f0d932dae8b5f40f92eecc4b71862dc1db08cbd64",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_float_linear_reference.cpp",
+      "bytes": 11003,
+      "sha256": "e276b9fd95dd9b8b18e8814b2e1fc9f1f68a782dbaeb37e077ebd5a548e38a3b"
+    },
+    {
+      "path": "tools/native/dng_float_precision_fixtures.py",
+      "bytes": 7014,
+      "sha256": "c9eff8c234413ac7268330b3459ecadbef7de0187c83941b44e5a83dd26ce95b",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_float_precision.cpp",
+      "bytes": 4982,
+      "sha256": "0ce61d0bb13ae69a60c8e1d5adc223009d9bcb9a604b831b04be7b432974d564"
+    },
+    {
+      "path": "tools/native/dng_forward_matrix.cpp",
+      "bytes": 10415,
+      "sha256": "697ac5206d705db3f8512558030b096f647f12d16aad5b9c4510bf5ff2482577"
+    },
+    {
+      "path": "tools/native/dng_render_metadata_build/CMakeLists.txt",
+      "bytes": 908,
+      "sha256": "f3d61437af70892dd5ef24c95a76561137bc3897083373af27b1bc36efed8a17"
+    },
+    {
+      "path": "tools/native/dng_render_metadata_fixtures.py",
+      "bytes": 10968,
+      "sha256": "cfc626a33c90cc567152877e344ebea8294e5538c3557a97b2de3fa51d7fbd2a",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_render_metadata.cpp",
+      "bytes": 2680,
+      "sha256": "cdf4a531793eee14c80c130d88cdb881b740856bc920a85f9ea412933b2b6651"
+    },
+    {
+      "path": "tools/native/dng_whitexy_fixtures.py",
+      "bytes": 17675,
+      "sha256": "ab8d2979166c7800281301bf3811da9c8e4e22d6c7e24ffbaa683a1f29e81b00",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_whitexy_samples.py",
+      "bytes": 3556,
+      "sha256": "6c736025f2861ec085f791577df8a4385d1261b645faa18b3d1cc0cddbb95540",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/dng_whitexy.cpp",
+      "bytes": 5098,
+      "sha256": "0bc4f832cea65060ae3e2c90dfad70f421b6ff72c381a590b91818c0353a29ad"
+    },
+    {
+      "path": "tools/native/engine_adaptation.cpp",
+      "bytes": 7974,
+      "sha256": "defb2f85effcd1b666be735e64b87616972c92219d2144013192bfcffce9ceaa"
+    },
+    {
+      "path": "tools/native/external_plane_contract.cpp",
+      "bytes": 14615,
+      "sha256": "3d3893062b8ba31340c580c972701d08dbf4d06571494b11a75097327d938f76"
+    },
+    {
+      "path": "tools/native/feedback_dispatch.cpp",
+      "bytes": 10397,
+      "sha256": "9d7e74345689000545280d332f8311c07a81a387461784f9df3d5ff5ce0099a6"
+    },
+    {
+      "path": "tools/native/feedback_session.cpp",
+      "bytes": 12344,
+      "sha256": "3800a3377a878cd52a63c1c3844bd1cbf02fd243088b53af286a4c8d93cc9aa0"
+    },
+    {
+      "path": "tools/native/filter_radius.cpp",
+      "bytes": 2415,
+      "sha256": "fc3787037392800ee03b00105a95aa2b4eef335bdb4c833c964e2ba36a052fb2"
+    },
+    {
+      "path": "tools/native/finite_output.cpp",
+      "bytes": 8006,
+      "sha256": "669b5711ca1d98d2fef551890688749cf1e6545439e1f511a297de59399f7e4c"
+    },
+    {
+      "path": "tools/native/fir_rows.cpp",
+      "bytes": 9381,
+      "sha256": "dfdcfaf83091928082c66934d9df24e867998541d12081c4c99ca229d8692aff"
+    },
+    {
+      "path": "tools/native/float_custom_wb_fixtures.py",
+      "bytes": 10522,
+      "sha256": "ac67a8dcd658aeff4e9f41460666d91923605dfb9f9c26852a8fe1669acbf9e6",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_deflate_fixtures.py",
+      "bytes": 14148,
+      "sha256": "1db0320437dae0012dc67c41a91b4748f0ee5fe1ab6f98d647ecba0677687f0d",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_deflate_host/CMakeLists.txt",
+      "bytes": 1876,
+      "sha256": "8c6ebe00802c9da4fc9963d46d205a67c316bcd1d2f184a7d84808cabbaa5916"
+    },
+    {
+      "path": "tools/native/float_dng_deflate_memory.py",
+      "bytes": 1104,
+      "sha256": "10dd83aeb9ff7a69238f6fa76b62b32bdd88df1f3a1e3e053bd67ea96cdab1cb",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_linear_fixtures.py",
+      "bytes": 10499,
+      "sha256": "57d1ed99b0d86eaf6d8cff53fd7ac5e9a8bbbe88c5b57ecf139fab3101a75604",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_linear.cpp",
+      "bytes": 5841,
+      "sha256": "34ff98c7165fa43b866e4a00acfbb2ab88013ff10901c092e55295b13be28069"
+    },
+    {
+      "path": "tools/native/float_dng_streaming_fixtures.py",
+      "bytes": 6241,
+      "sha256": "48b9da27f4bf3c210d0e78767c5f2fe5c2b3a1e777a220432b93f26d5ffa6b98",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_streaming.cpp",
+      "bytes": 5896,
+      "sha256": "4db9b3346abc585fdf3cded8ace6a698a1bb26db3e3b333df70099fa52518bd1"
+    },
+    {
+      "path": "tools/native/float_dng_strips_fixtures.py",
+      "bytes": 11299,
+      "sha256": "f10ff9489aec70ca652bd6f23a296b71ec7d966a7508ab26721591b1b65d98d2",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_dng_strips_memory.py",
+      "bytes": 1423,
+      "sha256": "56c570c48be24f169417aeea2d4494d8096faef0f07052fc28b126313fe286aa",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/float_frame_check.cpp",
+      "bytes": 4852,
+      "sha256": "5180feb664bbd83cbbc8d628d9a183518707059b513d9670426657b39ff44844"
+    },
+    {
+      "path": "tools/native/frame_check_benchmark.cpp",
+      "bytes": 1732,
+      "sha256": "440a5205c6c63e8e4c75fd8a33fe301072f6ef99c8c819b419566912d630d637"
+    },
+    {
+      "path": "tools/native/full_engine_host/CMakeLists.txt",
+      "bytes": 1115,
+      "sha256": "da20911d81dc40007e5c7febed8553ddf70081b71845b4432fd40df0a9967333"
+    },
+    {
+      "path": "tools/native/gain_map_boundary_fixtures.py",
+      "bytes": 4165,
+      "sha256": "48ec0f678b5c36e4d9990eb880ec9024d8109c06b49c3ae9f469dda520940cab",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/gain_map_boundary.cpp",
+      "bytes": 7790,
+      "sha256": "0df43eab7db7c24f97962b055732feced1f0313c786373ad27d3ab344665ca76"
+    },
+    {
+      "path": "tools/native/icc_typed_contract.cpp",
+      "bytes": 1076,
+      "sha256": "92fc417a6ab65fc459f57bac1c60d95f00cd278985a04416609b9a06b8108955"
+    },
+    {
+      "path": "tools/native/icc_typed_contract.py",
+      "bytes": 7727,
+      "sha256": "10b5eac69ccd9d21e8aabdd233679f0d14d686e3010cd69f236c573b074fd17e",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/iir_boundary_alias.cpp",
+      "bytes": 14063,
+      "sha256": "3385d1e2f5b0e869f4eed6ef3321f445e504d116c27483d9e73978904e50c8e9"
+    },
+    {
+      "path": "tools/native/iir_boundary_gpu.cpp",
+      "bytes": 11679,
+      "sha256": "77ca18a1ac7b5cc834615f39a2d6c54e2cb497be5f33f04cdc53a37f361ee9da"
+    },
+    {
+      "path": "tools/native/iir_boundary_reference.cpp",
+      "bytes": 6863,
+      "sha256": "e55cb9e5dc7e278b9f5b3f357f4d7401e225967943e7e2a2549466b9576a7a36"
+    },
+    {
+      "path": "tools/native/iir_large_radius.cpp",
+      "bytes": 8586,
+      "sha256": "e4a16d14c00f47d9d7f5aa9995fa4b0c545199c105fe48071e0c6a777f9689c9"
+    },
+    {
+      "path": "tools/native/iir_pipeline_domain.cpp",
+      "bytes": 16315,
+      "sha256": "b6042fe96bc4bcbbcf760437bb84876f8331aef45181d1f1df6e56e58aefe796"
+    },
+    {
+      "path": "tools/native/iir_pipeline.cpp",
+      "bytes": 23515,
+      "sha256": "10e7c12009ba91bc6283a5eb6664c3f4f7595cd7bebf39a2adf283a7593ff302"
+    },
+    {
+      "path": "tools/native/jni_frame_check.cpp",
+      "bytes": 5809,
+      "sha256": "45e9c0baf762ec00417cae4d7e55336d8e617b807d846345279beb5568d06598"
+    },
+    {
+      "path": "tools/native/jni_precision.cpp",
+      "bytes": 9295,
+      "sha256": "2a01f69b71e71921693defd552acb2a4258b29974ca7a70be749129b5c55490c"
+    },
+    {
+      "path": "tools/native/jni_precision/android/bitmap.h",
+      "bytes": 509,
+      "sha256": "204fe8251338dc146aa1868fc621e06d25d91cd0f10a1248499a22f931ba74fe"
+    },
+    {
+      "path": "tools/native/jni_precision/android/log.h",
+      "bytes": 176,
+      "sha256": "a7c8d475a395aa756c78c0178b58721102dc312bbe24726f338a23e54b4f9c01"
+    },
+    {
+      "path": "tools/native/jni_raw_cancellation.cpp",
+      "bytes": 18609,
+      "sha256": "8ea1c92332816c94f4ebe618070e1553b525c65ed0ba47c33be776298f31b832"
+    },
+    {
+      "path": "tools/native/jni_selection_preview.cpp",
+      "bytes": 9292,
+      "sha256": "1af04e9d73c50dfb6509e9ae3dc4e8caf9cc1d7e502fa6e5de6a195fe9adc0e7"
+    },
+    {
+      "path": "tools/native/jni_text.cpp",
+      "bytes": 3087,
+      "sha256": "dd209e9a9ca96ad419149392ce6e2afab0c765c0d81a922e3009deda52947535"
+    },
+    {
+      "path": "tools/native/jni_tiff_jvm.cpp",
+      "bytes": 1298,
+      "sha256": "7bd6fe08d87b2020527bc84f2d795bba7275ba4d64d1bef2b235eaacb1d5aa68"
+    },
+    {
+      "path": "tools/native/jni_tiff.cpp",
+      "bytes": 7459,
+      "sha256": "531bc85644bef177d8465539b4fa106d7d0f00f0d08c10b45ec67d2d8dbd0d73"
+    },
+    {
+      "path": "tools/native/jpeg_rows.cpp",
+      "bytes": 11137,
+      "sha256": "5d820534e36ffd3c5a6c87a87e4ad02d44e05da440bf79d9a8e3488130e40a8a"
+    },
+    {
+      "path": "tools/native/layer2_exposure_domain.cpp",
+      "bytes": 6009,
+      "sha256": "6027bab6b66cac2edeb5fbedd2f768c408dd64aa3c341dea8662dafef9f4210b"
+    },
+    {
+      "path": "tools/native/layer2_highlight_domain.cpp",
+      "bytes": 6138,
+      "sha256": "1fa36ddb7ccb66bc48a7ffd2c7a82167984ba7209bedb57d76de5b2814c45083"
+    },
+    {
+      "path": "tools/native/libraw_bitstream_bounds.cpp",
+      "bytes": 5919,
+      "sha256": "584131372876d60cdd85f2130b19a0bee8ab4cb743598fb89ee049e0315ef604"
+    },
+    {
+      "path": "tools/native/libraw_crx_quantizer.cpp",
+      "bytes": 3669,
+      "sha256": "9926ecc331a4fb3b46117e8a0cb41ffab324097da2469051d50f03f956af7bac"
+    },
+    {
+      "path": "tools/native/libraw_deflate_fixtures.py",
+      "bytes": 6100,
+      "sha256": "1073f4494af72eb5fee0995ed022e96c20ec541020e90a38acefe8727a29e49d",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/libraw_deflate.cpp",
+      "bytes": 2719,
+      "sha256": "82808cf35231a9186bb3b334f6fffecac0f8b0318910d66d8d4d30c536d53c2f"
+    },
+    {
+      "path": "tools/native/libraw_huffman_cache.cpp",
+      "bytes": 4170,
+      "sha256": "a2c3583c1ebb530494b91cd671c2312e3d0d2d3c6051f930bd16356a1b3f340a"
+    },
+    {
+      "path": "tools/native/libraw_maintenance_file.cpp",
+      "bytes": 1546,
+      "sha256": "5fe844cdb584fb46f38308d6ced4b2c9fa3a200027372b1f6b9e5b9a9d9660da"
+    },
+    {
+      "path": "tools/native/libraw-deflate-project/CMakeLists.txt",
+      "bytes": 1503,
+      "sha256": "1f075c8f921c1f2827d0db0e7efd17a2f71cb128b253803b21a346c314a347ba"
+    },
+    {
+      "path": "tools/native/linear_raw_black_regression.py",
+      "bytes": 4749,
+      "sha256": "978b07bdbc4ab2bc879d83532a52b6c8d45d078bf9c3e7f55505deea1929f62f",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/local_tone.cpp",
+      "bytes": 5968,
+      "sha256": "1de6e31bd3204750aa5fd197257192c9c117376a9010d852482ed3285e4e3e28"
+    },
+    {
+      "path": "tools/native/lut_bake_parity.cpp",
+      "bytes": 2216,
+      "sha256": "b06bdb49a7f7ceaee2b45b3ab8b656f9a1fb156269aec60ee784d5e79f3d03a8"
+    },
+    {
+      "path": "tools/native/lut_metrics.py",
+      "bytes": 5045,
+      "sha256": "c415ca4a2bf25c291ed3cd5ffc29338815cf9ea27163ca53cbda43e0a0398a2a",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/lut_offline.cpp",
+      "bytes": 31606,
+      "sha256": "aab716c7c2fe2614cd041d0a742ad11e73e490c3c30ef27e1fe9b97074e48c59"
+    },
+    {
+      "path": "tools/native/mac_export_reference.hpp",
+      "bytes": 7689,
+      "sha256": "a56b2d87d52a36523b91bf354a0431641dcede6b80136220a198d635099f142e"
+    },
+    {
+      "path": "tools/native/measure_nofilm_rows.py",
+      "bytes": 2258,
+      "sha256": "ef56e70e921fe62c2bca1f7dd5ec996abf9e9c3560ad460368565de3dea99a53",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/nofilm_float.cpp",
+      "bytes": 20128,
+      "sha256": "60d70a29cd5b32250da88f662843a51cead371eb3656167d751023723290f8e5"
+    },
+    {
+      "path": "tools/native/nofilm_rows.cpp",
+      "bytes": 12564,
+      "sha256": "0fec0b2647898a07a38044c56918dc0ead91415ac5fe40933d5568750b6ddc2b"
+    },
+    {
+      "path": "tools/native/opcode_list3_cancellation.cpp",
+      "bytes": 6571,
+      "sha256": "2079256ee076a30fbc9865f8aec93a151f76d0a7bc5dc59caae3ab57dd4b85bc"
+    },
+    {
+      "path": "tools/native/opcode_list3_fixtures.py",
+      "bytes": 2351,
+      "sha256": "da257d91781bd5abd2972c596b4916865899db3655790f764a728147142a2055",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/order_statistics_gpu.cpp",
+      "bytes": 4847,
+      "sha256": "c7789a0ab29a4ead85e0940dc08b0c47cf3944c9b77f6110fdcd2814ff36496e"
+    },
+    {
+      "path": "tools/native/order_statistics.cpp",
+      "bytes": 7964,
+      "sha256": "6f091323b41a239e18939d61d7bfc5dd28c73c96d0a20c0a6e63e8b8eafebf78"
+    },
+    {
+      "path": "tools/native/output_cancellation.cpp",
+      "bytes": 15027,
+      "sha256": "abb99e243eec28d91f2766e7d4c333ad1a7112f8801f0108e2d7f534ae7e1fe3"
+    },
+    {
+      "path": "tools/native/output_rows.cpp",
+      "bytes": 7972,
+      "sha256": "f07a16637e0cfb38bc4cc1cc11327d471a8048fef78a2173e4b2a3d45d354855"
+    },
+    {
+      "path": "tools/native/params_transaction.cpp",
+      "bytes": 8252,
+      "sha256": "2d1f509d55b6f7d125ae364f3f9ec6234e79a2f9913d5f214a0e1f504e77aa50"
+    },
+    {
+      "path": "tools/native/pipeline_print_tail.cpp",
+      "bytes": 17468,
+      "sha256": "945aa2e15b38e72578ab77601591f996db107c9a517f1a19f57a61fc1a3ad488"
+    },
+    {
+      "path": "tools/native/pipeline_recovery.cpp",
+      "bytes": 10692,
+      "sha256": "87d684f510e912fa81de2e40fa7c380001dfd01f328a81c6a7d62c558ed5141c"
+    },
+    {
+      "path": "tools/native/raw_color_audit_regression.py",
+      "bytes": 4784,
+      "sha256": "f0b6eb86007c05f8c22e0bfa9a645a0d085638dcd9f7ca85f26bbcc9c4306242",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/raw_color_audit.cpp",
+      "bytes": 7429,
+      "sha256": "5eeb3b324e5a37209f670c5a01d0b92f3d84dae68d7138ab0e5d4375f653f563"
+    },
+    {
+      "path": "tools/native/raw_color_compare_regression.py",
+      "bytes": 3968,
+      "sha256": "f70ab5f22b6daa31dc720be44f99bed62cf99648f7329ed711e355f59bfcb9c9",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/raw_color_compare.py",
+      "bytes": 8665,
+      "sha256": "6ebbc8d904da8034d61a62c724817a378af423ed65d578e33aece8b828017d77",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/raw_custom_white_balance.cpp",
+      "bytes": 5460,
+      "sha256": "3390a50fa1436f1b724ec52cf2b119304aef5b9e00998e615b3c41c22ebfe666"
+    },
+    {
+      "path": "tools/native/raw_development_benchmark.cpp",
+      "bytes": 3094,
+      "sha256": "4f2aab8dc234786af7e7f54437084c4347aa739f43fb04e4524d8b1e87abbfc9"
+    },
+    {
+      "path": "tools/native/raw_development_output.cpp",
+      "bytes": 12251,
+      "sha256": "aca67b4ad12e020b76403eed063bd19cb87f193a7a50f1e08ba3330921c41b4c"
+    },
+    {
+      "path": "tools/native/raw_development.cpp",
+      "bytes": 19305,
+      "sha256": "ade4087a97618f107979a56366e0e0b60e8adba6dc1d353671e555d6e60d9416"
+    },
+    {
+      "path": "tools/native/raw_linear_move.cpp",
+      "bytes": 9160,
+      "sha256": "7c7177fc53f6ecd6fd8afa2e7df27c68dba0fd64651023eca7db2cdb6ae9e39d"
+    },
+    {
+      "path": "tools/native/raw_precision_input_fixtures.py",
+      "bytes": 8039,
+      "sha256": "79cc86f85b12e21b90a0f880d1ea67ec560cc06741daa2acd3fe1b02c88924f7",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/raw_precision_input.cpp",
+      "bytes": 14915,
+      "sha256": "45a6892765b485669002c09b34f31ac4ddc1854bda980cf603a2460e45c28bbc"
+    },
+    {
+      "path": "tools/native/raw_storage_lifetime.cpp",
+      "bytes": 7500,
+      "sha256": "18e1c581c9d1796a53e5c974d509188a124225f3c01b7bfaa0496b27c3149613"
+    },
+    {
+      "path": "tools/native/raw_storage_parity.py",
+      "bytes": 2318,
+      "sha256": "942bb34d2af187393273944a8575eb5c9dd53a7a841afcc7149c10070bbee89b",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/raw_white_balance.cpp",
+      "bytes": 7961,
+      "sha256": "0624bb55d68f147e840366b52cab2c964105b2446fc0ec9ae76e43332a4b2582"
+    },
+    {
+      "path": "tools/native/raw_working_decode.cpp",
+      "bytes": 8323,
+      "sha256": "bb85f5567c51bf6dbd9bbd81ae7b321bb8ba482b1ea4b56ed22e6978657f45a6"
+    },
+    {
+      "path": "tools/native/raw_working_fixtures.py",
+      "bytes": 4496,
+      "sha256": "df2608cc8e4dc5c6bc700f5a304f43dc451f849ca8c7af2f489022a8e58c88e8",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/render_regression.py",
+      "bytes": 5097,
+      "sha256": "520b06e7c4b3ec2bac734d1eb914eaf27e1d573743ba71c8260b5aeba1bd8f34",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/resize_reference.cpp",
+      "bytes": 2688,
+      "sha256": "e0e69b3df160a3fe714b0faba6824c80eed64d8d812167c96e6d3a1f032b0592"
+    },
+    {
+      "path": "tools/native/rgb16_resize.cpp",
+      "bytes": 5999,
+      "sha256": "d2fd6518dac71410d05074d7ed29091f5b1edf40271cddeacf361759c2ea6972"
+    },
+    {
+      "path": "tools/native/rgba16_frame_check.cpp",
+      "bytes": 4962,
+      "sha256": "31abd4ffa9e5aff838488c9e021321dc77e842ab728714549ae9bb921313c887"
+    },
+    {
+      "path": "tools/native/run_adobe_legacy.sh",
+      "bytes": 1278,
+      "sha256": "b470073fa249c3afdcc3c48c2b0801f7317f04844b49904d9badd4ba69b20dc5",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_adobe_tiff.sh",
+      "bytes": 1407,
+      "sha256": "80c3c9775d2f8676730fe39c0b0e0bab6119b4dc675910489b8c60a84ac39300",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_bitmap_f16.sh",
+      "bytes": 978,
+      "sha256": "e4cadfe274eb87f2a0a5da3896ca97b5d73bb6108f9fffc119a22e756311635d",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_blur_study.sh",
+      "bytes": 651,
+      "sha256": "8394396ee8ef65089a621813f45381f24468e088b0b9167a414beb60dd01a93e",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_bounded_budget.sh",
+      "bytes": 1159,
+      "sha256": "6b70d0ecf4d421727dc5b22292dc96cd2b5555e719464044c45d396356f8f9c6",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_bounded_contract.sh",
+      "bytes": 757,
+      "sha256": "91ca538d1a2cf016ea6826cc553890e0a2ad3fdb91c455a6aeb956003ae4a55d",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_bounded_point_chain.sh",
+      "bytes": 1692,
+      "sha256": "8f7878b3a4d45f18007f1f9b37139f6cc9cdb2cdbda9b0e9b825546b511b9d49",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_bounded_print_run.sh",
+      "bytes": 1156,
+      "sha256": "3ef10e87c81185cf87b42da789ac0cfaf6642461025ebe7d01ebac517bed2a26",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_cam16_setup.sh",
+      "bytes": 2752,
+      "sha256": "d5030cd46db7a1fc83af234ce91a6a44d319fd9bf04824ef2a1d1cd88090abdc",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_compatible_raw_cancellation.sh",
+      "bytes": 2255,
+      "sha256": "acb7ea1e50f5f9a89407b6f52eb0b75c27b44470eab5ee3be93b70e3c1857ad5",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_curve_wire.sh",
+      "bytes": 515,
+      "sha256": "9d166bf291fb32c911ae18f62a6b514657adb63d85bc25eaa05b3ea2af42d243",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_di_setup.sh",
+      "bytes": 3302,
+      "sha256": "fe1109cb107d58b5c8dfabcc0d2caa4aba19f78cda40123f3497e5f6f7913480",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_dng_float_linear_reference.sh",
+      "bytes": 846,
+      "sha256": "b86c1477521e20bc15a0550405fdc671b6195f35a20ac7b473db9a980f449439",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_dng_float_precision.sh",
+      "bytes": 882,
+      "sha256": "1b7c9d397f33190280bc908269c8fc8e31a732ffb3f814554cb2d89e2981b635",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_dng_render_metadata.sh",
+      "bytes": 880,
+      "sha256": "7ee912282ce6880c0bfe7d2fd18b480a65ad43297fa5b8633e4b6fe60c7dd295",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_dng_whitexy.sh",
+      "bytes": 899,
+      "sha256": "0f590718eb6bb923dc732ebca1f2eb9f2199b963c8a6dced4864cedede188dda",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_external_plane_contract.sh",
+      "bytes": 807,
+      "sha256": "ee5c53b9cde71b7d9f26b2ca6ad688f28abcbf2e168e09acd4df487167caf1d3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_feedback_android.sh",
+      "bytes": 3259,
+      "sha256": "be666c6c0f259032edefbbfe88f8a65c5a6eb7ed0e0aa0e0068259a75e0827d6",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_feedback_dispatch.sh",
+      "bytes": 2290,
+      "sha256": "2ff92d903ac7ec30c0d0cd94a0d452f407a2dc35de5894b0d098c1090b5a1e75",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_feedback_environment.sh",
+      "bytes": 2689,
+      "sha256": "1254b42996f74727d5e6251f13fd80e963ad8d8ac976e2d8f7fab3c2be2dbabc",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_finite_output.sh",
+      "bytes": 3587,
+      "sha256": "02e4417c78296797c9201aa3c7153e51dd7d940470ef1e8d898926b7b489feda",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_fir_rows.sh",
+      "bytes": 636,
+      "sha256": "4bc916453ca3b614235a8babb56c240b96e1d4134745a3102d103b93b4d55cfd",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_custom_wb.sh",
+      "bytes": 685,
+      "sha256": "5c69ded1e0deaf97d35b5e940cea05af9da2b38bbe359e33814ba3c8dbc4ebab",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_dng_deflate.sh",
+      "bytes": 2184,
+      "sha256": "50cb641242f787b16257c2b87b02fa6f95e782423699ca1ec80f0f2e35cd979f",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_dng_linear.sh",
+      "bytes": 970,
+      "sha256": "2fcdee7a717cc11bb08b7be75b732258653eb91f55a4b33985ebddbc5b6a9bae",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_dng_streaming.sh",
+      "bytes": 1482,
+      "sha256": "5522d98842f39c1d8355f6ac3ec5fda861b3842c0a6e22748e446fad0efc76d7",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_dng_strips.sh",
+      "bytes": 1853,
+      "sha256": "c3a3da3f50aaa9b8e03744d169fe39962c313e83137e1d758249f96e3ff9a5da",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_float_frame_check.sh",
+      "bytes": 437,
+      "sha256": "41b7725ef89e82111ceba1c3d330672f50ab07de59669ee65d0b3d0fa53fb0d9",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_gain_map_boundary.sh",
+      "bytes": 1082,
+      "sha256": "58a8228f2d0f2efa6c2ab7de9d7b3998eac1af01d76ce2bc3baaf1c8100181f6",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_icc_typed_contract.sh",
+      "bytes": 1099,
+      "sha256": "7ecd5947699effab7d9d3fcfda5b1d87d121beb952fdc64d0f47073200e5e3f8",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_iir_boundary_gpu.sh",
+      "bytes": 2751,
+      "sha256": "6b4ffc44c0f05c2dbecae2026fd98284425d19a033c2ddb298bb30dd04cf0634",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_iir_large_radius.sh",
+      "bytes": 2823,
+      "sha256": "b0ec2c6dfe1517940dcd6eb4f01e1aa0384d63f68330377d4269d96cef91ae16",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_iir_pipeline.sh",
+      "bytes": 1975,
+      "sha256": "26c5fca194ed68c52b15a40e1b2339f735f5538764e125dc0a283bea482ba57f",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_iir_reference.sh",
+      "bytes": 529,
+      "sha256": "8d10c0ed3136080bf67d78aca2ef58fc7c712124a0cb7ca088e0942f5b3167cf",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_frame_check.sh",
+      "bytes": 1870,
+      "sha256": "16882fdc5eaf444ab9984b6d1c5f5c07a19ecb9787aff2923235bb281052724e",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_precision.sh",
+      "bytes": 1743,
+      "sha256": "0b05b1d793bd0144fa25450658a942ab7057c720b7853d6d31e60c47506a8380",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_raw_cancellation.sh",
+      "bytes": 2091,
+      "sha256": "4b013148407e7e470b302ed806a823f563ee2631c4e3848a2ff36eedbdb7d610",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_selection_preview.sh",
+      "bytes": 1924,
+      "sha256": "a3c2979f6ef7b6b12ef1d8eef329f5fe775948b468b56ad9347580840e2a9040",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_text.sh",
+      "bytes": 719,
+      "sha256": "b4cd9b5cf2159b7af17710b457edd198857bb1a8665c1a6f6a29b6e3b8f2af4f",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jni_tiff.sh",
+      "bytes": 3260,
+      "sha256": "4759d71bfd5864a17b103b27c4add0f444f9e6ce8827364532847933ee32f5c3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_jpeg_rows.sh",
+      "bytes": 1390,
+      "sha256": "e294fa89488de2ed50925f6dca647917b56730165386e97ab3573033d6221b25",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_layer2_domains.sh",
+      "bytes": 726,
+      "sha256": "d9a0112371d2a56445d08c061c93bd7bceb6f5787b9c69bbfc5a3fa0d5bf82be",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_bitstreams.sh",
+      "bytes": 831,
+      "sha256": "adcb344983ab3a364090e694570cfc10965715c472810cdb6ec8622e7e3ac775",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_crx_quantizer.sh",
+      "bytes": 694,
+      "sha256": "c62a8754fa7f700fd203db4648724518d3622000437e88056880df77ff4ec160",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_deflate.sh",
+      "bytes": 888,
+      "sha256": "76d66172bbda874ccfb9eb2f02ed486f61f88d6ac4a8d5c447738875c9ff06c3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_huffman_cache.sh",
+      "bytes": 2184,
+      "sha256": "f42f56260359f50d65b28cf898c9e2ed2c30561369c1422c5caf404ccd3c3177",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_huffman_files.sh",
+      "bytes": 2032,
+      "sha256": "8429b0652df73652919473946bcba9d4ba63ff74dc603ed7f3923df349a5beac",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_libraw_maintenance_files.sh",
+      "bytes": 1342,
+      "sha256": "b5e89ee8955d004474e21a1718364ccefdf003837881a5c02f62550270534fd2",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_lut_bake_parity.sh",
+      "bytes": 585,
+      "sha256": "bfbcfde694c7ba42796b9aa19feadfc68e4fa418dcfe288d35ac8be8b661acc5",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_lut_offline.sh",
+      "bytes": 1869,
+      "sha256": "9ae0059fc339f62c187e960e1fd535e743d1a07453286dfecd9b8ae75d978f81",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_nofilm_float.sh",
+      "bytes": 1473,
+      "sha256": "36d7d989377389112dae2ed9c6b1539263b198ab17a552902e5af162800f8374",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_nofilm_rows.sh",
+      "bytes": 1676,
+      "sha256": "0d23e9f612db007d777c6ba26061d69c1b56d4ad970aebfde3f6d79968b3d213",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_opcode_list3_cancellation.sh",
+      "bytes": 4072,
+      "sha256": "f6f691e5b3f8ddb8848f0b96bbac668a236cde260abf66e66716375299c42034",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_order_statistics_gpu.sh",
+      "bytes": 1637,
+      "sha256": "2f185fa03118f2acbee0b349f2b936814c6289c6288243e2aee964be7174d115",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_order_statistics.sh",
+      "bytes": 1710,
+      "sha256": "605621290f9e062bdf1faf34ba0d41f2204a2f8e919e7042a39954a15ce988fc",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_output_cancellation.sh",
+      "bytes": 1032,
+      "sha256": "6f9ebdde7a016f23ce13d787b61902e4e7352c0b85b6556be2a9c89db8cc122c",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_output.sh",
+      "bytes": 1015,
+      "sha256": "1e1cfc3498302a85cb65d4043951ea34b5c95a79cca80b653fc118286e940c39",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_params_transaction.sh",
+      "bytes": 856,
+      "sha256": "5b8ce9555ead4bf6f8a203567acd51f8862f024bbf027c682fd2b738fff8f2a3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_pipeline_print_tail.sh",
+      "bytes": 1708,
+      "sha256": "47be79f32842dbdb6338d69bd0cc758184b20f84f5ccb66409977f368502bdbb",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_pipeline_recovery.sh",
+      "bytes": 1407,
+      "sha256": "88cf10a5e572dabc40f563c389e259869f4aa9aa31eac63eea9f14906ed11cf3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_probe_lifetime.sh",
+      "bytes": 553,
+      "sha256": "bb13a7473ae4b98097f5d5e7ea9a5fa4cc925b215fcc5df6ca04ced2ef21420e",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_camera.sh",
+      "bytes": 1836,
+      "sha256": "0644022c57714afc7142c89bab65296ea9d88e8aa56e06bedfb70f7dbf6fd068",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_custom_white_balance.sh",
+      "bytes": 1108,
+      "sha256": "27be0ee77e0d0cf92be94091736b3249dfc4be55fb93e67a871cce86c3b02c4a",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_development_output.sh",
+      "bytes": 1047,
+      "sha256": "a416865d1da1d42c46d8ac51a93504ff289b42934a64096df4a6141993b4d2fc",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_development.sh",
+      "bytes": 583,
+      "sha256": "ea941693df99a702b985ceb6f218d64999af1f0380229cf4e7e4ba29808b124a",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_linear_move.sh",
+      "bytes": 897,
+      "sha256": "c71018c2f08ef5ec4157c978f3fc79a5b87da587c292af6516077ae1ea53b2a6",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_precision_input.sh",
+      "bytes": 1376,
+      "sha256": "ec05b8d3f56442268ab41967c88ff01bfabded1d2b8fdb7dfc9396ae4dc91359",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_storage_lifetime.sh",
+      "bytes": 914,
+      "sha256": "8bb792cd027cb90321dcbd924acc72a65ab9375d346d222b9a070306b064b03b",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_raw_working_decode.sh",
+      "bytes": 1410,
+      "sha256": "6347c6cc702848762ab7dafc13507f2f44ee933e91381ef15c29d070d284e135",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_rgb16_resize.sh",
+      "bytes": 651,
+      "sha256": "a45f7e94f229b9cbc048b1f02f41f19c30d8ddf2a591d46cf47a5264f94d8913",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_rgba16_frame_check.sh",
+      "bytes": 523,
+      "sha256": "1b273cb8c1d16060d5e5c68ed2a4e55f737e4106edd6c74688eb14d3e3d26ff2",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_scene_curve.sh",
+      "bytes": 970,
+      "sha256": "7e1ddf3c4f01984e21e1202439324c41f761912de5cf177a4002b78ca1456eef",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_setup_cache_illuminant.sh",
+      "bytes": 706,
+      "sha256": "7ebfb9d13b2e35dff36cb6e92b65f07802fce350c5c598c1ed7d872a80053b5f",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_spool_disk_probe.sh",
+      "bytes": 583,
+      "sha256": "1a462830b463188776741b70ff086368eb712e97b8e6d57d25d686f554511ae6",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_upstream_kernel_reference.sh",
+      "bytes": 1285,
+      "sha256": "2624b59861e23c79e508aba885cb6f68b071c356a22c277d4879e72ad1e936eb",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_view_curve_gpu.sh",
+      "bytes": 1778,
+      "sha256": "d5f81b27f45ef69be2ac67dfdda7c8d3fbef8579f0b27293d71e800f47da9240",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_view_curve.sh",
+      "bytes": 744,
+      "sha256": "591aae8076f29547f3c6de2db404f1fdcdb01986615d3c28d8fab7c051055d68",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_vulkan_device_lost.sh",
+      "bytes": 1051,
+      "sha256": "ce4b79589d2ca6b2ad4b93d249cf9453f51dcae18ee4716e0e70f92f0e9f1ff4",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_vulkan_fusion.sh",
+      "bytes": 914,
+      "sha256": "659ea0ac3c10ed982753f7fe261a5483389209849f1ea46cb763393188cabb4b",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run_vulkan_transfer_memory.sh",
+      "bytes": 925,
+      "sha256": "81bddec71600a3b079c8ef30aef04d19bdf1f110752a834f8b20302bb5f076a3",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/run.sh",
+      "bytes": 2249,
+      "sha256": "d797b1c874bd12403b9e8b54fff539203d2bca0072df9f1f96bb925f0c329273",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/native/scene_curve.cpp",
+      "bytes": 18120,
+      "sha256": "5a81014fc84a0bce35830fdc0ee4a36c03a82740de0e6aefb1dc2958e60d51a7"
+    },
+    {
+      "path": "tools/native/setup_cache_illuminant.cpp",
+      "bytes": 3853,
+      "sha256": "87005079432a6c9c56df5a74c68a95758ec7182cd78417a9fb85af2872abb4a2"
+    },
+    {
+      "path": "tools/native/setup_cache_lifetime.cpp",
+      "bytes": 3506,
+      "sha256": "110750a9af6f4aa7beb3584364d7f87c2fc5ce1543cf810dce15ce64f07edcae"
+    },
+    {
+      "path": "tools/native/spool_disk_probe.cpp",
+      "bytes": 6915,
+      "sha256": "ca85a8dae371df14bfc8b17bbfea6164a061ad5ebf8668372c063b961e90e76b"
+    },
+    {
+      "path": "tools/native/storage_probe_lifetime.cpp",
+      "bytes": 8180,
+      "sha256": "5b176bc1bd096a1669681f5596f76a562039272a403d849e2065ae269e089264"
+    },
+    {
+      "path": "tools/native/verify_release_apk.py",
+      "bytes": 8465,
+      "sha256": "e2d7a80ad7c0936eb5ed48f283c1b64113bb4285388b3414f8d15b24943489da",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/verify_wave2_sources.py",
+      "bytes": 3546,
+      "sha256": "d25dc9c17155a8c43eb84e849754b11dd3e3668d6210ff7bce5a5d37e1e7e9bd",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/native/view_curve_gpu.cpp",
+      "bytes": 4946,
+      "sha256": "9b0637a4eaae063f00ba0da53d2c4817cd8e8f9b03198a06c4f708ddeba47469"
+    },
+    {
+      "path": "tools/native/view_curve.cpp",
+      "bytes": 4917,
+      "sha256": "d795ea1e464ff979bec0ffbe43499a237f609092719f2486027c6935486ac6b1"
+    },
+    {
+      "path": "tools/native/vulkan_fusion.cpp",
+      "bytes": 12636,
+      "sha256": "50abd3fbf5385f50c12ed02d56ade7b07f88d8c1e8cb7e122ea88b3eb002b945"
+    },
+    {
+      "path": "tools/native/vulkan_transfer_memory.cpp",
+      "bytes": 6038,
+      "sha256": "1b06d3a472b5cc94255ba5177fdcdbbdd097a25d9f9a2600f28536f57d7cf326"
+    },
+    {
+      "path": "tools/native/white_balance_temperature.cpp",
+      "bytes": 2408,
+      "sha256": "15b2c9fe42a4bc92ea5105745c84bb864377f6c99d3989d83d16d4edc525b4a3"
+    },
+    {
+      "path": "tools/parity/build.sh",
+      "bytes": 2621,
+      "sha256": "1f07a189599a443642a756fcb5b1b993d56ef381eb2b6adabf689f1724c845cd",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/parity/fma_check.sh",
+      "bytes": 8350,
+      "sha256": "a060fb8307a3fd5df06c5922d41bc54e5fe3637a0b571cd4892844989cf08467",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/parity/grade.py",
+      "bytes": 3382,
+      "sha256": "711d6d8c9ab1558f06b56f7d18d35a87e9de8194874f26797f7a118bc20554d0",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/parity/host_parity.py",
+      "bytes": 33674,
+      "sha256": "fd2b5feb37d4f9a1ad5074d759c95460f6c601e3d9d07474124a32998c6c3817",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/parity/run.sh",
+      "bytes": 1602,
+      "sha256": "172f3a2bb4739b4aa08455f92bb96e9fdb7e58327fac218c43eaceecad4781d0",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/parity/spk_android.cpp",
+      "bytes": 13417,
+      "sha256": "b31a1c08c2a1b8997bf24926cbeec932a36ba5871273a05caafb0e7bd153a849"
+    },
+    {
+      "path": "tools/parity/spk_parity.cpp",
+      "bytes": 7049,
+      "sha256": "955961f7caed69bc2c4e04cc642d68c161012c611fb0fd1eff88350c3c6599c4"
+    },
+    {
+      "path": "tools/parity/view_export.py",
+      "bytes": 9615,
+      "sha256": "efd224984a428b05515357bdb2754430a1df05c21da9ab65ec587ec2ce299265",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/samples/bw_regress.sh",
+      "bytes": 3172,
+      "sha256": "5ecbfce77ffc785c1ac34da4ce9266b87263a99fce66b630141573aa3af212af",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/samples/compose.py",
+      "bytes": 4268,
+      "sha256": "e0ef27228a3e48d8beeeaf2acbb05f96d8c4138f4bf127c6d6a045fbd1bec445",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/samples/regress.sh",
+      "bytes": 5346,
+      "sha256": "e98b32f1627008f46ef26c5c93b67e456d361fcb0b3928bf46ea2f0f9c5f5d59",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/samples/samples.sh",
+      "bytes": 1867,
+      "sha256": "e338897b057bdcd3c1dee58a7ae2621f088c3ff5482092e0b420c2609782b1fe",
+      "syntax": "bash -n"
+    },
+    {
+      "path": "tools/samples/spk_decode.cpp",
+      "bytes": 6243,
+      "sha256": "98b23899f1f03c359a2eb4d7453c6cda8074e4729100cd9c84faf2721e1d8837"
+    },
+    {
+      "path": "tools/samples/spk_render.cpp",
+      "bytes": 6502,
+      "sha256": "0c1af18bc461478c47badbe1d41903ce1332784aecbe98228c609440f0bee8a1"
+    },
+    {
+      "path": "tools/stability/jpeg444_compare.py",
+      "bytes": 2161,
+      "sha256": "7a52631cf920e7f2faee9c5898e307a4c7de1a5b13bd5fccee93bdb14f26fc45",
+      "syntax": "Python AST"
+    },
+    {
+      "path": "tools/stability/jpeg444_main.cpp",
+      "bytes": 1895,
+      "sha256": "eefecb8daab9a4924b6600f43a0c85b55d3c794d120a792357ee957ab5801b49"
+    },
+    {
+      "path": "tools/stability/render8.cpp",
+      "bytes": 2212,
+      "sha256": "3944667949e30086ddd9234e31fa118e0c86a414b6f12f75110e35b4ccdad710"
+    },
+    {
+      "path": "tools/stability/striped.cpp",
+      "bytes": 5120,
+      "sha256": "d0ea0b1d4fb7439b8ad46735a9402626f02f3dd459044bab0412f011588ab1bf"
+    },
+    {
+      "path": "tools/stability/two_threads.cpp",
+      "bytes": 5218,
+      "sha256": "1c059d306a0174b44fdba81edeb8acf99ac05ab4c446911320fc938b54885cf3"
+    },
+    {
+      "path": "VERSION",
+      "bytes": 15,
+      "sha256": "4eeb619fb69a26d9c32a515febefa1661c4d8fabfef21641685cdc56be2084d8"
+    },
+    {
+      "path": "VERSION_CODE",
+      "bytes": 4,
+      "sha256": "56292515f7d3a7110811eb8de26b3f75f82a0766aa5a1fd66ebcfcb84fe6d5ff"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp:338:35: warning: Although the value stored to 'd' is used in the enclosing expression, the value is never actually read from 'd' [deadcode.DeadStores]
+  338 |         c = 1 - FC(row, col) / 2, d = 1 - c;
+      |                                   ^   ~~~~~
+1 warning generated.

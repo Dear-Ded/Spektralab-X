@@ -23,7 +23,8 @@ High 0, Medium 1, Low 0. This is not a penetration test or a proof of safety.
   are not retained in memory. No entry-controlled filesystem extraction exists.
 - Cloud baseline: five tests, four expected-rejection tests fail on the old code;
   the small unknown-entry compatibility test passes. Baseline XML is retained.
-- Final acceptance and CI results are linked from the release report.
+- Final AOIDC acceptance: all five cases pass. Complete suites pass 230 Release
+  and 378 Debug tests. Production CI results are linked from the release report.
 
 ## Boundary review
 

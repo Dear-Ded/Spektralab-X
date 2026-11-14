@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/sony_arw6.cpp",
+  "source_sha256": "e7dc103273a6680e95ec5f423ac745635b20da9e38c1f49dc18bca1f60de5946",
+  "exit": 0,
+  "seconds": 7.705,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "049-sony_arw6"
+}

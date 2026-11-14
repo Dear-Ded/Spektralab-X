@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils_dcrdefs.cpp",
+  "source_sha256": "335761c5d3ce3c6150e09e7114dd9669323112c792651a7d70b34586bf4876ea",
+  "exit": 0,
+  "seconds": 4.659,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "093-postprocessing_utils_dcrdefs"
+}

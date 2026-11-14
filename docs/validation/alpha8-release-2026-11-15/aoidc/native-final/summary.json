@@ -1,0 +1,1447 @@
+{
+  "database_sha256": "873f467669966c70db0f75292d6c8df6dfb338031c801836a67e9bc54bc58598",
+  "translation_units": 118,
+  "completed": 118,
+  "plist_diagnostics": 48,
+  "text_warnings": 48,
+  "results": [
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp",
+      "source_sha256": "e6595d28848e732c28b135871dcfde80e42843e33ee7b34df3e319965ef5593d",
+      "exit": 0,
+      "seconds": 84.259,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "000-spektralab_jni"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/tiff16.cpp",
+      "source_sha256": "bffe64d1b22c28529b34f2700e0ed8573ae71f1a8ee14edc10dbc075e94cec38",
+      "exit": 0,
+      "seconds": 8.006,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "001-tiff16"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/storage_probe.cpp",
+      "source_sha256": "b93d13b126dc191f60fe256133bb8753edf6c66038611c81dc93b347a87b74a1",
+      "exit": 0,
+      "seconds": 6.2,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "002-storage_probe"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/jpeg444.cpp",
+      "source_sha256": "744730a3cbe7629ea56591a9d2f2382984672b42eabfc1ea10b17c4c0c7fd91a",
+      "exit": 0,
+      "seconds": 2.439,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "003-jpeg444"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/resize.cpp",
+      "source_sha256": "db9658b45d56a703fc920b6049cd2f34db3dcc63ebb62646eeee9998c9da5d10",
+      "exit": 0,
+      "seconds": 8.803,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "004-resize"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/layer2.cpp",
+      "source_sha256": "f55ad1488bebb8e1f89c6d574931136bddb62af88f8adcfbf82becb192f4f77d",
+      "exit": 0,
+      "seconds": 13.451,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "005-layer2"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+      "source_sha256": "aa281d374c90ebb2ad209a6040e522e53e41466daa62b4877700367126a2684d",
+      "exit": 0,
+      "seconds": 27.098,
+      "diagnostics": [
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access (from variable 's') results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+          "line": 150
+        },
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access (from variable 's') results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+          "line": 370
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:150:35: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:370:24: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]"
+      ],
+      "report": "006-output_transform"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/raw_development.cpp",
+      "source_sha256": "91098e983c7c605ecb24b307f3ec895e75d3a5e6bddc5f214820bdaf38cc4bf1",
+      "exit": 0,
+      "seconds": 7.043,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "007-raw_development"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/input_transform.cpp",
+      "source_sha256": "05fe025f77674e99651aae024e113b750fede9b5a715a8077bb873ba06a5fb94",
+      "exit": 0,
+      "seconds": 1.72,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "008-input_transform"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/host/white_balance.cpp",
+      "source_sha256": "af147c07d6c1e15500b05e9b73fc8cc12a96f9f4421f4ac94ccbd2c5f4697dec",
+      "exit": 0,
+      "seconds": 2.021,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "009-white_balance"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/blob.cpp",
+      "source_sha256": "12bea43d4fbfe654c82f70cc1cd1e7b56be5c229cbafff372762751ebc16f4bd",
+      "exit": 0,
+      "seconds": 4.832,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "010-blob"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/cam16.cpp",
+      "source_sha256": "715af1bfa8658d1dfb7dd64dd6bbc1c14bc8c0b467d20e98a18497bf7d3077c6",
+      "exit": 0,
+      "seconds": 1.669,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "011-cam16"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/colour.cpp",
+      "source_sha256": "2e507db29568cf798958bb242fb1174303a469ebca072243a30070a76f6b4243",
+      "exit": 0,
+      "seconds": 5.832,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "012-colour"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/curves.cpp",
+      "source_sha256": "1cde1154d92bf7671f8a427b0798ab9aa284e5ee15d94788b6677095cec57c85",
+      "exit": 0,
+      "seconds": 1.972,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "013-curves"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/digital_intermediate.cpp",
+      "source_sha256": "ffcef5cc42b63f39b2233f56a411b08cf30c01307a1eaad0ae43b27fa203c289",
+      "exit": 0,
+      "seconds": 1.97,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "014-digital_intermediate"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/hanatos.cpp",
+      "source_sha256": "e6e23dd599af20fca75eca648d86f5a46d9663de96cc617b0f87013c18c92a35",
+      "exit": 0,
+      "seconds": 3.224,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "015-hanatos"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/json.cpp",
+      "source_sha256": "cb37dc91238845e574234832a8ec52a3c78476d2c196f38c3ab26caad82cfc98",
+      "exit": 0,
+      "seconds": 9.742,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "016-json"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/latitude_fit.cpp",
+      "source_sha256": "21e63ae6089ee51b29419eb4a6b75916de1f30bd5c3438660f77269bc818a675",
+      "exit": 0,
+      "seconds": 10.347,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "017-latitude_fit"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/numeric.cpp",
+      "source_sha256": "138660966cf3481cf29a53d5da6ad406c53f7481b1ffd8d0b5565ab05d6645f1",
+      "exit": 0,
+      "seconds": 1.821,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "018-numeric"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/params.cpp",
+      "source_sha256": "17ee866717969026d8c055b521d6697675c7562bbbb290b1e4592505cba22c21",
+      "exit": 0,
+      "seconds": 22.635,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "019-params"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/print_lut.cpp",
+      "source_sha256": "3fd3cfff6d1bc447441e7fab7e4f281cef7d91396585e92a274544ca115c174f",
+      "exit": 0,
+      "seconds": 2.421,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "020-print_lut"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/printing.cpp",
+      "source_sha256": "6da2ec0d19d5f35671a86dcd7eee33c73c2ba8449adc329d4b009fb09d272ad8",
+      "exit": 0,
+      "seconds": 2.021,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "021-printing"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/profile.cpp",
+      "source_sha256": "6bf9801b0ab80ba5a9e08bfd294d28e5b46e5259355dee3d9a9f1ba656530d53",
+      "exit": 0,
+      "seconds": 6.087,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "022-profile"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/setup_cache.cpp",
+      "source_sha256": "c27c50f125bf98aec9cd0fb1166c9f1d3db21d5574554b7921c722768987780b",
+      "exit": 0,
+      "seconds": 6.18,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "023-setup_cache"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/spectral.cpp",
+      "source_sha256": "f8b733fda96ba5e26b37ec414135af3aabfe2f641b20974f2a859f2f8896ee6f",
+      "exit": 0,
+      "seconds": 2.272,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "024-spectral"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/blur.cpp",
+      "source_sha256": "9fc43e6dceef856e7753f92bc11d008b142094fcf352ec75a58863ccf216e144",
+      "exit": 0,
+      "seconds": 5.734,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "025-blur"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp",
+      "source_sha256": "5ac9922a0e8b892c30eeb09eb20fc1dd292054cb5092dff260e83f3e1ea9e277",
+      "exit": 0,
+      "seconds": 79.246,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'ok' is never read",
+          "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp",
+          "line": 740
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp:740:9: warning: Value stored to 'ok' is never read [deadcode.DeadStores]"
+      ],
+      "report": "026-engine"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/pipeline.cpp",
+      "source_sha256": "80621c02b62202ce630d3be01b429095785f020885130d4d10c60790f89382f7",
+      "exit": 0,
+      "seconds": 58.938,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "027-pipeline"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/scene_latitude.cpp",
+      "source_sha256": "ecfe8003fc6cfdd07327cbf18889776b5e784817517b861842605db3aa0d66c6",
+      "exit": 0,
+      "seconds": 9.26,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "028-scene_latitude"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/windows_unported.cpp",
+      "source_sha256": "837ebd75823de6e881b9d756da5caaa9d087a5728436a1fed1478a5b874bbf54",
+      "exit": 0,
+      "seconds": 1.945,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "029-windows_unported"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/view_process.cpp",
+      "source_sha256": "d7bc57c86bbee853be22b74c1aa2988ea614fc75757e78ad85128340e92ac264",
+      "exit": 0,
+      "seconds": 4.879,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "030-view_process"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/overscan.cpp",
+      "source_sha256": "3b2b27ad1c40a0fe5e8df6e65ebc52831accfe1495d710e0998b045d03246ddf",
+      "exit": 0,
+      "seconds": 23.741,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "031-overscan"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/imprint_raster.cpp",
+      "source_sha256": "fbb416d8fe3de97cc82e4bf95a07176b9b9d419d5aeb2edc21f67469f9a1d4d2",
+      "exit": 0,
+      "seconds": 27.148,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'dx' is never read",
+          "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h",
+          "line": 3151
+        },
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'xb' is used in the enclosing expression, the value is never actually read from 'xb'",
+          "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h",
+          "line": 3153
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3151:19: warning: Value stored to 'dx' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3153:36: warning: Although the value stored to 'xb' is used in the enclosing expression, the value is never actually read from 'xb' [deadcode.DeadStores]"
+      ],
+      "report": "032-imprint_raster"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/third_party/volk/volk.c",
+      "source_sha256": "a70a715023a6ff03654994239787c7e57e84b8151f4ba6e7a4d0f7e910100dbe",
+      "exit": 0,
+      "seconds": 3.442,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "033-volk"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/gpu/vulkan_gpu.cpp",
+      "source_sha256": "1afcbeb6238af81f542e7265fc155126cb98c06366763c18673294219f205f01",
+      "exit": 0,
+      "seconds": 30.218,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "034-vulkan_gpu"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/canon_600.cpp",
+      "source_sha256": "ebaac5d26a497092a24c0479b615250a4a74097807bcfd27b2591df147fa172f",
+      "exit": 0,
+      "seconds": 1.64,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "035-canon_600"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp",
+      "source_sha256": "1b0018b86dc45c2c72b7574ba15346eda72c67147166ea99e1cd0d3cb2309c78",
+      "exit": 0,
+      "seconds": 11.988,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'lineBufL2' during its initialization is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp",
+          "line": 1399
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp:1399:14: warning: Value stored to 'lineBufL2' during its initialization is never read [deadcode.DeadStores]"
+      ],
+      "report": "036-crx"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "source_sha256": "e5afe722ca7e744747063909233af50fb2161c6a1a766df71d4b8a937dbde393",
+      "exit": 0,
+      "seconds": 23.229,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'jhigh' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+          "line": 658
+        },
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'max' is used in the enclosing expression, the value is never actually read from 'max'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+          "line": 987
+        },
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access (from variable 'bytes') results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+          "line": 1205
+        },
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'bit' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+          "line": 1546
+        },
+        {
+          "checker": "core.UndefinedBinaryOperatorResult",
+          "description": "The left operand of '<<' is a garbage value",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+          "line": 1605
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:658:5: warning: Value stored to 'jhigh' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:987:24: warning: Although the value stored to 'max' is used in the enclosing expression, the value is never actually read from 'max' [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1205:19: warning: Array access (from variable 'bytes') results in a null pointer dereference [core.NullDereference]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1546:16: warning: Value stored to 'bit' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1605:42: warning: The left operand of '<<' is a garbage value [core.UndefinedBinaryOperatorResult]"
+      ],
+      "report": "037-decoders_dcraw"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp",
+      "source_sha256": "2889524cba9878f83d0ccdd48c9ae44d57d03318f13ad1120ed2a9b81d28a8fe",
+      "exit": 0,
+      "seconds": 18.895,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'bwide' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp",
+          "line": 352
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:352:5: warning: Value stored to 'bwide' is never read [deadcode.DeadStores]"
+      ],
+      "report": "038-decoders_libraw"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw_dcrdefs.cpp",
+      "source_sha256": "aa13da70a50d177d5c5ce4ff1aac101ca5c5a84a950541802c64cf63a7f42ced",
+      "exit": 0,
+      "seconds": 8.569,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "039-decoders_libraw_dcrdefs"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/dng.cpp",
+      "source_sha256": "13ac11d70a740012dbfe75dd22cb939170bf1ba72f200de7dc0ee73eeba9ce1f",
+      "exit": 0,
+      "seconds": 4.786,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "040-dng"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fp_dng.cpp",
+      "source_sha256": "9d8e925de445c32f1710d346e13c65e7f66de9033e21a3395510fcc3393d0455",
+      "exit": 0,
+      "seconds": 7.047,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "041-fp_dng"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+      "source_sha256": "70155663033a535573403d2202d712fcddb7407af31300c956b95d4e2a0886ad",
+      "exit": 0,
+      "seconds": 8.026,
+      "diagnostics": [
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access (from variable 'q_bases') results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+          "line": 1058
+        },
+        {
+          "checker": "unix.Malloc",
+          "description": "Argument to free() is the address of the local variable 'common_info', which is not memory allocated by malloc()",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+          "line": 1087
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1058:39: warning: Array access (from variable 'q_bases') results in a null pointer dereference [core.NullDereference]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1087:5: warning: Argument to free() is the address of the local variable 'common_info', which is not memory allocated by malloc() [unix.Malloc]"
+      ],
+      "report": "042-fuji_compressed"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/generic.cpp",
+      "source_sha256": "54d6528a5c6cf938862fabb506dacf5785a2e6b86404c7908573cb07c15de79e",
+      "exit": 0,
+      "seconds": 3.383,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "043-generic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+      "source_sha256": "f819457938a761344d07bf6520248f382013f490aa466fca03474de6d8e4fa3c",
+      "exit": 0,
+      "seconds": 13.658,
+      "diagnostics": [
+        {
+          "checker": "core.uninitialized.Assign",
+          "description": "Assigned value is garbage or undefined",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+          "line": 509
+        },
+        {
+          "checker": "core.uninitialized.Assign",
+          "description": "Assigned value is garbage or undefined",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+          "line": 511
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:509:49: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:511:54: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]"
+      ],
+      "report": "044-kodak_decoders"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+      "source_sha256": "589692bb16137640e24f2c6a340f9455d174e1b10fd0d90fd735989f27c98ad2",
+      "exit": 0,
+      "seconds": 8.028,
+      "diagnostics": [
+        {
+          "checker": "unix.MallocSizeof",
+          "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 574
+        },
+        {
+          "checker": "unix.MallocSizeof",
+          "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 576
+        },
+        {
+          "checker": "unix.MallocSizeof",
+          "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 664
+        },
+        {
+          "checker": "unix.MallocSizeof",
+          "description": "Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 668
+        },
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access (from variable 'pixel') results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 833
+        },
+        {
+          "checker": "unix.Malloc",
+          "description": "Potential leak of memory pointed to by 'pixel'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp",
+          "line": 848
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:574:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:576:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:664:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:668:22: warning: Result of 'calloc' is converted to a pointer of type 'short[2]', which is incompatible with sizeof operand type 'ushort' [unix.MallocSizeof]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:833:41: warning: Array access (from variable 'pixel') results in a null pointer dereference [core.NullDereference]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/load_mfbacks.cpp:848:1: warning: Potential leak of memory pointed to by 'pixel' [unix.Malloc]"
+      ],
+      "report": "045-load_mfbacks"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp",
+      "source_sha256": "c3494f01c86ac7c11fb5b55092f6ea7165d66f59cf1e7779ab4e08b8cd09fc50",
+      "exit": 0,
+      "seconds": 4.839,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'NW' is used in the enclosing expression, the value is never actually read from 'NW'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp",
+          "line": 302
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp:302:57: warning: Although the value stored to 'NW' is used in the enclosing expression, the value is never actually read from 'NW' [deadcode.DeadStores]"
+      ],
+      "report": "046-olympus14"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/pana8.cpp",
+      "source_sha256": "013e939b35c7d945a77241bb6df1bfeb6fbd47e0767a6a9c591edbd58c8dfe8c",
+      "exit": 0,
+      "seconds": 3.693,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "047-pana8"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/smal.cpp",
+      "source_sha256": "da85bad70142dc1f5bb7803f65f7d1c7388037d3cac417980ae4efe4954d523e",
+      "exit": 0,
+      "seconds": 3.633,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "048-smal"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/sony_arw6.cpp",
+      "source_sha256": "e7dc103273a6680e95ec5f423ac745635b20da9e38c1f49dc18bca1f60de5946",
+      "exit": 0,
+      "seconds": 7.705,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "049-sony_arw6"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/sonycc.cpp",
+      "source_sha256": "35e5077e11699ac26266258e5fc13ad9c09f416db66e8fad53f43d8103f310c3",
+      "exit": 0,
+      "seconds": 6.298,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "050-sonycc"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/unpack.cpp",
+      "source_sha256": "6a462fdec8c2961790f2077af3016c314ac00ce3cabe33f1ea33a051c8d9f97c",
+      "exit": 0,
+      "seconds": 3.74,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "051-unpack"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/unpack_thumb.cpp",
+      "source_sha256": "b9382b99fe8082e0711f8ad105d01e17877121ad5c43188bec3f820cbbab38f6",
+      "exit": 0,
+      "seconds": 4.093,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "052-unpack_thumb"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decompressors/losslessjpeg.cpp",
+      "source_sha256": "9b33eafce1b6e84c83bb191f80ee35bf7c80258fe5c6700c3f2e37c3b14853ac",
+      "exit": 0,
+      "seconds": 7.503,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "053-losslessjpeg"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/aahd_demosaic.cpp",
+      "source_sha256": "234ec195d9aea3353792397a9d4563997b552926100069021260bfa473f10f05",
+      "exit": 0,
+      "seconds": 3.783,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "054-aahd_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/ahd_demosaic.cpp",
+      "source_sha256": "5445b43a06543f2117cc3a0123e14c7b136cdc7fd92dc64d9af63671a66a6688",
+      "exit": 0,
+      "seconds": 3.279,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "055-ahd_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp",
+      "source_sha256": "e02a3626c5794c40221bde1be4bd55ee0cad15c860013319969f0cbec682410f",
+      "exit": 0,
+      "seconds": 13.769,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'd' is used in the enclosing expression, the value is never actually read from 'd'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp",
+          "line": 338
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dcb_demosaic.cpp:338:35: warning: Although the value stored to 'd' is used in the enclosing expression, the value is never actually read from 'd' [deadcode.DeadStores]"
+      ],
+      "report": "056-dcb_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp",
+      "source_sha256": "6203338d108919868ee8ad4d514712dbc3e438d150b608a7d6859a32a2a7f45c",
+      "exit": 0,
+      "seconds": 11.707,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'l' during its initialization is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp",
+          "line": 785
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/dht_demosaic.cpp:785:9: warning: Value stored to 'l' during its initialization is never read [deadcode.DeadStores]"
+      ],
+      "report": "057-dht_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/misc_demosaic.cpp",
+      "source_sha256": "09598759f8f7c882c5ee755772f91aa4cd1bb4e0fb6763a967eac0436c0dfac1",
+      "exit": 0,
+      "seconds": 4.491,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "058-misc_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/xtrans_demosaic.cpp",
+      "source_sha256": "8f6de2685bc5968a7569301fa7ce912cbcad33c6a6556a1ebdf7d6acf0cd0d5a",
+      "exit": 0,
+      "seconds": 1.42,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "059-xtrans_demosaic"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/integration/dngsdk_glue.cpp",
+      "source_sha256": "0bff3a8fe78b341557fdb4395a3462cf93f5eff8cea33348f909e8f15942018b",
+      "exit": 0,
+      "seconds": 1.224,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "060-dngsdk_glue"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/integration/rawspeed_glue.cpp",
+      "source_sha256": "505264b9905f0f4d9918fe4cf68bb430efb06e8bb154d2d7b6869d82298fcf80",
+      "exit": 0,
+      "seconds": 1.369,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "061-rawspeed_glue"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/libraw_c_api.cpp",
+      "source_sha256": "93227da95765cd08feb2db0e14b10c86eb73da9222c9355c1b0a145c1494b8d0",
+      "exit": 0,
+      "seconds": 1.27,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "062-libraw_c_api"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/libraw_datastream.cpp",
+      "source_sha256": "0ad116e2d96771b812bb0bb5ebfda90c4e70ef8c52ce2acd1c0ef7d302ee6aa3",
+      "exit": 0,
+      "seconds": 1.369,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "063-libraw_datastream"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/adobepano.cpp",
+      "source_sha256": "24963d7f98c7fc5fd9dd67e50be651a95e5779a6e92e53ead766bcd1af78b6f0",
+      "exit": 0,
+      "seconds": 3.781,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "064-adobepano"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/canon.cpp",
+      "source_sha256": "c4fb78c71326f190c986f85ceea5c4599db42e0a7d7a7d722b7c9ca393e18713",
+      "exit": 0,
+      "seconds": 3.884,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "065-canon"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/ciff.cpp",
+      "source_sha256": "837aa51751e86eac2d9084f6f889eaf38393bd668abced8fc3c0fa9e6beb8faa",
+      "exit": 0,
+      "seconds": 4.14,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "066-ciff"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp",
+      "source_sha256": "3a6688c29a5e65d9c524c6680645dcad287342781ab53d58270c1f2e725015ee",
+      "exit": 0,
+      "seconds": 4.386,
+      "diagnostics": [
+        {
+          "checker": "unix.MallocSizeof",
+          "description": "Result of 'calloc' is converted to a pointer of type 'INT64', which is incompatible with sizeof operand type 'int64_t'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp",
+          "line": 876
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp:876:47: warning: Result of 'calloc' is converted to a pointer of type 'INT64', which is incompatible with sizeof operand type 'int64_t' [unix.MallocSizeof]"
+      ],
+      "report": "067-cr3_parser"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/epson.cpp",
+      "source_sha256": "700ef8fbcbee6c2be439a371dd7aac83ffc50ecacbfada4066c5073335899712",
+      "exit": 0,
+      "seconds": 1.639,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "068-epson"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/exif_gps.cpp",
+      "source_sha256": "a751dcb863eb3564c39b0c080dc23db43089f42014496bc106412cd4e4cec401",
+      "exit": 0,
+      "seconds": 4.886,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "069-exif_gps"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+      "source_sha256": "cc7c90036716625975c25d18d9a43c02f12f91274d22c7cd76f034a94641fc74",
+      "exit": 0,
+      "seconds": 10.972,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'ifd_len' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+          "line": 241
+        },
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'FujiShotSelect' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+          "line": 242
+        },
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'FujiShotSelect' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+          "line": 244
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:241:9: warning: Value stored to 'ifd_len' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:242:9: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:244:12: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]"
+      ],
+      "report": "070-fuji"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/hasselblad_model.cpp",
+      "source_sha256": "02b7606d7827b733a63ea550c3bc70ac9719b811cbd8ab442f4c7f5dadbd651f",
+      "exit": 0,
+      "seconds": 4.813,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "071-hasselblad_model"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/identify.cpp",
+      "source_sha256": "de7162fc2c51fe2083bcb561dedf6c9f7c2184e36b839d48e9939e042bc57d2e",
+      "exit": 0,
+      "seconds": 7.871,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "072-identify"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/identify_tools.cpp",
+      "source_sha256": "8197f97fb91e84676fd76926c5e4bdfe66a1c0bd259cf7909dbc0ab92586082d",
+      "exit": 0,
+      "seconds": 1.526,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "073-identify_tools"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/kodak.cpp",
+      "source_sha256": "a5167f19bee9be44c6a68bc3b605a0d372835e2e8415128c3fc210763b4bfd8b",
+      "exit": 0,
+      "seconds": 4.486,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "074-kodak"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/leica.cpp",
+      "source_sha256": "ea325ec9edc0cc0f825299acb41a6f3bbec7e98343bfd18dd30bebfd4d4d9260",
+      "exit": 0,
+      "seconds": 4.455,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "075-leica"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/makernotes.cpp",
+      "source_sha256": "a8815454596d5b5404e5924b95a91bfb6ad3463492da9fabb43e97d00138e6e0",
+      "exit": 0,
+      "seconds": 8.831,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "076-makernotes"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/mediumformat.cpp",
+      "source_sha256": "a034a409201c87a37031647d29360214752fcd4c662b65bedf2515068e9ae469",
+      "exit": 0,
+      "seconds": 9.025,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "077-mediumformat"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/minolta.cpp",
+      "source_sha256": "b0e2da67138e7ac841e143f154e090dc47ce539be1f178b116096594508facd8",
+      "exit": 0,
+      "seconds": 1.38,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "078-minolta"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/misc_parsers.cpp",
+      "source_sha256": "2c6e88799eb4d437c1f064d8e4150d0cfb7b440a3e23001e75725effc4e050b9",
+      "exit": 0,
+      "seconds": 12.57,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'i' is used in the enclosing expression, the value is never actually read from 'i'",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/misc_parsers.cpp",
+          "line": 125
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/misc_parsers.cpp:125:12: warning: Although the value stored to 'i' is used in the enclosing expression, the value is never actually read from 'i' [deadcode.DeadStores]"
+      ],
+      "report": "079-misc_parsers"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/nikon.cpp",
+      "source_sha256": "7f5b4c7ee5952ad0072aa3123d389ce0dc30ea3a074f8bc0cef0592bfe4d99e2",
+      "exit": 0,
+      "seconds": 7.1,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "080-nikon"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "source_sha256": "92f26d2d160a458deb4e3605e76d32e2b759ecacfa780c43621856c2c1761a71",
+      "exit": 0,
+      "seconds": 7.678,
+      "diagnostics": [
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 811
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 827
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 856
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 891
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 908
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 919
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 947
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 973
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 993
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 1041
+        },
+        {
+          "checker": "nullability.NullPassedToNonnull",
+          "description": "Null passed to a callee that requires a non-null 2nd parameter",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+          "line": 1104
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:811:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:827:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:856:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:891:11: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:908:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:919:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:947:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:973:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:993:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:1041:11: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:1104:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]"
+      ],
+      "report": "081-normalize_model"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/olympus.cpp",
+      "source_sha256": "584cbd7a3347f6235c31cbbc912457ae271256975f0cc2dbf34dff6bafe86bf9",
+      "exit": 0,
+      "seconds": 2.277,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "082-olympus"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/p1.cpp",
+      "source_sha256": "1b7d58e696ab416ab669e5a7a32ecdf5096774c3c1d5b583d5edf5b71b659ea8",
+      "exit": 0,
+      "seconds": 1.531,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "083-p1"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/pentax.cpp",
+      "source_sha256": "70f3d2f3a9b918eb912bcf2e4c00c14350885c3d54d9a300524b879cc4c62af2",
+      "exit": 0,
+      "seconds": 4.615,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "084-pentax"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/samsung.cpp",
+      "source_sha256": "0d858a3d60347d1b4bf394af9c714d4dbc2fb5c0a57b5b64de374f4d8efea002",
+      "exit": 0,
+      "seconds": 1.478,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "085-samsung"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp",
+      "source_sha256": "b31324db64e5ddb194d214f519547700ae880a886732d75b98f4bbe9543eb596",
+      "exit": 0,
+      "seconds": 14.585,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'offset' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp",
+          "line": 2441
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp:2441:7: warning: Value stored to 'offset' is never read [deadcode.DeadStores]"
+      ],
+      "report": "086-sony"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp",
+      "source_sha256": "55b26811336b3acf1c2dec470d91e085db579c7423ff4d2d9da6bdd753fc0850",
+      "exit": 0,
+      "seconds": 4.16,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'MakN_length' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp",
+          "line": 1729
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp:1729:17: warning: Value stored to 'MakN_length' is never read [deadcode.DeadStores]"
+      ],
+      "report": "087-tiff"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/aspect_ratio.cpp",
+      "source_sha256": "5a6e0e52ecb187d56e6e83ac62bd08112e3b6da24d023c1e1ce293519cd7b49d",
+      "exit": 0,
+      "seconds": 1.83,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "088-aspect_ratio"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/dcraw_process.cpp",
+      "source_sha256": "2714c102bcdbba04b1013fa63a1cfc782d489443ff9c92720287cccc9589fd80",
+      "exit": 0,
+      "seconds": 1.878,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "089-dcraw_process"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/mem_image.cpp",
+      "source_sha256": "8555fd3f58f1936f6497175eb663cc1ec252f13091a0958d8e82116e7cea50c6",
+      "exit": 0,
+      "seconds": 4.603,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "090-mem_image"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+      "source_sha256": "35e12fff82f6b60c55553b9e29b94c8be27143e13ca447aee306f2d3f1d00013",
+      "exit": 0,
+      "seconds": 6.294,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'temp' is never read",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+          "line": 152
+        },
+        {
+          "checker": "core.UndefinedBinaryOperatorResult",
+          "description": "The left operand of '>' is a garbage value",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+          "line": 271
+        },
+        {
+          "checker": "core.UndefinedBinaryOperatorResult",
+          "description": "The right operand of '>' is a garbage value",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+          "line": 271
+        },
+        {
+          "checker": "core.UndefinedBinaryOperatorResult",
+          "description": "The right operand of '/' is a garbage value",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp",
+          "line": 356
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:152:3: warning: Value stored to 'temp' is never read [deadcode.DeadStores]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:271:27: warning: The left operand of '>' is a garbage value [core.UndefinedBinaryOperatorResult]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:271:27: warning: The right operand of '>' is a garbage value [core.UndefinedBinaryOperatorResult]",
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_aux.cpp:356:26: warning: The right operand of '/' is a garbage value [core.UndefinedBinaryOperatorResult]"
+      ],
+      "report": "091-postprocessing_aux"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils.cpp",
+      "source_sha256": "e8f9e4eba7c473eb19ab271bd149e6110fef0eb55a601e9a2db6466a20675ebf",
+      "exit": 0,
+      "seconds": 3.63,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "092-postprocessing_utils"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/postprocessing_utils_dcrdefs.cpp",
+      "source_sha256": "335761c5d3ce3c6150e09e7114dd9669323112c792651a7d70b34586bf4876ea",
+      "exit": 0,
+      "seconds": 4.659,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "093-postprocessing_utils_dcrdefs"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/ext_preprocess.cpp",
+      "source_sha256": "f7e96dfe6d04ebb52bfde566cc5e313c3c20b2b868011b641474698ac7e757dc",
+      "exit": 0,
+      "seconds": 4.895,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "094-ext_preprocess"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/raw2image.cpp",
+      "source_sha256": "c3dca650835898fc043b8b93d89cac1981cf4343acc9e86db4cc683ba1286173",
+      "exit": 0,
+      "seconds": 7.315,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "095-raw2image"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/subtract_black.cpp",
+      "source_sha256": "dfb40396a6654fd45adee4410ae4b75def7278b5b3187413bb8c6f7079a82239",
+      "exit": 0,
+      "seconds": 1.474,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "096-subtract_black"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/cameralist.cpp",
+      "source_sha256": "b2e1fbc07d3e5678d35e4e99f3cd9ccad7c82333b919769f108623f14e0f3ca9",
+      "exit": 0,
+      "seconds": 1.385,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "097-cameralist"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/colorconst.cpp",
+      "source_sha256": "cad6b9a6661400e70de73fe0c0f9eae501ed58d98c8ecad7afae54275798609b",
+      "exit": 0,
+      "seconds": 1.584,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "098-colorconst"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/colordata.cpp",
+      "source_sha256": "db2c5648071a3076d771d6eb7fa7324d5b4399e631858d24d3485635544f90eb",
+      "exit": 0,
+      "seconds": 10.294,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "099-colordata"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/wblists.cpp",
+      "source_sha256": "172d53844b49df0875f84c1283a285c05414341a8528e8d49966a0c81addc0f6",
+      "exit": 0,
+      "seconds": 1.484,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "100-wblists"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/curves.cpp",
+      "source_sha256": "298a82b1d71c84ba1f1d061f888be6ca7c162a43985483232152b5e152ab47e2",
+      "exit": 0,
+      "seconds": 1.427,
+      "diagnostics": [
+        {
+          "checker": "core.NullDereference",
+          "description": "Array access results in a null pointer dereference",
+          "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/curves.cpp",
+          "line": 58
+        }
+      ],
+      "text_warnings": [
+        "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/curves.cpp:58:15: warning: Array access results in a null pointer dereference [core.NullDereference]"
+      ],
+      "report": "101-curves"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/decoder_info.cpp",
+      "source_sha256": "21557a31fae03074c3f3094145f0c887f990a5cc376ad36d20a12c26b70f917c",
+      "exit": 0,
+      "seconds": 1.469,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "102-decoder_info"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/init_close_utils.cpp",
+      "source_sha256": "f245e420f1c901c547428507f9c4517d787e1f5fbce489bc0a9d46949f433af9",
+      "exit": 0,
+      "seconds": 1.32,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "103-init_close_utils"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/open.cpp",
+      "source_sha256": "87530daa60184ff4aa30663f805c9647344b55c81a567680e21efa7fd608ffac",
+      "exit": 0,
+      "seconds": 3.744,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "104-open"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/phaseone_processing.cpp",
+      "source_sha256": "1a581a0f1f7a43fbc0a397a2591d79b342552f955d61c3c3b0b826117bb962dd",
+      "exit": 0,
+      "seconds": 1.622,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "105-phaseone_processing"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/read_utils.cpp",
+      "source_sha256": "d390ba5310138cc06247174f845279a48ab3acc91c2f4c8825608978709041af",
+      "exit": 0,
+      "seconds": 1.273,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "106-read_utils"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/thumb_utils.cpp",
+      "source_sha256": "57ba0b151c81e1277f6b505d82518366043e4150e584bd04a469d923fa714596",
+      "exit": 0,
+      "seconds": 3.027,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "107-thumb_utils"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/utils_dcraw.cpp",
+      "source_sha256": "61d3fda9d20a8263bbb5b9b09a41c0c37d2729763cf4b1742fa63a784651ce73",
+      "exit": 0,
+      "seconds": 4.329,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "108-utils_dcraw"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/utils_libraw.cpp",
+      "source_sha256": "03a71375400dcf7bfe884ece8e7430437e2f5199c04d50300f07b08dc7410ca9",
+      "exit": 0,
+      "seconds": 6.276,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "109-utils_libraw"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/apply_profile.cpp",
+      "source_sha256": "b4052e42ea8444fde9ec99eb6a21576521354cff25f1220003836495fa314c76",
+      "exit": 0,
+      "seconds": 1.638,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "110-apply_profile"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/file_write.cpp",
+      "source_sha256": "27106f663b6fb6a297d0aa3497506f69b210f70fccf5cd6052433f9afdff2ad9",
+      "exit": 0,
+      "seconds": 4.396,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "111-file_write"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/tiff_writer.cpp",
+      "source_sha256": "830a24b827e7913f522f43b34162164fa30c392d1450ea17b985aefcba181f4c",
+      "exit": 0,
+      "seconds": 1.43,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "112-tiff_writer"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/x3f/x3f_parse_process.cpp",
+      "source_sha256": "803ca1791cf722893e9b44a8b914d453aa8d56d884733056494a31cf3142026f",
+      "exit": 0,
+      "seconds": 0.033,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "113-x3f_parse_process"
+    },
+    {
+      "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/x3f/x3f_utils_patched.cpp",
+      "source_sha256": "0b642f723dc843e3c2c80c0f09869bbf4fd1ca46e4183034becb5cdda70bdda4",
+      "exit": 0,
+      "seconds": 0.033,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "114-x3f_utils_patched"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_decoder.cpp",
+      "source_sha256": "683368d73100623ce7935cb8d00d9fa3a8c3c64a80dd6816963d2b195b593191",
+      "exit": 0,
+      "seconds": 9.913,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "115-raw_decoder"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_headroom.cpp",
+      "source_sha256": "77b98b3f298abedfe8bec823da5b78f4a2b6b863cfca9046e9c1354e2d40dfe3",
+      "exit": 0,
+      "seconds": 1.881,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "116-raw_headroom"
+    },
+    {
+      "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/image_writer.cpp",
+      "source_sha256": "38e6c6c2be1ab0e6174481453d6e44a84ce06127a5e516d4eef41e6691b86e3a",
+      "exit": 0,
+      "seconds": 2.029,
+      "diagnostics": [],
+      "text_warnings": [],
+      "report": "117-image_writer"
+    }
+  ]
+}

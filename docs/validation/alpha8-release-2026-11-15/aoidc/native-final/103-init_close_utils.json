@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/init_close_utils.cpp",
+  "source_sha256": "f245e420f1c901c547428507f9c4517d787e1f5fbce489bc0a9d46949f433af9",
+  "exit": 0,
+  "seconds": 1.32,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "103-init_close_utils"
+}

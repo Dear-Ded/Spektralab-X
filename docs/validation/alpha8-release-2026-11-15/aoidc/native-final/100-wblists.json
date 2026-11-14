@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/wblists.cpp",
+  "source_sha256": "172d53844b49df0875f84c1283a285c05414341a8528e8d49966a0c81addc0f6",
+  "exit": 0,
+  "seconds": 1.484,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "100-wblists"
+}

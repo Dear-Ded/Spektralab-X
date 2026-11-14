@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/io/raw_decoder.cpp",
+  "source_sha256": "683368d73100623ce7935cb8d00d9fa3a8c3c64a80dd6816963d2b195b593191",
+  "exit": 0,
+  "seconds": 9.913,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "115-raw_decoder"
+}

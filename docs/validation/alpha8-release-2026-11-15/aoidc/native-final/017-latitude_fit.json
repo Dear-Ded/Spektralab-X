@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/latitude_fit.cpp",
+  "source_sha256": "21e63ae6089ee51b29419eb4a6b75916de1f30bd5c3438660f77269bc818a675",
+  "exit": 0,
+  "seconds": 10.347,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "017-latitude_fit"
+}

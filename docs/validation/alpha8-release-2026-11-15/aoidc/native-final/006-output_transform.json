@@ -1,0 +1,25 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+  "source_sha256": "aa281d374c90ebb2ad209a6040e522e53e41466daa62b4877700367126a2684d",
+  "exit": 0,
+  "seconds": 27.098,
+  "diagnostics": [
+    {
+      "checker": "core.NullDereference",
+      "description": "Array access (from variable 's') results in a null pointer dereference",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+      "line": 150
+    },
+    {
+      "checker": "core.NullDereference",
+      "description": "Array access (from variable 's') results in a null pointer dereference",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp",
+      "line": 370
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:150:35: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:370:24: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]"
+  ],
+  "report": "006-output_transform"
+}

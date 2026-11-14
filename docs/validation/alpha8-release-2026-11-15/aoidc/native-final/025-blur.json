@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/blur.cpp",
+  "source_sha256": "9fc43e6dceef856e7753f92bc11d008b142094fcf352ec75a58863ccf216e144",
+  "exit": 0,
+  "seconds": 5.734,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "025-blur"
+}

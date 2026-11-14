@@ -1,0 +1,10 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:241:9: warning: Value stored to 'ifd_len' is never read [deadcode.DeadStores]
+  241 |         ifd_len = l;
+      |         ^         ~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:242:9: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]
+  242 |         FujiShotSelect = 0;
+      |         ^                ~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:244:12: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]
+  244 |     } else FujiShotSelect = 0;
+      |            ^                ~
+3 warnings generated.

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/pipeline.cpp",
+  "source_sha256": "80621c02b62202ce630d3be01b429095785f020885130d4d10c60790f89382f7",
+  "exit": 0,
+  "seconds": 58.938,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "027-pipeline"
+}

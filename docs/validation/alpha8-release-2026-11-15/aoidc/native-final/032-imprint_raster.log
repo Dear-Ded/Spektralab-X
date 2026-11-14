@@ -1,0 +1,8 @@
+In file included from /data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/imprint_raster.cpp:9:
+/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3151:19: warning: Value stored to 'dx' is never read [deadcode.DeadStores]
+ 3151 |                   dx = -dx;
+      |                   ^    ~~~
+/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/../../third_party/stb/stb_truetype.h:3153:36: warning: Although the value stored to 'xb' is used in the enclosing expression, the value is never actually read from 'xb' [deadcode.DeadStores]
+ 3153 |                   t = x0, x0 = xb, xb = t;
+      |                                    ^    ~
+2 warnings generated.

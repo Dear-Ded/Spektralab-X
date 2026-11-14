@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/numeric.cpp",
+  "source_sha256": "138660966cf3481cf29a53d5da6ad406c53f7481b1ffd8d0b5565ab05d6645f1",
+  "exit": 0,
+  "seconds": 1.821,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "018-numeric"
+}

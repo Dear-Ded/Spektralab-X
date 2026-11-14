@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/spectral.cpp",
+  "source_sha256": "f8b733fda96ba5e26b37ec414135af3aabfe2f641b20974f2a859f2f8896ee6f",
+  "exit": 0,
+  "seconds": 2.272,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "024-spectral"
+}

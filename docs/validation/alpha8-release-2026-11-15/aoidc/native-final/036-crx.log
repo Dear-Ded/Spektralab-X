@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp:1399:14: warning: Value stored to 'lineBufL2' during its initialization is never read [deadcode.DeadStores]
+ 1399 |     int32_t *lineBufL2 = wavelet->lineBuf[2];
+      |              ^~~~~~~~~   ~~~~~~~~~~~~~~~~~~~
+1 warning generated.

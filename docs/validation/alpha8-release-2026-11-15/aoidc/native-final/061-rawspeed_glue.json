@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/integration/rawspeed_glue.cpp",
+  "source_sha256": "505264b9905f0f4d9918fe4cf68bb430efb06e8bb154d2d7b6869d82298fcf80",
+  "exit": 0,
+  "seconds": 1.369,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "061-rawspeed_glue"
+}

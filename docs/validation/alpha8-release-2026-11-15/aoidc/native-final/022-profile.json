@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/profile.cpp",
+  "source_sha256": "6bf9801b0ab80ba5a9e08bfd294d28e5b46e5259355dee3d9a9f1ba656530d53",
+  "exit": 0,
+  "seconds": 6.087,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "022-profile"
+}

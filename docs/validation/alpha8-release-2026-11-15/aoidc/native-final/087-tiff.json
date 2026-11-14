@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp",
+  "source_sha256": "55b26811336b3acf1c2dec470d91e085db579c7423ff4d2d9da6bdd753fc0850",
+  "exit": 0,
+  "seconds": 4.16,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'MakN_length' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp",
+      "line": 1729
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/tiff.cpp:1729:17: warning: Value stored to 'MakN_length' is never read [deadcode.DeadStores]"
+  ],
+  "report": "087-tiff"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/libraw_c_api.cpp",
+  "source_sha256": "93227da95765cd08feb2db0e14b10c86eb73da9222c9355c1b0a145c1494b8d0",
+  "exit": 0,
+  "seconds": 1.27,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "062-libraw_c_api"
+}

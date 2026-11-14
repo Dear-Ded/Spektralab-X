@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/gpu/vulkan_gpu.cpp",
+  "source_sha256": "1afcbeb6238af81f542e7265fc155126cb98c06366763c18673294219f205f01",
+  "exit": 0,
+  "seconds": 30.218,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "034-vulkan_gpu"
+}

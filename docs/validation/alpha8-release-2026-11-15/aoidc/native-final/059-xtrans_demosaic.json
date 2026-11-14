@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/demosaic/xtrans_demosaic.cpp",
+  "source_sha256": "8f6de2685bc5968a7569301fa7ce912cbcad33c6a6556a1ebdf7d6acf0cd0d5a",
+  "exit": 0,
+  "seconds": 1.42,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "059-xtrans_demosaic"
+}

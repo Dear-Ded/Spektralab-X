@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/print_lut.cpp",
+  "source_sha256": "3fd3cfff6d1bc447441e7fab7e4f281cef7d91396585e92a274544ca115c174f",
+  "exit": 0,
+  "seconds": 2.421,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "020-print_lut"
+}

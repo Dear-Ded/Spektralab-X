@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/integration/dngsdk_glue.cpp",
+  "source_sha256": "0bff3a8fe78b341557fdb4395a3462cf93f5eff8cea33348f909e8f15942018b",
+  "exit": 0,
+  "seconds": 1.224,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "060-dngsdk_glue"
+}

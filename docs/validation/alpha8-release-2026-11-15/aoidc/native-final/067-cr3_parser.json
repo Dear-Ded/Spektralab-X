@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp",
+  "source_sha256": "3a6688c29a5e65d9c524c6680645dcad287342781ab53d58270c1f2e725015ee",
+  "exit": 0,
+  "seconds": 4.386,
+  "diagnostics": [
+    {
+      "checker": "unix.MallocSizeof",
+      "description": "Result of 'calloc' is converted to a pointer of type 'INT64', which is incompatible with sizeof operand type 'int64_t'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp",
+      "line": 876
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp:876:47: warning: Result of 'calloc' is converted to a pointer of type 'INT64', which is incompatible with sizeof operand type 'int64_t' [unix.MallocSizeof]"
+  ],
+  "report": "067-cr3_parser"
+}

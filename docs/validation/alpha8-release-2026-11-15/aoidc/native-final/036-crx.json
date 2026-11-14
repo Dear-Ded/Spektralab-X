@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp",
+  "source_sha256": "1b0018b86dc45c2c72b7574ba15346eda72c67147166ea99e1cd0d3cb2309c78",
+  "exit": 0,
+  "seconds": 11.988,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'lineBufL2' during its initialization is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp",
+      "line": 1399
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp:1399:14: warning: Value stored to 'lineBufL2' during its initialization is never read [deadcode.DeadStores]"
+  ],
+  "report": "036-crx"
+}

@@ -26,14 +26,18 @@ files, 4,328,589 bytes. Every uploaded byte hash matched; all 221 Python AST,
 XML and shell syntax checks passed. This excludes historical generated evidence
 and third-party binary assets, and does not claim every line is manually proven.
 The first targeted cloud run passed 36 tests without failures/errors/skips.
-The final maintained-code inventory covers 651 files / 4,338,516 bytes, with
-all byte hashes matching and 222 syntax checks passing. The first complete
+The expanded release inventory covers 662 files / 4,363,797 bytes, including
+the Windows wrapper, R8 rules, symbol exports, signing identity, sample tables
+and root configuration in addition to the 651-file intermediate source set.
+All byte hashes match and 222 syntax checks pass. The first complete
 cloud suite passes 225 Release / 371 Debug cases with no failures/errors/skips,
 and lint reports zero errors / 100 warnings / 6 hints in the offline cloud
 environment. The final fixes add five package-boundary tests and two navigation
 tests. All 17 final targeted cases pass, including language and Settings UI.
-Final all-suite, native analyzer and signed release/package/provenance results
-will be recorded below when their gates complete.
+The final complete AOIDC suite passes **230 Release / 378 Debug** cases with
+zero failures, errors or skips. Final offline lint reports **0 errors / 100
+warnings / 6 hints**. Signed release/package/provenance results will be recorded
+below when the GitHub production gates complete.
 
 ## Audit Findings and Coverage
 
@@ -57,6 +61,28 @@ The first broad native scan encountered an old local cloud LibRaw copy and
 therefore is retained as a stale-input attempt. Fresh Android CMake configuration
 reapplies all current patches; its CRX source hash then matches the separately
 replayed final source. Only the refreshed scan is final native evidence.
+
+## Final Native Diagnostics
+
+All **118 / 118** actual ARM64 compilation units complete successfully after
+refreshing the current overlay. Plists and text each contain **48** warnings;
+JNI has **zero**. There are no remaining bitwise-shift diagnostics. All 48
+correspond to previously reviewed categories from the
+[Alpha 7 triage](ALPHA7_AUDIT_2026-11-14.md#static-diagnostics-triage):
+
+| Diagnostics | Disposition for this application configuration |
+| --- | --- |
+| 18 dead stores | No observed state/numeric effect; avoid unrelated third-party algorithm edits. |
+| 11 normalize_model nullability paths | Alias tables establish a canonical entry first; analysis loses the constant table ordering. |
+| 6 null dereferences | Two OutputTransform paths assume both validated row sources null; Panasonic/Fuji/Leaf paths vary invariant decoder flags; spline rows are checked allocations. |
+| 5 allocation-size warnings | Actual short-pair row/INT64 byte allocations match the consuming representations. |
+| 2 malloc warnings | Fuji lossless stack state cannot follow the lossy free branch; Leaf borrowed/raw storage follows invariant filters. |
+| 4 undefined-operand / 2 uninitialized warnings | Existing Sony/Kodak/postprocessing loop paths; prior inspection found assignments/production mode guards on consumed elements. No new input path was reproduced in this audit. |
+
+These are residual diagnostics, not 48 newly confirmed defects and not a claim
+that every hypothetical path is impossible for other LibRaw consumers. Full
+source identities, reports and unsuccessful attempts are retained under
+`validation/alpha8-release-2026-11-15/aoidc/`.
 
 ## Device Boundary
 

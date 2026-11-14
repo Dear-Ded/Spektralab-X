@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp",
+  "source_sha256": "e6595d28848e732c28b135871dcfde80e42843e33ee7b34df3e319965ef5593d",
+  "exit": 0,
+  "seconds": 84.259,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "000-spektralab_jni"
+}

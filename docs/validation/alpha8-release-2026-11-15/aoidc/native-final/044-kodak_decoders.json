@@ -1,0 +1,25 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+  "source_sha256": "f819457938a761344d07bf6520248f382013f490aa466fca03474de6d8e4fa3c",
+  "exit": 0,
+  "seconds": 13.658,
+  "diagnostics": [
+    {
+      "checker": "core.uninitialized.Assign",
+      "description": "Assigned value is garbage or undefined",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+      "line": 509
+    },
+    {
+      "checker": "core.uninitialized.Assign",
+      "description": "Assigned value is garbage or undefined",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp",
+      "line": 511
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:509:49: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:511:54: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]"
+  ],
+  "report": "044-kodak_decoders"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/raw2image.cpp",
+  "source_sha256": "c3dca650835898fc043b8b93d89cac1981cf4343acc9e86db4cc683ba1286173",
+  "exit": 0,
+  "seconds": 7.315,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "095-raw2image"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/postprocessing/mem_image.cpp",
+  "source_sha256": "8555fd3f58f1936f6497175eb663cc1ec252f13091a0958d8e82116e7cea50c6",
+  "exit": 0,
+  "seconds": 4.603,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "090-mem_image"
+}

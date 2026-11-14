@@ -1,0 +1,25 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+  "source_sha256": "70155663033a535573403d2202d712fcddb7407af31300c956b95d4e2a0886ad",
+  "exit": 0,
+  "seconds": 8.026,
+  "diagnostics": [
+    {
+      "checker": "core.NullDereference",
+      "description": "Array access (from variable 'q_bases') results in a null pointer dereference",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+      "line": 1058
+    },
+    {
+      "checker": "unix.Malloc",
+      "description": "Argument to free() is the address of the local variable 'common_info', which is not memory allocated by malloc()",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp",
+      "line": 1087
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1058:39: warning: Array access (from variable 'q_bases') results in a null pointer dereference [core.NullDereference]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1087:5: warning: Argument to free() is the address of the local variable 'common_info', which is not memory allocated by malloc() [unix.Malloc]"
+  ],
+  "report": "042-fuji_compressed"
+}

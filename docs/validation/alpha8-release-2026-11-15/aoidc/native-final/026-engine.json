@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp",
+  "source_sha256": "5ac9922a0e8b892c30eeb09eb20fc1dd292054cb5092dff260e83f3e1ea9e277",
+  "exit": 0,
+  "seconds": 79.246,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'ok' is never read",
+      "file": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp",
+      "line": 740
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp:740:9: warning: Value stored to 'ok' is never read [deadcode.DeadStores]"
+  ],
+  "report": "026-engine"
+}

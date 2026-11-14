@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/subtract_black.cpp",
+  "source_sha256": "dfb40396a6654fd45adee4410ae4b75def7278b5b3187413bb8c6f7079a82239",
+  "exit": 0,
+  "seconds": 1.474,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "096-subtract_black"
+}

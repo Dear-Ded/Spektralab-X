@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/write/apply_profile.cpp",
+  "source_sha256": "b4052e42ea8444fde9ec99eb6a21576521354cff25f1220003836495fa314c76",
+  "exit": 0,
+  "seconds": 1.638,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "110-apply_profile"
+}

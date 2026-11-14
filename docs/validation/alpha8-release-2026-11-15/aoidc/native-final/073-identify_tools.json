@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/identify_tools.cpp",
+  "source_sha256": "8197f97fb91e84676fd76926c5e4bdfe66a1c0bd259cf7909dbc0ab92586082d",
+  "exit": 0,
+  "seconds": 1.526,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "073-identify_tools"
+}

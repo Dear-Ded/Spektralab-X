@@ -1,0 +1,4 @@
+/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/engine.cpp:740:9: warning: Value stored to 'ok' is never read [deadcode.DeadStores]
+  740 |         ok = built;
+      |         ^    ~~~~~
+1 warning generated.

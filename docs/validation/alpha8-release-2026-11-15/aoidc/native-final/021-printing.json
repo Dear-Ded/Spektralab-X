@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/printing.cpp",
+  "source_sha256": "6da2ec0d19d5f35671a86dcd7eee33c73c2ba8449adc329d4b009fb09d272ad8",
+  "exit": 0,
+  "seconds": 2.021,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "021-printing"
+}

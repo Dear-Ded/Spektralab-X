@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/cam16.cpp",
+  "source_sha256": "715af1bfa8658d1dfb7dd64dd6bbc1c14bc8c0b467d20e98a18497bf7d3077c6",
+  "exit": 0,
+  "seconds": 1.669,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "011-cam16"
+}

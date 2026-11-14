@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/host/white_balance.cpp",
+  "source_sha256": "af147c07d6c1e15500b05e9b73fc8cc12a96f9f4421f4ac94ccbd2c5f4697dec",
+  "exit": 0,
+  "seconds": 2.021,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "009-white_balance"
+}

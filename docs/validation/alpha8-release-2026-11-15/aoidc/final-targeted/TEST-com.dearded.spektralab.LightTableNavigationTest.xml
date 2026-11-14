@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableNavigationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:01:46.131Z" hostname="ser858255664526" time="15.787">
+  <properties/>
+  <testcase name="firstEnglishCrossRowSelectionSurvivesNarrowNavigation" classname="com.dearded.spektralab.LightTableNavigationTest" time="15.183"/>
+  <testcase name="firstChineseCrossRowSelectionSurvivesNavigation" classname="com.dearded.spektralab.LightTableNavigationTest" time="0.603"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

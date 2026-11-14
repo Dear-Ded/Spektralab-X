@@ -1,0 +1,18 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp",
+  "source_sha256": "2889524cba9878f83d0ccdd48c9ae44d57d03318f13ad1120ed2a9b81d28a8fe",
+  "exit": 0,
+  "seconds": 18.895,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'bwide' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp",
+      "line": 352
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:352:5: warning: Value stored to 'bwide' is never read [deadcode.DeadStores]"
+  ],
+  "report": "038-decoders_libraw"
+}

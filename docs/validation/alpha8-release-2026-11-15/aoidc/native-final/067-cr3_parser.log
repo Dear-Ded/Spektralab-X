@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/cr3_parser.cpp:876:47: warning: Result of 'calloc' is converted to a pointer of type 'INT64', which is incompatible with sizeof operand type 'int64_t' [unix.MallocSizeof]
+  876 |         current_track.chunk_offsets = (INT64*)calloc(entries * sizeof(int64_t),1);
+      |                                        ~~~~~~ ^~~~~~           ~~~~~~~~~~~~~~~
+1 warning generated.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationUiTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:06:27.376Z" hostname="ser858255664526" time="4.324">
+  <properties/>
+  <testcase name="benchmarkResultsAreVisibleWithoutCopyingDiagnostics" classname="com.dearded.spektralab.LocalizationUiTest" time="2.916"/>
+  <testcase name="settingSwitchesBothWaysAndRetainsTheOpenEdit" classname="com.dearded.spektralab.LocalizationUiTest" time="1.408"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

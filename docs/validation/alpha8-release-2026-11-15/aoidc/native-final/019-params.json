@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/params.cpp",
+  "source_sha256": "17ee866717969026d8c055b521d6697675c7562bbbb290b1e4592505cba22c21",
+  "exit": 0,
+  "seconds": 22.635,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "019-params"
+}

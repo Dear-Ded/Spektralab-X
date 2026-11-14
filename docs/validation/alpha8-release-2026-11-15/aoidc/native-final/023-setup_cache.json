@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/setup_cache.cpp",
+  "source_sha256": "c27c50f125bf98aec9cd0fb1166c9f1d3db21d5574554b7921c722768987780b",
+  "exit": 0,
+  "seconds": 6.18,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "023-setup_cache"
+}

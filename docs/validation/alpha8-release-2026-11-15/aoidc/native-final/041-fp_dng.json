@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fp_dng.cpp",
+  "source_sha256": "9d8e925de445c32f1710d346e13c65e7f66de9033e21a3395510fcc3393d0455",
+  "exit": 0,
+  "seconds": 7.047,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "041-fp_dng"
+}

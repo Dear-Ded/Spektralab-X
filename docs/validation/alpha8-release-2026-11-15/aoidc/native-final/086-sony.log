@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/sony.cpp:2441:7: warning: Value stored to 'offset' is never read [deadcode.DeadStores]
+ 2441 |       offset = tag_offset;
+      |       ^        ~~~~~~~~~~
+1 warning generated.

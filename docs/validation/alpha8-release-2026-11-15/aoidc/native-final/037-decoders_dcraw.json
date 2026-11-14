@@ -1,0 +1,46 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+  "source_sha256": "e5afe722ca7e744747063909233af50fb2161c6a1a766df71d4b8a937dbde393",
+  "exit": 0,
+  "seconds": 23.229,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'jhigh' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "line": 658
+    },
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Although the value stored to 'max' is used in the enclosing expression, the value is never actually read from 'max'",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "line": 987
+    },
+    {
+      "checker": "core.NullDereference",
+      "description": "Array access (from variable 'bytes') results in a null pointer dereference",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "line": 1205
+    },
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'bit' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "line": 1546
+    },
+    {
+      "checker": "core.UndefinedBinaryOperatorResult",
+      "description": "The left operand of '<<' is a garbage value",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp",
+      "line": 1605
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:658:5: warning: Value stored to 'jhigh' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:987:24: warning: Although the value stored to 'max' is used in the enclosing expression, the value is never actually read from 'max' [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1205:19: warning: Array access (from variable 'bytes') results in a null pointer dereference [core.NullDereference]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1546:16: warning: Value stored to 'bit' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_dcraw.cpp:1605:42: warning: The left operand of '<<' is a garbage value [core.UndefinedBinaryOperatorResult]"
+  ],
+  "report": "037-decoders_dcraw"
+}

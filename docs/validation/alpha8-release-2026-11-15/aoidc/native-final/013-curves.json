@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/curves.cpp",
+  "source_sha256": "1cde1154d92bf7671f8a427b0798ab9aa284e5ee15d94788b6677095cec57c85",
+  "exit": 0,
+  "seconds": 1.972,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "013-curves"
+}

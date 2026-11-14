@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/preprocessing/ext_preprocess.cpp",
+  "source_sha256": "f7e96dfe6d04ebb52bfde566cc5e313c3c20b2b868011b641474698ac7e757dc",
+  "exit": 0,
+  "seconds": 4.895,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "094-ext_preprocess"
+}

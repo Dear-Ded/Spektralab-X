@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExternalFileRoutingTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-14T18:05:56.906Z" hostname="ser858255664526" time="4.771">
+  <properties/>
+  <testcase name="explicitDngPresetImportStillReadsEmbeddedXmp" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="3.448"/>
+  <testcase name="nullProviderNameFallsBackToUri" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.099"/>
+  <testcase name="ordinaryImagesStillOpenAsPhotos" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.068"/>
+  <testcase name="unavailableMetadataFallsBackToUriAndDeclaredType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.039"/>
+  <testcase name="rawMimeWorksWithoutAnExtension" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.042"/>
+  <testcase name="genericOrMissingDeclaredTypeUsesTheProviderImageType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.027"/>
+  <testcase name="mainActivityQueuesHaldFromViewAndShare" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.735"/>
+  <testcase name="genericCameraRawUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.088"/>
+  <testcase name="stylesAndRecipesStillEnterTheImporter" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.084"/>
+  <testcase name="newerExternalOpenDiscardsTheSlowProviderResult" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.102"/>
+  <testcase name="numericHaldUriUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.038"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

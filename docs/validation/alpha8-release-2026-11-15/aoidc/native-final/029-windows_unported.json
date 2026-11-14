@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/windows_unported.cpp",
+  "source_sha256": "837ebd75823de6e881b9d756da5caaa9d087a5728436a1fed1478a5b874bbf54",
+  "exit": 0,
+  "seconds": 1.945,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "029-windows_unported"
+}

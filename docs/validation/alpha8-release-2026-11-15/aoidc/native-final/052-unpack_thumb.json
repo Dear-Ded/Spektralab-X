@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/unpack_thumb.cpp",
+  "source_sha256": "b9382b99fe8082e0711f8ad105d01e17877121ad5c43188bec3f820cbbab38f6",
+  "exit": 0,
+  "seconds": 4.093,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "052-unpack_thumb"
+}

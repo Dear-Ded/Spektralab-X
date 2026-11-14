@@ -1,0 +1,7 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1058:39: warning: Array access (from variable 'q_bases') results in a null pointer dereference [core.NullDereference]
+ 1058 |         init_main_qtable(info_common, q_bases[cur_line]);
+      |                                       ^~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/fuji_compressed.cpp:1087:5: warning: Argument to free() is the address of the local variable 'common_info', which is not memory allocated by malloc() [unix.Malloc]
+ 1087 |     free(info_common);
+      |     ^~~~~~~~~~~~~~~~~
+2 warnings generated.

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decompressors/losslessjpeg.cpp",
+  "source_sha256": "9b33eafce1b6e84c83bb191f80ee35bf7c80258fe5c6700c3f2e37c3b14853ac",
+  "exit": 0,
+  "seconds": 7.503,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "053-losslessjpeg"
+}

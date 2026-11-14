@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/hasselblad_model.cpp",
+  "source_sha256": "02b7606d7827b733a63ea550c3bc70ac9719b811cbd8ab442f4c7f5dadbd651f",
+  "exit": 0,
+  "seconds": 4.813,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "071-hasselblad_model"
+}

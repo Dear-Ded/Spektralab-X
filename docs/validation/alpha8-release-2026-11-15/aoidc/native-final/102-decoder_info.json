@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/decoder_info.cpp",
+  "source_sha256": "21557a31fae03074c3f3094145f0c887f990a5cc376ad36d20a12c26b70f917c",
+  "exit": 0,
+  "seconds": 1.469,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "102-decoder_info"
+}

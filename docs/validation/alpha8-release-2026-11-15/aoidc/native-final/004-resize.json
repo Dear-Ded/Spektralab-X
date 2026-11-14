@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/resize.cpp",
+  "source_sha256": "db9658b45d56a703fc920b6049cd2f34db3dcc63ebb62646eeee9998c9da5d10",
+  "exit": 0,
+  "seconds": 8.803,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "004-resize"
+}

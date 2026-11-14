@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/pipeline/overscan.cpp",
+  "source_sha256": "3b2b27ad1c40a0fe5e8df6e65ebc52831accfe1495d710e0998b045d03246ddf",
+  "exit": 0,
+  "seconds": 23.741,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "031-overscan"
+}

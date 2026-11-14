@@ -1,0 +1,7 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:509:49: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]
+  509 |           FORC3 ip[c] = ret ? (*bp++) : (rgb[c] += *bp++);
+      |                                                 ^  ~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/kodak_decoders.cpp:511:54: warning: Assigned value is garbage or undefined [core.uninitialized.Assign]
+  511 |           FORC3 if ((ip[c] = ret ? (*bp++) : (rgb[c] += *bp++)) >> 12) derror();
+      |                                                      ^  ~~~~~
+2 warnings generated.

@@ -1,0 +1,4 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/utils/curves.cpp:58:15: warning: Array access results in a null pointer dereference [core.NullDereference]
+   58 |     float v = A[i + 1][i] / A[i][i];
+      |               ^~~~~~~~~~~
+1 warning generated.

@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/canon_600.cpp",
+  "source_sha256": "ebaac5d26a497092a24c0479b615250a4a74097807bcfd27b2591df147fa172f",
+  "exit": 0,
+  "seconds": 1.64,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "035-canon_600"
+}

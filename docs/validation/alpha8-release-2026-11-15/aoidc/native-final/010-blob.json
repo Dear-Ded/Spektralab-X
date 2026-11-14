@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/blob.cpp",
+  "source_sha256": "12bea43d4fbfe654c82f70cc1cd1e7b56be5c229cbafff372762751ebc16f4bd",
+  "exit": 0,
+  "seconds": 4.832,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "010-blob"
+}

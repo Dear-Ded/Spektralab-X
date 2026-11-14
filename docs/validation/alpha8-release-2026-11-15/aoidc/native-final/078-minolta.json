@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/minolta.cpp",
+  "source_sha256": "b0e2da67138e7ac841e143f154e090dc47ce539be1f178b116096594508facd8",
+  "exit": 0,
+  "seconds": 1.38,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "078-minolta"
+}

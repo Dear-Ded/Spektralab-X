@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/tiff16.cpp",
+  "source_sha256": "bffe64d1b22c28529b34f2700e0ed8573ae71f1a8ee14edc10dbc075e94cec38",
+  "exit": 0,
+  "seconds": 8.006,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "001-tiff16"
+}

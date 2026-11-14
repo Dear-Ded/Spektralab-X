@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-rank-selection-20261113/upstream/engine/src/core/hanatos.cpp",
+  "source_sha256": "e6e23dd599af20fca75eca648d86f5a46d9663de96cc617b0f87013c18c92a35",
+  "exit": 0,
+  "seconds": 3.224,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "015-hanatos"
+}

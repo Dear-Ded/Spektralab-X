@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/adobepano.cpp",
+  "source_sha256": "24963d7f98c7fc5fd9dd67e50be651a95e5779a6e92e53ead766bcd1af78b6f0",
+  "exit": 0,
+  "seconds": 3.781,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "064-adobepano"
+}

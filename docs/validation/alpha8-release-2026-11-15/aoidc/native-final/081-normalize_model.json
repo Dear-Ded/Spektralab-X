@@ -1,0 +1,88 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+  "source_sha256": "92f26d2d160a458deb4e3605e76d32e2b759ecacfa780c43621856c2c1761a71",
+  "exit": 0,
+  "seconds": 7.678,
+  "diagnostics": [
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 811
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 827
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 856
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 891
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 908
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 919
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 947
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 973
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 993
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 1041
+    },
+    {
+      "checker": "nullability.NullPassedToNonnull",
+      "description": "Null passed to a callee that requires a non-null 2nd parameter",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp",
+      "line": 1104
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:811:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:827:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:856:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:891:11: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:908:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:919:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:947:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:973:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:993:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:1041:11: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/normalize_model.cpp:1104:9: warning: Null passed to a callee that requires a non-null 2nd parameter [nullability.NullPassedToNonnull]"
+  ],
+  "report": "081-normalize_model"
+}

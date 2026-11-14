@@ -1,0 +1,7 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:150:35: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]
+  150 |     const float v[3] = {decode16_[s[0]], decode16_[s[1]], decode16_[s[2]]};
+      |                                   ^~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/output_transform.cpp:370:24: warning: Array access (from variable 's') results in a null pointer dereference [core.NullDereference]
+  370 |                 c[0] = s[4 * x] / 65535.0f; c[1] = s[4 * x + 1] / 65535.0f; c[2] = s[4 * x + 2] / 65535.0f;
+      |                        ^~~~~~~~
+2 warnings generated.

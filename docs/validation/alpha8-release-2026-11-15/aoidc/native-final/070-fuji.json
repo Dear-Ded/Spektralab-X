@@ -1,0 +1,32 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+  "source_sha256": "cc7c90036716625975c25d18d9a43c02f12f91274d22c7cd76f034a94641fc74",
+  "exit": 0,
+  "seconds": 10.972,
+  "diagnostics": [
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'ifd_len' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+      "line": 241
+    },
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'FujiShotSelect' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+      "line": 242
+    },
+    {
+      "checker": "deadcode.DeadStores",
+      "description": "Value stored to 'FujiShotSelect' is never read",
+      "file": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp",
+      "line": 244
+    }
+  ],
+  "text_warnings": [
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:241:9: warning: Value stored to 'ifd_len' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:242:9: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]",
+    "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/metadata/fuji.cpp:244:12: warning: Value stored to 'FujiShotSelect' is never read [deadcode.DeadStores]"
+  ],
+  "report": "070-fuji"
+}

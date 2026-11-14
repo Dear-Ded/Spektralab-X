@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/x3f/x3f_parse_process.cpp",
+  "source_sha256": "803ca1791cf722893e9b44a8b914d453aa8d56d884733056494a31cf3142026f",
+  "exit": 0,
+  "seconds": 0.033,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "113-x3f_parse_process"
+}

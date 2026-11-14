@@ -1,0 +1,9 @@
+{
+  "source": "/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/tables/colorconst.cpp",
+  "source_sha256": "cad6b9a6661400e70de73fe0c0f9eae501ed58d98c8ecad7afae54275798609b",
+  "exit": 0,
+  "seconds": 1.584,
+  "diagnostics": [],
+  "text_warnings": [],
+  "report": "098-colorconst"
+}
