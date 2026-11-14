@@ -1238,7 +1238,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
         // Keep every unresolved gallery ticket, plus the newest 30 finished records.
         val list = _jobs.value
         val keep = list.filter { it.active || it.pendingUri.isNotEmpty() } +
-            list.filter { !it.active && it.pendingUri.isEmpty() }.sortedByDescending { it.finishedAt }.take(30)
+            list.filter { !it.active && it.pendingUri.isEmpty() }.sortedByDescending { it.finishedAt }.take(FINISHED_HISTORY_LIMIT)
         val arr = JSONArray()
         keep.sortedBy { it.id }.forEach { arr.put(it.toJson()) }
         val edit = prefs.edit().putString("jobs", arr.toString())
@@ -1263,6 +1263,7 @@ class ProcessingQueue(private val app: Application, private val host: EngineHost
     private fun now() = System.currentTimeMillis()
 
     companion object {
+        const val FINISHED_HISTORY_LIMIT = 30
         private const val BASE_SECONDS = 2.0
         private const val EDITOR_GRACE_MS = 1200L
         private const val SHEET_RATE_KEY = "spf_contact"

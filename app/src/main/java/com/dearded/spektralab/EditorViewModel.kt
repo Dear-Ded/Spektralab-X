@@ -479,7 +479,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             val ww = info.optInt("width"); val wh = info.optInt("height")
             if (wb == null && sw > 0 && (ww < sw || wh < sh)) {
                 _ui.update {
-                    it.copy(message = tr("原图 {0}×{1}，按工作尺寸缩到 {2}×{3} 处理；可在“设置”里调大", sw, sh, ww, wh))
+                    it.copy(message = tr("原图 {0}×{1}，实际工作尺寸 {2}×{3}；受设置、GPU 和内存上限共同限制。", sw, sh, ww, wh))
                 }
             }
             renders.trySend(Unit)
@@ -1311,6 +1311,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                     // memoryClass is a Java-heap MB limit, not native/GPU RSS.
                     // No measured per-process native budget is available here.
                     peakBudgetMb = 0L,
+                    pssKb = { android.os.Debug.getPss() },
                 )
                 val outcome = host.transientSessions.withLease(
                     onWaiting = { _ui.update { it.copy(busy = tr("等待当前处理")) } },

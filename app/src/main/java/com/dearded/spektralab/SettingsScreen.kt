@@ -200,7 +200,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 {
                     ChoiceRow(
                         tr("工作尺寸（长边）"),
-                        tr("预览和导出都用这个尺寸，越大越慢。"),
+                        tr("预览和导出都用这个尺寸，越大越慢。原始尺寸仍受 GPU 和内存上限限制。"),
                         value = WORKING_EDGES.firstOrNull { it.first == ui.workingEdge }?.second ?: "${ui.workingEdge} px",
                     ) {
                         PillRow {

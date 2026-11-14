@@ -32,6 +32,9 @@ internal data class BenchmarkResult(
     val thermalAfter: Float,
     val advice: BenchmarkAdvice,
     val finishedAt: Long,
+    /** Maximum of stage PSS samples minus the pre-open sample; not peak RSS. */
+    val sampledPssGrowthMb: Long = -1L,
+    val pssSamples: Int = 0,
 )
 
 internal object BenchmarkPolicy {
@@ -74,6 +77,7 @@ internal object BenchmarkPolicy {
         val gate = thermalGate(thermalAfter, hotLine)
         if (gate == ThermalGate.HOT) caveats += tr("测试结束时机身已偏热，耗时可能偏长，降温后重测更可靠。")
         if (gate == ThermalGate.UNKNOWN) caveats += tr("这台机器读不到热状态，无法判断测试时是否发热。")
+        if (peakGrowthMb < 0) caveats += tr("读不到峰值 RSS，尺寸建议未按峰值内存筛选。")
 
         val live = when {
             switchStyleMs <= LIVE_OK_MS -> LivePreviewAdvice.ON
@@ -101,6 +105,9 @@ internal object BenchmarkPolicy {
         add(tr("切换风格 {0} ms", r.switchStyleMs))
         add(tr("导出 {0} ms（{1} px 合成图，不写入相册）", r.exportMs, r.testEdge))
         add(if (r.peakGrowthMb >= 0) tr("峰值内存增加 {0} MB", r.peakGrowthMb) else tr("峰值内存 读不到"))
+        if (r.sampledPssGrowthMb >= 0) {
+            add(tr("阶段采样 PSS 增加 {0} MB（{1} 次采样，可能漏掉峰值）", r.sampledPssGrowthMb, r.pssSamples))
+        }
         add(tr("热余量 {0} → {1}", headroom(r.thermalBefore), headroom(r.thermalAfter)))
         add(when (r.advice.livePreview) {
             LivePreviewAdvice.ON -> tr("实时预览：可以开")
@@ -117,6 +124,7 @@ internal object BenchmarkPolicy {
         appendLine("Benchmark (this device, this run only; not a verdict on other devices): synthetic ${r.testEdge}px")
         appendLine("Benchmark timings: first preview ${r.firstPreviewMs} ms, style switch ${r.switchStyleMs} ms, export ${r.exportMs} ms, peak RSS growth ${r.peakGrowthMb} MB")
         appendLine("Benchmark thermal headroom: ${headroom(r.thermalBefore)} -> ${headroom(r.thermalAfter)}")
+        appendLine("Benchmark stage-sampled PSS growth: ${r.sampledPssGrowthMb} MB (${r.pssSamples} samples; not peak RSS; may miss peaks)")
         appendLine("Benchmark advice: live preview ${r.advice.livePreview}, working edge ${r.advice.edge}")
     }
 }

@@ -100,7 +100,8 @@ class LocalizationUiTest {
     @Test fun benchmarkResultsAreVisibleWithoutCopyingDiagnostics() {
         val vm = show()
         val result = BenchmarkResult(3072, 120, 65, 900, 80, 0.2f, 0.3f,
-            BenchmarkAdvice(LivePreviewAdvice.ON, 4096, emptyList()), 1L)
+            BenchmarkAdvice(LivePreviewAdvice.ON, 4096, emptyList()), 1L,
+            sampledPssGrowthMb = 42L, pssSamples = 7)
         compose.runOnIdle {
             val field = EditorViewModel::class.java.getDeclaredField("benchmarkResult\$delegate").apply { isAccessible = true }
             (field.get(vm) as MutableState<BenchmarkResult?>).value = result
@@ -110,6 +111,7 @@ class LocalizationUiTest {
         compose.mainClock.autoAdvance = true
         compose.onNodeWithText("First preview 120 ms").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Style switch 65 ms").assertExists()
+        compose.onNodeWithText("Stage-sampled PSS increase 42 MB (7 samples; may miss peaks)").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(tr(BenchmarkPolicy.DISCLAIMER)).performScrollTo().assertIsDisplayed()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/92_benchmark_results_en_320.png")
         assertTrue(vm.benchmarkLines().any { it.contains("not saved to the gallery") })

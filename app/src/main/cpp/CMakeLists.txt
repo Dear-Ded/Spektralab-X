@@ -64,7 +64,7 @@ if(NOT spk_libraw_have STREQUAL spk_libraw_stamp)
     string(REPLACE "\r\n" "\n" spk_crx "${spk_crx}")
     file(WRITE "${spk_libraw}/src/decoders/crx.cpp" "${spk_crx}")
     foreach(p IN LISTS spk_libraw_patches)
-        execute_process(COMMAND "${SPK_PATCH}" -p1 --forward --batch -i "${p}"
+        execute_process(COMMAND "${SPK_PATCH}" -p1 --fuzz=0 --forward --batch -i "${p}"
             WORKING_DIRECTORY "${spk_libraw}" RESULT_VARIABLE rc OUTPUT_VARIABLE out ERROR_VARIABLE out)
         if(NOT rc EQUAL 0)
             message(FATAL_ERROR "LibRaw patch ${p} does not apply:\n${out}")

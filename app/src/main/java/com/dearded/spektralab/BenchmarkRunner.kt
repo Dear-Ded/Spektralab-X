@@ -54,13 +54,14 @@ internal class BenchmarkRunner(
     private val backend: BenchmarkBackend,
     private val clockMs: () -> Long,
     private val headroom: () -> Float,
-    /** 把 VmHWM 重置为当前 RSS；false = 内核不让，峰值内存就报读不到。 */
+    /** Reset VmHWM when permitted; sampled PSS remains a separate measurement. */
     private val resetPeak: () -> Boolean,
     private val rssKb: () -> Long,
     private val peakKb: () -> Long,
     private val maxPixels: Long,
     private val peakBudgetMb: Long,
     private val wallClockMs: () -> Long = System::currentTimeMillis,
+    private val pssKb: () -> Long = { -1L },
 ) {
     suspend fun run(onProgress: (String, Float) -> Unit = { _, _ -> }): BenchmarkOutcome = coroutineScope {
         val before = headroom()
@@ -73,6 +74,21 @@ internal class BenchmarkRunner(
         // is blocked in native render. Join it before releasing the session.
         var watcher: kotlinx.coroutines.Job? = null
         try {
+            // Read outside timed render sections. Stage samples can miss transient peaks
+            // and must never substitute for RSS in memory admission or size advice.
+            var pssBaseline = -1L
+            var pssMaximum = -1L
+            var pssSamples = 0
+            suspend fun samplePss() {
+                val value = withContext(Dispatchers.IO) { runCatching(pssKb).getOrDefault(-1L) }
+                if (value > 0) {
+                    if (pssSamples == 0) pssBaseline = value
+                    pssMaximum = maxOf(pssMaximum, value)
+                    pssSamples++
+                }
+            }
+            samplePss()
+            val pssBaselineAvailable = pssSamples == 1
             onProgress(tr("准备合成图"), 0.05f)
             backend.open(edge)
             watcher = launch(Dispatchers.Unconfined, start = CoroutineStart.UNDISPATCHED) {
@@ -82,18 +98,23 @@ internal class BenchmarkRunner(
                     if (!runContext.isActive) backend.cancel()
                 }
             }
+            samplePss()
 
             hot(tr("首次预览"))?.let { return@coroutineScope it }
             onProgress(tr("首次预览"), 0.2f)
             val firstMs = timed { backend.firstPreview() }
+            samplePss()
 
             hot(tr("切换风格"))?.let { return@coroutineScope it }
             onProgress(tr("切换风格"), 0.45f)
-            val samples = List(STYLE_SAMPLES) { i -> timed { backend.switchStyle(i) } }
+            val samples = List(STYLE_SAMPLES) { i ->
+                timed { backend.switchStyle(i) }.also { samplePss() }
+            }
 
             hot(tr("导出"))?.let { return@coroutineScope it }
             onProgress(tr("导出"), 0.7f)
             val exportMs = timed { backend.export() }
+            samplePss()
 
             val after = headroom()
             val peak = peakKb()
@@ -101,7 +122,9 @@ internal class BenchmarkRunner(
             val switchMs = median(samples)
             val advice = BenchmarkPolicy.advise(edge, switchMs, exportMs, growthMb, after, maxPixels, peakBudgetMb)
             onProgress(tr("完成"), 1f)
-            BenchmarkOutcome.Done(BenchmarkResult(edge, firstMs, switchMs, exportMs, growthMb, before, after, advice, wallClockMs()))
+            BenchmarkOutcome.Done(BenchmarkResult(edge, firstMs, switchMs, exportMs, growthMb, before, after, advice, wallClockMs(),
+                sampledPssGrowthMb = if (pssBaselineAvailable && pssSamples > 1) (pssMaximum - pssBaseline) / 1024 else -1L,
+                pssSamples = pssSamples))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {

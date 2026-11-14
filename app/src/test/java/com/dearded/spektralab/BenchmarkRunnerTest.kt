@@ -16,6 +16,45 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class BenchmarkRunnerTest {
+    private fun memoryRunner(readPss: () -> Long) = BenchmarkRunner(
+        backend = object : BenchmarkBackend {
+            override suspend fun open(edge: Int) {}
+            override suspend fun firstPreview() {}
+            override suspend fun switchStyle(index: Int) {}
+            override suspend fun export() {}
+            override fun cancel() {}
+            override suspend fun close() {}
+        },
+        clockMs = { 0L }, headroom = { .2f }, resetPeak = { false },
+        rssKb = { -1L }, peakKb = { -1L }, maxPixels = 8_388_608L,
+        peakBudgetMb = 0L, pssKb = readPss,
+    )
+
+    @Test fun `restricted proc retains separate stage PSS measurements`() = runBlocking {
+        val readings = listOf(100_000L, 202_400L, 160_000L, 130_000L, 180_000L, 150_000L, 140_000L).iterator()
+        val result = (memoryRunner { readings.next() }.run() as BenchmarkOutcome.Done).result
+        assertEquals(-1L, result.peakGrowthMb)
+        assertEquals(100L, result.sampledPssGrowthMb)
+        assertEquals(7, result.pssSamples)
+        assertEquals(3072, result.advice.edge)
+        assertTrue(result.advice.caveats.any { it.contains("峰值 RSS") })
+        assertTrue(BenchmarkPolicy.diagnostics(result).contains("not peak RSS; may miss peaks"))
+    }
+
+    @Test fun `missing initial PSS cannot become a late baseline`() = runBlocking {
+        var sample = 0
+        val result = (memoryRunner { if (sample++ == 0) -1L else sample * 100_000L }.run() as BenchmarkOutcome.Done).result
+        assertEquals(-1L, result.sampledPssGrowthMb)
+        assertEquals(6, result.pssSamples)
+    }
+
+    @Test fun `restricted PSS does not fail an otherwise successful benchmark`() = runBlocking {
+        val result = (memoryRunner { throw SecurityException("denied") }.run() as BenchmarkOutcome.Done).result
+        assertEquals(-1L, result.peakGrowthMb)
+        assertEquals(-1L, result.sampledPssGrowthMb)
+        assertEquals(0, result.pssSamples)
+    }
+
     @Test
     fun `cancellation signals a blocked render before release`() = runBlocking {
         Executors.newSingleThreadExecutor().asCoroutineDispatcher().use { engine ->

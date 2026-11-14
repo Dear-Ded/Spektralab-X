@@ -57,13 +57,19 @@ fun QueueSheet(
         val done = jobs.filter { !it.active }.sortedByDescending { it.finishedAt }
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding()) {
             PanelHeader(
-                title = tr("正在处理"),
-                hint = tr("可以切到后台，进度在实时通知里。"),
+                title = tr("处理队列"),
+                hint = if (active.isNotEmpty()) tr("可以切到后台，进度在实时通知里。") else tr("当前没有进行中的任务。"),
             )
             Spacer(Modifier.height(RowGap))
             Summary(active, saved = done.count { it.state == JobState.DONE },
-                failed = done.count { it.state == JobState.FAILED })
-            QueueNotices()
+                failed = done.count { it.state == JobState.FAILED },
+                cancelled = done.count { it.state == JobState.CANCELLED })
+            if (active.isNotEmpty()) QueueNotices()
+            if (done.isNotEmpty()) Text(
+                tr("重启后保留最近 {0} 条已结束记录。清除记录不会删除已保存的照片。", ProcessingQueue.FINISHED_HISTORY_LIMIT),
+                style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
             // Height follows the list, up to about half the screen; the sheet scrolls no further.
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
                 if (active.isNotEmpty()) {
@@ -72,7 +78,7 @@ fun QueueSheet(
                 }
                 if (done.isNotEmpty()) {
                     item(key = "h-done") {
-                        GroupHead(tr("已完成"), done.size) { QuietButton(tr("清除"), onClick = onClear) }
+                        GroupHead(tr("处理记录"), done.size) { QuietButton(tr("清除"), onClick = onClear) }
                     }
                     items(done, key = { it.id }) { job -> JobRow(job, onCancel, onRetry) }
                 }
@@ -88,14 +94,15 @@ fun QueueSheet(
  * (ui_ai_flavor_audit.md 11).
  */
 @Composable
-private fun Summary(active: List<ProcessingJob>, saved: Int, failed: Int) {
-    val finished = saved + failed
+private fun Summary(active: List<ProcessingJob>, saved: Int, failed: Int, cancelled: Int) {
+    val finished = saved + failed + cancelled
     Column(Modifier.fillMaxWidth()) {
         if (active.isEmpty()) {
             // Only what was saved counts as done; a failure is named, never folded in.
             Text(
                 when {
                     failed > 0 -> tr("{0} 张没有完成", failed) + if (saved > 0) tr(" · {0} 张已保存", saved) else ""
+                    cancelled > 0 -> tr("{0} 张已取消", cancelled) + if (saved > 0) tr(" · {0} 张已保存", saved) else ""
                     saved > 0 -> tr("全部完成 · {0} 张已保存", saved)
                     else -> tr("没有进行中的任务")
                 },

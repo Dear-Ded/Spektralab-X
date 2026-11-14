@@ -397,6 +397,7 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
         const val MAX_LOOK = 3L shl 20
         const val MAX_LUT = 12L shl 20
         const val MAX_THUMB = 2L shl 20
+        const val MAX_EXPANDED = MAX_LOOK + MAX_LUT + MAX_THUMB
         const val MAX_ENTRIES = 16
 
         fun isZip(head: ByteArray) = head.size >= 4 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte() &&
@@ -418,6 +419,22 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
             val entries = HashMap<String, ByteArray>()
             var count = 0
             ZipInputStream(ByteArrayInputStream(bytes)).use { zip ->
+                var expanded = 0L
+                val buffer = ByteArray(1 shl 16)
+                fun readEntry(limit: Long, name: String, retain: Boolean): ByteArray? {
+                    val output = if (retain) ByteArrayOutputStream() else null
+                    var size = 0L
+                    while (true) {
+                        val n = zip.read(buffer)
+                        if (n < 0) break
+                        size += n
+                        expanded += n
+                        if (expanded > MAX_EXPANDED) throw ImportException(tr("压缩包解压后过大（超过 {0} MB）", MAX_EXPANDED shr 20))
+                        if (size > limit) throw ImportException(tr("{0} 太大（超过 {1}）", name, sizeText(limit)))
+                        output?.write(buffer, 0, n)
+                    }
+                    return output?.toByteArray()
+                }
                 while (true) {
                     // Android 14+ refuses names with ".." or a leading "/" here.
                     val e = try { zip.nextEntry } catch (x: ZipException) {
@@ -433,12 +450,16 @@ class SpkPackage(val look: SpkLook, val lutCube: ByteArray? = null, val thumbJpe
                         SpkLook.THUMB_ENTRY -> MAX_THUMB
                         else -> -1L
                     }
+                    val retain = !e.isDirectory && limit >= 0 && name !in entries
                     when {
                         e.isDirectory -> {}
                         limit < 0 -> report.ignored(name.take(80), tr("不是 .spklook 的条目，未读取"))
                         name in entries -> report.ignored(name, tr("重复的条目，只用第一个"))
-                        else -> entries[name] = readBounded(zip, limit, name)
                     }
+                    // nextEntry drains unread data itself. Drain here so ignored,
+                    // duplicate and directory payloads share the same inflated budget.
+                    val data = readEntry(if (retain) limit else MAX_EXPANDED, name, retain)
+                    if (retain) entries[name] = checkNotNull(data)
                 }
             }
             val lookBytes = entries[SpkLook.LOOK_ENTRY] ?: throw ImportException(tr("压缩包里没有 look.json"))

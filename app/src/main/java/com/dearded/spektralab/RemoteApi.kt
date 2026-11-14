@@ -6,8 +6,8 @@ import org.json.JSONObject
 /*
  * Remote processing, contract only (docs/REMOTE.md, API v1).
  *
- * The alpha ships no implementation: the app has no network permission and
- * nothing leaves the phone. What is fixed here is the shape a later release
+ * The alpha ships no remote implementation. The updater uses the network;
+ * this contract never uploads photos. Its shape is fixed for a later release
  * builds on, so the queue, the job format and the server can be written
  * against one definition:
  *
