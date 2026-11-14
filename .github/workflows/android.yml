@@ -115,7 +115,7 @@ jobs:
           SPK_LUT_EVIDENCE_DIR: ${{ github.workspace }}/lut-bake-evidence
         run: ./gradlew --no-daemon --stacktrace :app:assembleRelease :app:testReleaseUnitTest :app:testDebugUnitTest :app:lintRelease
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: android-regressions
@@ -134,7 +134,7 @@ jobs:
             > lut-bake-evidence/native.log 2>&1
           cat lut-bake-evidence/native.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: imported-lut-regression
@@ -191,13 +191,13 @@ jobs:
           python3 tools/native/verify_release_apk.py dist/*.apk \
             --android-tools "$tools" --ndk-bin "$ndk_bin" --output package-evidence
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: package-inspection
           path: package-evidence/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Spektralab-X-${{ steps.version.outputs.version }}-run${{ github.run_number }}${{ env.SPK_KEYSTORE == '' && '-debug-key' || '' }}
           path: dist/*
