@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "name": "export-jpeg.jpg",
+      "bytes": 229713,
+      "sha256": "e2a9c65bd5095d6cc61444410f3694dce5d2b90385ca75d204e197dd7fd9dc40",
+      "metadata": {
+        "SourceFile": "/data/work/gpt-alpha8-candidate-20261114/device-exports-r2/export-jpeg.jpg",
+        "IFD0:ImageWidth": 1600,
+        "File:ImageWidth": 1600,
+        "IFD0:ImageHeight": 1000,
+        "File:ImageHeight": 1000,
+        "ExifIFD:ExifImageWidth": 1600,
+        "ExifIFD:ExifImageHeight": 1000,
+        "File:BitsPerSample": 8,
+        "ExifIFD:ColorSpace": "Uncalibrated",
+        "ICC_Profile:ProfileDescription": "Display P3 Gamut with sRGB Transfer",
+        "IFD0:Orientation": "Horizontal (normal)",
+        "IFD0:Software": "Spektralab-X 0.2.00-alpha-8"
+      }
+    },
+    {
+      "name": "export-tiff.tif",
+      "bytes": 464670,
+      "sha256": "b877ec4cfedf350699391092ca664daae08c38957d68e4346ffc61377231b48d",
+      "metadata": {
+        "SourceFile": "/data/work/gpt-alpha8-candidate-20261114/device-exports-r2/export-tiff.tif",
+        "IFD0:ImageWidth": 1600,
+        "IFD0:ImageHeight": 1000,
+        "IFD0:BitsPerSample": "16 16 16",
+        "IFD0:Compression": "Adobe Deflate",
+        "ICC_Profile:ProfileDescription": "sRGB built-in",
+        "IFD0:Orientation": "Horizontal (normal)"
+      }
+    },
+    {
+      "name": "export-heif.heic",
+      "bytes": 167417,
+      "sha256": "b16b17541099d017a4a7e90dd30452ae9f6cf54f2687bc1db74113bfda49420d",
+      "metadata": {
+        "SourceFile": "/data/work/gpt-alpha8-candidate-20261114/device-exports-r2/export-heif.heic",
+        "IFD0:ImageWidth": 1600,
+        "File:ImageWidth": 1600,
+        "IFD0:ImageHeight": 1000,
+        "File:ImageHeight": 1000,
+        "ExifIFD:ExifImageWidth": 1600,
+        "ExifIFD:ExifImageHeight": 1000,
+        "ExifIFD:ColorSpace": "sRGB",
+        "IFD0:Orientation": "Horizontal (normal)",
+        "IFD0:Software": "Spektralab-X 0.2.00-alpha-8"
+      }
+    }
+  ],
+  "tiff": {
+    "decodedBytes": 9600000,
+    "expectedBytes": 9600000,
+    "bitsPerSample": [
+      16,
+      16,
+      16
+    ],
+    "sampleRange": [
+      0,
+      65535
+    ]
+  },
+  "heifIndependentDecode": {
+    "tool": "libheif heif-convert",
+    "width": 1600,
+    "height": 1000
+  }
+}

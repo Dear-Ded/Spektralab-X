@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.Screenshots" tests="30" skipped="0" failures="0" errors="0" timestamp="2026-11-14T14:17:43.613Z" hostname="runnervm8axu0" time="57.859">
+  <properties/>
+  <testcase name="developExposureBright" classname="com.dearded.spektralab.Screenshots" time="6.87"/>
+  <testcase name="editorAdjust" classname="com.dearded.spektralab.Screenshots" time="4.327"/>
+  <testcase name="editorBusy" classname="com.dearded.spektralab.Screenshots" time="1.471"/>
+  <testcase name="editorNoFilm" classname="com.dearded.spektralab.Screenshots" time="1.786"/>
+  <testcase name="editorEmpty" classname="com.dearded.spektralab.Screenshots" time="1.396"/>
+  <testcase name="editorMasks" classname="com.dearded.spektralab.Screenshots" time="2.4"/>
+  <testcase name="developGrainOff" classname="com.dearded.spektralab.Screenshots" time="1.824"/>
+  <testcase name="zoomed" classname="com.dearded.spektralab.Screenshots" time="1.14"/>
+  <testcase name="updateSheet" classname="com.dearded.spektralab.Screenshots" time="2.035"/>
+  <testcase name="developExposureDark" classname="com.dearded.spektralab.Screenshots" time="4.595"/>
+  <testcase name="launchIntro" classname="com.dearded.spektralab.Screenshots" time="1.749"/>
+  <testcase name="styleStrength" classname="com.dearded.spektralab.Screenshots" time="1.353"/>
+  <testcase name="rolls" classname="com.dearded.spektralab.Screenshots" time="0.75"/>
+  <testcase name="rollStrip" classname="com.dearded.spektralab.Screenshots" time="0.591"/>
+  <testcase name="launchIntroEarly" classname="com.dearded.spektralab.Screenshots" time="1.519"/>
+  <testcase name="detailViewer" classname="com.dearded.spektralab.Screenshots" time="0.828"/>
+  <testcase name="editorDevelop" classname="com.dearded.spektralab.Screenshots" time="3.127"/>
+  <testcase name="aboutHeader" classname="com.dearded.spektralab.Screenshots" time="0.732"/>
+  <testcase name="changesSheet" classname="com.dearded.spektralab.Screenshots" time="1.012"/>
+  <testcase name="lightTableLoupe" classname="com.dearded.spektralab.Screenshots" time="1.029"/>
+  <testcase name="editorBorderAndCrop" classname="com.dearded.spektralab.Screenshots" time="1.507"/>
+  <testcase name="editorStyleAndPanel" classname="com.dearded.spektralab.Screenshots" time="2.013"/>
+  <testcase name="launchNameFlip" classname="com.dearded.spektralab.Screenshots" time="2.357"/>
+  <testcase name="settings" classname="com.dearded.spektralab.Screenshots" time="0.487"/>
+  <testcase name="importSheet" classname="com.dearded.spektralab.Screenshots" time="4.747"/>
+  <testcase name="pasteSheet" classname="com.dearded.spektralab.Screenshots" time="1.326"/>
+  <testcase name="lightTableGrid" classname="com.dearded.spektralab.Screenshots" time="0.928"/>
+  <testcase name="adjustLightMoved" classname="com.dearded.spektralab.Screenshots" time="1.1"/>
+  <testcase name="queueSheet" classname="com.dearded.spektralab.Screenshots" time="1.335"/>
+  <testcase name="borderDateBetweenFrames" classname="com.dearded.spektralab.Screenshots" time="1.509"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

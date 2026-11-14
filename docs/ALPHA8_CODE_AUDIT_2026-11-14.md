@@ -2,6 +2,13 @@
 
 Co-created with GPT (OpenAI), 2026-11-14.
 
+The original candidate below subsequently failed actual phone startup and is
+rejected. The corrected source is `b1c61bdde739022fd6d6b60b49d8c57b1822dbdb`;
+its accepted APK SHA-256 is `a806e456cbcdb16f67449a4bbe7396637d1bf83f2b7b3140a3864cd34c2214a3`.
+[Actual-device acceptance](ALPHA8_DEVICE_ACCEPTANCE_2026-11-14.md) records the
+startup correction, successful replacement build and completed phone cases.
+The remaining sections preserve the earlier code/cloud audit as historical evidence.
+
 ## Scope
 
 The phone was disconnected at the user's request after the Alpha 7 device

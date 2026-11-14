@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Independently inspect the signed CI candidate. Co-created with GPT (OpenAI).
 set -euo pipefail
-A=/data/work/gpt-alpha8-candidate-20261114
+A=${SPK_CANDIDATE_DIR:-/data/work/gpt-alpha8-candidate-20261114}
 tools=/opt/android/build-tools/36.0.0
 apk=Spektralab-X-0.2.00-alpha-8-arm64-v8a.apk
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64

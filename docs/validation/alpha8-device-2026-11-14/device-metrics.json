@@ -1,0 +1,34 @@
+{
+  "coCreatedWith": "GPT (OpenAI)",
+  "date": "2026-11-14",
+  "timezone": "Asia/Shanghai",
+  "source": "b1c61bdde739022fd6d6b60b49d8c57b1822dbdb",
+  "apkSha256": "a806e456cbcdb16f67449a4bbe7396637d1bf83f2b7b3140a3864cd34c2214a3",
+  "device": {"model": "Xiaomi 13 Ultra / 2304FPN6DC", "androidApi": 36, "gpu": "Adreno 740"},
+  "benchmark": {
+    "syntheticLongEdge": 3072, "firstPreviewMs": 534, "styleSwitchMs": 315,
+    "exportRenderMs": 1429, "writesGallery": false, "peakRssGrowthMb": null,
+    "thermalHeadroomBefore": 0.15, "thermalHeadroomAfter": 0.15,
+    "completionPssKiB": 404760, "completionRssKiB": 553992
+  },
+  "hwui": {
+    "pid": 27541, "frames": 13556, "jankyFrames": 143, "jankPercent": 1.05,
+    "legacyJankyFrames": 7200, "legacyJankPercent": 53.11,
+    "cpuPercentilesMs": {"p50": 10, "p90": 18, "p95": 21, "p99": 46},
+    "gpuPercentilesMs": {"p50": 5, "p90": 13, "p95": 14, "p99": 15},
+    "nativePhotoRenderFps": null
+  },
+  "finalInterval": {"pssKiB": 418876, "rssKiB": 581716, "activities": 1},
+  "afterFinalRestart": {"pssKiB": 235624, "rssKiB": 371052, "activities": 1},
+  "finalLiveThermal": {
+    "status": 0, "batteryC": 31.3, "skinC": 33.067,
+    "cpuRangeC": [34.8, 37.1], "gpuRangeC": [34.3, 35.5], "isMeasuredPeak": false
+  },
+  "restartPids": {"englishWithPersistentRead": [25704, 27046], "chinese": [27046, 27541], "queue": [27541, 2288]},
+  "postRestart": {"language": "zh-CN", "libraryFrames": 4, "preservedOriginalFrames": 2, "savedQueueItems": 19},
+  "capturedLogs": [
+    {"pid": 27541, "from": "22:32:40", "to": "22:54:22", "criticalPatternMatches": 0},
+    {"pid": 2288, "from": "22:54:26", "to": "22:55:04", "criticalPatternMatches": 0}
+  ],
+  "limits": ["peak RSS growth unavailable", "ADB grid multiselection unverified", "full device shader parity pending", "temporary provider grants do not persist through force-stop"]
+}

@@ -1,0 +1,4 @@
+Signer #1 certificate SHA-256 digest: cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3
+package: name='com.dearded.spektralab' versionCode='128' versionName='0.2.00-alpha-8' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+native-code: 'arm64-v8a'
+PASS alpha-8 candidate: checksum, CRC, package/version, published certificate, ARM64, 16KiB alignment, asset stamp and 56 validated shaders

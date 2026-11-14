@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.UpdaterIdentityTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-14T14:18:46.988Z" hostname="runnervm8axu0" time="0.241">
+  <properties/>
+  <testcase name="rejectsEqualAndOlderVersions" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.065"/>
+  <testcase name="acceptsANewerReleaseWithTheSameCertificate" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.041"/>
+  <testcase name="rejectsDebuggableApksEvenWithTheSameCertificate" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.027"/>
+  <testcase name="installRechecksIdentityBeforeCreatingASession" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.039"/>
+  <testcase name="rejectsAnotherCertificateAndAnotherPackage" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.03"/>
+  <testcase name="unreadableApkAbandonsTheCreatedInstallerSession" classname="com.dearded.spektralab.UpdaterIdentityTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

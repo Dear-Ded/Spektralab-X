@@ -1,5 +1,9 @@
 # Real-device validation, 2026-11-14
 
+This is the earlier Alpha 7 baseline. The subsequent corrected Alpha 8
+installation, Chinese/English restart tests and export verification are in
+[the actual-device acceptance report](ALPHA8_DEVICE_ACCEPTANCE_2026-11-14.md).
+
 Status: baseline testing completed on the installed official Alpha 7. The phone
 was disconnected by the user after capture. New source changes have not been
 installed or verified on the phone. Language implementation and cloud checks
