@@ -1,0 +1,1 @@
+PASS alpha-8 candidate: checksum, CRC, package/version, published certificate, ARM64, 16KiB alignment, asset stamp and 56 validated shaders

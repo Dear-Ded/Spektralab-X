@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:19:00.476Z" hostname="ser858255664526" time="5.033">
+  <properties/>
+  <testcase name="defaultsToChineseEvenOnEnglishSystemAndUnknownPreference" classname="com.dearded.spektralab.LocalizationTest" time="2.89"/>
+  <testcase name="switchingUpdatesPreviouslyInitializedLabelsWithoutChangingRecipeIdentity" classname="com.dearded.spektralab.LocalizationTest" time="0.18"/>
+  <testcase name="localizedContextRetainsActivityAndDoesNotMutateBaseResources" classname="com.dearded.spektralab.LocalizationTest" time="1.654"/>
+  <testcase name="failedPreferenceWriteDoesNotPublishLanguage" classname="com.dearded.spektralab.LocalizationTest" time="0.092"/>
+  <testcase name="translatedArgumentsKeepFilenamesAndBracesVerbatim" classname="com.dearded.spektralab.LocalizationTest" time="0.072"/>
+  <testcase name="selectionIsDurableAndReloadsAfterInMemoryLanguageChanges" classname="com.dearded.spektralab.LocalizationTest" time="0.075"/>
+  <testcase name="catalogKeepsAllNumberedArgumentsAndHasNoChineseTranslations" classname="com.dearded.spektralab.LocalizationTest" time="0.066"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=SpektraLab Android (personal)
+Signer #1 certificate SHA-256 digest: cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3
+Signer #1 certificate SHA-1 digest: fa0b7d8618ef24b0a571edda61d369355df9b4b5
+Signer #1 certificate MD5 digest: 3b828a38d79226739d204f565ed5a91b
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: e1561741f16f0da4fd947f8c13e38f93cb711471b66fcfbf6b263e776a4ecc95
+Signer #1 public key SHA-1 digest: fdf88961d99ec4be8bdf154a01a20eeba4aa36c2
+Signer #1 public key MD5 digest: e5dd24fbaabee2dcb7f9c791af995f9b

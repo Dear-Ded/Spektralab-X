@@ -1,0 +1,18 @@
+[
+  {
+    "variant": "testReleaseUnitTest",
+    "suites": 29,
+    "tests": 222,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "variant": "testDebugUnitTest",
+    "suites": 48,
+    "tests": 354,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

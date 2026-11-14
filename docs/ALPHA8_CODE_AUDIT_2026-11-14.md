@@ -58,17 +58,48 @@ AOIDC full regression round 3 completed with Gradle `BUILD SUCCESSFUL`:
 The Debug suite includes language persistence and failure handling, context
 unwrapping, recipe identity, narrow-screen Settings switching, visible
 benchmark results, external provider routing and the HEIF metadata regression.
-Lint completed successfully. Detailed counts and final candidate results are
-recorded with the validation evidence when available.
+AOIDC lint reports zero errors, 100 warnings and 6 hints. The final targeted
+round also passes all 7 localization and 2 real-composition UI tests. Its
+screenshots show the complete benchmark result block and the English Settings
+page at 320dp, with a synthetic editor and explicitly synthetic measurements.
 
 The native text regression separately passed a real JDK 21 JVM with
 `-Xcheck:jni` and an ASan/UBSan build. It covers all 1,112,064 valid Unicode
-scalars, embedded NUL and 15 malformed input cases. The changed ARM64 JNI
-translation unit is also submitted for NDK Clang analysis.
+scalars, embedded NUL and 15 malformed input cases. The output-cancellation
+regression passes ASan/UBSan, checking stage cancellation, recovery, integer
+and float output parity, joined workers and partial TIFF cleanup. The changed
+ARM64 JNI translation unit passes its actual NDK Clang analysis command with
+zero diagnostics after the pixel ownership correction.
 
-The final candidate is version `0.2.00-alpha-8`, code `128`. Candidate CI and
-package identity checks must finish before it is described as a verified
-installable artifact. A research-branch dispatch does not publish a release.
+Final source is `c34657bde1f0318b27c6f7c7efb9a947b99226b6`, version
+`0.2.00-alpha-8`, code `128`. GitHub Actions run `43570672053` completed
+successfully at 07:28:54 UTC on November 14, 2026. Its final Release 222 and
+Debug 354 tests have zero failures, errors or skips. RAW storage/decoder,
+Vulkan/FIR, native adaptation, imported LUT parity and package inspection
+also pass. This is a research-branch candidate; no release is published.
+
+GitHub lint has zero errors, 111 warnings and 6 hints. Compared with the
+published Alpha 7's report, there are two added warnings: a KTX style
+suggestion for the explicit preference transaction (whose Boolean result is
+checked), and `AppBundleLocaleChanges` for the dynamic resource locale.
+The delivered APK includes its resources together. A future language-split
+App Bundle is not covered by this APK verification and needs a split-language
+delivery policy. The other eleven warnings above the offline AOIDC count
+are the online dependency/version notices. No warning is suppressed to
+obtain these counts.
+
+Raw results and screenshots are in
+[the validation evidence](validation/alpha8-code-audit-2026-11-14/README.md).
+
+The downloaded signed candidate is 38,780,914 bytes, SHA-256
+`702914c627851263a93464943eb6d95e387cae269a18ebd6e62434987cb30a32`.
+Its checksum agrees with both the CI checksum file and packaged inspection.
+The published signing certificate is unchanged. Package inspection verifies
+39 JNI methods, both ARM64 libraries, 56 shaders and 113 engine assets.
+AOIDC independently passes checksum, ZIP CRC, certificate, package/version,
+ELF and ZIP 16KiB alignment, recomputed asset stamp and all 56 `spirv-val`
+checks. Its `verification.exit` is zero. The engine asset stamp remains
+`ae0291630fc4f07708f735bffd3ed6a2`.
 
 ## Limits
 

@@ -87,7 +87,8 @@ was changed. Automatic approval separately rejected an ADB reverse-port command
 with `blocked by policy`; that operation was stopped and its unused local
 server was closed. No benchmark values were inferred from either failed path.
 
-Further work: finish localization, scan and fix code issues, run cloud
-regressions, and build an official-signature candidate. Phone installation,
-Chinese/English switching and persistence, and fixed HEIF metadata need a later
-connected-device verification.
+Follow-up localization, code corrections, cloud regressions and an official
+signature Alpha 8 candidate are completed in
+[the code audit](ALPHA8_CODE_AUDIT_2026-11-14.md). Candidate installation,
+Chinese/English switching and persistence, and fixed HEIF metadata still need
+a later connected-device verification.

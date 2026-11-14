@@ -1,0 +1,590 @@
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EngineHost.kt:304: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+        edit.putLong("exit_seen", exits.last().timestamp).putString("exit_last", last).commit()
+                                                                                       ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1245: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+        return if (sync) edit.commit() else { edit.apply(); true }
+                              ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StorageProbe.kt:37: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+                prefs.edit().putString("key", key).putLong("bytes", 0L).remove("probing").commit()
+                                                                                          ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StorageProbe.kt:41: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+                prefs.edit().putString("probing", key).commit()
+                                                       ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StorageProbe.kt:44: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+                prefs.edit().putString("key", key).putLong("bytes", bytes).remove("probing").commit()
+                                                                                             ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:215: Warning: Field requires API level 34 (current min is 29): android.view.HapticFeedbackConstants#GESTURE_THRESHOLD_ACTIVATE [InlinedApi]
+            if (sdk >= 34) HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE else HapticFeedbackConstants.CLOCK_TICK
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:217: Warning: Field requires API level 34 (current min is 29): android.view.HapticFeedbackConstants#SEGMENT_TICK [InlinedApi]
+            if (sdk >= 34) HapticFeedbackConstants.SEGMENT_TICK else HapticFeedbackConstants.CLOCK_TICK
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:219: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#CONFIRM [InlinedApi]
+            if (sdk >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.VIRTUAL_KEY
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:222: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#GESTURE_START [InlinedApi]
+            if (sdk >= 30) HapticFeedbackConstants.GESTURE_START else HapticFeedbackConstants.CONTEXT_CLICK
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:223: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#GESTURE_END [InlinedApi]
+        HapticEvent.GestureEnd -> if (sdk >= 30) HapticFeedbackConstants.GESTURE_END else null
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:226: Warning: Field requires API level 34 (current min is 29): android.view.HapticFeedbackConstants#TOGGLE_ON [InlinedApi]
+            if (sdk >= 34) HapticFeedbackConstants.TOGGLE_ON else HapticFeedbackConstants.CLOCK_TICK
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:228: Warning: Field requires API level 34 (current min is 29): android.view.HapticFeedbackConstants#TOGGLE_OFF [InlinedApi]
+            if (sdk >= 34) HapticFeedbackConstants.TOGGLE_OFF else HapticFeedbackConstants.CLOCK_TICK
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Interactions.kt:230: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#REJECT [InlinedApi]
+            if (sdk >= 30) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.LONG_PRESS
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableLoupe.kt:108: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#CONFIRM [InlinedApi]
+        if (pick > 0) view.feel(HapticFeedbackConstants.CONFIRM, HapticFeedbackConstants.VIRTUAL_KEY)
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableLoupe.kt:109: Warning: Field requires API level 30 (current min is 29): android.view.HapticFeedbackConstants#REJECT [InlinedApi]
+        else if (pick < 0) view.feel(HapticFeedbackConstants.REJECT, HapticFeedbackConstants.LONG_PRESS)
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "InlinedApi":
+   This check scans through all the Android API field references in the
+   application and flags certain constants, such as static final integers and
+   Strings, which were introduced in later versions. These will actually be
+   copied into the class files rather than being referenced, which means that
+   the value is available even when running on older devices. In some cases
+   that's fine, and in other cases it can result in a runtime crash or
+   incorrect behavior. It depends on the context, so consider the code
+   carefully and decide whether it's safe and can be suppressed or whether the
+   code needs to be guarded.
+
+   If you really want to use this API and don't need to support older devices
+   just set the minSdkVersion in your build.gradle or AndroidManifest.xml
+   files.
+
+   If your code is deliberately accessing newer APIs, and you have ensured
+   (e.g. with conditional execution) that this code will only ever be called
+   on a supported platform, then you can annotate your class or method with
+   the @TargetApi annotation specifying the local minimum SDK to apply, such
+   as @TargetApi(11), such that this check considers 11 rather than your
+   manifest file's minimum SDK as the required API level.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:25: Warning: Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details. [OldTargetApi]
+        targetSdk = 36
+        ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "OldTargetApi":
+   When your application or sdk runs on a version of Android that is more
+   recent than your targetSdkVersion specifies that it has been tested with,
+   various compatibility modes kick in. This ensures that your application
+   continues to work, but it may look out of place. For example, if the
+   targetSdkVersion is less than 14, your app may get an option button in the
+   UI.
+
+   To fix this issue, set the targetSdkVersion to the highest available value.
+   Then test your app to make sure everything works correctly. You may want to
+   consult the compatibility notes to see what changes apply to each version
+   you are adding support for:
+   https://developer.android.com/reference/android/os/Build.VERSION_CODES.html
+   as well as follow this guide:
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.
+   html
+
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.html
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/AndroidManifest.xml:26: Warning: Attribute enableOnBackInvokedCallback is only used in API level 33 and higher (current min is 29) [UnusedAttribute]
+        android:enableOnBackInvokedCallback="true"
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedAttribute":
+   This check finds attributes set in XML files that were introduced in a
+   version newer than the oldest version targeted by your application (with
+   the minSdkVersion attribute).
+
+   This is not an error; the application will simply ignore the attribute.
+   However, if the attribute is important to the appearance or functionality
+   of your application, you should consider finding an alternative way to
+   achieve the same result with only available attributes, and then you can
+   optionally create a copy of the layout in a layout-vNN folder which will be
+   used on API NN or higher where you can take advantage of the newer
+   attribute.
+
+   Note: This check does not only apply to attributes. For example, some tags
+   can be unused too, such as the new <tag> element in layouts introduced in
+   API 21.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Localization.kt:45: Warning: Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the bundle configuration [AppBundleLocaleChanges]
+        setLocales(LocaleList(Locale.forLanguageTag(value.tag)))
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AppBundleLocaleChanges":
+   When changing locales at runtime (e.g. to provide an in-app language
+   switcher), the Android App Bundle must be configured to not split by locale
+   or the Play Core library must be used to download additional locales at
+   runtime.
+
+   https://developer.android.com/guide/app-bundle/configure-base#handling_language_changes
+
+/home/runner/work/Spektralab-X/Spektralab-X/gradle/wrapper/gradle-wrapper.properties:3: Warning: A newer version of Gradle than 8.13 is available: 8.14.7 [AndroidGradlePluginVersion]
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AndroidGradlePluginVersion":
+   This detector looks for usage of the Android Gradle Plugin where the
+   version you are using is not the current stable release. Using older
+   versions is fine, and there are cases where you deliberately want to stick
+   with an older version. However, you may simply not be aware that a more
+   recent version is available, and that is what this lint check helps find.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:103: Warning: A newer version of androidx.core:core-ktx than 1.17.0 is available: 1.19.1 [GradleDependency]
+    implementation("androidx.core:core-ktx:1.17.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:106: Warning: A newer version of androidx.exifinterface:exifinterface than 1.3.7 is available: 1.4.2 [GradleDependency]
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:109: Warning: A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0 [GradleDependency]
+    implementation("androidx.activity:activity-compose:1.9.3")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:110: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:111: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:118: Warning: A newer version of androidx.profileinstaller:profileinstaller than 1.4.0 is available: 1.4.1 [GradleDependency]
+    implementation("androidx.profileinstaller:profileinstaller:1.4.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:116: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.9.0 is available: 1.11.0 [NewerVersionAvailable]
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:121: Warning: A newer version of org.json:json than 20240303 is available: 20260814 [NewerVersionAvailable]
+    testImplementation("org.json:json:20240303")
+                       ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:125: Warning: A newer version of org.robolectric:robolectric than 4.17 is available: 4.18 [NewerVersionAvailable]
+    testDebugImplementation("org.robolectric:robolectric:4.17")
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:126: Warning: A newer version of io.github.takahirom.roborazzi:roborazzi than 1.77.0 is available: 1.79.0 [NewerVersionAvailable]
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi:1.77.0")
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:127: Warning: A newer version of io.github.takahirom.roborazzi:roborazzi-compose than 1.77.0 is available: 1.79.0 [NewerVersionAvailable]
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.77.0")
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Pill.kt:90: Warning: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]
+internal fun EditedDot(onFill: Boolean = false, modifier: Modifier = Modifier) {
+                                                ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Pill.kt:229: Warning: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]
+internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
+                                                                ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Pill.kt:252: Warning: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]
+    modifier: Modifier = Modifier,
+    ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Pill.kt:543: Warning: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]
+internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
+                                                                ~~~~~~~~
+
+   Explanation for issues of type "ModifierParameter":
+   The first (or only) Modifier parameter in a Composable function should
+   follow the following rules:
+   - Be named modifier
+   - Have a type of Modifier
+   - Either have no default value, or have a default value of Modifier
+   - If optional, be the first optional parameter in the parameter list
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.ui
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/build.gradle.kts:28: Warning: Missing x86_64 ABI support for ChromeOS [ChromeOsAbiSupport]
+        ndk { abiFilters += "arm64-v8a" }
+                            ~~~~~~~~~~~
+
+   Explanation for issues of type "ChromeOsAbiSupport":
+   To properly support ChromeOS, your Android application should have an x86
+   and/or x86_64 binary as part of the build configuration. To fix the issue,
+   ensure your files are properly optimized for ARM; the binary translator
+   will then ensure compatibility with x86. Alternatively, add an abiSplit for
+   x86 within your build.gradle file and create the required x86
+   dependencies.
+
+   https://developer.android.com/ndk/guides/abis
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/AndroidManifest.xml:27: Warning: The attribute android:allowBackup is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures cloud backups and device transfers on Android 12 and higher. [DataExtractionRules]
+        android:allowBackup="false"
+                             ~~~~~
+
+   Explanation for issues of type "DataExtractionRules":
+   Before Android 12, the attributes android:allowBackup and
+   android:fullBackupContent were used to configure all forms of backup,
+   including cloud backups, device-to-device transfers and adb backup.
+
+   In Android 12 and higher, these attributes have been deprecated and will
+   only apply to cloud backups. You should instead use the attribute
+   android:dataExtractionRules, specifying an @xml resource that configures
+   which files to back up, for cloud backups and for device-to-device
+   transfers, separately. If your minSdkVersion supports older versions,
+   you'll still want to specify an android:fullBackupContent resource if the
+   default behavior is not right for your app.
+
+   https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   https://goo.gle/DataExtractionRules
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ExportService.kt:43: Warning: Unnecessary; Build.VERSION.SDK_INT >= 29 is always true here (SDK_INT ≥ 29 and < 35) [ObsoleteSdkInt]
+                Build.VERSION.SDK_INT >= 29 ->
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/MainActivity.kt:63: Warning: Unnecessary; SDK_INT is always >= 29 [ObsoleteSdkInt]
+        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/res/mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 29. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FrameStore.kt:304: Warning: Do not place Android context classes in static fields (static reference to FrameStore which has field context pointing to Context); this is a memory leak [StaticFieldLeak]
+        @Volatile private var instance: FrameStore? = null
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StyleImport.kt:46: Warning: Do not place Android context classes in static fields (static reference to StyleImports which has field context pointing to Context); this is a memory leak [StaticFieldLeak]
+    @Volatile private var instance: StyleImports? = null
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "StaticFieldLeak":
+   A static field will leak contexts.
+
+   Non-static inner classes have an implicit reference to their outer class.
+   If that outer class is for example a Fragment or Activity, then this
+   reference means that the long-running handler/loader/task will hold a
+   reference to the activity which prevents it from getting garbage
+   collected.
+
+   Similarly, direct field references to activities and fragments from these
+   longer running instances can cause leaks.
+
+   ViewModel classes should never point to Views or non-application Contexts.
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/BorderGroups.kt:57: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var group by rememberSaveable { mutableStateOf(BorderGroups.groupOf(current)) }
+                                    ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Curves.kt:220: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var active by remember { mutableStateOf(-1) }
+                             ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:1344: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+        mutableStateOf(ui.catalog.film(ui.edit.film)?.let(::kindOf) ?: 0)
+        ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ImportSheet.kt:113: Hint: Prefer mutableDoubleStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var strength by remember(pending) { mutableStateOf(1.0) }
+                                        ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/RollView.kt:108: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var current by rememberSaveable(roll.id) { mutableStateOf(0) }
+                                               ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/RollView.kt:322: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var last by remember { mutableStateOf(-1) }
+                           ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AutoboxingStateCreation":
+   Calling mutableStateOf<T>() when T is either backed by a primitive type on
+   the JVM or is a value class results in a state implementation that requires
+   all state values to be boxed. This usually causes an additional allocation
+   for each state write, and adds some additional work to auto-unbox values
+   when reading the value of the state. Instead, prefer to use a specialized
+   primitive state implementation for Int, Long, Float, and Double when the
+   state does not need to track null values and does not override the default
+   SnapshotMutationPolicy. See mutableIntStateOf(), mutableLongStateOf(),
+   mutableFloatStateOf(), and mutableDoubleStateOf() for more information.
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.runtime
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/AboutSection.kt:62: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val open = { url: String -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                                                                                 ~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Brands.kt:437: Warning: Use the KTX extension function Canvas.withTranslation instead? [UseKtx]
+        canvas.save()
+        ~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Brands.kt:499: Warning: Use the KTX extension function String.toColorInt instead? [UseKtx]
+                    layers += android.graphics.Color.parseColor(p.getAttributeValue(NS, "fillColor")) to path
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Coach.kt:95: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putBoolean(key(step), true).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Coach.kt:100: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putBoolean(SKIP, true).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Coach.kt:105: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        val e = prefs.edit().putBoolean(SKIP, false)
+                ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:183: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                hintPrefs.edit().putBoolean("hint_immersive", true).apply()
+                ~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:1501: Warning: Use the KTX extension function Canvas.withTranslation instead? [UseKtx]
+            n.save(); n.translate(ox, oy); n.scale(k, k)
+            ~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:1527: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, Uri.parse(it))
+                                                                                      ~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorScreen.kt:1534: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            context.getSharedPreferences("settings", 0).edit().putString(KEY, uri.toString()).apply()
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:557: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            prefs.edit().putString("last_film", edit.film).putString("last_paper", edit.paper)
+            ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1161: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putBoolean("wide_gamut", on).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1168: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putFloat("highlight_stops_v2", stops).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1231: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                    runCatching { resolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                                                           ~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1233: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            prefs.edit().putString("editor_grant", if (took) uri.toString() else null).apply()
+            ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1246: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString("default_film", film).putString("default_paper", paper)
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1253: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString("new_photo_mode", NEW_NONE).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/EditorViewModel.kt:1285: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putInt("working_edge", edge).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ExifCopy.kt:161: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            val edit = prefs.edit().putString(source.toString(), text)
+                       ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ExifCopy.kt:321: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        context.getSharedPreferences("settings", 0).edit().putBoolean(KEY, on).apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FilmNotes.kt:76: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString(favKey, favourites.joinToString(",")).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FilmNotes.kt:83: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString(recentKey, recent.joinToString(",")).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FrameStore.kt:154: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        _frames.value = list.map { it.copy(persisted = Uri.parse(it.uri).scheme == "file" || it.uri in held) }
+                                                       ~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FrameStore.kt:193: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                        Uri.parse(described.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FrameStore.kt:287: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        for (f in gone) if (f.uri !in still && Uri.parse(f.uri).scheme != "file") {
+                                               ~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/FrameStore.kt:288: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(f.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                                                                  ~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Frames.kt:145: Warning: Use the KTX function createBitmap instead? [UseKtx]
+            val out = Bitmap.createBitmap(l.width, l.height, Bitmap.Config.ARGB_8888, true,
+                      ^
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Frames.kt:233: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+            val scaled = Bitmap.createScaledBitmap(src, max(1, (image.width * k).roundToInt()), max(1, (image.height * k).roundToInt()), true)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/HeifExport.kt:73: Warning: Use the KTX function createBitmap instead? [UseKtx]
+            val one = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/JobNotifier.kt:220: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            context.contentResolver.call(android.net.Uri.parse("content://miui.statusbar.notification.public"),
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/KeepAlive.kt:31: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putBoolean("due", true).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/KeepAlive.kt:47: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        context.getSharedPreferences(PREFS, 0).edit().putBoolean("shown", true).putBoolean("due", false).apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableFilm.kt:210: Warning: Use the KTX function createBitmap instead? [UseKtx]
+            val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888, thumb.hasAlpha(), target)
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableThumbs.kt:64: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val uri = Uri.parse(frame.uri)
+                  ~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableThumbs.kt:104: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+        return Bitmap.createScaledBitmap(b, max(1, (b.width * s).toInt()), max(1, (b.height * s).toInt()), true)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt:266: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                val uri = Uri.parse(frame.uri)
+                          ~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/LightTableViewModel.kt:382: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val exif = runCatching { ExifCopy.read(app, Uri.parse(f.uri)) }.getOrNull() ?: return car
+                                                    ~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Localization.kt:39: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        if (!context.getSharedPreferences("settings", 0).edit().putString(KEY, value.tag).commit()) return false
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Perforations.kt:51: Warning: Use the KTX extension function Canvas.withSave instead? [UseKtx]
+        canvas.save()
+        ~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Presets.kt:109: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString(KEY, JSONArray(list.map { it.toJson() }).toString()).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:227: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                val location = if (LocationSetting.enabled(app)) ExifLocation.encode(ExifCopy.readLocation(app, Uri.parse(job.uri))) else ""
+                                                                                                                ~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:598: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putFloat("working_peak_bpp", next.toFloat()).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:705: Warning: Use the KTX function createBitmap instead? [UseKtx]
+            val tiny = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, false, p3)
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:770: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val uri = if (local != null) Uri.fromFile(local) else Uri.parse(job.uri)
+                                                              ~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:772: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val exif = withContext(Dispatchers.IO) { ExifCopy.read(app, uri, fillKey = Uri.parse(job.uri)) }.withLocation(ExifLocation.decode(job.location))
+                                                                                   ~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1037: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val uri = Uri.parse(job.uri)
+                  ~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1043: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                prefs.edit().putStringSet("grants", HashSet(prefs.getStringSet("grants", emptySet()).orEmpty()) + job.uri).apply()
+                ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1095: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val entry = MediaSaver.discardIfPending(app, Uri.parse(latest.pendingUri))
+                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1152: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(u), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                                                                  ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1155: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        if (keep.size != held.size) prefs.edit().putStringSet("grants", keep).apply()
+                                    ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1199: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            prefs.edit().putFloat(SHEET_RATE_KEY, (0.6 * secondsPerFrame() + 0.4 * measured).toFloat()).apply()
+            ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/ProcessingQueue.kt:1205: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putFloat(rateKey(job), next.toFloat()).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/RealBenchmarkBackend.kt:86: Warning: Use the KTX function createBitmap instead? [UseKtx]
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/RollContactSheet.kt:64: Warning: Use the KTX function createBitmap instead? [UseKtx]
+        val sheet = withContext(Dispatchers.Default) { Bitmap.createBitmap(g.width, g.height, Bitmap.Config.ARGB_8888) }
+                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/RollContactSheet.kt:231: Warning: Use the KTX extension function Canvas.withClip instead? [UseKtx]
+            canvas.save()
+            ~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:155: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                    ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
+                                        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:169: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                                    onClick = { surround = key; prefs.edit().putString(SURROUND_KEY, key).apply() },
+                                                                ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/SettingsScreen.kt:191: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                    ) { intro = it; prefs.edit().putBoolean(LAUNCH_INTRO, it).apply() }
+                                    ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/SourceLoader.kt:159: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+                    val scaled = Bitmap.createScaledBitmap(out, max(1, (out.width * s).toInt()), max(1, (out.height * s).toInt()), true)
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StorageProbe.kt:44: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                prefs.edit().putString("key", key).putLong("bytes", bytes).remove("probing").commit()
+                ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StyleImport.kt:214: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        context.getSharedPreferences(STYLE_STRENGTH_PREFS, 0).edit()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/StyleImport.kt:292: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+            val small = if (s >= 1) photo else Bitmap.createScaledBitmap(photo,
+                                               ^
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Styles.kt:356: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    fun browse(g: String) { group = g; prefs.edit().putString(LAST_GROUP, g).apply() }
+                                       ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Styles.kt:358: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs.edit().putString(LAST_STYLE, s.id).putString(LAST_GROUP, s.group).putFloat(s.id, k.toFloat()).apply()
+        ~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/UpdateDialog.kt:104: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}")),
+                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/UpdateDialog.kt:120: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r?.page ?: Updater.RELEASES_PAGE)))
+                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Updater.kt:73: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    fun setAutoCheck(c: Context, on: Boolean) = prefs(c).edit().putBoolean(KEY_AUTO, on).apply()
+                                                ~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Updater.kt:75: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    fun setWifiDownload(c: Context, on: Boolean) = prefs(c).edit().putBoolean(KEY_WIFI, on).apply()
+                                                   ~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Updater.kt:102: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            prefs(app).edit().putLong(KEY_LAST, System.currentTimeMillis()).apply()
+            ~~~~~~~~~~~~~~~~~
+/home/runner/work/Spektralab-X/Spektralab-X/app/src/main/java/com/dearded/spektralab/Updater.kt:121: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        prefs(context).edit().putString(KEY_SKIP, r.version).apply()
+        ~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 111 warnings, 6 hints

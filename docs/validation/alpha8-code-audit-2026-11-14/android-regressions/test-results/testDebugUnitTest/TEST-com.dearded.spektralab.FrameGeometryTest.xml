@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.FrameGeometryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:25:48.410Z" hostname="runnervm8axu0" time="0.009">
+  <properties/>
+  <testcase name="mat with keyline - gallery mat with hairline border" classname="com.dearded.spektralab.FrameGeometryTest" time="0.005"/>
+  <testcase name="no frame - photo fills container with letterbox" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="portrait composition with bottom caption bar" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="instant card - portrait photo with heavy bottom margin" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="square photo with 9x16 padding in portrait container" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="wide container landscape photo no frame" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="canvas aspect padding - 1x1 square from landscape" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <testcase name="cardTransform matches photoRect scaling" classname="com.dearded.spektralab.FrameGeometryTest" time="0.001"/>
+  <testcase name="thin white border - photo rect accounts for margin" classname="com.dearded.spektralab.FrameGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

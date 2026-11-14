@@ -1,0 +1,148 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:526:11: warning: Use of memory after it is freed [unix.Malloc]
+  526 |         ? spk::android::check_rgba16_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px)
+      |           ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1613:9: note: Assuming 'fd' is >= 0
+ 1613 |     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+      |         ^~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1613:5: note: Taking false branch
+ 1613 |     if (fd < 0) { fail("TIFF: no descriptor"); return JNI_FALSE; }
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1614:12: note: Calling 'export_tiff'
+ 1614 |     return export_tiff(env, reinterpret_cast<Session*>(handle), std::string(), fd, icc_j, target_j, tier_j);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1517:9: note: Assuming 's' is non-null
+ 1517 |     if (!s) { fail("no session"); return JNI_FALSE; }
+      |         ^~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1517:5: note: Taking false branch
+ 1517 |     if (!s) { fail("no session"); return JNI_FALSE; }
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1524:13: note: Assuming the condition is false
+ 1524 |         if (icc_path.empty() || !file) { fail("TIFF: ICC profile missing from engine resources"); return JNI_FALSE; }
+      |             ^~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1524:13: note: Left side of '||' is false
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1524:9: note: Taking false branch
+ 1524 |         if (icc_path.empty() || !file) { fail("TIFF: ICC profile missing from engine resources"); return JNI_FALSE; }
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1526:13: note: Assuming the condition is false
+ 1526 |         if (icc.empty()) { fail("TIFF: ICC profile is empty"); return JNI_FALSE; }
+      |             ^~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1526:9: note: Taking false branch
+ 1526 |         if (icc.empty()) { fail("TIFF: ICC profile is empty"); return JNI_FALSE; }
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1528:36: note: Assuming 'target_j' is null
+ 1528 |         const std::string target = target_j ? str(env, target_j) : std::string("sRGB");
+      |                                    ^~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1528:36: note: '?' condition is false
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1529:34: note: Assuming 'tier_j' is null
+ 1529 |         const std::string tier = tier_j ? str(env, tier_j) : std::string("full");
+      |                                  ^~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1529:34: note: '?' condition is false
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1536:13: note: Assuming field 'prophoto' is false
+ 1536 |         if (s->prophoto && !output.fetch(s->engine, target, true, error)) {
+      |             ^~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1536:25: note: Left side of '&&' is false
+ 1536 |         if (s->prophoto && !output.fetch(s->engine, target, true, error)) {
+      |                         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1540:16: note: Field 'prophoto' is false
+ 1540 |         if (s->prophoto) xf = &output;
+      |                ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1540:9: note: Taking false branch
+ 1540 |         if (s->prophoto) xf = &output;
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1541:18: note: Assuming the condition is false
+ 1541 |         else if (target != "sRGB") {
+      |                  ^~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1541:14: note: Taking false branch
+ 1541 |         else if (target != "sRGB") {
+      |              ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1547:14: note: Calling 'render'
+ 1547 |         if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:487:9: note: Assuming field 'no_film' is false
+  487 |     if (s->view.no_film || s->view.di()) {
+      |         ^~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:487:9: note: Left side of '||' is false
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:487:5: note: Taking true branch
+  487 |     if (s->view.no_film || s->view.di()) {
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:491:33: note: Field 'no_film' is false
+  491 |         const bool ok = s->view.no_film
+      |                                 ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:491:25: note: '?' condition is false
+  491 |         const bool ok = s->view.no_film
+      |                         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:493:15: note: Calling 'render_view'
+  493 |             : spk::android::render_view(s->session, tier, false, out, error, cancel);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:154:5: note: Taking false branch
+  154 |     if (!view_request(session, tier, no_film, request, error)) return false;
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:155:5: note: Taking true branch
+  155 |     if (cancel.enabled()) request.cancelled = [cancel]() noexcept { return cancel.cancelled(); };
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:157:9: note: Assuming the condition is false
+  157 |     if (!spk::view::render(session, request, result, error)) return false;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:157:5: note: Taking false branch
+  157 |     if (!spk::view::render(session, request, result, error)) return false;
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:9: note: Assuming field 'width' is not equal to 0
+  160 |     if (!result.width || !result.height || result.pixels.size() != bytes) {
+      |         ^~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:9: note: Left side of '||' is false
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:26: note: Assuming field 'height' is not equal to 0
+  160 |     if (!result.width || !result.height || result.pixels.size() != bytes) {
+      |                          ^~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:9: note: Left side of '||' is false
+  160 |     if (!result.width || !result.height || result.pixels.size() != bytes) {
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:44: note: Assuming the condition is false
+  160 |     if (!result.width || !result.height || result.pixels.size() != bytes) {
+      |                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:160:5: note: Taking false branch
+  160 |     if (!result.width || !result.height || result.pixels.size() != bytes) {
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:163:20: note: Memory is allocated
+  163 |     void* pixels = std::malloc(bytes);
+      |                    ^~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:164:9: note: Assuming 'pixels' is non-null
+  164 |     if (!pixels) { error = "cannot allocate the view's pixels"; return false; }
+      |         ^~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:164:5: note: Taking false branch
+  164 |     if (!pixels) { error = "cannot allocate the view's pixels"; return false; }
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:166:9: note: Assuming the condition is true
+  166 |     if (cancel.cancelled()) {
+      |         ^~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:166:5: note: Taking true branch
+  166 |     if (cancel.cancelled()) {
+      |     ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/passthrough.hpp:167:9: note: Memory is released
+  167 |         std::free(pixels);
+      |         ^~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:493:15: note: Returning; memory was released
+  493 |             : spk::android::render_view(s->session, tier, false, out, error, cancel);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:494:14: note: 'ok' is true
+  494 |         if (!ok) {
+      |              ^~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:494:9: note: Taking false branch
+  494 |         if (!ok) {
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1547:14: note: Returning; memory was released
+ 1547 |         if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1547:9: note: Taking false branch
+ 1547 |         if (!render(s, tier, result.r, result.float_rgb, cancel)) return JNI_FALSE;
+      |         ^
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:1548:17: note: Calling 'blank_result'
+ 1548 |         error = blank_result(result);
+      |                 ^~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:525:12: note: Assuming the condition is true
+  525 |     return result.float_rgb.empty()
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:525:12: note: '?' condition is true
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:526:11: note: Use of memory after it is freed
+  526 |         ? spk::android::check_rgba16_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px)
+      |           ^                                ~~~~~~~~~~~~~~~
+1 warning generated.

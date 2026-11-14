@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.CurveWireTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:25:25.700Z" hostname="runnervm8axu0" time="0.065">
+  <properties/>
+  <testcase name="ordinaryRowsKeepTheExistingWireBytes" classname="com.dearded.spektralab.CurveWireTest" time="0.006"/>
+  <testcase name="localOrdinaryRowsAndDustKeepTheirOffsets" classname="com.dearded.spektralab.CurveWireTest" time="0.001"/>
+  <testcase name="everyCollidingRowUsesTheFinal256SampleTable" classname="com.dearded.spektralab.CurveWireTest" time="0.013"/>
+  <testcase name="actualLookWireKeepsMasksAfterTheSampledRows" classname="com.dearded.spektralab.CurveWireTest" time="0.029"/>
+  <testcase name="adjacentDoublePointsRemainEditableAfterJsonRoundTrip" classname="com.dearded.spektralab.CurveWireTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

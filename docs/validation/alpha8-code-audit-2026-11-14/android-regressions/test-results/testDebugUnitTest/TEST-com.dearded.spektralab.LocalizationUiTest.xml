@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationUiTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:26:05.185Z" hostname="runnervm8axu0" time="12.317">
+  <properties/>
+  <testcase name="benchmarkResultsAreVisibleWithoutCopyingDiagnostics" classname="com.dearded.spektralab.LocalizationUiTest" time="9.621"/>
+  <testcase name="settingSwitchesBothWaysAndRetainsTheOpenEdit" classname="com.dearded.spektralab.LocalizationUiTest" time="2.696"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openInner(SQLiteDatabase.java:1088)
+	at android.database.sqlite.SQLiteDatabase.openInner(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$open(SQLiteDatabase.java:1067)
+	at android.database.sqlite.SQLiteDatabase.open(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openDatabase(SQLiteDatabase.java:958)
+	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openDatabase(SQLiteDatabase.java:905)
+	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$create(SQLiteDatabase.java:1111)
+	at android.database.sqlite.SQLiteDatabase.create(SQLiteDatabase.java)
+	at org.robolectric.fakes.FakeMediaProvider.lambda$onCreate$0(FakeMediaProvider.java:108)
+	at com.google.common.base.Suppliers$NonSerializableMemoizingSupplier.get(Suppliers.java:194)
+	at org.robolectric.fakes.FakeMediaProvider.query(FakeMediaProvider.java:176)
+	at org.robolectric.shadows.ShadowContentResolver.query(ShadowContentResolver.java:303)
+	at android.content.ContentResolver.query(ContentResolver.java)
+	at com.dearded.spektralab.MediaSaver.sweepPending(MediaSaver.kt:134)
+	at com.dearded.spektralab.ProcessingQueue.recoverInterrupted(ProcessingQueue.kt:1082)
+	at com.dearded.spektralab.ProcessingQueue.access$recoverInterrupted(ProcessingQueue.kt:180)
+	at com.dearded.spektralab.ProcessingQueue$loop$2.invokeSuspend(ProcessingQueue.kt:325)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
+
+System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openInner(SQLiteDatabase.java:1088)
+	at android.database.sqlite.SQLiteDatabase.openInner(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$open(SQLiteDatabase.java:1067)
+	at android.database.sqlite.SQLiteDatabase.open(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openDatabase(SQLiteDatabase.java:958)
+	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$openDatabase(SQLiteDatabase.java:905)
+	at android.database.sqlite.SQLiteDatabase.openDatabase(SQLiteDatabase.java)
+	at android.database.sqlite.SQLiteDatabase.$$robo$$android_database_sqlite_SQLiteDatabase$create(SQLiteDatabase.java:1111)
+	at android.database.sqlite.SQLiteDatabase.create(SQLiteDatabase.java)
+	at org.robolectric.fakes.FakeMediaProvider.lambda$onCreate$0(FakeMediaProvider.java:108)
+	at com.google.common.base.Suppliers$NonSerializableMemoizingSupplier.get(Suppliers.java:194)
+	at org.robolectric.fakes.FakeMediaProvider.query(FakeMediaProvider.java:176)
+	at org.robolectric.shadows.ShadowContentResolver.query(ShadowContentResolver.java:303)
+	at android.content.ContentResolver.query(ContentResolver.java)
+	at com.dearded.spektralab.MediaSaver.sweepPending(MediaSaver.kt:134)
+	at com.dearded.spektralab.ProcessingQueue.recoverInterrupted(ProcessingQueue.kt:1082)
+	at com.dearded.spektralab.ProcessingQueue.access$recoverInterrupted(ProcessingQueue.kt:180)
+	at com.dearded.spektralab.ProcessingQueue$loop$2.invokeSuspend(ProcessingQueue.kt:325)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
+
+]]></system-err>
+</testsuite>

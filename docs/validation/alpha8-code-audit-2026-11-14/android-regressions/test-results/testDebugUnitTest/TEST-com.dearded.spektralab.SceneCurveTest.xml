@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.SceneCurveTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:26:27.797Z" hostname="runnervm8axu0" time="1.903">
+  <properties/>
+  <testcase name="nativeOnlySidecarPreservesSamplesWithoutAppMetadata" classname="com.dearded.spektralab.SceneCurveTest" time="0.296"/>
+  <testcase name="resolvedEngineParamsRetainAuthoredPoints" classname="com.dearded.spektralab.SceneCurveTest" time="0.01"/>
+  <testcase name="spklookZipRetainsAuthoredPointsAndDenseImportedSamples" classname="com.dearded.spektralab.SceneCurveTest" time="0.315"/>
+  <testcase name="editorPointOperationsKeepStrictOrderingAtNarrowGaps" classname="com.dearded.spektralab.SceneCurveTest" time="0.004"/>
+  <testcase name="queueSnapshotPreservesTheActualExportTable" classname="com.dearded.spektralab.SceneCurveTest" time="0.115"/>
+  <testcase name="malformedSamplesFailInsteadOfSilentlyDroppingTheCurve" classname="com.dearded.spektralab.SceneCurveTest" time="0.03"/>
+  <testcase name="absentStyleFieldPreservesAndExplicitIdentityResets" classname="com.dearded.spektralab.SceneCurveTest" time="0.001"/>
+  <testcase name="identityBypassesAndResetHasAnExplicitDelta" classname="com.dearded.spektralab.SceneCurveTest" time="0.003"/>
+  <testcase name="importedSampleTablesNeverBecomeDefaultOrCubic" classname="com.dearded.spektralab.SceneCurveTest" time="0.315"/>
+  <testcase name="explicitDiagonalSamplesAreNotAnExactBypass" classname="com.dearded.spektralab.SceneCurveTest" time="0.001"/>
+  <testcase name="authoredSamplingIsLocaleIndependentAndKeepsAllFiveRows" classname="com.dearded.spektralab.SceneCurveTest" time="0.056"/>
+  <testcase name="exposurePasteIncludesSceneCurveButLayer2PasteDoesNot" classname="com.dearded.spektralab.SceneCurveTest" time="0.0"/>
+  <testcase name="sidecarRestoresControlPointsAndNoFilmDoesNotEraseThem" classname="com.dearded.spektralab.SceneCurveTest" time="0.016"/>
+  <testcase name="importedLargeSampleTableSurvivesUserLibrarySaveAndReload" classname="com.dearded.spektralab.SceneCurveTest" time="0.728"/>
+  <testcase name="malformedSpklookCurveIsAReportedImportFailure" classname="com.dearded.spektralab.SceneCurveTest" time="0.001"/>
+  <testcase name="changeGroupResetClearsOnlyTheSceneCurveAndExposureGroup" classname="com.dearded.spektralab.SceneCurveTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ProcessingQueueGrantTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:26:26.944Z" hostname="runnervm8axu0" time="0.794">
+  <properties/>
+  <testcase name="unrelatedEditorGrantDoesNotRetainFinishedSource" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.101"/>
+  <testcase name="tableRemovalAfterQueueFinishesKeepsEditorGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.065"/>
+  <testcase name="finishedJobAloneDoesNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.07"/>
+  <testcase name="failedAndCancelledJobsKeepTheirSourceForRetry" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.062"/>
+  <testcase name="tableRemovalReleasesGrantWhenPreviouslyQueuedJobHasFinished" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.043"/>
+  <testcase name="tableRemovalAfterEditorMovesReleasesFinalGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.04"/>
+  <testcase name="anotherPendingJobKeepsGrantUntilItFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.034"/>
+  <testcase name="tableImportKeepsGrantWhenQueueCleanupRunsBeforeCommit" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.099"/>
+  <testcase name="removedJobsDoNotKeepGrant" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.048"/>
+  <testcase name="editorKeepsGrantWithoutStaleQueueOwnership" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.041"/>
+  <testcase name="tableRemovalReadsPendingJobPublishedAfterProviderWasCreated" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.122"/>
+  <testcase name="tableKeepsGrantAndCanReleaseItAfterQueueFinishes" classname="com.dearded.spektralab.ProcessingQueueGrantTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

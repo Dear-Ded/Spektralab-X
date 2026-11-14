@@ -1,0 +1,19 @@
+/home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/before/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/before/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/before/src/decompressors/losslessjpeg.cpp:21:
+/home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/before/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+/home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/after/src/decompressors/losslessjpeg.cpp:24: warning: "ZERO" redefined
+   24 | #define ZERO(a) do { memset(a,0,sizeof(a));} while(0)
+      | 
+In file included from /home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/after/src/decompressors/../../internal/losslessjpeg.h:23,
+                 from /home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/after/src/decompressors/losslessjpeg.cpp:21:
+/home/runner/work/Spektralab-X/Spektralab-X/huffman-tests/after/src/decompressors/../../internal/libraw_cxx_defs.h:117: note: this is the location of the previous definition
+  117 | #define ZERO(a) memset(&a, 0, sizeof(a))
+      | 
+PASS pre-fix high-index negative control (exit 1)
+PASS legal cache/slow/DNG/real-pump cases=81920
+PASS high-index cache cases=24576

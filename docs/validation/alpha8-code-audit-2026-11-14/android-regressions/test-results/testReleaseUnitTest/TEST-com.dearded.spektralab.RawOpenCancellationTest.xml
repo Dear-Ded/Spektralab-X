@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.RawOpenCancellationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:25:19.427Z" hostname="runnervm8axu0" time="0.071">
+  <properties/>
+  <testcase name="lateNativeSuccessReleasesCandidateAndKeepsPreviousEditor" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.025"/>
+  <testcase name="cancellationReachesBlockedNativeWithoutReleasingItsToken" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.012"/>
+  <testcase name="failureAndRetryOwnDifferentTokens" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.009"/>
+  <testcase name="failedTokenAllocationDoesNotEnterNativeOrReleaseNull" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.002"/>
+  <testcase name="successStopsTheWatcherBeforeReleasingItsToken" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.002"/>
+  <testcase name="cancellationBeforeDispatcherEntryDoesNotStartNative" classname="com.dearded.spektralab.RawOpenCancellationTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

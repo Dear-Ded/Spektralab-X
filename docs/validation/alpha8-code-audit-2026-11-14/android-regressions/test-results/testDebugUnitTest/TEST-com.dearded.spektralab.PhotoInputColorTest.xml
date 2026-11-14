@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.PhotoInputColorTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-14T07:26:26.356Z" hostname="runnervm8axu0" time="0.202">
+  <properties/>
+  <testcase name="srgbPixelsAndTagAreUnchanged" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.017"/>
+  <testcase name="gainmapF16CopyAndRescaleKeepLegacyEightBitBaseAndOwnedGainMap" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.033"/>
+  <testcase name="p3PixelsAndTagAreUnchanged" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.042"/>
+  <testcase name="realP3JpegDecodeAndResizeUseActualMetadata" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.038"/>
+  <testcase name="realSrgbJpegDecodeUsesActualMetadata" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.038"/>
+  <testcase name="unsupportedGamutAndTransferDoNotBecomeSrgbAndReleaseOwnedStorage" classname="com.dearded.spektralab.PhotoInputColorTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
