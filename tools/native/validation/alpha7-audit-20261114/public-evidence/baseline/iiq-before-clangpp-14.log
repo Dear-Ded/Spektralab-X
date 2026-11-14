@@ -1,0 +1,11 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:772:24: runtime error: shift exponent 32 is too large for 32-bit type 'int'
+==795272==WARNING: invalid path to external symbolizer!
+==795272==WARNING: Failed to use and restart external symbolizer!
+    #0 0x4d2cfc  (/data/work/gpt-alpha7-audit-20261114/iiq-before-clangpp-14+0x4d2cfc) (BuildId: 6ff6e1bf14753bf61bf1410861cdbc454d090cfd)
+    #1 0x4d317f  (/data/work/gpt-alpha7-audit-20261114/iiq-before-clangpp-14+0x4d317f) (BuildId: 6ff6e1bf14753bf61bf1410861cdbc454d090cfd)
+    #2 0x4d2f20  (/data/work/gpt-alpha7-audit-20261114/iiq-before-clangpp-14+0x4d2f20) (BuildId: 6ff6e1bf14753bf61bf1410861cdbc454d090cfd)
+    #3 0x7fc7c5431d8f  (/lib/x86_64-linux-gnu/libc.so.6+0x29d8f) (BuildId: 12b87db2df813df96f66d6f02dd18ea5c8b7cf8d)
+    #4 0x7fc7c5431e3f  (/lib/x86_64-linux-gnu/libc.so.6+0x29e3f) (BuildId: 12b87db2df813df96f66d6f02dd18ea5c8b7cf8d)
+    #5 0x41d334  (/data/work/gpt-alpha7-audit-20261114/iiq-before-clangpp-14+0x41d334) (BuildId: 6ff6e1bf14753bf61bf1410861cdbc454d090cfd)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:772:24 in 

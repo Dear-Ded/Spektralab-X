@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.AtomicTextFileTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:06:08.601Z" hostname="ser858255664526" time="0.121">
+  <properties/>
+  <testcase name="failedReplacementDoesNotDeleteTheExistingTarget" classname="com.dearded.spektralab.AtomicTextFileTest" time="0.108"/>
+  <testcase name="stagingFailureThrowsAndKeepsTheLastGoodFile" classname="com.dearded.spektralab.AtomicTextFileTest" time="0.006"/>
+  <testcase name="createsParentsAndReplacesCompleteText" classname="com.dearded.spektralab.AtomicTextFileTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

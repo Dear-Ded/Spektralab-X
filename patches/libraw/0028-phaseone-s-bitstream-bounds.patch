@@ -1,0 +1,87 @@
+From: GPT (OpenAI), AI assistant
+Subject: [PATCH] Bound Phase One S bitstream reads and decoded arithmetic
+
+diff --git a/src/decoders/decoders_libraw.cpp b/src/decoders/decoders_libraw.cpp
+index 96f36c8..db40318 100644
+--- a/src/decoders/decoders_libraw.cpp
++++ b/src/decoders/decoders_libraw.cpp
+@@ -747,29 +747,35 @@
+ struct iiq_bitstream_t
+ {
+ 	uint64_t curr;
+-	uint32_t *input;
++	const unsigned char *input;
+ 	uint8_t used;
+ 	size_t pos, maxpos;
+-	iiq_bitstream_t(uint32_t *img_input, size_t inpsz): curr(0),input(img_input),used(0),pos(0),maxpos(inpsz){}
++	iiq_bitstream_t(uint32_t *img_input, size_t inpsz): curr(0),input(reinterpret_cast<const unsigned char *>(img_input)),used(0),pos(0),maxpos(inpsz){}
+ 
+ 	void fill()
+     {
+       if (used <= 32)
+       {
+-        uint64_t bitpump_next = *input++;
+-		pos++;
+-		if (pos > maxpos) throw LIBRAW_EXCEPTION_IO_EOF;
++        if (pos >= maxpos) throw LIBRAW_EXCEPTION_IO_EOF;
++        const size_t remaining = maxpos - pos;
++        const size_t bytes = remaining < sizeof(uint32_t) ? remaining : sizeof(uint32_t);
++        uint32_t bitpump_next = 0;
++        memcpy(&bitpump_next, input, bytes);
++        input += bytes;
++        pos += bytes;
+         curr = (curr << 32) | bitpump_next;
+         used += 32;
+       }
+     }
+     uint64_t peek(uint8_t len)
+     {
+-      if (len >= used)
++      if (len > 32) throw LIBRAW_EXCEPTION_IO_CORRUPT;
++      if (!len) return 0;
++      if (len > used)
+         fill();
+ 
+ 	  uint64_t res = curr >> (used - len);
+-      return res & ((1 << (uint8_t)len) - 1);
++      return res & ((uint64_t(1) << len) - 1);
+     }
+ 
+     void consume(uint8_t len)
+@@ -789,6 +794,7 @@ struct iiq_bitstream_t
+ 
+ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf, size_t datalen /*, int bit_depth*/)
+ {
++    if (out_width <= 0 || !img_input || !outbuf) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+ #if 0
+ 	if (((bit_depth - 12) & 0xFFFFFFFD) != 0)
+ 		return 0;
+@@ -853,20 +859,24 @@ void decode_S_type(int32_t out_width, uint32_t *img_input, ushort *outbuf, size_
+ 
+         uint8_t take_bits = init_bits + extra_bits[bidx]; // 11 or less
+ 
++		if (bit_check[0] > pix_sub_init || bit_check[1] > pix_sub_init ||
++		    bit_check[0] < extra_bits[bidx] || bit_check[1] < extra_bits[bidx])
++			throw LIBRAW_EXCEPTION_IO_CORRUPT;
+         uint32_t bp_shift[2] = {bit_check[0] - extra_bits[bidx], bit_check[1] - extra_bits[bidx]};
+ 
+ 		int pix_sub[2] = {0xFFFF >> (pix_sub_init - bit_check[0]), 0xFFFF >> (pix_sub_init - bit_check[1])};
+ 
+ 	    for (int i = 0; i < 8; i++) // MAIN LOOP for pixel decoding
+         {
+-          int32_t value = 0;
++          int64_t value = 0;
+           if (bit_check[i & 1] == 9)
+             value = int32_t(stream.get(14));
+           else
+-            value = prev_pix_value[i & 1] + ((uint32_t)stream.get(take_bits) << bp_shift[i & 1]) - pix_sub[i & 1];
++            value = int64_t(prev_pix_value[i & 1]) + (int64_t(stream.get(take_bits)) << bp_shift[i & 1]) - pix_sub[i & 1];
+ 
+-		  outbuf[i] = LIM(value << pix_corr_shift, 0, 0xffff);
+-          prev_pix_value[i & 1] = value;
++		  if (value < INT32_MIN || value > INT32_MAX) throw LIBRAW_EXCEPTION_IO_CORRUPT;
++		  outbuf[i] = ushort(LIM(value * (1 << pix_corr_shift), 0, 0xffff));
++          prev_pix_value[i & 1] = int32_t(value);
+         }
+           outbuf += 8; // always produce 8 pixels from this cluster
+       }

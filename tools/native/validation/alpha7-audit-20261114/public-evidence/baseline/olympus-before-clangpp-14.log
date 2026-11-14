@@ -1,0 +1,11 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp:70:31: runtime error: shift exponent 32 is too large for 32-bit type 'uint32_t' (aka 'unsigned int')
+==795288==WARNING: invalid path to external symbolizer!
+==795288==WARNING: Failed to use and restart external symbolizer!
+    #0 0x4d43e2  (/data/work/gpt-alpha7-audit-20261114/olympus-before-clangpp-14+0x4d43e2) (BuildId: 433d2d5f7b3f001fb0ea774084456b6aedbcd2bd)
+    #1 0x4d2e2b  (/data/work/gpt-alpha7-audit-20261114/olympus-before-clangpp-14+0x4d2e2b) (BuildId: 433d2d5f7b3f001fb0ea774084456b6aedbcd2bd)
+    #2 0x4d28d0  (/data/work/gpt-alpha7-audit-20261114/olympus-before-clangpp-14+0x4d28d0) (BuildId: 433d2d5f7b3f001fb0ea774084456b6aedbcd2bd)
+    #3 0x7fd23e25bd8f  (/lib/x86_64-linux-gnu/libc.so.6+0x29d8f) (BuildId: 12b87db2df813df96f66d6f02dd18ea5c8b7cf8d)
+    #4 0x7fd23e25be3f  (/lib/x86_64-linux-gnu/libc.so.6+0x29e3f) (BuildId: 12b87db2df813df96f66d6f02dd18ea5c8b7cf8d)
+    #5 0x41d364  (/data/work/gpt-alpha7-audit-20261114/olympus-before-clangpp-14+0x41d364) (BuildId: 433d2d5f7b3f001fb0ea774084456b6aedbcd2bd)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp:70:31 in 

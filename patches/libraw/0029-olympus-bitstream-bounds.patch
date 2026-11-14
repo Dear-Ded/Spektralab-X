@@ -1,0 +1,111 @@
+From: GPT (OpenAI), AI assistant
+Subject: [PATCH] Bound Olympus bit widths and reject truncated refills
+
+diff --git a/src/decoders/olympus14.cpp b/src/decoders/olympus14.cpp
+index 27ff87d..40a0d8d 100644
+--- a/src/decoders/olympus14.cpp
++++ b/src/decoders/olympus14.cpp
+@@ -65,9 +65,11 @@ void skip_bit(uint32_t &vbits)
+   }
+   uint32_t getbits(unsigned wbits)
+   {
++    if (!wbits) return 0;
++    if (wbits > 16) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+     while (bitcount < wbits)
+       add_data();
+-    uint32_t ret = bitstorage << (32 - (bitcount & 0x1f)) >> (32 - wbits);
++    uint32_t ret = (bitstorage >> (bitcount - wbits)) & ((1u << wbits) - 1);
+     bitcount -= wbits;
+     return ret;
+   }
+@@ -83,7 +85,7 @@ void skip_bit(uint32_t &vbits)
+     int i = 0;
+     while (pos < datasz)
+       b[i++] = bufp[pos++];
+-    refill(2);
++    refill(2 - i);
+     for (; i < 2; i++)
+       b[i] = bufp[pos++];
+     return b[0] << 8 | b[1];
+@@ -101,7 +103,7 @@ void skip_bit(uint32_t &vbits)
+     int i = 0;
+     while (pos < datasz)
+       b[i++] = bufp[pos++];
+-    refill(4);
++    refill(4 - i);
+     for (; i < 4; i++)
+       b[i] = bufp[pos++];
+     return b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3];
+@@ -109,8 +111,9 @@ void skip_bit(uint32_t &vbits)
+   void refill(int b)
+   {
+ 	  int r = input->read(bufp, 1, buffer.size());
++	  if (r < b) throw LIBRAW_EXCEPTION_IO_EOF;
+ 	  pos = 0;
+-	  datasz = r > b ? r : b; 
++	  datasz = r;
+   }
+ };
+ 
+@@ -152,6 +155,9 @@ int32_t oly_code(buffered_bitpump_t *th, unsigned int wbits, unsigned int tag0x6
+ {
+   int highdatabit;
+ 
++  if (wbits >= 16 || tag0x640 > 16 || tag0x643 > 16)
++    throw LIBRAW_EXCEPTION_IO_CORRUPT;
++
+   if (!th->bitcount)
+     th->replace_data();
+ 
+@@ -193,7 +199,7 @@ int32_t oly_code(buffered_bitpump_t *th, unsigned int wbits, unsigned int tag0x6
+   {
+ 	  while (vbits < wbits)
+ 		  vbits = th->add_data();
+-	  low = th->bitstorage << (32 - (vbits & 0x1f)) >> (32 - (wbits & 0x1f));
++	  low = (th->bitstorage >> (vbits - wbits)) & ((1u << wbits) - 1);
+ 	  th->bitcount = vbits - wbits;
+   }
+   *glc = low | (high << wbits);
+@@ -212,10 +218,13 @@ void LibRaw::olympus_load_raw()
+ 	uint32_t context[4] = { 0,0,0,0 };
+ 	buffered_bitpump_t pump(libraw_internal_data.internal_data.input, 65536);
+ 
++	if (imgdata.makernotes.olympus.tagX641 < 0 || imgdata.makernotes.olympus.tagX641 > 30 ||
++	    tag0x640 < 0 || tag0x640 > 16 || tag0x643 > 16)
++		throw LIBRAW_EXCEPTION_IO_CORRUPT;
+ 	const int32_t one_shl_tag0x641 = 1 << imgdata.makernotes.olympus.tagX641;
+ 	const int32_t tag0x642 = imgdata.makernotes.olympus.tagX642;
+ 	const int32_t tag0x644 = imgdata.makernotes.olympus.tagX644;
+-	const int32_t one_shl_tag645 = 1 << (imgdata.makernotes.olympus.tagX645 & 0x1f);
++	const uint32_t one_shl_tag645 = 1u << (imgdata.makernotes.olympus.tagX645 & 0x1f);
+ 	const int32_t tag0x646 = imgdata.makernotes.olympus.tagX646;
+ 	const int32_t tag0x647 = imgdata.makernotes.olympus.tagX647;
+ 	const int32_t tag0x648 = imgdata.makernotes.olympus.tagX648;
+@@ -223,7 +232,9 @@ void LibRaw::olympus_load_raw()
+ 	const int32_t tag0x650 = imgdata.makernotes.olympus.tagX650;
+ 	const int32_t tag0x651 = imgdata.makernotes.olympus.tagX651;
+ 	const int32_t tag0x652 = MAX(1, imgdata.makernotes.olympus.tagX652);
+-	const uint16_t datamax = 1<<imgdata.makernotes.olympus.ValidBits;
++	if (imgdata.makernotes.olympus.ValidBits < 1 || imgdata.makernotes.olympus.ValidBits > 16)
++		throw LIBRAW_EXCEPTION_IO_CORRUPT;
++	const uint32_t datamax = 1u << imgdata.makernotes.olympus.ValidBits;
+ 
+     const int32_t raw_width = imgdata.sizes.raw_width;
+     ushort * const raw_image = imgdata.rawdata.raw_image;
+@@ -261,7 +272,7 @@ void LibRaw::olympus_load_raw()
+ 		  if (wbits > tag0x651) 
+             wbits = tag0x651;
+ 
+-          if (wbits >= 16)
++          if (wbits < 0 || wbits >= 16)
+             throw LIBRAW_EXCEPTION_IO_CORRUPT;
+ 
+           int32_t gcode = oly_code(&pump, wbits, tag0x640, tag0x643, tag0x652, &glc, &t640bits, &t643bits);
+@@ -283,6 +294,7 @@ void LibRaw::olympus_load_raw()
+           else
+             vbits = 0;
+ 
++		  if (tag0x644 < 0 || tag0x644 >= 32) throw LIBRAW_EXCEPTION_IO_CORRUPT;
+ 		  pred1 = context[0];
+ 		  context[0] = (tag0x644 == 15) ? 0 : vbits >> tag0x644;
+           int32_t W = col < 2 ? tag0x642 : context[1];

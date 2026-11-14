@@ -1,0 +1,30 @@
+From: GPT (OpenAI), AI assistant
+Subject: [PATCH] Sequence stage lookup before invoking its member pointer
+
+Keep the same stage and arguments, but materialize the member pointer before
+moving the chain. This also avoids GCC 11 ASan/UBSan using the chain's stack
+address as the bounds-check index for the combined subscript/member call.
+The complete recovery regression must pass with both GCC and Clang sanitizers.
+
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -2251,7 +2251,8 @@
+     cur.cur = std::move(in);
+     for (size_t i = 0; i < kFilmStageCount; ++i) {
+         Chain next;
+-        if (!(this->*kFilmStages[i].run)(std::move(cur), next, error)) return false;
++        const auto run = kFilmStages[i].run;
++        if (!(this->*run)(std::move(cur), next, error)) return false;
+         cur = std::move(next);
+     }
+     out = std::move(cur.cur);
+@@ -2672,7 +2673,8 @@
+     for (size_t i = 0; i < kPrintStageCount; ++i) {
+         if (bounded && i == 2) return print_tail_bounded(std::move(cur.cur), out, error);
+         Chain next;
+-        if (!(this->*kPrintStages[i].run)(std::move(cur), next, error)) return false;
++        const auto run = kPrintStages[i].run;
++        if (!(this->*run)(std::move(cur), next, error)) return false;
+         cur = std::move(next);
+     }
+     out = std::move(cur.cur);

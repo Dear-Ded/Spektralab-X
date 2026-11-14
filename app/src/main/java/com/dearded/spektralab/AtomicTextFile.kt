@@ -8,10 +8,14 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 /** Private JSON writes, co-created with GPT (OpenAI). Failure leaves the previous file in place. */
 internal fun writeAtomicText(file: File, text: String) {
+    writeAtomicBytes(file, text.toByteArray(Charsets.UTF_8))
+}
+
+internal fun writeAtomicBytes(file: File, bytes: ByteArray) {
     file.parentFile?.mkdirs()
     val part = File(file.parentFile, file.name + ".part")
     FileOutputStream(part).use { stream ->
-        stream.write(text.toByteArray(Charsets.UTF_8))
+        stream.write(bytes)
         stream.fd.sync()
     }
     // Same-directory replacement must succeed atomically; never delete the good file to retry.

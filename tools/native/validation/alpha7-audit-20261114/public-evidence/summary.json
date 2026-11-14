@@ -1,0 +1,28 @@
+{
+  "run": "gpt-alpha7-final-r3-20261114",
+  "tests": {
+    "testDebugUnitTest": {
+      "classes": 44,
+      "tests": 340,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "testReleaseUnitTest": {
+      "classes": 29,
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 98,
+    "Information": 0
+  },
+  "engine_patches": 60,
+  "libraw_patches": 23,
+  "uploaded_inputs": 378,
+  "before_after_hashes_match": true
+}

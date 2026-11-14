@@ -1,0 +1,99 @@
+From: GPT (OpenAI), AI assistant
+Subject: [PATCH] CRX: define quantizer shifts and reject overflowing residuals
+
+The legacy branch evaluated a negative right shift before its high-QP branch,
+which also shifted by QP/6+26. Use the same mathematical scale as QStep tables
+and reject values that cannot fit their output types. Negative QP retains the
+maintenance clamp to the first table entry. Average QP sums in 64 bits.
+
+--- a/src/decoders/crx.cpp
++++ b/src/decoders/crx.cpp
+@@ -194,5 +194,24 @@
+ int32_t q_step_tbl[8] = {0x28, 0x2D, 0x33, 0x39, 0x40, 0x48};
+ 
++static bool crxQuantizationScale(int64_t qp, uint32_t &scale)
++{
++  const int64_t quotient = qp / 6;
++  const uint32_t value = q_step_tbl[qp < 0 ? 0 : qp % 6];
++  if (quotient < 6)
++  {
++    const int64_t shift = 6 - quotient;
++    scale = shift >= 32 ? 0 : value >> shift;
++  }
++  else
++  {
++    const int64_t shift = quotient - 6;
++    if (shift >= 32 || value > (UINT32_MAX >> shift))
++      return false;
++    scale = value << shift;
++  }
++  return true;
++}
++
+ uint32_t JS[32] = {1,    1,    1,     1,     2,     2,     2,      2,      4,      4,     4,
+                    4,    8,    8,     8,     8,     0x10,  0x10,   0x20,   0x20,   0x40,  0x40,
+                    0x80, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000};
+@@ -1112,13 +1131,18 @@
+   else
+   {
+     // prev. version
+-    int32_t qScale = q_step_tbl[MAX(0, band->qParam % 6)] >> (6 - band->qParam / 6);
+-    if (band->qParam / 6 >= 6)
+-      qScale = q_step_tbl[band->qParam % 6] * (1 << (band->qParam / 6 + 26));
++    uint32_t qScale;
++    if (!crxQuantizationScale(band->qParam, qScale) || qScale > INT32_MAX)
++      return -1;
+ 
+     if (qScale != 1)
+       for (int32_t i = 0; i < band->width; ++i)
+-        bandBuf[i] *= qScale;
++      {
++        const int64_t scaled = int64_t(bandBuf[i]) * qScale;
++        if (scaled < INT32_MIN || scaled > INT32_MAX)
++          return -1;
++        bandBuf[i] = int32_t(scaled);
++      }
+   }
+ 
+   return 0;
+@@ -2030,11 +2054,9 @@
+       for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl)
+       {
+-        int32_t quantVal = qpTable[row0Idx++] + qpTable[row1Idx++] + qpTable[row2Idx++] + qpTable[row3Idx++];
++        int64_t quantVal = int64_t(qpTable[row0Idx++]) + qpTable[row1Idx++] + qpTable[row2Idx++] + qpTable[row3Idx++];
+         // not sure about this nonsense - why is it not just avg like with 2 levels?
+         quantVal = ((quantVal < 0) * 3 + quantVal) >> 2;
+-        if (quantVal / 6 >= 6)
+-          *qStepTbl = q_step_tbl[quantVal % 6] << ((quantVal / 6 - 6 ) & 0x1f);
+-        else
+-          *qStepTbl = q_step_tbl[MAX(0, quantVal % 6)] >> (6 - quantVal / 6);
++        if (!crxQuantizationScale(quantVal, *qStepTbl))
++          return -1;
+       }
+     }
+@@ -2052,9 +2074,7 @@
+       for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl)
+       {
+-        int32_t quantVal = (qpTable[row0Idx++] + qpTable[row1Idx++]) / 2;
+-        if (quantVal / 6 >= 6)
+-          *qStepTbl = q_step_tbl[quantVal % 6] << ((quantVal / 6 - 6) & 0x1f);
+-        else
+-          *qStepTbl = q_step_tbl[MAX(0, quantVal % 6)] >> (6 - quantVal / 6);
++        const int64_t quantVal = (int64_t(qpTable[row0Idx++]) + qpTable[row1Idx++]) / 2;
++        if (!crxQuantizationScale(quantVal, *qStepTbl))
++          return -1;
+       }
+     }
+@@ -2066,10 +2086,8 @@
+     qStep->height = qpHeight;
+     for (int qpRow = 0; qpRow < qpHeight; ++qpRow)
+       for (int qpCol = 0; qpCol < qpWidth; ++qpCol, ++qStepTbl, ++qpTable)
+-        if (*qpTable / 6 >= 6)
+-          *qStepTbl = q_step_tbl[*qpTable % 6] << ((*qpTable / 6 - 6) & 0x1f);
+-        else
+-          *qStepTbl = q_step_tbl[MAX(0, (*qpTable % 6))] >> (6 - *qpTable / 6);
++        if (!crxQuantizationScale(*qpTable, *qStepTbl))
++          return -1;
+ 
+     break;
+   }

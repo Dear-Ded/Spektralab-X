@@ -250,7 +250,7 @@ class LutBakeTest {
         val source = look(2)
         val baked = LutStore(dir).save(id, source, SpkLut.SPACE_SRGB)
         assertArrayEquals(baked.data, LutStore(dir).load(id)!!.data, 0f)
-        assertEquals(0x324B5053, ByteBuffer.wrap(File(dir, "$id.lut").readBytes()).order(ByteOrder.LITTLE_ENDIAN).int)
+        assertEquals(0x334B5053, ByteBuffer.wrap(File(dir, "$id.lut").readBytes()).order(ByteOrder.LITTLE_ENDIAN).int)
         val original = LutStore(dir).original(id)!!
         assertEquals(SpkLut.SPACE_SRGB, original.second)
         val restored = CubeFile.parse(String(original.first, Charsets.US_ASCII)).threeD!!
@@ -265,5 +265,10 @@ class LutBakeTest {
         File(dir, "lut_legacy.cube").writeBytes(source.toCube())
         assertArrayEquals(frozen.data, LutStore(dir).load("lut_legacy")!!.data, 0f)
         assertEquals(SpkLut.SPACE_SRGB, LutStore(dir).original("lut_legacy")!!.second)
+        buf.putInt(0, 0x324B5053)
+        File(dir, "lut_piecewise.lut").writeBytes(buf.array())
+        File(dir, "lut_piecewise.cube").writeBytes(source.toCube())
+        assertArrayEquals(frozen.data, LutStore(dir).load("lut_piecewise")!!.data, 0f)
+        assertEquals(SpkLut.SPACE_SRGB, LutStore(dir).original("lut_piecewise")!!.second)
     }
 }

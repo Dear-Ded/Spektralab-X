@@ -190,15 +190,14 @@ class UserProfiles(private val dir: File) {
         require(id.startsWith(FilmRecipe.PREFIX) && Regex("[a-z0-9_-]{1,96}").matches(id)) { "bad user stock id $id" }
         dir.mkdirs()
         val target = File(dir, "$id.json")
-        val tmp = File(dir, "$id.json.part")
-        tmp.writeText(json.toString())
-        if (!tmp.renameTo(target)) { target.delete(); if (!tmp.renameTo(target)) error("cannot store $target") }
+        writeAtomicText(target, json.toString())
         return target
     }
 
     fun delete(id: String, engineDir: File?) {
-        File(dir, "$id.json").delete()
-        engineDir?.let { File(it, "profiles/$id.json").delete() }
+        require(id.startsWith(FilmRecipe.PREFIX) && Regex("[a-z0-9_-]{1,96}").matches(id)) { "bad user stock id $id" }
+        java.nio.file.Files.deleteIfExists(File(dir, "$id.json").toPath())
+        engineDir?.let { java.nio.file.Files.deleteIfExists(File(it, "profiles/$id.json").toPath()) }
     }
 
     /** A free id for [wanted]: itself, or with _2, _3 … when [taken] says it is in use. */
@@ -219,7 +218,7 @@ class UserProfiles(private val dir: File) {
         for (f in list()) {
             val dest = File(profiles, f.name)
             if (dest.exists() && dest.length() == f.length() && dest.lastModified() >= f.lastModified()) { n++; continue }
-            f.copyTo(dest, overwrite = true)
+            writeAtomicBytes(dest, f.readBytes())
             n++
         }
         return n

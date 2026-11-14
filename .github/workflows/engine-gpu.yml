@@ -33,6 +33,14 @@ jobs:
           for p in patches/libraw/*.patch; do
             patch -d "$RUNNER_TEMP/raw-libraw" -p1 --fuzz=0 --forward --batch < "$p"
           done
+      - name: Check RAW quantizer and bitstream boundaries
+        run: |
+          mkdir -p raw-storage-evidence
+          LIBRAW_SOURCE="$RUNNER_TEMP/raw-libraw" BUILD_DIR="$PWD/raw-quantizer" SANITIZE=1 \
+            bash tools/native/run_libraw_crx_quantizer.sh > raw-storage-evidence/quantizer.log 2>&1
+          LIBRAW_SOURCE="$RUNNER_TEMP/raw-libraw" BUILD_DIR="$PWD/raw-bitstreams" SANITIZE=1 \
+            bash tools/native/run_libraw_bitstreams.sh > raw-storage-evidence/bitstreams.log 2>&1
+          cat raw-storage-evidence/quantizer.log raw-storage-evidence/bitstreams.log
       - name: Build complete sanitized decoder
         run: |
           cmake -S tools/native/float_dng_deflate_host -B raw-storage-build -G Ninja \
@@ -117,6 +125,15 @@ jobs:
             -DSPEKTRALAB_BUILD_NATIVE_RAW=OFF -DSPEKTRALAB_BUILD_HOST=OFF \
             -DSPEKTRALAB_BUILD_DESKTOP=OFF -DSPEKTRALAB_BUILD_TEST_DLL=OFF
           cmake --build build-fir --target spektralab_engine -j2
+      - name: Check pipeline failure recovery
+        env:
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: |
+          mkdir -p fir-evidence
+          UP="$PWD/upstream" B="$PWD/build-fir" BUILD_DIR="$PWD/recovery-tests" SANITIZE=1 \
+            bash tools/native/run_pipeline_recovery.sh > fir-evidence/recovery.log 2>&1
+          cat fir-evidence/recovery.log
       - name: Compare exact meter and scene order statistics
         run: |
           mkdir -p fir-evidence

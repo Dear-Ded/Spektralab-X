@@ -1,0 +1,15 @@
+// Read resolved release coordinates without changing production configuration.
+gradle.beforeProject { project ->
+    project.plugins.withId('com.android.application') {
+        project.tasks.register('auditRuntimeComponents') {
+            doLast {
+                def components = project.configurations.getByName('releaseRuntimeClasspath')
+                    .incoming.resolutionResult.allComponents.collect { it.moduleVersion }
+                    .findAll { it != null }.collect { [group: it.group, name: it.name, version: it.version] }
+                    .sort { a, b -> "${a.group}:${a.name}" <=> "${b.group}:${b.name}" }
+                def destination = new File(System.getenv('SPK_AUDIT_DIR'), 'runtime-components.json')
+                destination.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(components)) + '\n'
+            }
+        }
+    }
+}

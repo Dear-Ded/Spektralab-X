@@ -8,6 +8,23 @@
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
+## 0.2.00-alpha-7 · 2026-11-14
+
+**省流：** 修复快速切图、重启和保存失败时的状态丢失，选片预览使用完整配方；外部 LUT 更准确，RAW 计算少做重复工作。补齐三类 RAW 解码边界和更新安装检查。
+
+内部安装版本码递增为 **127**，沿用原发布签名，可覆盖原正式签名版本。本轮共创：**GPT（OpenAI，AI 助手）**。
+
+- 快速切图和退出前保留编辑，重启后恢复当前状态；存储失败会明确提示，照片选择、手动卷和风格不再先显示保存成功。自定义配方和风格原子替换，失败时保留上一份文件。
+- 选片预览使用当前完整配方；读取缓存缩略图不再排在耗时引擎操作后。修复外部文件路由和完整导出帧的验证边界。
+- 新导入 LUT 使用分段 ProPhoto 编码及更精确的插值烘焙；历史缓存按原样读取。新的本地缓存把渲染表和分享用原表放在同一次原子提交中，避免两份文件保存到不同版本。
+- RAW 曝光统计复用工作区，标准显影预计算 sigmoid 的固定量，保留既有数值约定。默认仍为线性 RAW；云端阶段测量不等于手机整图提速。
+- 修复 CRX 极端量化参数的移位与整数溢出、Phase One S 位流读取和 Olympus 位流边界。损坏输入明确失败；未把合成边界测试称为真实相机问题文件复现。
+- 更新下载在安装前再次检查包名、版本、调试标志和签名，失败时清理安装会话；所有发布密钥候选都核对公开证书，临时调试密钥产物明确标注。
+
+安装时的具体安全提示尚未取得原文及手机实测证据，**不能保证本版消除系统或厂商的安装提示**。本版使用项目原发布证书，保留用户数据；未大规模真机验证，需要社区反馈。
+
+审查范围、云端回归和 APK 检验边界见 [Alpha 7 记录](docs/ALPHA7_AUDIT_2026-11-14.md)。此前研究记录：[完整帧与外部文件](docs/EXPORT_ROUTING_FIXES_2026-11-13.md)、[LUT 精度](docs/EXPERT_COLOR_RESEARCH_2026-11-13.md)、[保存与预览](docs/SAVE_FAILURE_AND_PREVIEW_SCHEDULING_2026-11-13.md)、[RAW 算法优化](docs/RAW_ALGORITHM_OPTIMIZATION_2026-11-13.md)。
+
 ## 0.2.00-alpha-6 · 2026-11-13
 
 **省流：** 不选胶卷也能只用滤镜保存图片，自定义组合保存得更完整；RAW 少占一些内存，测光和曲线少做重复计算。界面保持原样，未大规模真机验证，需要社区反馈。

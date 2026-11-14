@@ -47,8 +47,8 @@ class UserStyles(private val dir: File) {
     fun save(style: UserStyle, thumbJpeg: ByteArray? = null) {
         require(UserStyle.ID.matches(style.id)) { "bad style id ${style.id}" }
         dir.mkdirs()
-        thumbJpeg?.let { write(File(dir, "${style.id}.jpg"), it) }
-        write(File(dir, "${style.id}.json"), style.toJson().toString().toByteArray(Charsets.UTF_8))
+        thumbJpeg?.let { writeAtomicBytes(File(dir, "${style.id}.jpg"), it) }
+        writeAtomicText(File(dir, "${style.id}.json"), style.toJson().toString())
         _all.value = load()
     }
 
@@ -56,7 +56,7 @@ class UserStyles(private val dir: File) {
     fun delete(id: String): UserStyle? {
         if (!UserStyle.ID.matches(id)) return null
         val gone = _all.value.firstOrNull { it.id == id }
-        File(dir, "$id.json").delete()
+        java.nio.file.Files.deleteIfExists(File(dir, "$id.json").toPath())
         File(dir, "$id.jpg").delete()
         _all.value = load()
         return gone
@@ -72,12 +72,6 @@ class UserStyles(private val dir: File) {
             .filter { it.length() <= MAX_FILE }
             .mapNotNull { f -> runCatching { UserStyle.fromJson(JSONObject(f.readText())) }.getOrNull() }
             .sortedBy { it.added }
-
-    private fun write(target: File, bytes: ByteArray) {
-        val tmp = File(target.parentFile, target.name + ".part")
-        tmp.writeBytes(bytes)
-        if (!tmp.renameTo(target)) { target.delete(); if (!tmp.renameTo(target)) error("cannot store $target") }
-    }
 
     private companion object { const val MAX_FILE = SpkPackage.MAX_LOOK }
 }

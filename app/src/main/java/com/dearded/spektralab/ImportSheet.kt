@@ -185,12 +185,21 @@ fun ImportHost(vm: EditorViewModel) {
                     }
                     ReportList(pending.report)
                     Buttons(onCancel = ::cancel, keep = "保存") {
+                        if (state.busy) return@Buttons
                         val p = pending
+                        state = state.copy(busy = true)
                         scope.launch {
-                            withContext(Dispatchers.IO) { library.saveStyle(p, name, category, strength) }
-                            vm.showMessage("已保存风格「${name.trim().ifEmpty { p.look.name }}」")
-                            before = null
-                            state = ImportUi()
+                            try {
+                                withContext(Dispatchers.IO) { library.saveStyle(p, name, category, strength) }
+                                vm.showMessage("已保存风格「${name.trim().ifEmpty { p.look.name }}」")
+                                before = null
+                                state = ImportUi()
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                state = state.copy(busy = false)
+                                vm.showMessage("保存失败，请检查存储空间后重试")
+                            }
                         }
                     }
                 }
@@ -210,6 +219,7 @@ fun ImportHost(vm: EditorViewModel) {
                     )
                     ReportList(pending.report)
                     Buttons(onCancel = ::cancel, keep = "保存") {
+                        if (state.busy) return@Buttons
                         val p = pending
                         state = state.copy(busy = true)
                         scope.launch {
@@ -229,12 +239,24 @@ fun ImportHost(vm: EditorViewModel) {
                                 e.message ?: e.javaClass.simpleName
                             }
                             if (error != null) {
-                                withContext(Dispatchers.IO) { library.dropFilm(p.profileId) }
-                                state = ImportUi(error = "引擎打不开这份数据，已删除：$error", left = state.left)
+                                val removed = withContext(Dispatchers.IO) {
+                                    runCatching { library.dropFilm(p.profileId) }.isSuccess
+                                }
+                                state = ImportUi(error = if (removed) "没能保存这份数据，已清理：$error"
+                                    else "没能保存这份数据，清理失败，请重试：$error", left = state.left)
                                 return@launch
                             }
                             // A recipe is also a one-tap style on its new film, under 胶片方案.
-                            if (recipe) withContext(Dispatchers.IO) { library.saveStyle(p, p.look.name, p.look.category, 1.0) }
+                            try {
+                                if (recipe) withContext(Dispatchers.IO) { library.saveStyle(p, p.look.name, p.look.category, 1.0) }
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                vm.reloadCatalog()
+                                state = state.copy(busy = false)
+                                vm.showMessage("胶片已保存，风格保存失败，请检查存储空间后重试")
+                                return@launch
+                            }
                             vm.reloadCatalog()
                             vm.showMessage("已添加「${p.look.name}」")
                             state = ImportUi()
@@ -315,7 +337,13 @@ fun UserLibrarySection(vm: EditorViewModel) {
     for (s in styles) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("${s.name} · ${s.category}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-            TextButton(onClick = { scope.launch(Dispatchers.IO) { library.deleteStyle(s.id) } }) { Text("删除") }
+            TextButton(onClick = {
+                scope.launch {
+                    try { withContext(Dispatchers.IO) { library.deleteStyle(s.id) } }
+                    catch (e: CancellationException) { throw e }
+                    catch (e: Exception) { vm.showMessage("删除失败，请检查存储空间后重试") }
+                }
+            }) { Text("删除") }
         }
     }
     for (id in films) {
@@ -324,9 +352,15 @@ fun UserLibrarySection(vm: EditorViewModel) {
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
                 scope.launch {
-                    withContext(Dispatchers.IO) { library.dropFilm(id) }
-                    films = films - id
-                    vm.reloadCatalog()
+                    try {
+                        withContext(Dispatchers.IO) { library.dropFilm(id) }
+                        films = films - id
+                        vm.reloadCatalog()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        vm.showMessage("删除失败，请检查存储空间后重试")
+                    }
                 }
             }, enabled = ui.edit.film != id && ui.edit.paper != id) { Text("删除") }
         }

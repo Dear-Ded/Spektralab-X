@@ -155,8 +155,10 @@ object Updater {
     fun install(context: Context, file: File) {
         val app = context.applicationContext
         scope.launch {
+            val installer = app.packageManager.packageInstaller
+            var pendingSession: Int? = null
             try {
-                val installer = app.packageManager.packageInstaller
+                checkSigner(app, file)
                 val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
                     setAppPackageName(app.packageName)
                     setSize(file.length())
@@ -166,6 +168,7 @@ object Updater {
                         setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
                 }
                 val id = installer.createSession(params)
+                pendingSession = id
                 installer.openSession(id).use { s ->
                     s.openWrite("base.apk", 0, file.length()).use { out ->
                         file.inputStream().use { it.copyTo(out, 1 shl 16) }
@@ -176,8 +179,10 @@ object Updater {
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
                     )
                     s.commit(done.intentSender)
+                    pendingSession = null
                 }
             } catch (e: Exception) {
+                pendingSession?.let { id -> runCatching { installer.abandonSession(id) } }
                 failed("安装失败：${reason(e)}")
             }
         }
@@ -286,6 +291,10 @@ object Updater {
             ?: throw IOException("安装包无法解析")
         if (theirs.packageName != context.packageName) throw IOException("安装包不是 Spektralab-X")
         val ours = pm.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        if (theirs.longVersionCode <= ours.longVersionCode) throw IOException("安装包版本不高于当前应用")
+        val info = theirs.applicationInfo ?: throw IOException("安装包缺少应用信息")
+        if ((info.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)
+            throw IOException("安装包为调试版本，请下载正式签名的发布版本")
         val a = theirs.signingInfo?.apkContentsSigners?.toSet()
         val b = ours.signingInfo?.apkContentsSigners?.toSet()
         if (a.isNullOrEmpty() || a != b) throw IOException("安装包签名和当前应用不同（当前是自行编译的版本？）")

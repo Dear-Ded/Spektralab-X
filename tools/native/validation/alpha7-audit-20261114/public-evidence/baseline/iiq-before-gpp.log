@@ -1,0 +1,9 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:772:24: runtime error: shift exponent 32 is too large for 32-bit type 'int'
+    #0 0x4028ff in iiq_bitstream_t::peek(unsigned char) /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:772
+    #1 0x4028ff in iiq_bitstream_t::get(char) /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/decoders_libraw.cpp:783
+    #2 0x405801 in test /data/work/gpt-alpha7-audit-20261114/libraw_bitstream_bounds.cpp:85
+    #3 0x406f26 in main /data/work/gpt-alpha7-audit-20261114/libraw_bitstream_bounds.cpp:120
+    #4 0x7f5f12bded8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7f5f12bdee3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #6 0x4024b4 in _start (/data/work/gpt-alpha7-audit-20261114/iiq-before-gpp+0x4024b4)
+

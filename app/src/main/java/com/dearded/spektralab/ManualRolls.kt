@@ -100,21 +100,16 @@ class ManualRolls private constructor(context: Context) {
         load()
         val (next, n) = change(_rolls.value)
         if (next != _rolls.value) {
+            write(next)
             _rolls.value = next
-            write()
         }
         n
     }
 
     // A kill mid-write leaves the old file, never half of the new one.
-    private fun write() {
-        runCatching {
-            file.parentFile?.mkdirs()
-            val a = JSONArray().also { arr -> _rolls.value.forEach { arr.put(it.toJson()) } }
-            val part = File(file.parentFile, file.name + ".part")
-            part.writeText(a.toString())
-            if (!part.renameTo(file)) { file.delete(); part.renameTo(file) }
-        }
+    private fun write(next: List<ManualRoll>) {
+        val a = JSONArray().also { arr -> next.forEach { arr.put(it.toJson()) } }
+        writeAtomicText(file, a.toString())
     }
 
     companion object {

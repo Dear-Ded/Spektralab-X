@@ -75,6 +75,8 @@ All changes to the upstream engine live here as unified diffs, applied in name o
 
 0059 为测光和场景统计复用已选 rank 的分区边界，传统 median 改为选择中间项和左半最大值；原整数分位点、均值/权重/直方图算序保持，NaN/正负零歧义走历史顺序。三种编译配置各 1,460 组真实生产统计与独立排序 oracle、48 组完整 Vulkan 输出、ARM64 全链接及 59 个补丁重放通过。云端统计阶段 median 耗时降低约 63%–80%，scene_stats 约 9%–22%，默认四种测光意图计算约 4%–6%；非整机导出或手机指标。见 [外部算法与精确次序统计](ENGINE_ORDER_STATISTICS_2026-11-13.md)。GPT（OpenAI）共创。
 
+0060 将胶片和印放阶段的成员函数指针读取与调用分成两步，保留阶段顺序和运行函数，消除 GCC 11 sanitizer 在原组合表达式上的越界索引诊断。GCC 11 / Clang 14 的 42 项真实失败恢复检查通过；不把这一结果泛化为编译器缺陷证明。Alpha 7 全量重放与 CI 输出对照见 [审查记录](ALPHA7_AUDIT_2026-11-14.md)。GPT（OpenAI）共创。
+
 本轮上游递归边界与核近似的独立复核见
 [`ENGINE_ALGORITHM_RESEARCH.md`](ENGINE_ALGORITHM_RESEARCH.md)；0052 只接入默认关闭的 Vulkan 边界候选。
 
@@ -98,6 +100,9 @@ LibRaw 固定在 0.22.2（与上游宿主一致）。`app/src/main/cpp/CMakeList
 | `0024-sony-ycbcr-cache-index-mask` | LibRaw `d7e09495734c527c9fdcd154e6435e06d20bb942`，0.22.3 的两行维护修复 | HuffTable 的 8192 项缓存按低 13 位寻址，合法索引及解码/消费顺序不变。81,920 个合法组合与 24,576 个受控高位组合通过；ASan/UBSan、合成 DNG 对照、18 补丁重放和完整 ARM64 JNI 链接见 [实施报告](ENGINE_SONY_HUFFMAN_CACHE_2026-11-13.md)。未把局部索引测试称为真实 Sony 故障文件复现。GPT（OpenAI）共创。 |
 | `0025-one-shot-raw-storage-release` | 本项目，依据固定 LibRaw 的分配/处理/输出/回收实现 | 添加成功 RGB 处理后的受限一次性释放，清空原始所有者与样本视图，保留完整处理图、元数据和输出状态。拒绝提前、重复、外部所有者或 working-image alias 释放；需要新 open/unpack 才能再处理原始样本。没有改变原有结构布局。配套引擎 0057 与完整验证见 [报告](ENGINE_RAW_STORAGE_LIFETIME_2026-11-13.md)。GPT（OpenAI）共创。 |
 | `0026-one-shot-linearraw-buffer-move` | 本项目，依据 LibRaw 0.22.2 的内部所有权与处理顺序 | 添加受限一次性处理入口，将无裁切/边距的 owned RGBA16 LinearRaw 直接变成处理图，拒绝外部分配、其他样本视图与不匹配几何。原公开处理 API 仍复制、可重用；样本视图可在处理回调前结束。与引擎 0058 同步重编，具体条件、回归和测量见 [报告](ENGINE_LINEAR_RAW_BUFFER_MOVE_2026-11-13.md)。GPT（OpenAI）共创。 |
+| `0027-crx-defined-quantizer-arithmetic` | 本项目，保留 0020 的维护版负索引规则 | 明确量化移位和残差乘法的范围，使用 64 位中间值，拒绝超出可表示范围的 QP，修复未定义移位与有符号溢出。真实 CRX 实现与独立 oracle 的 1,515 案例在三种编译器 sanitizer 下通过。GPT（OpenAI）共创。 |
+| `0028-phaseone-s-bitstream-bounds` | 本项目 | 将长度按字节计算，在读取前检查 EOF，以字节指针和有界 memcpy 处理未对齐及最后不足四字节的输入；修复 32 位 mask 和解码算术溢出。16,235 项实际位流检查通过。GPT（OpenAI）共创。 |
+| `0029-olympus-bitstream-bounds` | 本项目 | 使用有界位宽 mask，校验补充读取、残差位宽和编码标签，拒绝截断输入。44 项真实位流边界检查通过。详见 [Alpha 7 审查](ALPHA7_AUDIT_2026-11-14.md)。GPT（OpenAI）共创。 |
 
 `crx.cpp` 在固定归档中为 CRLF。CMake 仅规范构建复制件的换行，再应用 LF 补丁；
 该操作版本计入 stamp，不修改 pristine 依赖。本轮 ARM64 NDK 构建已重新应用整个 LibRaw 补丁集并通过编译。

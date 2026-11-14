@@ -1,0 +1,8 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp:1115:59: runtime error: shift exponent 36 is too large for 32-bit type 'int'
+    #0 0x43f0e5 in crxDecodeLineWithIQuantization(CrxSubband*, CrxQStep*) /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/crx.cpp:1115
+    #1 0x43f7fa in legacy /data/work/gpt-alpha7-audit-20261114/libraw_crx_quantizer.cpp:37
+    #2 0x444527 in main /data/work/gpt-alpha7-audit-20261114/libraw_crx_quantizer.cpp:82
+    #3 0x7f9cd0c99d8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7f9cd0c99e3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #5 0x402574 in _start (/data/work/gpt-alpha7-audit-20261114/crx-before-gpp+0x402574)
+

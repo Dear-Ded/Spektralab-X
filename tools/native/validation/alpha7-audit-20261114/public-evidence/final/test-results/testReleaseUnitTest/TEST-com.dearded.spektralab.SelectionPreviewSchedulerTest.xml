@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.SelectionPreviewSchedulerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:06:13.918Z" hostname="ser858255664526" time="1.683">
+  <properties/>
+  <testcase name="cancelledRenderReleasesTheLockForTheNextRequest" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.252"/>
+  <testcase name="foregroundWorkStartingDuringLockContentionIsRecheckedBeforeRendering" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.404"/>
+  <testcase name="cachedCardReturnsWhileAnotherRecipeWaitsForIdle" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.128"/>
+  <testcase name="sourceChangeDuringIdleWaitDiscardsTheRequest" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.275"/>
+  <testcase name="staleSourceDoesNotReturnCachedPixelsOrRender" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.002"/>
+  <testcase name="cachedCardAlsoBypassesAnUnrelatedRenderAlreadyHoldingTheLock" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.125"/>
+  <testcase name="concurrentRequestsForTheSameRecipeRecheckTheCacheAfterLocking" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.247"/>
+  <testcase name="aWaitingRecipeDoesNotBlockAnotherReadyRender" classname="com.dearded.spektralab.SelectionPreviewSchedulerTest" time="0.248"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

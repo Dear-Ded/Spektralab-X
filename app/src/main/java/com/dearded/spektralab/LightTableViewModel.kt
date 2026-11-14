@@ -94,9 +94,11 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
         if (frames.isEmpty()) return
         val label = name.trim().take(40).ifEmpty { "我的卷" }
         viewModelScope.launch {
-            val made = withContext(Dispatchers.IO) { manualRolls.pack(frames.map { it.id }, label) }
-            _state.update { it.copy(selection = emptySet()) }
-            show(if (made > 1) "已装成 $made 卷「$label」（每卷最多 ${Roll.LENGTH} 张）" else "已装成一卷「$label」")
+            saveOrReport {
+                val made = withContext(Dispatchers.IO) { manualRolls.pack(frames.map { it.id }, label) }
+                _state.update { it.copy(selection = emptySet()) }
+                show(if (made > 1) "已装成 $made 卷「$label」（每卷最多 ${Roll.LENGTH} 张）" else "已装成一卷「$label」")
+            }
         }
     }
 
@@ -104,14 +106,16 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun moveToRoll(frames: List<Frame>, to: String, toName: String) {
         if (frames.isEmpty()) return
         viewModelScope.launch {
-            val moved = withContext(Dispatchers.IO) { manualRolls.move(frames.map { it.id }, to) }
-            _state.update { it.copy(selection = emptySet()) }
-            val left = frames.size - moved
-            show(when {
-                moved == 0 -> "「$toName」已满 ${Roll.LENGTH} 张，没有移动"
-                left > 0 -> "已移 $moved 张到「$toName」，$left 张放不下，留在原卷"
-                else -> "已移 $moved 张到「$toName」"
-            })
+            saveOrReport {
+                val moved = withContext(Dispatchers.IO) { manualRolls.move(frames.map { it.id }, to) }
+                _state.update { it.copy(selection = emptySet()) }
+                val left = frames.size - moved
+                show(when {
+                    moved == 0 -> "「$toName」已满 ${Roll.LENGTH} 张，没有移动"
+                    left > 0 -> "已移 $moved 张到「$toName」，$left 张放不下，留在原卷"
+                    else -> "已移 $moved 张到「$toName」"
+                })
+            }
         }
     }
 
@@ -119,23 +123,29 @@ class LightTableViewModel(private val app: Application) : AndroidViewModel(app) 
     fun releaseFromRolls(frames: List<Frame>) {
         if (frames.isEmpty()) return
         viewModelScope.launch {
-            val n = withContext(Dispatchers.IO) { manualRolls.release(frames.map { it.id }) }
-            _state.update { it.copy(selection = emptySet()) }
-            show(if (n == 0) "这些照片不在手动卷里" else "已把 $n 张放回自动分卷")
+            saveOrReport {
+                val n = withContext(Dispatchers.IO) { manualRolls.release(frames.map { it.id }) }
+                _state.update { it.copy(selection = emptySet()) }
+                show(if (n == 0) "这些照片不在手动卷里" else "已把 $n 张放回自动分卷")
+            }
         }
     }
 
     /** 拆卷: manual roll [id] is gone; its frames return to the automatic rolls. */
     fun dissolveRoll(id: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { manualRolls.dissolve(id) }
-            _nav.update { if (it.roll == "m|$id") it.copy(roll = null) else it }
-            show("已拆卷，照片回到自动分卷")
+            saveOrReport {
+                withContext(Dispatchers.IO) { manualRolls.dissolve(id) }
+                _nav.update { if (it.roll == "m|$id") it.copy(roll = null) else it }
+                show("已拆卷，照片回到自动分卷")
+            }
         }
     }
 
     fun renameRoll(id: String, name: String) {
-        viewModelScope.launch(Dispatchers.IO) { manualRolls.rename(id, name) }
+        viewModelScope.launch {
+            saveOrReport { withContext(Dispatchers.IO) { manualRolls.rename(id, name) } }
+        }
     }
 
     fun openLoupe(frames: List<Frame>, index: Int) {

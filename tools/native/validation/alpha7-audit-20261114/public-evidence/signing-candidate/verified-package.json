@@ -1,0 +1,35 @@
+{
+  "workflow_run": 43466329167,
+  "source_commit": "fee70ee9fea4d6477776d32b5261bc2ce02f0df8",
+  "package_name": "com.dearded.spektralab",
+  "version_name": "0.2.00-alpha-6",
+  "version_code": 126,
+  "abi": "arm64-v8a",
+  "debuggable": false,
+  "apk_bytes": 38649310,
+  "apk_sha256": "c50c6bbcdc5cf4f273045e3699ff444161c7c6cfa1e1c331c32abf4d5fc2f4be",
+  "certificate_sha256": "cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3",
+  "matches_published_certificate": true,
+  "native_libraries": {
+    "lib/arm64-v8a/libandroidx.graphics.path.so": {
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    "lib/arm64-v8a/libspektralab_jni.so": {
+      "sha256": "f490f2d0cd86d6adf41d55bdbfde58ca6952d91786060fb4fbec4fb1be9db119",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    }
+  },
+  "engine_asset_count": 113,
+  "engine_stamp": "ae0291630fc4f07708f735bffd3ed6a2",
+  "phone_installation": "not performed; no ADB device connected",
+  "warning_resolution": "unconfirmed; original installer warning text was not provided"
+}

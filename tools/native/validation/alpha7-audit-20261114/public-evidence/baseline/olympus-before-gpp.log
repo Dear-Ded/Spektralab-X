@@ -1,0 +1,8 @@
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp:70:31: runtime error: shift exponent 32 is too large for 32-bit type 'unsigned int'
+    #0 0x40489d in buffered_bitpump_t::getbits(unsigned int) /data/work/gpt-composable-styles-20261113/gradle-repo/app/.cxx/RelWithDebInfo/4x4c4s6b/arm64-v8a/LibRaw-0.22.2-spk/src/decoders/olympus14.cpp:70
+    #1 0x40489d in test /data/work/gpt-alpha7-audit-20261114/libraw_bitstream_bounds.cpp:55
+    #2 0x40494a in main /data/work/gpt-alpha7-audit-20261114/libraw_bitstream_bounds.cpp:120
+    #3 0x7f3ec9f16d8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7f3ec9f16e3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #5 0x402474 in _start (/data/work/gpt-alpha7-audit-20261114/olympus-before-gpp+0x402474)
+
