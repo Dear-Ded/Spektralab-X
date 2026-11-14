@@ -32,7 +32,7 @@ class SpektraLabApp : Application() {
 
     override fun attachBaseContext(base: Context) {
         AppLocale.load(base)
-        super.attachBaseContext(AppLocale.wrap(base))
+        super.attachBaseContext(AppLocale.wrapBase(base))
     }
 
     override fun onCreate() {

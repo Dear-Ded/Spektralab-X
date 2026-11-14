@@ -108,6 +108,20 @@ class LocalizationTest {
         controller.pause().stop().destroy()
     }
 
+    @Test fun activityBaseAttachmentDoesNotReadTheUninitializedTheme() {
+        val unattached = object : ContextWrapper(context) {
+            override fun getTheme(): android.content.res.Resources.Theme =
+                error("Activity theme is unavailable before attachment")
+        }
+        for (language in UiLanguage.entries) {
+            AppLocale.select(context, language)
+            val activity = MainActivity()
+            MainActivity::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
+                .apply { isAccessible = true }.invoke(activity, unattached)
+            assertEquals(language.tag, activity.resources.configuration.locales[0].toLanguageTag())
+        }
+    }
+
     @Test fun catalogKeepsAllNumberedArgumentsAndHasNoChineseTranslations() {
         val args = Regex("\\{\\d+\\}")
         val han = Regex("[\\u3400-\\u9fff]")

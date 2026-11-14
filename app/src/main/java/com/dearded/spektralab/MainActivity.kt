@@ -24,7 +24,7 @@ import androidx.compose.material3.lightColorScheme
 
 class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: android.content.Context) {
-        super.attachBaseContext(AppLocale.wrap(newBase))
+        super.attachBaseContext(AppLocale.wrapBase(newBase))
     }
 
     companion object {

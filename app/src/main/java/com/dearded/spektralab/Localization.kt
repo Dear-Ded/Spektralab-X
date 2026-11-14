@@ -46,6 +46,9 @@ internal object AppLocale {
         setLayoutDirection(Locale.forLanguageTag(value.tag))
     }
 
+    // ActivityInfo is not attached yet; asking the incoming context for its theme can crash.
+    fun wrapBase(context: Context) = context.createConfigurationContext(configuration(context.resources.configuration))
+
     fun wrap(context: Context, config: Configuration = configuration(context.resources.configuration)) =
         android.view.ContextThemeWrapper(context, context.theme).apply { applyOverrideConfiguration(config) }
 }
