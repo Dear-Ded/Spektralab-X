@@ -1,0 +1,10 @@
+PASS normal-completion
+PASS timeout-then-complete
+PASS timeout-then-device-lost
+PASS wait-error-then-complete
+PASS wait-device-lost
+PASS submit-error
+PASS submit-device-lost
+PASS unresolved-then-complete
+PASS unresolved-destructor-retains-instance
+4 KiB Vulkan smoke: verified=4096; advertised 128 MiB, verified 0 MiB

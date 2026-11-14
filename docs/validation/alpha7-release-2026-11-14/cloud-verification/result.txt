@@ -1,0 +1,1 @@
+PASS published alpha-7: checksum, CRC, package/version, release certificate, ARM64, 16KiB alignment, asset stamp and 56 validated shaders

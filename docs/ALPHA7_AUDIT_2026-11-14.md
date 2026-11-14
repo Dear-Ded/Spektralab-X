@@ -1,8 +1,9 @@
 # Alpha 7 audit and release record
 
-Co-created with GPT (OpenAI), 2026-11-14. Release candidate: `0.2.00-alpha-7`,
-code 127. Cloud regressions pass; signed release CI and final package inspection
-are pending. Phone installation-warning resolution remains unverified.
+Co-created with GPT (OpenAI), 2026-11-14. Published: `0.2.00-alpha-7`, code 127,
+at 09:39:03 Asia/Shanghai. Signed release CI, package inspection, provenance
+verification and independent cloud checks pass. Phone installation-warning
+resolution remains unverified.
 
 ## Scope and Baseline
 
@@ -78,7 +79,7 @@ The updated CI runs Release/Debug tests and release lint, full native
 adaptation regressions in strict and compatible modes, complete sanitized
 LibRaw storage/precision/linear/working paths, LUT interpolation parity, Vulkan
 FIR/view/order/finite-output checks and pipeline failure recovery. Its final
-run identifiers and package results will be appended after completion.
+run identifiers and package results are recorded below.
 
 Candidate Actions `43539700200` (`f26d398`) passes the full build, 221 Release
 and 340 Debug tests, lint, both native adaptation modes, RAW storage sanitizers
@@ -94,7 +95,42 @@ run is retained as evidence and is not counted as a successful package gate.
 The final profile deletion fix was also checked before/after in cloud:
 one test fails on the previous ordering with the user original missing, then
 all ten UserLibraryPersistenceTest cases pass after the change. The main-branch
-CI must repeat the complete tests with this final code before publishing.
+CI repeated the complete tests with this final code before publishing.
+
+## Published Package
+
+Tag `v0.2.00-alpha-7` and its build provenance both identify
+`5b6090c444c9660d0edf62842cbaa51cd3bc345b`. Production Actions `43541103433`
+passes APK, RAW storage, Vulkan and release jobs. Screenshot Actions
+`43541103393` also passes. The final Release/Debug suites contain **222 / 341**
+tests with zero failures, errors or skips. Production lint reports zero errors,
+109 warnings and six hints; the extra warnings compared with the offline
+cloud run concern dependency/tool/plugin/target version availability.
+
+| Field | Verified result |
+| --- | --- |
+| APK | `Spektralab-X-0.2.00-alpha-7-arm64-v8a.apk` |
+| Package / code | `com.dearded.spektralab` / `127` |
+| Bytes | 38,649,694 |
+| SHA-256 | `c182b9af71513596219a0c89096cf0323566e52577a8ebbc29a2135090031e66` |
+| Signing | Published certificate, one signer, APK Signature Scheme v2 |
+| Libraries | Two AArch64 ELF64 libraries, non-executable stacks, RELRO, no writable executable LOAD segment, 16 KiB LOAD/ZIP alignment |
+| JNI | All 39 declared Kotlin native methods exported |
+| Engine assets / shaders | 113 exact staged assets / 56 structurally checked SPIR-V modules |
+| Engine stamp | `ae0291630fc4f07708f735bffd3ed6a2` |
+
+The public release download, workflow artifact and published asset digest
+have the same SHA-256. `gh attestation verify` passes with the repository,
+signer workflow, `refs/heads/main`, exact source digest and GitHub-hosted-runner
+constraints. Independent AOIDC inspection of the public download passes ZIP
+CRC, checksum, aapt package/version, apksigner certificate, ARM64/16 KiB
+alignment, recomputed engine stamp and `spirv-val --target-env vulkan1.0` for
+all 56 modules. Its verification exit code is zero. No physical phone install
+or OEM-warning clearance is claimed.
+
+Release evidence: [docs/validation/alpha7-release-2026-11-14](validation/alpha7-release-2026-11-14/).
+The original candidate's failed parser step and all earlier unsuccessful
+replays remain in the audit evidence rather than being overwritten.
 
 ## Static Diagnostics Triage
 

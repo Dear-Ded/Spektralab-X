@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ManualRollPersistenceTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:36:18.767Z" hostname="runnervm8axu0" time="0.143">
+  <properties/>
+  <testcase name="failedInitialPackDoesNotPublishANonexistentRoll" classname="com.dearded.spektralab.ManualRollPersistenceTest" time="0.066"/>
+  <testcase name="failedRenameReleaseAndDissolveKeepTheLastGoodRoll" classname="com.dearded.spektralab.ManualRollPersistenceTest" time="0.072"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

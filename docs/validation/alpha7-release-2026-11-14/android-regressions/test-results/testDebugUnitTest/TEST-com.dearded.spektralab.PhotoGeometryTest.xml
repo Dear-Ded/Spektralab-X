@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.PhotoGeometryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:36:19.101Z" hostname="runnervm8axu0" time="1.832">
+  <properties/>
+  <testcase name="scaledPreviewRetainsTwentyFourMegapixelSource" classname="com.dearded.spektralab.PhotoGeometryTest" time="0.705"/>
+  <testcase name="originalAndWorkingSizesBothUseExifOrientation" classname="com.dearded.spektralab.PhotoGeometryTest" time="0.695"/>
+  <testcase name="decodeEnforcesAreaAndLongEdgeTogether" classname="com.dearded.spektralab.PhotoGeometryTest" time="0.43"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,40 @@
+Spektralab-X 0.2.00-alpha-7 release verification
+Prepared by GPT (OpenAI), 2026-11-14 Asia/Shanghai.
+
+Published: 2026-11-14 09:39:03 +08:00 (01:39:03 UTC).
+Release: https://github.com/Dear-Ded/Spektralab-X/releases/tag/v0.2.00-alpha-7
+Tag/source commit: 5b6090c444c9660d0edf62842cbaa51cd3bc345b
+Android versionCode: 127
+APK: Spektralab-X-0.2.00-alpha-7-arm64-v8a.apk
+Size: 38649694 bytes
+SHA256: c182b9af71513596219a0c89096cf0323566e52577a8ebbc29a2135090031e66
+Published signing certificate SHA256:
+CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3
+
+Production Actions 43541103433: success (APK, RAW, Vulkan and release).
+Screenshot Actions 43541103393: success.
+Final Release/Debug tests: 222 / 341, zero failures/errors/skips.
+Lint: zero errors, 109 warnings and six hints.
+60 engine / 23 LibRaw overlays replay with zero fuzz on verified archives.
+Both GCC11 and Clang14 ASan/UBSan: CRX1515, IIQ16235, Olympus44.
+IBX GCC14 independently passes 1515 CRX/oracle cases.
+Production recovery42 and order-statistics1460 pass; FIR368 cases compare
+74180082 byte-identical float32 values. Full sanitized RAW paths pass.
+
+CI inspects ZIP/DEX/ELF/JNI/SPIR-V and all staged engine assets. APK has two
+ARM64 libraries, 39 native methods, 56 shaders and 113 engine assets.
+Engine stamp: ae0291630fc4f07708f735bffd3ed6a2.
+The public download, workflow artifact and release digest match.
+Attestation verification succeeds with exact source SHA, refs/heads/main,
+android.yml signer workflow, repository and GitHub-hosted-runner constraints.
+
+Independent AOIDC inspection of this public download succeeds: checksum/CRC,
+release certificate, package/code/version, ARM64 ELF and ZIP 16KiB alignment,
+recomputed asset stamp and spirv-val for all 56 modules. See cloud-verification/.
+This is the published release APK, not the earlier debug-key research package.
+No physical phone was connected, and the original warning text was unavailable.
+The phone installation-warning outcome remains unverified. No uninstall,
+data erasure or disabling device protection was performed.
+
+All executable tests and builds ran in cloud. Private photos, handoffs,
+measurements and signing credentials were not published.

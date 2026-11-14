@@ -1,0 +1,33 @@
+Dynamic section at offset 0x417620 contains 31 entries:
+  Tag                Type           Name/Value
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libjnigraphics.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libz.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x000000000000000e (SONAME)       Library soname: [libspektralab_jni.so]
+  0x000000000000001e (FLAGS)        BIND_NOW 
+  0x000000006ffffffb (FLAGS_1)      NOW 
+  0x0000000000000007 (RELA)         0x3248
+  0x0000000000000008 (RELASZ)       153120 (bytes)
+  0x0000000000000009 (RELAENT)      24 (bytes)
+  0x000000006ffffff9 (RELACOUNT)    6369
+  0x0000000000000017 (JMPREL)       0x28868
+  0x0000000000000002 (PLTRELSZ)     5448 (bytes)
+  0x0000000000000003 (PLTGOT)       0x41ca98
+  0x0000000000000014 (PLTREL)       RELA
+  0x0000000000000006 (SYMTAB)       0x330
+  0x000000000000000b (SYMENT)       24 (bytes)
+  0x0000000000000005 (STRTAB)       0x2020
+  0x000000000000000a (STRSZ)        4647 (bytes)
+  0x000000006ffffef5 (GNU_HASH)     0x1f10
+  0x0000000000000019 (INIT_ARRAY)   0x41b5f8
+  0x000000000000001b (INIT_ARRAYSZ) 40 (bytes)
+  0x000000000000001a (FINI_ARRAY)   0x41b5e8
+  0x000000000000001c (FINI_ARRAYSZ) 16 (bytes)
+  0x000000006ffffff0 (VERSYM)       0x1c80
+  0x000000006ffffffe (VERNEED)      0x1e9c
+  0x000000006fffffff (VERNEEDNUM)   3
+  0x0000000000000000 (NULL)         0x0

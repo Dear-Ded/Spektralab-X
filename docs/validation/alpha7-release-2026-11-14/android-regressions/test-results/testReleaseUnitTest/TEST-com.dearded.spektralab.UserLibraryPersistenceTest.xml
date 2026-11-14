@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.UserLibraryPersistenceTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:35:35.738Z" hostname="runnervm8axu0" time="0.079">
+  <properties/>
+  <testcase name="failedDeletionDoesNotReportAStyleAsRemoved" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.005"/>
+  <testcase name="failedEngineProfileCopyKeepsTheInstalledProfile" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.01"/>
+  <testcase name="failedLutReplacementKeepsTheOldTableAndCanBeRetried" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.014"/>
+  <testcase name="failedStyleReplacementKeepsPublishedAndPersistedStyle" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.008"/>
+  <testcase name="lutCommitDoesNotDependOnASecondCubeWrite" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.005"/>
+  <testcase name="failedProfileReplacementKeepsTheOriginalAndRetryCommits" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.003"/>
+  <testcase name="failedLibraryReplacementNeverDeletesAnExistingDirectory" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.01"/>
+  <testcase name="failedProfileCleanupReportsFailureAndPreservesItsContents" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.001"/>
+  <testcase name="failedEngineProfileCleanupPreservesTheUserOriginal" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.008"/>
+  <testcase name="truncatedPairedLutIsRejectedForRenderingAndSharing" classname="com.dearded.spektralab.UserLibraryPersistenceTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

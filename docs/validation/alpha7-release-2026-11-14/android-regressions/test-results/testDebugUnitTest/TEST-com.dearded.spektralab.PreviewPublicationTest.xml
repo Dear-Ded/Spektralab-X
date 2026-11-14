@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.PreviewPublicationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:36:21.368Z" hostname="runnervm8axu0" time="0.001">
+  <properties/>
+  <testcase name="releasedSessionCannotPublishOrRepack" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.001"/>
+  <testcase name="requestRevisionDetectsEditRoundTripAndTemporaryOverride" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <testcase name="failedRenderDoesNotChangeRetainedTier" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <testcase name="sourceReplacementClearsRetainedCacheAndRejectsReusedHandle" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <testcase name="staleLivePermissionIsExplicitAndNeverGrantedToRepack" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <testcase name="newerPublicationWinsEvenWhenMainCallbacksArriveOutOfOrder" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <testcase name="sameEditHigherQualityWinsButANewEditCanStartWithLive" classname="com.dearded.spektralab.PreviewPublicationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

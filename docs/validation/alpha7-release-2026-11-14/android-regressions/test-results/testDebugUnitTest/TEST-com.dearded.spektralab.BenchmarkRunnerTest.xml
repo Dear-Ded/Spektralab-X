@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.BenchmarkRunnerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:35:45.597Z" hostname="runnervm8axu0" time="0.16">
+  <properties/>
+  <testcase name="style switch requests the physical film pipeline" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.005"/>
+  <testcase name="runner stops when hot during test" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.1"/>
+  <testcase name="runner calls cancel on exception" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.002"/>
+  <testcase name="codeOf extracts error codes" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.0"/>
+  <testcase name="runner catches engine exception" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.002"/>
+  <testcase name="runner completes successfully" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.002"/>
+  <testcase name="cancellation signals a blocked render before release" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.037"/>
+  <testcase name="median calculation" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.0"/>
+  <testcase name="runner stops when hot before start" classname="com.dearded.spektralab.BenchmarkRunnerTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,293 @@
+{
+  "package_name": "com.dearded.spektralab",
+  "version_name": "0.2.00-alpha-7",
+  "version_code": 127,
+  "apk_bytes": 38649694,
+  "apk_sha256": "c182b9af71513596219a0c89096cf0323566e52577a8ebbc29a2135090031e66",
+  "native_libraries": {
+    "lib/arm64-v8a/libandroidx.graphics.path.so": {
+      "bytes": 10096,
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "relro": true,
+      "non_executable_stack": true
+    },
+    "lib/arm64-v8a/libspektralab_jni.so": {
+      "bytes": 4572928,
+      "sha256": "061e4780f7b874ac7b00902ae7d25cc5e1486014ee63ad5aa71c490195b2a93b",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ],
+      "relro": true,
+      "non_executable_stack": true
+    }
+  },
+  "dex": {
+    "classes.dex": {
+      "bytes": 4020908,
+      "sha256": "a8156df75a8bdb624bc4274395db8b505ca9cf5b676f461ff2fefea935e6f6f3"
+    }
+  },
+  "spirv_count": 56,
+  "spirv": {
+    "assets/engine/vulkan/spk_affine3.spv": {
+      "bytes": 2660,
+      "sha256": "fe94af84a38966da00bd708924028ebb6a8d6f0716497e0b41b07888151114a7"
+    },
+    "assets/engine/vulkan/spk_boost.spv": {
+      "bytes": 3196,
+      "sha256": "6549e55a41fbcfd58a3860ae9338edb490c7cf15ebb7692bd313c6ae3a0ddf77"
+    },
+    "assets/engine/vulkan/spk_bw_correct.spv": {
+      "bytes": 3144,
+      "sha256": "b20994a79702400ddb2dde085ef52f65fe8d22904ce016a1d8562b42e30646f6"
+    },
+    "assets/engine/vulkan/spk_cam16ucs_compress.spv": {
+      "bytes": 24460,
+      "sha256": "312120dea2bb99ed711f4be0bcd83d00a77352455f2ba51b63e5c058ae5f7752"
+    },
+    "assets/engine/vulkan/spk_cctf_decode.spv": {
+      "bytes": 4640,
+      "sha256": "3ee11e2e93e3c465d10fdaa2fa426791979b6d4683166cead1165dcb70d509e5"
+    },
+    "assets/engine/vulkan/spk_cctf_encode_matrix.spv": {
+      "bytes": 6228,
+      "sha256": "1d48d75f3e1b4c269ac0e21c995173031a5879b3f515f621d40a91ff8a57b775"
+    },
+    "assets/engine/vulkan/spk_couplers_correction.spv": {
+      "bytes": 5064,
+      "sha256": "47b0e88691d036045f0ee2a4745ff31ec5c526d42a24763ec5a659c3c054cc35"
+    },
+    "assets/engine/vulkan/spk_curves.spv": {
+      "bytes": 5700,
+      "sha256": "b8b04f6ef0e2238ac960f02a41b6bf6c1e46c421588d00acf154eff160f1b69c"
+    },
+    "assets/engine/vulkan/spk_di_encode.spv": {
+      "bytes": 13424,
+      "sha256": "2e9632a6d4d741c0e1e4aa1da96913fdb57221ef4adf02a41fdd679d60cd953f"
+    },
+    "assets/engine/vulkan/spk_di_normalise.spv": {
+      "bytes": 3064,
+      "sha256": "f0308f429df6f2059d2951e7824b3192659ffa02685df19aed3cd57dbafa789b"
+    },
+    "assets/engine/vulkan/spk_dir_finish.spv": {
+      "bytes": 6076,
+      "sha256": "9880d58700805dca25a47a676c04812c4fd7efadd6ac50e5dd30b32f915c5965"
+    },
+    "assets/engine/vulkan/spk_edr.spv": {
+      "bytes": 5204,
+      "sha256": "0301a369d3bed4d9531c3a5a820de5582ae1124d43e6b82dfed94fb424030148"
+    },
+    "assets/engine/vulkan/spk_geometry_resample_df.spv": {
+      "bytes": 17080,
+      "sha256": "3ce5f73b3f70ab04cd3dd949cf9e1e6be539726fbeda6ebbc0ca46f0b638810e"
+    },
+    "assets/engine/vulkan/spk_glare_add.spv": {
+      "bytes": 2708,
+      "sha256": "44fca33a5bcb355c352b784231c1750814f64ec2ab6c228c6cf66885b44def79"
+    },
+    "assets/engine/vulkan/spk_grain_layer_one.spv": {
+      "bytes": 19084,
+      "sha256": "c3a1442812f89439dd8c297b1e8e1558070bc8e1e56e326d2ddf15e1af2d7527"
+    },
+    "assets/engine/vulkan/spk_grain_layers.spv": {
+      "bytes": 19348,
+      "sha256": "8ece0cfa430afb732b9c124e98ab41dc8bb2368e399214977ca75a5162b1c77f"
+    },
+    "assets/engine/vulkan/spk_grain_simple.spv": {
+      "bytes": 15380,
+      "sha256": "cf728b1ad911f8bcb62997a3679b2b560067671c3a5f44a4d6b7a79b76cb848b"
+    },
+    "assets/engine/vulkan/spk_highlight_headroom.spv": {
+      "bytes": 4652,
+      "sha256": "d517e9073973a0c04a2ec40fc2b613b3b6756ebf7c760c14663d29fcbf3fbfbf"
+    },
+    "assets/engine/vulkan/spk_iir_boundary_df_acc.spv": {
+      "bytes": 21176,
+      "sha256": "5b2da0b6a44f82ce0f3d9d130b1d053b2c3b50fc4c838bd3d2ac4ae8005ae0de"
+    },
+    "assets/engine/vulkan/spk_iir_df_acc.spv": {
+      "bytes": 17156,
+      "sha256": "7ad73bb9bff79fe701f8e99baf3e81b2e0953dd41815bfe393dae2c08db25664"
+    },
+    "assets/engine/vulkan/spk_iir_difference_df_acc.spv": {
+      "bytes": 21228,
+      "sha256": "96aed44d2f736ca72f2b187d5d494ee6f655a4b58fd90a15fa5f5021ffa2bcbb"
+    },
+    "assets/engine/vulkan/spk_lincomb3.spv": {
+      "bytes": 2928,
+      "sha256": "9bcf788bede01671eec7f8cdff8d39d308d331fcb481fcdac765e700503aadc0"
+    },
+    "assets/engine/vulkan/spk_log10_guarded.spv": {
+      "bytes": 2524,
+      "sha256": "1f91854d1b45f185e9f51fe722b85d39b57a0b3a6184430f3afd5e194b487365"
+    },
+    "assets/engine/vulkan/spk_lognormal_field.spv": {
+      "bytes": 8488,
+      "sha256": "9d17a2f62a551723bb2ad8e0e3d693d26b9e685c065c0c6e5582d1557de6cc62"
+    },
+    "assets/engine/vulkan/spk_lut2d_cubic.spv": {
+      "bytes": 9432,
+      "sha256": "7234a48598696ed997d68f390f5cbf7caf990716b3f0b502e40946e91ad35b19"
+    },
+    "assets/engine/vulkan/spk_lut3d_trilinear.spv": {
+      "bytes": 9364,
+      "sha256": "9c58c5baf6519cc1f8073b23a0af7885cf6d49ea92a37ee694f00d9540f9a5e6"
+    },
+    "assets/engine/vulkan/spk_math_probe.spv": {
+      "bytes": 2100,
+      "sha256": "17784bb3daf6444a69f979048bfe688961e8d82b00d67af555d7fc9b901ed248"
+    },
+    "assets/engine/vulkan/spk_matmul3.spv": {
+      "bytes": 3708,
+      "sha256": "c78a7000a8134537e3937835801a4c6c7d063b733d7af97ca7bdfa22ede9a6f4"
+    },
+    "assets/engine/vulkan/spk_mul.spv": {
+      "bytes": 2272,
+      "sha256": "579b2bccf41e41e7c4bcc0305b9680f91e4489756d4bedabedbf8d85b3edec0c"
+    },
+    "assets/engine/vulkan/spk_overscan_add_mask.spv": {
+      "bytes": 5236,
+      "sha256": "6243bac8a1653241e4228c2099b07bcfa498d140f4a60006ecb80453ea1df008"
+    },
+    "assets/engine/vulkan/spk_overscan_canvas.spv": {
+      "bytes": 29916,
+      "sha256": "38d1433d84838a5e9766df290f884bb11ec142e869c5fafcecb237276835bfcf"
+    },
+    "assets/engine/vulkan/spk_overscan_film_present.spv": {
+      "bytes": 17888,
+      "sha256": "c0bd91c243b118de165a1fdb65cd79fbc4f6bf9d6b1b78baf80fda555c4aec45"
+    },
+    "assets/engine/vulkan/spk_overscan_light.spv": {
+      "bytes": 25400,
+      "sha256": "dd8ee87eda7ccf8c4cad0f8eb0b54f5ccea439a6a71b1c4bb6559520c4c0b5da"
+    },
+    "assets/engine/vulkan/spk_print_exposure.spv": {
+      "bytes": 2644,
+      "sha256": "06e8800ab9bb8521f8d4521fe2ce68753c351be914cbc6944638f3c4d17ecd1a"
+    },
+    "assets/engine/vulkan/spk_reduce_max.spv": {
+      "bytes": 3180,
+      "sha256": "0c45e0d59efe84d52a3346c3be10a2c3bbf3082993ee90418a40bf17dc964761"
+    },
+    "assets/engine/vulkan/spk_rng_probe.spv": {
+      "bytes": 16684,
+      "sha256": "f62ec12d714a887ee8df32128757e5ae89cd28932b1b779cde9e74d51b24248e"
+    },
+    "assets/engine/vulkan/spk_scene_curve.spv": {
+      "bytes": 9368,
+      "sha256": "b2dcbde2cd466364e6ec8b50619866fc20accb1f0f00889ceeb3dfe8d0239481"
+    },
+    "assets/engine/vulkan/spk_scene_latitude.spv": {
+      "bytes": 10260,
+      "sha256": "968221c508b2c690b04876ec042bfa15d347f0b4f84739a25f42d5eed8351972"
+    },
+    "assets/engine/vulkan/spk_sep_fir_acc.spv": {
+      "bytes": 9200,
+      "sha256": "bd706bdda37bab58c47ba8fe5878120f33dc8e279866844ca7e96f7a025ac0c3"
+    },
+    "assets/engine/vulkan/spk_sep_fir_rows.spv": {
+      "bytes": 9648,
+      "sha256": "d99184f033d9cfeb8318219e86f55f460cf77aebf84e14cfa511af88013c3ab7"
+    },
+    "assets/engine/vulkan/spk_spectral_epilogue.spv": {
+      "bytes": 5844,
+      "sha256": "add1f3b679de47d65a87e1254a15e012fdda71745c7b169035c2234bc323f762"
+    },
+    "assets/engine/vulkan/spk_split_probe.spv": {
+      "bytes": 3512,
+      "sha256": "18ecd055a75b738208df165c23d76787f203500afa4db08b263b8ece792757d1"
+    },
+    "assets/engine/vulkan/spk_stride_sample.spv": {
+      "bytes": 3136,
+      "sha256": "f80ef92f0fe564eae73685d566e38e5b9c86a7fdba59b0d774bfd1d5502ab40e"
+    },
+    "assets/engine/vulkan/spk_take_rgb.spv": {
+      "bytes": 2504,
+      "sha256": "3693160da34bd6fdf758f877190b65ac820ddbaf72acaeddee7043a18102227b"
+    },
+    "assets/engine/vulkan/spk_tc_b.spv": {
+      "bytes": 5004,
+      "sha256": "4511f33f7837acd106c991a099926dc8cc329882e678e822f51fbb8cbce4ec10"
+    },
+    "assets/engine/vulkan/spk_to_rgba16.spv": {
+      "bytes": 3344,
+      "sha256": "e9c4125f37168549f8e418dfd544315cf6fa2c38470775a08cd4d76c26fca3d2"
+    },
+    "assets/engine/vulkan/spk_validate_finite.spv": {
+      "bytes": 2428,
+      "sha256": "bc93448b44f4076be85c0d268e9a4b75de6b9a95cd3904ac8a4f5ee187ff9e21"
+    },
+    "assets/engine/vulkan/spk_view_cam16.spv": {
+      "bytes": 24944,
+      "sha256": "9e240ee8f40494803c844d49b62bff85e68cd48032d3b951296e6c418497639d"
+    },
+    "assets/engine/vulkan/spk_view_geometry.spv": {
+      "bytes": 8020,
+      "sha256": "a60cb38b923c7ec090f5594b566078ac1059ffa4085dcde4657498e591fb2170"
+    },
+    "assets/engine/vulkan/spk_view_grade.spv": {
+      "bytes": 13252,
+      "sha256": "a1eeac1a3817d91ef0f20f5af81aa31ffbb2eef772e17f63882ead26a76f2f8e"
+    },
+    "assets/engine/vulkan/spk_view_grade_di.spv": {
+      "bytes": 18668,
+      "sha256": "fd4b475520bffc97849aeece1731038e76d39b3869ef76e2eb8cd77a50b2ad2a"
+    },
+    "assets/engine/vulkan/spk_view_grade_float.spv": {
+      "bytes": 13052,
+      "sha256": "24e0f04d544544a042e297d852d7edeb91ebb4bcd61a8a87a45905c4134e2256"
+    },
+    "assets/engine/vulkan/spk_view_pack.spv": {
+      "bytes": 10656,
+      "sha256": "fc8f910434f0e8cc6cd52fa74af8ea1c304a3fc7a2f44e4a59ae139bff486c13"
+    },
+    "assets/engine/vulkan/spk_view_pair.spv": {
+      "bytes": 6224,
+      "sha256": "05e300c3881b86780ba6ab71acc35c923b19c57c7e2cf4e11b1f5b94bb84b9e5"
+    },
+    "assets/engine/vulkan/spk_xyz_cam16_compress.spv": {
+      "bytes": 25620,
+      "sha256": "3632e5a9db43f410d4f4d48ba770a1aeca757ad9b3df4ed03ba27e4fccbf1adc"
+    },
+    "assets/engine/vulkan/spk_zoom_bilinear_mirror.spv": {
+      "bytes": 13940,
+      "sha256": "f1c8401b610b5fb8fb60a049a8eca62f492f8c74ec0985a78e82c27f1dbe3b45"
+    }
+  },
+  "engine_asset_count": 113,
+  "engine_stamp": "ae0291630fc4f07708f735bffd3ed6a2",
+  "phone_installation": "not performed",
+  "installation_warning": "not verified on a phone",
+  "certificate_sha256": "cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3",
+  "matches_published_certificate": true,
+  "jni_method_count": 39,
+  "dynamic_dependencies": [
+    "libandroid.so",
+    "liblog.so",
+    "libjnigraphics.so",
+    "libz.so",
+    "libdl.so",
+    "libm.so",
+    "libc.so"
+  ],
+  "declared_permissions": [
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.ACCESS_MEDIA_LOCATION",
+    "android.permission.POST_PROMOTED_NOTIFICATIONS",
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.REQUEST_INSTALL_PACKAGES",
+    "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION",
+    "com.dearded.spektralab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ]
+}
