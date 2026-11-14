@@ -1,0 +1,26 @@
+apk	Inspect packaged DEX, ELF, shaders and assets	﻿2026-11-14T01:25:26.3241776Z ##[group]Run tools="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n1)"
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3242590Z ^[[36;1mtools="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n1)"^[[0m
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3243386Z ^[[36;1mndk_bin="$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin"^[[0m
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3244146Z ^[[36;1mpython3 tools/native/verify_release_apk.py dist/*.apk \^[[0m
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3244868Z ^[[36;1m  --android-tools "$tools" --ndk-bin "$ndk_bin" --output package-evidence^[[0m
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3269720Z shell: /usr/bin/bash -e {0}
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3270141Z env:
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3270634Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3271410Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3272075Z   SPK_KEYSTORE: /home/runner/work/_temp/release.p12
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3272620Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3273111Z   GRADLE_USER_HOME: /home/runner/.gradle
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3273612Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3274099Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3274779Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3275537Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3276317Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:26.3276775Z ##[endgroup]
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7808751Z Traceback (most recent call last):
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7809645Z   File "/home/runner/work/Spektralab-X/Spektralab-X/tools/native/verify_release_apk.py", line 146, in <module>
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7810422Z     main()
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7810987Z   File "/home/runner/work/Spektralab-X/Spektralab-X/tools/native/verify_release_apk.py", line 119, in main
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7811769Z     assert signers == [certificate] and 'CN=Android Debug' not in signature
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7812314Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7812742Z AssertionError
+apk	Inspect packaged DEX, ELF, shaders and assets	2026-11-14T01:25:27.7957434Z ##[error]Process completed with exit code 1.

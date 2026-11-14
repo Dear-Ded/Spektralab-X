@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.ExternalFileRoutingTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:22:31.477Z" hostname="runnervm8axu0" time="5.499">
+  <properties/>
+  <testcase name="explicitDngPresetImportStillReadsEmbeddedXmp" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="4.374"/>
+  <testcase name="nullProviderNameFallsBackToUri" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.122"/>
+  <testcase name="ordinaryImagesStillOpenAsPhotos" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.043"/>
+  <testcase name="unavailableMetadataFallsBackToUriAndDeclaredType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.042"/>
+  <testcase name="rawMimeWorksWithoutAnExtension" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.028"/>
+  <testcase name="genericOrMissingDeclaredTypeUsesTheProviderImageType" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.065"/>
+  <testcase name="mainActivityQueuesHaldFromViewAndShare" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.741"/>
+  <testcase name="genericCameraRawUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.031"/>
+  <testcase name="stylesAndRecipesStillEnterTheImporter" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.031"/>
+  <testcase name="numericHaldUriUsesTheProviderFileName" classname="com.dearded.spektralab.ExternalFileRoutingTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Robolectric] WARN: Android SDK 36 requires Java 21 (have Java 17). Tests won't be run on SDK 36 unless explicitly requested.
+[Robolectric] WARN: Android SDK 37 requires Java 21 (have Java 17). Tests won't be run on SDK 37 unless explicitly requested.
+]]></system-err>
+</testsuite>

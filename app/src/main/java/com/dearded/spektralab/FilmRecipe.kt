@@ -196,8 +196,8 @@ class UserProfiles(private val dir: File) {
 
     fun delete(id: String, engineDir: File?) {
         require(id.startsWith(FilmRecipe.PREFIX) && Regex("[a-z0-9_-]{1,96}").matches(id)) { "bad user stock id $id" }
-        java.nio.file.Files.deleteIfExists(File(dir, "$id.json").toPath())
         engineDir?.let { java.nio.file.Files.deleteIfExists(File(it, "profiles/$id.json").toPath()) }
+        java.nio.file.Files.deleteIfExists(File(dir, "$id.json").toPath())
     }
 
     /** A free id for [wanted]: itself, or with _2, _3 … when [taken] says it is in use. */

@@ -1,0 +1,4 @@
+/data/work/gpt-alpha7-final-r3-20261114/libraw/src/decoders/decoders_libraw.cpp:352:5: warning: Value stored to 'bwide' is never read [deadcode.DeadStores]
+  352 |     bwide = bwide * 16 / 15;
+      |     ^       ~~~~~~~~~~~~~~~
+1 warning generated.

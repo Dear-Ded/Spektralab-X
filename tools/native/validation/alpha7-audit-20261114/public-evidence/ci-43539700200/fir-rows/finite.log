@@ -1,0 +1,8 @@
+In file included from /home/runner/work/Spektralab-X/Spektralab-X/tools/native/finite_output.cpp:7:
+/home/runner/work/Spektralab-X/Spektralab-X/upstream/engine/src/pipeline/engine.cpp:213:58: warning: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Wignored-attributes]
+  213 |         std::unique_ptr<std::FILE, decltype(&std::fclose)> file{nullptr, &std::fclose};
+      |                                                          ^
+30MP_scan_ms=57.0892 summary_bytes=8
+PASS candidate materialise_accepted=3 materialise_rejected=18 view_cases=21 proof_cases=3
+render integrity: incomplete GPU validation (3113/3114 groups)
+PASS finite-output fault rejection

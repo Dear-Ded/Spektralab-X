@@ -50,6 +50,7 @@ measurements, handoff files and authentication material were not published.
 | A7-08 | The earlier GCC 11 instrumented pipeline recovery diagnostic remained unexplained | Engine 0060 reads each stage member-function pointer into a local before invocation. Both GCC 11 and Clang 14 pass the actual 42-check recovery harness. Normal stage order/function and numeric expressions are unchanged. This is not a general compiler-defect proof. |
 | A7-09 | Installation did not revalidate identity and could leave a failed installer session | Recheck package, strictly newer version, non-debuggable flag and certificate immediately before creating the session; abandon an uncommitted session on failure. Six Robolectric tests cover rejection, acceptance and session cleanup. |
 | A7-10 | Import/library callers could dismiss a failed save/delete without useful feedback | Report failures, preserve retry state and prevent duplicate save taps. Report partial film/style saves and failed cleanup explicitly. |
+| A7-11 | Profile deletion removed the user original before a possibly failing engine-copy deletion | Delete the disposable engine copy first and the user original last. A new failure test reproduces original loss on the old ordering; all ten persistence tests pass after the fix. |
 
 ## Cloud Verification
 
@@ -79,12 +80,32 @@ LibRaw storage/precision/linear/working paths, LUT interpolation parity, Vulkan
 FIR/view/order/finite-output checks and pipeline failure recovery. Its final
 run identifiers and package results will be appended after completion.
 
+Candidate Actions `43539700200` (`f26d398`) passes the full build, 221 Release
+and 340 Debug tests, lint, both native adaptation modes, RAW storage sanitizers
+and Vulkan checks. FIR tests compare 74,180,082 float32 values in 368 cases,
+all byte-identical; statistics pass 1,460 production vectors, and recovery
+passes 42 checks. The final inspection step correctly prevented publication
+but failed on a verifier parser assumption: newer apksigner output uses
+`V2 Signer:` instead of `Signer #1`. The actual certificate is the published
+one. The parser now accepts both real formats, still requires one signer and
+the exact certificate, and passes six acceptance/rejection checks. That failed
+run is retained as evidence and is not counted as a successful package gate.
+
+The final profile deletion fix was also checked before/after in cloud:
+one test fails on the previous ordering with the user original missing, then
+all ten UserLibraryPersistenceTest cases pass after the change. The main-branch
+CI must repeat the complete tests with this final code before publishing.
+
 ## Static Diagnostics Triage
 
 The actual ARM64 compilation database contains 118 translation units; all 118
 completed Clang analysis. Plists contain 52 diagnostics. One additional JNI
 use-after-free warning is text-only because the analyzer could not emit its
 cross-file plist path, so the total reviewed warning count is **53**, not 52.
+The three fixed decoder translation units were then reanalyzed against the
+complete final overlay: zero bitwise-shift diagnostics remain, with one
+existing dead-store diagnostic per file. Source hashes and reports are in
+`tools/native/validation/alpha7-audit-20261114/public-evidence/reanalysis/`.
 
 | Diagnostic group | Disposition |
 | --- | --- |
@@ -125,6 +146,7 @@ item until the original text/screenshot and a phone result are supplied.
 
 - https://developer.android.com/studio/publish/app-signing
 - https://support.google.com/googleplay/answer/2812853
+- https://developers.google.com/android/play-protect/warning-dev-guidance
 
 The previous chat's generic risk flag did not provide a precise triggering
 action. This continuation stays within authorized defensive source review,

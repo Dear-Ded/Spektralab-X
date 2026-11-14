@@ -130,4 +130,15 @@ class UserLibraryPersistenceTest {
         assertThrows(IOException::class.java) { UserProfiles(temporary.root).delete("user_test", null) }
         assertEquals("keep", content.readText())
     }
+
+    @Test fun failedEngineProfileCleanupPreservesTheUserOriginal() {
+        val dir = temporary.newFolder("user-profiles")
+        val engine = temporary.newFolder("engine-profiles")
+        val profiles = UserProfiles(dir)
+        val original = profiles.store("user_test", JSONObject().put("value", "keep"))
+        val blocked = File(engine, "profiles/user_test.json").apply { mkdirs() }
+        File(blocked, "unremoved").writeText("keep")
+        assertThrows(IOException::class.java) { profiles.delete("user_test", engine) }
+        assertEquals("keep", JSONObject(original.readText()).getString("value"))
+    }
 }

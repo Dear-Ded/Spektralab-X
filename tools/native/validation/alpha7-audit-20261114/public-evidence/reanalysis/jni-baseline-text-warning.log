@@ -1,0 +1,6 @@
+warning: Path diagnostic report is not generated. Current output format does not support diagnostics that cross file boundaries. Refer to --analyzer-output for valid output formats
+warning: Path diagnostic report is not generated. Current output format does not support diagnostics that cross file boundaries. Refer to --analyzer-output for valid output formats
+/data/work/gpt-composable-styles-20261113/gradle-repo/app/src/main/cpp/spektralab_jni.cpp:538:11: warning: Use of memory after it is freed [unix.Malloc]
+  538 |         ? spk::android::check_rgba16_frame(result.r.rgba16, result.r.width, result.r.height, result.r.row_stride_px)
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 warning generated.

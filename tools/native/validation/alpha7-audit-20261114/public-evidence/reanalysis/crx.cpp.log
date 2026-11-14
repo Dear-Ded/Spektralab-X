@@ -1,0 +1,4 @@
+/data/work/gpt-alpha7-final-r3-20261114/libraw/src/decoders/crx.cpp:1399:14: warning: Value stored to 'lineBufL2' during its initialization is never read [deadcode.DeadStores]
+ 1399 |     int32_t *lineBufL2 = wavelet->lineBuf[2];
+      |              ^~~~~~~~~   ~~~~~~~~~~~~~~~~~~~
+1 warning generated.

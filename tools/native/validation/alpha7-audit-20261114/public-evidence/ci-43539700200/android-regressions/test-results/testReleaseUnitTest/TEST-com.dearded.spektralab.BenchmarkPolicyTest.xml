@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.BenchmarkPolicyTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:22:01.809Z" hostname="runnervm8axu0" time="0.144">
+  <properties/>
+  <testcase name="thermalGate handles unknown" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.006"/>
+  <testcase name="advise scales down when export is slow" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.05"/>
+  <testcase name="thermalGate recognizes OK state" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.0"/>
+  <testcase name="advise recommends live preview when fast" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.0"/>
+  <testcase name="diagnostics formats result in English" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.069"/>
+  <testcase name="advise caps edge when hot" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.001"/>
+  <testcase name="advise does not recommend live preview when slow" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.0"/>
+  <testcase name="lines formats result correctly" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.006"/>
+  <testcase name="advise adds caveat when extrapolating" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.004"/>
+  <testcase name="thermalGate recognizes hot state" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.001"/>
+  <testcase name="advise scales down when memory is tight" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.0"/>
+  <testcase name="advise handles missing memory data" classname="com.dearded.spektralab.BenchmarkPolicyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

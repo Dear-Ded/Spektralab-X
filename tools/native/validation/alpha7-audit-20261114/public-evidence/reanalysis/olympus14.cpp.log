@@ -1,0 +1,4 @@
+/data/work/gpt-alpha7-final-r3-20261114/libraw/src/decoders/olympus14.cpp:302:57: warning: Although the value stored to 'NW' is used in the enclosing expression, the value is never actually read from 'NW' [deadcode.DeadStores]
+  302 |           int32_t NW = (row < 2 || col < 2)? tag0x642 : NW = raw_image[(row - 2) * raw_width + col - 2] >> tag0x640;
+      |                                                         ^    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 warning generated.

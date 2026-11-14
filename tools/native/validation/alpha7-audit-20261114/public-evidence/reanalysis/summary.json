@@ -1,0 +1,42 @@
+{
+  "translation_units": 3,
+  "bitwise_shift_diagnostics": 0,
+  "results": [
+    {
+      "source": "crx.cpp",
+      "sha256": "1b0018b86dc45c2c72b7574ba15346eda72c67147166ea99e1cd0d3cb2309c78",
+      "exit": 0,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'lineBufL2' during its initialization is never read",
+          "line": 1399
+        }
+      ]
+    },
+    {
+      "source": "decoders_libraw.cpp",
+      "sha256": "2889524cba9878f83d0ccdd48c9ae44d57d03318f13ad1120ed2a9b81d28a8fe",
+      "exit": 0,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Value stored to 'bwide' is never read",
+          "line": 352
+        }
+      ]
+    },
+    {
+      "source": "olympus14.cpp",
+      "sha256": "c3494f01c86ac7c11fb5b55092f6ea7165d66f59cf1e7779ab4e08b8cd09fc50",
+      "exit": 0,
+      "diagnostics": [
+        {
+          "checker": "deadcode.DeadStores",
+          "description": "Although the value stored to 'NW' is used in the enclosing expression, the value is never actually read from 'NW'",
+          "line": 302
+        }
+      ]
+    }
+  ]
+}

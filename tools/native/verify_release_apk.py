@@ -16,6 +16,17 @@ def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def verify_certificate(signature, certificate):
+    # Accept scheme-labelled output as well as the older numbered signer.
+    count = re.search(r'^Number of signers: (\d+)\s*$', signature, re.MULTILINE)
+    digests = re.findall(
+        r'^(?:Signer #\d+|V\d+(?:\.\d+)? Signer:)\s+certificate SHA-256 digest: ([0-9a-fA-F]{64})\s*$',
+        signature, re.MULTILINE)
+    assert count and int(count.group(1)) == 1, 'Expected one APK signer'
+    assert {d.lower() for d in digests} == {certificate}, 'APK certificate differs from the published identity'
+    assert 'CN=Android Debug' not in signature
+
+
 def inspect(apk, root):
     version = (root / 'VERSION').read_text().strip()
     code = int((root / 'VERSION_CODE').read_text().strip())
@@ -115,8 +126,7 @@ def main():
         (args.output / log).write_text(text)
     signature = (args.output / 'signature.log').read_text()
     certificate = (args.root / 'scripts/signing-cert.sha256').read_text().replace(':', '').strip().lower()
-    signers = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-f]+)', signature)
-    assert signers == [certificate] and 'CN=Android Debug' not in signature
+    verify_certificate(signature, certificate)
     assert 'Verified using v2 scheme (APK Signature Scheme v2): true' in signature
     badging = (args.output / 'badging.log').read_text()
     assert ("package: name='com.dearded.spektralab' versionCode='" + str(result['version_code']) +
