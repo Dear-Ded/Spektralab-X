@@ -118,7 +118,7 @@ class LocalizationTest {
             val activity = MainActivity()
             MainActivity::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
                 .apply { isAccessible = true }.invoke(activity, unattached)
-            assertEquals(language.tag, activity.resources.configuration.locales[0].toLanguageTag())
+            assertEquals(language.tag, activity.baseContext.resources.configuration.locales[0].toLanguageTag())
         }
     }
 
