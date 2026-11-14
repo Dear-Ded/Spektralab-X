@@ -261,9 +261,6 @@ private fun FrameGrid(
         LazyVerticalGrid(
             columns = GridCells.Fixed(state.columns),
             state = gridState,
-            // The grid's vertical scroll recognizer must not take an active drag selection.
-            // Edge autoscroll still uses gridState.scrollBy directly.
-            userScrollEnabled = !dragSelecting,
             horizontalArrangement = Arrangement.spacedBy(gap),
             verticalArrangement = Arrangement.spacedBy(gap),
             contentPadding = PaddingValues(start = gap, end = gap, top = top, bottom = bottom),
@@ -303,6 +300,7 @@ private fun FrameGrid(
                     var start = -1
                     detectDragGesturesAfterLongPress(
                         onDragStart = { at ->
+                            android.util.Log.i("SpkGridTrace", "start at=$at padding=${gridState.layoutInfo.beforeContentPadding} items=${gridState.layoutInfo.visibleItemsInfo.map { Triple(it.index, it.offset, it.size) }}")
                             gridState.frameAt(at, currentIds, gap.toPx())?.let { i ->
                                 dragSelecting = true
                                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -311,9 +309,10 @@ private fun FrameGrid(
                                 table.selectRange(base, listOf(currentIds[i]))
                             }
                         },
-                        onDragEnd = { start = -1; autoScroll = 0f; dragSelecting = false },
-                        onDragCancel = { start = -1; autoScroll = 0f; dragSelecting = false },
+                        onDragEnd = { android.util.Log.i("SpkGridTrace", "end start=$start"); start = -1; autoScroll = 0f; dragSelecting = false },
+                        onDragCancel = { android.util.Log.i("SpkGridTrace", "cancel start=$start"); start = -1; autoScroll = 0f; dragSelecting = false },
                         onDrag = { change, _ ->
+                            android.util.Log.i("SpkGridTrace", "move at=${change.position} start=$start hit=${gridState.frameAt(change.position, currentIds, gap.toPx())}")
                             if (start >= 0) {
                                 val y = change.position.y
                                 val edge = 64.dp.toPx()
