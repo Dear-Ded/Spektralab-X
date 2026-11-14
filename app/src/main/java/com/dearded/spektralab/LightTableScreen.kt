@@ -62,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -246,6 +247,7 @@ private fun FrameGrid(
 
     // Dragging near the top or bottom edge during a drag-select scrolls the grid.
     var autoScroll by remember { mutableFloatStateOf(0f) }
+    var dragSelecting by remember { mutableStateOf(false) }
     LaunchedEffect(autoScroll) {
         if (autoScroll != 0f) while (isActive) { gridState.scrollBy(autoScroll); delay(10) }
     }
@@ -271,6 +273,10 @@ private fun FrameGrid(
                         var zoom = 1f
                         do {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
+                            // A child click sees Main before the drag detector does: consume release first.
+                            if (dragSelecting) {
+                                event.changes.filter { it.previousPressed && !it.pressed }.forEach { it.consume() }
+                            }
                             if (event.changes.count { it.pressed } >= 2) {
                                 zoom *= event.calculateZoom()
                                 val cols = LightTableViewModel.COLUMNS
@@ -294,15 +300,16 @@ private fun FrameGrid(
                     var start = -1
                     detectDragGesturesAfterLongPress(
                         onDragStart = { at ->
-                            gridState.frameAt(at, currentIds)?.let { i ->
+                            gridState.frameAt(at, currentIds, gap.toPx())?.let { i ->
+                                dragSelecting = true
                                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                 start = i
                                 base = currentSelection
                                 table.selectRange(base, listOf(currentIds[i]))
                             }
                         },
-                        onDragEnd = { start = -1; autoScroll = 0f },
-                        onDragCancel = { start = -1; autoScroll = 0f },
+                        onDragEnd = { start = -1; autoScroll = 0f; dragSelecting = false },
+                        onDragCancel = { start = -1; autoScroll = 0f; dragSelecting = false },
                         onDrag = { change, _ ->
                             if (start >= 0) {
                                 val y = change.position.y
@@ -312,7 +319,7 @@ private fun FrameGrid(
                                     y < top.toPx() + edge -> -8.dp.toPx()
                                     else -> 0f
                                 }
-                                gridState.frameAt(change.position, currentIds)?.let { i ->
+                                gridState.frameAt(change.position, currentIds, gap.toPx())?.let { i ->
                                     val ids = currentIds
                                     if (start < ids.size) {
                                         table.selectRange(base, ids.subList(minOf(start, i), maxOf(start, i) + 1))
@@ -350,8 +357,9 @@ private fun FrameGrid(
 private const val HEADER = "header"
 
 /** The frame under [at], as its index in [ids]; null over the filters or a gap. */
-private fun LazyGridState.frameAt(at: Offset, ids: List<String>): Int? {
-    val p = at.round()
+private fun LazyGridState.frameAt(at: Offset, ids: List<String>, startPadding: Float): Int? {
+    // Item offsets omit the grid's content padding; pointer coordinates include it.
+    val p = (at - Offset(startPadding, layoutInfo.beforeContentPadding.toFloat())).round()
     val key = layoutInfo.visibleItemsInfo.firstOrNull { IntRect(it.offset, it.size).contains(p) }?.key as? String
     return key?.let(ids::indexOf)?.takeIf { it >= 0 }
 }
