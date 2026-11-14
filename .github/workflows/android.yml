@@ -219,7 +219,7 @@ jobs:
           path: dist
 
       - name: Build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/*.apk
 
