@@ -333,7 +333,7 @@ private fun FrameGrid(
                         val start = gridState.frameAt(held.position, currentIds, gap.toPx())
                             ?: return@awaitEachGesture
                         val base = currentSelection
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        view.haptic(HapticEvent.LongPress)
                         table.selectRange(base, listOf(currentIds[start]))
                         try {
                             while (true) {
@@ -519,12 +519,7 @@ private fun EmptyTable(add: AddPhotos) {
                 style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(28.dp))
-            Button(
-                onClick = add.gallery,
-                modifier = Modifier.height(56.dp),
-                contentPadding = PaddingValues(horizontal = 28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-            ) { Text(tr("从相册添加"), style = MaterialTheme.typography.titleSmall) }
+            SpecularButton(tr("从相册添加"), modifier = Modifier.height(56.dp), selected = true, onClick = add.gallery)
             Spacer(Modifier.height(8.dp))
             QuietButton(tr("从文件添加（RAW / DNG）"), onClick = add.files)
         }
@@ -533,5 +528,10 @@ private fun EmptyTable(add: AddPhotos) {
 
 /** One haptic event from the map in docs/UI.md 1: [api30] on Android 11+, else [fallback]. */
 internal fun View.feel(api30: Int, fallback: Int) {
-    performHapticFeedback(if (Build.VERSION.SDK_INT >= 30) api30 else fallback)
+    haptic(when (api30) {
+        HapticFeedbackConstants.CONFIRM -> HapticEvent.Confirm
+        HapticFeedbackConstants.REJECT -> HapticEvent.Reject
+        HapticFeedbackConstants.LONG_PRESS -> HapticEvent.LongPress
+        else -> HapticEvent.Click
+    })
 }

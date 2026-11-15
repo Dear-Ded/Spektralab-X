@@ -303,11 +303,7 @@ private fun Buttons(onCancel: () -> Unit, keep: String, onKeep: () -> Unit) {
 /** The primary action: near-white, full pill, 48 dp, dark ink. */
 @Composable
 private fun PrimaryPill(text: String, onClick: () -> Unit) {
-    Button(
-        onClick = onClick, shape = Corners.full, modifier = Modifier.heightIn(min = 48.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-        contentPadding = PaddingValues(horizontal = 24.dp),
-    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
+    SpecularButton(text, selected = true, onClick = onClick)
 }
 
 /**

@@ -242,16 +242,8 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         Text(tr("支持 JPEG、HEIC、PNG 和相机 RAW"),
             style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
         Spacer(Modifier.height(28.dp))
-        androidx.compose.material3.Button(
-            onClick = onPick, interactionSource = press,
-            shape = Corners.m,
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = Palette.Darkroom, contentColor = Palette.OnAccent),
-            modifier = Modifier.height(52.dp).widthIn(min = 200.dp)
-                .graphicsLayer { scaleX = scale; scaleY = scale },
-        ) {
-            Text(tr("打开照片"), style = MaterialTheme.typography.titleMedium)
-        }
+        SpecularButton(tr("打开照片"), onClick = onPick, selected = true,
+            modifier = Modifier.height(52.dp).widthIn(min = 200.dp))
         Spacer(Modifier.height(8.dp))
         TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(tr("观片台"), color = Palette.OnSurface.copy(alpha = 0.85f))

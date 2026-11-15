@@ -156,11 +156,7 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
                     val on = !state.autoAdvance
                     table.setAutoAdvance(on)
                     // TOGGLE_ON / OFF are API 34 (UI.md 1: CLOCK_TICK before).
-                    view.performHapticFeedback(when {
-                        android.os.Build.VERSION.SDK_INT < 34 -> HapticFeedbackConstants.CLOCK_TICK
-                        on -> HapticFeedbackConstants.TOGGLE_ON
-                        else -> HapticFeedbackConstants.TOGGLE_OFF
-                    })
+                    view.haptic(if (on) HapticEvent.ToggleOn else HapticEvent.ToggleOff)
                 },
                 label = { Text(tr("自动下一张")) },
             )

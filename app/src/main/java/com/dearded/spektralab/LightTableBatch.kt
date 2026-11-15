@@ -133,11 +133,8 @@ internal fun PasteSheet(
                 QuietButton(tr("取消"), onClick = onDismiss)
                 Spacer(Modifier.width(8.dp))
                 // The primary action (UI2.md 1.1): the inverted fill, fully round, a size up from the rest.
-                Button(
-                    onClick = { onPaste(groups) }, enabled = groups.isNotEmpty(),
-                    shape = Corners.full, modifier = Modifier.height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
-                ) { Text(tr("粘贴到 {0} 张", count)) }
+                SpecularButton(tr("粘贴到 {0} 张", count), enabled = groups.isNotEmpty(), selected = true,
+                    onClick = { onPaste(groups) })
             }
             Spacer(Modifier.height(8.dp))
         }

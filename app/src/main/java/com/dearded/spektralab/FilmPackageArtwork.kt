@@ -104,7 +104,7 @@ internal class FilmPackageArtwork(val spec: FilmPackageSpec, mono: Typeface, san
                     print("FUJIFILM", 12f, 10f, 7f, Color.White, bold = true, maxWidth = 49f)
                     print(spec.model, 5f, 31f, 14f, Color.White, bold = true, italic = true)
                     print(spec.speed.orEmpty(), 5f, 60f, 21f, black, mono = true, bold = true)
-                    print(if (spec.base == FilmBase.Slide) "COLOR REVERSAL" else "PROFESSIONAL", 5f, 66f, 5f, black, mono = true)
+                    print(if (spec.base == PackageFilmBase.Slide) "COLOR REVERSAL" else "PROFESSIONAL", 5f, 66f, 5f, black, mono = true)
                 }
                 PackageLayout.CineStill -> {
                     drawRect(Color(0xFFD94A38), size = Size(66f, 4f))

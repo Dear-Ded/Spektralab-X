@@ -176,7 +176,7 @@ internal fun PanelHeader(
 ) {
     Column(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = Palette.OnSurface, maxLines = 1)
+            Text(title, style = MaterialTheme.typography.titleSmall, color = Palette.OnSurface, maxLines = 1)
             if (summary.isNotBlank()) {
                 Spacer(Modifier.width(10.dp))
                 Text(summary, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft,
@@ -539,19 +539,7 @@ private fun Check(color: Color) {
  */
 @Composable
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val press = remember { MutableInteractionSource() }
-    val shape = Corners.m
-    Box(
-        modifier.heightIn(min = 48.dp).widthIn(min = 48.dp)
-            .pressScale(press).instrumentSurface(shape, enabled = enabled)
-            .clickable(enabled = enabled, interactionSource = press, indication = TactileIndication, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 18.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = MaterialTheme.typography.labelLarge,
-            color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft, maxLines = 1,
-            overflow = TextOverflow.Ellipsis)
-    }
+    SpecularButton(text, modifier = modifier, enabled = enabled, onClick = onClick)
 }
 
 /**

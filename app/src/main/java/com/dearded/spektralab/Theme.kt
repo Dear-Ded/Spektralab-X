@@ -170,13 +170,13 @@ private val Type = Typography().let { t ->
         headlineSmall = t.headlineSmall.copy(fontWeight = FontWeight.SemiBold).zh(),
         titleLarge = t.titleLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold).zh(),
         titleMedium = t.titleMedium.copy(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold).zh(),
-        titleSmall = t.titleSmall.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold).zh(),
+        titleSmall = t.titleSmall.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold).zh().copy(letterSpacing = .2.sp),
         bodyLarge = t.bodyLarge.zh(),
         bodyMedium = t.bodyMedium.copy(fontSize = 14.sp, lineHeight = 22.sp).zh(),
         bodySmall = t.bodySmall.copy(fontSize = 12.sp, lineHeight = 18.sp).zh(),
-        labelLarge = t.labelLarge.copy(fontSize = 13.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium).zh(),
-        labelMedium = t.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium,
-            fontFeatureSettings = "tnum").zh(),
+        labelLarge = t.labelLarge.copy(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium).zh().copy(letterSpacing = .1.sp),
+        labelMedium = t.labelMedium.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium,
+            fontFeatureSettings = "tnum").zh().copy(letterSpacing = .1.sp),
         labelSmall = t.labelSmall.copy(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium).zh(),
     )
 }

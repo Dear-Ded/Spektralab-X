@@ -3,6 +3,8 @@ package com.dearded.spektralab
 /** Reviewed English UI messages. Co-created with GPT (OpenAI). */
 internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
+        "\u786e\u8ba4\u65e0\u635f\u5bfc\u51fa" to "Confirm lossless export",
+        "\u957f\u6309\u5b8c\u6210\u540e\u5f00\u59cb\u5bfc\u51fa\uff0c\u63d0\u524d\u677e\u5f00\u5373\u53d6\u6d88\u3002" to "Hold to start the export. Release early to cancel.",
         "\u7cbe\u5bc6\u89e6\u611f\u53cd\u9988" to "Precision haptic feedback",
         "\u523b\u5ea6\u3001\u5f52\u96f6\u3001\u80f6\u5377\u5207\u6362\u4e0e\u786e\u8ba4\u7684\u673a\u68b0\u89e6\u611f\u3002" to "Mechanical feedback for dial steps, zero detents, film selection and confirmation.",
         "\u84c4\u529b\u4e2d\uff0c\u677e\u5f00\u53d6\u6d88" to "Holding, release to cancel",

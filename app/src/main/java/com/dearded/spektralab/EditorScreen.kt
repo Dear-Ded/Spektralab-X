@@ -117,12 +117,20 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     var showSettings by remember { mutableStateOf(false) }
     var openMenu by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
+    var losslessCommit by remember { mutableStateOf<(() -> Unit)?>(null) }
     // ui2_reactbits.md 3.4 C: when 保存 last queued an export, so its icon follows that job (Moments.kt SaveMark).
     var savedAt by remember { mutableLongStateOf(0L) }
 
     // Android 13+: the export's progress notification needs POST_NOTIFICATIONS.
     // Asked when an export starts; a refusal only hides the notification.
     val context = androidx.compose.ui.platform.LocalContext.current
+    losslessCommit?.let { commit ->
+        AlertDialog(onDismissRequest = { losslessCommit = null },
+            title = { Text(tr("\u786e\u8ba4\u65e0\u635f\u5bfc\u51fa")) },
+            text = { Text(tr("\u957f\u6309\u5b8c\u6210\u540e\u5f00\u59cb\u5bfc\u51fa\uff0c\u63d0\u524d\u677e\u5f00\u5373\u53d6\u6d88\u3002")) },
+            confirmButton = { HoldCommitButton(tr("\u957f\u6309\u5bfc\u51fa")) { losslessCommit = null; commit() } },
+            dismissButton = { QuietButton(tr("\u53d6\u6d88")) { losslessCommit = null } })
+    }
     var queuedExport by remember { mutableStateOf<(() -> Unit)?>(null) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         queuedExport?.invoke()
@@ -230,16 +238,16 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                             }
                             // TIFF target selection is explicit for each export.
                             DropdownMenuItem(text = { Text(tr("16 位 TIFF · sRGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
+                                exportMenu = false; losslessCommit = { exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB) }
                             })
                             DropdownMenuItem(text = { Text(tr("16 位 TIFF · Display P3")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3)
+                                exportMenu = false; losslessCommit = { exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3) }
                             })
                             DropdownMenuItem(text = { Text(tr("16 位 TIFF · ProPhoto RGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
+                                exportMenu = false; losslessCommit = { exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO) }
                             })
                             DropdownMenuItem(text = { Text(tr("16 位 TIFF · Adobe RGB (1998)")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.ADOBE_RGB)
+                                exportMenu = false; losslessCommit = { exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.ADOBE_RGB) }
                             })
                             if (HeifExport.available) DropdownMenuItem(text = { Text(tr("HEIF · 工作尺寸（sRGB）")) }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
                             DropdownMenuItem(text = { Text(tr("高质量导出（受设备上限限制）")) }, onClick = {
@@ -292,7 +300,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         onDismissRequest = { confirmReset = false },
                         title = { Text(tr("重置全部调整？")) },
                         text = { Text(tr("照片会回到刚打开时的样子：风格、胶片、相纸、全部参数、边框和裁剪都会还原，RAW 白平衡回到拍摄时。之后仍可以点撤销找回。")) },
-                        confirmButton = { TextButton(onClick = { confirmReset = false; vm.resetAll() }) { Text(tr("重置"), color = Palette.Warning) } },
+                        confirmButton = { HoldCommitButton(tr("\u957f\u6309\u91cd\u7f6e")) { confirmReset = false; vm.resetAll() } },
                         dismissButton = { TextButton(onClick = { confirmReset = false }) { Text(tr("取消")) } },
                     )
                     IconButton(onClick = vm::undo, enabled = canUndo) {

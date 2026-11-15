@@ -317,8 +317,11 @@ suspend fun Animatable<Float, AnimationVector1D>.settle(
  */
 fun directionalSwap(forward: Boolean): ContentTransform {
     val dir = if (forward) 1 else -1
-    return (slideInHorizontally(Motion.defaultSpatialOffset()) { it / 8 * dir } + fadeIn(Motion.defaultEffects())) togetherWith
-        (slideOutHorizontally(Motion.defaultSpatialOffset()) { -it / 8 * dir } + fadeOut(Motion.fastEffects()))
+    val easing = CubicBezierEasing(.16f, 1f, .3f, 1f)
+    return (slideInHorizontally(androidx.compose.animation.core.tween(220, easing = easing)) { it / 8 * dir } +
+        fadeIn(androidx.compose.animation.core.tween(220, easing = easing))) togetherWith
+        (slideOutHorizontally(androidx.compose.animation.core.tween(220, easing = easing)) { -it / 8 * dir } +
+        fadeOut(androidx.compose.animation.core.tween(220, easing = easing)))
 }
 
 /**

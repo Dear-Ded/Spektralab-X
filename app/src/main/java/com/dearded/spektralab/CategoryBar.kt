@@ -75,10 +75,10 @@ fun CategoryBar(
                 Column(
                     Modifier.weight(1f).fillMaxHeight().widthIn(min = 48.dp)
                         .pressScale(press)
-                        .instrumentSurface(Corners.s, selected = on, enabled = enabled)
+                        .then(if (on) Modifier.instrumentSurface(Corners.s, selected = true, enabled = enabled) else Modifier)
                         .selectable(
                             selected = on, enabled = enabled, role = Role.Tab,
-                            interactionSource = press, indication = null,
+                            interactionSource = press, indication = TactileIndication,
                         ) { view.tick(); onSelect(i) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
