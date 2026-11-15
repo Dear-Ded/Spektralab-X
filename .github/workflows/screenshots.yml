@@ -48,6 +48,7 @@ jobs:
             --tests com.dearded.spektralab.FrameRateBoostTest \
             --tests com.dearded.spektralab.PreviewOpticsUiTest \
             --tests com.dearded.spektralab.FilmPackageUiTest \
+            --tests com.dearded.spektralab.LaunchIntroTimingTest \
             --tests com.dearded.spektralab.ExternalFileRoutingTest
 
       # First, so a failing contact sheet never loses the PNGs.

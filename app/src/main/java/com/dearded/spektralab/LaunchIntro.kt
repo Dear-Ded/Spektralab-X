@@ -116,9 +116,7 @@ fun LaunchIntro(ready: Boolean, visible: Boolean = true, onDone: () -> Unit) {
                 leaving = true
             }
         }
-    }
-    LaunchedEffect(leaving) {
-        if (!leaving) return@LaunchedEffect
+        // Continue into the dissolve without waiting for a recomposition to start another job.
         shown.animateTo(0f, tween(if (quick) 180 else INTRO_FADE_MS, easing = FastOutSlowInEasing))
         done()
     }
