@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LightTableGestureTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-15T02:04:24.031Z" hostname="ser858255664526" time="5.955">
+  <properties/>
+  <testcase name="firstDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="3.148"/>
+  <testcase name="nextTapCanClearSelectionThenOpenThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.382"/>
+  <testcase name="secondFingerEndsDragSelectionAndCanZoomTheGrid" classname="com.dearded.spektralab.LightTableGestureTest" time="0.295"/>
+  <testcase name="longPressDragSelectsAcrossRows" classname="com.dearded.spektralab.LightTableGestureTest" time="0.272"/>
+  <testcase name="longPressFirstRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.263"/>
+  <testcase name="longPressSecondRowSelectsTouchedFrame" classname="com.dearded.spektralab.LightTableGestureTest" time="0.248"/>
+  <testcase name="crossRowDragSurvivesTheSelectionRecomposition" classname="com.dearded.spektralab.LightTableGestureTest" time="0.297"/>
+  <testcase name="shortTapStillOpensThePhoto" classname="com.dearded.spektralab.LightTableGestureTest" time="0.177"/>
+  <testcase name="firstUpwardDragEventCanCrossTheScrollTouchSlop" classname="com.dearded.spektralab.LightTableGestureTest" time="0.239"/>
+  <testcase name="longPressNearBottomKeepsTheTouchedRow" classname="com.dearded.spektralab.LightTableGestureTest" time="0.221"/>
+  <testcase name="normalScrollingResumesAfterLongPressRelease" classname="com.dearded.spektralab.LightTableGestureTest" time="0.412"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

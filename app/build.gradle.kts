@@ -92,6 +92,10 @@ android {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.maxHeapSize = "2g"
                 System.getenv("SPK_LUT_EVIDENCE_DIR")?.let { dir -> it.outputs.dir(dir) }
+                val candidates = System.getenv("SPK_STYLE_CANDIDATES_DIR").orEmpty()
+                it.inputs.property("styleLabCandidatesDir", candidates)
+                if (candidates.isNotEmpty()) it.inputs.dir(candidates)
+                else it.exclude("**/StyleLabCandidateTest*")
             }
         }
     }

@@ -1,0 +1,19 @@
+test_candidates_neutrals_monotonic_and_tints_explicit (test_colour.ColourTests.test_candidates_neutrals_monotonic_and_tints_explicit) ... ok
+test_color_proxy_protection_reduces_skin_range_changes (test_colour.ColourTests.test_color_proxy_protection_reduces_skin_range_changes) ... ok
+test_deepest_cube_cell_preserves_original_color (test_colour.ColourTests.test_deepest_cube_cell_preserves_original_color) ... ok
+test_disconnected_oklab_ray_does_not_bypass_rgb_mapping (test_colour.ColourTests.test_disconnected_oklab_ray_does_not_bypass_rgb_mapping) ... ok
+test_interior_gamut_bypass_is_exact (test_colour.ColourTests.test_interior_gamut_bypass_is_exact) ... ok
+test_negative_lms_extremes_preserve_input (test_colour.ColourTests.test_negative_lms_extremes_preserve_input) ... ok
+test_official_oklab_red_reference (test_colour.ColourTests.test_official_oklab_red_reference) ... ok
+test_periodic_hue_has_no_wrap_seam (test_colour.ColourTests.test_periodic_hue_has_no_wrap_seam) ... ok
+test_prophoto_transfer_round_trip_and_toe (test_colour.ColourTests.test_prophoto_transfer_round_trip_and_toe) ... ok
+test_rgb_ray_response_monotonic_at_boundary (test_colour.ColourTests.test_rgb_ray_response_monotonic_at_boundary) ... ok
+test_signed_wide_gamut_round_trip (test_colour.ColourTests.test_signed_wide_gamut_round_trip) ... ok
+test_soft_gamut_contains_wide_colors (test_colour.ColourTests.test_soft_gamut_contains_wide_colors) ... ok
+test_soft_knee_value_and_derivative_are_continuous (test_colour.ColourTests.test_soft_knee_value_and_derivative_are_continuous) ... ok
+test_sorted_tetra_identity_axis_order_and_ties (test_colour.ColourTests.test_sorted_tetra_identity_axis_order_and_ties) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.067s
+
+OK

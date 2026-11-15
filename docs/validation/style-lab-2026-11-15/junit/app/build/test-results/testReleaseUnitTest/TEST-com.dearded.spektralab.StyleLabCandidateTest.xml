@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.StyleLabCandidateTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-15T02:05:54.736Z" hostname="ser858255664526" time="20.422">
+  <properties/>
+  <testcase name="generatedBilingualPackagesRespectNativeFilterContract" classname="com.dearded.spektralab.StyleLabCandidateTest" time="20.422"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

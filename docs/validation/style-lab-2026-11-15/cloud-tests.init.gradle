@@ -1,0 +1,6 @@
+allprojects {
+    tasks.withType(org.gradle.api.tasks.testing.Test).configureEach {
+        def scratch = System.getenv('SPK_STYLE_TEST_TMP')
+        if (scratch) systemProperty('java.io.tmpdir', scratch)
+    }
+}

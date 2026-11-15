@@ -1,0 +1,34 @@
+[
+  {
+    "file": "astronaut.png",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/astronaut.png",
+    "credit_license": "NASA / public domain, Eileen Collins portrait",
+    "license_source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html",
+    "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+    "preview": "embedded RGB treated as sRGB; not a RAW camera-profile test"
+  },
+  {
+    "file": "coffee.png",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/coffee.png",
+    "credit_license": "Rachel Michetti / CC0, scikit-image data",
+    "license_source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html",
+    "sha256": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7",
+    "preview": "embedded RGB treated as sRGB; not a RAW camera-profile test"
+  },
+  {
+    "file": "chelsea.png",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/chelsea.png",
+    "credit_license": "Stefan van der Walt / CC0, scikit-image data",
+    "license_source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html",
+    "sha256": "596aa1e7cb875eb79f437e310381d26b338a81c2da23439704a73c4651e8c4bb",
+    "preview": "embedded RGB treated as sRGB; not a RAW camera-profile test"
+  },
+  {
+    "file": "rocket.jpg",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/rocket.jpg",
+    "credit_license": "SpaceX / public domain, scikit-image data",
+    "license_source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html",
+    "sha256": "c2dd0de7c538df8d111e479619b129464d0269d0ae5fd18ca91d33a7fdfea95c",
+    "preview": "embedded RGB treated as sRGB; not a RAW camera-profile test"
+  }
+]

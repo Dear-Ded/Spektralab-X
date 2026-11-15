@@ -1,0 +1,26 @@
+[
+  {
+    "file": "tools/style_lab/build.py",
+    "sha256": "5f0a5243e1f5d5ff1766d7ad686197876ed16d1bd41f99402cee25e306ff60a7"
+  },
+  {
+    "file": "tools/style_lab/candidates.json",
+    "sha256": "f7b51b05df8acbd775c92fba5242b7649c0d13ffb9497a5a0a44fed1e1a1d038"
+  },
+  {
+    "file": "tools/style_lab/colour.py",
+    "sha256": "44fce18b9d817b59449b7efc2d6f72a8e02aefc4504e4ecbf4f7a93514825f47"
+  },
+  {
+    "file": "tools/style_lab/test_colour.py",
+    "sha256": "3b7550678f6882bd31a3b038f25a1f2caa34443f1b589c90d130486c1ab35343"
+  },
+  {
+    "file": "app/build.gradle.kts",
+    "sha256": "9c24382ce8e34ffc884b75194cd8e55224ac85b6055c564e2d92a24b394bd889"
+  },
+  {
+    "file": "app/src/test/java/com/dearded/spektralab/StyleLabCandidateTest.kt",
+    "sha256": "93078969b6820c7c62ecc83db88968e2ac2de2857ef389fa675b3ea997a9429c"
+  }
+]

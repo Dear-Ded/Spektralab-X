@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.SpkPackageBoundsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-15T02:05:54.233Z" hostname="ser858255664526" time="0.5">
+  <properties/>
+  <testcase name="smallUnknownEntryStillImportsTheLook" classname="com.dearded.spektralab.SpkPackageBoundsTest" time="0.002"/>
+  <testcase name="unknownEntryCannotInflatePastThePackageBudget" classname="com.dearded.spektralab.SpkPackageBoundsTest" time="0.128"/>
+  <testcase name="duplicateEntryCannotBypassThePackageBudget" classname="com.dearded.spektralab.SpkPackageBoundsTest" time="0.127"/>
+  <testcase name="multipleSkippedEntriesShareOneBudget" classname="com.dearded.spektralab.SpkPackageBoundsTest" time="0.124"/>
+  <testcase name="directoryPayloadCannotInflatePastThePackageBudget" classname="com.dearded.spektralab.SpkPackageBoundsTest" time="0.119"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

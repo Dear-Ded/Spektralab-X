@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.LocalizationTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-15T02:04:32.212Z" hostname="ser858255664526" time="0.999">
+  <properties/>
+  <testcase name="defaultsToChineseEvenOnEnglishSystemAndUnknownPreference" classname="com.dearded.spektralab.LocalizationTest" time="0.041"/>
+  <testcase name="activityBaseAttachmentDoesNotReadTheUninitializedTheme" classname="com.dearded.spektralab.LocalizationTest" time="0.033"/>
+  <testcase name="switchingUpdatesPreviouslyInitializedLabelsWithoutChangingRecipeIdentity" classname="com.dearded.spektralab.LocalizationTest" time="0.064"/>
+  <testcase name="localizedContextRetainsActivityAndDoesNotMutateBaseResources" classname="com.dearded.spektralab.LocalizationTest" time="0.726"/>
+  <testcase name="failedPreferenceWriteDoesNotPublishLanguage" classname="com.dearded.spektralab.LocalizationTest" time="0.03"/>
+  <testcase name="translatedArgumentsKeepFilenamesAndBracesVerbatim" classname="com.dearded.spektralab.LocalizationTest" time="0.022"/>
+  <testcase name="selectionIsDurableAndReloadsAfterInMemoryLanguageChanges" classname="com.dearded.spektralab.LocalizationTest" time="0.024"/>
+  <testcase name="catalogKeepsAllNumberedArgumentsAndHasNoChineseTranslations" classname="com.dearded.spektralab.LocalizationTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

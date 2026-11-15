@@ -1,0 +1,5 @@
+70d84928bb0dda36dbe0378b0741ce30e2c2674088d1247f4ff7ee2e6ec9aeee  Spektralab-X-original-style-candidates-20261115-en.zip
+333c3cd63d0d6817bd18db9c86de94721af802c4e663d251ae582cee4a8fbfbc  Spektralab-X-original-style-candidates-20261115-zh.zip
+43f655200ab3bfc504f7441f674d57db466c4c2e13f1df434ccbb22078a37c8d  style-evidence.tgz
+f43d1670318edd101a383366af9db4583149b39cfe40dde26f1e94c5646f4e61  style-contact-sheets.tgz
+717aade9fc734a28dc97be8d9bfa6fe0f56eca9a77c3b62b161e41d7ee380bd8  style-junit.tgz

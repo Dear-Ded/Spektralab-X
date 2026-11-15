@@ -1,0 +1,205 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :app:compileReleaseKotlin UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :app:bundleReleaseClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleReleaseClassesToCompileJar UP-TO-DATE
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///data/work/gpt-composable-styles-20261113/gradle-repo/app/src/test/java/com/dearded/spektralab/StyleLabCandidateTest.kt:44:17 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'java.io.File?'.
+
+> Task :app:compileReleaseUnitTestKotlin
+w: file:///data/work/gpt-composable-styles-20261113/gradle-repo/app/src/test/java/com/dearded/spektralab/StyleLabCandidateTest.kt:44:17 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'java.io.File?'.
+
+> Task :app:preReleaseUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileReleaseUnitTest UP-TO-DATE
+> Task :app:compileReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :app:mergeReleaseShaders UP-TO-DATE
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :app:testDebugUnitTest
+
+FrameRateBoostTest > stoppedActivityRestoresPreferenceAndRemovesPendingIdleReset FAILED
+    java.lang.AssertionError at DefaultNativeRuntimeLoader.java:262
+        Caused by: java.io.IOException at FileOutputStream.java:-2
+
+FrameRateBoostTest > liftRestoresPreviousPreference FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+FrameRateBoostTest > missingForecastDoesNotOverrideKnownPowerAndThermalStatus FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+FrameRateBoostTest > severeThermalStateReleasesEvenWithoutCoordinateChange FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+FrameRateBoostTest > powerSaverDuringDragRestoresPreviousPreference FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+FrameRateBoostTest > idleFingerRestoresPreviousPreference FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+FrameRateBoostTest > cancellationRestoresPreviousPreference FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LightTableNavigationTest > firstChineseCrossRowSelectionSurvivesNavigation FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > defaultsToChineseEvenOnEnglishSystemAndUnknownPreference FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > activityBaseAttachmentDoesNotReadTheUninitializedTheme FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > switchingUpdatesPreviouslyInitializedLabelsWithoutChangingRecipeIdentity FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > localizedContextRetainsActivityAndDoesNotMutateBaseResources FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > failedPreferenceWriteDoesNotPublishLanguage FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > translatedArgumentsKeepFilenamesAndBracesVerbatim FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > selectionIsDurableAndReloadsAfterInMemoryLanguageChanges FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationTest > catalogKeepsAllNumberedArgumentsAndHasNoChineseTranslations FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationUiTest > benchmarkResultsAreVisibleWithoutCopyingDiagnostics FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LocalizationUiTest > settingSwitchesBothWaysAndRetainsTheOpenEdit FAILED
+    java.lang.RuntimeException at TempDirectory.java:63
+        Caused by: java.nio.file.FileSystemException at UnixException.java:100
+
+LutBakeTest > prophotoTablesRetainTheirExactOriginalSamples FAILED
+    java.nio.file.FileSystemException at UnixException.java:100
+
+LutBakeTest > toeAndGamutBoundaryVerticesMatchIndependentReference FAILED
+    java.nio.file.FileSystemException at UnixException.java:100
+
+LutBakeTest > densLutBakeTest > denseOffGridSamplesReduceCompositionError FAILED
+    java.nio.file.FileSystemException at UnixException.java:100
+
+
+    java.nio.file.FileSystemException at UnixException.java:100
+
+UserLibraryPersistenceTest > truncatedPairedLutIsRejectedForRenderingAndSharing FAILED
+    java.nio.file.FileSystemException at UnixException.java:100
+java.io.IOException: No space left on device
+
+	at com.esotericsoftware.kryo.io.Output.flush(Output.java:165)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+379 tests completed, 158 failed
+
+> Task :app:testDebugUnitTest FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testDebugUnitTest'.
+> java.io.IOException: No space left on device
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 27s
+57 actionable tasks: 7 executed, 50 up-to-date

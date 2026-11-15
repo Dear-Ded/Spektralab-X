@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "algorithm": "oklab-prophoto-soft-gamut-v1",
+  "styles": [
+    {"id":"clear_portrait","zh":"素净人像","en":"Clear Portrait","use_zh":"日光人像、浅色衣物；先校准白平衡","use_en":"Daylight portraits and pale fabrics; balance white first","contrast":0.05,"chroma":0.98,"skin_protect":0.85,"bands":[{"hue":145,"width":40,"chroma":0.94,"density":0.025}]},
+    {"id":"airy_daylight","zh":"晴日留白","en":"Airy Daylight","use_zh":"明亮日常、建筑；不补救过曝","use_en":"Bright everyday scenes and architecture; cannot recover clipping","contrast":-0.18,"chroma":0.94,"skin_protect":0.7,"bands":[{"hue":245,"width":40,"lightness":0.015,"chroma":0.94}]},
+    {"id":"mineral_greens","zh":"岩青绿影","en":"Mineral Greens","use_zh":"园林、山野、石材；避免把肤色当植物","use_en":"Gardens, hills and stone; inspect skin near foliage","contrast":0.10,"chroma":0.96,"skin_protect":0.8,"bands":[{"hue":145,"width":35,"shift":9,"chroma":0.88,"density":0.06},{"hue":245,"width":35,"chroma":0.94,"density":0.025}]},
+    {"id":"dense_street","zh":"浓彩街光","en":"Dense Street","use_zh":"阳光街景、彩色招牌；高感噪点不会消失","use_en":"Sunlit streets and colored signs; does not remove noise","contrast":0.24,"chroma":1.08,"skin_protect":0.75,"density":0.055,"bands":[{"hue":30,"width":25,"density":0.025},{"hue":145,"width":35,"density":0.03}]},
+    {"id":"amber_slate","zh":"琥珀青灰","en":"Amber Slate","use_zh":"窗边、室内暖光；中性色会有意偏色","use_en":"Window light and warm interiors; intentionally tinted neutrals","contrast":0.10,"chroma":0.90,"skin_protect":0.65,"split":{"shadow_hue":235,"highlight_hue":75,"amount":0.012}},
+    {"id":"powder_coast","zh":"粉蓝海岸","en":"Powder Coast","use_zh":"海天、浅蓝织物；蓝色本身需有细节","use_en":"Sea, sky and pale blue fabrics; requires existing blue detail","contrast":-0.10,"chroma":0.96,"skin_protect":0.8,"bands":[{"hue":250,"width":40,"shift":-4,"chroma":0.84,"lightness":0.025},{"hue":160,"width":30,"chroma":0.93}]},
+    {"id":"muted_ochre","zh":"赭石旧日","en":"Muted Ochre","use_zh":"砖墙、秋色、静物；不制造胶片颗粒","use_en":"Brick, autumn and still life; adds no film grain","contrast":0.12,"chroma":0.84,"skin_protect":0.75,"bands":[{"hue":100,"width":30,"shift":-6,"density":0.035},{"hue":145,"width":30,"chroma":0.83,"shift":-8}]},
+    {"id":"night_cobalt","zh":"夜航钴蓝","en":"Night Cobalt","use_zh":"蓝调时刻、混合灯光；不替代降噪或局部蒙版","use_en":"Blue hour and mixed light; no denoising or local masks","contrast":0.18,"chroma":0.97,"skin_protect":0.8,"bands":[{"hue":265,"width":35,"shift":5,"chroma":1.08,"density":0.035},{"hue":25,"width":25,"chroma":1.02}],"split":{"shadow_hue":260,"highlight_hue":65,"amount":0.006}},
+    {"id":"silver_document","zh":"银灰纪实","en":"Silver Document","use_zh":"光影、人像、建筑；灰阶映射不是黑白乳剂","use_en":"Light, portraits and architecture; tonal mapping, not a BW emulsion","contrast":0.30,"chroma":0.0,"skin_protect":0.0},
+    {"id":"warm_ink","zh":"墨暖双色","en":"Warm Ink","use_zh":"静物、雨天、纪实；有意保留微量暖冷双色","use_en":"Still life, rain and documentary; subtle warm/cool duotone","contrast":0.22,"chroma":0.0,"skin_protect":0.0,"split":{"shadow_hue":250,"highlight_hue":70,"amount":0.014}}
+  ]
+}

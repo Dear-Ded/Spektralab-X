@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.EditorStateAutosaveTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-15T02:04:08.244Z" hostname="ser858255664526" time="0.463">
+  <properties/>
+  <testcase name="aNewSnapshotCannotBeOverwrittenByAnOlderInFlightWrite" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.023"/>
+  <testcase name="snapshotsKeepTheirSourceRecipeAndWbTogether" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.014"/>
+  <testcase name="backgroundFlushWritesTheLatestSnapshotWithoutWaitingForDebounce" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.003"/>
+  <testcase name="disposalFlushesPendingStateAndStopsItsWorker" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.007"/>
+  <testcase name="failuresReachTheFlushCallerRetainPendingStateAndReportOnceUntilRecovery" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.008"/>
+  <testcase name="quietStateIsSavedEvenWithoutAnExplicitFlush" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.403"/>
+  <testcase name="cancellingTheEditorDoesNotCancelTheProcessOwnedSave" classname="com.dearded.spektralab.EditorStateAutosaveTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

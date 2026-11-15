@@ -1,0 +1,102 @@
+[
+  {
+    "file": "zh/clear_portrait.spklook",
+    "bytes": 2834979,
+    "sha256": "3c92af42b251f6998e34e29c75c54636c1eefe862e27ac8a8385197afd8c62c0"
+  },
+  {
+    "file": "en/clear_portrait.spklook",
+    "bytes": 2834936,
+    "sha256": "475c27a7be269f7e84cd2294a42cd6a85e69425e59ca6302c8bcb4dbb6307d1a"
+  },
+  {
+    "file": "zh/airy_daylight.spklook",
+    "bytes": 2787884,
+    "sha256": "c06a868537eafb61172fa1e6928885fc8ef1a3a418e3e6a3ca282088cafa1c30"
+  },
+  {
+    "file": "en/airy_daylight.spklook",
+    "bytes": 2787852,
+    "sha256": "757baf432d5f8fa59947c89265d95500050c331cddf80288f848f7c0a12c0b34"
+  },
+  {
+    "file": "zh/mineral_greens.spklook",
+    "bytes": 2892792,
+    "sha256": "0b7794fe803a1e2c8bb98986104c521156e1a11317a34c99f1468411fa665581"
+  },
+  {
+    "file": "en/mineral_greens.spklook",
+    "bytes": 2892737,
+    "sha256": "baaef6b4e4980d70884ec14618d291d514e73483b5979d53b9c59987c2b6126f"
+  },
+  {
+    "file": "zh/dense_street.spklook",
+    "bytes": 2862187,
+    "sha256": "c2309bd72903bbe90f496e414ad4f49055b0b3725ad01a92b0d8591b236f9c25"
+  },
+  {
+    "file": "en/dense_street.spklook",
+    "bytes": 2862133,
+    "sha256": "4aca2a09e84ad56aeb0bcfb3a6b26569943f0beaa5acbd58b788d68489590680"
+  },
+  {
+    "file": "zh/amber_slate.spklook",
+    "bytes": 2872405,
+    "sha256": "5341a776ea4202508f6275b6af31b4a796181bc23692624f35b4abecf0fe9f27"
+  },
+  {
+    "file": "en/amber_slate.spklook",
+    "bytes": 2872364,
+    "sha256": "05020d77372127d3cc21111374786a82e3e76bc0c23d9dbbb63beeada67587ba"
+  },
+  {
+    "file": "zh/powder_coast.spklook",
+    "bytes": 2819843,
+    "sha256": "f7e4e61ace53a2d98ba17c5b31906b0290acfb04ebaa34f6a727461983f9bdde"
+  },
+  {
+    "file": "en/powder_coast.spklook",
+    "bytes": 2819805,
+    "sha256": "084a48c5341847295249cc879308c7f27df4ca21abeec044cc8516c4a5995983"
+  },
+  {
+    "file": "zh/muted_ochre.spklook",
+    "bytes": 2907226,
+    "sha256": "bcfbedef2ef3b648dc6509cc543afee4f1e0b08d082dfba365b580d59fbaf8b2"
+  },
+  {
+    "file": "en/muted_ochre.spklook",
+    "bytes": 2907179,
+    "sha256": "9e344000b952f643dd103cf4e79af791ce264deb9b81783d44f30a2511b02f64"
+  },
+  {
+    "file": "zh/night_cobalt.spklook",
+    "bytes": 2838263,
+    "sha256": "c8f7a339995ee1ae2f6d16315fd05946b80f21e608b91a149f4052aa3851d927"
+  },
+  {
+    "file": "en/night_cobalt.spklook",
+    "bytes": 2838204,
+    "sha256": "b2046f2407fb3951caab3aab42cc299f5297aa7ed592b5e0707d08b1af6cee44"
+  },
+  {
+    "file": "zh/silver_document.spklook",
+    "bytes": 1618285,
+    "sha256": "70ea21a70ed474d08fd9d73b2032abf5cb0d12a8aeda9e053078ce91fc9d1f73"
+  },
+  {
+    "file": "en/silver_document.spklook",
+    "bytes": 1618238,
+    "sha256": "0539b161ed9459d79109ed0835488cd397d1a01229164138c6211a178933574a"
+  },
+  {
+    "file": "zh/warm_ink.spklook",
+    "bytes": 2945948,
+    "sha256": "90ce4d8061a5538a5644aa79280dfa1a625fe030ea798176b750ca1e87835d12"
+  },
+  {
+    "file": "en/warm_ink.spklook",
+    "bytes": 2945900,
+    "sha256": "4f83b19634b713c64e742a9f664dbea5a34aac5ec96f1c521a55e1893a42a800"
+  }
+]

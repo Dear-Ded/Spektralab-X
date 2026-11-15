@@ -1,0 +1,23 @@
+{
+  "testDebugUnitTest": {
+    "tests": 379,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testReleaseUnitTest": {
+    "tests": 231,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "numerical_tests_per_host": 14,
+  "native": {
+    "tables": 10,
+    "samples": 163840,
+    "max_float": 1.19209e-07,
+    "max16": 1,
+    "asan_ubsan": true
+  },
+  "cross_cloud_packages": "20/20 SHA256 identical, independently checked against IBX manifest"
+}

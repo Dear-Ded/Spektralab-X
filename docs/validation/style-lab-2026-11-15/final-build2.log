@@ -1,0 +1,11 @@
+building clear_portrait
+building airy_daylight
+building mineral_greens
+building dense_street
+building amber_slate
+building powder_coast
+building muted_ochre
+building night_cobalt
+building silver_document
+building warm_ink
+{"hard_clip_hue_error_mean_deg": 16.315213525160058, "hard_clip_hue_error_max_deg": 46.137322642070224, "soft_map_hue_error_mean_deg": 9.324127208691985, "soft_map_hue_error_max_deg": 34.06730540233806, "hard_clip_lightness_error_mean": 0.013489869803564404, "hard_clip_lightness_error_max": 0.036687702107304654, "soft_map_lightness_error_mean": 0.0013431991226499536, "soft_map_lightness_error_max": 0.0044826798894693765}
