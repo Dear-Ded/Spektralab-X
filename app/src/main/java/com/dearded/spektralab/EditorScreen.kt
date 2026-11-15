@@ -258,10 +258,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     }
 
     val nav = remember { EditorNav() }
-    LaunchedEffect(nav.tab, nav.adjustSeg, nav.gradingTool) {
+    LaunchedEffect(nav.tab, nav.step, nav.adjustSeg, nav.gradingTool) {
         // Graphical tools need their whole touch surface in view on entry.
-        if (panelLevel == 1 && nav.tab == 2 &&
-            (nav.adjustSeg in 3..4 || (nav.adjustSeg == 2 && nav.gradingTool == 1))) panelLevel = 2
+        if (panelLevel == 1 && ((nav.tab == 1 && nav.step == 0) ||
+            (nav.tab == 2 && (nav.adjustSeg in 3..4 || (nav.adjustSeg == 2 && nav.gradingTool == 1))))) panelLevel = 2
     }
     var showChanges by remember { mutableStateOf(false) }
     // The light table's view model is the activity's, so its 复制调整 is visible here too.

@@ -187,7 +187,7 @@ fun LightTableScreen(
             },
         )
         // Reading photos in: the working bar under the head, never a halo round a photo (UI2.md 1.1).
-        if (state.importing > 0) AuraBar(Modifier.padding(top = top))
+        if (state.importing > 0) WorkLine(Modifier.padding(top = top))
 
         Box(Modifier.align(Alignment.BottomCenter)) {
             if (frames.isNotEmpty()) {

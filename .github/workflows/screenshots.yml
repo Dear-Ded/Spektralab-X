@@ -52,6 +52,7 @@ jobs:
 
       # First, so a failing contact sheet never loses the PNGs.
       - name: Upload screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-${{ github.run_number }}

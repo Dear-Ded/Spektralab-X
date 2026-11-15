@@ -407,7 +407,8 @@ internal fun ThumbCard(
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
             .clip(outer)
             .combinedClickable(
-                enabled = enabled, interactionSource = press, indication = null, role = Role.RadioButton,
+                enabled = enabled, interactionSource = press, indication = TactileIndication, role = Role.RadioButton,
+                hapticFeedbackEnabled = false,
                 onLongClickLabel = if (onLongClick != null) (if (starred) tr("取消收藏") else tr("收藏")) else null,
                 onLongClick = onLongClick, onClick = onClick,
             )
@@ -415,7 +416,7 @@ internal fun ThumbCard(
         horizontalAlignment = Alignment.Start,
     ) {
         Box(Modifier.width(size + 8.dp).height((size + 8.dp) * 0.68f)
-            .border(1.dp, ring, outer).padding(3.dp)) {
+            .border(.75.dp, ring, outer).padding(3.dp)) {
             Box(Modifier.fillMaxSize().clip(inner).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
                 if (image != null) {
                     Image(image, contentDescription = title, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

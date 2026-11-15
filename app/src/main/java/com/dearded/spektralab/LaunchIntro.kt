@@ -135,7 +135,7 @@ fun LaunchIntro(ready: Boolean, visible: Boolean = true, onDone: () -> Unit) {
                 }
             },
     ) {
-        Aura(Modifier.matchParentSize(), strength = { glow.value })
+        Aura(Modifier.matchParentSize(), strength = { glow.value }, active = visible && !leaving)
         Canvas(Modifier.matchParentSize()) {
             val r = LaunchIcon.rect
             // The splash icon box: what the system reported, else 240 dp centred (API 31's icon size).

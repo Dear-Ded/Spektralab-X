@@ -63,7 +63,7 @@ fun UpdateDialog(editing: Boolean) {
                 Updater.State.Idle -> Unit
                 Updater.State.Checking -> {
                     PanelHeader(tr("正在检查更新"), hint = tr("只连 GitHub 上本项目的发布页。"))
-                    AuraBar(Modifier.padding(vertical = RowGap))
+                    WorkLine(Modifier.padding(vertical = RowGap))
                     Actions(primary = tr("后台检查"), onPrimary = dismiss)
                 }
                 Updater.State.UpToDate -> {

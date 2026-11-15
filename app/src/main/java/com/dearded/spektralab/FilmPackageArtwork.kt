@@ -49,7 +49,7 @@ internal class FilmPackageArtwork(val spec: FilmPackageSpec, mono: Typeface, san
     private val uvText = android.graphics.Path().also {
         paint.typeface = monoFace; paint.textSize = 26f; paint.isFakeBoldText = true
         val speed = spec.speed.orEmpty()
-        paint.getTextPath(speed, 0, speed.length, 6f, 57f, it)
+        paint.getTextPath(speed, 0, speed.length, 5f, 57f, it)
     }
 
     private fun path(vararg xy: Float) = Path().apply {
@@ -93,7 +93,8 @@ internal class FilmPackageArtwork(val spec: FilmPackageSpec, mono: Typeface, san
                 PackageLayout.TriX -> {
                     print("KODAK", 5f, 10f, 8f, gold, bold = true)
                     drawPath(triBand, gold)
-                    print("TRI-X", 6f, 36f, 15f, black, bold = true, italic = true)
+                    print("TRI-X", 6f, 36f, 15f, paper, bold = true, italic = true)
+                    clipPath(triBand) { print("TRI-X", 6f, 36f, 15f, black, bold = true, italic = true) }
                     print("400TX", 5f, 61f, 17f, paper, mono = true, bold = true)
                 }
                 PackageLayout.Fuji -> {
@@ -116,7 +117,8 @@ internal class FilmPackageArtwork(val spec: FilmPackageSpec, mono: Typeface, san
                 PackageLayout.Ilford -> {
                     drawPath(diagonal, black)
                     print("ILFORD", 5f, 13f, 13f, black, bold = true)
-                    print("HP5", 5f, 46f, 24f, paper, bold = true)
+                    print("HP5", 5f, 46f, 24f, black, bold = true)
+                    clipPath(diagonal) { print("HP5", 5f, 46f, 24f, paper, bold = true) }
                     print("PLUS", 6f, 56f, 8f, paper, bold = true)
                     print("400", 6f, 66f, 8f, paper, mono = true, bold = true)
                 }

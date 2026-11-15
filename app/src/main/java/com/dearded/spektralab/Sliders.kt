@@ -115,15 +115,6 @@ internal fun LabeledSlider(
             textSize = with(density) { 12.sp.toPx() }
         }
     }
-    val tickLabels = remember(lo, hi, majorStep) {
-        val decimals = if (majorStep < 1f) ceil(-kotlin.math.log10(majorStep)).toInt().coerceIn(0, 4) else 0
-        val first = kotlin.math.floor(lo / majorStep).toInt()
-        val last = ceil(hi / majorStep).toInt()
-        (first..last).associateWith { i ->
-            val number = i * majorStep
-            String.format(Locale.ROOT, if (number > 0f && lo < 0f) "%+.${decimals}f" else "%.${decimals}f", number)
-        }
-    }
     // One state for the slider's life: the gesture loop keeps writing to it
     // across recompositions. A value from elsewhere (undo, a preset) replaces
     // it, except mid-drag, where the model's echo lags the finger.

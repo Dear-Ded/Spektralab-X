@@ -75,7 +75,7 @@ internal fun SpecularButton(
         .clickable(enabled = enabled, interactionSource = source, indication = TactileIndication,
             role = Role.Button, onClick = onClick).padding(horizontal = 14.dp), contentAlignment = Alignment.Center) {
         Text(text, style = MaterialTheme.typography.labelLarge,
-            color = if (selected) Palette.Darkroom else Palette.OnSurface)
+            color = when { !enabled -> Palette.OnSurfaceSoft; selected -> Palette.Darkroom; else -> Palette.OnSurface })
     }
 }
 

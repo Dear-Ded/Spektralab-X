@@ -84,7 +84,7 @@ internal fun FilmPackageCard(
             if (preview != null) Image(preview, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             else Text(tr("\u80f6\u7247\u7f29\u7565\u56fe"), style = MaterialTheme.typography.labelSmall,
                 color = Palette.OnSurfaceSoft, modifier = Modifier.padding(4.dp))
-            if (selected) Text("+", color = Palette.Darkroom, fontFamily = UiMono,
+            if (selected) Text("\u2713", color = Palette.Darkroom, fontFamily = UiMono,
                 modifier = Modifier.align(Alignment.TopEnd).background(Palette.Background).padding(horizontal = 3.dp))
             if (favourite) Text("*", color = Palette.OnSurface, fontFamily = UiMono,
                 modifier = Modifier.align(Alignment.BottomStart).background(Palette.Background).padding(horizontal = 3.dp))

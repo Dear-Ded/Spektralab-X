@@ -232,10 +232,6 @@ internal fun PageColumn(content: @Composable () -> Unit) = Column { content() }
 @Composable
 internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
     // UI2.md 1.1: one near-white primary action in the middle, the light table as the quiet second.
-    val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-    val pressed by press.collectIsPressedAsState()
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "open")
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
         Text(tr("从一张照片开始"), style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
         Spacer(Modifier.height(12.dp))

@@ -151,7 +151,7 @@ fun ImportHost(vm: EditorViewModel) {
                 state.busy -> {
                     PanelHeader(tr("正在读取"), summary = left)
                     // The working bar, never a spinner over the photo (UI2.md 1.1).
-                    AuraBar(Modifier.padding(vertical = RowGap))
+                    WorkLine(Modifier.padding(vertical = RowGap))
                 }
                 state.error != null -> {
                     PanelHeader(tr("没能导入"), summary = left)

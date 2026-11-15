@@ -142,8 +142,8 @@ private fun auraPhase(): Float = (android.os.SystemClock.uptimeMillis() % PERIOD
  * 1 for the launch screen, about 0.5 under text on a waiting overlay.
  */
 @Composable
-fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Background) =
-    Aura(modifier, { strength }, ground)
+fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Background, active: Boolean = true) =
+    Aura(modifier, { strength }, ground, active = active)
 
 /**
  * [Aura] whose [strength] is read in the draw phase, so an animated strength
@@ -151,7 +151,8 @@ fun Aura(modifier: Modifier, strength: Float = 1f, ground: Color = Palette.Backg
  * up from the bottom edge); below that, the radial glow.
  */
 @Composable
-fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Background, reach: Float = AURORA_REACH) {
+fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Background, reach: Float = AURORA_REACH, active: Boolean = true) {
+    if (!active) return
     val shader = remember { if (Build.VERSION.SDK_INT >= 33) Aurora.create() else null }
     if (shader != null && Build.VERSION.SDK_INT >= 33) AuroraBand(modifier, shader, strength, ground, reach) else RadialAura(modifier, strength, ground)
 }
@@ -170,7 +171,7 @@ fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Back
 @RequiresApi(33)
 @Composable
 private fun AuroraBand(modifier: Modifier, shader: RuntimeShader, strength: () -> Float, ground: Color, reach: Float) {
-    val moving = remember { motionAllowed() }
+    val moving = !rememberReduceMotion()
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val active = moving && lifecycle.isAtLeast(Lifecycle.State.STARTED)
     val time = remember { mutableFloatStateOf(if (moving) auroraSeconds() else AURORA_STILL_TIME) }
@@ -370,7 +371,7 @@ half4 main(float2 p) {
 /** The radial glow: the aurora's stand-in on API 29-32, where there is no RuntimeShader. */
 @Composable
 private fun RadialAura(modifier: Modifier, strength: () -> Float, ground: Color) {
-    val moving = remember { motionAllowed() }
+    val moving = !rememberReduceMotion()
     // One clock for everything; every motion is a whole number of cycles per
     // period, so the loop has no seam.
     // Read only inside the draw lambda, so each frame redraws without recomposing.
