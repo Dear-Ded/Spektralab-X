@@ -57,6 +57,9 @@ class LaunchIntroTimingTest {
     }
 
     private fun advance(ms: Long) {
+        // Dispatch visibility changes before counting frames; a hidden intro has no Aura clock.
+        shadowOf(Looper.getMainLooper()).idle()
+        compose.waitForIdle()
         compose.mainClock.advanceTimeBy(ms)
         shadowOf(Looper.getMainLooper()).idle()
         compose.waitForIdle()
