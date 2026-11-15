@@ -1,0 +1,31 @@
+{
+  "upstreamReference": "a46627d250545a394ca21522f8a28b0fb89e4c42",
+  "upstreamScope": "Existing patched source directories and native archives from earlier engine validation reused. No fresh full-engine rebuild or new independent upstream archive verification claimed; cloud source archive has no .git metadata.",
+  "privateInputs": false,
+  "deviceTestAdded": false,
+  "newApkBuilt": false,
+  "newReleasePublished": false,
+  "cloudCompiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "reusedHostArchives": [
+    {
+      "path": "/data/work/gpt-rank-selection-20261113/host/engine/libspektralab_engine.a",
+      "bytes": 2803072,
+      "sha256": "b452104b2ce26e3cbe958f0f3a1d700fbbb1fe9932ba3e532ac9d0fa006d59f2"
+    },
+    {
+      "path": "/data/work/gpt-rank-selection-20261113/host/engine/libspektralab_core.a",
+      "bytes": 788920,
+      "sha256": "1999742c0a925c963ef9e489f66493accafbc37cc9b93a100818b5cde88512bd"
+    },
+    {
+      "path": "/data/work/gpt-raw-storage-20261113/host/engine/libspk_image_io.a",
+      "bytes": 201264,
+      "sha256": "d8a7f9f4810d7fb54b047ff5c42470012eb2d9bf955748cb6a33dd9dc3548e79"
+    },
+    {
+      "path": "/data/work/gpt-raw-storage-20261113/host/engine/libspk_libraw.a",
+      "bytes": 2036318,
+      "sha256": "3f82856611477038a48a77c8090daa37f15dee95462dfbc2c3d2a1fe090a1918"
+    }
+  ]
+}

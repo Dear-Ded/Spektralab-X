@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "linkedJniExports": 40,
+  "allExportsMatchedKotlin": true,
+  "loadAlignmentMin": 16384,
+  "soBytes": 31291416,
+  "soSha256": "52e6e20a2714cfe2d47e730e2fc3e0fc1af495c931b792b671bd37e8edeaa250",
+  "cacheReuse": "Existing unchanged native archives/objects; recompiled modified JNI object with original NDK flags; no APK/package build."
+}

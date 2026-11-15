@@ -45,6 +45,7 @@
 #include "rgba16_frame_check.hpp"
 #include "layer2.hpp"
 #include "lut3d.hpp"
+#include "source_lut.hpp"
 #include "look_state.hpp"
 #include "output_transform.hpp"
 #include "passthrough.hpp"
@@ -1707,9 +1708,39 @@ JNI_FN(jboolean, setLut)(JNIEnv* env, jobject, jlong handle, jfloatArray values_
     return JNI_FALSE;
 }
 
-// The last display render again, through the current look: what an
-// adjustment slider shows, in milliseconds, without the engine. Null when
-// there is nothing kept (lastError), and the caller renders instead.
+// Source-preserving CUBE evaluation; refusal leaves the previous look intact.
+JNI_FN(jboolean, setSourceLutV1)(JNIEnv* env, jobject, jlong handle, jfloatArray shaper_j,
+                                jfloatArray table_j, jint side, jfloatArray domains_j,
+                                jboolean srgb, jfloat strength) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s) { fail("setSourceLut: no session"); return JNI_FALSE; }
+    try {
+        if (!std::isfinite(strength) || !domains_j || env->GetArrayLength(domains_j) != 12 ||
+            (side != 0 && (side < 2 || side > spk::android::SourceLut::kMaxSide))) {
+            fail("setSourceLut: invalid strength, domains or side"); return JNI_FALSE;
+        }
+        const jsize sn = shaper_j ? env->GetArrayLength(shaper_j) : 0;
+        const jsize tn = table_j ? env->GetArrayLength(table_j) : 0;
+        if ((sn && (sn < 6 || sn % 3 || size_t(sn) > spk::android::SourceLut::kMaxShaper * 3)) ||
+            tn != side * side * side * 3 || (!sn && !tn)) {
+            fail("setSourceLut: invalid source lengths"); return JNI_FALSE;
+        }
+        std::vector<float> shaper(size_t(sn), 0), table(size_t(tn), 0);
+        std::array<float, 12> domains{};
+        if (sn) env->GetFloatArrayRegion(shaper_j, 0, sn, shaper.data());
+        if (tn) env->GetFloatArrayRegion(table_j, 0, tn, table.data());
+        env->GetFloatArrayRegion(domains_j, 0, 12, domains.data());
+        if (env->ExceptionCheck()) { env->ExceptionClear(); fail("setSourceLut: cannot read arrays"); return JNI_FALSE; }
+        auto lut = spk::android::SourceLut::make(std::move(shaper), std::move(table), side, domains, srgb == JNI_TRUE);
+        if (!lut) { fail("setSourceLut: invalid source values"); return JNI_FALSE; }
+        s->look.set_lut(std::move(lut), std::clamp(strength, 0.0f, 1.0f));
+        return JNI_TRUE;
+    } catch (const std::exception& e) { fail(std::string("setSourceLut: ") + e.what()); }
+    catch (...) { fail("setSourceLut: unknown failure"); }
+    return JNI_FALSE;
+}
+
+// The retained display frame through the current look, without developing again.
 JNI_FN(jobject, repack)(JNIEnv* env, jobject, jlong handle, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s || (!s->last.rgba16 && s->last_float.empty())) { fail("nothing to repack"); return nullptr; }

@@ -167,6 +167,8 @@ internal object EnglishCatalog {
         "展开成 {0}³ 的 3D 表" to "Expanded to a {0}³ 3D table",
         "边长 {0} 重采样到 {1}" to "Resampled from side {0} to {1}",
         "1D 整形曲线" to "1D shaper curve",
+        "按原始曲线、定义域和色表计算；{0}³ 表用于兼容缓存" to "Evaluated from the original curves, domains and table; a {0}³ table is kept for cache compatibility",
+        "原文超过 {0} MB，分享时携带最终 ProPhoto 色表" to "Source exceeds {0} MB; sharing carries the final ProPhoto table",
         "并入 3D 表" to "Merged into the 3D table",
         ".cube 第 {0} 行：{1}" to ".cube line {0}: {1}",
         "需要三个数" to "Expected three numbers",

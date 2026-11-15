@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.BuiltinStyleFidelityTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-15T04:03:44.786Z" hostname="ser858255664526" time="0.369">
+  <properties/>
+  <testcase name="builtinSelectionKeepsPhotoGeometryRawDevelopmentAndMasks" classname="com.dearded.spektralab.BuiltinStyleFidelityTest" time="0.24"/>
+  <testcase name="builtinRoundTripCarriesItsCompletePhysicalRecipe" classname="com.dearded.spektralab.BuiltinStyleFidelityTest" time="0.1"/>
+  <testcase name="everyBuiltinHasTheSameRecipeAfterAnyPreviousFilmEffects" classname="com.dearded.spektralab.BuiltinStyleFidelityTest" time="0.018"/>
+  <testcase name="partialUserRecipesStillPreserveMissingPhysicalFields" classname="com.dearded.spektralab.BuiltinStyleFidelityTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

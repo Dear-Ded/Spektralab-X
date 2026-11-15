@@ -159,6 +159,10 @@ object NativeEngine {
      */
     external fun setLut(session: Long, values: FloatArray?, side: Int, strength: Float): Boolean
 
+    /** Original CUBE chain; no intermediate grid. Domains are 1D min/max then 3D min/max RGB. */
+    external fun setSourceLutV1(session: Long, shaper: FloatArray?, table: FloatArray?, side: Int,
+                               domains: FloatArray, srgb: Boolean, strength: Float): Boolean
+
     /** The last display render again, through the current look, into [reuse] if it fits. */
     external fun repack(session: Long, reuse: Bitmap?): Bitmap?
 

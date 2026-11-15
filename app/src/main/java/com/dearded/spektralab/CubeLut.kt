@@ -73,8 +73,8 @@ class Lut3(val size: Int, val data: FloatArray) {
         const val NATIVE_SIDE = 65
         /** The largest table read at all (129^3 floats is 26 MB). */
         const val MAX_SIDE = 129
-        /** A 1D-only .cube is expanded to this. */
-        const val EXPAND_SIDE = 33
+        /** A 1D-only .cube uses the final native grid. */
+        const val EXPAND_SIDE = NATIVE_SIDE
 
         fun identity(side: Int): Lut3 {
             val out = FloatArray(side * side * side * 3)
@@ -99,24 +99,21 @@ class CubeFile(
      * a side. A shaper and a non-unit domain are folded in by resampling.
      */
     fun toLut(report: ImportReport): Lut3 {
-        val plainDomain = threeDMin.all { it == 0f } && threeDMax.all { it == 1f }
-        if (threeD != null && oneD == null && plainDomain && threeD.size <= Lut3.NATIVE_SIDE) return threeD
-        val side = when {
-            threeD == null -> Lut3.EXPAND_SIDE.also { report.mapped("1D LUT", tr("展开成 {0}³ 的 3D 表", it)) }
-            threeD.size > Lut3.NATIVE_SIDE -> Lut3.NATIVE_SIDE.also { report.approximated("3D LUT", tr("边长 {0} 重采样到 {1}", threeD.size, it)) }
-            else -> threeD.size
-        }
-        if (oneD != null && threeD != null) report.mapped(tr("1D 整形曲线"), tr("并入 3D 表"))
-        val out = FloatArray(side * side * side * 3)
-        val px = FloatArray(3)
-        val step = 1f / (side - 1)
-        var i = 0
-        for (b in 0 until side) for (g in 0 until side) for (r in 0 until side) {
-            px[0] = r * step; px[1] = g * step; px[2] = b * step
-            apply(px)
-            out[i++] = px[0]; out[i++] = px[1]; out[i++] = px[2]
-        }
-        return Lut3(side, out)
+        reportBake(report)
+        return LutBake.forLayer2(this, SpkLut.SPACE_PROPHOTO)
+    }
+
+    internal val plainThreeD: Lut3? get() = threeD?.takeIf {
+        oneD == null && threeDMin.all { it == 0f } && threeDMax.all { it == 1f }
+    }
+
+    internal fun reportBake(report: ImportReport) {
+        if (oneD != null) report.approximated(tr("1D 整形曲线"),
+            tr("按原始曲线、定义域和色表计算；{0}³ 表用于兼容缓存", Lut3.NATIVE_SIDE))
+        if (threeD != null && plainThreeD == null && oneD == null) report.approximated("DOMAIN",
+            tr("按原始曲线、定义域和色表计算；{0}³ 表用于兼容缓存", Lut3.NATIVE_SIDE))
+        if (threeD != null && threeD.size > Lut3.NATIVE_SIDE) report.approximated("3D LUT",
+            tr("边长 {0} 重采样到 {1}", threeD.size, Lut3.NATIVE_SIDE))
     }
 
     /**
@@ -124,7 +121,7 @@ class CubeFile(
      * Each table's domain says which input values its first and last entries
      * stand for; inputs outside it clamp to the edge entries.
      */
-    private fun apply(px: FloatArray) {
+    internal fun sample(px: FloatArray) {
         if (oneD != null) {
             val n1 = oneDSize - 1
             for (k in 0 until 3) {
@@ -299,6 +296,18 @@ object LutBake {
     fun forLayer2(lut: Lut3, space: String): Lut3 {
         if (space == SpkLut.SPACE_PROPHOTO)
             return if (lut.size > Lut3.NATIVE_SIDE) lut.resampled(Lut3.NATIVE_SIDE) else lut
+        return bake(space, lut::sample)
+    }
+
+    /** Evaluate the original shaper/domain/table chain on the final grid only. */
+    fun forLayer2(cube: CubeFile, space: String): Lut3 {
+        if (space == SpkLut.SPACE_PROPHOTO) cube.plainThreeD?.let {
+            if (it.size <= Lut3.NATIVE_SIDE) return it
+        }
+        return bake(space, cube::sample)
+    }
+
+    private fun bake(space: String, sample: (FloatArray) -> Unit): Lut3 {
         // The composed colour-space transform is nonlinear even for a 2^3
         // source. Sample it once on the final grid; do not first shrink a
         // larger source, or inherit a small source's coarse grid.
@@ -308,10 +317,16 @@ object LutBake {
         val step = 1f / (side - 1)
         var i = 0
         for (b in 0 until side) for (g in 0 until side) for (r in 0 until side) {
+            if (space == SpkLut.SPACE_PROPHOTO) {
+                px[0] = r * step; px[1] = g * step; px[2] = b * step
+                sample(px)
+                for (k in 0 until 3) out[i++] = clamp01(px[k])
+                continue
+            }
             lin[0] = proDecode(r * step); lin[1] = proDecode(g * step); lin[2] = proDecode(b * step)
             mul(PRO_TO_SRGB, lin, px)
             for (k in 0 until 3) px[k] = srgbEncode(clamp01(px[k]))
-            lut.sample(px)
+            sample(px)
             for (k in 0 until 3) lin[k] = srgbDecode(clamp01(px[k]))
             mul(SRGB_TO_PRO, lin, px)
             for (k in 0 until 3) out[i++] = proEncode(clamp01(px[k]))

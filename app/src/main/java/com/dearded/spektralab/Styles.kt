@@ -83,18 +83,21 @@ data class Style(
             look.copy(tone = tH, colour = cH, toneHome = tH, colourHome = cH, masks = edit.look.masks)
         }
         if (scope == StyleScope.FILTER) return edit.copy(look = finish)
+        // Built-ins were tuned on one complete physical baseline. A previous
+        // recipe's preflash/couplers/input curve must not alter that result.
+        val input = if (id in BUILTIN_IDS) BUILTIN_ENGINE.applyOptions(edit).copy(sceneCurve = SceneCurve.IDENTITY) else edit
         val stock = catalog.film(film)
         if (stock == null && engineOptions.noFilm != true) return null
         // A style is a film on a paper: 无 off, the paper chosen. Coming from 效果「无」
         // it develops with the scanner's own sharpening, as every style was tuned with.
-        val base = if (keepFilmState || engineOptions.noFilm == true) edit.copy(film = film,
-                paper = if (catalog.paper(paper) != null) paper else edit.paper)
-            else edit.copy(film = film, scanFilm = stock!!.positive, noFilm = false, digitalIntermediate = false,
-                unsharpAmount = if (edit.effectsNone) Edit.SCAN_UNSHARP else edit.unsharpAmount,
-                paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: edit.paper)
+        val base = if (keepFilmState || engineOptions.noFilm == true) input.copy(film = film,
+                paper = if (catalog.paper(paper) != null) paper else input.paper)
+            else input.copy(film = film, scanFilm = stock!!.positive, noFilm = false, digitalIntermediate = false,
+                unsharpAmount = if (input.effectsNone) Edit.SCAN_UNSHARP else input.unsharpAmount,
+                paper = if (catalog.paper(paper) != null) paper else stock.targetPrint ?: input.paper)
         return catalog.normalize(engineOptions.applyOptions(base.copy(
             exposureEv = exposureEv, printExposure = printExposure,
-            sceneCurve = sceneCurve ?: edit.sceneCurve,
+            sceneCurve = sceneCurve ?: input.sceneCurve,
             yShift = (yCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             mShift = (mCc / Edit.FILTER_SHIFT_CC).coerceIn(-1.0, 1.0),
             filmFormatMm = formatMm,
@@ -114,17 +117,27 @@ data class Style(
     fun atStrength(k: Double): Style = if (k >= 1.0) this else copy(look = look.finishAt(k.coerceIn(0.0, 1.0)))
 
     /** This style as a .spklook (what a Fuji recipe builds on, and what export writes). */
-    fun toSpkLook() = SpkLook(
-        name = name, category = group, scope = scope,
-        engine = if (scope == StyleScope.FILTER) SpkEngine() else engineOptions.copy(film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
-            sceneCurve = sceneCurve,
-            yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
-        layer2 = if (scope == StyleScope.FILM) Look.NEUTRAL else look.copy(lut = "", lutStrength = 1.0, masks = emptyList()),
-        source = SpkSource("style", id, inspiredBy),
-    )
+    fun toSpkLook(): SpkLook {
+        val options = if (id in BUILTIN_IDS) engineOptions.applyOptions(Edit()).savedStyle(name).engine else engineOptions
+        return SpkLook(
+            name = name, category = group, scope = scope,
+            engine = if (scope == StyleScope.FILTER) SpkEngine() else options.copy(
+                film = film, paper = paper, exposureEv = exposureEv, printExposure = printExposure,
+                sceneCurve = sceneCurve ?: if (id in BUILTIN_IDS) SceneCurve.IDENTITY else null,
+                scanFilm = engineOptions.scanFilm ?: if (id in BUILTIN_IDS) film in SLIDE_FILMS else options.scanFilm,
+                grainActive = engineOptions.grainActive ?: if (id in BUILTIN_IDS) grain > 0 else options.grainActive,
+                halationActive = engineOptions.halationActive ?: if (id in BUILTIN_IDS) halation > 0 else options.halationActive,
+                glareActive = engineOptions.glareActive ?: if (id in BUILTIN_IDS) glare > 0 else options.glareActive,
+                yCc = yCc, mCc = mCc, formatMm = formatMm, grain = grain, halation = halation, glare = glare),
+            layer2 = if (scope == StyleScope.FILM) Look.NEUTRAL else look.copy(lut = "", lutStrength = 1.0, masks = emptyList()),
+            source = SpkSource("style", id, inspiredBy),
+        )
+    }
 
     companion object {
         private val BUILTIN_IDS by lazy { ALL.map { it.id }.toSet() }
+        private val BUILTIN_ENGINE by lazy { Edit().savedStyle("builtin").engine }
+        private val SLIDE_FILMS = setOf("fujifilm_provia_100f", "fujifilm_velvia_100", "kodak_ektachrome_100", "kodak_kodachrome_64")
 
         // Lab scanner signatures, as the labs describe them (Carmencita, theFINDlab,
         // Richard Photo Lab): Frontier punchy and golden with cyan shadows, Noritsu

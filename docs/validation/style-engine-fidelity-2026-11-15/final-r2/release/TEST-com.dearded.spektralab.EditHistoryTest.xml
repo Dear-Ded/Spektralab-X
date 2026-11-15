@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.EditHistoryTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-15T04:03:52.833Z" hostname="ser858255664526" time="0.007">
+  <properties/>
+  <testcase name="abandonedCandidateDoesNotDiscardRedoOrCreateUndo" classname="com.dearded.spektralab.EditHistoryTest" time="0.005"/>
+  <testcase name="inspectingPendingUndoAndRedoLeavesBothStacksIntact" classname="com.dearded.spektralab.EditHistoryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

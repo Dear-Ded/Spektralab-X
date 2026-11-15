@@ -1,0 +1,4 @@
+source fidelity: pixels=16384 mean_float=1.26032e-08 max_float=5.96046e-08 max16=1
+source detail: 129 alternating native-grid samples preserved
+cost: mode=baked65 pixels=1048576 single_thread_ms=46.0285 checksum=1.33165e+06
+cost: mode=source pixels=1048576 single_thread_ms=93.9813 checksum=1.3319e+06

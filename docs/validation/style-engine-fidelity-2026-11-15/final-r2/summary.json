@@ -1,0 +1,16 @@
+{
+  "release": {
+    "suites": 34,
+    "tests": 241,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "debug": {
+    "suites": 57,
+    "tests": 390,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

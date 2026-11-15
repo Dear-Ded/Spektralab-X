@@ -1,0 +1,132 @@
+{
+  "files": [
+    {
+      "path": "app/src/main/cpp/source_lut.hpp",
+      "bytes": 4742,
+      "sha256": "0acbda1fd62942ac9ce90f4f9d72ac2c775494de5015869c9e611e865948486d"
+    },
+    {
+      "path": "app/src/main/cpp/spektralab_jni.cpp",
+      "bytes": 92110,
+      "sha256": "e9ad520a224da66b4790e22ad2e0096f010f94715ca321c92254bf9e3039e882"
+    },
+    {
+      "path": "app/src/main/cpp/layer2.hpp",
+      "bytes": 5258,
+      "sha256": "7932ce0b782857ddf19e91f0f411351b3c4582c02bb23b8d5e51c846fcd5f976"
+    },
+    {
+      "path": "app/src/main/cpp/layer2.cpp",
+      "bytes": 15981,
+      "sha256": "f55ad1488bebb8e1f89c6d574931136bddb62af88f8adcfbf82becb192f4f77d"
+    },
+    {
+      "path": "app/src/main/cpp/lut3d.hpp",
+      "bytes": 3217,
+      "sha256": "de03a761379ad1ce37ab50f0bbc77467414ab538da819cc05191687119e0f58d"
+    },
+    {
+      "path": "app/src/main/cpp/look_state.hpp",
+      "bytes": 1444,
+      "sha256": "9add6135a1a2524c1b540c62289de9ed8e2b4c8562ba9531dd9c4f346454b744"
+    },
+    {
+      "path": "app/src/main/cpp/jni_exports.map",
+      "bytes": 307,
+      "sha256": "e3d335cf410bdb8986169d21d30ea1545c92d25226c835b4ca95750363792422"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/CubeLut.kt",
+      "bytes": 18677,
+      "sha256": "d2e28ec980fa2fdd042cf7a1a9c9b1b27dfa15b6024ac13de2fed053df44389e"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/EnglishCatalog.kt",
+      "bytes": 101889,
+      "sha256": "6bef0f1b7574c6068d1d40b8792c8149fdf3ce4144d6ffae7140334658e21c62"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/LutStore.kt",
+      "bytes": 7420,
+      "sha256": "b063e6cd8564ddc435eac113a3ec374d96aa6906cce576bf3a644a010a1da6de"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/NativeEngine.kt",
+      "bytes": 8788,
+      "sha256": "6ca375fd3a0f144df5200106b4e9e19383b844a7aa5357beda8e4c0c4079105e"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StyleImport.kt",
+      "bytes": 18925,
+      "sha256": "35947b7086d113b3fcf467681852ad2719b02b4628df36b6eae936a0c62a28bf"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/Styles.kt",
+      "bytes": 48852,
+      "sha256": "1b34515d632d7c3ce181eec20f4934ec468284f6f3fba651ebdceb8d553a8ba6"
+    },
+    {
+      "path": "app/src/main/java/com/dearded/spektralab/StyleRecipe.kt",
+      "bytes": 3666,
+      "sha256": "b6cf231b29f0fce5bde40c62fbaa4e21d81b38651910ca825c9984fcf5dfe169"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/BuiltinStyleFidelityTest.kt",
+      "bytes": 3620,
+      "sha256": "7c90d03c3a5d3764bffc1f6169c00a771e2f7e1225c9b2e1c004d871b069a696"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/CubeShaperFidelityTest.kt",
+      "bytes": 1695,
+      "sha256": "e2c36b6315b47f8bbd81e4d986413303925e1fd48b27b3f1cf1d82fd9824a59c"
+    },
+    {
+      "path": "app/src/test/java/com/dearded/spektralab/CubeSourceBakeTest.kt",
+      "bytes": 9802,
+      "sha256": "1924efca360eccb91dfab7888fc7ef62eb1a618588afdda1f7d309689aec7fc0"
+    },
+    {
+      "path": "app/src/testDebug/java/com/dearded/spektralab/CubeImportFidelityTest.kt",
+      "bytes": 2545,
+      "sha256": "341bc1f4e7d966fd7903daf3c5e3932834d34b487096523c1ad15d8578f89873"
+    },
+    {
+      "path": "tools/native/source_lut_fidelity.cpp",
+      "bytes": 5393,
+      "sha256": "0bb6c57b7af523973ce41014607033c07553c965600de8e095100fc56778bec6"
+    },
+    {
+      "path": "tools/native/jni_source_lut.cpp",
+      "bytes": 3037,
+      "sha256": "f62e6e208864961ce661c689cf19a37dd57cb8009af08c98848b67c7470c4750"
+    },
+    {
+      "path": "tools/native/run_jni_source_lut.sh",
+      "bytes": 1740,
+      "sha256": "9881fe712765f42fc38cd04b8feee4791000fbd7ba8662864d5cfa33890636e5"
+    },
+    {
+      "path": "tools/native/jni_selection_preview.cpp",
+      "bytes": 9816,
+      "sha256": "f6759ad57f22aabfd1dffb16101e39ac6687ec2ca36dbfe101d6a54e1aed33c9"
+    },
+    {
+      "path": "tools/native/run_jni_selection_preview.sh",
+      "bytes": 1924,
+      "sha256": "a3c2979f6ef7b6b12ef1d8eef329f5fe775948b468b56ad9347580840e2a9040"
+    },
+    {
+      "path": "tools/native/jni_precision.cpp",
+      "bytes": 9295,
+      "sha256": "2a01f69b71e71921693defd552acb2a4258b29974ca7a70be749129b5c55490c"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "bytes": 6332,
+      "sha256": "9c24382ce8e34ffc884b75194cd8e55224ac85b6055c564e2d92a24b394bd889"
+    }
+  ],
+  "allCloudBytesMatched": true,
+  "count": 25,
+  "scope": "Modified implementation/tests plus relevant unchanged Layer 2, JNI bridge, recipe and Gradle dependencies. Documentation excluded."
+}

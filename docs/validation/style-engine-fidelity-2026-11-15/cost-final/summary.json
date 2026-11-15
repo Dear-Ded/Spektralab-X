@@ -1,0 +1,41 @@
+{
+  "srgb": {
+    "pixels": 1048576,
+    "singleThreadMs": {
+      "baked65": [
+        66.9269,
+        60.5882,
+        64.8026
+      ],
+      "source": [
+        508.629,
+        502.69,
+        524.133
+      ]
+    },
+    "medianMs": {
+      "baked65": 64.8026,
+      "source": 508.629
+    }
+  },
+  "prophoto": {
+    "pixels": 1048576,
+    "singleThreadMs": {
+      "baked65": [
+        65.1376,
+        63.3615,
+        61.971
+      ],
+      "source": [
+        97.975,
+        95.952,
+        94.5123
+      ]
+    },
+    "medianMs": {
+      "baked65": 63.3615,
+      "source": 95.952
+    }
+  },
+  "limits": "Three repetitions after JVM/native jobs completed on a shared 4-vCPU cloud host; no phone, thermal, full-image or statistically controlled benchmark claim."
+}

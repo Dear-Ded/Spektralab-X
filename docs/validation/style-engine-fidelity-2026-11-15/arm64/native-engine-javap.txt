@@ -1,0 +1,144 @@
+Compiled from "NativeEngine.kt"
+public final class com.dearded.spektralab.NativeEngine {
+  public static final com.dearded.spektralab.NativeEngine INSTANCE;
+    descriptor: Lcom/dearded/spektralab/NativeEngine;
+  public static final int $stable;
+    descriptor: I
+  private com.dearded.spektralab.NativeEngine();
+    descriptor: ()V
+
+  public final native java.lang.String lastError();
+    descriptor: ()Ljava/lang/String;
+
+  public final native java.lang.String deviceInfo();
+    descriptor: ()Ljava/lang/String;
+
+  public final native long probeStorageRange(long);
+    descriptor: (J)J
+
+  public final native long create(java.lang.String, java.lang.String);
+    descriptor: (Ljava/lang/String;Ljava/lang/String;)J
+
+  public final native void destroy(long);
+    descriptor: (J)V
+
+  public final native java.lang.String capabilities(long);
+    descriptor: (J)Ljava/lang/String;
+
+  public final native long openRaw(long, java.lang.String, int, long, java.lang.String, double, double);
+    descriptor: (JLjava/lang/String;IJLjava/lang/String;DD)J
+
+  public final native long createRawOpenCancellation();
+    descriptor: ()J
+
+  public final native void cancelRawOpen(long);
+    descriptor: (J)V
+
+  public final native void releaseRawOpenCancellation(long);
+    descriptor: (J)V
+
+  public final native long openRawCancellableV1(long, java.lang.String, int, long, java.lang.String, double, double, long);
+    descriptor: (JLjava/lang/String;IJLjava/lang/String;DDJ)J
+
+  public final native long openBitmap(long, android.graphics.Bitmap, java.lang.String, java.lang.String, float, int, int);
+    descriptor: (JLandroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;FII)J
+
+  public static long openBitmap$default(com.dearded.spektralab.NativeEngine, long, android.graphics.Bitmap, java.lang.String, java.lang.String, float, int, int, int, java.lang.Object);
+    descriptor: (Lcom/dearded/spektralab/NativeEngine;JLandroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;FIIILjava/lang/Object;)J
+
+  public final native long openBitmapF16V1(long, android.graphics.Bitmap, java.lang.String, java.lang.String, float, int, int, int);
+    descriptor: (JLandroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;FIII)J
+
+  public static long openBitmapF16V1$default(com.dearded.spektralab.NativeEngine, long, android.graphics.Bitmap, java.lang.String, java.lang.String, float, int, int, int, int, java.lang.Object);
+    descriptor: (Lcom/dearded/spektralab/NativeEngine;JLandroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;FIIIILjava/lang/Object;)J
+
+  public final native long openBitmapHdr(long, android.graphics.Bitmap, android.graphics.Bitmap, float[], java.lang.String, java.lang.String, int, int);
+    descriptor: (JLandroid/graphics/Bitmap;Landroid/graphics/Bitmap;[FLjava/lang/String;Ljava/lang/String;II)J
+
+  public static long openBitmapHdr$default(com.dearded.spektralab.NativeEngine, long, android.graphics.Bitmap, android.graphics.Bitmap, float[], java.lang.String, java.lang.String, int, int, int, java.lang.Object);
+    descriptor: (Lcom/dearded/spektralab/NativeEngine;JLandroid/graphics/Bitmap;Landroid/graphics/Bitmap;[FLjava/lang/String;Ljava/lang/String;IIILjava/lang/Object;)J
+
+  public final native android.graphics.Bitmap beforeBitmap(long);
+    descriptor: (J)Landroid/graphics/Bitmap;
+
+  public final native android.graphics.Bitmap filmPreview(long, java.lang.String);
+    descriptor: (JLjava/lang/String;)Landroid/graphics/Bitmap;
+
+  public final native long openPreviewV1(long, java.lang.String);
+    descriptor: (JLjava/lang/String;)J
+
+  public final native java.lang.String sourceInfo(long);
+    descriptor: (J)Ljava/lang/String;
+
+  public final native java.lang.String setParams(long, java.lang.String);
+    descriptor: (JLjava/lang/String;)Ljava/lang/String;
+
+  public final native java.lang.String getParams(long);
+    descriptor: (J)Ljava/lang/String;
+
+  public final native android.graphics.Bitmap renderBitmap(long, java.lang.String);
+    descriptor: (JLjava/lang/String;)Landroid/graphics/Bitmap;
+
+  public final native android.graphics.Bitmap renderProofBitmap(long, java.lang.String, java.lang.String);
+    descriptor: (JLjava/lang/String;Ljava/lang/String;)Landroid/graphics/Bitmap;
+
+  public final native android.graphics.Bitmap exportBitmap(long, java.lang.String);
+    descriptor: (JLjava/lang/String;)Landroid/graphics/Bitmap;
+
+  public final native boolean writeJpeg444(android.graphics.Bitmap, java.lang.String, int, byte[]);
+    descriptor: (Landroid/graphics/Bitmap;Ljava/lang/String;I[B)Z
+
+  public final native long exportJpeg444(long, java.lang.String, java.lang.String, int, byte[]);
+    descriptor: (JLjava/lang/String;Ljava/lang/String;I[B)J
+
+  public final native android.graphics.Bitmap renderReuse(long, java.lang.String, android.graphics.Bitmap);
+    descriptor: (JLjava/lang/String;Landroid/graphics/Bitmap;)Landroid/graphics/Bitmap;
+
+  public final native boolean exportTiff(long, java.lang.String, java.lang.String, java.lang.String);
+    descriptor: (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+
+  public final native boolean exportTiffFd(long, int, java.lang.String, java.lang.String);
+    descriptor: (JILjava/lang/String;Ljava/lang/String;)Z
+
+  public final boolean exportTiffFd(long, int, java.lang.String, java.lang.String, java.lang.String);
+    descriptor: (JILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+
+  private final native boolean exportTiffFdV1(long, int, java.lang.String, java.lang.String, java.lang.String);
+    descriptor: (JILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+
+  public final native void release(long);
+    descriptor: (J)V
+
+  public final native boolean setLook(long, float[]);
+    descriptor: (J[F)Z
+
+  public final native boolean setLut(long, float[], int, float);
+    descriptor: (J[FIF)Z
+
+  public final native boolean setSourceLutV1(long, float[], float[], int, float[], boolean, float);
+    descriptor: (J[F[FI[FZF)Z
+
+  public final native android.graphics.Bitmap repack(long, android.graphics.Bitmap);
+    descriptor: (JLandroid/graphics/Bitmap;)Landroid/graphics/Bitmap;
+
+  public final native boolean setOutput(long, java.lang.String, boolean);
+    descriptor: (JLjava/lang/String;Z)Z
+
+  public final native void cancel(long);
+    descriptor: (J)V
+
+  public final native boolean warmUp(long, java.lang.String, java.lang.String);
+    descriptor: (JLjava/lang/String;Ljava/lang/String;)Z
+
+  public final native long trimMemory(long);
+    descriptor: (J)J
+
+  public final native boolean lastWasCancelled();
+    descriptor: ()Z
+
+  public final native boolean lastWasDeviceLost();
+    descriptor: ()Z
+
+  static {};
+    descriptor: ()V
+}

@@ -7,6 +7,7 @@
 
 - **风格 = 已打包的胶片 + 相纸 + 冲印 / 效果参数 + 冲印后调整（Layer 2，`Look`）。** 色彩科学来自胶片和相纸，Look 只补冲印店或相机厂商在成片上做的那一步。不改引擎，不加胶片数据。
 - **只模仿公开描述的观感，不复制任何产品。** 厂商没有公开参数，每款都是按官方文字描述和公开样片近似，局限写在映射表里。
+- **内置风格是完整且可复现的物理配方。** 2026-11-15 起，87 款内置风格在套用和导出时显式固定自动曝光方式、胶片前曲线、预闪、乳剂耦合、散射、锐化等已开放参数，以原先调校时的引擎默认值为起点，避免继承上一套效果。每张照片的 RAW 显影、白平衡、几何和蒙版保留；用户导入的部分配方仍保留缺省字段的兼容语义。
 - **命名与法律**（同 [UI.md](UI.md) 附录 B）：
   - 显示名一律用描述性中文（“静默纪实”），不用厂商商标或相机模式名（Classic Chrome、Velvia、Leica Classic 等都不作显示名）。
   - `Style.inspiredBy` 存“灵感来源”文字，界面可作副标题，写作“灵感来自 富士胶片模拟 Classic Chrome”。这是指称性使用，不暗示授权；“关于”页已有不隶属声明。
@@ -264,14 +265,16 @@ ROADMAP M2 两条“用户自定义”的调研结论在这里落成规格。代
 - `engine` 每个字段都可省：省掉的就**沿用当前照片的设置**，所以只有 Layer 2 的文件（XMP、.cube）套用时不换胶片。`film` / `paper` 不在当前版本的胶片目录里时，套用时跳过并提示。
 - 数值全部按滑杆范围夹紧：Layer 2 同 `AdjustPanel.kt`（色温 / 色调 ±100、曝光 ±3、对比 / 亮度 ±50、饱和 / 自然饱和 / 高光 / 阴影 ±100、黑场 / 白场 0–50、褪色 0–100、暗角 ±100、暗角范围 0–100、色轮色相 0–360 取模、强度 0–100、明亮度 ±100、HSL ±100）；`engine` 同胶片页（曝光补偿 ±4、放大曝光 0.2–3、Y / M ±40 CC、画幅 4–200 mm、颗粒 0–2、光晕 0–4、眩光 0–5）。
 - `license` 写 SPDX 标识；导入时不校验许可，只显示。
-- `lut.space`：`srgb`（默认，市面上的 LUT 基本都按 sRGB / Rec.709 显示做）或 `prophoto`（按本应用冲印输出的编码做）。
+- `lut.space`：`srgb`（默认，明确采用 sRGB 编码）或 `prophoto`（按本应用冲印输出的编码做）。Rec.709、Log、PQ、HLG 等输入不自动转换成 sRGB；需要先确定来源合同，不能只凭文件扩展名判断。
 
 ### 7.2 LUT 放在哪、怎么算
 
-- 位置：冲印之后、Layer 2 之前（ROADMAP 结论）。Layer 2 跑在引擎输出的 ProPhoto 编码值上（γ 1.8，中灰 0.3857，见 `layer2.hpp`），所以 sRGB LUT 先**烘焙**成 ProPhoto 域的表：每个格点 ProPhoto 编码 → 线性 → sRGB 线性（裁到 0–1）→ sRGB 编码 → 原 LUT（四面体插值）→ 反算回 ProPhoto 编码。矩阵是 ProPhoto（D50）与 sRGB（D65）之间的 Bradford 适配矩阵。
+- 位置：冲印之后、Layer 2 调整之前。Layer 2 的输入是引擎输出的 ProPhoto 编码值（γ 1.8，中灰 0.3857，见 `layer2.hpp`）。sRGB LUT 的既定转换顺序为 ProPhoto 编码 → 线性 → sRGB 线性（裁到 0–1）→ sRGB 编码 → 原 LUT → 反算回 ProPhoto 编码；使用现有 ProPhoto D50 / sRGB D65 适配矩阵及转移函数。
+- 2026-11-15 原始链路修正：原文 ≤12 MiB 的新 `.cube` 用 `SPK4` 记录，原生 `SourceLut` 按原始 1D 曲线、各自定义域和 3D 表逐像素求值；1D 线性插值、3D 四面体插值，不经过中间网格。纯 ProPhoto、无整形、单位定义域、边长 ≤65 的表继续直接使用 `Lut3d`。原文按字节原子存储，分享携带原文，避免反复导入导出的重采样和文本精度损失。原始求值较预烘焙查表慢，详见 `STYLE_ENGINE_FIDELITY_2026-11-15.md`；尚无本次新增真机时延数据。
+- 兼容缓存直接从完整源链烘焙到最终 65³，不先压到来源 3D 表的尺寸。旧 SPKL/SPK2/SPK3 继续使用旧表，不自动改变既有照片。原文 >12 MiB 的独立 `.cube` 仍可导入，但使用最终网格方案，报告明确提示分享携带最终 ProPhoto 表；以可往返 Float 文本和正确色彩空间保持该有限网格的值，不再次合成 CST。导入报告中的网格近似项描述兼容表，不代表 SPK4 原始求值也经过该网格。
 - 局限：超出 sRGB 的颜色进 LUT 前会被裁进 sRGB，强度 100% 时高饱和色会被压一点。强度在原生侧按 `mix(输入, 查表, 强度)` 做，拖强度只重新打包。
-- 原生接口（由调整工具线在 Layer 2 入口实现）：一张边长 N ≤ 65 的表，float RGB，**R 变化最快**，值域是 ProPhoto 编码，加一个强度。风格库线负责解析、重采样、烘焙；原生侧只做四面体插值和混合。
-- `.cube`：认 `TITLE`、`LUT_1D_SIZE`、`LUT_3D_SIZE`、`DOMAIN_MIN` / `DOMAIN_MAX`（Adobe 写法）和 `LUT_1D_INPUT_RANGE` / `LUT_3D_INPUT_RANGE`（Resolve 写法）、`#` 注释；1D 在前、3D 在后时 1D 当整形曲线先用。3D 边长 2–129（更大的拒收，内存原因），超过 65 时四面体重采样到 65；纯 1D 展开成 33³。文件 ≤ 64 MB。来源：[ResolveCafe：Cube LUT 说明](https://github.com/CommandPost/ResolveCafe/blob/main/docs/developers/luts.md)。
+- 原生接口：保留 `setLut` 的 ProPhoto 编码 float RGB、边长 ≤65、R 最快和强度合同；新增 `setSourceLutV1` 接收原始 1D / 3D 数组、两套 RGB 定义域和 sRGB 标记。源表边长最高 129，1D 最多 65,536 点。无效输入拒绝且保留旧状态。
+- `.cube`：认 `TITLE`、`LUT_1D_SIZE`、`LUT_3D_SIZE`、`DOMAIN_MIN` / `DOMAIN_MAX` 和 `LUT_1D_INPUT_RANGE` / `LUT_3D_INPUT_RANGE`、`#` 注释；1D 在前、3D 在后时先用 1D。3D 边长 2–129；纯 1D 也走原始曲线路径，兼容缓存为 65³。文件上限 64 MiB，包内原文上限 12 MiB。来源：[ResolveCafe：Cube LUT 说明](https://github.com/CommandPost/ResolveCafe/blob/main/docs/developers/luts.md)。
 - HaldCLUT PNG：边长 L³（L 为级数，2–16），每通道 N = L² 个采样，像素序号 i = r + g·N + b·N²，行优先、R 最快。按 sRGB LUT 处理，N > 65 重采样。解码前先读尺寸，边长不是立方数或超过 4096 拒收。来源：[HaldCLUT 说明](http://www.quelsolaar.com/technology/clut.html)。
 
 ### 7.3 Lightroom XMP / DNG 预设

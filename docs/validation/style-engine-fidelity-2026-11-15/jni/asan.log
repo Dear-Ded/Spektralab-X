@@ -1,0 +1,10 @@
+/usr/bin/ld: /usr/bin/ld: DWARF error: invalid or unhandled FORM value: 0x23
+/tmp/jni_source_lut-a05c9e.o: in function `Java_com_dearded_spektralab_NativeEngine_openBitmap::$_6::operator()(unsigned int, unsigned int) const':
+jni_source_lut.cpp:(.text._ZZ51Java_com_dearded_spektralab_NativeEngine_openBitmapENK3$_6clEjj+0x587): undefined reference to `spk::android::InputTransform::decode(float, int) const'
+/usr/bin/ld: jni_source_lut.cpp:(.text._ZZ51Java_com_dearded_spektralab_NativeEngine_openBitmapENK3$_6clEjj+0x722): undefined reference to `spk::android::InputTransform::to_prophoto(float*) const'
+/usr/bin/ld: /tmp/jni_source_lut-a05c9e.o: in function `Java_com_dearded_spektralab_NativeEngine_openBitmapF16V1::$_7::operator()(unsigned int, unsigned int) const':
+jni_source_lut.cpp:(.text._ZZ56Java_com_dearded_spektralab_NativeEngine_openBitmapF16V1ENK3$_7clEjj+0x44a): undefined reference to `spk::android::InputTransform::decode(float, int) const'
+/usr/bin/ld: jni_source_lut.cpp:(.text._ZZ56Java_com_dearded_spektralab_NativeEngine_openBitmapF16V1ENK3$_7clEjj+0x639): undefined reference to `spk::android::InputTransform::to_prophoto(float*) const'
+/usr/bin/ld: /tmp/jni_source_lut-a05c9e.o: in function `Java_com_dearded_spektralab_NativeEngine_openBitmapHdr::$_8::operator()(unsigned int, unsigned int) const':
+jni_source_lut.cpp:(.text._ZZ54Java_com_dearded_spektralab_NativeEngine_openBitmapHdrENK3$_8clEjj+0xdfd): undefined reference to `spk::android::InputTransform::to_prophoto(float*) const'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)

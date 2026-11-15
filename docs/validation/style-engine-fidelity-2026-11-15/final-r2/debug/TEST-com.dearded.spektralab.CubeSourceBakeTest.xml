@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dearded.spektralab.CubeSourceBakeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-15T04:04:25.048Z" hostname="ser858255664526" time="4.209">
+  <properties/>
+  <testcase name="offGridErrorAndNativeFixturesAreMeasuredAgainstTheSourceChain" classname="com.dearded.spektralab.CubeSourceBakeTest" time="0.765"/>
+  <testcase name="originalBytesAndBakedFloatsSurviveRepeatedSharing" classname="com.dearded.spektralab.CubeSourceBakeTest" time="0.9"/>
+  <testcase name="oversizedSourceSharesAnExactNativeFloatTableWithinThePackageLimit" classname="com.dearded.spektralab.CubeSourceBakeTest" time="2.388"/>
+  <testcase name="finalVerticesUseTheOriginalShaperAndDomainChain" classname="com.dearded.spektralab.CubeSourceBakeTest" time="0.155"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

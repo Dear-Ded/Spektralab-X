@@ -1,0 +1,27 @@
+[
+  {
+    "name": "native-prophoto.bin",
+    "bytes": 3688724,
+    "sha256": "9353873ad1350ed3c0ce40d19f759d408952708cedb51d30321700efe89ce4a2"
+  },
+  {
+    "name": "native-srgb.bin",
+    "bytes": 3688724,
+    "sha256": "93ee20727254263b7b913bb1e28f239ec84f93333a3cbc4470e912abc1305e08"
+  },
+  {
+    "name": "source-chain-error.csv",
+    "bytes": 250,
+    "sha256": "bcb836c548bbb5e326be8424818e07a89c36fbc1d3b4705248505906552de03f"
+  },
+  {
+    "name": "source-prophoto.bin",
+    "bytes": 396460,
+    "sha256": "77e2009daabdbb1eaf619f3d94e4bd72326eb369e53f2766b871851b2ccc0211"
+  },
+  {
+    "name": "source-srgb.bin",
+    "bytes": 396460,
+    "sha256": "c4298a19d1fe45b57f5d7172b5c1453c34d4b3862ae9f2c750b590b394d18540"
+  }
+]

@@ -1,0 +1,2 @@
+source fidelity: pixels=16384 mean_float=1.26032e-08 max_float=5.96046e-08 max16=1
+source detail: 129 alternating native-grid samples preserved

@@ -1,0 +1,10 @@
+{
+  "objectExports": 40,
+  "kotlinNativeMethods": 40,
+  "exactNamesMatched": true,
+  "jniNewDescriptor": "(J[F[FI[FZF)Z",
+  "checkerCorrections": [
+    "Substring counted 95 symbols including compiler-generated symbols; final uses exact Java_ prefix.",
+    "Public-only javap hid existing private exportTiffFdV1; final includes private native declarations."
+  ]
+}

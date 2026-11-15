@@ -61,7 +61,9 @@ int main(int argc, char** argv) try {
         lut.push_back(.1f + .8f * r); lut.push_back(.03f + .9f * g); lut.push_back(.8f * b);
     }
     int cases = 0;
-    for (const std::string output : {"sRGB", "Display P3"}) for (int mode = 0; mode < 4; ++mode) {
+    std::vector<float> shaper{0, 0, 0, .3f, .25f, .2f, 1, 1, 1};
+    std::vector<float> domains{0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
+    for (const std::string output : {"sRGB", "Display P3"}) for (int mode = 0; mode < 5; ++mode) {
         auto params = spk::Json::object(); std::string error;
         require(spk::Json::parse(opening, params, error), "parse base params");
         if (mode >= 2) {
@@ -82,7 +84,9 @@ int main(int argc, char** argv) try {
         require(CALL(setOutput)(&env, nullptr, child_handle, text(output), JNI_FALSE), "preview display output");
         auto* ungraded = picture(CALL(renderBitmap)(&env, nullptr, child_handle, text("full")));
         require(CALL(setLook)(&env, nullptr, child_handle, floats(look)), "complete finish");
-        if (mode != 0) require(CALL(setLut)(&env, nullptr, child_handle, floats(lut), 2, .7f), "imported LUT and strength");
+        if (mode == 4) require(CALL(setSourceLutV1)(&env, nullptr, child_handle, floats(shaper), floats(lut), 2,
+            floats(domains), JNI_TRUE, .7f), "original shaper/table chain");
+        else if (mode != 0) require(CALL(setLut)(&env, nullptr, child_handle, floats(lut), 2, .7f), "imported LUT and strength");
         auto* actual = picture(CALL(renderBitmap)(&env, nullptr, child_handle, text("full")));
         require(actual->pixels != ungraded->pixels, "finish changes preview pixels even on the same film");
 
@@ -93,7 +97,9 @@ int main(int argc, char** argv) try {
         const auto reference_handle = reinterpret_cast<jlong>(reference.get());
         require(CALL(setOutput)(&env, nullptr, reference_handle, text(output), JNI_FALSE), "reference display output");
         require(CALL(setLook)(&env, nullptr, reference_handle, floats(look)), "reference finish");
-        if (mode != 0) require(CALL(setLut)(&env, nullptr, reference_handle, floats(lut), 2, .7f), "reference LUT");
+        if (mode == 4) require(CALL(setSourceLutV1)(&env, nullptr, reference_handle, floats(shaper), floats(lut), 2,
+            floats(domains), JNI_TRUE, .7f), "reference original chain");
+        else if (mode != 0) require(CALL(setLut)(&env, nullptr, reference_handle, floats(lut), 2, .7f), "reference LUT");
         const auto* expected = picture(CALL(renderBitmap)(&env, nullptr, reference_handle, text("full")));
         require(actual->info.width == expected->info.width && actual->info.height == expected->info.height &&
             actual->pixels == expected->pixels, "preview equals ordinary main pipeline at identical input resolution");

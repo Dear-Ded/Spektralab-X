@@ -117,7 +117,7 @@ class StyleImports(private val context: Context) {
         val cube = pkg.lutCube
         if (look.lut != null && cube != null) {
             try {
-                lutId = storeLut(CubeFile.parse(String(cube, Charsets.UTF_8)).toLut(report), look.lut!!.space)
+                lutId = storeCube(CubeFile.parse(String(cube, Charsets.UTF_8)), cube, look.lut!!.space, report)
             } catch (e: ImportException) {
                 report.ignored("lut.cube", e.message ?: tr("读不了"))
                 look = look.copy(lut = null)
@@ -128,11 +128,11 @@ class StyleImports(private val context: Context) {
 
     private fun fromCube(bytes: ByteArray, file: String, stem: String, catalog: Catalog, report: ImportReport): PendingImport {
         val cube = CubeFile.parse(String(bytes, Charsets.UTF_8))
-        val lut = cube.toLut(report)
-        report.mapped("LUT", tr("{0}³ 色表，放在冲印之后、调整之前", lut.size))
+        val lutId = storeCube(cube, bytes, SpkLut.SPACE_SRGB, report)
+        report.mapped("LUT", tr("{0}³ 色表，放在冲印之后、调整之前", Lut3.NATIVE_SIDE))
         val look = SpkLook(name = cube.title.ifBlank { stem }.take(60), lut = SpkLut(),
             source = SpkSource("cube", file.take(120), tr("导入的 LUT")))
-        return style(look, file, catalog, report, storeLut(lut, SpkLut.SPACE_SRGB))
+        return style(look, file, catalog, report, lutId)
     }
 
     private fun fromHald(bytes: ByteArray, file: String, stem: String, catalog: Catalog, report: ImportReport): PendingImport {
@@ -179,6 +179,9 @@ class StyleImports(private val context: Context) {
     }
 
     private fun storeLut(lut: Lut3, space: String): String = luts.newId().also { luts.save(it, lut, space) }
+
+    private fun storeCube(cube: CubeFile, bytes: ByteArray, space: String, report: ImportReport): String =
+        luts.newId().also { luts.saveCube(it, cube, bytes, space, report) }
 
     /** Whether a bundled or user stock is itself an alias (the engine refuses an alias of an alias). */
     private fun isAlias(id: String): Boolean {
@@ -247,9 +250,18 @@ class StyleImports(private val context: Context) {
         val p = previous?.resolved()
         if (p != null && p.lut == r.lut && (r.lut.isEmpty() || p.lutStrength == r.lutStrength)) return
         val id = r.lut.takeIf { it.isNotEmpty() && r.lutStrength > 0 }
-        val table = id?.let { luts.load(it) ?: throw EngineException(tr("风格的 LUT 文件缺失或损坏，请重新导入风格")) }
-        val accepted = if (table == null) NativeEngine.setLut(handle, null, 0, 0f)
-        else NativeEngine.setLut(handle, table.data, table.size, r.lutStrength.toFloat())
+        val source = id?.let(luts::source)
+        val accepted = if (source != null && !(source.second == SpkLut.SPACE_PROPHOTO &&
+                    source.first.plainThreeD?.size?.let { it <= Lut3.NATIVE_SIDE } == true)) {
+            val cube = source.first
+            NativeEngine.setSourceLutV1(handle, cube.oneD, cube.threeD?.data, cube.threeD?.size ?: 0,
+                cube.oneDMin + cube.oneDMax + cube.threeDMin + cube.threeDMax,
+                source.second == SpkLut.SPACE_SRGB, r.lutStrength.toFloat())
+        } else {
+            val table = id?.let { luts.load(it) ?: throw EngineException(tr("风格的 LUT 文件缺失或损坏，请重新导入风格")) }
+            if (table == null) NativeEngine.setLut(handle, null, 0, 0f)
+            else NativeEngine.setLut(handle, table.data, table.size, r.lutStrength.toFloat())
+        }
         if (!accepted) throw EngineException(tr("应用 LUT 失败：{0}", NativeEngine.lastError()))
     }
 
