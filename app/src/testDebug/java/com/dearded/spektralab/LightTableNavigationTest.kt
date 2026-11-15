@@ -3,6 +3,7 @@ package com.dearded.spektralab
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -51,6 +52,11 @@ class LightTableNavigationTest {
         compose.mainClock.advanceTimeBy(800)
         compose.waitForIdle()
         compose.onNodeWithText(tr("观片台")).performClick()
+        // Navigation awaits the asynchronous sidecar flush before composing the grid.
+        compose.waitUntil(5_000) {
+            compose.mainClock.advanceTimeByFrame()
+            compose.onAllNodesWithContentDescription("nav-2.jpg").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.mainClock.advanceTimeBy(160)
         compose.waitForIdle()
         return ViewModelProvider(compose.activity)[LightTableViewModel::class.java]
