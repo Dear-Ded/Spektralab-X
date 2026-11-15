@@ -38,8 +38,15 @@ internal object PrecisionHaptics {
                 VibrationEffect.Composition.PRIMITIVE_TICK,
                 VibrationEffect.Composition.PRIMITIVE_CLICK,
             ) else intArrayOf(VibrationEffect.Composition.PRIMITIVE_TICK, VibrationEffect.Composition.PRIMITIVE_CLICK)
-            val supported = vibrator?.arePrimitivesSupported(*ids) ?: BooleanArray(ids.size)
-            ids.filterIndexed { i, _ -> supported.getOrElse(i) { false } }.toSet()
+            val supported = if (Build.VERSION.SDK_INT >= 31) vibrator?.arePrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                VibrationEffect.Composition.PRIMITIVE_TICK,
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+            ) else vibrator?.arePrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_TICK,
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+            )
+            ids.filterIndexed { i, _ -> supported?.getOrElse(i) { false } == true }.toSet()
         }.getOrDefault(emptySet()) else emptySet()
         private val attributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
