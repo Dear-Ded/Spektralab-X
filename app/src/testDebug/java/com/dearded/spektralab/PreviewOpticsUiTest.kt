@@ -77,11 +77,13 @@ class PreviewOpticsUiTest {
         } finally { bitmap.recycle() }
         val previous = Locale.getDefault()
         try {
-            for (exposure in listOf("3/2" to "1.5s", "2/1" to "2s", "1/125" to "1/125s")) {
+            for (exposure in listOf("1.5" to "1.5s", "2.0" to "2s", "0.008" to "1/125s")) {
                 ExifInterface(file).apply {
                     setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exposure.first)
                     saveAttributes()
                 }
+                assertEquals(exposure.first.toDouble(),
+                    ExifInterface(file).getAttributeDouble(ExifInterface.TAG_EXPOSURE_TIME, -1.0), 0.000001)
                 for (locale in listOf(Locale.GERMANY, Locale.forLanguageTag("ar"), Locale.CHINA)) {
                     Locale.setDefault(locale)
                     assertEquals(locale.toLanguageTag(), exposure.second, ExifCopy.read { file.inputStream() }.shutter())
