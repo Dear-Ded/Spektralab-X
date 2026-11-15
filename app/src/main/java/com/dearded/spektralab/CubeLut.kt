@@ -125,14 +125,14 @@ class CubeFile(
         if (oneD != null) {
             val n1 = oneDSize - 1
             for (k in 0 until 3) {
-                val t = clamp01((px[k] - oneDMin[k]) / (oneDMax[k] - oneDMin[k])) * n1
+                val t = clamp01(domainPosition(px[k], oneDMin[k], oneDMax[k])) * n1
                 val i0 = min(t.toInt(), n1 - 1)
                 val f = t - i0
                 px[k] = oneD[i0 * 3 + k] * (1 - f) + oneD[(i0 + 1) * 3 + k] * f
             }
         }
         if (threeD != null) {
-            for (k in 0 until 3) px[k] = (px[k] - threeDMin[k]) / (threeDMax[k] - threeDMin[k])
+            for (k in 0 until 3) px[k] = domainPosition(px[k], threeDMin[k], threeDMax[k])
             threeD.sample(px)
         }
     }
@@ -169,7 +169,7 @@ class CubeFile(
                 if (n !in lo..hi) fail(tr("尺寸 {0} 不在 {1}…{2}", n, lo, hi))
                 return n
             }
-            for (raw in text.lineSequence()) {
+            for (raw in text.removePrefix("\uFEFF").lineSequence()) {
                 line++
                 val s = raw.substringBefore('#').trim()
                 if (s.isEmpty()) continue
@@ -342,6 +342,14 @@ object LutBake {
     private fun srgbDecode(x: Float) = if (x <= 0.04045f) x / 12.92f else ((x + 0.055f) / 1.055f).pow(2.4f)
     private fun proDecode(x: Float) = if (x < 16f / 512f) x / 16f else x.pow(1.8f)
     private fun proEncode(x: Float) = if (x < 1f / 512f) 16f * x else x.pow(1f / 1.8f)
+}
+
+private fun domainPosition(x: Float, low: Float, high: Float): Float {
+    val offset = x - low
+    val span = high - low
+    // Keep ordinary tables byte-compatible; wide finite domains need Double subtraction.
+    return if (offset.isFinite() && span.isFinite()) offset / span
+        else ((x.toDouble() - low) / (high.toDouble() - low)).toFloat()
 }
 
 private fun clamp01(x: Float) = max(0f, min(1f, if (x.isNaN()) 0f else x))

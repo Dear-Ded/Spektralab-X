@@ -1,1 +1,1 @@
-Film preview cards pause while the phone is hot; thermal headroom in diagnostics.
+Pause background film-card previews when the phone gets hot, giving the current image priority. Add temperature-related status to diagnostics.

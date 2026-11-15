@@ -1,1 +1,1 @@
-DNG ColorMatrix1/2 interpolated at the shot's white balance for truer colour under warm light; highlight recovery for phone photos without a gain map (1 stop by default); new CineStill 50D. Not yet verified on a device.
+Improve DNG colour conversion under warm indoor light using the shot white balance. Add highlight recovery for phone photos: off, one stop or two stops, with one stop as the default. Add CineStill 50D film simulation.

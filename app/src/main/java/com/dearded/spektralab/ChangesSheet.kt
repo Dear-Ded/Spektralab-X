@@ -71,7 +71,7 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
         }
     if (!e.autoExposure || e.exposureEv != d.exposureEv || !e.sceneCurve.isIdentity || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
         out += Change(tr("曝光"), listOfNotNull(
-            e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.1f EV", it) },
+            e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.2f EV", it) },
             e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
             tr("滤镜").takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
             tr("手动曝光").takeIf { !e.autoExposure },

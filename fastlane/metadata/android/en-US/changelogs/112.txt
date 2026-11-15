@@ -1,1 +1,1 @@
-Reuse preview bitmaps to cut memory spikes; new icon and artwork.
+Reuse preview image buffers to reduce memory spikes. Update the app icon and promotional artwork.

@@ -1,1 +1,1 @@
-0.2.00-alpha-2: the style picker no longer piles its chips, cards, and strength panel on top of each other. Opening strength sits under the cards. Everything else matches 0.2.00-alpha-1. Not checked on a phone yet.
+Fix overlapping style controls: groups, cards and strength controls now sit in separate rows. Expanding strength no longer covers the cards.

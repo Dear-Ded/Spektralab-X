@@ -51,7 +51,7 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ## 提交规范
 
 - 一个 PR 只做一件事，提交信息说明改了什么、为什么。
-- 用户能看到的改动写进 `CHANGELOG.md`。
+- 用户能看到的改动写进 `CHANGELOG.md`，并遵循 [更新说明规则](docs/RELEASE_NOTES_POLICY.md)：说人话，写清功能与体验变化，不透露开发者私人信息或测试环境。
 - 发布由维护者负责：更新 `VERSION` 为新的显示版本，每次发布都递增独立的 `VERSION_CODE`（包括只改阶段标签），并在 `CHANGELOG.md` 加对应章节和以内部版本码命名的中英文 fastlane 短说明；推送到 `main` 后 CI 自动发布。
 - 代码风格跟随所在文件：Kotlin 用官方风格，C++ 用 C++20，注释解释“为什么”。
 - 新文件请加上 [docs/ABOUT_TEXT.md](docs/ABOUT_TEXT.md#源码文件头--source-file-header) 里的文件头。

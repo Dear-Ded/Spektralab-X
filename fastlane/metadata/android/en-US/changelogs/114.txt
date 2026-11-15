@@ -1,1 +1,1 @@
-Architecture: the engine stays warm for the whole process; closing the editor no longer cancels an export.
+Reuse the prepared engine when returning to the editor. Closing the editor no longer interrupts an export, and diagnostics retain recent actions.

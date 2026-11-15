@@ -26,6 +26,8 @@ BUILD_DIR="$build/layer2-domains" bash "$repo/tools/native/run_layer2_domains.sh
 "$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/curve_regression.cpp" -o "$build/curve_regression"
 "$build/curve_regression"
 BUILD_DIR="$build/curve-wire" bash "$repo/tools/native/run_curve_wire.sh"
+"$cxx" "${flags[@]}" -I"$app" "$repo/tools/native/lut_independent_oracle.cpp" -o "$build/lut_independent_oracle"
+"$build/lut_independent_oracle"
 if [[ -n "${UP:-}" ]]; then
     core="$UP/engine/src/core"
     "$cxx" "${flags[@]}" -I"$UP/engine/src" "$repo/tools/native/dng_forward_matrix.cpp" \

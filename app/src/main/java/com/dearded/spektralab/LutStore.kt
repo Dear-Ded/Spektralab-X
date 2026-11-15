@@ -72,6 +72,7 @@ class LutStore(private val dir: File) {
         buf.getInt()
         if (magic == MAGIC || magic == SOURCE_MAGIC) buf.getInt()
         val data = FloatArray(side * side * side * 3) { buf.getFloat() }
+        if (data.any { !it.isFinite() }) return null
         val lut = runCatching { Lut3(side, data) }.getOrNull() ?: return null
         synchronized(this) { cached = id to lut }
         return lut

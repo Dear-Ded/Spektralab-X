@@ -38,6 +38,22 @@ class BuiltinStyleFidelityTest {
         }
     }
 
+    @Test fun everyOrderedBuiltinPairKeepsTheTargetRecipeAndPhotoControls() {
+        val photo = previous.copy(cropX = .125, cropY = .0625, cropW = .75, cropH = .875,
+            quarterTurns = 3, rawDevelopment = RawDevelopmentMode.STANDARD_V1, rawExposureEv = -1.25,
+            look = Look(masks = listOf(EditMask(tone = MaskTone(exposure = -.375)))))
+        assertEquals(87, Style.ALL.size)
+        for (first in Style.ALL) for (second in Style.ALL) {
+            val intermediate = first.applyTo(photo, catalog)!!
+            val expected = second.applyTo(photo, catalog)!!
+            val actual = second.applyTo(intermediate, catalog)!!
+            val label = "${first.id} -> ${second.id}"
+            assertEquals(label, expected, actual)
+            assertArrayEquals(label, expected.look.values(), actual.look.values(), 0f)
+            assertEquals(label, actual, second.applyTo(actual, catalog))
+        }
+    }
+
     @Test fun builtinSelectionKeepsPhotoGeometryRawDevelopmentAndMasks() {
         val input = previous.copy(cropX = .2, cropW = .7, quarterTurns = 1,
             rawDevelopment = RawDevelopmentMode.STANDARD_V1, rawExposureEv = 1.5,

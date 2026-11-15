@@ -1,1 +1,1 @@
-Display P3 JPEG export (on by default); Ultra HDR gain maps recovered on Android 14+ for real highlight headroom; snapping film strip with haptics; Settings as a bottom sheet, predictive back in the 1:1 viewer. Not yet verified on a device.
+Add Display P3 JPEG export, on by default and optional in Settings. Read Ultra HDR gain maps on Android 14 and later. Film cards snap into place with selection haptics. Settings opens as a bottom sheet; the 1:1 viewer supports predictive back. Fix faded wide-gamut original comparisons.
