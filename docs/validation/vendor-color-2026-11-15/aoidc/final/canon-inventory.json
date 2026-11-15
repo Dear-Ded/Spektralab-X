@@ -1,0 +1,162 @@
+[
+  {
+    "file": "WW01_NOSTALGIA.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1249,
+    "sha256": "54492a9e2ae6427e250a364a5c2e2658afab8f931372cface30d2992d3c08b32",
+    "version": "0x00002000",
+    "declaredBodyBytes": 1237,
+    "bodySha256": "46ecf2662bd468d2b48067bab03e60be9970af02e68c13fc1da3b8938dacea91",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1237,
+          "sha256": "46ecf2662bd468d2b48067bab03e60be9970af02e68c13fc1da3b8938dacea91"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW02_CLEAR.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1241,
+    "sha256": "9c8de4aa733220b429e166e991e4d1f07ecd8d0a53e51f9d875f9d24e953b65a",
+    "version": "0x00002000",
+    "declaredBodyBytes": 1229,
+    "bodySha256": "d98b4fe76b14c20615bf93efcc0af846bf1de1f8953c30456c323cc46dfd4c68",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1229,
+          "sha256": "d98b4fe76b14c20615bf93efcc0af846bf1de1f8953c30456c323cc46dfd4c68"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW03_TWILIGHT.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1244,
+    "sha256": "9d5ad2ab95c82dba8e1e7e537a8c52a032e3d17d3f455df30e59f1af38f04177",
+    "version": "0x00002000",
+    "declaredBodyBytes": 1232,
+    "bodySha256": "442318b3e45d8982a16c81528de1a07b55635ae4741f6805756b4887af073e37",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1232,
+          "sha256": "442318b3e45d8982a16c81528de1a07b55635ae4741f6805756b4887af073e37"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW04_EMERALD.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1243,
+    "sha256": "26fe253a44c698b2cf5f70763802c7f97d2d26267ca215f1ff5c77402fdeb33d",
+    "version": "0x00002000",
+    "declaredBodyBytes": 1231,
+    "bodySha256": "97adc8533ec82c13e18a4c74007207a66a3d13f17163ffb870cb85eecd1650e0",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1231,
+          "sha256": "97adc8533ec82c13e18a4c74007207a66a3d13f17163ffb870cb85eecd1650e0"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW05_AUTUMN_HUES.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1247,
+    "sha256": "ffff581c825dec08476d5473294b3d4e929d1914f1eec681f5a49ca48e87d317",
+    "version": "0x00002000",
+    "declaredBodyBytes": 1235,
+    "bodySha256": "02684f42b97abd5251851ab9fec3761e4f9fc63653379d5fc332399bb222b3aa",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1235,
+          "sha256": "02684f42b97abd5251851ab9fec3761e4f9fc63653379d5fc332399bb222b3aa"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW06_P-STUDIO.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1340,
+    "sha256": "47d51f11c3f7bed469e87be78b9deb6ad121ea8ab4212bfcd6bb6e659bf60491",
+    "version": "0x00002001",
+    "declaredBodyBytes": 1328,
+    "bodySha256": "bb608667a596f4860111c33597cd11e45567aaf9d4ebbcf4f8e01ab3a3173b3c",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1328,
+          "sha256": "bb608667a596f4860111c33597cd11e45567aaf9d4ebbcf4f8e01ab3a3173b3c"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW07_P-SNAPSHOT.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1342,
+    "sha256": "c03a850642b396271cb0a66ccd33fe4237d4a2c6b1f58eaeeb74c1a4770395d4",
+    "version": "0x00002001",
+    "declaredBodyBytes": 1330,
+    "bodySha256": "d53d4d72aecab6f88b086c32db740645c374421a8a65b69f8633f13b33344d81",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1330,
+          "sha256": "d53d4d72aecab6f88b086c32db740645c374421a8a65b69f8633f13b33344d81"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  },
+  {
+    "file": "WW08_VIDEO-X.pf2",
+    "format": "Canon Picture Style envelope",
+    "bytes": 1339,
+    "sha256": "78974c414a5d56d5fd80c91c1cef60d18b7000c9355f0add3cf6fc5667414679",
+    "version": "0x00002001",
+    "declaredBodyBytes": 1327,
+    "bodySha256": "29029fc77b9e65452f52e14d2f43422c1399460e38f7a7ef33d2471ae6873a26",
+    "byteAccounting": {
+      "decodedOrFramedBytes": 12,
+      "uninterpretedRanges": [
+        {
+          "offset": 12,
+          "bytes": 1327,
+          "sha256": "29029fc77b9e65452f52e14d2f43422c1399460e38f7a7ef33d2471ae6873a26"
+        }
+      ]
+    },
+    "renderingStatus": "opaque body; no decoded Canon look or redistribution permission inferred"
+  }
+]

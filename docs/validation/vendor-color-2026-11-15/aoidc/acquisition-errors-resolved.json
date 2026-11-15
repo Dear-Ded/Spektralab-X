@@ -1,0 +1,166 @@
+{
+  "firstAttemptErrors": [
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/FUJIFILM X-T30.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/FUJIFILM%20X-T30.dcp",
+      "gitBlobSha1": "97917b810a90c1769dc1c2dc81799290f8cf33c3",
+      "error": "The read operation timed out"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/PENTAX K-5.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/PENTAX%20K-5.dcp",
+      "gitBlobSha1": "b4efc37d1dcb6fd4a46382098b31480732242f3a",
+      "error": "The read operation timed out"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/Panasonic DC-GX9.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/Panasonic%20DC-GX9.dcp",
+      "gitBlobSha1": "7b8414e970bfbe03936ec428e7fcc5bfb46cec36",
+      "error": "The read operation timed out"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/Panasonic DC-S5.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/Panasonic%20DC-S5.dcp",
+      "gitBlobSha1": "fd01c1225d8411272af1b31eb84b17015963602e",
+      "error": "The read operation timed out"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/RICOH GR III.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/RICOH%20GR%20III.dcp",
+      "gitBlobSha1": "f226e62b42a1effb9a42beec188a8eb20323e8ab",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/RICOH PENTAX K-1.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/RICOH%20PENTAX%20K-1.dcp",
+      "gitBlobSha1": "6d33b63f261b3a5c10ec7a1202e40100f9762561",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/RICOH PENTAX K-3.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/RICOH%20PENTAX%20K-3.dcp",
+      "gitBlobSha1": "0e2273cb29d4dfd6c36d92517c0489e47bbd8309",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY DSLR-A580.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20DSLR-A580.dcp",
+      "gitBlobSha1": "cf81687a53baa28090c189a8954d9f8b136dab2b",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-6000.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-6000.dcp",
+      "gitBlobSha1": "3832c514dc08baf383a3e1e43806b05efa62ee61",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-6300.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-6300.dcp",
+      "gitBlobSha1": "53194d35de93762a1ee2ebe2d4d495a95f8378c9",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-6400.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-6400.dcp",
+      "gitBlobSha1": "8c5fcfec419b64fff39745438bc6c4775f8d2d29",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-6500.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-6500.dcp",
+      "gitBlobSha1": "66be8b1de0486546f1534c32cf865634c3870f1d",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-6600.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-6600.dcp",
+      "gitBlobSha1": "8c802d1509754bc4af6fae92816e25a50b092c06",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-7.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-7.dcp",
+      "gitBlobSha1": "ecf577920392df29efaced271478c4d3147df84f",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-7M2.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-7M2.dcp",
+      "gitBlobSha1": "fc0627d2aeca3def0c9fbac8e9fa1988034e43bd",
+      "error": "<urlopen error _ssl.c:990: The handshake operation timed out>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-7M3.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-7M3.dcp",
+      "gitBlobSha1": "b736c1281cd8f62363be9ca612dc970650a60e6a",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-7M4.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-7M4.dcp",
+      "gitBlobSha1": "693453619e5df8bb0973829c5fb07a53d4811ee0",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtdata/dcpprofiles/SONY ILCE-7RM4.dcp",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtdata/dcpprofiles/SONY%20ILCE-7RM4.dcp",
+      "gitBlobSha1": "e473fa4968a4bb0cf7bf17e466e162c77cc682df",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    },
+    {
+      "repo": "RawTherapee/RawTherapee",
+      "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+      "path": "rtengine/dcp.h",
+      "url": "https://raw.githubusercontent.com/RawTherapee/RawTherapee/64c2d90a3248c7ad41842d9162368858b61aac6a/rtengine/dcp.h",
+      "gitBlobSha1": "43ea07d8cd31952e6cc946b79d244a6603013da1",
+      "error": "<urlopen error _ssl.c:990: The handshake operation timed out>"
+    },
+    {
+      "repo": "lensfun/lensfun",
+      "commit": "52cf1a7b0e82e07e0ecaa3391ee5106a6dd1ee54",
+      "path": "data/COPYING.CC_BY-SA_3.0",
+      "url": "https://raw.githubusercontent.com/lensfun/lensfun/52cf1a7b0e82e07e0ecaa3391ee5106a6dd1ee54/data/COPYING.CC_BY-SA_3.0",
+      "gitBlobSha1": "604209a804632b6e5274005a22293976d07c3099",
+      "error": "<urlopen error [Errno 99] Cannot assign requested address>"
+    }
+  ],
+  "finalRequested": 256,
+  "finalFailed": 0
+}

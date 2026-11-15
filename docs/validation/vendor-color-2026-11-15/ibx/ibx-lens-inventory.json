@@ -1,0 +1,488 @@
+{
+  "files": [
+    {
+      "path": "6x6.xml",
+      "bytes": 29550,
+      "sha256": "ca13c2756b32d728675372695c072517a0e38af5eff2ecd3e17599dee7fc58b3",
+      "cameras": 6,
+      "lenses": 11
+    },
+    {
+      "path": "actioncams.xml",
+      "bytes": 17188,
+      "sha256": "79a5da0322574b95690464444c9d9ba1da0e1f827da44fd6bff120a0ec10e4b4",
+      "cameras": 19,
+      "lenses": 19
+    },
+    {
+      "path": "compact-canon.xml",
+      "bytes": 247046,
+      "sha256": "bae47e4b3a0f8852641038ae2dcca5b28ed7965e65ca795fd676f9de857c4670",
+      "cameras": 128,
+      "lenses": 70
+    },
+    {
+      "path": "compact-casio.xml",
+      "bytes": 6889,
+      "sha256": "ab35433879c4574ef8f97cd4e3d114d7ff8db4e7279da9d502fc9e911b51ee27",
+      "cameras": 12,
+      "lenses": 6
+    },
+    {
+      "path": "compact-fujifilm.xml",
+      "bytes": 67954,
+      "sha256": "58af9ebef2410c428ae2c5d01003d2247330d47d918823e63522b4d897a997d1",
+      "cameras": 39,
+      "lenses": 22
+    },
+    {
+      "path": "compact-kodak.xml",
+      "bytes": 2091,
+      "sha256": "377018ccd74f58e966b37a11e5a8689be4268153bebece9f1f2a0dbfa8234845",
+      "cameras": 4,
+      "lenses": 1
+    },
+    {
+      "path": "compact-konica-minolta.xml",
+      "bytes": 13349,
+      "sha256": "832a7473951ab625e10c48af6cf60f89b57280016d45729e2584cf9e41ad3cc7",
+      "cameras": 18,
+      "lenses": 11
+    },
+    {
+      "path": "compact-leica.xml",
+      "bytes": 9113,
+      "sha256": "8e4676679377576dc19e7900ce86fc69b0248ea1d4538aa22ee1ee09431a3be3",
+      "cameras": 15,
+      "lenses": 5
+    },
+    {
+      "path": "compact-nikon.xml",
+      "bytes": 40003,
+      "sha256": "5393bdb8223e13d21b85818e96571e97c035470b49b0452dfcedc2e1ff512d3b",
+      "cameras": 26,
+      "lenses": 27
+    },
+    {
+      "path": "compact-olympus.xml",
+      "bytes": 34454,
+      "sha256": "7637d469ad54a02ebce9492a9aa9424a2ff1ec07b0398158076f762fdc08389b",
+      "cameras": 33,
+      "lenses": 17
+    },
+    {
+      "path": "compact-panasonic.xml",
+      "bytes": 70621,
+      "sha256": "f191fc2a5d49fb50c06f4c399ee8c1a83a05f93a0efaecd352ec5c1479b8e60b",
+      "cameras": 76,
+      "lenses": 22
+    },
+    {
+      "path": "compact-pentax.xml",
+      "bytes": 6689,
+      "sha256": "596fae3edaadcf2d90ae930fc1bec42597ca0b2bd11842e686e1b915f3736390",
+      "cameras": 10,
+      "lenses": 4
+    },
+    {
+      "path": "compact-ricoh.xml",
+      "bytes": 18424,
+      "sha256": "46df96ebc367d5170cb6b7dfc3742093f0ad946264518fc5488573ba052f29d7",
+      "cameras": 10,
+      "lenses": 8
+    },
+    {
+      "path": "compact-samsung.xml",
+      "bytes": 13875,
+      "sha256": "36e3a778046d56385c387d48474cd32a89a5da94d99e640b5ce716ce747f898d",
+      "cameras": 7,
+      "lenses": 6
+    },
+    {
+      "path": "compact-sigma.xml",
+      "bytes": 2395,
+      "sha256": "0ddc265e3e580da05dcd4664d1b9c2464838d74dd02519c826520950c8f1759e",
+      "cameras": 9,
+      "lenses": 1
+    },
+    {
+      "path": "compact-sony.xml",
+      "bytes": 126390,
+      "sha256": "6b1e5ec3710915f04eceffb87eafdfded4b56d5b4bc58d5086ae59f7d3c066f0",
+      "cameras": 48,
+      "lenses": 39
+    },
+    {
+      "path": "contax.xml",
+      "bytes": 1696,
+      "sha256": "5eba12e6fd4913470afb6fe25fee47a263084b6cec830297273909872f47669a",
+      "cameras": 1,
+      "lenses": 3
+    },
+    {
+      "path": "generic.xml",
+      "bytes": 5416,
+      "sha256": "cd572d4110981546b2c4cd296c2ff16755b30063fa136d8b06ad2ca13ab4c59f",
+      "cameras": 8,
+      "lenses": 3
+    },
+    {
+      "path": "mil-canon.xml",
+      "bytes": 247994,
+      "sha256": "2de8e9467a6af6f83cc9da834d3d3b94d1aaf54519f60c68ac6bc02780a77516",
+      "cameras": 30,
+      "lenses": 45
+    },
+    {
+      "path": "mil-fujifilm.xml",
+      "bytes": 213330,
+      "sha256": "cc8fd1d595bf6b57ea2e4f0bbdc30f5ac8af4867fad29efe445a79c90c2d2177",
+      "cameras": 42,
+      "lenses": 46
+    },
+    {
+      "path": "mil-hasselblad.xml",
+      "bytes": 1048,
+      "sha256": "13e1fa55d36c2ed7d22964c21ce6c21d887bfe4506e840e425da1ce4157c3756",
+      "cameras": 5,
+      "lenses": 0
+    },
+    {
+      "path": "mil-leica.xml",
+      "bytes": 11663,
+      "sha256": "c691037e2e0743388473c2a0545e340462c412b7e3b57e451f4f9c89dde2388a",
+      "cameras": 11,
+      "lenses": 7
+    },
+    {
+      "path": "mil-nikon.xml",
+      "bytes": 187918,
+      "sha256": "3814e192a9f599847eefeea6163d26186d8107cb794f33e4724803e476e45cea",
+      "cameras": 27,
+      "lenses": 45
+    },
+    {
+      "path": "mil-olympus.xml",
+      "bytes": 147123,
+      "sha256": "989a3d88ef07a286efc2755df214792fdf71d60366932a1b369a77ad39cf2abb",
+      "cameras": 28,
+      "lenses": 32
+    },
+    {
+      "path": "mil-panasonic.xml",
+      "bytes": 299264,
+      "sha256": "eb5f01f33e65721f3900786d5970c7e220dd042aaa56968be33c009a358ff3c5",
+      "cameras": 62,
+      "lenses": 57
+    },
+    {
+      "path": "mil-pentax.xml",
+      "bytes": 1385,
+      "sha256": "675a94f52794868ad9f1d79e17b7128783c34b3db23e9eac346c5963812a16e5",
+      "cameras": 4,
+      "lenses": 1
+    },
+    {
+      "path": "mil-samsung.xml",
+      "bytes": 13007,
+      "sha256": "10130e9e125e0882a16fd3033cfed0175e9c14cb7d35e630cdb94736f27e5dc3",
+      "cameras": 18,
+      "lenses": 13
+    },
+    {
+      "path": "mil-samyang.xml",
+      "bytes": 25990,
+      "sha256": "ae3bf262f12facdc6f81b837cf6d36fdde2a930d2bfb0918d5abaa47fcfea3ab",
+      "cameras": 0,
+      "lenses": 16
+    },
+    {
+      "path": "mil-sigma.xml",
+      "bytes": 126270,
+      "sha256": "34082bae4f6b476f8b75ea03d2f88a0485b1c5f7ce6bde87c7d729742f7b81ba",
+      "cameras": 6,
+      "lenses": 40
+    },
+    {
+      "path": "mil-sony.xml",
+      "bytes": 274541,
+      "sha256": "f9f7e5d7461ac58f76eb55dcc5b211f2e9a451402ddb4a9ecb12d1e4dc04f2b8",
+      "cameras": 52,
+      "lenses": 61
+    },
+    {
+      "path": "mil-tamron.xml",
+      "bytes": 108177,
+      "sha256": "64077167f06e25b1a9393eaefd8ceb9b288c7ad20b046c2d97c83fbca536b6b6",
+      "cameras": 0,
+      "lenses": 23
+    },
+    {
+      "path": "mil-tokina.xml",
+      "bytes": 1014,
+      "sha256": "addb27bd82b0d729644b9da1342f92401f63cc5945309ed17f38f4b7af1649e3",
+      "cameras": 0,
+      "lenses": 2
+    },
+    {
+      "path": "mil-zeiss.xml",
+      "bytes": 19171,
+      "sha256": "ef8a238904fc9ea6fdb6171863dfd70cd94814af19ecd8c31ee000ca1864589d",
+      "cameras": 0,
+      "lenses": 12
+    },
+    {
+      "path": "misc.xml",
+      "bytes": 176039,
+      "sha256": "2000a347d9dc37d908ea5b56c760de5b2b4ab475857959ae2e901c31339b01bb",
+      "cameras": 13,
+      "lenses": 138
+    },
+    {
+      "path": "om-system.xml",
+      "bytes": 45205,
+      "sha256": "ab7cfcfd4c4023f7d0affd87a971e93a391d4d11952b9bf0436aa7967e68880e",
+      "cameras": 6,
+      "lenses": 8
+    },
+    {
+      "path": "rf-leica.xml",
+      "bytes": 6712,
+      "sha256": "f93636e1980ad308d1873cc3ac078cdc77c0d529d777cd45c5c8d0e4781981e3",
+      "cameras": 14,
+      "lenses": 6
+    },
+    {
+      "path": "slr-canon.xml",
+      "bytes": 780353,
+      "sha256": "5244e6df8f2522f829c57e2073313ce31a624e9ed9605310fe43613b9d588c99",
+      "cameras": 102,
+      "lenses": 169
+    },
+    {
+      "path": "slr-hasselblad.xml",
+      "bytes": 642,
+      "sha256": "97602c467699904bf101179ea2fa24f05f3e1879250498a6ba306cd95a3b7a6b",
+      "cameras": 2,
+      "lenses": 0
+    },
+    {
+      "path": "slr-konica-minolta.xml",
+      "bytes": 47170,
+      "sha256": "5639ca94f121f609247c2c120b65830b3ef7784db6ecfa7e8eb3d29ff5046c1b",
+      "cameras": 4,
+      "lenses": 26
+    },
+    {
+      "path": "slr-leica.xml",
+      "bytes": 432,
+      "sha256": "c5e74cb511712e99ed60a066e85c842fea58f693c5039c3819485619f5293d0e",
+      "cameras": 0,
+      "lenses": 0
+    },
+    {
+      "path": "slr-nikon.xml",
+      "bytes": 551265,
+      "sha256": "aa770005b85567721038456183cfdbf6b6cea51b33a399b291f447287b9e91db",
+      "cameras": 62,
+      "lenses": 170
+    },
+    {
+      "path": "slr-olympus.xml",
+      "bytes": 116602,
+      "sha256": "f7693b6779edd8ed10d7dc23113669255bfa4987cea7db0e843f7f5f2bbbe615",
+      "cameras": 17,
+      "lenses": 28
+    },
+    {
+      "path": "slr-panasonic.xml",
+      "bytes": 419,
+      "sha256": "cd79acb49d9ce5f2a4cecc572b3e117f03da380bed2dcbfd52327192d8ce2381",
+      "cameras": 2,
+      "lenses": 0
+    },
+    {
+      "path": "slr-pentax.xml",
+      "bytes": 210117,
+      "sha256": "93be1fe9263e06d7d69a8a6ae10cb52f23cad08ddc44f57f749e1ca288bc0c6e",
+      "cameras": 37,
+      "lenses": 88
+    },
+    {
+      "path": "slr-ricoh.xml",
+      "bytes": 2869,
+      "sha256": "c835798136a53535fdf4f81312ac9aad0ea3de3ef732c183d8cc4d2f432011d9",
+      "cameras": 0,
+      "lenses": 3
+    },
+    {
+      "path": "slr-samsung.xml",
+      "bytes": 1110,
+      "sha256": "dc0a29e424ff96e4316ddeb76126fa6f6c73a8836905a3e1f56f0c493826148f",
+      "cameras": 4,
+      "lenses": 0
+    },
+    {
+      "path": "slr-samyang.xml",
+      "bytes": 16811,
+      "sha256": "fb1585bea91f5f59e1fae8811dd76c92252ee5d52e3647df2aff4695048443b5",
+      "cameras": 0,
+      "lenses": 16
+    },
+    {
+      "path": "slr-schneider.xml",
+      "bytes": 5890,
+      "sha256": "de607cfe4ba6e7debc61e282ce39b72825c07601572e14af2bc9108ba67faf81",
+      "cameras": 0,
+      "lenses": 11
+    },
+    {
+      "path": "slr-sigma.xml",
+      "bytes": 444640,
+      "sha256": "f55f41c144fbb72e3c51d2dfef40e918930d37db1b4150bd02bd746406c036d2",
+      "cameras": 6,
+      "lenses": 105
+    },
+    {
+      "path": "slr-soligor.xml",
+      "bytes": 573,
+      "sha256": "1aba0aab19bce87ea86175b6551cb5306a512eb54be1698b89991b86008f6a04",
+      "cameras": 0,
+      "lenses": 1
+    },
+    {
+      "path": "slr-sony.xml",
+      "bytes": 88865,
+      "sha256": "e5ca7f532afe23ff380bf2f9e5458f687bed603355d73a254d85c4e692942fdc",
+      "cameras": 30,
+      "lenses": 23
+    },
+    {
+      "path": "slr-tamron.xml",
+      "bytes": 201992,
+      "sha256": "c62090789cebe6bbb663111c6e97beeb1111852bb735088e29cf8782df4bab45",
+      "cameras": 0,
+      "lenses": 53
+    },
+    {
+      "path": "slr-tokina.xml",
+      "bytes": 91977,
+      "sha256": "b1213eda81a613bc3976340398c6b8ce8b7dc29423476fc565d5f8e5cf612ecf",
+      "cameras": 0,
+      "lenses": 28
+    },
+    {
+      "path": "slr-ussr.xml",
+      "bytes": 19024,
+      "sha256": "1fd6acc8a8f40373379bea2899ffd96fc34b22d9b044d0474dabd4c89af44efb",
+      "cameras": 6,
+      "lenses": 10
+    },
+    {
+      "path": "slr-vivitar.xml",
+      "bytes": 2157,
+      "sha256": "c5c67e3fe38e8fa19044acadc7730047690435f66aac563f55ffe04997a88111",
+      "cameras": 0,
+      "lenses": 2
+    },
+    {
+      "path": "slr-zeiss.xml",
+      "bytes": 14957,
+      "sha256": "49aa211a41fd5fe391d26af5fa65bdf9428d60863ffff15d3916fa1c520dc101",
+      "cameras": 0,
+      "lenses": 20
+    }
+  ],
+  "cameraEntries": 1059,
+  "lensEntries": 1580,
+  "lensMakers": {
+    "Schneider": 7,
+    "Mamiya": 7,
+    "GoPro": 6,
+    "DJI": 9,
+    "AEE": 1,
+    "GitUp": 1,
+    "Hasselblad": 2,
+    "Canon": 284,
+    "Casio": 6,
+    "Fujifilm": 68,
+    "Kodak": 1,
+    "Konica Minolta": 15,
+    "Leica": 21,
+    "LEICA CAMERA AG": 3,
+    "Nikon": 240,
+    "NIKON CORPORATION": 1,
+    "Olympus": 78,
+    "Panasonic": 60,
+    "Pentax": 92,
+    "Ricoh": 9,
+    "Ricoh imaging company, ltd.": 2,
+    "Samsung": 19,
+    "Sigma": 146,
+    "Carl Zeiss": 28,
+    "Sony": 95,
+    "Contax": 3,
+    "Generic": 3,
+    "Leica Camera AG": 13,
+    "Nikon Corporation": 1,
+    "Samyang": 32,
+    "Tamron": 76,
+    "Tokina": 30,
+    "Zeiss": 35,
+    "Apple": 2,
+    "Fujian": 1,
+    "Pentacon": 3,
+    "Cosina": 6,
+    "Mitakon": 2,
+    "Zenit": 1,
+    "Fotasy": 1,
+    "Voigtl\u00e4nder": 13,
+    "LG": 1,
+    "Huawei": 3,
+    "Beroflex": 2,
+    "Yongnuo": 7,
+    "Irix": 2,
+    "Arsenal": 1,
+    "Meike": 8,
+    "Meke": 2,
+    "Miranda": 1,
+    "Petri": 2,
+    "Venus": 11,
+    "TTArtisan": 10,
+    "Chinon": 2,
+    "SLR Magic": 1,
+    "Opteka": 1,
+    "Honor": 1,
+    "Viltrox": 19,
+    "Meyer-Optik G\u00f6rlitz": 8,
+    "Rollei": 2,
+    "Kipon": 1,
+    "7Artisans": 5,
+    "Pergear": 2,
+    "Steinheil M\u00fcnchen": 3,
+    "Toshiba": 1,
+    "Sun": 2,
+    "Quantaray": 1,
+    "AstrHori": 1,
+    "Yashica": 4,
+    "LZOS": 1,
+    "OM Digital Solutions": 7,
+    "Minolta": 22,
+    "Ricoh Imaging Company": 1,
+    "Schneider-Kreuznach": 9,
+    "Soligor": 1,
+    "KMZ": 9,
+    "MTO": 1,
+    "Vivitar": 2
+  },
+  "calibrationRecordsByTypeAndModel": {
+    "distortion:ptlens": 5606,
+    "tca:poly3": 3811,
+    "vignetting:pa": 29817,
+    "distortion:poly3": 889,
+    "distortion:poly5": 5,
+    "tca:linear": 5
+  },
+  "colourTransmissionData": false,
+  "note": "Database entries, not deduplicated physical models; geometry/TCA/shading do not specify coating spectral transmission."
+}

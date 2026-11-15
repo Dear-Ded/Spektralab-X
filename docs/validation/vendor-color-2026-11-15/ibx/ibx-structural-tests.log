@@ -1,0 +1,17 @@
+test_both_byte_orders_and_unknown_data_accounting (validate_profiles.StructuralTests.test_both_byte_orders_and_unknown_data_accounting) ... ok
+test_canon_envelope_size (validate_profiles.StructuralTests.test_canon_envelope_size) ... ok
+test_canon_tlv_checksum_and_end_marker (validate_profiles.StructuralTests.test_canon_tlv_checksum_and_end_marker) ... ok
+test_dcp_cycles_and_duplicate_tags (validate_profiles.StructuralTests.test_dcp_cycles_and_duplicate_tags) ... ok
+test_dcp_invalid_shape_nonfinite_and_counts (validate_profiles.StructuralTests.test_dcp_invalid_shape_nonfinite_and_counts) ... ok
+test_next_representable_cyclic_hue_boundary (validate_profiles.StructuralTests.test_next_representable_cyclic_hue_boundary) ... ok
+test_np3_invalid_tone_points (validate_profiles.StructuralTests.test_np3_invalid_tone_points) ... ok
+test_np3_short_variant_and_truncated_comment (validate_profiles.StructuralTests.test_np3_short_variant_and_truncated_comment) ... ok
+test_real_lensfun_doctype_without_external_resolution (validate_profiles.StructuralTests.test_real_lensfun_doctype_without_external_resolution) ... ok
+test_table_identity_single_hue_and_boundaries (validate_profiles.StructuralTests.test_table_identity_single_hue_and_boundaries) ... ok
+test_table_rejects_undefined_inputs (validate_profiles.StructuralTests.test_table_rejects_undefined_inputs) ... ok
+test_truncated_dcp (validate_profiles.StructuralTests.test_truncated_dcp) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.044s
+
+OK

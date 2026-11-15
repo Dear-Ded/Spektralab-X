@@ -1,0 +1,44 @@
+[
+  {
+    "name": "dng-1.7.1.pdf",
+    "url": "https://helpx.adobe.com/content/dam/help/en/photoshop/pdf/DNG_Spec_1_7_1_0.pdf",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "canon-picturestyle.html",
+    "url": "https://global.canon/en/imaging/picturestyle/file/index.html",
+    "finalUrl": "https://global.canon/en/imaging/picturestyle/file/index.html",
+    "status": 200,
+    "bytes": 24856,
+    "sha256": "6c7b27f05c689a9608026bec1a53d3ba89e73014e1c10abe7371bf4af98e6192"
+  },
+  {
+    "name": "nikon-flexible-color.html",
+    "url": "https://imaging.nikon.com/imaging/lineup/software/nx_studio/",
+    "finalUrl": "https://imaging.nikon.com/imaging/lineup/software/nx_studio/",
+    "status": 200,
+    "bytes": 16431,
+    "sha256": "8bd4c67141a9d5ba387fbd96f0cadeeb806766fdddd2ef1a816e12a58f6d71ba"
+  },
+  {
+    "name": "lensfun.json",
+    "url": "https://api.github.com/repos/lensfun/lensfun",
+    "finalUrl": "https://api.github.com/repos/lensfun/lensfun",
+    "status": 200,
+    "bytes": 6124,
+    "sha256": "41adeba93a461b4f6c505012b39a5092f820a50f2023e71a1198dc6a94fc8825"
+  },
+  {
+    "name": "rawtherapee.json",
+    "url": "https://api.github.com/repos/RawTherapee/RawTherapee",
+    "finalUrl": "https://api.github.com/repos/RawTherapee/RawTherapee",
+    "status": 200,
+    "bytes": 6576,
+    "sha256": "5f8b9922b641c59f558b8a0c3d04d39ec62346c3785334be4d91904ffc030e9e"
+  },
+  {
+    "name": "sony-look.html",
+    "url": "https://www.sony.com/electronics/support/articles/00261294",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

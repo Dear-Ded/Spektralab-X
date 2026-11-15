@@ -1,0 +1,36 @@
+✔ deserialize vanilla.NP3 (4.266173ms)
+✔ serialize vanilla.NP3 (1.063325ms)
+✔ deserialize comment-a.NP3 (0.612574ms)
+✔ serialize comment-a.NP3 (0.477002ms)
+✔ deserialize comment-ab.NP3 (0.349721ms)
+✔ serialize comment-ab.NP3 (0.30947ms)
+✔ deserialize comment-abcde.NP3 (0.342197ms)
+✔ serialize comment-abcde.NP3 (0.295415ms)
+✔ deserialize comment-hello-in-jp.NP3 (0.402004ms)
+✔ serialize comment-hello-in-jp.NP3 (0.489595ms)
+✔ deserialize longest-comment.NP3 (0.400643ms)
+✔ serialize longest-comment.NP3 (0.33507ms)
+✔ deserialize longest-comment-emj.NP3 (0.284568ms)
+✔ serialize longest-comment-emj.NP3 (0.307864ms)
+✔ deserialize longest-comment-jp.NP3 (0.290075ms)
+✔ serialize longest-comment-jp.NP3 (0.291815ms)
+✔ deserialize tonecurve-noop.NP3 (0.721335ms)
+✔ serialize tonecurve-noop.NP3 (0.761076ms)
+✔ deserialize comment-a-tonecurve.NP3 (0.406808ms)
+✔ serialize comment-a-tonecurve.NP3 (0.364449ms)
+✔ deserialize tonecurve-black.NP3 (0.360081ms)
+✔ serialize tonecurve-black.NP3 (0.275587ms)
+✔ deserialize tonecurve-white.NP3 (0.359317ms)
+✔ serialize tonecurve-white.NP3 (0.292995ms)
+✔ deserialize tonecurve-max-point.NP3 (0.363966ms)
+✔ serialize tonecurve-max-point.NP3 (0.254078ms)
+✔ serialize trims overlong emoji comments like the official app (0.569142ms)
+✔ serialize and deserialize clamp overlong comments to the supported length (0.565795ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 223.624742

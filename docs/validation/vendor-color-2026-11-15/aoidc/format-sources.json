@@ -1,0 +1,26 @@
+[
+  {
+    "name": "canon-download.js",
+    "url": "https://global.canon/en/imaging/picturestyle/js/download.js",
+    "bytes": 11687,
+    "sha256": "af8cee8dec4a7e2a46f71565124ccecb8bf9d6968d0bb5465062716026c0225d"
+  },
+  {
+    "name": "nikon-flexible-help.html",
+    "url": "https://nikonimglib.com/nxstdo/onlinehelp/en/the_picture_controls_flexible_color_23.html",
+    "bytes": 42644,
+    "sha256": "df7d52792cca01ab1192a91a5d045b49e0c8475ad14c02e3c280134f3b3c135f"
+  },
+  {
+    "name": "node-index.json",
+    "url": "https://nodejs.org/dist/index.json",
+    "bytes": 337814,
+    "sha256": "ecbf1d9f49532daf606cd495537d2ff7ab28f441e877ae40821738d56e2a0a80"
+  },
+  {
+    "name": "rea-package.json",
+    "url": "https://registry.npmjs.org/rea-agents/latest",
+    "bytes": 25677,
+    "sha256": "a8638ddb2d922194f58992572b62893f098193013a361863192249218b0a0c30"
+  }
+]

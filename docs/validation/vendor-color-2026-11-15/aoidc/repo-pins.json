@@ -1,0 +1,1432 @@
+[
+  {
+    "repo": "ssssota/nikon-flexible-color-picture-control",
+    "commit": "ed0397fbf1e4d4f2bc11ab3070522c613667d359",
+    "license": "MIT",
+    "matches": [
+      {
+        "path": "LICENSE",
+        "bytes": 1072
+      },
+      {
+        "path": "README.md",
+        "bytes": 1297
+      },
+      {
+        "path": "samples/comment-a-tonecurve.NP3",
+        "bytes": 988
+      },
+      {
+        "path": "samples/comment-a.NP3",
+        "bytes": 402
+      },
+      {
+        "path": "samples/comment-ab.NP3",
+        "bytes": 404
+      },
+      {
+        "path": "samples/comment-abcde.NP3",
+        "bytes": 406
+      },
+      {
+        "path": "samples/comment-hello-in-jp.NP3",
+        "bytes": 416
+      },
+      {
+        "path": "samples/longest-comment-emj.NP3",
+        "bytes": 984
+      },
+      {
+        "path": "samples/longest-comment-jp.NP3",
+        "bytes": 1170
+      },
+      {
+        "path": "samples/longest-comment.NP3",
+        "bytes": 658
+      },
+      {
+        "path": "samples/tonecurve-black.NP3",
+        "bytes": 978
+      },
+      {
+        "path": "samples/tonecurve-max-point.NP3",
+        "bytes": 978
+      },
+      {
+        "path": "samples/tonecurve-noop.NP3",
+        "bytes": 978
+      },
+      {
+        "path": "samples/tonecurve-white.NP3",
+        "bytes": 978
+      },
+      {
+        "path": "samples/vanilla.NP3",
+        "bytes": 392
+      }
+    ]
+  },
+  {
+    "repo": "bryankwandou/rea",
+    "error": "IncompleteRead(1736704 bytes read)"
+  },
+  {
+    "repo": "Icodextrin/pf2_decomp",
+    "commit": "40dc9150af04650ed2088a4485946ee1b4391acc",
+    "license": null,
+    "matches": [
+      {
+        "path": ".claude/skills/create-pf2/SKILL.md",
+        "bytes": 10831
+      },
+      {
+        "path": "make_pf2.py",
+        "bytes": 6105
+      },
+      {
+        "path": "make_pf3.py",
+        "bytes": 9426
+      },
+      {
+        "path": "pf3_tests/TEST WB A2 M2.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "pf3_tests/TEST WB A4.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "pf3_tests/TEST WB B2 G2.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "pf3_tests/TEST control.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "pf3_tests/TEST green.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "pf3_tests/TEST swap RB.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "pf3_tests/wb-calibration-a4.json",
+        "bytes": 361
+      },
+      {
+        "path": "pf3_tests/wb-calibration-b2g2.json",
+        "bytes": 357
+      },
+      {
+        "path": "pf3_tests/wb-calibration.json",
+        "bytes": 216
+      },
+      {
+        "path": "styles/defaults/Faithful.pf2",
+        "bytes": 1410
+      },
+      {
+        "path": "styles/defaults/Faithful.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "styles/defaults/Landscape.pf2",
+        "bytes": 1410
+      },
+      {
+        "path": "styles/defaults/Landscape.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "styles/defaults/Neutral.pf2",
+        "bytes": 1410
+      },
+      {
+        "path": "styles/defaults/Neutral.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "styles/defaults/Portrait.pf2",
+        "bytes": 1410
+      },
+      {
+        "path": "styles/defaults/Portrait.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "styles/defaults/Standard.pf2",
+        "bytes": 1410
+      },
+      {
+        "path": "styles/defaults/Standard.pf3",
+        "bytes": 434466
+      },
+      {
+        "path": "styles/generated/Fujicolor Pro 400H.pf2",
+        "bytes": 2413
+      },
+      {
+        "path": "styles/generated/Fujicolor Pro 400H.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "styles/generated/Kodachrome 64 v2.pf2",
+        "bytes": 2021
+      },
+      {
+        "path": "styles/generated/Kodachrome 64 v2.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "styles/generated/Kodachrome 64.pf2",
+        "bytes": 2609
+      },
+      {
+        "path": "styles/generated/Kodak Gold 200.pf2",
+        "bytes": 2805
+      },
+      {
+        "path": "styles/generated/Kodak Portra 800 (Portrait).pf2",
+        "bytes": 2805
+      },
+      {
+        "path": "styles/generated/Kodak Portra 800 v2.pf2",
+        "bytes": 2413
+      },
+      {
+        "path": "styles/generated/Kodak Portra 800 v2.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "styles/generated/Kodak Portra 800.pf2",
+        "bytes": 2805
+      },
+      {
+        "path": "styles/generated/Kodak Vision3 250D.pf2",
+        "bytes": 2413
+      },
+      {
+        "path": "styles/generated/Kodak Vision3 250D.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "styles/generated/Kodak Vision3 500T.pf2",
+        "bytes": 2413
+      },
+      {
+        "path": "styles/generated/Kodak Vision3 500T.pf3",
+        "bytes": 434529
+      },
+      {
+        "path": "styles/reference/Kodachrome 25.pf2",
+        "bytes": 1823
+      },
+      {
+        "path": "styles/reference/Thomas Fransson CrowdakV3.pf2",
+        "bytes": 3195
+      },
+      {
+        "path": "styles/reference/Thomas Fransson CrowdakV3.pf3",
+        "bytes": 435711
+      },
+      {
+        "path": "styles/reference/Velvia by Giosi 2.0.pf2",
+        "bytes": 2019
+      }
+    ]
+  },
+  {
+    "repo": "RawTherapee/RawTherapee",
+    "commit": "64c2d90a3248c7ad41842d9162368858b61aac6a",
+    "license": "GPL-3.0",
+    "matches": [
+      {
+        "path": "LICENSE",
+        "bytes": 32473
+      },
+      {
+        "path": "README.md",
+        "bytes": 3406
+      },
+      {
+        "path": "external/jpeg_ijg/README",
+        "bytes": 18848
+      },
+      {
+        "path": "external/klt/README.txt",
+        "bytes": 1030
+      },
+      {
+        "path": "external/libraw.README",
+        "bytes": 1130
+      },
+      {
+        "path": "external/libraw/LICENSE.CDDL",
+        "bytes": 16906
+      },
+      {
+        "path": "external/libraw/LICENSE.LGPL",
+        "bytes": 24389
+      },
+      {
+        "path": "external/libraw/README.DNGSDK.txt",
+        "bytes": 2561
+      },
+      {
+        "path": "external/libraw/README.GoPro.txt",
+        "bytes": 4771
+      },
+      {
+        "path": "external/libraw/README.RawSpeed.txt",
+        "bytes": 2455
+      },
+      {
+        "path": "external/libraw/README.cmake",
+        "bytes": 302
+      },
+      {
+        "path": "external/libraw/README.demosaic-packs",
+        "bytes": 830
+      },
+      {
+        "path": "external/libraw/README.md",
+        "bytes": 7096
+      },
+      {
+        "path": "external/libraw/RawSpeed3/README.md",
+        "bytes": 5811
+      },
+      {
+        "path": "external/libraw/src/tables/colordata.cpp",
+        "bytes": 100851
+      },
+      {
+        "path": "licenses/DroidSansMonoDotted.txt",
+        "bytes": 11358
+      },
+      {
+        "path": "licenses/Expat_LICENSE",
+        "bytes": 1144
+      },
+      {
+        "path": "licenses/Lensfun_LICENSE",
+        "bytes": 7652
+      },
+      {
+        "path": "licenses/LibRaw_LICENSE",
+        "bytes": 25577
+      },
+      {
+        "path": "licenses/LunaSVG_LICENSE",
+        "bytes": 1104
+      },
+      {
+        "path": "licenses/README",
+        "bytes": 700
+      },
+      {
+        "path": "licenses/cJSON_LICENSE",
+        "bytes": 1083
+      },
+      {
+        "path": "licenses/gtkmm_LICENSE",
+        "bytes": 7652
+      },
+      {
+        "path": "licenses/jpeg_ijg_LICENSE",
+        "bytes": 18848
+      },
+      {
+        "path": "licenses/lcms2_LICENSE",
+        "bytes": 1080
+      },
+      {
+        "path": "licenses/libbacktrace_LICENSE",
+        "bytes": 1471
+      },
+      {
+        "path": "licenses/libcanberra_LICENSE",
+        "bytes": 26524
+      },
+      {
+        "path": "licenses/libiptcdata_LICENSE",
+        "bytes": 25292
+      },
+      {
+        "path": "licenses/libjxl_LICENSE",
+        "bytes": 1508
+      },
+      {
+        "path": "licenses/librsvg_LICENSE",
+        "bytes": 26530
+      },
+      {
+        "path": "licenses/libtiff_LICENSE",
+        "bytes": 1139
+      },
+      {
+        "path": "licenses/osx_libiomp5_LICENSE.txt",
+        "bytes": 1511
+      },
+      {
+        "path": "licenses/sleef_LICENSE.txt",
+        "bytes": 1680
+      },
+      {
+        "path": "licenses/tcmalloc_LICENSE",
+        "bytes": 11359
+      },
+      {
+        "path": "licenses/tracy_LICENSE",
+        "bytes": 1618
+      },
+      {
+        "path": "rtdata/dcpprofiles/CANON EOS 250D.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/dcpprofiles/CANON EOS 800D.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/CANON EOS M50.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/CANON POWERSHOT G5 X MARK II.dcp",
+        "bytes": 65390
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 100D.dcp",
+        "bytes": 1013034
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 1300D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 20D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 400D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 40D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 450D.dcp",
+        "bytes": 1510
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 50D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 550D.dcp",
+        "bytes": 1504
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 5D Mark II.dcp",
+        "bytes": 65374
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 5D Mark III.dcp",
+        "bytes": 1522
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 5D Mark IV.dcp",
+        "bytes": 32782
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 5D.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 600D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 60D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 650D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 6D Mark II.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 6D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 7D Mark II.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 7D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS 90D.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS D60.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS M6 Mark II.dcp",
+        "bytes": 65374
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS R.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS R5.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS R6.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS R8.dcp",
+        "bytes": 65342
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS RP.dcp",
+        "bytes": 1045590
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS-1D Mark III.dcp",
+        "bytes": 1522
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS-1D X Mark III.dcp",
+        "bytes": 65374
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon EOS-1Ds Mark II.dcp",
+        "bytes": 65374
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot G1 X Mark II.dcp",
+        "bytes": 65390
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot G10.dcp",
+        "bytes": 1518
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot G12.dcp",
+        "bytes": 1518
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot G7 X.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot S110.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/Canon PowerShot S120.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM DBP for GX680.dcp",
+        "bytes": 65374
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM FinePix F600EXR.dcp",
+        "bytes": 1102982
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM GFX 50R.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-A5.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-A7.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-E3.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-H1.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-Pro2.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-Pro3.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-S1.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-S10.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T1.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T10.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T2.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T20.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T3.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T30.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X-T4.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X100S.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/FUJIFILM X100T.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Fujifilm FinePix S9500.dcp",
+        "bytes": 1526
+      },
+      {
+        "path": "rtdata/dcpprofiles/Fujifilm X-E1.dcp",
+        "bytes": 1038202
+      },
+      {
+        "path": "rtdata/dcpprofiles/Fujifilm X-E2.dcp",
+        "bytes": 1038202
+      },
+      {
+        "path": "rtdata/dcpprofiles/LG Mobile LG-H815.dcp",
+        "bytes": 1102930
+      },
+      {
+        "path": "rtdata/dcpprofiles/Leaf Aptus 75.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/MINOLTA DYNAX 7D.dcp",
+        "bytes": 1102982
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON COOLPIX P7800.dcp",
+        "bytes": 1102966
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D300.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D3300.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D50.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D500.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D5000.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D5300.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D5600.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D600.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D610.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D700.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D70s.dcp",
+        "bytes": 1102942
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D7100.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D7200.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D750.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D7500.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D80.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D800.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D800E.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D810.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON D850.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 5.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 50.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 6.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 6_2.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 7.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 8.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z 9.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/NIKON Z F.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D200.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D3000.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D3100.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D3S.dcp",
+        "bytes": 1498
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D5100.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Nikon D7000.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/OLYMPUS E-510.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/OLYMPUS E-M1.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/OLYMPUS E-M10.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/OLYMPUS E-M1MarkII.dcp",
+        "bytes": 1102970
+      },
+      {
+        "path": "rtdata/dcpprofiles/OLYMPUS E-M5MarkII.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/dcpprofiles/Olympus E-1.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Olympus E-520.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/Olympus E-M5.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/Olympus E-P2.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/Olympus XZ-1.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/PANASONIC DC-S5M2.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/dcpprofiles/PANASONIC DMC-LX100.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/dcpprofiles/PENTAX K-5 II.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/PENTAX K-5.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/PENTAX K-50.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/PENTAX K10D.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DC-G9.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DC-GX9.dcp",
+        "bytes": 1102966
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DC-S1.dcp",
+        "bytes": 1102950
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DC-S5.dcp",
+        "bytes": 1102934
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DC-TZ91.dcp",
+        "bytes": 1102966
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-FZ1000.dcp",
+        "bytes": 1102974
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-FZ150.dcp",
+        "bytes": 1518
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-FZ35.dcp",
+        "bytes": 1518
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-FZ38.dcp",
+        "bytes": 1518
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-G1.dcp",
+        "bytes": 1514
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-G3.dcp",
+        "bytes": 1514
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-G5.dcp",
+        "bytes": 1514
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-GH1.dcp",
+        "bytes": 1514
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-GH2.dcp",
+        "bytes": 1514
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-GX7.dcp",
+        "bytes": 1102966
+      },
+      {
+        "path": "rtdata/dcpprofiles/Panasonic DMC-GX85.dcp",
+        "bytes": 1102966
+      },
+      {
+        "path": "rtdata/dcpprofiles/Pentax K-r.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Pentax K200D.dcp",
+        "bytes": 1506
+      },
+      {
+        "path": "rtdata/dcpprofiles/RICOH GR III.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/RICOH PENTAX K-1.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/RICOH PENTAX K-3.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY DSC-RX100M6.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY DSLR-A580.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-6000.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-6300.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-6400.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-6500.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-6600.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7C.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7M2.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7M3.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7M4.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7RM3.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7RM4.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-7SM3.dcp",
+        "bytes": 65358
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY ILCE-9.dcp",
+        "bytes": 65350
+      },
+      {
+        "path": "rtdata/dcpprofiles/SONY SLT-A99V.dcp",
+        "bytes": 1102958
+      },
+      {
+        "path": "rtdata/dcpprofiles/Sony DSLR-A700.dcp",
+        "bytes": 1510
+      },
+      {
+        "path": "rtdata/dcpprofiles/Sony DSLR-A900.dcp",
+        "bytes": 1510
+      },
+      {
+        "path": "rtdata/dcpprofiles/Sony NEX-5N.dcp",
+        "bytes": 1502
+      },
+      {
+        "path": "rtdata/dcpprofiles/Sony SLT-A55V.dcp",
+        "bytes": 55294
+      },
+      {
+        "path": "rtdata/dcpprofiles/YI TECHNOLOGY M1.dcp",
+        "bytes": 1070330
+      },
+      {
+        "path": "rtdata/dcpprofiles/camera_model_aliases.json",
+        "bytes": 2680
+      },
+      {
+        "path": "rtdata/dcpprofiles/samsung SM-G930V.dcp",
+        "bytes": 65366
+      },
+      {
+        "path": "rtdata/languages/LICENSE",
+        "bytes": 783
+      },
+      {
+        "path": "rtdata/languages/README",
+        "bytes": 3592
+      },
+      {
+        "path": "rtengine/camconst.cc",
+        "bytes": 27159
+      },
+      {
+        "path": "rtengine/camconst.h",
+        "bytes": 2583
+      },
+      {
+        "path": "rtengine/camconst.json",
+        "bytes": 197578
+      },
+      {
+        "path": "rtengine/dcp.cc",
+        "bytes": 77530
+      },
+      {
+        "path": "rtengine/dcp.h",
+        "bytes": 5044
+      },
+      {
+        "path": "rtengine/dcraw.patch.README",
+        "bytes": 382
+      },
+      {
+        "path": "tools/INSTALL.readme",
+        "bytes": 266
+      },
+      {
+        "path": "tools/camconst_creator.ods",
+        "bytes": 13566
+      },
+      {
+        "path": "tools/osx/INSTALL.readme.rtf",
+        "bytes": 795
+      },
+      {
+        "path": "tools/update_camconst.py",
+        "bytes": 4233
+      },
+      {
+        "path": "tools/win/readme.txt",
+        "bytes": 591
+      }
+    ]
+  },
+  {
+    "repo": "lensfun/lensfun",
+    "commit": "52cf1a7b0e82e07e0ecaa3391ee5106a6dd1ee54",
+    "license": "LGPL-3.0",
+    "matches": [
+      {
+        "path": "COPYING",
+        "bytes": 35149
+      },
+      {
+        "path": "COPYING.LESSER",
+        "bytes": 7652
+      },
+      {
+        "path": "README.md",
+        "bytes": 6873
+      },
+      {
+        "path": "data/COPYING.CC_BY-SA_3.0",
+        "bytes": 22240
+      },
+      {
+        "path": "data/db/6x6.xml",
+        "bytes": 29550
+      },
+      {
+        "path": "data/db/actioncams.xml",
+        "bytes": 17188
+      },
+      {
+        "path": "data/db/compact-canon.xml",
+        "bytes": 247046
+      },
+      {
+        "path": "data/db/compact-casio.xml",
+        "bytes": 6889
+      },
+      {
+        "path": "data/db/compact-fujifilm.xml",
+        "bytes": 67954
+      },
+      {
+        "path": "data/db/compact-kodak.xml",
+        "bytes": 2091
+      },
+      {
+        "path": "data/db/compact-konica-minolta.xml",
+        "bytes": 13349
+      },
+      {
+        "path": "data/db/compact-leica.xml",
+        "bytes": 9113
+      },
+      {
+        "path": "data/db/compact-nikon.xml",
+        "bytes": 40003
+      },
+      {
+        "path": "data/db/compact-olympus.xml",
+        "bytes": 34454
+      },
+      {
+        "path": "data/db/compact-panasonic.xml",
+        "bytes": 70621
+      },
+      {
+        "path": "data/db/compact-pentax.xml",
+        "bytes": 6689
+      },
+      {
+        "path": "data/db/compact-ricoh.xml",
+        "bytes": 18424
+      },
+      {
+        "path": "data/db/compact-samsung.xml",
+        "bytes": 13875
+      },
+      {
+        "path": "data/db/compact-sigma.xml",
+        "bytes": 2395
+      },
+      {
+        "path": "data/db/compact-sony.xml",
+        "bytes": 126390
+      },
+      {
+        "path": "data/db/contax.xml",
+        "bytes": 1696
+      },
+      {
+        "path": "data/db/generic.xml",
+        "bytes": 5416
+      },
+      {
+        "path": "data/db/lensfun-database.dtd",
+        "bytes": 2423
+      },
+      {
+        "path": "data/db/lensfun-database.xsd",
+        "bytes": 6195
+      },
+      {
+        "path": "data/db/mil-canon.xml",
+        "bytes": 247994
+      },
+      {
+        "path": "data/db/mil-fujifilm.xml",
+        "bytes": 213330
+      },
+      {
+        "path": "data/db/mil-hasselblad.xml",
+        "bytes": 1048
+      },
+      {
+        "path": "data/db/mil-leica.xml",
+        "bytes": 11663
+      },
+      {
+        "path": "data/db/mil-nikon.xml",
+        "bytes": 187918
+      },
+      {
+        "path": "data/db/mil-olympus.xml",
+        "bytes": 147123
+      },
+      {
+        "path": "data/db/mil-panasonic.xml",
+        "bytes": 299264
+      },
+      {
+        "path": "data/db/mil-pentax.xml",
+        "bytes": 1385
+      },
+      {
+        "path": "data/db/mil-samsung.xml",
+        "bytes": 13007
+      },
+      {
+        "path": "data/db/mil-samyang.xml",
+        "bytes": 25990
+      },
+      {
+        "path": "data/db/mil-sigma.xml",
+        "bytes": 126270
+      },
+      {
+        "path": "data/db/mil-sony.xml",
+        "bytes": 274541
+      },
+      {
+        "path": "data/db/mil-tamron.xml",
+        "bytes": 108177
+      },
+      {
+        "path": "data/db/mil-tokina.xml",
+        "bytes": 1014
+      },
+      {
+        "path": "data/db/mil-zeiss.xml",
+        "bytes": 19171
+      },
+      {
+        "path": "data/db/misc.xml",
+        "bytes": 176039
+      },
+      {
+        "path": "data/db/om-system.xml",
+        "bytes": 45205
+      },
+      {
+        "path": "data/db/rf-leica.xml",
+        "bytes": 6712
+      },
+      {
+        "path": "data/db/slr-canon.xml",
+        "bytes": 780353
+      },
+      {
+        "path": "data/db/slr-hasselblad.xml",
+        "bytes": 642
+      },
+      {
+        "path": "data/db/slr-konica-minolta.xml",
+        "bytes": 47170
+      },
+      {
+        "path": "data/db/slr-leica.xml",
+        "bytes": 432
+      },
+      {
+        "path": "data/db/slr-nikon.xml",
+        "bytes": 551265
+      },
+      {
+        "path": "data/db/slr-olympus.xml",
+        "bytes": 116602
+      },
+      {
+        "path": "data/db/slr-panasonic.xml",
+        "bytes": 419
+      },
+      {
+        "path": "data/db/slr-pentax.xml",
+        "bytes": 210117
+      },
+      {
+        "path": "data/db/slr-ricoh.xml",
+        "bytes": 2869
+      },
+      {
+        "path": "data/db/slr-samsung.xml",
+        "bytes": 1110
+      },
+      {
+        "path": "data/db/slr-samyang.xml",
+        "bytes": 16811
+      },
+      {
+        "path": "data/db/slr-schneider.xml",
+        "bytes": 5890
+      },
+      {
+        "path": "data/db/slr-sigma.xml",
+        "bytes": 444640
+      },
+      {
+        "path": "data/db/slr-soligor.xml",
+        "bytes": 573
+      },
+      {
+        "path": "data/db/slr-sony.xml",
+        "bytes": 88865
+      },
+      {
+        "path": "data/db/slr-tamron.xml",
+        "bytes": 201992
+      },
+      {
+        "path": "data/db/slr-tokina.xml",
+        "bytes": 91977
+      },
+      {
+        "path": "data/db/slr-ussr.xml",
+        "bytes": 19024
+      },
+      {
+        "path": "data/db/slr-vivitar.xml",
+        "bytes": 2157
+      },
+      {
+        "path": "data/db/slr-zeiss.xml",
+        "bytes": 14957
+      },
+      {
+        "path": "data/db/timestamp.txt",
+        "bytes": 11
+      },
+      {
+        "path": "docs/man/README",
+        "bytes": 373
+      },
+      {
+        "path": "libs/getopt/LICENSE",
+        "bytes": 19526
+      },
+      {
+        "path": "tests/README.md",
+        "bytes": 877
+      },
+      {
+        "path": "tools/calibrate/README.md",
+        "bytes": 8779
+      },
+      {
+        "path": "tools/calibration_statistics/README.rst",
+        "bytes": 1220
+      },
+      {
+        "path": "tools/calibration_webserver/README.rst",
+        "bytes": 1784
+      }
+    ]
+  },
+  {
+    "repo": "LibRaw/LibRaw",
+    "commit": "a9a14b1970d188c25dade81f8326ff00a6e33649",
+    "license": "NOASSERTION",
+    "matches": [
+      {
+        "path": "LICENSE.CDDL",
+        "bytes": 16906
+      },
+      {
+        "path": "LICENSE.LGPL",
+        "bytes": 24389
+      },
+      {
+        "path": "README.DNGSDK.txt",
+        "bytes": 2561
+      },
+      {
+        "path": "README.GoPro.txt",
+        "bytes": 4771
+      },
+      {
+        "path": "README.RawSpeed.txt",
+        "bytes": 2455
+      },
+      {
+        "path": "README.cmake",
+        "bytes": 302
+      },
+      {
+        "path": "README.demosaic-packs",
+        "bytes": 830
+      },
+      {
+        "path": "README.md",
+        "bytes": 7096
+      },
+      {
+        "path": "RawSpeed3/README.md",
+        "bytes": 5811
+      },
+      {
+        "path": "src/tables/colordata.cpp",
+        "bytes": 103580
+      }
+    ]
+  },
+  {
+    "repo": "Beep6581/dcamprof",
+    "commit": "bffb659d6a0af82f7b6b2e6d0006d1824ac4d398",
+    "license": "GPL-3.0",
+    "matches": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 35149
+      },
+      {
+        "path": "README.md",
+        "bytes": 1904
+      }
+    ]
+  }
+]

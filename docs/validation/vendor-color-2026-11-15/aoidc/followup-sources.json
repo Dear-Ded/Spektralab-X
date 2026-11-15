@@ -1,0 +1,31 @@
+[
+  {
+    "name": "canon-download.html",
+    "url": "https://global.canon/en/imaging/picturestyle/file/download.html",
+    "bytes": 22598,
+    "sha256": "d7b36b3be220c10ef3975f5fe1ff20345dd78baafd4fe01b4383ad14a71b8d77"
+  },
+  {
+    "name": "canon-portrait.html",
+    "url": "https://global.canon/en/imaging/picturestyle/file/studio-portrait.html",
+    "bytes": 13978,
+    "sha256": "4ea7c7216a5d20e597776eb17a8e987570198c70bf54d9f1f35034a3e836da52"
+  },
+  {
+    "name": "adobe-sdk.html",
+    "url": "https://helpx.adobe.com/camera-raw/digital-negative.html",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "rea-readme.md",
+    "url": "https://raw.githubusercontent.com/bryankwandou/rea/main/README.md",
+    "bytes": 28840,
+    "sha256": "9e3b72c0867df5fda49e9c8e5b249c0daa5a86cc5ab4873550037a9cfa105a4c"
+  },
+  {
+    "name": "canon-faithful.html",
+    "url": "https://global.canon/en/imaging/picturestyle/style/faithful.html",
+    "bytes": 15114,
+    "sha256": "4f03a5d0c060cd5d5c7ab778b733434d05da1f9c3fdef811d7de621124b433a4"
+  }
+]

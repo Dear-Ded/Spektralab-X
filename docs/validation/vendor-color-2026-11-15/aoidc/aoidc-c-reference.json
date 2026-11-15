@@ -1,0 +1,111 @@
+{
+  "referenceSha256": "75554d70128e740428b260ea90df56fc223828c4563d609444e9775fb6e9d07a",
+  "extractedBlockSha256": "7fb5ed14b28e92e92997107bf9a19d1539d311cb07cbb1674006ad08eddf4401",
+  "generatedHarnessSha256": "34b18ae80e0e66bbc65961a2ccb5921d7e3df361de8e88316f9ed9ef017381fe",
+  "testedScriptSha256": "45debc58e9cecfb09365a56531b82982a6a79f344abf054040283449c6860f7e",
+  "compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "rows": [
+    {
+      "dataset": "synthetic-1x2x1",
+      "dimensions": [
+        1,
+        2,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 1.4210854715202004e-14
+    },
+    {
+      "dataset": "synthetic-7x5x1",
+      "dimensions": [
+        7,
+        5,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 9.370282327836321e-14
+    },
+    {
+      "dataset": "synthetic-7x5x4",
+      "dimensions": [
+        7,
+        5,
+        4
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 1.1368683772161603e-13
+    },
+    {
+      "dataset": "CANON EOS 250D.dcp:ProfileHueSatMapData1",
+      "dimensions": [
+        90,
+        30,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 3.375077994860476e-14
+    },
+    {
+      "dataset": "CANON EOS 250D.dcp:ProfileHueSatMapData2",
+      "dimensions": [
+        90,
+        30,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 1.7763568394002505e-14
+    },
+    {
+      "dataset": "Canon EOS 100D.dcp:ProfileHueSatMapData1",
+      "dimensions": [
+        90,
+        30,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 3.552713678800501e-15
+    },
+    {
+      "dataset": "Canon EOS 100D.dcp:ProfileLookTableData",
+      "dimensions": [
+        90,
+        30,
+        30
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 1.3500311979441904e-13
+    },
+    {
+      "dataset": "Canon EOS 450D.dcp:ProfileHueSatMapData1",
+      "dimensions": [
+        6,
+        6,
+        3
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 5.329070518200751e-15
+    },
+    {
+      "dataset": "Sony SLT-A55V.dcp:ProfileHueSatMapData1",
+      "dimensions": [
+        90,
+        25,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 2.220446049250313e-16
+    },
+    {
+      "dataset": "Sony SLT-A55V.dcp:ProfileHueSatMapData2",
+      "dimensions": [
+        90,
+        25,
+        1
+      ],
+      "samples": 4096,
+      "maximumAbsoluteComponentError": 7.993605777301127e-15
+    }
+  ],
+  "totalSamples": 40960,
+  "scope": "table parameters only; both coordinate encodings tested, not full DCP RGB application or camera looks"
+}

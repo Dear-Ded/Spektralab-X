@@ -1,0 +1,41 @@
+{
+  "platform": "Linux-6.18.54-instabox-x86_64-with-glibc2.41",
+  "python": "3.13.5",
+  "structuralTests": 12,
+  "failures": 0,
+  "analyticHsvComponent": {
+    "samples": 8192,
+    "maximumAbsoluteComponentError": 1.7763568394002505e-14,
+    "reference": "independent analytic multilinear function; not a full DCP renderer"
+  },
+  "lensXmlFiles": 56,
+  "lensCameraEntries": 1059,
+  "lensEntries": 1580,
+  "lensCorpusDigest": "505e733d8eff9d1e0e0b2b93767213cc02b977948c6ea0c518a6801e509cf2d9",
+  "sourceFingerprints": [
+    {
+      "file": "fetch_sources.py",
+      "sha256": "d2c5021005e739cf09a2368d79e1b778a514dbe585b61d96040ec2983ddd37cb"
+    },
+    {
+      "file": "inspect_canon_reference.py",
+      "sha256": "e418f1c9589e3e6a3062631b1bd9b60d1603859603869c800e8c3462b0be486e"
+    },
+    {
+      "file": "inspect_profiles.py",
+      "sha256": "4b4833b8236bff19c32214041ce8e42b1c5cd960cef5f78a5a7d192bed4c925a"
+    },
+    {
+      "file": "reference_dcp_component.py",
+      "sha256": "45debc58e9cecfb09365a56531b82982a6a79f344abf054040283449c6860f7e"
+    },
+    {
+      "file": "reference_np3.mjs",
+      "sha256": "e1d8a5b738b754adc0cc7000468a6aa893c6e3f1582095d9efc1c4b293921ad9"
+    },
+    {
+      "file": "validate_profiles.py",
+      "sha256": "3804689e0507223a3fa224f06d238f1158d79f7135a59ba742ca2bc98981e20a"
+    }
+  ]
+}

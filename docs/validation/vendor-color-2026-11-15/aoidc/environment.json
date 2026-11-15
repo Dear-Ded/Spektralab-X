@@ -1,0 +1,16 @@
+{
+  "host": "AOIDC",
+  "platform": "Linux-5.15.0-30-generic-x86_64-with-glibc2.35",
+  "python": "3.10.12",
+  "exiftool": "12.40",
+  "privateImagesUsed": false,
+  "localExecutableTests": false,
+  "apkBuilt": false,
+  "node": {
+    "url": "https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz",
+    "version": "v26.13.1",
+    "bytes": 34093052,
+    "sha256": "5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864",
+    "verifiedOfficialSums": true
+  }
+}

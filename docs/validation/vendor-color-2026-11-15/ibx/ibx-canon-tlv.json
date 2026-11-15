@@ -1,0 +1,1002 @@
+{
+  "externalCodecSha256": "4005569993a94853e77ea61df0d6f7d9b9fe396687d3711c6d36531bb35db75e",
+  "externalCodecLicense": "no declared license; external analysis only",
+  "testedScriptSha256": "e418f1c9589e3e6a3062631b1bd9b60d1603859603869c800e8c3462b0be486e",
+  "profiles": [
+    {
+      "file": "WW01_NOSTALGIA.pf2",
+      "sha256": "54492a9e2ae6427e250a364a5c2e2658afab8f931372cface30d2992d3c08b32",
+      "bytes": 1249,
+      "version": "0x00002000",
+      "payloadBytesAccounted": 1237,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "b4d99ba03e4720c3482d79786ef129e68ab58c0b5513c2b8d3745885000b6954",
+          "text": "NOSTALGIA"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "905240728323dea0e4e49776d3483a2e7e8479f60acf23a6e6002ec87886cbe8",
+          "baseStyleIdentifier": 132
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x1010",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 89,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 397,
+          "valueBytes": 300,
+          "valueSha256": "6b2b884d7ad2ea3705b9657e98b715b4517ec13f2d7d62eb35625d46bc78ea48"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 705,
+          "valueBytes": 240,
+          "valueSha256": "dc344056bc488cfd7a39b276338ebd4a2341e5b84172457fd07013003189ade2"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 953,
+          "valueBytes": 240,
+          "valueSha256": "975cf96e7dc302a3e2a68792035a8551a9da356c886d55ec4dfae32b7faa4b6c"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 1201,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 1211,
+          "valueBytes": 10,
+          "valueSha256": "830b48d1bc155cb87e328a8a7d0e5c6a138792477c147158977711413592ac62"
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1229,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW02_CLEAR.pf2",
+      "sha256": "9c8de4aa733220b429e166e991e4d1f07ecd8d0a53e51f9d875f9d24e953b65a",
+      "bytes": 1241,
+      "version": "0x00002000",
+      "payloadBytesAccounted": 1229,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "c6578ccf0125e5c9bff98c094007cd6f36f26f3a2092bdd9bfe51300de5436ca",
+          "text": "CLEAR"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "fb13e8eb4ee0b20345624f1ad3a29eb8e4c09ca68f5ae26f2dcfd0edf81ab81c",
+          "baseStyleIdentifier": 129
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x1010",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 8,
+          "valueSha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 85,
+          "valueBytes": 300,
+          "valueSha256": "912bf89368787819f4a3bc30410ca7761268bc20a15329f00ad04ea17cb0895d"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 393,
+          "valueBytes": 300,
+          "valueSha256": "6b2b884d7ad2ea3705b9657e98b715b4517ec13f2d7d62eb35625d46bc78ea48"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 701,
+          "valueBytes": 240,
+          "valueSha256": "ae1fe7165f0e2d7c2f547559c3d648dba0bede1b8da4810a8a9f3dda6a189b26"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 949,
+          "valueBytes": 240,
+          "valueSha256": "1b5e5fb7fc1876d71c036edfbc8da77a310e139bb30e7823b604e20490c30a73"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 1197,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 1207,
+          "valueBytes": 6,
+          "valueSha256": "558ad838c31fc5f780f7c443c5aa41356b961fab28b74d0873622c184319a411"
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1221,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW03_TWILIGHT.pf2",
+      "sha256": "9d5ad2ab95c82dba8e1e7e537a8c52a032e3d17d3f455df30e59f1af38f04177",
+      "bytes": 1244,
+      "version": "0x00002000",
+      "payloadBytesAccounted": 1232,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "e4734809247eca9133d77767a087acd4c0ca221dcdbc86e6e9ecd7efb7c6784c",
+          "text": "TWILIGHT"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "fb13e8eb4ee0b20345624f1ad3a29eb8e4c09ca68f5ae26f2dcfd0edf81ab81c",
+          "baseStyleIdentifier": 129
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x1010",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 8,
+          "valueSha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 85,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 393,
+          "valueBytes": 300,
+          "valueSha256": "6b2b884d7ad2ea3705b9657e98b715b4517ec13f2d7d62eb35625d46bc78ea48"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 701,
+          "valueBytes": 240,
+          "valueSha256": "203c045b9ae96e82ab6b03b02fac15c7545adf884f6a02368f1cdc27a76539fb"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 949,
+          "valueBytes": 240,
+          "valueSha256": "ab9b27d4fc7363857c4c0bcbc1b96cdbdddc4617b311868c4360d2b47fe44f99"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 1197,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 1207,
+          "valueBytes": 9,
+          "valueSha256": "724d033207ac08f1b99a03a19d02845aa2fe660207c3cd4eae895e5c1e783936"
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1224,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW04_EMERALD.pf2",
+      "sha256": "26fe253a44c698b2cf5f70763802c7f97d2d26267ca215f1ff5c77402fdeb33d",
+      "bytes": 1243,
+      "version": "0x00002000",
+      "payloadBytesAccounted": 1231,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "e59cf7614c7a7ed18e416ec863f2df8c37a41270ca187f1d427c66f15da39b47",
+          "text": "EMERALD"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "fb13e8eb4ee0b20345624f1ad3a29eb8e4c09ca68f5ae26f2dcfd0edf81ab81c",
+          "baseStyleIdentifier": 129
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x1010",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 8,
+          "valueSha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 85,
+          "valueBytes": 300,
+          "valueSha256": "d29d9494a3acf627913d586714453e9f70ddd025cf80901d8fa4dc66f8fc714b"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 393,
+          "valueBytes": 300,
+          "valueSha256": "6b2b884d7ad2ea3705b9657e98b715b4517ec13f2d7d62eb35625d46bc78ea48"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 701,
+          "valueBytes": 240,
+          "valueSha256": "59993b508a1c86db157912c06242e74c37cbdf0de1a9cf5453ca4ad391b503a0"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 949,
+          "valueBytes": 240,
+          "valueSha256": "8afb80d0709b979ada7d8e5dd7c3ca7f3034807345dce510090572144d4d0f1a"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 1197,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 1207,
+          "valueBytes": 8,
+          "valueSha256": "9d96de2ee273e54968080099f5448a7c2a8c1a808f09a1a87ea3c68aae0d1521"
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1223,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW05_AUTUMN_HUES.pf2",
+      "sha256": "ffff581c825dec08476d5473294b3d4e929d1914f1eec681f5a49ca48e87d317",
+      "bytes": 1247,
+      "version": "0x00002000",
+      "payloadBytesAccounted": 1235,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "c7e06942137bdecd98975e08934f2ef8225d03057b9707c37602b52e46d44240",
+          "text": "AUTUMN HUES"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "fb13e8eb4ee0b20345624f1ad3a29eb8e4c09ca68f5ae26f2dcfd0edf81ab81c",
+          "baseStyleIdentifier": 129
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x1010",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 8,
+          "valueSha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 85,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 393,
+          "valueBytes": 300,
+          "valueSha256": "6b2b884d7ad2ea3705b9657e98b715b4517ec13f2d7d62eb35625d46bc78ea48"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 701,
+          "valueBytes": 240,
+          "valueSha256": "dd877cb408cbcb97873dd769c763fd32125d5b2d3e1fa6cb1b05a7aefc2ab4c0"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 949,
+          "valueBytes": 240,
+          "valueSha256": "f85b63adba91d68686053489c257722877f02123e310fec0f4d5300aaad98bce"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 1197,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 1207,
+          "valueBytes": 12,
+          "valueSha256": "3444e009d4549fa4a063aa3ab433274d71f5af0485a9ef040246f33ec407a92d"
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1227,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW06_P-STUDIO.pf2",
+      "sha256": "47d51f11c3f7bed469e87be78b9deb6ad121ea8ab4212bfcd6bb6e659bf60491",
+      "bytes": 1340,
+      "version": "0x00002001",
+      "payloadBytesAccounted": 1328,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "e46e7949f40ea54fb40c13aa66b20debe87b6eed8952603ccabbed12945da83d",
+          "text": "P-STUDIO"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "54b417d0e98392330adc944046dd1a2d2ad064f7165d27b4038cc250e9139af4",
+          "baseStyleIdentifier": 130
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 9,
+          "valueSha256": "ccd52402c27066a55a9acf68e412477d9fa77735ea42238fb88b6128a4bebe01"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 86,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 96,
+          "valueBytes": 300,
+          "valueSha256": "36ab6c32892b2ce5b845d52c36445031e362f4a8ec848765c1351d74de5a00f5"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 404,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 712,
+          "valueBytes": 240,
+          "valueSha256": "132e974714e3ce81c886ebfd08f380b06f54aead166f231b5499ff27a22bfcc0"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 960,
+          "valueBytes": 240,
+          "valueSha256": "3a2e0a1ef64af5a8384f3aa2ce95151e20b1d0c81e46ff6829ab48abfc7d5010"
+        },
+        {
+          "tag": "0x1023",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1208,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x102b",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1228,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x1030",
+          "label": "sharpness",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1248,
+          "valueBytes": 4,
+          "valueSha256": "433ebf5bc03dffa38536673207a21281612cef5faa9bc7a4d5b9be2fdb12cf1a",
+          "controlInteger": 2
+        },
+        {
+          "tag": "0x1031",
+          "label": "contrast",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1260,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1032",
+          "label": "saturation",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1272,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1033",
+          "label": "colourTone",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1284,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1011",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1296,
+          "valueBytes": 4,
+          "valueSha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+        },
+        {
+          "tag": "0xfffe",
+          "label": "checksum",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1308,
+          "valueBytes": 4,
+          "valueSha256": "dbb283fa547a9bcfd45cb66a4b463d5bca53ecc624989c44621e26a6a55dd692",
+          "checksumValid": true
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1320,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW07_P-SNAPSHOT.pf2",
+      "sha256": "c03a850642b396271cb0a66ccd33fe4237d4a2c6b1f58eaeeb74c1a4770395d4",
+      "bytes": 1342,
+      "version": "0x00002001",
+      "payloadBytesAccounted": 1330,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "fda9223949b056978393bcd91c90c32113096cf2b10d311d01db3e52c215eb65",
+          "text": "P-SNAPSHOT"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "54b417d0e98392330adc944046dd1a2d2ad064f7165d27b4038cc250e9139af4",
+          "baseStyleIdentifier": 130
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 11,
+          "valueSha256": "fe60a999bbc26e5dfb9cc284e9d4f9d999988b595e287bef0641379c08d93f26"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 88,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 98,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 406,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 714,
+          "valueBytes": 240,
+          "valueSha256": "07d30ede4266fc2068159af12eb712e09ce7438e743fbe55c37a302326900573"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 962,
+          "valueBytes": 240,
+          "valueSha256": "91806b31ab1cc74357e518a682dcc25db74d3445f09e47b7d38550e237207753"
+        },
+        {
+          "tag": "0x1023",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1210,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x102b",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1230,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x1030",
+          "label": "sharpness",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1250,
+          "valueBytes": 4,
+          "valueSha256": "433ebf5bc03dffa38536673207a21281612cef5faa9bc7a4d5b9be2fdb12cf1a",
+          "controlInteger": 2
+        },
+        {
+          "tag": "0x1031",
+          "label": "contrast",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1262,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1032",
+          "label": "saturation",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1274,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1033",
+          "label": "colourTone",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1286,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1011",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1298,
+          "valueBytes": 4,
+          "valueSha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+        },
+        {
+          "tag": "0xfffe",
+          "label": "checksum",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1310,
+          "valueBytes": 4,
+          "valueSha256": "cec8673cb35cb9714f5ecff93afbaa2be153c0e4bb0e8687ee09459ed1fe175a",
+          "checksumValid": true
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1322,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    },
+    {
+      "file": "WW08_VIDEO-X.pf2",
+      "sha256": "78974c414a5d56d5fd80c91c1cef60d18b7000c9355f0add3cf6fc5667414679",
+      "bytes": 1339,
+      "version": "0x00002001",
+      "payloadBytesAccounted": 1327,
+      "records": [
+        {
+          "tag": "0x1002",
+          "label": "name",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 0,
+          "valueBytes": 32,
+          "valueSha256": "ca38e335dc0529a1cee205715daa00116f65a1da3053d5ada1560bb7f2888446",
+          "text": "VIDEO-X"
+        },
+        {
+          "tag": "0x1009",
+          "label": "baseStyleIdentifier",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 40,
+          "valueBytes": 2,
+          "valueSha256": "905240728323dea0e4e49776d3483a2e7e8479f60acf23a6e6002ec87886cbe8",
+          "baseStyleIdentifier": 132
+        },
+        {
+          "tag": "0x100a",
+          "label": "copyright",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 50,
+          "valueBytes": 11,
+          "valueSha256": "c2eff19d29061b7de7ae3ccb37176568efd12ebb4ac63bd02841a60fa6e43332",
+          "text": "Canon INC."
+        },
+        {
+          "tag": "0x100d",
+          "label": "uninterpreted",
+          "type": 2,
+          "deobfuscatedPayloadOffset": 69,
+          "valueBytes": 8,
+          "valueSha256": "f90e3a34c413c32a5a67eb397761c727dab831ccfb7052c0f8da120ca3228ef5"
+        },
+        {
+          "tag": "0x100c",
+          "label": "uninterpreted",
+          "type": 3,
+          "deobfuscatedPayloadOffset": 85,
+          "valueBytes": 2,
+          "valueSha256": "b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2"
+        },
+        {
+          "tag": "0x1018",
+          "label": "curveBlockA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 95,
+          "valueBytes": 300,
+          "valueSha256": "5dbb82d372e78b1bb85da037c1c4659acb444389c248641b26bd33b5c49ced30"
+        },
+        {
+          "tag": "0x1019",
+          "label": "curveBlockB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 403,
+          "valueBytes": 300,
+          "valueSha256": "6db1677abae21eb7624d4ae8b0f6b6e1f2e074004345a700d24711890846a58e"
+        },
+        {
+          "tag": "0x1021",
+          "label": "baseColourDataA",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 711,
+          "valueBytes": 240,
+          "valueSha256": "d9936ef8eee7963c62c9dff1dc44748586ccb5bd739d5347c3bbf0ef79afbd8a"
+        },
+        {
+          "tag": "0x1029",
+          "label": "baseColourDataB",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 959,
+          "valueBytes": 240,
+          "valueSha256": "382d77f3b20a6e6b0c6015d47fb1b07dd437bc3fc159d83891fbe0b9d0eae676"
+        },
+        {
+          "tag": "0x1023",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1207,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x102b",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1227,
+          "valueBytes": 12,
+          "valueSha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+        },
+        {
+          "tag": "0x1030",
+          "label": "sharpness",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1247,
+          "valueBytes": 4,
+          "valueSha256": "433ebf5bc03dffa38536673207a21281612cef5faa9bc7a4d5b9be2fdb12cf1a",
+          "controlInteger": 2
+        },
+        {
+          "tag": "0x1031",
+          "label": "contrast",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1259,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1032",
+          "label": "saturation",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1271,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1033",
+          "label": "colourTone",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1283,
+          "valueBytes": 4,
+          "valueSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "controlInteger": 0
+        },
+        {
+          "tag": "0x1011",
+          "label": "uninterpreted",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1295,
+          "valueBytes": 4,
+          "valueSha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+        },
+        {
+          "tag": "0xfffe",
+          "label": "checksum",
+          "type": 4,
+          "deobfuscatedPayloadOffset": 1307,
+          "valueBytes": 4,
+          "valueSha256": "59cb5facd6e8debebbfa284bc16f689d0263e7b074228db67388500249888f79",
+          "checksumValid": true
+        },
+        {
+          "tag": "0xffff",
+          "label": "end",
+          "type": 65535,
+          "deobfuscatedPayloadOffset": 1319,
+          "valueBytes": 0,
+          "valueSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "renderingMathVerified": false
+    }
+  ],
+  "files": 8,
+  "records": 109,
+  "checksumsPresentAndValid": 3,
+  "renderingStatus": "TLV structure/controls observed; base colour math, curve semantics and vendor JPEG parity unverified"
+}

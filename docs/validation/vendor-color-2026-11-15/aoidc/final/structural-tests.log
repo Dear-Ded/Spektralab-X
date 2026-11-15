@@ -1,0 +1,17 @@
+test_both_byte_orders_and_unknown_data_accounting (__main__.StructuralTests) ... ok
+test_canon_envelope_size (__main__.StructuralTests) ... ok
+test_canon_tlv_checksum_and_end_marker (__main__.StructuralTests) ... ok
+test_dcp_cycles_and_duplicate_tags (__main__.StructuralTests) ... ok
+test_dcp_invalid_shape_nonfinite_and_counts (__main__.StructuralTests) ... ok
+test_next_representable_cyclic_hue_boundary (__main__.StructuralTests) ... ok
+test_np3_invalid_tone_points (__main__.StructuralTests) ... ok
+test_np3_short_variant_and_truncated_comment (__main__.StructuralTests) ... ok
+test_real_lensfun_doctype_without_external_resolution (__main__.StructuralTests) ... ok
+test_table_identity_single_hue_and_boundaries (__main__.StructuralTests) ... ok
+test_table_rejects_undefined_inputs (__main__.StructuralTests) ... ok
+test_truncated_dcp (__main__.StructuralTests) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.014s
+
+OK
