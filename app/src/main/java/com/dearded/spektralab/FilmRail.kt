@@ -38,7 +38,7 @@ internal fun Modifier.filmRail(key: String? = null): Modifier {
         } else {
             // A new key cancels this effect, including any in-flight animation.
             reveal.snapTo(0.18f)
-            reveal.animateTo(1f, tween(320, easing = FastOutSlowInEasing))
+            reveal.animateTo(1f, tween(300, easing = androidx.compose.animation.core.CubicBezierEasing(.16f, 1f, .3f, 1f)))
         }
     }
     return drawWithContent {

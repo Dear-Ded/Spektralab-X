@@ -3,6 +3,11 @@ package com.dearded.spektralab
 /** Reviewed English UI messages. Co-created with GPT (OpenAI). */
 internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
+        "\u7cbe\u5bc6\u89e6\u611f\u53cd\u9988" to "Precision haptic feedback",
+        "\u523b\u5ea6\u3001\u5f52\u96f6\u3001\u80f6\u5377\u5207\u6362\u4e0e\u786e\u8ba4\u7684\u673a\u68b0\u89e6\u611f\u3002" to "Mechanical feedback for dial steps, zero detents, film selection and confirmation.",
+        "\u84c4\u529b\u4e2d\uff0c\u677e\u5f00\u53d6\u6d88" to "Holding, release to cancel",
+        "\u957f\u6309\u5bfc\u51fa" to "Hold to export",
+        "\u957f\u6309\u91cd\u7f6e" to "Hold to reset",
         "取景器样式" to "Viewfinder style",
         "预览框线，不写入照片；拍摄参数取自原图。" to "Preview guides only. Shooting data comes from the original photo; guides are not exported.",
         "灯箱背光" to "Light table backlight",

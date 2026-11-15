@@ -95,6 +95,7 @@ private val HIGHLIGHT_STOPS get() = listOf(0f to tr("关（默认）"), 1f to tr
 @Composable
 fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
     val context = LocalContext.current
+    val hapticView = androidx.compose.ui.platform.LocalView.current
     var back by remember { mutableFloatStateOf(0f) }
     PredictiveBackHandler { events ->
         try {
@@ -149,6 +150,14 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
             val coach = LocalCoach.current
             SettingsGroup(tr("编辑"), buildList<@Composable () -> Unit> {
                 add {
+                    var haptics by remember { mutableStateOf(prefs.getBoolean(SpektraHapticEngine.ENABLED_KEY, true)) }
+                    SettingRow(tr("\u7cbe\u5bc6\u89e6\u611f\u53cd\u9988"), haptics, true,
+                        note = tr("\u523b\u5ea6\u3001\u5f52\u96f6\u3001\u80f6\u5377\u5207\u6362\u4e0e\u786e\u8ba4\u7684\u673a\u68b0\u89e6\u611f\u3002")) {
+                        haptics = it
+                        prefs.edit().putBoolean(SpektraHapticEngine.ENABLED_KEY, it).apply()
+                    }
+                }
+                add {
                     SettingRow(
                         tr("默认展开全部参数"), expandAll, true,
                         note = tr("冲洗和调整直接显示全部参数。"),
@@ -187,6 +196,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                         PillRow {
                             ViewfinderStyle.entries.forEach { style ->
                                 SelectPill(selected = style == finder, onClick = {
+                                    if (style != finder) SpektraHapticEngine.clickMechanical(hapticView)
                                     prefs.edit().putString(ViewfinderStyle.KEY, style.name).apply()
                                 }, label = { Text(tr(style.title)) })
                             }

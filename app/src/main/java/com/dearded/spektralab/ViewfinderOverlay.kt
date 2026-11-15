@@ -3,6 +3,8 @@ package com.dearded.spektralab
 import android.content.SharedPreferences
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -67,8 +69,8 @@ internal fun ViewfinderOverlay(
         previous = style to cameraStyleId
         if (!changed || off || style == ViewfinderStyle.OFF) { curtain.snapTo(0f); return@LaunchedEffect }
         curtain.snapTo(0f)
-        curtain.animateTo(1f, tween(45))
-        curtain.animateTo(0f, tween(95))
+        curtain.animateTo(1f, tween(70, easing = FastOutSlowInEasing))
+        curtain.animateTo(0f, tween(70, easing = FastOutSlowInEasing))
     }
     val context = LocalContext.current
     val iso = exif.iso()?.toString() ?: "--"
@@ -78,10 +80,10 @@ internal fun ViewfinderOverlay(
     Box(modifier.testTag("viewfinder-${style.name.lowercase(Locale.ROOT)}").drawWithCache {
         val r = FrameGeometry.photoRect(size.width, size.height, photoWidth, photoHeight, frame)
         val w = r.width; val h = r.height
-        val stroke = 0.75.dp.toPx()
+        val stroke = 1.dp.toPx()
         val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = typeface
-            textSize = 11.sp.toPx().coerceAtMost(minOf(w, h) / 16f)
+            textSize = 10.sp.toPx().coerceAtMost(minOf(w, h) / 16f)
             fontFeatureSettings = "tnum"
             setShadowLayer(1.dp.toPx(), 0f, 0f, android.graphics.Color.BLACK)
         }
@@ -89,8 +91,8 @@ internal fun ViewfinderOverlay(
             if (style != ViewfinderStyle.OFF && w > 0f && h > 0f) {
                 translate(r.left, r.top) {
                     clipRect(0f, 0f, w, h) {
-                        val white = Color(0xFFFFF4D2).copy(alpha = 0.65f)
-                        val red = Color(0xFFD94A38)
+                        val white = Color.White.copy(alpha = .75f)
+                        val red = Color(0xFFE02424)
                         val amber = Color(0xFFE5A93C)
                         val cx = w / 2f; val cy = h / 2f
                         fun line(x: Float, y: Float, xx: Float, yy: Float, ink: Color = white) =
@@ -116,13 +118,11 @@ internal fun ViewfinderOverlay(
                         }
                         when (style) {
                             ViewfinderStyle.LEICA -> {
-                                corners(0.07f, white); corners(0.19f, white.copy(alpha = 0.35f), 0.035f)
+                                corners(0.10f, white); corners(0.19f, white.copy(alpha = 0.35f), 0.035f)
                                 text("35", w * .07f, h * .07f - 4.dp.toPx())
                                 text("50", w * .19f, h * .19f - 4.dp.toPx(), white.copy(alpha = .45f))
-                                val patch = Size(w * .11f, h * .075f)
-                                drawRect(amber.copy(alpha = .055f), Offset(cx - patch.width / 2, cy - patch.height / 2), patch)
-                                drawRect(amber.copy(alpha = .65f), Offset(cx - patch.width / 2, cy - patch.height / 2), patch, style = Stroke(stroke))
-                                drawRect(amber.copy(alpha = .24f), Offset(cx - patch.width * .44f, cy - patch.height / 2), patch, style = Stroke(stroke))
+                                val patch = Size(36.dp.toPx().coerceAtMost(w * .3f), 28.dp.toPx().coerceAtMost(h * .3f))
+                                drawRect(Color(0xFFFFF3C4).copy(alpha = .35f), Offset(cx - patch.width / 2, cy - patch.height / 2), patch)
                                 val ledY = h * .94f
                                 val ledX = w * .32f
                                 val ledSize = 3.dp.toPx()
@@ -143,9 +143,15 @@ internal fun ViewfinderOverlay(
                                     minOf(8.dp.toPx(), h * .035f), red)
                             }
                             ViewfinderStyle.GR -> {
-                                val green = Color(0xFF76B88B).copy(alpha = .7f)
-                                corners(.16f, green, .035f)
-                                text("SNAP", w * .16f, h * .16f - 4.dp.toPx(), green)
+                                val green = Color(0xFF22C55E)
+                                val focus = minOf(w, h) * .10f
+                                for (right in listOf(false, true)) for (bottom in listOf(false, true)) {
+                                    val x = cx + if (right) focus else -focus
+                                    val y = cy + if (bottom) focus else -focus
+                                    line(x, y, x + if (right) -focus * .3f else focus * .3f, y, green)
+                                    line(x, y, x, y + if (bottom) -focus * .3f else focus * .3f, green)
+                                }
+                                text("SNAP", w * .08f, h * .08f, green)
                                 for (i in -4..4) {
                                     val x = cx + i * w * .025f
                                     line(x, cy - if (i == 0) 4.dp.toPx() else 2.dp.toPx(), x, cy + 2.dp.toPx(), white.copy(alpha = .4f))
@@ -153,8 +159,9 @@ internal fun ViewfinderOverlay(
                                 text("GR  ISO $iso  EV $ev", w * .94f, h * .94f, green, right = true)
                             }
                             ViewfinderStyle.FUJI -> {
-                                val cyan = Color(0xFF80BEC5).copy(alpha = .65f)
-                                corners(.09f, white)
+                                val cyan = Color(0xFF38BDF8)
+                                drawRect(white, Offset(w * .09f, h * .09f), Size(w * .82f, h * .82f),
+                                    style = Stroke(stroke, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f))))
                                 line(cx - w * .012f, cy, cx + w * .012f, cy, cyan)
                                 line(cx, cy - h * .018f, cx, cy + h * .018f, cyan)
                                 line(w * .06f, h * .89f, w * .94f, h * .89f, cyan.copy(alpha = .25f))
@@ -165,20 +172,21 @@ internal fun ViewfinderOverlay(
                                 val side = minOf(w, h) * .8f
                                 val x = cx - side / 2; val y = cy - side / 2
                                 drawRect(white.copy(alpha = .25f), Offset(x, y), Size(side, side), style = Stroke(stroke))
-                                for (i in 1..3) {
-                                    val t = side * i / 4
-                                    line(x + t, y, x + t, y + side, white.copy(alpha = .12f))
-                                    line(x, y + t, x + side, y + t, white.copy(alpha = .12f))
+                                for (i in 1..2) {
+                                    val t = side * i / 3
+                                    line(x + t, y, x + t, y + side, Color.White.copy(alpha = .35f))
+                                    line(x, y + t, x + side, y + t, Color.White.copy(alpha = .35f))
                                 }
                                 line(cx - 6.dp.toPx(), cy, cx + 6.dp.toPx(), cy)
                                 line(cx, cy - 6.dp.toPx(), cx, cy + 6.dp.toPx())
-                                drawCircle(amber.copy(alpha = .65f), 12.dp.toPx(), Offset(cx, cy), style = Stroke(stroke))
+                                drawCircle(Color(0xFFF97316), 9.dp.toPx(), Offset(cx, cy), style = Stroke(stroke))
                             }
                             ViewfinderStyle.NIKON -> {
-                                val radius = minOf(w, h) * .09f
-                                drawCircle(white.copy(alpha = .3f), radius * 1.4f, Offset(cx, cy), style = Stroke(stroke))
-                                drawCircle(white.copy(alpha = .65f), radius, Offset(cx, cy), style = Stroke(stroke))
-                                line(cx - radius, cy, cx + radius, cy, white.copy(alpha = .5f))
+                                val radius = 12.dp.toPx().coerceAtMost(minOf(w, h) * .15f)
+                                val inner = 5.dp.toPx().coerceAtMost(radius * .5f)
+                                drawCircle(white.copy(alpha = .3f), radius, Offset(cx, cy), style = Stroke(stroke))
+                                drawCircle(white.copy(alpha = .65f), inner, Offset(cx, cy), style = Stroke(stroke))
+                                line(cx - inner, cy, cx + inner, cy, white.copy(alpha = .5f))
                                 for (i in 0 until 24) {
                                     val a = i * Math.PI / 12
                                     line(cx + kotlin.math.cos(a).toFloat() * radius * 1.15f,
@@ -187,7 +195,7 @@ internal fun ViewfinderOverlay(
                                         cy + kotlin.math.sin(a).toFloat() * radius * 1.35f, white.copy(alpha = .16f))
                                 }
                                 text("+", w * .94f, h * .43f, red.copy(alpha = .6f))
-                                drawCircle(red.copy(alpha = .6f), 2.dp.toPx(), Offset(w * .948f, h * .5f), style = Stroke(stroke))
+                                drawCircle(Color(0xFF22C55E), 2.dp.toPx(), Offset(w * .948f, h * .5f), style = Stroke(stroke))
                                 text("-", w * .94f, h * .59f, red.copy(alpha = .6f))
                             }
                             ViewfinderStyle.OFF -> Unit

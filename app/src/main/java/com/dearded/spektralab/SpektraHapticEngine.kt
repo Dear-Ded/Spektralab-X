@@ -10,16 +10,25 @@ import android.provider.Settings
 import android.view.View
 
 /** Foreground touch feedback only. Unsupported primitives must never silence a whole composition. */
-internal object PrecisionHaptics {
+internal object SpektraHapticEngine {
+    const val ENABLED_KEY = "precision_haptics"
+    private val cadence = HapticCadence()
     @Volatile private var device: Device? = null
+
+    fun tickDialStep(view: View) = view.haptic(HapticEvent.Detent)
+    fun tickZeroDetent(view: View) = view.haptic(HapticEvent.Tick)
+    fun clickMechanical(view: View) = view.haptic(HapticEvent.Click)
+    fun confirmHoldAction(view: View) = view.haptic(HapticEvent.Confirm)
 
     fun play(view: View, event: HapticEvent): Boolean {
         if (!view.isHapticFeedbackEnabled || !view.isShown || !view.hasWindowFocus()) return true
         val context = view.context.applicationContext
+        if (!context.getSharedPreferences("settings", 0).getBoolean(ENABLED_KEY, true)) return true
         val enabled = runCatching {
             Settings.System.getInt(context.contentResolver, Settings.System.HAPTIC_FEEDBACK_ENABLED, 1) != 0
         }.getOrDefault(false)
         if (!enabled) return true
+        if (!synchronized(cadence) { cadence.accept(event, android.os.SystemClock.uptimeMillis()) }) return true
         val target = device ?: synchronized(this) {
             device ?: Device(context).also { device = it }
         }
@@ -73,14 +82,18 @@ internal object PrecisionHaptics {
                 }
                 if (primitive in primitives) {
                     val scale = when (event) {
-                        HapticEvent.Detent -> 0.22f
-                        HapticEvent.Tick -> 0.65f
-                        HapticEvent.Confirm -> 0.48f
+                        HapticEvent.Detent -> 0.30f
+                        HapticEvent.Tick -> 0.72f
+                        HapticEvent.Confirm -> 0.9f
                         HapticEvent.Edge, HapticEvent.Reject -> 0.75f
-                        else -> 0.42f
+                        else -> 0.85f
                     }
                     val composition = VibrationEffect.startComposition().addPrimitive(primitive, scale)
-                    if (event == HapticEvent.Confirm) composition.addPrimitive(primitive, 0.32f, 45)
+                    if (event == HapticEvent.Confirm && VibrationEffect.Composition.PRIMITIVE_TICK in primitives) {
+                        return VibrationEffect.startComposition()
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.9f, 65).compose()
+                    }
                     return composition.compose()
                 }
             }

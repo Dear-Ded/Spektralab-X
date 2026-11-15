@@ -115,7 +115,7 @@ fun SelectPill(
             .pressScale(press).clip(Corners.s)
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
-                interactionSource = press, indication = ripple(), onClick = onClick,
+                interactionSource = press, indication = TactileIndication, onClick = onClick,
             )
             .padding(vertical = 6.dp)
             .instrumentSurface(Corners.s, selected = selected, enabled = enabled)
@@ -227,7 +227,7 @@ internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifi
     Box(
         modifier.heightIn(min = 48.dp).widthIn(min = 48.dp).pressScale(press).clip(Corners.m)
             .then(if (pressed && enabled) Modifier.instrumentSurface(Corners.m) else Modifier)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, interactionSource = press, indication = TactileIndication, role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -267,7 +267,7 @@ internal fun Segmented(
             Box(
                 Modifier.weight(1f).fillMaxSize().widthIn(min = 48.dp).pressScale(press).clip(Corners.s)
                     .selectable(selected = on, enabled = can, role = Role.Tab,
-                        interactionSource = press, indication = ripple()) { if (!on) onSelect(i) }
+                        interactionSource = press, indication = TactileIndication) { if (!on) onSelect(i) }
                     .padding(4.dp).instrumentSurface(Corners.s, selected = on, enabled = can),
                 contentAlignment = Alignment.Center,
             ) {
@@ -482,7 +482,7 @@ internal fun TextCard(
     Box(
         Modifier.width(width).heightIn(min = 80.dp)
             .pressScale(press).instrumentSurface(shape, selected = selected, enabled = enabled)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.RadioButton, onClick = onClick)
+            .clickable(enabled = enabled, interactionSource = press, indication = TactileIndication, role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = chosen }
             .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
@@ -544,7 +544,7 @@ internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifi
     Box(
         modifier.heightIn(min = 48.dp).widthIn(min = 48.dp)
             .pressScale(press).instrumentSurface(shape, enabled = enabled)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, interactionSource = press, indication = TactileIndication, role = Role.Button, onClick = onClick)
             .padding(horizontal = 18.dp),
         contentAlignment = Alignment.Center,
     ) {

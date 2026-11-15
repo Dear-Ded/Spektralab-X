@@ -26,6 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,6 +90,9 @@ internal fun LabeledSlider(
     onChange: (Double) -> Unit,
 ) {
     val view = LocalView.current
+    val scope = rememberCoroutineScope()
+    val reduced = rememberReduceMotion()
+    val rubberBand = remember { Animatable(0f) }
     val lo = min.toFloat()
     val hi = max.toFloat()
     val def = default.toFloat().coerceIn(lo, hi)
@@ -88,8 +100,8 @@ internal fun LabeledSlider(
     val step = remember(format) { stepFor(format) }
     val exposureScale = format.contains("EV") && span <= 20f
     val majorStep = remember(span, step, exposureScale) { if (exposureScale) 1f else rulerMajorStep(span, step) }
-    val subdivisions = if (exposureScale) 3 else 5
-    val detentStep = step
+    val subdivisions = 5
+    val detentStep = majorStep / subdivisions
     val context = androidx.compose.ui.platform.LocalContext.current
     val density = androidx.compose.ui.platform.LocalDensity.current
     val rulerBed = remember {
@@ -169,8 +181,14 @@ internal fun LabeledSlider(
                     .padding(horizontal = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text(local), style = Readout,
-                    color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
+                AnimatedContent(text(local), transitionSpec = {
+                    if (reduced) fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                    else (slideInVertically(tween(120)) { with(density) { 4.dp.roundToPx() } } + fadeIn(tween(120))) togetherWith
+                        (slideOutVertically(tween(120)) { -with(density) { 4.dp.roundToPx() } } + fadeOut(tween(120)))
+                }, label = "dial-readout") { readout ->
+                    Text(readout, style = Readout,
+                        color = if (changed && enabled) Palette.OnSurface else Palette.OnSurfaceSoft)
+                }
             }
             // The space is kept when hidden, so the readout does not jump as ↺ comes and goes.
             // A visible reset for double-tap (UI2.md 3.3): 48 dp, in white 92 % so it reads as "moved".
@@ -203,13 +221,15 @@ internal fun LabeledSlider(
                 .pointerInput(enabled, lo, hi, def, step) {
                     if (!enabled) return@pointerInput
                     val fineBand = 40.dp.toPx()
-                    val snap = minOf(step / 2f, span * 0.002f)
+                    val snap = minOf(.03f, span * .02f)
                     val slop = viewConfiguration.touchSlop
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         if (down.isConsumed) return@awaitEachGesture
                         val onThumb = abs(down.position.x - size.width / 2f) <= 24.dp.toPx()
-                        val perPx = span * 0.4f / size.width.coerceAtLeast(1)
+                        val pitch = 8.dp.toPx()
+                        val perPx = detentStep / pitch
+                        var overshoot = 0f
                         var dragging = false
                         var released = false
                         var raw = local   // the unsnapped position, so the snap never sticks
@@ -230,14 +250,18 @@ internal fun LabeledSlider(
                                 onDragLatest(true); recede(true)
                             }
                             val fine = abs(c.position.y - size.height / 2f) > fineBand
-                            raw = (raw - (c.position.x - lastX) * perPx * (if (fine) 0.25f else 1f)).coerceIn(lo, hi)
+                            raw -= (c.position.x - lastX) * perPx * (if (fine) 0.25f else 1f)
+                            raw = raw.coerceIn(lo - 48.dp.toPx() * perPx, hi + 48.dp.toPx() * perPx)
+                            overshoot = ((raw - raw.coerceIn(lo, hi)) / perPx * .25f).coerceIn(-12.dp.toPx(), 12.dp.toPx())
+                            scope.launch { rubberBand.snapTo(if (reduced) 0f else overshoot) }
                             lastX = c.position.x
-                            moveTo(if (abs(raw - def) < snap) def else raw)
+                            moveTo((if (abs(raw - def) < snap) def else raw).coerceIn(lo, hi))
                             c.consume()
                         }
                         } finally {
                         if (dragging) {
                             pressed = false
+                            scope.launch { rubberBand.animateTo(0f, if (reduced) androidx.compose.animation.core.snap() else spring(dampingRatio = Spring.DampingRatioMediumBouncy)) }
                             try { onDragLatest(false) } finally { recede(false) }
                         }
                         }
@@ -253,8 +277,8 @@ internal fun LabeledSlider(
                     }
                 },
         ) {
-            val visible = span * 0.4f
-            val pixelsPerUnit = size.width / visible
+            val pixelsPerUnit = 8.dp.toPx() / detentStep
+            val visible = size.width / pixelsPerUnit
             val tickUnit = detentStep
             val first = kotlin.math.floor((local - visible / 2) / tickUnit).toInt()
             val last = ceil((local + visible / 2) / tickUnit).toInt()
@@ -267,10 +291,10 @@ internal fun LabeledSlider(
             for (i in first..last) {
                 val v = i * tickUnit
                 if (v < lo - tickUnit * 0.01f || v > hi + tickUnit * 0.01f) continue
-                val x = size.width / 2 + (v - local) * pixelsPerUnit
+                val x = size.width / 2 + (v - local) * pixelsPerUnit - rubberBand.value
                 val edgeFade = (minOf(x, size.width - x) / 20.dp.toPx()).coerceIn(0f, 1f)
                 val major = i % subdivisions == 0
-                val h = (if (major) 22.dp else 12.dp).toPx()
+                val h = (if (major) 14.dp else 7.dp).toPx()
                 val ink = if (enabled) Palette.OnSurface.copy(alpha = (if (major) 0.82f else 0.40f) * edgeFade)
                     else Palette.Track.copy(alpha = 0.45f * edgeFade)
                 drawLine(Color.Black.copy(alpha = 0.7f * edgeFade), Offset(x + 0.5.dp.toPx(), cy - h / 2),
@@ -279,7 +303,7 @@ internal fun LabeledSlider(
                     (if (major) 1.2.dp else 0.75.dp).toPx())
                 if (major) {
                     tickPaint.color = android.graphics.Color.argb(((if (enabled) 210 else 100) * edgeFade).toInt(), 210, 210, 214)
-                    val label = tickLabels[i / subdivisions].orEmpty()
+                    val label = String.format(Locale.ROOT, if (lo < 0f) "%+.2f" else "%.2f", v)
                     val halfText = tickPaint.measureText(label) / 2
                     if (x - halfText >= 2.dp.toPx() && x + halfText <= size.width - 2.dp.toPx())
                         drawContext.canvas.nativeCanvas.drawText(label, x, 54.dp.toPx(), tickPaint)

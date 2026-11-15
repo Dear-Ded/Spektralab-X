@@ -645,8 +645,8 @@ private fun Preview(
                 front = bitmap
                 if (!cross) { latent.snapTo(0f); return@LaunchedEffect }
                 latent.snapTo(0.88f)
-                latent.animateTo(0f, androidx.compose.animation.core.tween(450,
-                    easing = androidx.compose.animation.core.FastOutSlowInEasing))
+                latent.animateTo(0f, androidx.compose.animation.core.tween(420,
+                    easing = androidx.compose.animation.core.CubicBezierEasing(.22f, 1f, .36f, 1f)))
             }
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
                 FramedImage(bitmap, frame, caption, showFrameDecoration,
@@ -791,7 +791,7 @@ private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = tr
         Modifier.heightIn(min = 48.dp).graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(Corners.s)
             .clickable(enabled = enabled, interactionSource = press,
-                indication = androidx.compose.material3.ripple(), onClick = onClick)
+                indication = TactileIndication, onClick = onClick)
             .padding(vertical = 8.dp)
             .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f), Corners.s)
             .padding(horizontal = 10.dp, vertical = 4.dp),
@@ -813,7 +813,7 @@ private fun BusyOverlay(text: String) {
         Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { } },
         contentAlignment = Alignment.Center,
     ) {
-        Aura(Modifier.matchParentSize(), strength = 0.9f, ground = Palette.Background.copy(alpha = 0.92f))
+        Box(Modifier.matchParentSize().background(Palette.Background.copy(alpha = 0.92f)))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text, color = Palette.OnSurface.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyMedium)
         }
@@ -1430,6 +1430,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
     }
     val view = androidx.compose.ui.platform.LocalView.current
     val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    val densityForFilm = androidx.compose.ui.platform.LocalDensity.current.density
     // The current film is brought into view when the strip appears or the film
     // changes from elsewhere (a preset, undo), with the motion spring.
     // Item 0 is 无.
@@ -1466,8 +1467,12 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                 image = bitmap?.asAndroidBitmap(),
                 enabled = enabled,
                 favourite = picks.isFavourite(film.id),
+                scrollOffset = {
+                    val item = state.layoutInfo.visibleItemsInfo.firstOrNull { it.key == film.id }
+                    (item?.offset ?: 0) / densityForFilm
+                },
                 onLongClick = { view.haptic(HapticEvent.LongPress); picks.toggleFavourite(film.id) },
-            ) { if (!selected) { view.haptic(HapticEvent.Click); picks.used(film.id); onPick(film.id) } }
+            ) { if (!selected) { SpektraHapticEngine.clickMechanical(view); picks.used(film.id); onPick(film.id) } }
         }
     }
 }

@@ -88,7 +88,7 @@ fun <T> Motion.slowEffects() = spring<T>(dampingRatio = 1f, stiffness = 800f)
 private val SizeSpring = spring(dampingRatio = 0.8f, stiffness = 380f, visibilityThreshold = IntSize.VisibilityThreshold)
 
 /** The press scale (UI2.md 3.6). */
-const val PressedScale = 0.97f
+const val PressedScale = 0.96f
 
 // --- press -------------------------------------------------------------------
 
@@ -107,8 +107,9 @@ const val PressedScale = 0.97f
  */
 fun Modifier.pressScale(interactionSource: InteractionSource, pressedScale: Float = PressedScale): Modifier = composed {
     val pressed by interactionSource.collectIsPressedAsState()
+    val reduced = rememberReduceMotion()
     val scale = animateFloatAsState(if (pressed) pressedScale else 1f,
-        spring(dampingRatio = 0.7f, stiffness = 450f), label = "press")
+        if (reduced) androidx.compose.animation.core.snap() else spring(dampingRatio = 0.65f, stiffness = 500f), label = "press")
     graphicsLayer { scaleX = scale.value; scaleY = scale.value }
 }
 
@@ -175,7 +176,7 @@ fun Modifier.morphingPill(
 ): Modifier = composed {
     val pressed = interactionSource?.collectIsPressedAsState()
     val scale = animateFloatAsState(if (pressed?.value == true) pressedScale else 1f,
-        spring(dampingRatio = 0.7f, stiffness = 450f), label = "pill-press")
+        spring(dampingRatio = 0.65f, stiffness = 500f), label = "pill-press")
     graphicsLayer {
         scaleX = scale.value; scaleY = scale.value
         shape = SmoothCornerShape(style.corner)
@@ -247,31 +248,18 @@ fun hapticConstant(event: HapticEvent): Int? {
  */
 fun View.haptic(event: HapticEvent) {
     val constant = hapticConstant(event) ?: return
-    val cadence = synchronized(HapticCadences) { HapticCadences.getOrPut(this) { HapticCadence() } }
-    if (cadence.accept(event, android.os.SystemClock.uptimeMillis()) && !PrecisionHaptics.play(this, event))
+    if (!SpektraHapticEngine.play(this, event))
         performHapticFeedback(constant)
 }
 
-private val HapticCadences = java.util.WeakHashMap<View, HapticCadence>()
-
-/** Feedback is immediate, never queued; a zero/edge click can interrupt a soft detent. */
+/** All pulse classes share a strict 16 ms floor; rejected pulses are never queued. */
 internal class HapticCadence {
     private var lastAt = -1L
-    private var lastEvent: HapticEvent? = null
 
     fun accept(event: HapticEvent, now: Long): Boolean {
         val gap = now - lastAt
-        val interval = when {
-            event == HapticEvent.Detent -> 48L
-            event == lastEvent && (event == HapticEvent.Tick || event == HapticEvent.Edge) -> 90L
-            event != lastEvent && (event == HapticEvent.Tick || event == HapticEvent.Edge ||
-                event == HapticEvent.Confirm || event == HapticEvent.Reject) -> 0L
-            lastEvent == HapticEvent.Detent -> 0L
-            else -> 24L
-        }
-        if (lastAt >= 0 && gap >= 0 && gap < interval) return false
+        if (lastAt >= 0 && gap >= 0 && gap < 16L) return false
         lastAt = now
-        lastEvent = event
         return true
     }
 }

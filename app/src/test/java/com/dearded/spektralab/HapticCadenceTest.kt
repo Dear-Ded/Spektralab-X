@@ -1,37 +1,24 @@
 package com.dearded.spektralab
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class HapticCadenceTest {
-    @Test fun fastDetentsDoNotQueueButTheNeutralAndEndStopsStillArrive() {
-        val cadence = HapticCadence()
-        assertTrue(cadence.accept(HapticEvent.Detent, 100))
-        assertFalse(cadence.accept(HapticEvent.Detent, 116))
-        assertTrue(cadence.accept(HapticEvent.Tick, 120))
-        assertFalse(cadence.accept(HapticEvent.Tick, 140))
-        assertTrue(cadence.accept(HapticEvent.Edge, 160))
-        assertFalse(cadence.accept(HapticEvent.Edge, 180))
-        assertFalse(cadence.accept(HapticEvent.Detent, 190))
-        assertTrue(cadence.accept(HapticEvent.Detent, 220))
+    @Test fun everyPulseClassRespectsTheSixteenMillisecondFloor() {
+        for (first in HapticEvent.entries) for (next in HapticEvent.entries) {
+            val cadence = HapticCadence()
+            assertTrue(cadence.accept(first, 100))
+            assertFalse("$first -> $next must not bypass the floor", cadence.accept(next, 115))
+            assertTrue(cadence.accept(next, 116))
+        }
     }
 
-    @Test fun separateViewsDoNotSuppressEachOtherAndNewGesturesCanStart() {
-        val first = HapticCadence()
-        val second = HapticCadence()
-        assertTrue(first.accept(HapticEvent.Detent, 0))
-        assertTrue(second.accept(HapticEvent.Detent, 1))
-        assertTrue(first.accept(HapticEvent.GestureStart, 2))
-        assertTrue(first.accept(HapticEvent.Confirm, 200))
-    }
-
-    @Test fun semanticStopsAndConfirmationCanInterruptOtherFeedbackImmediately() {
+    @Test fun rejectedPulsesDoNotExtendTheWindowOrQueue() {
         val cadence = HapticCadence()
-        assertTrue(cadence.accept(HapticEvent.Tick, 100))
-        assertTrue(cadence.accept(HapticEvent.Edge, 101))
-        assertFalse(cadence.accept(HapticEvent.Edge, 102))
-        assertTrue(cadence.accept(HapticEvent.GestureStart, 200))
-        assertTrue(cadence.accept(HapticEvent.Confirm, 201))
+        assertTrue(cadence.accept(HapticEvent.Detent, 0))
+        for (time in 1L..15L) assertFalse(cadence.accept(HapticEvent.Detent, time))
+        assertTrue(cadence.accept(HapticEvent.Tick, 16))
+        assertFalse(cadence.accept(HapticEvent.Confirm, 17))
+        assertTrue(cadence.accept(HapticEvent.Confirm, 32))
     }
 }

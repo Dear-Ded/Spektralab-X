@@ -25,9 +25,14 @@ object Palette {
     val Panel = Color(0xFF131316)
     val Control = Color(0xFF1A1A1F)
     val PanelHigh = Control
-    val PanelHighest = Color(0xFF24242A)
+    val PanelHighest = Color(0xFF222228)
+    val Elevated = PanelHighest
+    val BorderSubtle = Color.White.copy(alpha = .08f)
+    val BorderHighlightTop = Color.White.copy(alpha = .22f)
+    val BorderShadowBottom = Color.Black.copy(alpha = .45f)
     val OnSurface = Color(0xFFF2F2F4)
-    val OnSurfaceSoft = Color(0xFFA8A8A8)  // secondary text, white 64 %
+    val OnSurfaceSoft = Color(0xFF9E9EA8)
+    val TextMuted = Color(0xFF5C5C66)
     val Outline = Color(0xFF3A3A3C)
     /** A slider's unfilled track: 3:1 against the panel. */
     val Track = Color(0xFF6A6A6C)
@@ -152,7 +157,8 @@ val UiSans = UiFonts.family(UiFonts.SANS)
 /** Readouts, film codes, frame numbers: JetBrains Mono with Noto Sans SC behind it. */
 val UiMono = UiFonts.family(UiFonts.MONO)
 
-private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh, fontFamily = UiSans)
+private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh, fontFamily = UiSans,
+    fontFeatureSettings = "tnum")
 
 private val Type = Typography().let { t ->
     t.copy(
@@ -164,27 +170,33 @@ private val Type = Typography().let { t ->
         headlineSmall = t.headlineSmall.copy(fontWeight = FontWeight.SemiBold).zh(),
         titleLarge = t.titleLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold).zh(),
         titleMedium = t.titleMedium.copy(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold).zh(),
-        titleSmall = t.titleSmall.zh(),
+        titleSmall = t.titleSmall.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold).zh(),
         bodyLarge = t.bodyLarge.zh(),
         bodyMedium = t.bodyMedium.copy(fontSize = 14.sp, lineHeight = 22.sp).zh(),
         bodySmall = t.bodySmall.copy(fontSize = 12.sp, lineHeight = 18.sp).zh(),
         labelLarge = t.labelLarge.copy(fontSize = 13.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium).zh(),
         labelMedium = t.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium,
             fontFeatureSettings = "tnum").zh(),
-        labelSmall = t.labelSmall.copy(fontSize = 12.sp, lineHeight = 18.sp).zh(),
+        labelSmall = t.labelSmall.copy(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium).zh(),
     )
 }
 
 /** Any readout that changes while a finger moves: monospaced, so its width never jitters. */
 val Readout = TextStyle(fontFamily = UiMono, fontFeatureSettings = "tnum", fontWeight = FontWeight.Medium,
-    fontSize = 13.sp, localeList = Zh)
+    fontSize = 12.sp, localeList = Zh)
 
 @Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun SpektraTheme(content: @Composable () -> Unit) {
     // Build the four weights on a worker while the first frame lays out (ui-fonts.md 5).
     val c = androidx.compose.ui.platform.LocalContext.current
     androidx.compose.runtime.remember(c) { Thread({ UiFonts.warm(c) }, "ui-fonts").apply { isDaemon = true; start() } }
-    MaterialTheme(colorScheme = Scheme, typography = Type, shapes = Corners.material, content = content)
+    androidx.compose.runtime.CompositionLocalProvider(
+        androidx.compose.foundation.LocalIndication provides TactileIndication,
+        androidx.compose.material3.LocalRippleConfiguration provides null,
+    ) {
+        MaterialTheme(colorScheme = Scheme, typography = Type, shapes = Corners.material, content = content)
+    }
 }
 
 /**

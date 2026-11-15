@@ -150,11 +150,12 @@ fun SmoothTopShape(r: Dp) = SmoothCornerShape(CornerSize(r), CornerSize(r), Corn
 object Corners {
     val xs = SmoothCornerShape(4.dp)
     val s = SmoothCornerShape(8.dp)
-    val m = SmoothCornerShape(12.dp)
+    val m = SmoothCornerShape(8.dp)
+    val slot = SmoothCornerShape(10.dp)
     val l = SmoothCornerShape(16.dp)
-    val xl = SmoothCornerShape(24.dp)
+    val xl = SmoothCornerShape(16.dp)
     val full = CornerSize(50).let { SmoothCornerShape(it, it, it, it) }
-    val panelTop = SmoothTopShape(24.dp)
+    val panelTop = SmoothTopShape(16.dp)
 
     /** MaterialTheme's shapes: dialogs, menus, sheets and text fields take the same corners. */
     val material = Shapes(extraSmall = xs, small = s, medium = m, large = l, extraLarge = xl)
