@@ -21,6 +21,13 @@ class BuiltinStyleFidelityTest {
             val clean = style.applyTo(Edit(), catalog)
             val inherited = style.applyTo(previous, catalog)
             assertEquals(style.id, clean, inherited)
+            System.getenv("SPK_BUILTIN_EVIDENCE_DIR")?.let { path ->
+                val edit = requireNotNull(clean)
+                val directory = java.io.File(path).apply { mkdirs() }
+                val fixture = org.json.JSONObject().put("id", style.id).put("params", edit.toJson())
+                    .put("look", org.json.JSONArray(edit.look.values().toList()))
+                java.io.File(directory, "${style.id}.json").writeText(fixture.toString())
+            }
         }
     }
 
