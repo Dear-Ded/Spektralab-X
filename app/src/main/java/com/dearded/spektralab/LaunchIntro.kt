@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +33,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 
 /*
@@ -106,16 +103,19 @@ fun LaunchIntro(ready: Boolean, visible: Boolean = true, onDone: () -> Unit) {
     LaunchedEffect(visible) {
         if (!visible) return@LaunchedEffect
         // Composition can start behind the system splash. Count only visible frames.
-        withFrameNanos { }
-        launch { delay(300); canSkip = true }
+        val visibleSince = withFrameNanos { it }
         wipe.snapTo(LaunchIcon.wipe.coerceIn(0f, 1f))
         launch { glow.animateTo(1f, Motion.slowEffects()) }
         launch { wipe.animateTo(1f, Motion.defaultEffects()) }
         launch { delay(60); pull.animateTo(1f, Motion.defaultSpatial()) }
-        val hold = launch { delay(INTRO_HOLD_MS) }
-        withTimeoutOrNull(INTRO_TIMEOUT_MS) { snapshotFlow { isReady }.first { it } }
-        hold.join()
-        leaving = true
+        // Keep the visible hold and its timeout on the same clock as the dissolve.
+        while (!leaving) {
+            val elapsed = withFrameNanos { (it - visibleSince) / 1_000_000L }
+            if (elapsed >= 300L) canSkip = true
+            if (elapsed >= INTRO_HOLD_MS && (isReady || elapsed >= INTRO_TIMEOUT_MS)) {
+                leaving = true
+            }
+        }
     }
     LaunchedEffect(leaving) {
         if (!leaving) return@LaunchedEffect
