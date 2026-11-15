@@ -46,7 +46,7 @@ internal fun Modifier.filmRail(key: String? = null): Modifier {
         val width = size.width * if (reduceMotion) 1f else reveal.value
         val left = if (layoutDirection == LayoutDirection.Rtl) size.width - width else 0f
         clipRect(left = left, right = left + width) {
-            drawFilmRail()
+            this@drawWithContent.drawFilmRail()
         }
     }.padding(vertical = 9.dp)
 }
