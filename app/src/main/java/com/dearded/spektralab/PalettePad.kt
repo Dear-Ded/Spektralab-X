@@ -76,7 +76,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            String.format(Locale.ROOT, tr("色调 %+.0f · 色彩 %+.0f"), look.tone, look.colour),
+            String.format(Locale.ROOT, tr("明暗 %+.0f · 浓淡 %+.0f"), look.tone, look.colour),
             style = Readout, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f),
         )
         if (!talkBack) TextButton(onClick = { numbers = !numbers }) { Text(if (numbers) tr("调色盘") else tr("数值")) }
@@ -87,10 +87,10 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
     }
 
     if (talkBack || numbers) {
-        LabeledSlider(tr("色调"), look.tone, -100.0, 100.0, look.toneHome, enabled, "%+.0f", onDrag) {
+        LabeledSlider(tr("明暗倾向"), look.tone, -100.0, 100.0, look.toneHome, enabled, "%+.0f", onDrag) {
             onChange(lookLatest.copy(tone = it))
         }
-        LabeledSlider(tr("色彩"), look.colour, -100.0, 100.0, look.colourHome, enabled, "%+.0f", onDrag) {
+        LabeledSlider(tr("色彩浓淡"), look.colour, -100.0, 100.0, look.colourHome, enabled, "%+.0f", onDrag) {
             onChange(lookLatest.copy(colour = it))
         }
     } else {
@@ -118,7 +118,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
             Modifier.fillMaxWidth().padding(vertical = 6.dp).height(116.dp).systemGestureExclusion()
                 .clearAndSetSemantics {
                     contentDescription = tr("调色盘")
-                    stateDescription = String.format(Locale.ROOT, tr("色调 %+.0f，色彩 %+.0f"), tone, colour)
+                    stateDescription = String.format(Locale.ROOT, tr("明暗 %+.0f，浓淡 %+.0f"), tone, colour)
                     if (enabled) customActions = listOf(
                         CustomAccessibilityAction(tr("回到默认")) { send(homeT, homeC); true },
                     )

@@ -65,7 +65,7 @@ class LocalizationUiTest {
         val field = EditorViewModel::class.java.getDeclaredField("_ui").apply { isAccessible = true }
         (field.get(vm) as MutableStateFlow<UiState>).value = UiState(ready = true, busy = null,
             edit = Edit(exposureEv = 0.5, quarterTurns = 1),
-            source = SourceInfo("设置 {0}.dng", 160, 120, 160, 120, "raw", "synthetic"))
+            source = SourceInfo("低饱高反 {0}.dng", 160, 120, 160, 120, "raw", "synthetic"))
         compose.setContent {
             AppLocaleHost { SpektraTheme {
                 val ui by vm.ui.collectAsState()
@@ -93,6 +93,19 @@ class LocalizationUiTest {
         tap("Language")
         tap("中文")
         compose.onNodeWithText("设置").assertExists()
+        assertEquals(before.edit, vm.ui.value.edit)
+    }
+
+    @Test fun processingSizeNameUpdatesInTheRealSettingsWithoutRenamingThePhoto() {
+        val vm = show()
+        val before = vm.ui.value
+        compose.mainClock.autoAdvance = true
+        compose.onNodeWithText("处理尺寸（长边）").performScrollTo().assertIsDisplayed()
+        compose.runOnIdle { AppLocale.select(compose.activity, UiLanguage.ENGLISH) }
+        settle()
+        compose.onNodeWithText("Processing size (long edge)").performScrollTo().assertIsDisplayed()
+        assertEquals("低饱高反 {0}.dng", vm.ui.value.source?.name)
+        assertEquals(before.source, vm.ui.value.source)
         assertEquals(before.edit, vm.ui.value.edit)
     }
 

@@ -77,6 +77,86 @@ class LocalizationTest {
         assertEquals("Value {12345678901234567890}", tr("Value {12345678901234567890}", "unused"))
     }
 
+    @Test fun reviewedNamesAcceptLegacyAndCurrentKeysInBothLanguages() {
+        val names = listOf(
+            Triple("分色", "精细调色", "Colour grading"),
+            Triple("单色调整", "按颜色调整", "Colour mixer"),
+            Triple("色彩平衡", "按明暗调色", "Tonal grading"),
+            Triple("低饱高反", "低饱和高反差", "Low Saturation, High Contrast"),
+            Triple("胶片前曲线", "胶片输入曲线", "Film input curve"),
+            Triple("工作尺寸（长边）", "处理尺寸（长边）", "Processing size (long edge)"),
+            Triple("JPEG · 工作尺寸", "JPEG · 处理尺寸", "JPEG · Processing size"),
+            Triple("照片边界角标", "照片四角标记", "Photo corner guides"),
+            Triple("高光能量", "高光增强", "Highlight boost"),
+            Triple("预闪", "相纸预闪", "Paper preflash"),
+            Triple("复位", "恢复风格默认", "Restore style defaults"),
+            Triple("应用数值", "应用数值", "Apply value"),
+            Triple("输入", "输入", "Input"),
+            Triple("输出", "输出", "Output"),
+            Triple("整体 RGB", "整体 RGB", "All colours (RGB)"),
+        )
+        for (language in UiLanguage.entries) {
+            assertTrue(AppLocale.select(context, language))
+            for ((legacy, chinese, english) in names) {
+                val expected = if (language == UiLanguage.CHINESE) chinese else english
+                assertEquals(legacy, expected, tr(legacy))
+                assertEquals(chinese, expected, tr(chinese))
+            }
+            assertEquals(if (language == UiLanguage.CHINESE) "无" else "None", tr("无"))
+            assertEquals(if (language == UiLanguage.CHINESE) "确定" else "OK", tr("确定"))
+        }
+    }
+
+    @Test fun reviewedAliasesPreserveArgumentsAndHaveUnambiguousEnglish() {
+        val arguments = Regex("\\{\\d+\\}")
+        ReviewedChinese.forEach { (legacy, reviewed) ->
+            assertEquals(legacy, arguments.findAll(legacy).map { it.value }.toList(),
+                arguments.findAll(reviewed).map { it.value }.toList())
+            assertEquals(legacy, reviewed, ReviewedChinese[reviewed] ?: reviewed)
+            assertNotNull("Missing English: $legacy", EnglishCatalog.text[legacy])
+            assertEquals(legacy, EnglishCatalog.text[legacy], EnglishCatalog.text[reviewed])
+        }
+        ReviewedChinese.entries.groupBy { it.value }.forEach { (reviewed, aliases) ->
+            assertEquals(reviewed, 1, aliases.map { EnglishCatalog.text[it.key] }.distinct().size)
+        }
+    }
+
+    @Test fun importedNamesAndFilenamesThatMatchUiKeysStayVerbatim() {
+        val builtin = Style.ALL.first()
+        for (name in listOf("分色", "低饱高反", "胶片前曲线", "工作尺寸（长边）", "无", "确定")) {
+            val style = builtin.copy(id = "us_custom", name = name, inspiredBy = name)
+            val filename = "$name {0} \$photo.spklook"
+            val imported = UserStyle("us_custom", SpkLook(name = name, category = name,
+                engine = SpkEngine(film = builtin.film, paper = builtin.paper),
+                source = SpkSource("user", filename, name)))
+            val before = imported.toJson().toString()
+            for (language in UiLanguage.entries) {
+                assertTrue(AppLocale.select(context, language))
+                assertEquals(name, style.displayName)
+                assertEquals(name, style.displayInspiration)
+                assertEquals(name, imported.name)
+                assertEquals(name, imported.category)
+                assertEquals(filename, imported.look.source?.file)
+                assertEquals(before, imported.toJson().toString())
+                val expected = if (language == UiLanguage.CHINESE) "没有找到“$filename”" else "No results for $filename"
+                assertEquals(expected, tr("没有找到“{0}”", filename))
+            }
+        }
+    }
+
+    @Test fun renamedBuiltinKeepsItsRecipeAndRemainsSearchableInEnglish() {
+        val style = Style.ALL.single { it.id == "cam_bleach" }
+        val before = style.toSpkLook().toJson().toString()
+        assertEquals("低饱和高反差", style.displayName)
+        assertTrue(style.matchesQuery("低饱和高反差"))
+        assertEquals("低饱高反", style.name)
+        assertTrue(AppLocale.select(context, UiLanguage.ENGLISH))
+        assertEquals("Low Saturation, High Contrast", style.displayName)
+        assertTrue(style.matchesQuery("low saturation high contrast"))
+        assertTrue(style.matchesQuery("低饱高反"))
+        assertEquals(before, style.toSpkLook().toJson().toString())
+    }
+
     @Test fun switchingUpdatesPreviouslyInitializedLabelsWithoutChangingRecipeIdentity() {
         val style = Style.ALL.first()
         val recipe = style.toSpkLook().toJson().toString()

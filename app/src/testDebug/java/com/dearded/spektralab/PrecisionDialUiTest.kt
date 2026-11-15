@@ -108,7 +108,7 @@ class PrecisionDialUiTest {
         settleDialog()
         compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
         settleDialog()
-        compose.onNodeWithText("确定").performClick()
+        compose.onNodeWithText("应用数值").performClick()
         settleDialog()
         compose.runOnIdle {
             assertEquals(-1.25, value, 0.0001)
@@ -127,7 +127,7 @@ class PrecisionDialUiTest {
         settleDialog()
         compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
         settleDialog()
-        compose.onNodeWithText("确定").assertIsNotEnabled()
+        compose.onNodeWithText("应用数值").assertIsNotEnabled()
         compose.runOnIdle { assertEquals(0.0, value, 0.0) }
         compose.onNodeWithText("取消").performClick()
         settleDialog()
@@ -146,12 +146,12 @@ class PrecisionDialUiTest {
         for (entry in listOf("1,5", "9")) {
             compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
             settleDialog()
-            compose.onNodeWithText("确定").assertIsNotEnabled()
+            compose.onNodeWithText("应用数值").assertIsNotEnabled()
             compose.runOnIdle { assertEquals(0.0, value, 0.0) }
         }
         compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString("\u22121.25")) }
         settleDialog()
-        compose.onNodeWithText("确定").performClick()
+        compose.onNodeWithText("应用数值").performClick()
         settleDialog()
         compose.runOnIdle {
             assertEquals(-1.25, value, 0.0001)

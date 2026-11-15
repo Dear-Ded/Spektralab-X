@@ -32,6 +32,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -57,8 +60,8 @@ import kotlin.math.pow
  * Gestures: a drag moves the scale by the finger's travel;
  * holding the finger more than 40 dp above or below the track slows it to a
  * quarter for fine work; a tap beside the pointer steps one readout unit;
- * a double tap on the pointer or the label row resets. Haptics only
- * on reaching the default or an end. TalkBack reads it as an adjustable value
+ * a double tap on the pointer or the label row resets. Soft detents are rate
+ * limited; the default and end stops have distinct feedback. TalkBack reads it as an adjustable value
  * with a "重置" custom action.
  *
  * The value lives in this slider's own state, so the scale follows the finger
@@ -83,6 +86,31 @@ internal fun LabeledSlider(
     val def = default.toFloat().coerceIn(lo, hi)
     val span = (hi - lo).coerceAtLeast(1e-6f)
     val step = remember(format) { stepFor(format) }
+    val exposureScale = format.contains("EV") && span <= 20f
+    val majorStep = remember(span, step, exposureScale) { if (exposureScale) 1f else rulerMajorStep(span, step) }
+    val subdivisions = if (exposureScale) 3 else 5
+    val detentStep = maxOf(step, majorStep / subdivisions)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val rulerBed = remember {
+        Brush.verticalGradient(listOf(Palette.Background, Palette.Surface, Palette.Background))
+    }
+    val tickPaint = remember(context, density) {
+        android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            typeface = UiFonts.typeface(context, UiFonts.MONO, 400)
+            textAlign = android.graphics.Paint.Align.CENTER
+            textSize = with(density) { 12.sp.toPx() }
+        }
+    }
+    val tickLabels = remember(lo, hi, majorStep) {
+        val decimals = if (majorStep < 1f) ceil(-kotlin.math.log10(majorStep)).toInt().coerceIn(0, 4) else 0
+        val first = kotlin.math.floor(lo / majorStep).toInt()
+        val last = ceil(hi / majorStep).toInt()
+        (first..last).associateWith { i ->
+            val number = i * majorStep
+            String.format(Locale.ROOT, if (number > 0f && lo < 0f) "%+.${decimals}f" else "%.${decimals}f", number)
+        }
+    }
     // One state for the slider's life: the gesture loop keeps writing to it
     // across recompositions. A value from elsewhere (undo, a preset) replaces
     // it, except mid-drag, where the model's echo lags the finger.
@@ -102,14 +130,17 @@ internal fun LabeledSlider(
     fun moveTo(v: Float) {
         val before = local
         if (v == before) return
-        val arrived = (v == def && before != def) || (v == lo || v == hi)
-        if (arrived) view.tick(strong = true)
+        when {
+            v == lo || v == hi -> view.haptic(HapticEvent.Edge)
+            (before < def && v >= def) || (before > def && v <= def) -> view.haptic(HapticEvent.Tick)
+            kotlin.math.floor(v / detentStep) != kotlin.math.floor(before / detentStep) -> view.haptic(HapticEvent.Detent)
+        }
         local = v
         onChangeLatest(v.toDouble())
     }
     fun reset() {
         if (local == def) return
-        view.tick(strong = true)
+        view.haptic(HapticEvent.Confirm)
         local = def
         onChangeLatest(default)
     }
@@ -154,7 +185,7 @@ internal fun LabeledSlider(
         }
 
         Canvas(
-            Modifier.fillMaxWidth().height(48.dp).systemGestureExclusion()
+            Modifier.fillMaxWidth().height(64.dp).systemGestureExclusion()
                 .semantics {
                     contentDescription = label
                     stateDescription = text(local)
@@ -223,26 +254,45 @@ internal fun LabeledSlider(
         ) {
             val visible = span * 0.4f
             val pixelsPerUnit = size.width / visible
-            val tickUnit = maxOf(step, span / 100f)
+            val tickUnit = detentStep
             val first = kotlin.math.floor((local - visible / 2) / tickUnit).toInt()
             val last = ceil((local + visible / 2) / tickUnit).toInt()
-            val cy = size.height * 0.48f
+            val cy = 23.dp.toPx()
+            drawRoundRect(rulerBed,
+                cornerRadius = CornerRadius(3.dp.toPx()))
+            drawLine(Palette.OutlineSoft, Offset(0f, 1.dp.toPx()), Offset(size.width, 1.dp.toPx()), 0.5.dp.toPx())
+            drawLine(Palette.OutlineSoft, Offset(0f, size.height - 1.dp.toPx()),
+                Offset(size.width, size.height - 1.dp.toPx()), 0.5.dp.toPx())
             for (i in first..last) {
                 val v = i * tickUnit
                 if (v < lo - tickUnit * 0.01f || v > hi + tickUnit * 0.01f) continue
                 val x = size.width / 2 + (v - local) * pixelsPerUnit
-                val edgeFade = (minOf(x, size.width - x) / 24.dp.toPx()).coerceIn(0f, 1f)
-                val major = i % 5 == 0
-                val h = (if (major) 20.dp else 10.dp).toPx()
-                drawLine(if (enabled) Palette.OnSurfaceSoft.copy(alpha = (if (major) 0.85f else 0.48f) * edgeFade)
-                    else Palette.Outline, Offset(x, cy - h / 2), Offset(x, cy + h / 2), 1.dp.toPx())
+                val edgeFade = (minOf(x, size.width - x) / 20.dp.toPx()).coerceIn(0f, 1f)
+                val major = i % subdivisions == 0
+                val h = (if (major) 22.dp else 12.dp).toPx()
+                val ink = if (enabled) Palette.OnSurface.copy(alpha = (if (major) 0.82f else 0.40f) * edgeFade)
+                    else Palette.Track.copy(alpha = 0.45f * edgeFade)
+                drawLine(Color.Black.copy(alpha = 0.7f * edgeFade), Offset(x + 0.5.dp.toPx(), cy - h / 2),
+                    Offset(x + 0.5.dp.toPx(), cy + h / 2 + 0.5.dp.toPx()), 1.5.dp.toPx())
+                drawLine(ink, Offset(x, cy - h / 2), Offset(x, cy + h / 2),
+                    (if (major) 1.2.dp else 0.75.dp).toPx())
+                if (major) {
+                    tickPaint.color = android.graphics.Color.argb(((if (enabled) 210 else 100) * edgeFade).toInt(), 210, 210, 214)
+                    val label = tickLabels[i / subdivisions].orEmpty()
+                    val halfText = tickPaint.measureText(label) / 2
+                    if (x - halfText >= 2.dp.toPx() && x + halfText <= size.width - 2.dp.toPx())
+                        drawContext.canvas.nativeCanvas.drawText(label, x, 54.dp.toPx(), tickPaint)
+                }
             }
             val xd = size.width / 2 + (def - local) * pixelsPerUnit
-            if (xd in 0f..size.width) drawCircle(Palette.OnSurfaceSoft, 2.dp.toPx(), Offset(xd, cy + 17.dp.toPx()))
+            if (xd in 0f..size.width) drawCircle(Palette.OnSurfaceSoft, 1.5.dp.toPx(), Offset(xd, 5.dp.toPx()))
             val needle = if (enabled) Palette.Darkroom else Palette.Track
+            drawRoundRect(Palette.Background, Offset(size.width / 2 - 3.dp.toPx(), cy - 16.dp.toPx()),
+                Size(6.dp.toPx(), 32.dp.toPx()), CornerRadius(2.dp.toPx()))
             drawRoundRect(needle, Offset(size.width / 2 - 1.dp.toPx(), cy - 15.dp.toPx()),
                 Size(2.dp.toPx(), 30.dp.toPx()), CornerRadius(1.dp.toPx()))
-            drawCircle(needle, 2.dp.toPx(), Offset(size.width / 2, cy - 19.dp.toPx()))
+            drawLine(needle.copy(alpha = 0.5f), Offset(size.width / 2 - 4.dp.toPx(), 7.dp.toPx()),
+                Offset(size.width / 2 + 4.dp.toPx(), 7.dp.toPx()), 1.dp.toPx())
         }
         // Neutral words, never a hue: the direction is told in text (UI2.md 1.1).
         if (ends != null) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
@@ -289,7 +339,7 @@ internal fun LabeledSlider(
                 androidx.compose.material3.TextButton(enabled = valid, onClick = {
                     parsed?.takeIf { it in lo..hi }?.let { moveTo(it) }
                     typing = false
-                }) { Text(tr("确定")) }
+                }) { Text(tr("应用数值")) }
             },
             dismissButton = { androidx.compose.material3.TextButton(onClick = { typing = false }) { Text(tr("取消")) } },
         )
@@ -301,6 +351,13 @@ private fun stepFor(format: String): Float {
     val decimals = Regex("""\.(\d+)f""").find(format)?.groupValues?.get(1)?.toIntOrNull() ?: 0
     val unit = 10.0.pow(-decimals).toFloat()
     return unit
+}
+
+private fun rulerMajorStep(span: Float, step: Float): Float {
+    val target = span / 10f
+    val decade = 10.0.pow(kotlin.math.floor(kotlin.math.log10(target.toDouble()))).toFloat()
+    val unit = target / decade
+    return maxOf(step, decade * when { unit <= 1f -> 1f; unit <= 2f -> 2f; unit <= 5f -> 5f; else -> 10f })
 }
 
 private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =

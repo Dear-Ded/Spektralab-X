@@ -170,9 +170,9 @@ class Screenshots {
         editor(Fake.ui())
         tap("调整")
         shot("35_adjust_wheel_entry")
-        tap("分色")
+        tap(tr("分色"))
         shot("36_adjust_grading_entry")
-        tap("色彩平衡")
+        tap(tr("色彩平衡"))
         tallPanel()
         shot("37_adjust_colour_wheel")
     }
@@ -186,7 +186,7 @@ class Screenshots {
         val before = compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot
         compose.onNodeWithContentDescription("更多").performSemanticsAction(SemanticsActions.OnClick)
         screenShot("96_boundary_menu")
-        tap("照片边界角标")
+        tap(tr("照片边界角标"))
         shot("97_boundary_enabled")
         compose.onNodeWithTag("photo-boundary-corners").assertExists()
         org.junit.Assert.assertEquals(before, compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot)

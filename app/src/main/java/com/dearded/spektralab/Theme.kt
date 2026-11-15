@@ -1,8 +1,6 @@
 package com.dearded.spektralab
 
 import androidx.compose.animation.core.VisibilityThreshold
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.MaterialTheme
@@ -199,13 +197,9 @@ object Motion {
     )
 }
 
-/** One haptic tick: a firmer segment tick on API 34+, a clock tick before. */
+/** Shared, rate-limited tick, using the device's native touch-feedback effects. */
 fun View.tick(strong: Boolean = false) {
-    val c = when {
-        Build.VERSION.SDK_INT >= 34 -> if (strong) HapticFeedbackConstants.SEGMENT_TICK else HapticFeedbackConstants.SEGMENT_FREQUENT_TICK
-        else -> HapticFeedbackConstants.CLOCK_TICK
-    }
-    performHapticFeedback(c)
+    haptic(if (strong) HapticEvent.Tick else HapticEvent.Detent)
 }
 
 /**

@@ -21,9 +21,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -129,6 +131,36 @@ internal fun ColorWheel(
             Canvas(
                 Modifier.size(side)
                     .graphicsLayer { alpha = if (enabled) 1f else 0.38f }
+                    .drawWithCache {
+                        val radius = (size.minDimension / 2f - WheelInset.toPx()).coerceAtLeast(0f)
+                        val origin = Offset(size.width / 2f, size.height / 2f)
+                        val fine = 0.75.dp.toPx()
+                        val ring = Stroke(fine)
+                        // Geometry stays cached while the cursor moves.
+                        val ticks = Array(48) { index ->
+                            val angle = index * PI / 24.0
+                            val direction = Offset(cos(angle).toFloat(), sin(angle).toFloat())
+                            val length = (if (index % 12 == 0) 6.dp else if (index % 6 == 0) 4.dp else 2.dp).toPx()
+                            (origin + direction * (radius + 3.dp.toPx())) to
+                                (origin + direction * (radius + 3.dp.toPx() + length))
+                        }
+                        onDrawBehind {
+                            if (radius > 0f) {
+                                drawCircle(Palette.Surface, radius + 10.dp.toPx(), origin)
+                                drawCircle(Palette.OutlineSoft, radius + 10.dp.toPx(), origin, style = ring)
+                                ticks.forEachIndexed { index, (from, to) ->
+                                    drawLine(
+                                        when {
+                                            index == 0 -> Palette.Darkroom
+                                            index % 12 == 0 -> Palette.OnSurfaceSoft
+                                            index % 6 == 0 -> Palette.Track
+                                            else -> Palette.Outline
+                                        }, from, to, fine, cap = StrokeCap.Round,
+                                    )
+                                }
+                            }
+                        }
+                    }
                     .semantics {
                         contentDescription = description
                         stateDescription = String.format(Locale.ROOT,
@@ -231,16 +263,36 @@ internal fun ColorWheel(
                 inset(WheelInset.toPx()) {
                     drawCircle(sweep, radius)
                     drawCircle(neutral, radius)
+                    drawCircle(Palette.Surround.copy(alpha = 0.12f), radius)
                 }
-                drawCircle(Palette.Outline, radius, center, style = Stroke(1.dp.toPx()))
+                val fine = 0.75.dp.toPx()
+                drawCircle(Palette.OnSurface.copy(alpha = 0.32f), radius, center, style = Stroke(fine))
+                for (fraction in 1..2) {
+                    drawCircle(Palette.Surface.copy(alpha = 0.22f), radius * fraction / 3f,
+                        center, style = Stroke(1.5.dp.toPx()))
+                    drawCircle(Palette.OnSurface.copy(alpha = 0.16f), radius * fraction / 3f,
+                        center, style = Stroke(fine))
+                }
+                val rim = colorWheelThumbAt(local.copy(sat = 100.0), center, radius)
                 val marker = colorWheelThumbAt(local, center, radius)
+                drawLine(Palette.Surface.copy(alpha = 0.6f), center, rim, 2.dp.toPx())
+                drawLine(Palette.OnSurface.copy(alpha = 0.58f), center, rim, fine)
+                val cross = 4.dp.toPx()
+                drawLine(Palette.Surface, center - Offset(cross, 0f), center + Offset(cross, 0f), 2.dp.toPx())
+                drawLine(Palette.Surface, center - Offset(0f, cross), center + Offset(0f, cross), 2.dp.toPx())
+                drawLine(Palette.OnSurface, center - Offset(cross, 0f), center + Offset(cross, 0f), fine)
+                drawLine(Palette.OnSurface, center - Offset(0f, cross), center + Offset(0f, cross), fine)
+                drawCircle(Palette.Surface, 1.5.dp.toPx(), center)
                 val markerRadius = (if (dragging) 10.dp else 8.dp).toPx()
-                drawCircle(Palette.Surface, markerRadius + 1.dp.toPx(), marker)
-                drawCircle(Palette.OnSurface, markerRadius - 1.dp.toPx(), marker, style = Stroke(2.dp.toPx()))
-                drawCircle(Palette.OnSurface, 2.dp.toPx(), marker)
+                // Dark outer edge and white inner ring stay legible over every hue.
+                drawCircle(Palette.Surround, markerRadius + 1.dp.toPx(), marker)
+                drawCircle(Palette.OnSurface, markerRadius - 1.dp.toPx(), marker)
+                drawCircle(Palette.Surface, markerRadius - 3.dp.toPx(), marker)
+                drawCircle(if (dragging) Palette.Darkroom else Palette.OnSurface, 1.5.dp.toPx(), marker)
             }
         }
-        Text(String.format(Locale.ROOT, "H %.0f\u00b0   S %.1f%%", local.hue, local.sat),
+        Text(tr("色相 {0}° · 饱和度 {1}%", String.format(Locale.ROOT, "%.0f", local.hue),
+            String.format(Locale.ROOT, "%.1f", local.sat)),
             style = Readout, color = Palette.OnSurfaceSoft)
     }
 }

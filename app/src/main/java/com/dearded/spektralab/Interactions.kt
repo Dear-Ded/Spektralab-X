@@ -185,6 +185,8 @@ fun Modifier.morphingPill(
 
 /** The events of UI2.md 3.5. Each maps to one HapticFeedbackConstants value with an API 29 fallback. */
 enum class HapticEvent {
+    /** A light mechanical detent while a scale is moving. */
+    Detent,
     /** A slider passes or snaps to its default. */
     Tick,
     /** A slider reaches either end. */
@@ -211,7 +213,10 @@ enum class HapticEvent {
 fun hapticConstant(event: HapticEvent): Int? {
     val sdk = Build.VERSION.SDK_INT
     return when (event) {
-        HapticEvent.Tick -> HapticFeedbackConstants.CLOCK_TICK
+        HapticEvent.Detent ->
+            if (sdk >= 34) HapticFeedbackConstants.SEGMENT_FREQUENT_TICK else HapticFeedbackConstants.CLOCK_TICK
+        HapticEvent.Tick ->
+            if (sdk >= 34) HapticFeedbackConstants.SEGMENT_TICK else HapticFeedbackConstants.CLOCK_TICK
         HapticEvent.Edge ->
             if (sdk >= 34) HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE else HapticFeedbackConstants.CLOCK_TICK
         HapticEvent.Segment ->
@@ -239,7 +244,34 @@ fun hapticConstant(event: HapticEvent): Int? {
  * threshold or detent is crossed.
  */
 fun View.haptic(event: HapticEvent) {
-    hapticConstant(event)?.let { performHapticFeedback(it) }
+    val constant = hapticConstant(event) ?: return
+    val cadence = synchronized(HapticCadences) { HapticCadences.getOrPut(this) { HapticCadence() } }
+    if (cadence.accept(event, android.os.SystemClock.uptimeMillis()))
+        performHapticFeedback(constant)
+}
+
+private val HapticCadences = java.util.WeakHashMap<View, HapticCadence>()
+
+/** Feedback is immediate, never queued; a zero/edge click can interrupt a soft detent. */
+internal class HapticCadence {
+    private var lastAt = -1L
+    private var lastEvent: HapticEvent? = null
+
+    fun accept(event: HapticEvent, now: Long): Boolean {
+        val gap = now - lastAt
+        val interval = when {
+            event == HapticEvent.Detent -> 48L
+            event == lastEvent && (event == HapticEvent.Tick || event == HapticEvent.Edge) -> 90L
+            event != lastEvent && (event == HapticEvent.Tick || event == HapticEvent.Edge ||
+                event == HapticEvent.Confirm || event == HapticEvent.Reject) -> 0L
+            lastEvent == HapticEvent.Detent -> 0L
+            else -> 24L
+        }
+        if (lastAt >= 0 && gap >= 0 && gap < interval) return false
+        lastAt = now
+        lastEvent = event
+        return true
+    }
 }
 
 /** [View.haptic] on the current view, for use from click lambdas: `val haptic = rememberHaptic(); ... haptic(HapticEvent.Click)`. */

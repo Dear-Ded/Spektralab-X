@@ -449,7 +449,7 @@ internal fun ThumbCard(
             title, style = MaterialTheme.typography.labelLarge,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (selected) Palette.Darkroom else Palette.OnSurface,
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            maxLines = 2, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 3.dp),
         )
         if (subtitle.isNotBlank()) Text(

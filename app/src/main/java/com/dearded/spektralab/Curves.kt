@@ -1,7 +1,7 @@
 package com.dearded.spektralab
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.systemGestureExclusion
@@ -27,11 +30,18 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -40,8 +50,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.abs
@@ -194,7 +210,7 @@ data class CurveSet(
 
 /** The editor's channels: CurveSet row, label, colour. Luma stays in the model (imports) but not on screen. */
 private val CHANNELS get() = listOf(
-    Triple(0, "RGB", Palette.OnSurface),
+    Triple(0, tr("整体 RGB"), Palette.OnSurface),
     Triple(2, tr("红"), Color(0xFFE5584A)),
     Triple(3, tr("绿"), Color(0xFF5EB65A)),
     Triple(4, tr("蓝"), Color(0xFF4A8AE8)),
@@ -219,6 +235,18 @@ private fun curvePlotGeometry(width: Float, height: Float, padding: Float): Curv
         (height - 2f * inset).coerceAtLeast(1f))
 }
 
+/** Cache the existing display samples per curve, independently of redraws and point selection. */
+private fun curvePlotSamples(curve: Curve): FloatArray {
+    val steps = if (curve.linear) curve.points.size - 1 else 128
+    return FloatArray((steps + 1) * 2).also { samples ->
+        for (step in 0..steps) {
+            val x = step.toDouble() / steps
+            samples[step * 2] = x.toFloat()
+            samples[step * 2 + 1] = (1.0 - curve.evaluate(x)).toFloat()
+        }
+    }
+}
+
 /**
  * The tone-curve editor (UI.md appendix A; behaviour after upstream's
  * CurveEditor.swift): RGB and the three channels over a histogram of the
@@ -232,7 +260,10 @@ internal fun CurveEditor(
     includeLuma: Boolean = false, editable: Boolean = true,
     onDrag: (Boolean) -> Unit, onChange: (CurveSet) -> Unit,
 ) {
-    val channels = if (includeLuma) listOf(CHANNELS[0], Triple(1, tr("明度"), Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
+    val english = AppLocale.language == UiLanguage.ENGLISH
+    val channels = remember(includeLuma, english) {
+        if (includeLuma) listOf(CHANNELS[0], Triple(1, tr("明度"), Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
+    }
     val view = LocalView.current
     var selectedRow by remember { mutableIntStateOf(0) }
     val row = selectedRow.takeIf { selected -> channels.any { it.first == selected } } ?: 0
@@ -245,6 +276,16 @@ internal fun CurveEditor(
     val histogram by produceState<Histogram?>(null, image) {
         value = image?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(it) } }
     }
+    val samples = channels.map { (r, _, _) ->
+        val channelCurve = curves[r]
+        remember(r, channelCurve) { curvePlotSamples(channelCurve) }
+    }
+    val textMeasurer = rememberTextMeasurer()
+    val pointReadout = remember(curve, active, english) {
+        curve.points.getOrNull(active)?.let {
+            String.format(Locale.ROOT, tr("输入 %.1f%% · 输出 %.1f%%"), it.x * 100.0, it.y * 100.0)
+        }
+    }
 
     Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -253,18 +294,24 @@ internal fun CurveEditor(
             channels.forEach { (r, label, _) ->
                 SelectPill(selected = row == r, onClick = { selectedRow = r }, enabled = enabled,
                     label = { Text(if (curves[r].isIdentity) label else "$label·",
-                        modifier = Modifier.widthIn(min = 24.dp), textAlign = TextAlign.Center) })
+                        modifier = Modifier.widthIn(min = 24.dp, max = 128.dp), textAlign = TextAlign.Center,
+                        fontWeight = if (row == r || r == 0) FontWeight.SemiBold else FontWeight.Normal,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis) })
+                if (r == (if (includeLuma) 1 else 0))
+                    Spacer(Modifier.width(1.dp).height(16.dp).background(Palette.Outline))
             }
         }
         TextButton(onClick = { view.tick(strong = true); onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)) },
             modifier = Modifier.size(48.dp), contentPadding = PaddingValues(0.dp),
-            enabled = enabled && editable && !curve.isIdentity) { Text(tr("重置"), maxLines = 1) }
+            enabled = enabled && editable && !curve.isIdentity) {
+                Text(tr("重置"), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
     }
 
     val color = channels.first { it.first == row }.third
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val plotHeight = if (maxWidth <= 320.dp) 176.dp else 192.dp
-        Canvas(
+        Spacer(
             Modifier.fillMaxWidth().height(plotHeight).systemGestureExclusion().testTag("curve-editor-plot")
             .semantics {
                 contentDescription = tr("{0} 曲线，{1} 个{2}", channels.first { it.first == row }.second,
@@ -361,53 +408,149 @@ internal fun CurveEditor(
                         }
                     }
                 }
-            },
-        ) {
-            val geometry = curvePlotGeometry(size.width, size.height, 24.dp.toPx())
-            val w = geometry.width; val h = geometry.height
-            val left = geometry.left; val top = geometry.top
-            val bottom = top + h; val right = left + w
-            drawRect(Palette.Panel)
-            histogram?.let { hist ->
-                val bins = when (row) { 2 -> hist.r; 3 -> hist.g; 4 -> hist.b; else -> hist.y }
-                val peak = sqrt(max(1, bins.max()).toFloat())
-                val bw = w / Histogram.BINS
-                val path = Path().apply {
-                    moveTo(left, bottom)
-                    for (i in bins.indices) {
-                        val y = top + h * (1f - 0.9f * sqrt(bins[i].toFloat()) / peak)
-                        lineTo(left + i * bw, y); lineTo(left + (i + 1) * bw, y)
+            }.drawWithCache {
+                val geometry = curvePlotGeometry(size.width, size.height, 24.dp.toPx())
+                val w = geometry.width; val h = geometry.height
+                val left = geometry.left; val top = geometry.top
+                val bottom = top + h; val right = left + w
+                val fine = 0.75.dp.toPx()
+                val hairline = Stroke(fine)
+                val companionStroke = Stroke(1.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                val curveStroke = Stroke(2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                val curveUnderlay = Stroke(4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx()))
+                val liner = Brush.verticalGradient(listOf(Palette.Surround, Palette.Surface), top, bottom)
+                val inputScale = Brush.horizontalGradient(listOf(Color.Black, Color.White), left, right)
+                val outputScale = Brush.verticalGradient(listOf(Color.White, Color.Black), top, bottom)
+                val histogramPath = histogram?.let { hist ->
+                    val bins = when (row) { 2 -> hist.r; 3 -> hist.g; 4 -> hist.b; else -> hist.y }
+                    val peak = sqrt(max(1, bins.max()).toFloat())
+                    val bw = w / Histogram.BINS
+                    Path().apply {
+                        moveTo(left, bottom)
+                        for (i in bins.indices) {
+                            val y = top + h * (1f - 0.9f * sqrt(bins[i].toFloat()) / peak)
+                            lineTo(left + i * bw, y); lineTo(left + (i + 1) * bw, y)
+                        }
+                        lineTo(right, bottom); close()
                     }
-                    lineTo(right, bottom); close()
                 }
-                drawPath(path, color.copy(alpha = 0.16f))
-            }
-            val grid = Palette.OutlineSoft
-            for (k in 1..3) {
-                drawLine(grid, Offset(left + w * k / 4, top), Offset(left + w * k / 4, bottom), 1.dp.toPx())
-                drawLine(grid, Offset(left, top + h * k / 4), Offset(right, top + h * k / 4), 1.dp.toPx())
-            }
-            drawLine(Palette.Outline, Offset(left, bottom), Offset(right, top), 1.dp.toPx(),
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
-            fun curvePath(c: Curve) = Path().apply {
-                val steps = if (c.linear) c.points.size - 1 else 128
-                for (s in 0..steps) {
-                    val x = s.toDouble() / steps
-                    val position = geometry.position(CurvePoint(x, c.evaluate(x)))
-                    if (s == 0) moveTo(position.x, position.y) else lineTo(position.x, position.y)
+                val paths = samples.map { values ->
+                    Path().apply {
+                        for (i in values.indices step 2) {
+                            val x = left + values[i] * w
+                            val y = top + values[i + 1] * h
+                            if (i == 0) moveTo(x, y) else lineTo(x, y)
+                        }
+                    }
                 }
-            }
-            // The other channels, faint, so a colour cast stays in view.
-            for ((r, _, col) in channels) if (r != row && !curves[r].isIdentity)
-                drawPath(curvePath(curves[r]), col.copy(alpha = 0.35f), style = Stroke(1.dp.toPx()))
-            val stroke = if (enabled) color else Palette.Outline
-            drawPath(curvePath(curve), stroke, style = Stroke(2.dp.toPx()))
-            if (editable) curve.points.forEachIndexed { i, p ->
-                val o = geometry.position(p)
-                drawCircle(stroke, if (i == active) 7.dp.toPx() else 5.dp.toPx(), o)
-                drawCircle(Palette.Panel, if (i == active) 4.dp.toPx() else 2.5.dp.toPx(), o)
-            }
-        }
+                val positions = curve.points.map(geometry::position)
+                val selected = positions.getOrNull(active)
+                val selectedPath = paths[channels.indexOfFirst { it.first == row }]
+                val companionPaths = channels.mapIndexedNotNull { index, (r, _, channelColor) ->
+                    if (r != row && !curves[r].isIdentity)
+                        paths[index] to channelColor.copy(alpha = if (enabled) 0.3f else 0.15f)
+                    else null
+                }
+                val corners = arrayOf(
+                    Offset(left, top) to Offset(1f, 1f), Offset(right, top) to Offset(-1f, 1f),
+                    Offset(left, bottom) to Offset(1f, -1f), Offset(right, bottom) to Offset(-1f, -1f),
+                )
+                val readout = pointReadout?.let {
+                    textMeasurer.measure(it, style = Readout.copy(color = Palette.OnSurface),
+                        maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        constraints = Constraints(maxWidth = (size.width - 32.dp.toPx()).toInt().coerceAtLeast(1),
+                            maxHeight = (size.height - 32.dp.toPx()).toInt().coerceAtLeast(1)))
+                }
+                val stroke = if (enabled) color else Palette.Track
+                onDrawBehind {
+                    drawRoundRect(Palette.Panel, cornerRadius = CornerRadius(8.dp.toPx()))
+                    drawRect(liner, Offset(left, top), Size(w, h))
+                    clipRect(left, top, right, bottom) {
+                        histogramPath?.let { drawPath(it, Palette.OnSurface.copy(alpha = 0.1f)) }
+                        for (k in 1..7) {
+                            val grid = when {
+                                k == 4 -> Palette.Outline
+                                k % 2 == 0 -> Palette.Outline.copy(alpha = 0.6f)
+                                else -> Palette.OutlineSoft.copy(alpha = 0.7f)
+                            }
+                            drawLine(grid, Offset(left + w * k / 8, top), Offset(left + w * k / 8, bottom), fine)
+                            drawLine(grid, Offset(left, top + h * k / 8), Offset(right, top + h * k / 8), fine)
+                        }
+                        drawLine(Palette.Track.copy(alpha = 0.5f), Offset(left, bottom), Offset(right, top), fine,
+                            pathEffect = dash)
+                        companionPaths.forEach { (path, ink) ->
+                            drawPath(path, ink, style = companionStroke)
+                        }
+                        if (selected != null) {
+                            val guide = Palette.Darkroom.copy(alpha = 0.55f)
+                            drawLine(guide, Offset(selected.x, top), Offset(selected.x, bottom), fine, pathEffect = dash)
+                            drawLine(guide, Offset(left, selected.y), Offset(right, selected.y), fine, pathEffect = dash)
+                        }
+                        drawPath(selectedPath, Palette.Surround, style = curveUnderlay)
+                        drawPath(selectedPath, stroke, style = curveStroke)
+                    }
+                    drawRect(Palette.Outline, Offset(left, top), Size(w, h), style = hairline)
+                    val cornerLength = 8.dp.toPx()
+                    corners.forEach { (origin, direction) ->
+                        drawLine(Palette.Track, origin, origin + Offset(direction.x * cornerLength, 0f), fine)
+                        drawLine(Palette.Track, origin, origin + Offset(0f, direction.y * cornerLength), fine)
+                    }
+                    // The scales live in the existing 24 dp gutter, outside the editable square.
+                    val scaleWidth = 4.dp.toPx()
+                    val scaleGap = 12.dp.toPx()
+                    drawRect(inputScale, Offset(left, bottom + scaleGap - scaleWidth / 2), Size(w, scaleWidth))
+                    drawRect(outputScale, Offset(left - scaleGap - scaleWidth / 2, top), Size(scaleWidth, h))
+                    drawRect(Palette.Track, Offset(left, bottom + scaleGap - scaleWidth / 2), Size(w, scaleWidth), style = hairline)
+                    drawRect(Palette.Track, Offset(left - scaleGap - scaleWidth / 2, top), Size(scaleWidth, h), style = hairline)
+                    for (k in 0..4) {
+                        val x = left + w * k / 4
+                        val y = top + h * k / 4
+                        drawLine(Palette.Track, Offset(x, bottom + 16.dp.toPx()), Offset(x, bottom + 19.dp.toPx()), fine)
+                        drawLine(Palette.Track, Offset(left - 19.dp.toPx(), y), Offset(left - 16.dp.toPx(), y), fine)
+                    }
+                    if (selected != null) {
+                        drawCircle(Palette.Darkroom, 2.dp.toPx(), Offset(selected.x, bottom + scaleGap))
+                        drawCircle(Palette.Darkroom, 2.dp.toPx(), Offset(left - scaleGap, selected.y))
+                    }
+                    // Clip the curves and histogram only. Endpoint handles retain the full hit gutter.
+                    if (editable) positions.forEachIndexed { index, position ->
+                        if (index != active) {
+                            drawCircle(Palette.Surround, 6.5.dp.toPx(), position)
+                            drawCircle(if (enabled) Palette.OnSurface else Palette.Track, 5.dp.toPx(), position)
+                            drawCircle(Palette.Surface, 3.dp.toPx(), position)
+                        }
+                    }
+                    if (editable && selected != null) {
+                        drawCircle(Palette.Surround, 10.dp.toPx(), selected)
+                        drawCircle(Palette.Darkroom, 8.dp.toPx(), selected)
+                        drawCircle(Palette.Surface, 5.5.dp.toPx(), selected)
+                        drawCircle(Palette.OnSurface, 2.dp.toPx(), selected)
+                    }
+                    if (selected != null && readout != null) {
+                        val gap = 8.dp.toPx()
+                        val bubbleSize = Size(readout.size.width + gap * 2, readout.size.height + gap)
+                        val bubbleX = (selected.x - bubbleSize.width / 2).coerceIn(gap, (size.width - gap - bubbleSize.width).coerceAtLeast(gap))
+                        val preferredY = if (selected.y < top + h / 3) selected.y + 16.dp.toPx()
+                            else selected.y - bubbleSize.height - 16.dp.toPx()
+                        val bubbleY = preferredY.coerceIn(gap, (size.height - gap - bubbleSize.height).coerceAtLeast(gap))
+                        val origin = Offset(bubbleX, bubbleY)
+                        drawRoundRect(Palette.PanelHigh, origin, bubbleSize, CornerRadius(4.dp.toPx()))
+                        drawRoundRect(Palette.Track, origin, bubbleSize, CornerRadius(4.dp.toPx()), style = hairline)
+                        drawText(readout, topLeft = origin + Offset(gap, gap / 2))
+                    }
+                }
+            },
+        )
+    }
+    val outputLabel = tr("输出")
+    val inputLabel = tr("输入")
+    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Y  $outputLabel 0–100%", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+            modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text("X  $inputLabel 0–100%", style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+            modifier = Modifier.weight(1f), textAlign = TextAlign.End, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
     Text(
         if (!editable) tr("导入的采样曲线按原样保留；重置后可编辑控制点。")

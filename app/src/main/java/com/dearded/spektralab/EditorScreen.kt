@@ -658,13 +658,17 @@ private fun Preview(
                         val r = FrameGeometry.photoRect(size.width, size.height, bitmap.width, bitmap.height, frame)
                         val stroke = 1.dp.toPx()
                         val inset = stroke / 2f
-                        val length = minOf(10.dp.toPx(), r.width / 4f, r.height / 4f)
-                        val ink = Color.White.copy(alpha = 0.38f)
+                        val length = minOf(12.dp.toPx(), r.width / 4f, r.height / 4f)
+                        val ink = Color.White.copy(alpha = 0.72f)
                         // Short neutral marks follow the photo, including inside a paper frame.
                         // They are a display layer; no layout, gestures or export state changes.
                         for (right in listOf(false, true)) for (bottom in listOf(false, true)) {
                             val x = if (right) r.right - inset else r.left + inset
                             val y = if (bottom) r.bottom - inset else r.top + inset
+                            drawLine(Color.Black.copy(alpha = 0.55f), Offset(x, y),
+                                Offset(x + if (right) -length else length, y), stroke * 2.5f)
+                            drawLine(Color.Black.copy(alpha = 0.55f), Offset(x, y),
+                                Offset(x, y + if (bottom) -length else length), stroke * 2.5f)
                             drawLine(ink, Offset(x, y), Offset(x + if (right) -length else length, y), stroke)
                             drawLine(ink, Offset(x, y), Offset(x, y + if (bottom) -length else length), stroke)
                         }
