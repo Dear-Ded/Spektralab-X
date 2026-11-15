@@ -32,17 +32,15 @@ internal object PrecisionHaptics {
                 context.getSystemService(VibratorManager::class.java)?.defaultVibrator
             else context.getSystemService(Vibrator::class.java)
         }.getOrNull()
-        private val primitives = if (Build.VERSION.SDK_INT >= 30) runCatching {
-            val ids = if (Build.VERSION.SDK_INT >= 31) intArrayOf(
+        // API 30 reports composition support, not individual primitive support.
+        private val primitives = if (Build.VERSION.SDK_INT >= 31) runCatching {
+            val ids = intArrayOf(
                 VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
                 VibrationEffect.Composition.PRIMITIVE_TICK,
                 VibrationEffect.Composition.PRIMITIVE_CLICK,
-            ) else intArrayOf(VibrationEffect.Composition.PRIMITIVE_TICK, VibrationEffect.Composition.PRIMITIVE_CLICK)
-            val supported = if (Build.VERSION.SDK_INT >= 31) vibrator?.arePrimitivesSupported(
+            )
+            val supported = vibrator?.arePrimitivesSupported(
                 VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-                VibrationEffect.Composition.PRIMITIVE_TICK,
-                VibrationEffect.Composition.PRIMITIVE_CLICK,
-            ) else vibrator?.arePrimitivesSupported(
                 VibrationEffect.Composition.PRIMITIVE_TICK,
                 VibrationEffect.Composition.PRIMITIVE_CLICK,
             )
@@ -65,10 +63,9 @@ internal object PrecisionHaptics {
         }
 
         private fun effect(event: HapticEvent): VibrationEffect {
-            if (Build.VERSION.SDK_INT >= 30) {
+            if (Build.VERSION.SDK_INT >= 31) {
                 val primitive = when (event) {
-                    HapticEvent.Detent -> if (Build.VERSION.SDK_INT >= 31 &&
-                        VibrationEffect.Composition.PRIMITIVE_LOW_TICK in primitives)
+                    HapticEvent.Detent -> if (VibrationEffect.Composition.PRIMITIVE_LOW_TICK in primitives)
                         VibrationEffect.Composition.PRIMITIVE_LOW_TICK else VibrationEffect.Composition.PRIMITIVE_TICK
                     HapticEvent.Tick, HapticEvent.Segment, HapticEvent.GestureStart, HapticEvent.GestureEnd,
                     HapticEvent.ToggleOn, HapticEvent.ToggleOff -> VibrationEffect.Composition.PRIMITIVE_TICK
@@ -87,7 +84,7 @@ internal object PrecisionHaptics {
                     return composition.compose()
                 }
             }
-            // Predefined effects have Android's device-specific fallback, including API 29.
+            // Predefined effects retain Android's device-specific fallback on API 29 and 30.
             return VibrationEffect.createPredefined(when (event) {
                 HapticEvent.Tick -> VibrationEffect.EFFECT_CLICK
                 HapticEvent.Detent, HapticEvent.Segment,

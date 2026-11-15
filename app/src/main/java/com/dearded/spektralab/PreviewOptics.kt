@@ -14,9 +14,10 @@ internal fun Modifier.latentPreview(
     val matrix = android.graphics.ColorMatrix()
     val paint = android.graphics.Paint()
     onDrawWithContent {
-        drawContent()
         val a = amount().coerceIn(0f, 1f)
-        if (a > 0.001f) {
+        if (a <= 0.001f) {
+            drawContent()
+        } else {
             val gain = 1f - 2f * a
             coefficients[0] = gain; coefficients[6] = gain; coefficients[12] = gain
             coefficients[4] = 255f * a; coefficients[9] = 255f * a; coefficients[14] = 255f * a
@@ -24,11 +25,22 @@ internal fun Modifier.latentPreview(
             matrix.set(coefficients)
             paint.colorFilter = android.graphics.ColorMatrixColorFilter(matrix)
             val canvas = drawContext.canvas.nativeCanvas
-            val saved = canvas.save()
-            canvas.clipRect(bounds)
-            canvas.saveLayer(bounds, paint)
-            drawContent()
-            canvas.restoreToCount(saved)
+            // Disjoint clips keep translucent photos from being composited twice.
+            val surround = canvas.save()
+            try {
+                canvas.clipOutRect(bounds)
+                drawContent()
+            } finally {
+                canvas.restoreToCount(surround)
+            }
+            val photo = canvas.save()
+            try {
+                canvas.clipRect(bounds)
+                canvas.saveLayer(bounds, paint)
+                drawContent()
+            } finally {
+                canvas.restoreToCount(photo)
+            }
         }
     }
 }

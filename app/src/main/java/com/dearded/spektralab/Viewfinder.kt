@@ -108,7 +108,11 @@ internal fun ViewfinderOverlay(
                             textPaint.color = android.graphics.Color.argb((ink.alpha * 255).toInt(),
                                 (ink.red * 255).toInt(), (ink.green * 255).toInt(), (ink.blue * 255).toInt())
                             textPaint.textAlign = if (right) android.graphics.Paint.Align.RIGHT else android.graphics.Paint.Align.LEFT
-                            drawContext.canvas.nativeCanvas.drawText(value, x, y, textPaint)
+                            val metrics = textPaint.fontMetrics
+                            val inset = minOf(1.dp.toPx(), h * .02f)
+                            val top = inset - metrics.ascent
+                            val bottom = (h - inset - metrics.descent).coerceAtLeast(top)
+                            drawContext.canvas.nativeCanvas.drawText(value, x, y.coerceIn(top, bottom), textPaint)
                         }
                         when (style) {
                             ViewfinderStyle.LEICA -> {

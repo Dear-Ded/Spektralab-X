@@ -75,6 +75,29 @@ class Screenshots {
         shot("01_editor_empty")
     }
 
+    @Test fun removingThePhotoDuringComparisonReleasesTheOriginalPreview() {
+        val initial = Fake.ui()
+        val vm = editorVm(initial)
+        content { EditorScreen(vm, preview = Fake::preview) }
+        compose.mainClock.advanceTimeBy(800)
+        compose.onNodeWithTag("editor-preview").performTouchInput {
+            down(center)
+            advanceEventTime(800)
+            moveBy(Offset.Zero)
+        }
+        compose.mainClock.advanceTimeBy(800)
+        compose.onNodeWithText(tr("原图")).assertExists()
+        @Suppress("UNCHECKED_CAST")
+        val state = EditorViewModel::class.java.getDeclaredField("_ui").apply { isAccessible = true }
+            .get(vm) as MutableStateFlow<UiState>
+        compose.runOnIdle { state.value = initial.copy(image = null, before = null) }
+        compose.mainClock.advanceTimeBy(100)
+        compose.runOnIdle { state.value = initial }
+        compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithText(tr("原图")).assertDoesNotExist()
+        compose.onRoot().performTouchInput { cancel() }
+    }
+
     @Test fun restrainedOpticalViewfinders() {
         val ui = Fake.ui()
         val image = ui.image!!

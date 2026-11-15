@@ -577,7 +577,7 @@ private fun Preview(
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
     var offset by remember(ui.source) { mutableStateOf(Offset.Zero) }
-    var holding by remember { mutableStateOf(false) }
+    var holding by remember(ui.source) { mutableStateOf(false) }
     val view = androidx.compose.ui.platform.LocalView.current
     // The surround the user chose in 设置 (18 % 灰 / 黑 / 白), never a hue (UI2.md 1.1).
     val surround = rememberSurround()
@@ -590,7 +590,7 @@ private fun Preview(
             val bitmap = remember(image) { image.asImageBitmap() }
             val gestures = Modifier
                     .fillMaxSize()
-                    .pointerInput(Unit) {
+                    .pointerInput(ui.source) {
                         detectTapGestures(
                             onTap = { toggle() },
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
@@ -599,8 +599,11 @@ private fun Preview(
                                 view.haptic(HapticEvent.LongPress)
                             },
                             onPress = {
-                                tryAwaitRelease()
-                                holding = false
+                                try {
+                                    tryAwaitRelease()
+                                } finally {
+                                    holding = false
+                                }
                             },
                         )
                     }

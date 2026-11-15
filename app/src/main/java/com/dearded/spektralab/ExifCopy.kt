@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.io.InputStream
+import java.util.Locale
 
 /**
  * Shooting metadata carried from the source photo to an exported JPEG.
@@ -53,7 +54,7 @@ class ExifCopy private constructor(private val values: Map<String, String>) {
     fun aperture(): String? = fNumber()?.let { if (it >= 10) "%.0f".format(it) else "%.1f".format(it).removeSuffix(".0") }
 
     fun shutter(): String? = rational(ExifInterface.TAG_EXPOSURE_TIME)?.let { t ->
-        if (t >= 1) "${"%.1f".format(t).removeSuffix(".0")}s" else "1/${kotlin.math.round(1 / t).toInt()}s"
+        if (t >= 1) "${String.format(Locale.ROOT, "%.1f", t).removeSuffix(".0")}s" else "1/${kotlin.math.round(1 / t).toInt()}s"
     }
 
     fun iso(): Int? = values[ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY]?.split(',')?.firstOrNull()?.trim()?.toIntOrNull()
