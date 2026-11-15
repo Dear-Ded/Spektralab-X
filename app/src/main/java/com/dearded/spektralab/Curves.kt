@@ -4,12 +4,16 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +21,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -31,15 +34,17 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.abs
-import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -195,6 +200,25 @@ private val CHANNELS get() = listOf(
     Triple(4, tr("蓝"), Color(0xFF4A8AE8)),
 )
 
+private data class CurvePlotGeometry(val left: Float, val top: Float, val width: Float, val height: Float) {
+    fun position(point: CurvePoint) = Offset(
+        left + (point.x * width).toFloat(), top + ((1.0 - point.y) * height).toFloat(),
+    )
+
+    fun point(position: Offset) = CurvePoint(
+        ((position.x - left) / width).toDouble().coerceIn(0.0, 1.0),
+        (1.0 - (position.y - top) / height).coerceIn(0.0, 1.0),
+    )
+
+    fun contains(position: Offset) = position.x in left..(left + width) && position.y in top..(top + height)
+}
+
+private fun curvePlotGeometry(width: Float, height: Float, padding: Float): CurvePlotGeometry {
+    val inset = min(padding, min(width, height) / 2f)
+    return CurvePlotGeometry(inset, inset, (width - 2f * inset).coerceAtLeast(1f),
+        (height - 2f * inset).coerceAtLeast(1f))
+}
+
 /**
  * The tone-curve editor (UI.md appendix A; behaviour after upstream's
  * CurveEditor.swift): RGB and the three channels over a histogram of the
@@ -210,146 +234,179 @@ internal fun CurveEditor(
 ) {
     val channels = if (includeLuma) listOf(CHANNELS[0], Triple(1, tr("明度"), Palette.OnSurface)) + CHANNELS.drop(1) else CHANNELS
     val view = LocalView.current
-    var channel by remember { mutableIntStateOf(0) }
-    val row = channels[channel].first
+    var selectedRow by remember { mutableIntStateOf(0) }
+    val row = selectedRow.takeIf { selected -> channels.any { it.first == selected } } ?: 0
     val curve = curves[row]
     val curvesLatest by rememberUpdatedState(curves)
     val onChangeLatest by rememberUpdatedState(onChange)
     val onDragLatest by rememberUpdatedState(onDrag)
-    val recede = LocalSliderDrag.current
-    var active by remember { mutableStateOf(-1) }
+    val recedeLatest by rememberUpdatedState(LocalSliderDrag.current)
+    var active by remember(row) { mutableIntStateOf(-1) }
     val histogram by produceState<Histogram?>(null, image) {
         value = image?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(it) } }
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        channels.forEachIndexed { i, (r, label, _) ->
-            SelectPill(selected = channel == i, onClick = { channel = i }, enabled = enabled,
-                label = { Text(if (curves[r].isIdentity) label else "$label·") })
+    Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()).testTag("curve-editor-channels"),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            channels.forEach { (r, label, _) ->
+                SelectPill(selected = row == r, onClick = { selectedRow = r }, enabled = enabled,
+                    label = { Text(if (curves[r].isIdentity) label else "$label·",
+                        modifier = Modifier.widthIn(min = 24.dp), textAlign = TextAlign.Center) })
+            }
         }
-        androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-        TextButton(onClick = { view.tick(strong = true); onChange(curves.with(row, Curve.IDENTITY)) },
-            enabled = enabled && editable && !curve.isIdentity) { Text(tr("重置")) }
+        TextButton(onClick = { view.tick(strong = true); onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)) },
+            modifier = Modifier.size(48.dp), contentPadding = PaddingValues(0.dp),
+            enabled = enabled && editable && !curve.isIdentity) { Text(tr("重置"), maxLines = 1) }
     }
 
-    val color = channels[channel].third
-    Canvas(
-        Modifier.fillMaxWidth().height(124.dp).padding(vertical = 6.dp).systemGestureExclusion()
+    val color = channels.first { it.first == row }.third
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val plotHeight = if (maxWidth <= 320.dp) 176.dp else 192.dp
+        Canvas(
+            Modifier.fillMaxWidth().height(plotHeight).systemGestureExclusion().testTag("curve-editor-plot")
             .semantics {
-                contentDescription = tr("{0} 曲线，{1} 个{2}", channels[channel].second, curve.points.size, if (editable) tr("控制点") else tr("采样点"))
+                contentDescription = tr("{0} 曲线，{1} 个{2}", channels.first { it.first == row }.second,
+                    curve.points.size, if (editable) tr("控制点") else tr("采样点"))
+                if (!enabled) disabled()
                 if (enabled && editable && !curve.isIdentity)
                     customActions = listOf(CustomAccessibilityAction(tr("重置")) { onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)); true })
             }
-            .pointerInput(enabled, editable, row) {
+            .pointerInput(enabled, editable, row, maxWidth, plotHeight) {
                 if (!enabled || !editable) return@pointerInput
                 val hit = 24.dp.toPx()
                 var lastTap = 0L
                 var lastTapIndex = -1
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    val w = size.width.toFloat(); val h = size.height.toFloat()
-                    fun toUnit(o: Offset) = CurvePoint((o.x / w).toDouble(), (1 - o.y / h).toDouble())
+                    if (down.isConsumed) return@awaitEachGesture
+                    val geometry = curvePlotGeometry(size.width.toFloat(), size.height.toFloat(), 24.dp.toPx())
                     var c = curvesLatest[row]
                     var index = c.points.indices.minByOrNull {
-                        hypot(c.points[it].x * w - down.position.x, (1 - c.points[it].y) * h - down.position.y)
+                        (geometry.position(c.points[it]) - down.position).getDistance()
                     }?.takeIf {
-                        hypot(c.points[it].x * w - down.position.x, (1 - c.points[it].y) * h - down.position.y) <= hit
+                        (geometry.position(c.points[it]) - down.position).getDistance() <= hit
                     } ?: -1
                     val grabbed = index >= 0
-                    var moved = false
+                    if (!grabbed && !geometry.contains(down.position)) {
+                        lastTapIndex = -1
+                        return@awaitEachGesture
+                    }
+                    var started = false
+                    var released = false
+                    var upAt = 0L
+                    var upPosition = down.position
                     // The point keeps its offset from the finger, so it does not jump under it.
                     var grab = Offset.Zero
-                    if (grabbed) grab = Offset((c.points[index].x * w).toFloat(), ((1 - c.points[index].y) * h).toFloat()) - down.position
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val ch = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (!ch.pressed) break
-                        if (!moved) {
-                            // The page's scroll took the swipe first: it is not ours.
-                            if (ch.isConsumed) return@awaitEachGesture
-                            val d = ch.position - down.position
-                            if (d.getDistance() <= viewConfiguration.touchSlop) continue
-                            // Off a point, an up/down swipe scrolls the page instead of
-                            // trapping the finger in the curve (only a point is dragged freely).
-                            if (!grabbed && abs(d.y) > abs(d.x)) return@awaitEachGesture
-                            moved = true
-                            if (!grabbed) {
-                                if (c.points.size >= 16) break
-                                // Dragging from an empty spot: a new point there, at the curve's own height.
-                                val q = toUnit(down.position)
-                                val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
-                                if (i == 0 || i == next.points.size - 1) break
-                                c = next; index = i
-                                grab = Offset((q.x * w).toFloat(), ((1 - c.points[i].y) * h).toFloat()) - down.position
+                    if (grabbed) grab = geometry.position(c.points[index]) - down.position
+                    try {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val ch = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (ch.isConsumed || event.changes.count { it.pressed } > 1) {
+                                lastTapIndex = -1
+                                break
                             }
-                            active = index
-                            onDragLatest(true); recede(true)
+                            if (!ch.pressed) {
+                                released = true
+                                upAt = ch.uptimeMillis
+                                upPosition = ch.position
+                                break
+                            }
+                            if (!started) {
+                                val d = ch.position - down.position
+                                if (d.getDistance() <= viewConfiguration.touchSlop) continue
+                                // Away from a point, vertical swipes belong to the scrolling page.
+                                if (!grabbed && abs(d.y) > abs(d.x)) break
+                                lastTapIndex = -1
+                                if (!grabbed) {
+                                    if (c.points.size >= 16) break
+                                    val q = geometry.point(down.position)
+                                    val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
+                                    if (i == 0 || i == next.points.size - 1) break
+                                    c = next; index = i
+                                    grab = geometry.position(c.points[i]) - down.position
+                                }
+                                started = true
+                                active = index
+                                onDragLatest(true); recedeLatest(true)
+                            }
+                            c = c.move(index, geometry.point(ch.position + grab))
+                            onChangeLatest(curvesLatest.with(row, c))
+                            ch.consume()
                         }
-                        c = c.move(index, toUnit(ch.position + grab))
-                        onChangeLatest(curvesLatest.with(row, c))
-                        ch.consume()
-                    }
-                    if (moved) {
-                        active = -1
-                        onDragLatest(false); recede(false)
-                    } else if (grabbed) {
-                        val now = down.uptimeMillis
-                        if (index == lastTapIndex && now - lastTap < viewConfiguration.doubleTapTimeoutMillis && c.isDeletable(index)) {
-                            view.tick(strong = true)
-                            onChangeLatest(curvesLatest.with(row, c.remove(index)))
-                            lastTapIndex = -1
-                        } else { lastTap = now; lastTapIndex = index }
-                    } else {
-                        val q = toUnit(down.position)
-                        val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
-                        if (i > 0 && i < next.points.size - 1 && next.points.size <= 16) {
-                            view.tick()
-                            onChangeLatest(curvesLatest.with(row, next))
+                        if (!started && released && upAt - down.uptimeMillis <= viewConfiguration.longPressTimeoutMillis &&
+                            (upPosition - down.position).getDistance() <= viewConfiguration.touchSlop) {
+                            if (grabbed) {
+                                val now = down.uptimeMillis
+                                if (index == lastTapIndex && now - lastTap < viewConfiguration.doubleTapTimeoutMillis && c.isDeletable(index)) {
+                                    view.tick(strong = true)
+                                    onChangeLatest(curvesLatest.with(row, c.remove(index)))
+                                    lastTapIndex = -1
+                                } else { lastTap = now; lastTapIndex = index }
+                            } else {
+                                val q = geometry.point(down.position)
+                                val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
+                                if (i > 0 && i < next.points.size - 1 && next.points.size <= 16) {
+                                    view.tick()
+                                    onChangeLatest(curvesLatest.with(row, next))
+                                }
+                            }
+                        } else lastTapIndex = -1
+                    } finally {
+                        if (started) {
+                            active = -1
+                            try { onDragLatest(false) } finally { recedeLatest(false) }
                         }
                     }
                 }
             },
-    ) {
-        val w = size.width; val h = size.height
-        drawRect(Palette.Panel)
-        histogram?.let { hist ->
-            val bins = when (row) { 2 -> hist.r; 3 -> hist.g; 4 -> hist.b; else -> hist.y }
-            val peak = sqrt(max(1, bins.max()).toFloat())
-            val bw = w / Histogram.BINS
-            val path = Path().apply {
-                moveTo(0f, h)
-                for (i in bins.indices) {
-                    val top = h * (1f - 0.9f * sqrt(bins[i].toFloat()) / peak)
-                    lineTo(i * bw, top); lineTo((i + 1) * bw, top)
+        ) {
+            val geometry = curvePlotGeometry(size.width, size.height, 24.dp.toPx())
+            val w = geometry.width; val h = geometry.height
+            val left = geometry.left; val top = geometry.top
+            val bottom = top + h; val right = left + w
+            drawRect(Palette.Panel)
+            histogram?.let { hist ->
+                val bins = when (row) { 2 -> hist.r; 3 -> hist.g; 4 -> hist.b; else -> hist.y }
+                val peak = sqrt(max(1, bins.max()).toFloat())
+                val bw = w / Histogram.BINS
+                val path = Path().apply {
+                    moveTo(left, bottom)
+                    for (i in bins.indices) {
+                        val y = top + h * (1f - 0.9f * sqrt(bins[i].toFloat()) / peak)
+                        lineTo(left + i * bw, y); lineTo(left + (i + 1) * bw, y)
+                    }
+                    lineTo(right, bottom); close()
                 }
-                lineTo(w, h); close()
+                drawPath(path, color.copy(alpha = 0.16f))
             }
-            drawPath(path, color.copy(alpha = 0.16f))
-        }
-        val grid = Palette.OutlineSoft
-        for (k in 1..3) {
-            drawLine(grid, Offset(w * k / 4, 0f), Offset(w * k / 4, h), 1.dp.toPx())
-            drawLine(grid, Offset(0f, h * k / 4), Offset(w, h * k / 4), 1.dp.toPx())
-        }
-        drawLine(Palette.Outline, Offset(0f, h), Offset(w, 0f), 1.dp.toPx(),
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
-        fun curvePath(c: Curve) = Path().apply {
-            val steps = if (c.linear) c.points.size - 1 else 128
-            for (s in 0..steps) {
-                val x = s.toDouble() / steps
-                val px = (x * w).toFloat(); val py = ((1 - c.evaluate(x)) * h).toFloat()
-                if (s == 0) moveTo(px, py) else lineTo(px, py)
+            val grid = Palette.OutlineSoft
+            for (k in 1..3) {
+                drawLine(grid, Offset(left + w * k / 4, top), Offset(left + w * k / 4, bottom), 1.dp.toPx())
+                drawLine(grid, Offset(left, top + h * k / 4), Offset(right, top + h * k / 4), 1.dp.toPx())
             }
-        }
-        // The other channels, faint, so a colour cast stays in view.
-        for ((r, _, col) in channels) if (r != row && !curves[r].isIdentity)
-            drawPath(curvePath(curves[r]), col.copy(alpha = 0.35f), style = Stroke(1.5.dp.toPx()))
-        val stroke = if (enabled) color else Palette.Outline
-        drawPath(curvePath(curve), stroke, style = Stroke(2.dp.toPx()))
-        if (editable) curve.points.forEachIndexed { i, p ->
-            val o = Offset((p.x * w).toFloat(), ((1 - p.y) * h).toFloat())
-            drawCircle(stroke, if (i == active) 8.dp.toPx() else 6.dp.toPx(), o)
-            drawCircle(Palette.Panel, if (i == active) 5.dp.toPx() else 3.5.dp.toPx(), o)
+            drawLine(Palette.Outline, Offset(left, bottom), Offset(right, top), 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
+            fun curvePath(c: Curve) = Path().apply {
+                val steps = if (c.linear) c.points.size - 1 else 128
+                for (s in 0..steps) {
+                    val x = s.toDouble() / steps
+                    val position = geometry.position(CurvePoint(x, c.evaluate(x)))
+                    if (s == 0) moveTo(position.x, position.y) else lineTo(position.x, position.y)
+                }
+            }
+            // The other channels, faint, so a colour cast stays in view.
+            for ((r, _, col) in channels) if (r != row && !curves[r].isIdentity)
+                drawPath(curvePath(curves[r]), col.copy(alpha = 0.35f), style = Stroke(1.dp.toPx()))
+            val stroke = if (enabled) color else Palette.Outline
+            drawPath(curvePath(curve), stroke, style = Stroke(2.dp.toPx()))
+            if (editable) curve.points.forEachIndexed { i, p ->
+                val o = geometry.position(p)
+                drawCircle(stroke, if (i == active) 7.dp.toPx() else 5.dp.toPx(), o)
+                drawCircle(Palette.Panel, if (i == active) 4.dp.toPx() else 2.5.dp.toPx(), o)
+            }
         }
     }
     Text(

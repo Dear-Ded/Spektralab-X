@@ -17,26 +17,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * UI2.md 1.1: no hue anywhere in the chrome. Layers are the ground plus white
- * at 6 / 10 / 14 % (written out opaque here), so a panel never tints the
- * photo's surround. The one "accent" is near-white: a selected item is an
- * inverted solid pill (light fill, dark text), not a colour.
+ * Neutral layers keep the photograph's surround free of colour. The darkroom
+ * amber is reserved for the wordmark, active navigation and the save action.
  */
 object Palette {
-    val Surround = Color(0xFF1E1E1E)       // behind the photo only: neutral mid-dark grey
-    val Background = Color(0xFF0E0E10)     // Ground
-    val Surface = Color(0xFF141416)        // top bar, toolbar
-    val Panel = Color(0xFF1D1D1F)          // Layer1: white 6 % on Ground
-    val PanelHigh = Color(0xFF262628)      // Layer2: white 10 %
+    val Surround = Color(0xFF0B0B0C)       // neutral photo surround; 18% grey remains in settings
+    val Background = Color(0xFF0B0B0C)
+    val Surface = Color(0xFF131316)
+    val Panel = Color(0xFF18181D)
+    val PanelHigh = Color(0xFF24242A)
     val PanelHighest = Color(0xFF303032)   // Layer3: white 14 %
-    val OnSurface = Color(0xFFEBEBEB)      // text, white 92 %
+    val OnSurface = Color(0xFFF2F2F4)
     val OnSurfaceSoft = Color(0xFFA8A8A8)  // secondary text, white 64 %
     val Outline = Color(0xFF3A3A3C)
     /** A slider's unfilled track: 3:1 against the panel. */
     val Track = Color(0xFF6A6A6C)
-    val OutlineSoft = Color(0xFF2A2A2C)    // hairline, white 8 %
+    val OutlineSoft = Color(0xFF24242A)
     /** Selected and primary: the inverted pill's fill, with [OnAccent] text. */
     val Accent = Color(0xFFF2F2F2)
+    val Darkroom = Color(0xFFE5A93C)
+    val DarkroomDim = Color(0xFF342A19)
     val OnAccent = Color(0xFF111113)
     /** A selected item's quiet container (chips that are on but not the focus). */
     val AccentDim = Color(0xFF3C3C3E)

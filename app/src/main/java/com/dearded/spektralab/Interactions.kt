@@ -146,11 +146,12 @@ fun rememberSelectionStyle(
     selectedFill: Color = Palette.Accent,
     restCorner: Dp = 12.dp,
     selectedCorner: Dp = 20.dp,
+    selectedInk: Color = Palette.OnAccent,
 ): SelectionStyle {
     val fill = animateColorAsState(if (selected) selectedFill else restFill, Motion.defaultEffects(), label = "sel-fill")
     val ink = animateColorAsState(
         when {
-            selected -> Palette.OnAccent
+            selected -> selectedInk
             enabled -> Palette.OnSurface
             else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f)
         },

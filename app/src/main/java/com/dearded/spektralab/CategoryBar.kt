@@ -41,11 +41,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * The editor's floating toolbar (UI2.md 2.1, 2.2): one pill 64 dp tall, 12 dp
- * off the screen edges, holding the five entries in the order a print is made
- * (one-tap styles, the darkroom steps, adjustments, borders, framing).
- * The selected entry sits on an inverted near-white pill with dark ink and a
- * filled icon, so "selected" is told by tone and shape, never by colour alone.
+ * Full-width navigation with five equal touch targets, including compact phones.
  */
 private val CATEGORIES get() = listOf(tr("风格"), tr("冲洗"), tr("调整"), tr("边框"), tr("构图"))
 /** Which drawn icon each entry uses: a highlight, the enlarger, sliders, a film frame, crop corners. */
@@ -53,47 +49,44 @@ private val ICONS = intArrayOf(3, 2, 1, 0, 4)
 
 @Composable
 fun CategoryBar(
-    selected: Int, enabled: Boolean, trailing: @Composable () -> Unit = {},
+    selected: Int, enabled: Boolean,
     /** Which entries differ from a fresh edit: a dot on the icon's corner (UI2.md 7.2 point 10). */
     edited: List<Boolean> = emptyList(),
     onSelect: (Int) -> Unit,
 ) {
     val view = LocalView.current
-    Row(Modifier.fillMaxWidth().background(Palette.Background).padding(horizontal = 12.dp, vertical = 8.dp),
+    Row(Modifier.fillMaxWidth().background(Palette.Surface).padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Row(
-            Modifier.weight(1f).height(64.dp)
-                .background(Palette.Panel, Corners.full)
-                .border(1.dp, Palette.OutlineSoft, Corners.full)
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            Modifier.weight(1f).height(56.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             CATEGORIES.forEachIndexed { i, label ->
                 val on = i == selected
                 val tint by animateColorAsState(
                     when {
-                        on -> Palette.OnAccent
-                        enabled -> Palette.OnSurface
+                        on -> Palette.Darkroom
+                        enabled -> Palette.OnSurfaceSoft
                         else -> Palette.OnSurfaceSoft.copy(alpha = 0.38f)
                     },
                     Motion.defaultEffects(), label = "tint",
                 )
                 val fill by animateColorAsState(
-                    if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
+                    if (on) Palette.DarkroomDim else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
                 Column(
                     Modifier.weight(1f).fillMaxHeight()
-                        .background(fill, Corners.full)
+                        .background(fill, Corners.s)
                         .selectable(
-                            selected = on, role = Role.Tab,
+                            selected = on, enabled = enabled, role = Role.Tab,
                             interactionSource = remember { MutableInteractionSource() }, indication = null,
                         ) { view.tick(); onSelect(i) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Box {
-                        Canvas(Modifier.size(22.dp)) { icon(ICONS[i], tint, on) }
-                        if (edited.getOrElse(i) { false }) EditedDot(onFill = on,
+                        Canvas(Modifier.size(20.dp)) { icon(ICONS[i], tint, on) }
+                        if (edited.getOrElse(i) { false }) EditedDot(
                             modifier = Modifier.align(Alignment.TopEnd).offset(x = 5.dp, y = (-2).dp))
                     }
                     Spacer(Modifier.height(2.dp))
@@ -101,8 +94,6 @@ fun CategoryBar(
                 }
             }
         }
-        Spacer(Modifier.width(8.dp))
-        trailing()
     }
 }
 

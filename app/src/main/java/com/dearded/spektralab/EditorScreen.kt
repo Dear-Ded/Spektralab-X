@@ -100,6 +100,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.layout.layout
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -176,6 +177,9 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     androidx.compose.runtime.SideEffect { coach?.allowed = coachAllowed }
     androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
     val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
+    var boundaryCorners by androidx.compose.runtime.saveable.rememberSaveable {
+        mutableStateOf(hintPrefs.getBoolean("preview_boundary_corners", false))
+    }
     val toggleChrome: () -> Unit = {
         if (canHide && ui.hasImage) {
             chrome = !chrome
@@ -193,17 +197,24 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
         }
     }
 
-    // UI2.md 2.1: 保存 sits at the right end of the bottom toolbar, under the thumb.
+    // Save has its own compact target; the five bottom tools keep equal widths.
     val saveButton: @Composable () -> Unit = {
                     Box {
-                        androidx.compose.material3.Button(
-                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp).coachAnchor(CoachStep.SAVE),
-                        ) {
-                            SaveMark(jobs, savedAt)
-                            Spacer(Modifier.width(6.dp))
-                            Text(tr("保存"))
+                        Box(Modifier.height(48.dp).width(76.dp).coachAnchor(CoachStep.SAVE)
+                            .clip(Corners.s).clickable(enabled = ui.hasImage && !ui.exporting,
+                                role = androidx.compose.ui.semantics.Role.Button) { exportMenu = true }
+                            .padding(vertical = 7.dp, horizontal = 4.dp), contentAlignment = Alignment.Center) {
+                            Row(Modifier.fillMaxSize().background(Palette.DarkroomDim, Corners.s)
+                                .border(1.dp, Palette.Darkroom.copy(alpha = 0.45f), Corners.s),
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                                androidx.compose.runtime.CompositionLocalProvider(
+                                    androidx.compose.material3.LocalContentColor provides Palette.Darkroom) {
+                                    SaveMark(jobs, savedAt, size = 14.dp)
+                                }
+                                Spacer(Modifier.width(4.dp))
+                                Text(tr("保存"), color = if (ui.hasImage && !ui.exporting) Palette.Darkroom else Palette.OnSurfaceSoft,
+                                    style = MaterialTheme.typography.labelLarge)
+                            }
                         }
                         DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
                             DropdownMenuItem(text = { Text(tr("JPEG · 工作尺寸")) }, onClick = {
@@ -239,13 +250,18 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     }
 
     val nav = remember { EditorNav() }
+    LaunchedEffect(nav.tab, nav.adjustSeg, nav.gradingTool) {
+        // Graphical tools need their whole touch surface in view on entry.
+        if (panelLevel == 1 && nav.tab == 2 &&
+            (nav.adjustSeg in 3..4 || (nav.adjustSeg == 2 && nav.gradingTool == 1))) panelLevel = 2
+    }
     var showChanges by remember { mutableStateOf(false) }
     // The light table's view model is the activity's, so its 复制调整 is visible here too.
     val table: LightTableViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val tableState by table.state.collectAsState()
     var showPaste by remember { mutableStateOf(false) }
     androidx.compose.runtime.CompositionLocalProvider(LocalSliderDrag provides { on: Boolean -> dragging = on },
-        LocalEditorNav provides nav) {
+        LocalParameterDrag provides vm::setInteracting, LocalEditorNav provides nav) {
     Scaffold(
         snackbarHost = { SwipeNotice(snackbar) },
         contentWindowInsets = WindowInsets.systemBarsIgnoringVisibility,
@@ -258,44 +274,20 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         androidx.compose.foundation.layout.WindowInsetsSides.Top),
                 title = {
                     Column {
-                        Text(ui.source?.name ?: "Spektralab-X", style = MaterialTheme.typography.titleMedium,
+                        Text("Spektralab-X", style = MaterialTheme.typography.titleMedium,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        ui.source?.let { s ->
-                            Text(
-                                listOf(s.camera, "${s.width}×${s.height}").filter { it.isNotBlank() }
-                                    .joinToString(" · "),
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                            )
-                        }
+                        Text(ui.source?.name ?: tr("暗房"), color = Palette.OnSurfaceSoft,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 },
                 actions = {
-                    Box {
-                        IconButton(onClick = { openMenu = true }, enabled = ui.ready && !ui.exporting) {
-                            Icon(Icons.Default.Add, contentDescription = tr("打开"))
-                        }
-                        DropdownMenu(expanded = openMenu, onDismissRequest = { openMenu = false }) {
-                            DropdownMenuItem(text = { Text(tr("从相册选择")) }, onClick = {
-                                openMenu = false
-                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            })
-                            DropdownMenuItem(text = { Text(tr("从文件选择（RAW / DNG）")) }, onClick = {
-                                openMenu = false
-                                pickFile.launch(arrayOf("*/*"))
-                            })
-                        }
-                    }
                     val active = jobs.count { it.active }
                     // Undo / redo as icons; tasks and settings behind ⋯ (docs/UI.md 2.2).
                     // A running export stays visible: its count rides on the ⋯ button.
                     val canUndo = ui.canUndo && !ui.exporting
                     val canRedo = ui.canRedo && !ui.exporting
                     var confirmReset by remember { mutableStateOf(false) }
-                    IconButton(onClick = { confirmReset = true }, enabled = ui.hasImage && !ui.exporting) {
-                        Icon(Icons.Default.Refresh, contentDescription = tr("重置全部"),
-                            tint = if (ui.hasImage && !ui.exporting) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
-                    }
                     if (confirmReset) AlertDialog(
                         onDismissRequest = { confirmReset = false },
                         title = { Text(tr("重置全部调整？")) },
@@ -306,9 +298,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                     IconButton(onClick = vm::undo, enabled = canUndo) {
                         HistoryIcon(redo = false, tint = if (canUndo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
                     }
-                    IconButton(onClick = vm::redo, enabled = canRedo) {
-                        HistoryIcon(redo = true, tint = if (canRedo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
-                    }
+                    saveButton()
                     Box {
                         var moreMenu by remember { mutableStateOf(false) }
                         IconButton(onClick = { moreMenu = true }) {
@@ -320,6 +310,26 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                             }
                         }
                         DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
+                            DropdownMenuItem(text = { Text(tr("从相册选择")) }, enabled = ui.ready && !ui.exporting, onClick = {
+                                moreMenu = false
+                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            })
+                            DropdownMenuItem(text = { Text(tr("从文件选择（RAW / DNG）")) }, enabled = ui.ready && !ui.exporting, onClick = {
+                                moreMenu = false
+                                pickFile.launch(arrayOf("*/*"))
+                            })
+                            DropdownMenuItem(text = { Text(tr("重做")) }, enabled = canRedo,
+                                onClick = { moreMenu = false; vm.redo() })
+                            DropdownMenuItem(text = { Text(tr("重置全部")) }, enabled = ui.hasImage && !ui.exporting,
+                                onClick = { moreMenu = false; confirmReset = true })
+                            DropdownMenuItem(text = { Text(tr("照片边界角标")) }, enabled = ui.hasImage,
+                                trailingIcon = { Text(if (boundaryCorners) tr("开启") else tr("关闭")) },
+                                onClick = {
+                                    boundaryCorners = !boundaryCorners
+                                    hintPrefs.edit().putBoolean("preview_boundary_corners", boundaryCorners).apply()
+                                    moreMenu = false
+                                })
+                            HorizontalDivider(color = Palette.OutlineSoft)
                             DropdownMenuItem(text = { Text(tr("观片台")) }, onClick = { moreMenu = false; onLightTable() })
                             DropdownMenuItem(text = { Text(tr("修改记录")) }, enabled = ui.hasImage,
                                 onClick = { moreMenu = false; showChanges = true })
@@ -348,6 +358,16 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                                 onClick = { moreMenu = false; showSettings = true },
                             )
                         }
+                        DropdownMenu(expanded = openMenu, onDismissRequest = { openMenu = false }) {
+                            DropdownMenuItem(text = { Text(tr("从相册选择")) }, onClick = {
+                                openMenu = false
+                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            })
+                            DropdownMenuItem(text = { Text(tr("从文件选择（RAW / DNG）")) }, onClick = {
+                                openMenu = false
+                                pickFile.launch(arrayOf("*/*"))
+                            })
+                        }
                     }
                 },
             )
@@ -355,24 +375,30 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     ) { padding ->
         BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
             val boxHeight = maxHeight
-            val landscape = maxWidth > boxHeight
+            val landscape = maxWidth >= 600.dp && maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
-                    if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome), preview)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome,
+                        boundaryCorners = boundaryCorners && nav.tab != 4)
+                    if (ui.hasImage) Column(Modifier.width(360.dp).fillMaxHeight().chrome(showChrome)) {
+                        Controls(ui, vm, true, {}, Modifier.fillMaxWidth().weight(1f), preview)
+                    }
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome,
+                        boundaryCorners = boundaryCorners && nav.tab != 4)
                     // shots_review_1 P1: the empty page is the whole screen.
                     if (!ui.hasImage) return@Column
                     // The handle follows the finger 1:1; on release the panel springs to the
                     // nearest of its three heights, a fling carrying it one further.
                     // UI2.md 3.1: the height lives in an Animatable read only in the layout
                     // phase below, so a drag frame re-measures the panel and recomposes nothing.
-                    val heights = listOf(96.dp, boxHeight * 0.55f, boxHeight * 0.75f)
+                    val folded = minOf(112.dp, boxHeight * 0.4f)
+                    val half = maxOf(folded, 328.dp.coerceAtMost(boxHeight * 0.55f))
+                    val heights = listOf(folded, half, maxOf(half, boxHeight * 0.78f))
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val anchors = remember(heights, density) { with(density) { heights.map { it.toPx() } } }
                     val panelPx = remember { androidx.compose.animation.core.Animatable(anchors[panelLevel]) }
@@ -406,7 +432,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                             .chrome(showChrome),
                     ) {
                         Box(
-                            Modifier.fillMaxWidth().height(20.dp).background(Palette.Surface)
+                            Modifier.fillMaxWidth().height(48.dp).background(Palette.Surface)
+                                .clickable(onClickLabel = if (panelOpen) tr("收起编辑面板") else tr("展开编辑面板")) {
+                                    panelLevel = if (panelOpen) 0 else 1
+                                }
                                 .pointerInput(anchors) {
                                     val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
                                     var at = 0f
@@ -449,9 +478,23 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                                 },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(Modifier.width(36.dp).height(4.dp).background(Palette.Outline, RoundedCornerShape(2.dp)))
+                            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                val film = if (ui.edit.noFilm) tr("原图") else ui.catalog.film(ui.edit.film)?.label.orEmpty()
+                                Text(film, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Spacer(Modifier.width(12.dp))
+                                androidx.compose.foundation.Canvas(Modifier.size(16.dp)) {
+                                    val up = panelLevel < 2
+                                    val edge = if (up) size.height * 0.65f else size.height * 0.35f
+                                    val mid = if (up) size.height * 0.35f else size.height * 0.65f
+                                    drawLine(Palette.OnSurfaceSoft, Offset(size.width * 0.2f, edge),
+                                        Offset(size.width * 0.5f, mid), 1.5.dp.toPx())
+                                    drawLine(Palette.OnSurfaceSoft, Offset(size.width * 0.5f, mid),
+                                        Offset(size.width * 0.8f, edge), 1.5.dp.toPx())
+                                }
+                            }
                         }
-                        Controls(ui, vm, saveButton, panelOpen, { panelLevel = if (it) maxOf(1, panelLevel) else 0 },
+                        Controls(ui, vm, panelOpen, { panelLevel = if (it) maxOf(1, panelLevel) else 0 },
                             Modifier.fillMaxWidth().weight(1f), preview)
                     }
                 }
@@ -528,6 +571,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
 private fun Preview(
     ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
     onLightTable: () -> Unit = {}, chrome: Boolean = true, onToggleChrome: () -> Unit = {},
+    boundaryCorners: Boolean = false,
 ) {
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
@@ -536,7 +580,7 @@ private fun Preview(
     val view = androidx.compose.ui.platform.LocalView.current
     // The surround the user chose in 设置 (18 % 灰 / 黑 / 白), never a hue (UI2.md 1.1).
     val surround = rememberSurround()
-    Box(modifier.background(surround), contentAlignment = Alignment.Center) {
+    Box(modifier.testTag("editor-preview").background(surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
         if (image != null) {
@@ -608,6 +652,24 @@ private fun Preview(
                 } else {
                     FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
                 }
+                if (boundaryCorners && chrome && scale == 1f && offset == Offset.Zero && !holding &&
+                    !MaskUi.open && !ui.rendering && ui.busy == null && ui.detail == null && !ui.loadingDetail) {
+                    androidx.compose.foundation.Canvas(Modifier.matchParentSize().testTag("photo-boundary-corners")) {
+                        val r = FrameGeometry.photoRect(size.width, size.height, bitmap.width, bitmap.height, frame)
+                        val stroke = 1.dp.toPx()
+                        val inset = stroke / 2f
+                        val length = minOf(10.dp.toPx(), r.width / 4f, r.height / 4f)
+                        val ink = Color.White.copy(alpha = 0.38f)
+                        // Short neutral marks follow the photo, including inside a paper frame.
+                        // They are a display layer; no layout, gestures or export state changes.
+                        for (right in listOf(false, true)) for (bottom in listOf(false, true)) {
+                            val x = if (right) r.right - inset else r.left + inset
+                            val y = if (bottom) r.bottom - inset else r.top + inset
+                            drawLine(ink, Offset(x, y), Offset(x + if (right) -length else length, y), stroke)
+                            drawLine(ink, Offset(x, y), Offset(x, y + if (bottom) -length else length), stroke)
+                        }
+                    }
+                }
                 if (!holding) MaskOverlay(ui, Modifier.fillMaxSize())   // edit-effects: mask handles and brush (MaskPanel.kt)
             }
         } else if (ui.ready && !ui.hasImage) {
@@ -664,6 +726,14 @@ private fun Preview(
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
+        if (ui.image != null && !holding) ui.source?.let { source ->
+            Text(listOf(source.camera, "${source.width}×${source.height}").filter { it.isNotBlank() }.joinToString(" · "),
+                color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.bodySmall,
+                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp).chrome(chrome)
+                    .clip(Corners.s).background(Color.Black.copy(alpha = 0.50f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp))
+        }
     }
 }
 
@@ -709,12 +779,13 @@ private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = tr
     val scale by androidx.compose.animation.core.animateFloatAsState(
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "chip")
     Box(
-        Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(Corners.s)   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
-            .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
+        Modifier.heightIn(min = 48.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+            .clip(Corners.s)
             .clickable(enabled = enabled, interactionSource = press,
                 indication = androidx.compose.material3.ripple(), onClick = onClick)
-            .padding(horizontal = 14.dp),
+            .padding(vertical = 8.dp)
+            .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f), Corners.s)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge, color = when {
@@ -742,7 +813,7 @@ private fun BusyOverlay(text: String) {
 
 @Composable
 private fun Controls(
-    ui: UiState, vm: EditorViewModel, save: @Composable () -> Unit,
+    ui: UiState, vm: EditorViewModel,
     open: Boolean, onOpen: (Boolean) -> Unit, modifier: Modifier,
     preview: suspend (Edit) -> android.graphics.Bitmap?,
 ) {
@@ -752,7 +823,7 @@ private fun Controls(
     var step by nav::step
     val e = ui.edit
     val enabled = ui.hasImage && !ui.exporting
-    Surface(modifier, tonalElevation = 2.dp) {
+    Surface(modifier, color = Palette.Surface) {
         Column {
             // Pages slide in the direction of travel and fade; the panel height is
             // fixed, so the photo above never moves.
@@ -766,15 +837,11 @@ private fun Controls(
             androidx.compose.runtime.CompositionLocalProvider(LocalNavScope provides this) {
             Column(
                 // UI2.md 7.2 point 1: rows 12 dp apart, groups 20; no dividers.
-                Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp),
+                Modifier.verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(RowGap),
             ) {
                     when (page) {
                         0 -> {
-                            PanelHeader(
-                                title = tr("风格"),
-                                summary = if (e.noFilm) tr("原图") else ui.catalog.film(e.film)?.label.orEmpty(),
-                            )
                         StyleStrip(ui, enabled, onEdit = vm::update, onNone = vm::clearStyle, preview = preview) { vm.applyStyle(it) }
                         PresetRow(ui, vm, enabled)
                         }
@@ -790,15 +857,6 @@ private fun Controls(
                                 !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma ||
                                     e.extraEffectsTuned(d),
-                            )
-                            // The panel head names the pair being developed (ui2_derivatives.md).
-                            PanelHeader(
-                                title = tr("冲洗"),
-                                // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
-                                summary = listOfNotNull(if (e.noFilm) tr("无胶卷") else ui.catalog.film(e.film)?.label,
-                                    if (e.noFilm) null else if (e.scanFilm) tr("直接扫描") else if (e.digitalIntermediate) tr("数字中间片") else ui.catalog.paper(e.paper)?.label,
-                                    if (e.exposureEv != 0.0) String.format(java.util.Locale.ROOT, "%+.1f EV", e.exposureEv) else null,
-                                ).joinToString(" · "),
                             )
                             DevelopSteps(step, stepEdited, enabled) { step = it }
                             if (e.noFilm && ui.source?.kind == "raw") {
@@ -1249,7 +1307,7 @@ private fun Controls(
                 e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,
                 e.cropAspect != 0.0 || e.quarterTurns % 4 != 0 || e.flipH,
             )
-            CategoryBar(selected = tab, enabled = true, trailing = save, edited = entryEdited) { i ->
+            CategoryBar(selected = tab, enabled = true, edited = entryEdited) { i ->
                 if (i == tab) onOpen(!open) else { tab = i; onOpen(true) }
             }
         }
@@ -1380,7 +1438,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
         // Flings settle on a card edge rather than halfway through one.
         flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().filmRail(),
     ) {
         // 无 leads the strip and is a new photo's default (tools/work/no_film_research.md).
         item(key = "_none") {

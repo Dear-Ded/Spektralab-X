@@ -109,7 +109,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         }
         2 -> {
             // Two tools that never share the screen: one colour at a time, or one tonal zone.
-            var tool by remember { mutableIntStateOf(0) }
+            var tool by nav::gradingTool
             Segmented(listOf(tr("单色调整"), tr("色彩平衡")), tool, enabled) { tool = it }
             if (tool == 0) {
                 var band by remember { mutableIntStateOf(0) }
@@ -148,6 +148,8 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                     1 -> l.copy(shadowZone = next); 2 -> l.copy(midZone = next); 3 -> l.copy(highlightZone = next)
                     else -> l.copy(master = next)
                 })
+                ColorWheel(listOf(tr("全局"), tr("阴影"), tr("中间调"), tr("高光"))[zone],
+                    z, enabled, onDrag = vm::setInteracting, onChange = ::setZone)
                 LabeledSlider(tr("色相"), z.hue, 0.0, 360.0, 0.0, enabled, "%.0f°") { setZone(z.copy(hue = it)) }
                 Adj(tr("强度"), z.sat, 0.0, 100.0, enabled) { setZone(z.copy(sat = it)) }
                 Adj(tr("明亮度"), z.lum, -100.0, 100.0, enabled) { setZone(z.copy(lum = it)) }
@@ -235,8 +237,16 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
     val scale by androidx.compose.animation.core.animateFloatAsState(
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "open")
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
+        Text(tr("从一张照片开始"), style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface)
+        Spacer(Modifier.height(12.dp))
+        Text(tr("支持 JPEG、HEIC、PNG 和相机 RAW"),
+            style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
+        Spacer(Modifier.height(28.dp))
         androidx.compose.material3.Button(
             onClick = onPick, interactionSource = press,
+            shape = Corners.m,
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = Palette.Darkroom, contentColor = Palette.OnAccent),
             modifier = Modifier.height(52.dp).widthIn(min = 200.dp)
                 .graphicsLayer { scaleX = scale; scaleY = scale },
         ) {
@@ -246,10 +256,5 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(tr("观片台"), color = Palette.OnSurface.copy(alpha = 0.85f))
         }
-        Spacer(Modifier.height(20.dp))
-        Text(
-            tr("支持 JPEG、HEIC、PNG 和相机 RAW"),
-            style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
-        )
     }
 }

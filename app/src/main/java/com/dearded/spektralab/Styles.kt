@@ -408,7 +408,7 @@ private fun StyleStripContent(
     if (searching && styles.isEmpty()) {
         Text(tr("没有找到“{0}”", query.trim()), style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.filmRail().coachAnchor(CoachStep.STYLE)) {
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
         if (!searching) item(key = "_none") {
             val original = rememberSelectionPreview(ui, ui.edit.withoutStyle(), preview)

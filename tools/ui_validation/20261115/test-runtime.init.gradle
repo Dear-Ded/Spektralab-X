@@ -1,0 +1,7 @@
+gradle.beforeProject { project ->
+    project.tasks.withType(Test).configureEach {
+        def scratch = new File(gradle.rootProject.rootDir, 'ui-test-tmp')
+        scratch.mkdirs()
+        systemProperty 'java.io.tmpdir', scratch.absolutePath
+    }
+}

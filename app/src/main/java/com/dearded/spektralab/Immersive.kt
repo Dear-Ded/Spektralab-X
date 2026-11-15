@@ -36,6 +36,23 @@ private tailrec fun Context.activity(): Activity? = when (this) {
     else -> null
 }
 
+/** The optional light-table backlight needs dark system icons. Restore on exit. */
+@Composable
+internal fun SystemBarTone(lightBackground: Boolean) {
+    val activity = LocalContext.current.activity() ?: return
+    DisposableEffect(activity, lightBackground) {
+        val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+        val status = controller.isAppearanceLightStatusBars
+        val navigation = controller.isAppearanceLightNavigationBars
+        controller.isAppearanceLightStatusBars = lightBackground
+        controller.isAppearanceLightNavigationBars = lightBackground
+        onDispose {
+            controller.isAppearanceLightStatusBars = status
+            controller.isAppearanceLightNavigationBars = navigation
+        }
+    }
+}
+
 /** Hides the status and navigation bars while [hidden]; a swipe from an edge shows them for a moment. */
 @Composable
 fun SystemBarsHidden(hidden: Boolean) {

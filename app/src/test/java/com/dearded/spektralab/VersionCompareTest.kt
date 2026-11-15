@@ -4,6 +4,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VersionCompareTest {
+    @Test fun twoComponentUiVersionFollowsThePreviousAlphaSeries() {
+        assertTrue(compareVersions("0.200-alpha-1", "0.2.00-alpha-8") > 0)
+        assertTrue(compareVersions("v0.200-alpha-2", "0.200-alpha-1") > 0)
+        assertTrue(compareVersions("0.200-alpha-1", "0.200.0-alpha1") == 0)
+    }
     @Test fun patchBumps() {
         assertTrue(compareVersions("0.1.19-alpha", "0.1.18-alpha") > 0)
         assertTrue(compareVersions("0.1.10-alpha", "0.1.9-alpha") > 0)

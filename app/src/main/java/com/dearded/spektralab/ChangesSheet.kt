@@ -36,6 +36,7 @@ internal class EditorNav {
     var tab by mutableIntStateOf(0)
     var step by mutableIntStateOf(0)
     var adjustSeg by mutableIntStateOf(0)
+    var gradingTool by mutableIntStateOf(0)
 }
 
 internal val LocalEditorNav = staticCompositionLocalOf { EditorNav() }

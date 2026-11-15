@@ -77,13 +77,13 @@ import androidx.compose.ui.unit.dp
  *  - SettingRow: a whole-row switch with an optional second line.
  *  - MoreRow: the one way into a step's 更多参数.
  *
- * Selected is always the inverted near-white fill with dark ink plus a shape
- * change, never a hue. Hit targets are 48 dp; items in a row sit 8 dp apart.
+ * Selection uses a quiet container, stronger label and thumbnail outline.
+ * Hit targets are 48 dp; items in a row sit 8 dp apart.
  */
 
 /** Vertical rhythm inside a panel: between controls, and before a new group. */
-internal val RowGap = 12.dp
-internal val GroupGap = 20.dp
+internal val RowGap = 8.dp
+internal val GroupGap = 16.dp
 
 /** The changed-from-default mark: a 6 dp dot, dark on a selected fill, light elsewhere. */
 @Composable
@@ -111,20 +111,23 @@ fun SelectPill(
     // Fill, corner and press come from ui-motion's one draw-phase layer (Interactions.kt).
     val press = remember { MutableInteractionSource() }
     // ui_corners.md: selected is told by the fill and the weight, not by a shape change.
-    val style = rememberSelectionStyle(selected, enabled, restCorner = 12.dp, selectedCorner = 12.dp)
+    val style = rememberSelectionStyle(selected, enabled,
+        restFill = Palette.Surface, selectedFill = Palette.DarkroomDim,
+        restCorner = 8.dp, selectedCorner = 8.dp, selectedInk = Palette.Darkroom)
     val ink = style.ink
     Box(
         Modifier
-            .minimumInteractiveComponentSize()
-            .height(40.dp)
+            .height(48.dp)
             .graphicsLayer { alpha = if (enabled || selected) 1f else 0.5f }
-            .pressScale(press).clip(Corners.m).drawBehind { drawRect(style.fill) }
-            .then(if (selected) Modifier else Modifier.border(1.dp, Palette.OutlineSoft, Corners.m))
+            .pressScale(press).clip(Corners.s)
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
                 interactionSource = press, indication = ripple(), onClick = onClick,
             )
-            .padding(horizontal = 16.dp),
+            .padding(vertical = 6.dp)
+            .clip(Corners.s).drawBehind { drawRect(style.fill) }
+            .then(if (selected) Modifier.border(1.dp, Palette.Darkroom.copy(alpha = 0.35f), Corners.s) else Modifier)
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(
@@ -132,7 +135,7 @@ fun SelectPill(
             LocalTextStyle provides MaterialTheme.typography.labelLarge.copy(
                 color = ink, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal),
         ) { label() }
-        if (edited) EditedDot(onFill = selected,
+        if (edited) EditedDot(
             modifier = Modifier.align(Alignment.TopEnd).offset(x = 10.dp, y = 5.dp))
     }
 }
@@ -256,29 +259,27 @@ internal fun Segmented(
     onSelect: (Int) -> Unit,
 ) {
     Row(
-        modifier.fillMaxWidth().height(48.dp)
-            .background(Palette.Panel, Corners.m)
-            .border(1.dp, Palette.OutlineSoft, Corners.m)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier.fillMaxWidth().height(48.dp).background(Palette.Surface, Corners.s),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         options.forEachIndexed { i, label ->
             val on = i == selected
             val can = enabled && optionEnabled(i)
-            val fill by animateColorAsState(if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f),
+            val fill by animateColorAsState(if (on) Palette.PanelHighest else Color.Transparent,
                 Motion.defaultEffects(), label = "seg-fill")
             val ink by animateColorAsState(
-                when { on -> Palette.OnAccent; can -> Palette.OnSurface; else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f) },
+                when { on -> Palette.OnSurface; can -> Palette.OnSurfaceSoft; else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f) },
                 Motion.defaultEffects(), label = "seg-ink")
             Box(
-                Modifier.weight(1f).fillMaxSize().clip(Corners.s).background(fill)
-                    .selectable(selected = on, enabled = can, role = Role.Tab) { if (!on) onSelect(i) },
+                Modifier.weight(1f).fillMaxSize().clip(Corners.s)
+                    .selectable(selected = on, enabled = can, role = Role.Tab) { if (!on) onSelect(i) }
+                    .padding(4.dp).background(fill, Corners.s),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(label, style = MaterialTheme.typography.labelLarge, color = ink, maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal)
-                if (edited(i)) EditedDot(onFill = on, modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 10.dp))
+                if (edited(i)) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 8.dp))
             }
         }
     }
@@ -399,10 +400,10 @@ internal fun ThumbCard(
 ) {
     val chosen = selected
     val press = remember { MutableInteractionSource() }
-    val ring by animateColorAsState(if (selected) Palette.Accent else Color.Transparent,
+    val ring by animateColorAsState(if (selected) Palette.Darkroom else Palette.OutlineSoft,
         Motion.defaultEffects(), label = "card-ring")
-    val outer = Corners.l
-    val inner = Corners.m
+    val outer = Corners.s
+    val inner = Corners.s
     Column(
         Modifier.width(size + 8.dp)
             .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
@@ -413,9 +414,10 @@ internal fun ThumbCard(
                 onLongClick = onLongClick, onClick = onClick,
             )
             .semantics { this.selected = chosen },
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
     ) {
-        Box(Modifier.size(size + 8.dp).border(2.dp, ring, outer).padding(4.dp)) {
+        Box(Modifier.width(size + 8.dp).height((size + 8.dp) * 0.68f)
+            .border(if (selected) 2.dp else 1.dp, ring, outer).padding(3.dp)) {
             Box(Modifier.fillMaxSize().clip(inner).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
                 if (image != null) {
                     Image(image, contentDescription = title, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
@@ -431,8 +433,8 @@ internal fun ThumbCard(
                     .padding(horizontal = 6.dp, vertical = 1.dp),
             )
             if (selected) Box(
-                Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp)
-                    .background(Palette.Accent, CircleShape),
+                Modifier.align(Alignment.TopEnd).padding(6.dp).size(18.dp)
+                    .background(Palette.Darkroom, CircleShape),
                 contentAlignment = Alignment.Center,
             ) { Check(Palette.OnAccent) }
             else if (edited) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
@@ -442,21 +444,19 @@ internal fun ThumbCard(
                 contentAlignment = Alignment.Center,
             ) { Star(Palette.OnSurface) }
         }
-        Spacer(Modifier.height(6.dp))
-        val nameFill by animateColorAsState(if (selected) Palette.Accent else Palette.Accent.copy(alpha = 0f),
-            Motion.defaultEffects(), label = "card-name")
+        Spacer(Modifier.height(4.dp))
         Text(
             title, style = MaterialTheme.typography.labelLarge,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) Palette.OnAccent else Palette.OnSurface,
+            color = if (selected) Palette.Darkroom else Palette.OnSurface,
             maxLines = 1, overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.background(nameFill, Corners.s).padding(horizontal = 8.dp, vertical = 1.dp),
+            modifier = Modifier.padding(horizontal = 3.dp),
         )
         if (subtitle.isNotBlank()) Text(
             subtitle, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft,
-            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 3.dp),
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
     }
 }
 

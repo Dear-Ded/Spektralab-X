@@ -1,0 +1,3 @@
+TL;DR: Darkroom UI and engine fixes; no broad phone testing yet, feedback needed.
+0.200-alpha-1 (129), unreleased: 87 styles reset full physics baselines; new CUBE <=12MiB runs native 1D/domain/3D chains, sharing original bytes; larger files use a reported grid fallback.
+Old caches stay: reimport originals for this fix; chains cost more CPU, cloud timings aren't phone results; curves updated, checks pending, UI not installed; ten candidates stay optional, vendor profiles remain research.

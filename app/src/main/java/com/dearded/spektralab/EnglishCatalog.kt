@@ -3,6 +3,14 @@ package com.dearded.spektralab
 /** Reviewed English UI messages. Co-created with GPT (OpenAI). */
 internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
+        "灯箱背光" to "Light table backlight",
+        "开启" to "On",
+        "关闭" to "Off",
+        "暗房" to "Darkroom",
+        "重做" to "Redo",
+        "从一张照片开始" to "Start with a photograph",
+        "展开编辑面板" to "Expand editing panel",
+        "收起编辑面板" to "Collapse editing panel",
         "语言 / Language" to "Language",
         "应用界面语言。切换后保留当前照片和编辑。" to "App language. Your current photo and edits are kept.",
         "无法保存语言设置，请重试。" to "Could not save the language setting. Please try again.",
@@ -1107,6 +1115,8 @@ internal object EnglishCatalog {
         "反转" to "Reversal",
         "输入{0}" to "Enter {0}",
         "范围 {0} 到 {1}，默认 {2}" to "Range {0} to {1}; default {2}",
+        "请输入范围内的有效数值" to "Enter a valid number within the range",
+        "照片边界角标" to "Photo boundary corners",
         "确定" to "OK",
         "偏亮，高光有溢出" to "Bright, with clipped highlights",
         "偏暗，暗部有溢出" to "Dark, with clipped shadows",

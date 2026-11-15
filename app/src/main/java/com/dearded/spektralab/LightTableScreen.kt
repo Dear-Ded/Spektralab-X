@@ -62,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -81,6 +82,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -119,6 +121,15 @@ fun LightTableScreen(
     val snackbar = remember { SnackbarHostState() }
     val selecting = state.selection.isNotEmpty()
     val add = rememberAddPhotos(table)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val lightingPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
+    var backlit by androidx.compose.runtime.saveable.rememberSaveable {
+        mutableStateOf(lightingPrefs.getBoolean("light_table_backlit", false))
+    }
+    val ground = if (backlit) Color(0xFFEFECE4) else Palette.Background
+    val ink = if (backlit) Color(0xFF242428) else Palette.OnSurface
+    val secondary = if (backlit) Color(0xFF59595F) else Palette.OnSurfaceSoft
+    SystemBarTone(backlit)
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -129,7 +140,7 @@ fun LightTableScreen(
     BackHandler(enabled = selecting) { table.clearSelection() }
 
     val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + HeadHeight
-    Box(Modifier.fillMaxSize().background(Palette.Background)) {
+    Box(Modifier.fillMaxSize().background(ground)) {
         if (frames.isEmpty()) {
             EmptyTable(add)
         } else {
@@ -137,7 +148,7 @@ fun LightTableScreen(
                 FilterRow(frames, state.filter, table::setFilter, state.filmThumbs, table::setFilmThumbs)
                 if (visible.isEmpty()) {
                     Text(tr("没有{0}的照片", state.filter.label), Modifier.fillMaxWidth().padding(32.dp),
-                        color = Palette.OnSurfaceSoft, textAlign = TextAlign.Center)
+                        color = secondary, textAlign = TextAlign.Center)
                 }
             }
         }
@@ -146,9 +157,33 @@ fun LightTableScreen(
             title = if (selecting) tr("已选 {0}", state.selection.size) else tr("观片台"),
             subtitle = if (selecting || frames.isEmpty()) "" else tr("{0} 张 · 双指缩放改列数", frames.size),
             selecting = selecting,
+            ground = ground, ink = ink, secondary = secondary,
             onBack = { if (selecting) table.clearSelection() else onBack() },
             trailing = {
-                if (selecting) QuietButton(tr("全选")) { table.selectAll(visible.map { it.id }) }
+                if (selecting) androidx.compose.material3.TextButton(
+                    onClick = { table.selectAll(visible.map { it.id }) }, modifier = Modifier.height(48.dp)) {
+                    Text(tr("全选"), color = ink)
+                }
+                IconButton(onClick = {
+                    backlit = !backlit
+                    lightingPrefs.edit().putBoolean("light_table_backlit", backlit).apply()
+                }, modifier = Modifier.size(48.dp).semantics {
+                    contentDescription = tr("灯箱背光")
+                    stateDescription = if (backlit) tr("开启") else tr("关闭")
+                }) {
+                    androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
+                        val c = if (backlit) ink else Palette.Darkroom
+                        val r = size.minDimension * 0.25f
+                        drawCircle(c, r, center, style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()))
+                        for (i in 0 until 8) {
+                            val a = i * Math.PI / 4
+                            val dx = kotlin.math.cos(a).toFloat()
+                            val dy = kotlin.math.sin(a).toFloat()
+                            drawLine(c, center + Offset(dx, dy) * (r * 1.45f),
+                                center + Offset(dx, dy) * (r * 1.9f), 1.5.dp.toPx())
+                        }
+                    }
+                }
             },
         )
         // Reading photos in: the working bar under the head, never a halo round a photo (UI2.md 1.1).
@@ -196,30 +231,32 @@ internal fun TableHead(
     titleLeading: @Composable () -> Unit = {},
     /** The subtitle's style, when it is not a plain hint (a roll's edge line). */
     subtitleStyle: androidx.compose.ui.text.TextStyle? = null,
+    ground: Color = Palette.Background,
+    ink: Color = Palette.OnSurface,
+    secondary: Color = Palette.OnSurfaceSoft,
     trailing: @Composable () -> Unit = {},
 ) {
     Row(
         Modifier.fillMaxWidth()
             // Solid behind the text, fading only below it, so frames scrolled under never reach the title.
-            .background(Brush.verticalGradient(0f to Palette.Background, 0.85f to Palette.Background.copy(alpha = 0.96f), 1f to Color.Transparent))
+            .background(Brush.verticalGradient(0f to ground, 0.85f to ground.copy(alpha = 0.96f), 1f to Color.Transparent))
             .statusBarsPadding()
             .height(HeadHeight)
             .padding(end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-            if (selecting) Icon(Icons.Default.Close, contentDescription = tr("取消选择"), tint = Palette.OnSurface)
-            else Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = Palette.OnSurface)
+            if (selecting) Icon(Icons.Default.Close, contentDescription = tr("取消选择"), tint = ink)
+            else Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = ink)
         }
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 titleLeading()
-                Text(title, style = MaterialTheme.typography.titleMedium, color = Palette.OnSurface, maxLines = 1,
+                Text(title, style = MaterialTheme.typography.titleMedium, color = ink, maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             if (subtitle.isNotEmpty()) {
-                if (subtitleStyle != null) Text(subtitle, style = subtitleStyle, color = Palette.OnSurfaceSoft, maxLines = 1)
-                else Hint(subtitle)
+                Text(subtitle, style = subtitleStyle ?: MaterialTheme.typography.bodySmall, color = secondary, maxLines = 1)
             }
         }
         trailing()

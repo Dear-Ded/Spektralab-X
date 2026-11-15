@@ -55,7 +55,7 @@ import kotlin.math.hypot
  * The drag is relative (gain 0.6, so the finger never covers the dot); hold
  * still for a long-press first and it drops to 0.2 for fine work. The dot snaps
  * to the centre and to the style's home point with a tick; a double tap goes
- * home. [onDrag] brackets a gesture, which the editor's history takes as one step.
+ * home. [onDrag] brackets a gesture; the editor manages preview settling and history.
  *
  * TalkBack gets two ordinary sliders (色调, 色彩) instead of the pad; "数值"
  * shows the same sliders to anyone.
@@ -141,6 +141,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                         // Pad units (-100..100) per pixel: the long side spans 200 at gain 1.
                         val unitsX = 200f / size.width
                         val unitsY = 200f / size.height
+                        try {
                         while (true) {
                             val event = awaitPointerEvent()
                             val c = event.changes.firstOrNull { it.id == down.id } ?: break
@@ -178,11 +179,14 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                             send(t, col)
                             c.consume()
                         }
+                        } finally {
                         fine = false
                         if (moved) {
                             pressed = false
                             onDragLatest(false); recede(false)
-                        } else if (!long) {
+                        }
+                        }
+                        if (!moved && !long) {
                             val now = down.uptimeMillis
                             if (now - lastTap < viewConfiguration.doubleTapTimeoutMillis) { send(homeT, homeC); lastTap = 0L }
                             else lastTap = now

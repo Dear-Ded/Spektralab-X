@@ -43,9 +43,6 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
@@ -54,28 +51,25 @@ import kotlin.math.ceil
 import kotlin.math.pow
 
 /**
- * The editing slider (docs/UI.md 2.3): a 3 dp track with a tick at the
- * default and the fill drawn from it (so a two-way slider fills from the
- * middle), a 20 dp thumb that grows to 24 dp and shows its value in a bubble
- * while dragged, and ↺ only once the value has moved.
+ * A precision ruler: moving ticks under a fixed pointer, numeric entry and
+ * a default detent. The existing API keeps engine and history callbacks intact.
  *
- * Gestures: a drag moves the thumb by the finger's travel, not to the finger;
+ * Gestures: a drag moves the scale by the finger's travel;
  * holding the finger more than 40 dp above or below the track slows it to a
- * quarter for fine work; a tap beside the thumb steps one unit that way
- * (Lightroom); a double tap on the thumb or the label row resets. Haptics only
+ * quarter for fine work; a tap beside the pointer steps one readout unit;
+ * a double tap on the pointer or the label row resets. Haptics only
  * on reaching the default or an end. TalkBack reads it as an adjustable value
  * with a "重置" custom action.
  *
- * The value lives in this slider's own state, so the thumb follows the finger
- * without waiting for the model: the thumb, fill and bubble read it in the draw
- * phase, and per move only this slider's readout recomposes, not the page. The
+ * The value lives in this slider's own state, so the scale follows the finger
+ * without waiting for the model. Tick positions are read in the draw phase. The
  * model still hears every change through [onChange] (the preview has to
  * follow), and [onDrag] brackets a drag.
  */
 @Composable
 internal fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
-    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = {},
+    enabled: Boolean, format: String, onDrag: (Boolean) -> Unit = LocalParameterDrag.current,
     /** Shown under the track while the slider is off: why it cannot be used (UI2.md 4, question 3). */
     disabledReason: String = "",
     /** Words under the two ends of the track, e.g. 偏黄 / 偏蓝: which way each end moves the picture. */
@@ -87,7 +81,7 @@ internal fun LabeledSlider(
     val hi = max.toFloat()
     val def = default.toFloat().coerceIn(lo, hi)
     val span = (hi - lo).coerceAtLeast(1e-6f)
-    val step = remember(format, span) { stepFor(format, span) }
+    val step = remember(format) { stepFor(format) }
     // One state for the slider's life: the gesture loop keeps writing to it
     // across recompositions. A value from elsewhere (undo, a preset) replaces
     // it, except mid-drag, where the model's echo lags the finger.
@@ -158,97 +152,96 @@ internal fun LabeledSlider(
             }
         }
 
-        val measurer = rememberTextMeasurer()
-        val bubbleStyle = TextStyle(fontSize = 12.sp, color = Palette.OnAccent, fontFeatureSettings = "tnum")
         Canvas(
-            Modifier.fillMaxWidth().height(36.dp).systemGestureExclusion()
+            Modifier.fillMaxWidth().height(48.dp).systemGestureExclusion()
                 .semantics {
                     contentDescription = label
                     stateDescription = text(local)
                     progressBarRangeInfo = ProgressBarRangeInfo(local, lo..hi)
                     if (!enabled) disabled()
                     else {
-                        setProgress { target -> moveTo(snapToStep(target, lo, hi, step)); true }
+                        setProgress { target ->
+                            if (!target.isFinite()) false
+                            else { moveTo(snapToStep(target, lo, hi, step)); true }
+                        }
                         customActions = listOf(CustomAccessibilityAction(tr("重置")) { reset(); true })
                     }
                 }
                 .pointerInput(enabled, lo, hi, def, step) {
                     if (!enabled) return@pointerInput
-                    val r = 12.dp.toPx()
                     val fineBand = 40.dp.toPx()
-                    val snap = span * 0.015f
+                    val snap = minOf(step / 2f, span * 0.002f)
                     val slop = viewConfiguration.touchSlop
-                    fun xOf(v: Float) = r + (v - lo) / span * (size.width - 2 * r)
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        val onThumb = abs(down.position.x - xOf(local)) <= 24.dp.toPx()
-                        val perPx = span / (size.width - 2 * r).coerceAtLeast(1f)
+                        if (down.isConsumed) return@awaitEachGesture
+                        val onThumb = abs(down.position.x - size.width / 2f) <= 24.dp.toPx()
+                        val perPx = span * 0.4f / size.width.coerceAtLeast(1)
                         var dragging = false
+                        var released = false
                         var raw = local   // the unsnapped position, so the snap never sticks
                         var lastX = down.position.x
+                        try {
                         while (true) {
                             val event = awaitPointerEvent()
                             val c = event.changes.firstOrNull { it.id == down.id } ?: break
-                            if (!c.pressed) break
+                            if (!c.pressed) { released = true; break }
+                            if (event.changes.count { it.pressed } > 1) break
                             // The page's scroll took a vertical swipe first: it is not ours.
                             if (!dragging && c.isConsumed) return@awaitEachGesture
                             if (!dragging) {
                                 if (abs(c.position.x - down.position.x) <= slop) continue
                                 dragging = true
                                 pressed = true
-                                lastX = c.position.x
+                                lastX = down.position.x + (if (c.position.x > down.position.x) slop else -slop)
                                 onDragLatest(true); recede(true)
                             }
                             val fine = abs(c.position.y - size.height / 2f) > fineBand
-                            raw = (raw + (c.position.x - lastX) * perPx * (if (fine) 0.25f else 1f)).coerceIn(lo, hi)
+                            raw = (raw - (c.position.x - lastX) * perPx * (if (fine) 0.25f else 1f)).coerceIn(lo, hi)
                             lastX = c.position.x
                             moveTo(if (abs(raw - def) < snap) def else raw)
                             c.consume()
                         }
+                        } finally {
                         if (dragging) {
                             pressed = false
-                            onDragLatest(false); recede(false)
-                        } else if (onThumb) {
+                            try { onDragLatest(false) } finally { recede(false) }
+                        }
+                        }
+                        if (!released) return@awaitEachGesture
+                        if (!dragging && onThumb) {
                             val now = down.uptimeMillis
-                            if (now - lastThumbTap < viewConfiguration.doubleTapTimeoutMillis) { reset(); lastThumbTap = 0L }
+                            if (lastThumbTap != 0L && now - lastThumbTap < viewConfiguration.doubleTapTimeoutMillis) { reset(); lastThumbTap = 0L }
                             else lastThumbTap = now
-                        } else {
-                            val dir = if (down.position.x > xOf(local)) 1 else -1
+                        } else if (!dragging) {
+                            val dir = if (down.position.x > size.width / 2f) 1 else -1
                             moveTo(snapToStep(local + dir * step, lo, hi, step))
                         }
                     }
                 },
         ) {
-            // ui2_visual_refs.md 2.8: a 2 dp track, filled from the default to the thumb; the
-            // default is a 4 dp dot; the thumb is a hollow ring with a centre point, 22 dp at
-            // rest and 28 dp under the finger.
-            val r = 14.dp.toPx()
-            val cy = size.height / 2f
-            val track = 2.dp.toPx()
-            val x0 = r
-            val x1 = size.width - r
-            fun xOf(v: Float) = x0 + (v - lo) / span * (x1 - x0)
-            val fill = if (enabled) Palette.Accent else Palette.Outline
-            drawRoundRect(if (enabled) Palette.Track else Palette.PanelHighest, Offset(x0, cy - track / 2), Size(x1 - x0, track), CornerRadius(track / 2))
-            val xd = xOf(def)
-            val xv = xOf(local)
-            drawRect(fill, Offset(minOf(xd, xv), cy - track / 2), Size(abs(xv - xd), track))
-            drawCircle(if (changed) Palette.OnSurfaceSoft else Palette.Track, 2.dp.toPx(), Offset(xd, cy))
-            val thumb = (if (pressed) 14.dp else 11.dp).toPx()
-            val ink = if (enabled) Palette.OnSurface else Palette.Outline
-            drawCircle(Palette.Surface, thumb, Offset(xv, cy))
-            drawCircle(ink, thumb - 1.dp.toPx(), Offset(xv, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
-            drawCircle(ink, 2.dp.toPx(), Offset(xv, cy))
-            if (pressed) {
-                val layout = measurer.measure(text(local), bubbleStyle)
-                val pad = 6.dp.toPx()
-                val w = layout.size.width + 2 * pad
-                val h = layout.size.height + pad
-                val left = (xv - w / 2).coerceIn(0f, size.width - w)
-                val top = cy - thumb - 6.dp.toPx() - h
-                drawRoundRect(Palette.Accent, Offset(left, top), Size(w, h), CornerRadius(h / 2))
-                drawText(layout, topLeft = Offset(left + pad, top + pad / 2))
+            val visible = span * 0.4f
+            val pixelsPerUnit = size.width / visible
+            val tickUnit = maxOf(step, span / 100f)
+            val first = kotlin.math.floor((local - visible / 2) / tickUnit).toInt()
+            val last = ceil((local + visible / 2) / tickUnit).toInt()
+            val cy = size.height * 0.48f
+            for (i in first..last) {
+                val v = i * tickUnit
+                if (v < lo - tickUnit * 0.01f || v > hi + tickUnit * 0.01f) continue
+                val x = size.width / 2 + (v - local) * pixelsPerUnit
+                val edgeFade = (minOf(x, size.width - x) / 24.dp.toPx()).coerceIn(0f, 1f)
+                val major = i % 5 == 0
+                val h = (if (major) 20.dp else 10.dp).toPx()
+                drawLine(if (enabled) Palette.OnSurfaceSoft.copy(alpha = (if (major) 0.85f else 0.48f) * edgeFade)
+                    else Palette.Outline, Offset(x, cy - h / 2), Offset(x, cy + h / 2), 1.dp.toPx())
             }
+            val xd = size.width / 2 + (def - local) * pixelsPerUnit
+            if (xd in 0f..size.width) drawCircle(Palette.OnSurfaceSoft, 2.dp.toPx(), Offset(xd, cy + 17.dp.toPx()))
+            val needle = if (enabled) Palette.Darkroom else Palette.Track
+            drawRoundRect(needle, Offset(size.width / 2 - 1.dp.toPx(), cy - 15.dp.toPx()),
+                Size(2.dp.toPx(), 30.dp.toPx()), CornerRadius(1.dp.toPx()))
+            drawCircle(needle, 2.dp.toPx(), Offset(size.width / 2, cy - 19.dp.toPx()))
         }
         // Neutral words, never a hue: the direction is told in text (UI2.md 1.1).
         if (ends != null) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
@@ -259,11 +252,13 @@ internal fun LabeledSlider(
         if (!enabled && disabledReason.isNotBlank()) Hint(disabledReason)
     }
 
-    // The typed value: digits, sign and point only (a unit such as EV, × or % is ignored),
-    // clamped to the slider's range; anything unreadable leaves the value alone.
+    // Parse the complete entry so a comma or a Unicode minus cannot silently
+    // become a different value. Out-of-range entries remain editable.
     if (typing) {
         var entry by remember { mutableStateOf(String.format(Locale.ROOT, "%.4f", local.toDouble()).trimEnd('0').trimEnd('.')) }
-        val parsed = entry.filter { it.isDigit() || it == '-' || it == '.' }.toFloatOrNull()
+        val parsed = entry.trim().replace('\u2212', '-').replace('\uFF0D', '-')
+            .replace('\uFF0B', '+').replace('\uFF0E', '.').toFloatOrNull()?.takeIf { it.isFinite() }
+        val valid = parsed != null && parsed in lo..hi
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { typing = false },
             title = { Text(label) },
@@ -271,18 +266,22 @@ internal fun LabeledSlider(
                 Column {
                     androidx.compose.material3.OutlinedTextField(
                         value = entry, onValueChange = { entry = it.take(12) }, singleLine = true,
+                        isError = !valid,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    if (!valid) Text(tr("请输入范围内的有效数值"),
+                        color = Palette.Warning, style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 6.dp))
                     Text(tr("范围 {0} 到 {1}，默认 {2}", text(lo), text(hi), text(def)),
                         style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
                         modifier = Modifier.padding(top = 6.dp))
                 }
             },
             confirmButton = {
-                androidx.compose.material3.TextButton(enabled = parsed != null, onClick = {
-                    parsed?.let { moveTo(it.coerceIn(lo, hi)) }
+                androidx.compose.material3.TextButton(enabled = valid, onClick = {
+                    parsed?.takeIf { it in lo..hi }?.let { moveTo(it) }
                     typing = false
                 }) { Text(tr("确定")) }
             },
@@ -291,11 +290,11 @@ internal fun LabeledSlider(
     }
 }
 
-/** One step: a unit of the readout's last digit, at least 1/200 of the range, so a tap is visible. */
-private fun stepFor(format: String, span: Float): Float {
+/** Taps and accessibility can reach the readout's last digit, including 0.01 EV. */
+private fun stepFor(format: String): Float {
     val decimals = Regex("""\.(\d+)f""").find(format)?.groupValues?.get(1)?.toIntOrNull() ?: 0
     val unit = 10.0.pow(-decimals).toFloat()
-    return unit * ceil(span / 200f / unit).coerceAtLeast(1f)
+    return unit
 }
 
 private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =
@@ -306,6 +305,7 @@ private fun snapToStep(v: Float, lo: Float, hi: Float, step: Float): Float =
  * overlays fade, leaving the photo and the slider. The editor provides it.
  */
 val LocalSliderDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean) -> Unit> { {} }
+internal val LocalParameterDrag = androidx.compose.runtime.staticCompositionLocalOf<(Boolean) -> Unit> { {} }
 
 /**
  * 欠曝 / 正常 / 过曝 from the print on screen (ui2_icecream.md 6.6): the mean of the

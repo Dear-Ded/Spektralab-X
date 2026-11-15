@@ -20,6 +20,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.ViewModelProvider
@@ -69,6 +71,35 @@ class Screenshots {
     @Test fun editorEmpty() {
         editor(Fake.ui().copy(source = null, image = null, before = null, canUndo = false))
         shot("01_editor_empty")
+    }
+
+    @Test @Config(qualifiers = "w320dp-h640dp-normal-notround-port-night-mdpi-keyshidden-nonav")
+    fun compactEnglishWorkspace() {
+        AppLocale.select(compose.activity, UiLanguage.ENGLISH)
+        try {
+            editor(Fake.ui())
+            shot("90_workspace_320_en")
+            for (label in listOf("Styles", "Develop", "Adjust", "Borders", "Crop")) {
+                val bounds = compose.onAllNodes(hasText(label) and hasClickAction()).onFirst().fetchSemanticsNode().boundsInRoot
+                org.junit.Assert.assertTrue("$label width: ${bounds.width}", bounds.width >= 48f)
+                org.junit.Assert.assertTrue("$label height: ${bounds.height}", bounds.height >= 48f)
+            }
+            val photo = compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot
+            val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+            org.junit.Assert.assertTrue("Photo must keep at least 40% of the screen", photo.height >= root.height * 0.40f)
+            tap("Save")
+            screenShot("91_workspace_export_en")
+            compose.onNodeWithText(tr("JPEG · 工作尺寸")).assertExists()
+        } finally { AppLocale.select(compose.activity, UiLanguage.CHINESE) }
+    }
+
+    @Test @Config(qualifiers = "w873dp-h393dp-normal-long-notround-land-night-mdpi-keyshidden-nonav")
+    fun landscapeWorkspace() {
+        editor(Fake.ui())
+        shot("92_workspace_landscape")
+        val photo = compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot
+        org.junit.Assert.assertTrue("Landscape photo width", photo.width >= 400f)
+        compose.onAllNodes(hasText("保存") and hasClickAction()).onFirst().assertExists()
     }
 
     @Test fun editorBusy() {
@@ -135,6 +166,36 @@ class Screenshots {
         }
     }
 
+    @Test fun editorColourWheel() {
+        editor(Fake.ui())
+        tap("调整")
+        shot("35_adjust_wheel_entry")
+        tap("分色")
+        shot("36_adjust_grading_entry")
+        tap("色彩平衡")
+        tallPanel()
+        shot("37_adjust_colour_wheel")
+    }
+
+    @Test fun optionalBoundaryCornersKeepThePhotoAndEditUnchanged() {
+        val state = Fake.ui()
+        val vm = editorVm(state)
+        content { EditorScreen(vm, preview = Fake::preview) }
+        shot("95_boundary_disabled")
+        compose.onNodeWithTag("photo-boundary-corners").assertDoesNotExist()
+        val before = compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot
+        compose.onNodeWithContentDescription("更多").performSemanticsAction(SemanticsActions.OnClick)
+        screenShot("96_boundary_menu")
+        tap("照片边界角标")
+        shot("97_boundary_enabled")
+        compose.onNodeWithTag("photo-boundary-corners").assertExists()
+        org.junit.Assert.assertEquals(before, compose.onNodeWithTag("editor-preview").fetchSemanticsNode().boundsInRoot)
+        org.junit.Assert.assertEquals(state.edit, vm.ui.value.edit)
+        tap("构图")
+        shot("98_boundary_crop_hidden")
+        compose.onNodeWithTag("photo-boundary-corners").assertDoesNotExist()
+    }
+
     @Test fun editorBorderAndCrop() {
         val ui = Fake.ui()
         val border = Borders.byId("gallery")!!
@@ -157,6 +218,9 @@ class Screenshots {
         val table = tableVm()
         content { LightTableScreen(table, onBack = {}, onOpen = { _, _ -> }, onRolls = {}) }
         shot("70_table_grid")
+        compose.onNodeWithContentDescription("灯箱背光").performSemanticsAction(SemanticsActions.OnClick)
+        shot("75_table_backlit")
+        compose.onNodeWithContentDescription("灯箱背光").performSemanticsAction(SemanticsActions.OnClick)
     }
 
     @Test fun lightTableLoupe() {

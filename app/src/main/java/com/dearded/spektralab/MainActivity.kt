@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
     private var incoming: Job? = null
+    private var introRevealed by androidx.compose.runtime.mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // ui-motion_splash.md 6: the system splash, then LaunchIntro from the same strip.
@@ -41,6 +43,8 @@ class MainActivity : ComponentActivity() {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         val intro = savedInstanceState == null && launchIntroWanted(this, intent)
+        LaunchIcon.rect = null
+        LaunchIcon.wipe = 1f
         splash.setOnExitAnimationListener { p ->
             if (intro) {
                 val r = android.graphics.Rect()
@@ -50,7 +54,10 @@ class MainActivity : ComponentActivity() {
                 LaunchIcon.wipe = if (start <= 0L) 1f
                     else ((System.currentTimeMillis() - start) / 450f).coerceIn(0f, 1f)
             }
-            p.view.animate().alpha(0f).setDuration(120).withEndAction { p.remove() }.start()
+            p.view.animate().alpha(0f).setDuration(120).withEndAction {
+                p.remove()
+                introRevealed = true
+            }.start()
         }
         // The UI is always dark: without this, a phone in light mode draws dark
         // status-bar icons on the dark top bar, where they vanish.
@@ -66,12 +73,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Always dark: judging a print against a white UI skews it.
             AppLocaleHost { SpektraTheme {
-                CoachHost { AppScreens(viewModel) }; ImportHost(viewModel)
-                // Over everything, until the engine is ready (600 ms to 1.6 s) or a tap skips it.
-                var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
-                if (showIntro) {
-                    val ui by viewModel.ui.collectAsState()
-                    LaunchIntro(ready = ui.ready, onDone = { showIntro = false })
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+                    CoachHost { AppScreens(viewModel) }
+                    ImportHost(viewModel)
+                    var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
+                    if (showIntro) {
+                        val ui by viewModel.ui.collectAsState()
+                        LaunchIntro(ready = ui.ready, visible = introRevealed, onDone = { showIntro = false })
+                    }
                 }
             } }
         }
