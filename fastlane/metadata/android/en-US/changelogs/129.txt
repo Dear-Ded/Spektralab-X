@@ -1,3 +1,2 @@
-TL;DR: Darkroom UI and engine fixes; no broad phone testing, feedback needed.
-0.210-alpha-1 (129), unreleased: 87 styles reset physics baselines. New CUBE <=12MiB runs native 1D/domain/3D chains and shares original bytes; larger files use a reported grid fallback.
-Reimport originals to replace old caches. Chains cost more CPU; cloud timings aren't phone results. UI checks passed; signed candidate ready, UI not phone-tested. Ten candidates stay optional; vendor profiles remain research.
+Unreleased 0.210-alpha-1 (129): detailed film boxes, shorter metal canisters, perforated leaders and interruptible development. Neutral controls, precision dials, hold-to-confirm reset/TIFF, optional viewfinders and a haptic switch. Chinese/English labels retained.
+87 styles reset physics baselines. New CUBE <=12MiB keeps native chains; larger files report grid fallback. Reimport originals to replace old caches. Latest phone acceptance is pending; vendor profiles remain research.
