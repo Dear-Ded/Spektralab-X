@@ -1,6 +1,6 @@
-# 0.200-alpha-1 / code129 发布准备
+# 0.210-alpha-1 / code129 发布准备
 
-2026-11-15（UTC+8）。构建源码：`5a23164102e5990ddd8c24e601a9479f9ae4e6b2`；显示版本：`0.200-alpha-1`；内部版本码：`129`。**正式签名候选已生成并检验，尚未创建公开 Release 或标签。** 历史 `0.2.00-alpha-*` 版本名保留原记录。
+2026-11-15（UTC+8）。构建源码：`5a23164102e5990ddd8c24e601a9479f9ae4e6b2`；显示版本：`0.210-alpha-1`；内部版本码：`129`。**正式签名候选正在重新构建，尚未创建公开 Release 或标签。** 历史 `0.2.00-alpha-*` 版本名保留原记录。
 
 ## 本轮改动
 
@@ -31,21 +31,15 @@
 
 ## 候选安装包与最终状态
 
-本机产物：`D:/AGI/GPT/releases/Spektralab-X/0.200-alpha-1/Spektralab-X-0.200-alpha-1-arm64-v8a.apk`，**38,954,354 bytes**。旁边保存 `SHA256SUMS`、R8 mapping 及 `verification/` 完整下载报告。下载后重新计算的哈希同时匹配 checksum 和云端包检查：
+本机旧候选：`D:/AGI/GPT/releases/Spektralab-X/0.200-alpha-1/Spektralab-X-0.200-alpha-1-arm64-v8a.apk`。该文件的显示版本仍为 `0.200-alpha-1`，已保留作审计材料，不作为本轮装机包。`0.210-alpha-1` 的签名产物、checksum、R8 mapping 及 `verification/` 将在重新构建后写入对应目录。
 
-```text
-1b852ce9d50c308d53efab5c9085d90c5e16bd012bdc6d5f2ebeea3792d8b3c6
-```
-
-证书 SHA-256 为 `cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3`，与原发布证书一致；APK v2 签名、版本 129 / `0.200-alpha-1`、非 debuggable ARM64、两库 ELF LOAD 16 KiB 与 ZIP 16 KiB 对齐均已通过。逐项核对 DEX、**40 个 JNI 方法**（包括新原始 LUT 入口）、**113 项引擎资源**、**56 个 SPIR-V**；没有复用旧 Alpha 8 的 JNI。
-
-机器可读结果和包检查见 [validation-summary.json](validation/alpha0200-1-2026-11-15/validation-summary.json) 与 [verified-package.json](validation/alpha0200-1-2026-11-15/verified-package.json)。这份记录后的文档 / QA helper 提交不改变上述构建源码。
+`0.210-alpha-1` 的哈希、签名和包检查结果待重新构建后补入；旧 `0.200-alpha-1` 候选的结果不转作本轮结论。
 
 | 项目 | 当前状态 | 证据 / 边界 |
 | --- | --- | --- |
 | 数值输入 | 最终 CI 9/9，AOIDC 补充视觉 3/3 | 普通 / Unicode 负号、无效 / 越界、连续改错、取消与范围钳制；真实软键盘未验 |
 | 完整回归 | Debug 435/435，Release 241/241，GPU 两组通过 | 0 失败 / 错误 / 跳过；云端测试不等于手机性能或色彩验收 |
-| 正式签名 APK | 已生成、下载并检验 | 原发布证书、正确版本、ARM64、40 JNI、DEX / 资源 / 着色器及 16 KiB 对齐 |
-| SHA-256 | 本地、checksum、云端包检查三者一致 | 完整值见上 |
-| 真机安装与体验 | 新 UI 未装机 | 启动视觉交接、软键盘、小屏手势、实际显示及原始链耗时 / 发热待后续复测 |
+| 正式签名 APK | 重新构建中 | 目标为原发布证书、`0.210-alpha-1`、ARM64、40 JNI、DEX / 资源 / 着色器及 16 KiB 对齐 |
+| SHA-256 | 待新包生成 | 旧候选哈希不适用于 `0.210-alpha-1` |
+| 真机安装与体验 | 待 `0.210-alpha-1` 包生成后执行 | 启动视觉交接、软键盘、小屏手势、实际显示及原始链耗时 / 发热将记录在本轮设备验收中 |
 | 发布 | **仅完成候选准备，未公开发布** | workflow_dispatch；release job 跳过，无新标签 |

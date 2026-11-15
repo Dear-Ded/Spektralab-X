@@ -4,11 +4,11 @@
 
 所有用户能看到的改动都记在这里，最新的在最上面。每个版本对应 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 页面的一个预发布版本，标签为 `v<版本号>`，安装包的校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。接下来要做的见[路线图](docs/ROADMAP.md)。
 
-版本号格式为 `主版本.次版本.修订号[-阶段序号]`，预发布使用 alpha、beta 或 rc。本轮版本使用 `0.200-alpha-1`，历史版本保留原记录；内部安装版本码由 `VERSION_CODE` 单独递增。已发布条目的日期为发布日（UTC+8），准备条目另行注明状态。
+版本号格式为 `主版本.次版本.修订号[-阶段序号]`，预发布使用 alpha、beta 或 rc。本轮版本使用 `0.210-alpha-1`，历史版本保留原记录；内部安装版本码由 `VERSION_CODE` 单独递增。已发布条目的日期为发布日（UTC+8），准备条目另行注明状态。
 
 Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
 
-## 0.200-alpha-1 · 2026-11-15
+## 0.210-alpha-1 · 2026-11-15
 
 **省流：** 暗房界面与精密控件、风格基线和 CUBE 原始链修正；未大规模真机验证，需要社区反馈。
 
@@ -43,12 +43,12 @@ Every user-visible change, newest first. Each version is a pre-release on the [R
 - 上一轮十款原创候选仍不自动纳入内置目录。厂商 profile 与颜色研究只到准入与适配准备，没有新增经过实测的厂商风格，也不声称与官方直出或官方软件同色。
 - 云端完整回归和签名包检查已通过，尚未公开发布；Lint 无错误，非阻断提示与验证明细保存在准备记录中。
 
-后续装机反馈请附机型、界面语言和复现步骤。安装包身份、校验值与验证边界见 [本轮发布准备记录](docs/ALPHA_0200_1_PREPARATION_2026-11-15.md)。
+后续装机反馈请附机型、界面语言和复现步骤。安装包身份、校验值与验证边界见 [本轮发布准备记录](docs/ALPHA_0210_1_PREPARATION_2026-11-15.md)。
 
 <details>
 <summary>技术细节（引擎、版本与角标边界）</summary>
 
-- 本轮显示版本为 `0.200-alpha-1`，内部版本码为 `129`；历史 `0.2.00-alpha-*` 条目保持原名。
+- 本轮显示版本为 `0.210-alpha-1`，内部版本码为 `129`；历史 `0.2.00-alpha-*` 条目保持原名。
 - 尚未发布的引擎修正来自已包含于当前 HEAD 的 `d1a0232`。实现、既有独立证据及性能限制见 [风格与引擎还原记录](docs/STYLE_ENGINE_FIDELITY_2026-11-15.md)，其中已有验证不代替本轮最终 APK 验收。
 - 新 CUBE 原文以 SPK4 保存；原生 `SourceLut` 执行 1D 线性插值、定义域、3D 四面体插值及既有色彩空间转换。纯 ProPhoto、单位定义域、无整形且边长不超过 65 的源表保留既有直接查表路径。
 - SPKL / SPK2 / SPK3 缓存不自动迁移，Hald 继续使用既有烘焙路径。独立 CUBE 导入上限为 64 MiB，包内原文上限为 12 MiB；超过包内原文上限时分享有限网格的 ProPhoto 表，不宣称保留原始链。
