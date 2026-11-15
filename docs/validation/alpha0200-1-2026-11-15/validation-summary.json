@@ -1,0 +1,50 @@
+{
+  "prepared_date": "2026-11-15",
+  "version_name": "0.200-alpha-1",
+  "version_code": 129,
+  "source_commit": "5a23164102e5990ddd8c24e601a9479f9ae4e6b2",
+  "android_workflow_run": 43699595875,
+  "android_workflow_run_number": 287,
+  "screenshots_workflow_run": 43699594454,
+  "android_workflow_conclusion": "success",
+  "screenshots_workflow_conclusion": "success",
+  "public_release_created": false,
+  "apk_filename": "Spektralab-X-0.200-alpha-1-arm64-v8a.apk",
+  "apk_bytes": 38954354,
+  "apk_sha256": "1b852ce9d50c308d53efab5c9085d90c5e16bd012bdc6d5f2ebeea3792d8b3c6",
+  "download_hash_matches_checksum_and_package_inspection": true,
+  "certificate_sha256": "cdc5e3d0ac6fc90b53e88c57e0409336725ae3c26fd19d1a7e585170945f6de3",
+  "matches_published_certificate": true,
+  "apk_v2_signature_verified": true,
+  "elf_load_alignment_bytes": 16384,
+  "zipalign_16k_verified": true,
+  "jni_method_count": 40,
+  "engine_asset_count": 113,
+  "spirv_count": 56,
+  "unit_tests": {
+    "debug": { "suites": 60, "tests": 435, "failures": 0, "errors": 0, "skipped": 0 },
+    "release": { "suites": 33, "tests": 241, "failures": 0, "errors": 0, "skipped": 0 }
+  },
+  "selected_debug_suites_already_included_in_debug_total": {
+    "precision_dial": 9,
+    "colour_wheel": 17,
+    "curve_editor": 11,
+    "launch_intro_timing": 4,
+    "screenshots": 34
+  },
+  "supplementary_cloud_visual_probe": { "tests": 3, "failures": 0, "errors": 0, "skipped": 0 },
+  "release_lint": { "errors": 0, "warnings": 113, "hints": 6 },
+  "gpu_jobs": { "fir_rows": "success", "raw_storage": "success" },
+  "native_lut_parity": { "pixels": 16384, "max_float_error": 0, "max_16bit_error": 0 },
+  "solid_token_contrast": { "pairs": 7, "minimum_ratio": 5.892, "covers_translucent_or_disabled_controls": false },
+  "phone_installation_performed": false,
+  "phone_soft_keyboard_layout_verified": false,
+  "phone_colour_fidelity_or_power_verified": false,
+  "notes": [
+    "Debug and release totals include overlapping shared tests; they are not a count of distinct cases.",
+    "The supplementary visual probe lives under tools and is not compiled into the application or included in the CI unit-test totals.",
+    "Robolectric screenshots use public repository fixtures or synthetic parameter state, not phone captures.",
+    "GitHub runner GPU checks use software Vulkan and do not establish Adreno numerical parity.",
+    "The signed candidate was prepared by workflow_dispatch on the research branch; no tag or public release was created."
+  ]
+}
