@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Capability-checked touch feedback; follows the system haptics switch. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Keeps an export alive while the app is in the background (HyperOS kills
          background processes early). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

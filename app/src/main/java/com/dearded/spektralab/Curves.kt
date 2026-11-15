@@ -301,7 +301,7 @@ internal fun CurveEditor(
                     Spacer(Modifier.width(1.dp).height(16.dp).background(Palette.Outline))
             }
         }
-        TextButton(onClick = { view.tick(strong = true); onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)) },
+        TextButton(onClick = { view.haptic(HapticEvent.Confirm); onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)) },
             modifier = Modifier.size(48.dp), contentPadding = PaddingValues(0.dp),
             enabled = enabled && editable && !curve.isIdentity) {
                 Text(tr("重置"), maxLines = 1, overflow = TextOverflow.Ellipsis)

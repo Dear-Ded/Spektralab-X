@@ -55,6 +55,10 @@ internal fun BorderPicker(
     onPick: (BorderPreset) -> Unit,
 ) {
     var group by rememberSaveable { mutableStateOf(BorderGroups.groupOf(current)) }
+    val haptic = rememberHaptic()
+    fun pick(preset: BorderPreset) {
+        if (preset.id != current) { haptic(HapticEvent.Click); onPick(preset) }
+    }
     PillRow {
         BorderGroups.NAMES.forEachIndexed { i, name ->
             val count = BorderGroups.inGroup(i).size
@@ -64,10 +68,10 @@ internal fun BorderPicker(
     // shots_review_1 S1: every style of the group in view, row after row, not one sideways line.
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Borders.byId("none")?.let { none ->
-            SelectPill(selected = current == "none", onClick = { onPick(none) }, label = { Text(none.label) }, enabled = enabled)
+            SelectPill(selected = current == "none", onClick = { pick(none) }, label = { Text(none.label) }, enabled = enabled)
         }
         for (p in BorderGroups.inGroup(group)) {
-            SelectPill(selected = current == p.id, onClick = { onPick(p) }, label = { Text(p.label) },
+            SelectPill(selected = current == p.id, onClick = { pick(p) }, label = { Text(p.label) },
                 enabled = enabled && !(noFilm && p.edge != null))
         }
     }

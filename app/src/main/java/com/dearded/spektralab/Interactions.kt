@@ -88,7 +88,7 @@ fun <T> Motion.slowEffects() = spring<T>(dampingRatio = 1f, stiffness = 800f)
 private val SizeSpring = spring(dampingRatio = 0.8f, stiffness = 380f, visibilityThreshold = IntSize.VisibilityThreshold)
 
 /** The press scale (UI2.md 3.6). */
-const val PressedScale = 0.96f
+const val PressedScale = 0.97f
 
 // --- press -------------------------------------------------------------------
 
@@ -107,7 +107,8 @@ const val PressedScale = 0.96f
  */
 fun Modifier.pressScale(interactionSource: InteractionSource, pressedScale: Float = PressedScale): Modifier = composed {
     val pressed by interactionSource.collectIsPressedAsState()
-    val scale = animateFloatAsState(if (pressed) pressedScale else 1f, Motion.fastSpatial(), label = "press")
+    val scale = animateFloatAsState(if (pressed) pressedScale else 1f,
+        spring(dampingRatio = 0.7f, stiffness = 450f), label = "press")
     graphicsLayer { scaleX = scale.value; scaleY = scale.value }
 }
 
@@ -173,7 +174,8 @@ fun Modifier.morphingPill(
     pressedScale: Float = PressedScale,
 ): Modifier = composed {
     val pressed = interactionSource?.collectIsPressedAsState()
-    val scale = animateFloatAsState(if (pressed?.value == true) pressedScale else 1f, Motion.fastSpatial(), label = "pill-press")
+    val scale = animateFloatAsState(if (pressed?.value == true) pressedScale else 1f,
+        spring(dampingRatio = 0.7f, stiffness = 450f), label = "pill-press")
     graphicsLayer {
         scaleX = scale.value; scaleY = scale.value
         shape = SmoothCornerShape(style.corner)
@@ -238,15 +240,15 @@ fun hapticConstant(event: HapticEvent): Int? {
 }
 
 /**
- * Plays [event] (UI2.md 3.5). Goes through View.performHapticFeedback, so it
- * follows the system's touch-feedback switch and needs no VIBRATE permission.
+ * Plays capability-checked primitives with predefined-effect and View fallbacks.
+ * Follows the system's touch-feedback switch, never queues drag pulses.
  * Once per event: never call this on every frame of a drag, only when a
  * threshold or detent is crossed.
  */
 fun View.haptic(event: HapticEvent) {
     val constant = hapticConstant(event) ?: return
     val cadence = synchronized(HapticCadences) { HapticCadences.getOrPut(this) { HapticCadence() } }
-    if (cadence.accept(event, android.os.SystemClock.uptimeMillis()))
+    if (cadence.accept(event, android.os.SystemClock.uptimeMillis()) && !PrecisionHaptics.play(this, event))
         performHapticFeedback(constant)
 }
 

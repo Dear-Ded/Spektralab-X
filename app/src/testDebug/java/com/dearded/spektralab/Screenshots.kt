@@ -40,6 +40,8 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.asImageBitmap
 
 /**
  * PNGs of the editor and the light table as the phone draws them (docs/SCREENSHOTS.md),
@@ -71,6 +73,26 @@ class Screenshots {
     @Test fun editorEmpty() {
         editor(Fake.ui().copy(source = null, image = null, before = null, canUndo = false))
         shot("01_editor_empty")
+    }
+
+    @Test fun restrainedOpticalViewfinders() {
+        val ui = Fake.ui()
+        val image = ui.image!!
+        val selected = androidx.compose.runtime.mutableStateOf(ViewfinderStyle.LEICA)
+        content {
+            androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+                androidx.compose.foundation.Image(image.asImageBitmap(), contentDescription = null,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize())
+                ViewfinderOverlay(selected.value, ExifCopy.NONE, "Portra 400", 0f,
+                    image.width, image.height, FrameSpec(), "", androidx.compose.ui.Modifier.fillMaxSize())
+            }
+        }
+        ViewfinderStyle.entries.filter { it != ViewfinderStyle.OFF }.forEachIndexed { i, style ->
+            compose.runOnIdle { selected.value = style }
+            compose.mainClock.advanceTimeBy(400)
+            shot("viewfinder_${i}_${style.name.lowercase()}")
+        }
     }
 
     @Test @Config(qualifiers = "w320dp-h640dp-normal-notround-port-night-mdpi-keyshidden-nonav")
@@ -372,7 +394,7 @@ class Screenshots {
         // The strip opens on the applied style's own group, where this card may sit off-screen; 热门 lists it first.
         tap("热门")
         // A tap on the applied style opens its strength. A real touch: the card's press scale and click run as on the phone.
-        compose.onAllNodes(hasText(style.name) and hasClickAction()).onFirst().performTouchInput { click(Offset(centerX, height * 0.3f)) }
+        compose.onAllNodes(hasText(tr(style.name)) and hasClickAction()).onFirst().performTouchInput { click(Offset(centerX, height * 0.3f)) }
         compose.mainClock.advanceTimeBy(1200)
         shot("14_style_strength")
     }

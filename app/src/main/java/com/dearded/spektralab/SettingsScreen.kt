@@ -181,6 +181,18 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     }
                 }
                 add { NewPhotoStocks(ui, vm) }
+                add {
+                    val finder = rememberViewfinder()
+                    ChoiceRow(tr("取景器样式"), tr("预览框线，不写入照片；拍摄参数取自原图。"), tr(finder.title)) {
+                        PillRow {
+                            ViewfinderStyle.entries.forEach { style ->
+                                SelectPill(selected = style == finder, onClick = {
+                                    prefs.edit().putString(ViewfinderStyle.KEY, style.name).apply()
+                                }, label = { Text(tr(style.title)) })
+                            }
+                        }
+                    }
+                }
                 // ui-motion_splash.md 6: LaunchIntro reads this at launch; off by itself when animations are off.
                 add {
                     var intro by remember { mutableStateOf(prefs.getBoolean(LAUNCH_INTRO, true)) }

@@ -1,8 +1,8 @@
 package com.dearded.spektralab
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,18 +26,17 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -48,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -93,11 +91,8 @@ internal fun EditedDot(onFill: Boolean = false, modifier: Modifier = Modifier) {
 
 /**
  * The one selectable chip (UI2.md 1.2). "Selected" is told three ways at
- * once, never by colour alone: the fill inverts (near-white with dark text),
- * the corners round from 12 dp to a full pill, and the label goes Medium.
- * Fill and text move on effects springs (no overshoot), the corner and the
- * press scale on spatial ones. The pill is drawn 40 dp tall inside a 48 dp
- * touch target.
+ * once: a quiet amber inset edge, a warmer fill and a stronger label. The
+ * material stays inside a 48 dp touch target; press motion uses the shared kit.
  */
 @Composable
 fun SelectPill(
@@ -108,25 +103,22 @@ fun SelectPill(
     /** Changed from its default: a solid dot at the top-right corner (ui2_derivatives.md). */
     edited: Boolean = false,
 ) {
-    // Fill, corner and press come from ui-motion's one draw-phase layer (Interactions.kt).
     val press = remember { MutableInteractionSource() }
-    // ui_corners.md: selected is told by the fill and the weight, not by a shape change.
-    val style = rememberSelectionStyle(selected, enabled,
-        restFill = Palette.Surface, selectedFill = Palette.DarkroomDim,
-        restCorner = 8.dp, selectedCorner = 8.dp, selectedInk = Palette.Darkroom)
-    val ink = style.ink
+    val reduceMotion = rememberReduceMotion()
+    val ink by animateColorAsState(
+        when { !enabled -> Palette.OnSurfaceSoft; selected -> Palette.Darkroom; else -> Palette.OnSurface },
+        if (reduceMotion) snap() else Motion.defaultEffects(), label = "pill-ink",
+    )
     Box(
         Modifier
-            .height(48.dp)
-            .graphicsLayer { alpha = if (enabled || selected) 1f else 0.5f }
+            .heightIn(min = 48.dp).widthIn(min = 48.dp)
             .pressScale(press).clip(Corners.s)
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
                 interactionSource = press, indication = ripple(), onClick = onClick,
             )
             .padding(vertical = 6.dp)
-            .clip(Corners.s).drawBehind { drawRect(style.fill) }
-            .then(if (selected) Modifier.border(1.dp, Palette.Darkroom.copy(alpha = 0.35f), Corners.s) else Modifier)
+            .instrumentSurface(Corners.s, selected = selected, enabled = enabled)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -231,8 +223,10 @@ internal fun GroupLabel(text: String, modifier: Modifier = Modifier) {
 @Composable
 internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
     Box(
-        modifier.heightIn(min = 48.dp).clip(Corners.m)
+        modifier.heightIn(min = 48.dp).widthIn(min = 48.dp).pressScale(press).clip(Corners.m)
+            .then(if (pressed && enabled) Modifier.instrumentSurface(Corners.m) else Modifier)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
@@ -245,7 +239,7 @@ internal fun QuietButton(text: String, enabled: Boolean = true, modifier: Modifi
 /**
  * Two to four choices that belong together (画幅, 日期顺序, 齿孔位置), in one
  * Layer1 track so the set reads as "pick one of these" (UI2.md 7.2 point 8).
- * The chosen segment is the inverted pill; each segment is a 48 dp target.
+ * The chosen segment has an amber edge and stronger label; each is a 48 dp target.
  */
 @Composable
 internal fun Segmented(
@@ -258,22 +252,23 @@ internal fun Segmented(
     edited: (Int) -> Boolean = { false },
     onSelect: (Int) -> Unit,
 ) {
+    val reduceMotion = rememberReduceMotion()
     Row(
-        modifier.fillMaxWidth().height(48.dp).background(Palette.Surface, Corners.s),
+        modifier.fillMaxWidth().height(48.dp).background(Palette.Panel, Corners.s),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         options.forEachIndexed { i, label ->
             val on = i == selected
             val can = enabled && optionEnabled(i)
-            val fill by animateColorAsState(if (on) Palette.PanelHighest else Color.Transparent,
-                Motion.defaultEffects(), label = "seg-fill")
+            val press = remember { MutableInteractionSource() }
             val ink by animateColorAsState(
-                when { on -> Palette.OnSurface; can -> Palette.OnSurfaceSoft; else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f) },
-                Motion.defaultEffects(), label = "seg-ink")
+                when { !can -> Palette.OnSurfaceSoft; on -> Palette.Darkroom; else -> Palette.OnSurface },
+                if (reduceMotion) snap() else Motion.defaultEffects(), label = "seg-ink")
             Box(
-                Modifier.weight(1f).fillMaxSize().clip(Corners.s)
-                    .selectable(selected = on, enabled = can, role = Role.Tab) { if (!on) onSelect(i) }
-                    .padding(4.dp).background(fill, Corners.s),
+                Modifier.weight(1f).fillMaxSize().widthIn(min = 48.dp).pressScale(press).clip(Corners.s)
+                    .selectable(selected = on, enabled = can, role = Role.Tab,
+                        interactionSource = press, indication = ripple()) { if (!on) onSelect(i) }
+                    .padding(4.dp).instrumentSurface(Corners.s, selected = on, enabled = can),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(label, style = MaterialTheme.typography.labelLarge, color = ink, maxLines = 1,
@@ -354,7 +349,9 @@ internal fun SettingRow(
  */
 @Composable
 internal fun MoreRow(open: Boolean, edited: Boolean, onToggle: () -> Unit) {
-    val turn by animateFloatAsState(if (open) 180f else 0f, Motion.defaultSpatial(), label = "more-turn")
+    val reduceMotion = rememberReduceMotion()
+    val turn by animateFloatAsState(if (open) 180f else 0f,
+        if (reduceMotion) snap() else Motion.defaultSpatial(), label = "more-turn")
     Row(
         Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(Corners.m)
             .clickable(role = Role.Button, onClick = onToggle)
@@ -400,8 +397,9 @@ internal fun ThumbCard(
 ) {
     val chosen = selected
     val press = remember { MutableInteractionSource() }
+    val reduceMotion = rememberReduceMotion()
     val ring by animateColorAsState(if (selected) Palette.Darkroom else Palette.OutlineSoft,
-        Motion.defaultEffects(), label = "card-ring")
+        if (reduceMotion) snap() else Motion.defaultEffects(), label = "card-ring")
     val outer = Corners.s
     val inner = Corners.s
     Column(
@@ -417,7 +415,7 @@ internal fun ThumbCard(
         horizontalAlignment = Alignment.Start,
     ) {
         Box(Modifier.width(size + 8.dp).height((size + 8.dp) * 0.68f)
-            .border(if (selected) 2.dp else 1.dp, ring, outer).padding(3.dp)) {
+            .border(1.dp, ring, outer).padding(3.dp)) {
             Box(Modifier.fillMaxSize().clip(inner).background(Palette.PanelHigh), contentAlignment = Alignment.Center) {
                 if (image != null) {
                     Image(image, contentDescription = title, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
@@ -462,8 +460,8 @@ internal fun ThumbCard(
 
 /**
  * A card without a picture (相纸, a stock with nothing rendered): the name and
- * a line, Layer1. Selected inverts the fill, rounds the corners further and
- * carries the check, the same three signals as [SelectPill].
+ * a line, Layer1. Selection adds the same inset amber edge as [SelectPill]
+ * and a check without changing the corner or the text's font family.
  */
 @Composable
 internal fun TextCard(
@@ -476,14 +474,14 @@ internal fun TextCard(
 ) {
     val chosen = selected
     val press = remember { MutableInteractionSource() }
-    val fill by animateColorAsState(if (selected) Palette.Accent else Palette.Panel, Motion.defaultEffects(), label = "tcard-fill")
-    val ink by animateColorAsState(if (selected) Palette.OnAccent else Palette.OnSurface, Motion.defaultEffects(), label = "tcard-ink")
+    val reduceMotion = rememberReduceMotion()
+    val ink by animateColorAsState(
+        when { !enabled -> Palette.OnSurfaceSoft; selected -> Palette.Darkroom; else -> Palette.OnSurface },
+        if (reduceMotion) snap() else Motion.defaultEffects(), label = "tcard-ink")
     val shape = Corners.m
     Box(
         Modifier.width(width).heightIn(min = 80.dp)
-            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
-            .clip(shape).background(fill)
-            .border(1.dp, if (selected) fill else Palette.OutlineSoft, shape)
+            .pressScale(press).instrumentSurface(shape, selected = selected, enabled = enabled)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = chosen }
             .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -493,13 +491,13 @@ internal fun TextCard(
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(4.dp))
-            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = ink.copy(alpha = 0.68f),
+            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         if (selected) Box(
-            Modifier.align(Alignment.TopEnd).size(20.dp).background(Palette.OnAccent, CircleShape),
+            Modifier.align(Alignment.TopEnd).size(20.dp).background(Palette.Darkroom, CircleShape),
             contentAlignment = Alignment.Center,
-        ) { Check(Palette.Accent) }
+        ) { Check(Palette.OnAccent) }
     }
 }
 
@@ -544,15 +542,14 @@ internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifi
     val press = remember { MutableInteractionSource() }
     val shape = Corners.m
     Box(
-        modifier.heightIn(min = 48.dp)
-            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
-            .clip(shape).background(Palette.PanelHigh)
-            .border(1.dp, Palette.OutlineSoft, shape)
+        modifier.heightIn(min = 48.dp).widthIn(min = 48.dp)
+            .pressScale(press).instrumentSurface(shape, enabled = enabled)
             .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
             .padding(horizontal = 18.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface, maxLines = 1,
+        Text(text, style = MaterialTheme.typography.labelLarge,
+            color = if (enabled) Palette.OnSurface else Palette.OnSurfaceSoft, maxLines = 1,
             overflow = TextOverflow.Ellipsis)
     }
 }

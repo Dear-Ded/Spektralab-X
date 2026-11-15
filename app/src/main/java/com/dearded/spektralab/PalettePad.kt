@@ -81,7 +81,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
         )
         if (!talkBack) TextButton(onClick = { numbers = !numbers }) { Text(if (numbers) tr("调色盘") else tr("数值")) }
         TextButton(
-            onClick = { view.tick(strong = true); onChange(look.copy(tone = look.toneHome, colour = look.colourHome)) },
+            onClick = { view.haptic(HapticEvent.Confirm); onChange(look.copy(tone = look.toneHome, colour = look.colourHome)) },
             enabled = enabled && !atHome,
         ) { Text(tr("复位")) }
     }

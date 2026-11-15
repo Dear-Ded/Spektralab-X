@@ -22,9 +22,10 @@ object Palette {
     val Surround = Color(0xFF0B0B0C)       // neutral photo surround; 18% grey remains in settings
     val Background = Color(0xFF0B0B0C)
     val Surface = Color(0xFF131316)
-    val Panel = Color(0xFF18181D)
-    val PanelHigh = Color(0xFF24242A)
-    val PanelHighest = Color(0xFF303032)   // Layer3: white 14 %
+    val Panel = Color(0xFF131316)
+    val Control = Color(0xFF1A1A1F)
+    val PanelHigh = Control
+    val PanelHighest = Color(0xFF24242A)
     val OnSurface = Color(0xFFF2F2F4)
     val OnSurfaceSoft = Color(0xFFA8A8A8)  // secondary text, white 64 %
     val Outline = Color(0xFF3A3A3C)
@@ -38,20 +39,28 @@ object Palette {
     val OnAccent = Color(0xFF111113)
     /** A selected item's quiet container (chips that are on but not the focus). */
     val AccentDim = Color(0xFF3C3C3E)
-    /** Only the confirm text of 重置 / 删除. */
+    /** Safety-red fills and borders; small warning text uses the brighter [Warning]. */
+    val SafetyRed = Color(0xFFD94A38)
+    /** Only the confirm text of 重置 / 删除, kept bright enough for small labels. */
     val Warning = Color(0xFFFF6B5E)
 }
 
 private val Scheme = darkColorScheme(
-    primary = Palette.Accent,
+    primary = Palette.Darkroom,
     onPrimary = Palette.OnAccent,
-    primaryContainer = Palette.AccentDim,
-    onPrimaryContainer = Palette.OnSurface,
+    primaryContainer = Palette.DarkroomDim,
+    onPrimaryContainer = Palette.Darkroom,
     secondary = Palette.OnSurfaceSoft,
     onSecondary = Palette.Background,
     secondaryContainer = Palette.PanelHighest,
     onSecondaryContainer = Palette.OnSurface,
-    tertiary = Palette.Accent,
+    tertiary = Palette.SafetyRed,
+    // Black reaches 4.99:1 on SafetyRed; OnAccent falls just below 4.5:1.
+    onTertiary = Color.Black,
+    tertiaryContainer = Palette.SafetyRed,
+    onTertiaryContainer = Color.Black,
+    inversePrimary = Palette.DarkroomDim,
+    surfaceTint = Palette.Darkroom,
     background = Palette.Background,
     onBackground = Palette.OnSurface,
     surface = Palette.Surface,

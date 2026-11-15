@@ -89,7 +89,7 @@ internal fun LabeledSlider(
     val exposureScale = format.contains("EV") && span <= 20f
     val majorStep = remember(span, step, exposureScale) { if (exposureScale) 1f else rulerMajorStep(span, step) }
     val subdivisions = if (exposureScale) 3 else 5
-    val detentStep = maxOf(step, majorStep / subdivisions)
+    val detentStep = step
     val context = androidx.compose.ui.platform.LocalContext.current
     val density = androidx.compose.ui.platform.LocalDensity.current
     val rulerBed = remember {
@@ -98,6 +98,7 @@ internal fun LabeledSlider(
     val tickPaint = remember(context, density) {
         android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             typeface = UiFonts.typeface(context, UiFonts.MONO, 400)
+            fontFeatureSettings = "tnum"
             textAlign = android.graphics.Paint.Align.CENTER
             textSize = with(density) { 12.sp.toPx() }
         }

@@ -1,7 +1,7 @@
 package com.dearded.spektralab
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,15 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,6 +53,7 @@ fun CategoryBar(
     onSelect: (Int) -> Unit,
 ) {
     val view = LocalView.current
+    val reduceMotion = rememberReduceMotion()
     Row(Modifier.fillMaxWidth().background(Palette.Surface).padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Row(
@@ -64,22 +63,22 @@ fun CategoryBar(
         ) {
             CATEGORIES.forEachIndexed { i, label ->
                 val on = i == selected
+                val press = remember { MutableInteractionSource() }
                 val tint by animateColorAsState(
                     when {
-                        on -> Palette.Darkroom
+                        on && enabled -> Palette.Darkroom
                         enabled -> Palette.OnSurfaceSoft
                         else -> Palette.OnSurfaceSoft.copy(alpha = 0.38f)
                     },
-                    Motion.defaultEffects(), label = "tint",
+                    if (reduceMotion) snap() else Motion.defaultEffects(), label = "tint",
                 )
-                val fill by animateColorAsState(
-                    if (on) Palette.DarkroomDim else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
                 Column(
-                    Modifier.weight(1f).fillMaxHeight()
-                        .background(fill, Corners.s)
+                    Modifier.weight(1f).fillMaxHeight().widthIn(min = 48.dp)
+                        .pressScale(press)
+                        .instrumentSurface(Corners.s, selected = on, enabled = enabled)
                         .selectable(
                             selected = on, enabled = enabled, role = Role.Tab,
-                            interactionSource = remember { MutableInteractionSource() }, indication = null,
+                            interactionSource = press, indication = null,
                         ) { view.tick(); onSelect(i) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,

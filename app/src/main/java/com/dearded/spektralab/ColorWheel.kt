@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
@@ -75,6 +76,7 @@ internal fun ColorWheel(
     onDrag: (Boolean) -> Unit,
     onChange: (Zone) -> Unit,
 ) {
+    val view = LocalView.current
     var local by remember(label) { mutableStateOf(value) }
     var dragging by remember(label) { mutableStateOf(false) }
     val valueLatest by rememberUpdatedState(value)
@@ -96,6 +98,14 @@ internal fun ColorWheel(
 
     fun send(next: Zone) {
         if (next == local) return
+        when {
+            next.sat == 0.0 && local.sat > 0.0 -> view.haptic(HapticEvent.Tick)
+            next.sat == 100.0 && local.sat < 100.0 -> view.haptic(HapticEvent.Edge)
+            dragging && next.sat > 6.0 &&
+                (kotlin.math.floor(next.hue / 15.0) != kotlin.math.floor(local.hue / 15.0) ||
+                    kotlin.math.floor(next.sat / 10.0) != kotlin.math.floor(local.sat / 10.0)) ->
+                view.haptic(HapticEvent.Detent)
+        }
         local = next
         onChangeLatest(next)
     }

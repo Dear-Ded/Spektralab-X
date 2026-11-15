@@ -380,7 +380,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome,
-                        boundaryCorners = boundaryCorners && nav.tab != 4)
+                        boundaryCorners = boundaryCorners && nav.tab != 4, opticsVisible = nav.tab != 4)
                     if (ui.hasImage) Column(Modifier.width(360.dp).fillMaxHeight().chrome(showChrome)) {
                         Controls(ui, vm, true, {}, Modifier.fillMaxWidth().weight(1f), preview)
                     }
@@ -389,7 +389,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome,
-                        boundaryCorners = boundaryCorners && nav.tab != 4)
+                        boundaryCorners = boundaryCorners && nav.tab != 4, opticsVisible = nav.tab != 4)
                     // shots_review_1 P1: the empty page is the whole screen.
                     if (!ui.hasImage) return@Column
                     // The handle follows the finger 1:1; on release the panel springs to the
@@ -572,6 +572,7 @@ private fun Preview(
     ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
     onLightTable: () -> Unit = {}, chrome: Boolean = true, onToggleChrome: () -> Unit = {},
     boundaryCorners: Boolean = false,
+    opticsVisible: Boolean = true,
 ) {
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
@@ -580,6 +581,8 @@ private fun Preview(
     val view = androidx.compose.ui.platform.LocalView.current
     // The surround the user chose in 设置 (18 % 灰 / 黑 / 白), never a hue (UI2.md 1.1).
     val surround = rememberSurround()
+    val reduceMotion = rememberReduceMotion()
+    val viewfinder = rememberViewfinder()
     Box(modifier.testTag("editor-preview").background(surround), contentAlignment = Alignment.Center) {
         // Held down: the frame as it went into the engine, before any film.
         val image = if (holding && ui.before != null) ui.before else ui.image
@@ -593,7 +596,7 @@ private fun Preview(
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
                             onLongPress = {
                                 holding = true
-                                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                                view.haptic(HapticEvent.LongPress)
                             },
                             onPress = {
                                 tryAwaitRelease()
@@ -626,33 +629,32 @@ private fun Preview(
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
-            // A film change crosses over from the old print (defaultEffects, no
-            // overshoot); drag renders, tier upgrades and the held original swap
-            // instantly, so live feedback is never delayed by an animation.
+            // Start only when a changed film's render arrives; ordinary parameter drags stay immediate.
             val film = ui.edit.film
-            var shownFilm by remember { mutableStateOf(film) }
-            var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
-            var front by remember { mutableStateOf(bitmap) }
-            val fade = remember { androidx.compose.animation.core.Animatable(1f) }
-            LaunchedEffect(bitmap) {
+            var shownFilm by remember(ui.previewSource) { mutableStateOf(film) }
+            var front by remember(ui.previewSource) { mutableStateOf(bitmap) }
+            val latent = remember(ui.previewSource) { androidx.compose.animation.core.Animatable(0f) }
+            LaunchedEffect(bitmap, reduceMotion, holding) {
+                if (reduceMotion || holding) latent.snapTo(0f)
                 if (bitmap === front) return@LaunchedEffect
-                val cross = film != shownFilm && !holding && back == null
+                val cross = film != shownFilm && !holding && !reduceMotion && !ui.edit.noFilm
                 shownFilm = film
-                if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
-                back = front; front = bitmap; fade.snapTo(0f)
-                // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
-                // is gone before the eye settles on the new one; with animations off it is a cut.
-                try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
+                front = bitmap
+                if (!cross) { latent.snapTo(0f); return@LaunchedEffect }
+                latent.snapTo(0.88f)
+                latent.animateTo(0f, androidx.compose.animation.core.tween(450,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing))
             }
             Box(gestures.coachAnchor(CoachStep.HOLD)) {
-                val under = back
-                if (under != null) {
-                    FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
-                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
-                } else {
-                    FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
+                FramedImage(bitmap, frame, caption, showFrameDecoration,
+                    Modifier.fillMaxSize().latentPreview(bitmap.width, bitmap.height, frame) { latent.value })
+                if (chrome && scale == 1f && offset == Offset.Zero && !holding && !MaskUi.open &&
+                    ui.busy == null && ui.detail == null && !ui.loadingDetail && opticsVisible) {
+                    ViewfinderOverlay(viewfinder, ui.exif, ui.catalog.film(film)?.label.orEmpty(),
+                        ui.edit.look.exposure.toFloat(), bitmap.width, bitmap.height, frame,
+                        ui.previewStyleId, Modifier.matchParentSize())
                 }
-                if (boundaryCorners && chrome && scale == 1f && offset == Offset.Zero && !holding &&
+                if (boundaryCorners && viewfinder == ViewfinderStyle.OFF && chrome && scale == 1f && offset == Offset.Zero && !holding &&
                     !MaskUi.open && !ui.rendering && ui.busy == null && ui.detail == null && !ui.loadingDetail) {
                     androidx.compose.foundation.Canvas(Modifier.matchParentSize().testTag("photo-boundary-corners")) {
                         val r = FrameGeometry.photoRect(size.width, size.height, bitmap.width, bitmap.height, frame)
@@ -1442,31 +1444,27 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
         // Flings settle on a card edge rather than halfway through one.
         flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state),
-        modifier = Modifier.fillMaxWidth().filmRail(),
+        modifier = Modifier.fillMaxWidth().filmRail(if (ui.edit.noFilm) "_none" else ui.edit.film),
     ) {
         // 无 leads the strip and is a new photo's default (tools/work/no_film_research.md).
         item(key = "_none") {
             val original = rememberSelectionPreview(ui, ui.edit.copy(noFilm = true), preview)
             NoneCard(selected = ui.edit.noFilm, original = original, enabled = enabled, size = 88.dp) {
-                if (!ui.edit.noFilm) { view.tick(); onNone() }
+                if (!ui.edit.noFilm) { view.haptic(HapticEvent.Click); onNone() }
             }
         }
         items(films, key = { it.id }) { film ->
             val selected = !ui.edit.noFilm && film.id == ui.edit.film
             val candidate = EditorViewModel.withFilm(ui.edit, ui.catalog, film.id)
             val bitmap = rememberSelectionPreview(ui, candidate, preview)
-            // UI2.md 7.2 points 3-4: a 104 dp square, the name, and ISO · balance · one trait.
-            // Before its card renders, the stock's own name stands in for the picture.
-            ThumbCard(
+            FilmPackageCard(
+                film = film,
                 selected = selected,
-                image = bitmap,
-                title = film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                subtitle = FilmNotes.line(film),
+                image = bitmap?.asAndroidBitmap(),
                 enabled = enabled,
-                placeholder = film.label, size = 88.dp,
-                starred = picks.isFavourite(film.id),
-                onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
-            ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
+                favourite = picks.isFavourite(film.id),
+                onLongClick = { view.haptic(HapticEvent.LongPress); picks.toggleFavourite(film.id) },
+            ) { if (!selected) { view.haptic(HapticEvent.Click); picks.used(film.id); onPick(film.id) } }
         }
     }
 }

@@ -3,6 +3,8 @@ package com.dearded.spektralab
 /** Reviewed English UI messages. Co-created with GPT (OpenAI). */
 internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
+        "取景器样式" to "Viewfinder style",
+        "预览框线，不写入照片；拍摄参数取自原图。" to "Preview guides only. Shooting data comes from the original photo; guides are not exported.",
         "灯箱背光" to "Light table backlight",
         "开启" to "On",
         "关闭" to "Off",

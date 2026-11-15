@@ -87,6 +87,8 @@ data class UiState(
     val defaultPaper: String = "",
     /** What a newly opened photo starts on: NEW_NONE (every stage 无), NEW_REMEMBER or NEW_FIXED. */
     val newPhotoMode: String = EditorViewModel.NEW_NONE,
+    /** UI-only camera-style identity for the optional viewfinder shutter transition. */
+    val previewStyleId: String = "",
 ) {
     val hasImage get() = source != null
 }
@@ -736,6 +738,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             return
         }
         update(next)
+        _ui.update { it.copy(previewStyleId = style.id) }
     }
 
     fun deletePreset(name: String) = _ui.update { it.copy(presets = presetStore.delete(name)) }

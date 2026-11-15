@@ -413,7 +413,7 @@ private fun StyleStripContent(
         if (!searching) item(key = "_none") {
             val original = rememberSelectionPreview(ui, ui.edit.withoutStyle(), preview)
             NoneCard(selected = ui.edit.styleNone, original = original, enabled = enabled, subtitle = "") {
-                if (!ui.edit.styleNone) { view.tick(); onNone() }
+                if (!ui.edit.styleNone) { view.haptic(HapticEvent.Click); onNone() }
             }
         }
         // + 存为风格 leads 我的 (Snapseed's + SAVE AS LOOK): the open edit, kept as a one-tap style.
@@ -431,7 +431,7 @@ private fun StyleStripContent(
                 subtitle = if (car.edit.noFilm) tr("原图") else ui.catalog.film(car.edit.film)?.label ?: tr("原图"),
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
-                view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                view.haptic(HapticEvent.Click)
                 candidate?.let(onEdit)
             }
         }
@@ -447,12 +447,12 @@ private fun StyleStripContent(
                 enabled = enabled,
                 placeholder = s.displayName,
                 starred = picks.isFavourite(s.id),
-                onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
+                onLongClick = { view.haptic(HapticEvent.LongPress); picks.toggleFavourite(s.id) },
                 onClick = {
                     if (on) open = if (open == s.id) null else s.id
                     else {
                         open = null
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                        view.haptic(HapticEvent.Click)
                         pick(s, strengthOf(s.id))
                     }
                 }
