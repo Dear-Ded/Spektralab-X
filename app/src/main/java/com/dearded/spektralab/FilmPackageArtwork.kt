@@ -186,30 +186,40 @@ internal class FilmPackageArtwork(val spec: FilmPackageSpec, mono: Typeface, san
 
     private fun DrawScope.drawCanister(p: Float) {
         val x = 52f + 20f * p
-        translate(x, 27f) {
+        translate(x, 35f) {
             // Clip the moving leader at the felt: its holes remain actual transparent cutouts.
-            clipRect(18f, 0f, 34f, 54f) {
-                translate(18f - 14f * (1f - p), 17f) { drawPath(leader, spec.base.colour.copy(alpha = spec.base.colour.alpha * p)) }
+            clipRect(24f, 0f, 40f, 46f) {
+                translate(24f - 14f * (1f - p), 14f) { drawPath(leader, spec.base.colour.copy(alpha = spec.base.colour.alpha * p)) }
             }
-            drawRoundRect(Color(0xFFA1A1AA).copy(alpha = p), Offset(7f, -4f), Size(6f, 4f), CornerRadius(.6f))
-            drawLine(Color.White.copy(alpha = .65f * p), Offset(8f, -3.5f), Offset(11f, -3.5f), .65f)
+            drawRoundRect(Color(0xFFA1A1AA).copy(alpha = p), Offset(10f, -3f), Size(6f, 3f), CornerRadius(.4f))
+            drawLine(Color.White.copy(alpha = .45f * p), Offset(11f, -2.5f), Offset(14f, -2.5f), .5f)
+            drawLine(Color.Black.copy(alpha = .6f * p), Offset(13f, -3f), Offset(13f, -1f), .7f)
             val colour = when (spec.layout) {
                 PackageLayout.Portra, PackageLayout.Kodak -> gold
                 PackageLayout.Fuji -> spec.face
                 PackageLayout.Ektar -> spec.face
                 else -> Color(0xFF3B3B3F)
             }
+            val shell = Brush.horizontalGradient(listOf(Color(0xFF08080A).copy(alpha = p),
+                Color(0xFF424248).copy(alpha = p), Color(0xFF19191C).copy(alpha = p),
+                Color(0xFF08080A).copy(alpha = p)), endX = 26f)
+            drawRoundRect(shell, size = Size(26f, 46f), cornerRadius = CornerRadius(3f))
             val cylinder = Brush.horizontalGradient(0f to lerp(colour, Color.Black, .45f).copy(alpha = p),
                 .35f to lerp(colour, Color.White, .25f).copy(alpha = p),
-                .7f to colour.copy(alpha = p), 1f to lerp(colour, Color.Black, .55f).copy(alpha = p), endX = 20f)
-            drawRoundRect(cylinder, size = Size(20f, 54f), cornerRadius = CornerRadius(2f))
-            drawOval(Brush.horizontalGradient(listOf(Color(0xFF48484D).copy(alpha = p), Color(0xFFB5B5BD).copy(alpha = p),
-                Color(0xFF303034).copy(alpha = p)), endX = 20f), size = Size(20f, 4f))
-            drawRect(Color(0xFF09090B).copy(alpha = p), Offset(0f, 52f), Size(20f, 2f))
-            drawRect(Color(0xFF09090B).copy(alpha = p), Offset(17.5f, 3f), Size(2.5f, 49f))
-            for (y in 6..49 step 2) drawLine(Color.White.copy(alpha = .04f * p), Offset(17.8f, y.toFloat()), Offset(19.6f, y + .5f), .3f)
-            print(spec.brand, 2f, 17f, 5f, paper.copy(alpha = p), bold = true, maxWidth = 14f)
-            print(spec.speed.orEmpty(), 2f, 29f, 7f, paper.copy(alpha = p), mono = true, bold = true, maxWidth = 14f)
+                .7f to colour.copy(alpha = p), 1f to lerp(colour, Color.Black, .55f).copy(alpha = p), endX = 26f)
+            // The printed wrap is bounded by black metal shoulders, rather than a full-height shiny tube.
+            drawRect(cylinder, Offset(0f, 8f), Size(26f, 29f))
+            drawOval(shell, Offset(0f, -1f), Size(26f, 5f))
+            drawOval(Color.Black.copy(alpha = .8f * p), Offset(4f, 0f), Size(18f, 2.5f))
+            drawLine(Color.White.copy(alpha = .18f * p), Offset(3f, .2f), Offset(22f, .2f), .55f)
+            drawRoundRect(Color(0xFF09090B).copy(alpha = p), Offset(0f, 43f), Size(26f, 3f), CornerRadius(.8f))
+            drawLine(Color.White.copy(alpha = .15f * p), Offset(2f, 43.5f), Offset(23f, 43.5f), .5f)
+            drawRect(Color(0xFF09090B).copy(alpha = p), Offset(23.5f, 3f), Size(2.5f, 40f))
+            for (y in 5..41 step 2) drawLine(Color.White.copy(alpha = .04f * p), Offset(23.8f, y.toFloat()), Offset(25.6f, y + .5f), .3f)
+            val labelInk = if (spec.layout in setOf(PackageLayout.Portra, PackageLayout.Kodak)) black else paper
+            print(spec.brand, 3f, 17f, 5f, labelInk.copy(alpha = p), bold = true, maxWidth = 19f)
+            print(spec.speed.orEmpty(), 3f, 29f, 8f, labelInk.copy(alpha = p), mono = true, bold = true, maxWidth = 19f)
+            spec.process?.let { print(it, 3f, 35f, 5f, labelInk.copy(alpha = p), mono = true, maxWidth = 19f) }
         }
     }
 }
