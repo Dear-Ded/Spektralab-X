@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.click
@@ -21,7 +23,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.dp
@@ -52,10 +53,13 @@ class PrecisionDialUiTest {
     }
 
     private fun show() = compose.setContent {
-        SpektraTheme {
-            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                LabeledSlider("曝光", value, -3.0, 3.0, 0.0, true, "%+.2f EV",
-                    onDrag = { drag += it }) { value = it }
+        // Cursor blinking uses coroutine delays, independently of the Compose test clock.
+        CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
+            SpektraTheme {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    LabeledSlider("曝光", value, -3.0, 3.0, 0.0, true, "%+.2f EV",
+                        onDrag = { drag += it }) { value = it }
+                }
             }
         }
     }
@@ -90,27 +94,68 @@ class PrecisionDialUiTest {
         compose.runOnIdle { assertEquals(0.01, value, 0.00001) }
     }
 
-    @Test fun numericEntryAndAccessibilityPreserveTheRange() {
+    @Test fun accessibilityPreservesTheRange() {
         show()
         compose.onNodeWithContentDescription("曝光").performSemanticsAction(SemanticsActions.SetProgress) { it(99f) }
         compose.runOnIdle { assertEquals(3.0, value, 0.0001) }
-        // Text-field cursor animation is intentionally continuous.
+    }
+
+    private fun acceptedEntry(entry: String) {
+        // Advance dialog transitions explicitly on the Compose and Android clocks.
+        show()
         compose.mainClock.autoAdvance = false
         compose.onNodeWithContentDescription("输入曝光").performClick()
         settleDialog()
-        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString("1,5")) }
-        settleDialog()
-        compose.onNodeWithText("确定").assertIsNotEnabled()
-        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString("9")) }
-        settleDialog()
-        compose.onNodeWithText("确定").assertIsNotEnabled()
-        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString("\u22121.25")) }
+        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
         settleDialog()
         compose.onNodeWithText("确定").performClick()
         settleDialog()
         compose.runOnIdle {
             assertEquals(-1.25, value, 0.0001)
             assertTrue("Discrete changes do not claim a drag", drag.isEmpty())
+        }
+    }
+
+    @Test fun asciiMinusIsAcceptedWithoutClaimingADrag() = acceptedEntry("-1.25")
+
+    @Test fun unicodeMinusIsAcceptedWithoutClaimingADrag() = acceptedEntry("\u22121.25")
+
+    private fun rejectedEntry(entry: String) {
+        show()
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithContentDescription("输入曝光").performClick()
+        settleDialog()
+        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
+        settleDialog()
+        compose.onNodeWithText("确定").assertIsNotEnabled()
+        compose.runOnIdle { assertEquals(0.0, value, 0.0) }
+        compose.onNodeWithText("取消").performClick()
+        settleDialog()
+        compose.runOnIdle { assertEquals(0.0, value, 0.0) }
+    }
+
+    @Test fun decimalCommaIsRejectedWithoutChangingTheNumber() = rejectedEntry("1,5")
+
+    @Test fun outOfRangeEntryIsRejectedWithoutChangingTheNumber() = rejectedEntry("9")
+
+    @Test fun invalidEntryCanBeCorrectedWithoutReopeningTheDialog() {
+        show()
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithContentDescription("输入曝光").performClick()
+        settleDialog()
+        for (entry in listOf("1,5", "9")) {
+            compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString(entry)) }
+            settleDialog()
+            compose.onNodeWithText("确定").assertIsNotEnabled()
+            compose.runOnIdle { assertEquals(0.0, value, 0.0) }
+        }
+        compose.onNode(hasSetTextAction()).performSemanticsAction(SemanticsActions.SetText) { it(AnnotatedString("\u22121.25")) }
+        settleDialog()
+        compose.onNodeWithText("确定").performClick()
+        settleDialog()
+        compose.runOnIdle {
+            assertEquals(-1.25, value, 0.0001)
+            assertTrue(drag.isEmpty())
         }
     }
 }

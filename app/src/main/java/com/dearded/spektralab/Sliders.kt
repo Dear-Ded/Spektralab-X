@@ -66,6 +66,7 @@ import kotlin.math.pow
  * model still hears every change through [onChange] (the preview has to
  * follow), and [onDrag] brackets a drag.
  */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 internal fun LabeledSlider(
     label: String, value: Double, min: Double, max: Double, default: Double,
@@ -255,8 +256,9 @@ internal fun LabeledSlider(
     // Parse the complete entry so a comma or a Unicode minus cannot silently
     // become a different value. Out-of-range entries remain editable.
     if (typing) {
-        var entry by remember { mutableStateOf(String.format(Locale.ROOT, "%.4f", local.toDouble()).trimEnd('0').trimEnd('.')) }
-        val parsed = entry.trim().replace('\u2212', '-').replace('\uFF0D', '-')
+        val entry = androidx.compose.foundation.text.input.rememberTextFieldState(
+            initialText = String.format(Locale.ROOT, "%.4f", local.toDouble()).trimEnd('0').trimEnd('.'))
+        val parsed = entry.text.toString().trim().replace('\u2212', '-').replace('\uFF0D', '-')
             .replace('\uFF0B', '+').replace('\uFF0E', '.').toFloatOrNull()?.takeIf { it.isFinite() }
         val valid = parsed != null && parsed in lo..hi
         androidx.compose.material3.AlertDialog(
@@ -265,7 +267,11 @@ internal fun LabeledSlider(
             text = {
                 Column {
                     androidx.compose.material3.OutlinedTextField(
-                        value = entry, onValueChange = { entry = it.take(12) }, singleLine = true,
+                        state = entry,
+                        lineLimits = androidx.compose.foundation.text.input.TextFieldLineLimits.SingleLine,
+                        inputTransformation = androidx.compose.foundation.text.input.InputTransformation {
+                            if (length > 12) revertAllChanges()
+                        },
                         isError = !valid,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),

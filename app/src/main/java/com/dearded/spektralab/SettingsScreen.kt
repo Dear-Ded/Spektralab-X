@@ -125,7 +125,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
         ) {
             Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("返回编辑器"))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("返回编辑器"), tint = Palette.OnSurface)
                 }
             }
             Text(tr("设置"), style = MaterialTheme.typography.headlineSmall, color = Palette.OnSurface,
