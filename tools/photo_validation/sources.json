@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "purpose": "Public real photos for rendering regression; no endorsement or official film reference.",
+  "sources": [
+    {"id":"portrait_collins","provider":"scikit-image","file":"astronaut.png","credit":"NASA","license":"Public domain","coverage":["portrait","skin","orange fabric","specular highlights"]},
+    {"id":"coffee","provider":"scikit-image","file":"coffee.png","credit":"Rachel Michetti","license":"CC0","coverage":["warm browns","white ceramic","texture"]},
+    {"id":"cat","provider":"scikit-image","file":"chelsea.png","credit":"Stefan van der Walt","license":"CC0","coverage":["fur","low contrast","texture"]},
+    {"id":"rocket_night","provider":"scikit-image","file":"rocket.jpg","credit":"SpaceX","license":"Public domain","coverage":["night","blue sky","bright lights"]},
+    {"id":"forest_backlight","provider":"commons","title":"File:Forest-sun.jpg","license":"CC0","coverage":["green foliage","backlight","deep shadows"]},
+    {"id":"neon_street","provider":"commons","title":"File:Shinjuku - Shinjuku255.jpg","license":"CC0","coverage":["night","neon","mixed lighting"]},
+    {"id":"sunset","provider":"commons","title":"File:Sun at sunset.jpg","license":"CC0","coverage":["warm sky","clouds","highlight transition"]},
+    {"id":"portrait_chawla","provider":"commons","title":"File:Kalpana Chawla, official portrait.jpg","license":"Public domain","coverage":["portrait","skin","blue fabric"]},
+    {"id":"snow_fox","provider":"commons","title":"File:Vulpes lagopus in Iceland.jpg","license":"CC0","coverage":["snow","white fur","neutral highlights"]},
+    {"id":"mountain_lake","provider":"commons","title":"File:Lake Mountain Landscape.jpg","license":"CC0","coverage":["landscape","water","blue sky"]},
+    {"id":"autumn_forest","provider":"commons","title":"File:Autumn Forest Wet Bark.jpg","license":"CC0","coverage":["autumn leaves","orange and brown","wet bark"]},
+    {"id":"portrait_glover","provider":"commons","title":"File:Victor Glover poses in JEM.jpg","license":"Public domain","coverage":["portrait","skin","interior"]}
+  ]
+}

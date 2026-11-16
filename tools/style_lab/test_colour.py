@@ -110,6 +110,23 @@ class ColourTests(unittest.TestCase):
             if style.get("chroma", 1) > 0:
                 np.testing.assert_array_equal(grade(pixels[:1], style), pixels[:1])
 
+    def test_real_photo_highlight_and_blue_interpolation_regression(self):
+        # Public autumn leaves, rocket lights, sunset and portrait samples.
+        # These failed the unchanged .75 budget on the first 12-photo audit.
+        cases = {
+            "mineral_greens": [[255, 255, 177], [254, 255, 196]],
+            "dense_street": [[255, 255, 177], [254, 255, 196], [252, 255, 197]],
+            "powder_coast": [[1, 1, 40]],
+            "night_cobalt": [[255, 255, 177]],
+        }
+        for style in self.styles:
+            if style["id"] not in cases:
+                continue
+            pixels = srgb_to_pro(np.asarray(cases[style["id"]], dtype=np.float64) / 255)
+            table = np.round(grade(cube_grid(65), style), 6).reshape(65, 65, 65, 3).astype(np.float32).astype(np.float64)
+            error = np.linalg.norm(pro_to_lab(sample_tetra(table, pixels)) - pro_to_lab(grade(pixels, style)), axis=1) * 100
+            self.assertLess(float(error.max()), .75, style["id"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

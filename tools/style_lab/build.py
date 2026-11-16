@@ -114,7 +114,7 @@ def main():
     checks = {"prophoto_uniform": samples, "srgb_uniform": srgb_to_pro(samples), "public_photo": public}
     previews = {name: [("Original", image8(photo))] for name, photo in photos.items()}
     previews["chart"] = [("Original", image8(chart()))]
-    metrics = {"algorithm": "oklab-prophoto-soft-gamut-v1", "seed": 20261115,
+    metrics = {"algorithm": json.loads((ROOT / "candidates.json").read_text(encoding="utf-8"))["algorithm"], "seed": 20261115,
                "error_units": "100 * Euclidean Oklab; not CIEDE2000 or a quality rating",
                "scope": "Photographic SDR candidates, not a general ProPhoto color transform",
                "styles": []}

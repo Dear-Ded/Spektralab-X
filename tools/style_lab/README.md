@@ -55,7 +55,7 @@ tests, not chart-calibrated camera tests. No private phone data is needed.
    `lut.space=prophoto`; do not route through the narrower sRGB LUT baker.
 
 The deepest 65-cube cell is identity, with a smooth transition to full effect
-by encoded ProPhoto max RGB .08. This limits under-resolved near-black chroma
+by encoded ProPhoto max RGB .12. This limits under-resolved near-black chroma
 and avoids introducing tint into almost-black noise. Neither this encoded-RGB
 toe blend nor finite LUT interpolation promises constant perceptual hue/L.
 For color looks, negative-LMS extremes of the ProPhoto cube retain the input;
@@ -63,7 +63,12 @@ a smooth confidence weight fades in the look over min(LMS)/max(LMS) 0..0.12.
 This avoids amplifying the signed cube-root singularity near non-physical
 primaries, without clipping to sRGB. The two monochrome looks use cube-root
 linear Rec.709/D65 luminance instead, so wide colors still become monochrome
-above the deliberately preserved darkest toe. Neither path is a camera profile.
+above the deliberately preserved darkest toe. Colour candidates also fade their
+effect smoothly over source Oklab lightness .90..1 to retain bright colour
+detail near the white corner; monochrome candidates keep their achromatic map.
+This v2 change addresses seven over-budget cases found in twelve additional
+public real photographs. The .75 photo-error budget remains unchanged. Neither
+path is a camera profile.
 
 Generation fails if public-photo maximum interpolation error exceeds 0.75 or
 uniform ProPhoto stress maximum exceeds 5, in 100*Oklab distance. These are

@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "algorithm": "oklab-prophoto-soft-gamut-v1",
+  "version": 2,
+  "algorithm": "oklab-prophoto-soft-gamut-v2",
   "styles": [
     {"id":"clear_portrait","zh":"素净人像","en":"Clear Portrait","use_zh":"日光人像、浅色衣物；先校准白平衡","use_en":"Daylight portraits and pale fabrics; balance white first","contrast":0.05,"chroma":0.98,"skin_protect":0.85,"bands":[{"hue":145,"width":40,"chroma":0.94,"density":0.025}]},
     {"id":"airy_daylight","zh":"晴日留白","en":"Airy Daylight","use_zh":"明亮日常、建筑；不补救过曝","use_en":"Bright everyday scenes and architecture; cannot recover clipping","contrast":-0.18,"chroma":0.94,"skin_protect":0.7,"bands":[{"hue":245,"width":40,"lightness":0.015,"chroma":0.94}]},

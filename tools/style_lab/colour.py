@@ -151,9 +151,9 @@ def grade(encoded, style):
     mapped = gamut_map(desired_lab(encoded, style))
     output = pro_encode(np.clip(lab_to_pro_linear(mapped), 0, 1))
     # Preserve the complete first 65-cube cell, where perceptual chroma is
-    # under-resolved. Fade in with a C1 toe instead of tinting near-black noise.
+    # under-resolved. Fade in through .12 instead of tinting near-black noise.
     source = np.asarray(encoded, dtype=np.float64)
-    toe = np.clip((source.max(axis=-1) - 1 / 64) / (.08 - 1 / 64), 0, 1)
+    toe = np.clip((source.max(axis=-1) - 1 / 64) / (.12 - 1 / 64), 0, 1)
     toe = toe * toe * (3 - 2 * toe)
     # Extreme ProPhoto cube corners can have negative Oklab LMS responses.
     # Preserve those values instead of amplifying the cube-root singularity;
@@ -163,7 +163,14 @@ def grade(encoded, style):
     confidence = confidence * confidence * (3 - 2 * confidence)
     if style.get("chroma", 1) == 0:
         confidence = np.ones_like(confidence)
-    return source + (output - source) * (toe * confidence)[..., None]
+    # Retain delicate bright colour detail instead of driving a 65-cube through
+    # the steep white-corner compression. Monochrome keeps its achromatic map.
+    highlight = np.ones_like(toe)
+    if style.get("chroma", 1) > 0:
+        light = np.cbrt(lms) @ M2[0]
+        shoulder = np.clip((light - .90) / .10, 0, 1)
+        highlight -= shoulder * shoulder * (3 - 2 * shoulder)
+    return source + (output - source) * (toe * confidence * highlight)[..., None]
 
 
 def srgb_to_pro(encoded):
