@@ -59,8 +59,15 @@ The actual native JNI integration checks ten combinations across no-film, film,
 intermediate, original LUT chains and two display outputs. It verifies that the
 picker excludes finish sliders, includes the LUT, keeps a bounded finite
 snapshot, and does not change retained pixels or repack results. These checks
-pass. Screenshot verification, complete packaging and device acceptance are
-recorded separately when complete; focused tests are not device acceptance.
+pass in normal and ASan/UBSan builds. LSan is disabled for this platform/Vulkan
+shim driver, so it is not claimed here. Final screenshots were inspected and
+a dark title contrast issue was corrected.
+
+The complete signed candidate passes 470 Debug and 255 Release test executions,
+with no failures, errors or skips. Lint has zero errors, 117 warnings and six
+hints. Existing-certificate and 16 KiB package checks pass. Candidate packaging
+is complete; physical-device acceptance is still pending. Automated checks and
+screenshots do not establish real touch feel or calibrated display accuracy.
 
 ## Meter optimisation retained in this change set
 
@@ -72,7 +79,7 @@ strict contraction policies. ASan/UBSan/LSan passes the same vectors and the
 baseline/candidate CSV comparison.
 
 Seven alternating paired measurements per pattern, after equal warmup, show
-15.50--20.08 percent lower meter-stage time under GCC and 10.92--14.62 percent
+15.50--20.08 percent lower meter-stage time under GCC and 10.92--14.83 percent
 under Clang across six 65,536-sample patterns. This is a measurement of the
 meter stage, not complete image processing or phone latency. Exposure values
 are unchanged. Snow/sunset exposure intent remains a separate product issue.
@@ -94,3 +101,25 @@ relevant reference distinctions are retained, without copying their code:
 Changing a global brightness statistic alone cannot establish scene intent.
 This patch therefore does not silently rewrite existing 87-style exposure
 recipes or claim to fix the snow/sunset aesthetic issue.
+
+The follow-up picker/curve research also checked these fixed source locations:
+
+- RawTherapee's ordinary-image spot WB uses source-channel averages, while RAW
+  has separate sensor/camera processing. This supports a stage distinction,
+  not a claim that encoded print correction estimates physical illuminant K.
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtengine/stdimagesource.cc#L359-L371
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtengine/rawimagesource.cc#L8202-L8213
+- Its coordinator maps a square sample to source coordinates. Our 7 x 7 size
+  and inverse of the existing gains are our own decisions, not its defaults.
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtengine/improccoordinator.cc#L3253-L3272
+- RawPedia advises avoiding black and clipped channels; this is an input
+  limitation, not proof that every mature implementation rejects them.
+  https://github.com/RawTherapee/RawPedia/blob/e2c56c717192f6203ae652c4ae072ad1698bf4ad/content/White_Balance/index.md#L136-L148
+- RawTherapee applies a spot immediately; its right click exits sampling.
+  Our explicit confirmation/cancellation contract is a deliberate difference.
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtgui/toolpanelcoord.cc#L1530-L1546
+- Its curve editor uses normalised relative displacement, a Ctrl fine factor
+  of .05, numeric point input and neighbour constraints. Our mobile quarter
+  speed is an explicit local interaction choice, not its desktop factor.
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtgui/widgets/curves/mydiagonalcurve.cc#L1302-L1362
+  https://github.com/RawTherapee/RawTherapee/blob/64c2d90a3248c7ad41842d9162368858b61aac6a/rtgui/widgets/curves/mydiagonalcurve.cc#L624-L650
