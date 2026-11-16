@@ -567,7 +567,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         if (_ui.value.previewSource != source || _ui.value.edit != edit || _ui.value.busy != null) {
             showMessage(tr("照片或调整已改变，请重新取样")); return
         }
+        history.endGroup()
         update(edit.copy(look = edit.look.copy(temperature = pick.temperature, tint = pick.tint)))
+        history.endGroup()
         showMessage(tr("已校正色温和色调，可撤销"))
     }
 

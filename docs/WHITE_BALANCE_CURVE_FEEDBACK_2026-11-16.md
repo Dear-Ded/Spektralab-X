@@ -9,6 +9,8 @@ Co-created with GPT (OpenAI), 2026-11-16. Engineering record; not release copy.
 - Confirmation changes only the existing finished-print temperature/tint fields.
   It uses the ordinary update/history/save/export path. RAW decoder Kelvin/tint,
   other adjustments, and file formats retain their current contracts.
+- A confirmed pick has its own undo step. It cannot merge with a quick
+  adjustment before or after it; a continuous slider drag still coalesces.
 - Curves use a 280--380 dp plot, with the existing 24 dp handle gutter. Fine drag
   is the default and maps one unit of finger travel to one quarter unit of
   point travel. Direct drag remains available.
@@ -68,6 +70,15 @@ with no failures, errors or skips. Lint has zero errors, 117 warnings and six
 hints. Existing-certificate and 16 KiB package checks pass. Candidate packaging
 is complete; physical-device acceptance is still pending. Automated checks and
 screenshots do not establish real touch feel or calibrated display accuracy.
+
+Follow-up history checks found that time-only coalescing had no boundary for
+picker confirmation. An explicit group boundary now surrounds that update and
+also closes a group on undo, redo and clear. This avoids relying on an uptime
+sentinel. The old implementation fails a rapid edit-after-redo regression;
+six history tests now pass, including a confirmation between two fast edits,
+continuous-drag coalescing, redo order and unchanged confirmation. Together
+with the picker, curve and solver suites, 29 focused checks pass. This history
+follow-up has not yet completed signed-candidate packaging.
 
 ## Meter optimisation retained in this change set
 
