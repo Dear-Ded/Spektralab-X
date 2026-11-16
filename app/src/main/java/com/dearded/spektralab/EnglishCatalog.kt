@@ -152,6 +152,7 @@ internal object EnglishCatalog {
         "相纸" to "Paper",
         "滤镜" to "Filter",
         "手动曝光" to "Manual exposure",
+        "自定义测光" to "Custom metering",
         "胶片前曲线" to "Film input curve",
         "效果" to "Effects",
         "颗粒" to "Grain",

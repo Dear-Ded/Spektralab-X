@@ -212,6 +212,14 @@ data class Edit(
     /** 胶片效果「无」: no grain, halation (and with it the scatter), glare or scanner sharpening. */
     val effectsNone: Boolean get() = !grainActive && !halationActive && !glareActive && unsharpAmount == 0.0
     val rawDevelopmentChanged: Boolean get() = rawDevelopment != RawDevelopmentMode.NEUTRAL || !rawAutoExposure || rawExposureEv != 0.0
+    val exposureChanged: Boolean get() = autoExposure != DEFAULT.autoExposure || aeMethod != DEFAULT.aeMethod ||
+        exposureEv != DEFAULT.exposureEv || !sceneCurve.isIdentity || printExposure != DEFAULT.printExposure ||
+        yShift != DEFAULT.yShift || mShift != DEFAULT.mShift
+
+    fun resetExposure() = copy(autoExposure = DEFAULT.autoExposure, aeMethod = DEFAULT.aeMethod,
+        exposureEv = DEFAULT.exposureEv, sceneCurve = SceneCurve.IDENTITY,
+        printExposure = DEFAULT.printExposure, yShift = DEFAULT.yShift, mShift = DEFAULT.mShift)
+
     fun requiresRawDevelopmentSource(source: SourceInfo?) = source?.kind == "raw" && noFilm &&
         rawDevelopment == RawDevelopmentMode.STANDARD_V1 && !source.rawStatsReady
 

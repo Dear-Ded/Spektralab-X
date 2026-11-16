@@ -66,6 +66,27 @@ int main(int argc, char** argv) try {
     auto* source = reinterpret_cast<Session*>(parent);
     const auto parentParams = *reinterpret_cast<std::string*>(CALL(getParams)(&env,nullptr,parent));
     const auto parentPixels = source->small_rgb;
+    if (std::getenv("SPK_METER_ONLY")) {
+        require(spk_set_params(source->session, R"({"auto_exposure_method":"balanced"})", nullptr) == SPK_OK,
+                "application default meter intent");
+        char* reply = nullptr;
+        const auto status = spk_solve(source->session, "exposure", &reply);
+        std::unique_ptr<char, decltype(&spk_string_free)> owned(reply, &spk_string_free);
+        require(status == SPK_OK && reply != nullptr, "actual session exposure solve");
+        std::ofstream meter(std::filesystem::path(argv[3]) / "meter.json");
+        meter << reply << '\n';
+        require(bool(meter), "write measured exposure");
+        std::ofstream linear(std::filesystem::path(argv[3]) / "input.f32", std::ios::binary);
+        linear.write(reinterpret_cast<const char*>(parentPixels.data()), parentPixels.size() * sizeof(float));
+        require(bool(linear), "write metered linear source");
+        require(source->small_rgb == parentPixels && input.pixels == originalInput && input.locks == 0,
+                "meter retained source and released bitmap");
+        CALL(release)(&env,nullptr,parent);
+        require(g_sessions[reinterpret_cast<spk_engine*>(engine)] == 0, "meter session released");
+        CALL(destroy)(&env,nullptr,engine);
+        std::cout << "PASS actual session exposure solve; source retained and session released\n";
+        return 0;
+    }
     std::vector<std::filesystem::path> fixtures;
     for (const auto& file : std::filesystem::directory_iterator(argv[2]))
         if (file.path().extension() == ".json") fixtures.push_back(file.path());

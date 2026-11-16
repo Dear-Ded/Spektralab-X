@@ -53,4 +53,27 @@ class ColourBoundaryAuditTest {
             assertTrue(change.detail, change.detail.contains(String.format(java.util.Locale.ROOT, "%+.2f EV", value)))
         }
     }
+
+    @Test fun importedMeterIntentIsVisibleAndExposureResetRestoresIt() {
+        val defaults = Edit()
+        val catalog = Catalog(listOf(Stock(defaults.film, "Portra", false, false, defaults.paper)),
+            listOf(Stock(defaults.paper, "Supra", false, false, null)))
+        for (method in listOf("center", "protect_highlights", "protect_shadows", "center_weighted", "average", "median")) {
+            for (automatic in listOf(true, false)) {
+                val imported = SpkLook("meter", engine = SpkEngine(autoExposure = automatic, aeMethod = method))
+                    .toStyle("meter", defaults, "").applyTo(defaults, catalog)!!
+                val original = imported.copy(look = Look(exposure = .25), quarterTurns = 1)
+                assertTrue(method, original.exposureChanged)
+                val exposure = changesOf(original, Catalog.EMPTY).single { it.name == tr("曝光") }
+                assertTrue(method, exposure.detail.isNotBlank())
+                val reset = exposure.reset(original)
+                assertEquals(method, defaults.aeMethod, reset.aeMethod)
+                assertEquals(defaults.autoExposure, reset.autoExposure)
+                assertEquals(original.look, reset.look)
+                assertEquals(original.quarterTurns, reset.quarterTurns)
+                assertFalse(method, reset.exposureChanged)
+                assertFalse(changesOf(reset, Catalog.EMPTY).any { it.name == tr("曝光") })
+            }
+        }
+    }
 }

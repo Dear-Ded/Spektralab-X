@@ -69,17 +69,16 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
         out += Change(tr("相纸"), catalog.paper(e.paper)?.label.orEmpty(), 1, step = 1) {
             catalog.normalize(if (positive) it.copy(scanFilm = true) else it.copy(scanFilm = false, digitalIntermediate = true))
         }
-    if (!e.autoExposure || e.exposureEv != d.exposureEv || !e.sceneCurve.isIdentity || e.printExposure != d.printExposure || e.yShift != d.yShift || e.mShift != d.mShift)
+    if (e.exposureChanged)
         out += Change(tr("曝光"), listOfNotNull(
             e.exposureEv.takeIf { it != d.exposureEv }?.let { String.format(java.util.Locale.ROOT, "%+.2f EV", it) },
             e.printExposure.takeIf { it != d.printExposure }?.let { String.format(java.util.Locale.ROOT, "×%.2f", it) },
             tr("滤镜").takeIf { e.yShift != d.yShift || e.mShift != d.mShift },
             tr("手动曝光").takeIf { !e.autoExposure },
+            tr("自定义测光").takeIf { e.aeMethod != d.aeMethod },
             tr("胶片前曲线").takeIf { !e.sceneCurve.isIdentity },
         ).joinToString(" · "), 1, step = 2) {
-            it.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv, printExposure = d.printExposure,
-                sceneCurve = SceneCurve.IDENTITY,
-                yShift = d.yShift, mShift = d.mShift)
+            it.resetExposure()
         }
     val fxTuned = e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
         e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma

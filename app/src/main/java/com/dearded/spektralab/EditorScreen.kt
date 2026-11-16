@@ -870,7 +870,7 @@ private fun Controls(
                             val stepEdited = listOf(
                                 !e.noFilm || e.filmFormatMm != d.filmFormatMm,
                                 !e.noFilm && !e.paperNone(positive),
-                                !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                                e.exposureChanged,
                                 !e.effectsNone || e.scatterAmount != d.scatterAmount || e.couplersAmount != d.couplersAmount ||
                                     e.grainLayered != d.grainLayered || e.grainArea != d.grainArea || e.unsharpSigma != d.unsharpSigma ||
                                     e.extraEffectsTuned(d),
@@ -914,14 +914,10 @@ private fun Controls(
                                     NextStep(tr("曝光")) { step = 2 }
                                 }
                                 2 -> {
-                                    val d = Edit()
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Spacer(Modifier.weight(1f))
-                                    StepReset(enabled, what = tr("曝光"), changed = !e.autoExposure || e.exposureEv != 0.0 || e.printExposure != 1.0 ||
-                                        e.yShift != 0.0 || e.mShift != 0.0 || !e.sceneCurve.isIdentity) {
-                                        vm.update(e.copy(autoExposure = d.autoExposure, exposureEv = d.exposureEv,
-                                            sceneCurve = SceneCurve.IDENTITY,
-                                            printExposure = d.printExposure, yShift = d.yShift, mShift = d.mShift))
+                                    StepReset(enabled, what = tr("曝光"), changed = e.exposureChanged) {
+                                        vm.update(e.resetExposure())
                                     }
                                     }
                                 LabeledSlider(tr("曝光补偿"), e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
@@ -1318,8 +1314,7 @@ private fun Controls(
             val entryEdited = listOf(
                 false,
                 e.film != fresh.film || e.paper != fresh.paper || e.scanFilm != fresh.scanFilm ||
-                    e.filmFormatMm != fresh.filmFormatMm || !e.autoExposure || e.exposureEv != 0.0 || !e.sceneCurve.isIdentity || e.rawDevelopmentChanged ||
-                    e.printExposure != 1.0 || e.yShift != 0.0 || e.mShift != 0.0,
+                    e.filmFormatMm != fresh.filmFormatMm || e.exposureChanged || e.rawDevelopmentChanged,
                 e.look != Look.NEUTRAL,
                 e.borderId != "none" || e.filmEdge || e.frame.perf != null || e.dateImprint,
                 e.cropAspect != 0.0 || e.quarterTurns % 4 != 0 || e.flipH,
