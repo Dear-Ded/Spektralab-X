@@ -44,8 +44,83 @@ static void ppm(const PrecisionBitmap& bitmap, const std::string& path) {
     require(bool(file), "write synthetic visual evidence");
 }
 
+static void verify_wb_wire(spk_engine* engine, const std::string& path) {
+    std::ifstream input(path);
+    std::string magic;
+    int count = 0;
+    require(bool(input >> magic >> count) && magic == "SPK_WB_WIRE_V1" && count == 375, "Kotlin WB fixture header");
+    std::vector<spk::android::OutputTransform> outputs;
+    for (const auto& target : {"sRGB", "Display P3", "ProPhoto RGB", "Adobe RGB (1998)"}) {
+        for (bool exporting : {false, true}) {
+            if (!exporting && target != std::string("sRGB") && target != std::string("Display P3")) continue;
+            spk::android::OutputTransform xf;
+            std::string error;
+            const bool ready = xf.fetch(engine, target, exporting, error);
+            const std::string context = "WB output transform " + std::string(target) + ": " + error;
+            require(ready, context.c_str());
+            xf.set_exact(true);
+            outputs.push_back(std::move(xf));
+        }
+    }
+    int unlimited = 0, pack_checks = 0;
+    float maximum_spread = 0, maximum_finish_error = 0;
+    const auto wire = [&] {
+        int size = 0;
+        require(bool(input >> size) && size >= 50 && size <= 4096, "WB native array length");
+        std::vector<float> values(size);
+        for (float& value : values) require(bool(input >> value) && std::isfinite(value), "finite WB native value");
+        return values;
+    };
+    for (int i = 0; i < count; ++i) {
+        std::array<float, 3> source{};
+        int limited = -1;
+        require(bool(input >> source[0] >> source[1] >> source[2] >> limited) && (limited == 0 || limited == 1), "WB source row");
+        const auto wb_values = wire(), finish_values = wire(), combined_values = wire();
+        require(wb_values[0] == combined_values[0] && wb_values[1] == combined_values[1], "resolved WB indices");
+        spk::android::Layer2 wb(wb_values), finish(finish_values), combined(combined_values);
+        auto corrected = source;
+        wb.apply(corrected[0], corrected[1], corrected[2], .5f, .5f);
+        const float spread = *std::max_element(corrected.begin(), corrected.end()) - *std::min_element(corrected.begin(), corrected.end());
+        if (!limited) {
+            ++unlimited;
+            maximum_spread = std::max(maximum_spread, spread);
+            require(spread <= 2e-7f, "unlimited picked patch becomes neutral through actual Layer2");
+        }
+        for (bool unquantised : {false, true}) {
+            auto actual = source, expected = corrected;
+            combined.apply(actual[0], actual[1], actual[2], .5f, .5f, {}, unquantised);
+            finish.apply(expected[0], expected[1], expected[2], .5f, .5f, {}, unquantised);
+            for (int k = 0; k < 3; ++k) {
+                maximum_finish_error = std::max(maximum_finish_error, std::abs(actual[k] - expected[k]));
+                require(std::abs(actual[k] - expected[k]) <= 2e-7f, "WB preserves the remaining finish in both packing modes");
+            }
+        }
+        for (const auto& xf : outputs) {
+            std::array<uint8_t, 4> actual8{}, expected8{};
+            std::vector<uint16_t> actual16, expected16, rows16;
+            std::vector<uint8_t> rows8;
+            spk::android::pack_float_rgba8(source.data(), 1, 1, 1, actual8.data(), 4, &combined, xf);
+            spk::android::pack_float_rgba8(corrected.data(), 1, 1, 1, expected8.data(), 4, &finish, xf);
+            require(actual8 == expected8, "WB display/JPEG pack retains finish");
+            spk::android::pack_float_rgba16(source.data(), 1, 1, 1, actual16, &combined, xf);
+            spk::android::pack_float_rgba16(corrected.data(), 1, 1, 1, expected16, &finish, xf);
+            require(actual16 == expected16, "WB TIFF pack retains finish");
+            spk::android::Rgba8Rows(source.data(), 1, 1, 1, &combined, &xf).pack(0, 1, rows8);
+            spk::android::Rgba16Rows(source.data(), 1, 1, 1, &combined, &xf).pack(0, 1, rows16);
+            require(std::equal(rows8.begin(), rows8.end(), actual8.begin(), actual8.end()) && rows16 == actual16,
+                "WB streamed JPEG/TIFF rows equal complete pack");
+            ++pack_checks;
+        }
+    }
+    input >> std::ws;
+    require(input.eof() && unlimited > 0 && unlimited < count, "complete WB fixtures including limited samples");
+    std::cout << "PASS Kotlin-sample/persist/wire -> actual Layer2/pack rows=" << count << " unlimited=" << unlimited
+              << " limited=" << count - unlimited << " max_neutral_spread=" << maximum_spread
+              << " max_finish_error=" << maximum_finish_error << " display_export_checks=" << pack_checks << '\n';
+}
+
 int main(int argc, char** argv) try {
-    require(argc == 3, "resources and isolated evidence directory required");
+    require(argc == 3 || argc == 4, "resources, isolated evidence directory and optional Kotlin WB fixture required");
     std::filesystem::create_directories(argv[2]);
     JNINativeInterface_ table{};
     table.GetStringUTFChars = get_string; table.ReleaseStringUTFChars = release_string; table.NewStringUTF = new_string;
@@ -58,6 +133,7 @@ int main(int argc, char** argv) try {
     require(CALL(whiteBalanceReferenceV1)(&env, nullptr, 0) == nullptr, "picker refuses absent session");
     const jlong engine = CALL(create)(&env, nullptr, text(argv[1]), text(argv[2]));
     require(engine != 0, "create production engine");
+    if (argc == 4) verify_wb_wire(reinterpret_cast<spk_engine*>(engine), argv[3]);
     const std::string opening = R"({"input_color_space":"ProPhoto RGB","input_cctf_decoding":false,"output_color_space":"ProPhoto RGB","output_cctf_encoding":true,"product_defaults":true,"x_no_film":true,"x_raw_development":"neutral"})";
     constexpr uint32_t w = 768, h = 512;
     PrecisionBitmap input{{w, h, w * 4, ANDROID_BITMAP_FORMAT_RGBA_8888, 0}, std::vector<uint8_t>(size_t(w) * h * 4)};

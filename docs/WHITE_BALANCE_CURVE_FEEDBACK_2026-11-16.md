@@ -80,6 +80,27 @@ continuous-drag coalescing, redo order and unchanged confirmation. Together
 with the picker, curve and solver suites, 29 focused checks pass. The complete
 signed candidate includes this history fix and passes the checks above.
 
+The follow-up `WhiteBalanceWireTest` exercises the real 7 x 7 sampler, JSON
+save/load and `Look.values()` path on 375 synthetic midtone/strength combinations.
+Its emitted arrays then drive the actual C++ Layer2 and pixel packers. Of these,
+160 corrections are within range: their maximum working-code channel spread is
+2.98023e-8. The other 215 retain the explicit limited flag; neutrality is not
+claimed for them. Existing exposure and contrast survive in both the legacy and
+unquantised application modes, with zero measured finish difference.
+
+Each of GCC, Clang and ASan/UBSan runs passes 2,250 combinations of these arrays
+with sRGB/P3 display and sRGB/P3/ProPhoto/Adobe export transforms. Complete 8/16-bit
+packing and streamed rows agree. These are pre-encoding pixel checks, not lossy
+JPEG-file or physical-display comparisons. LSan remains disabled for this
+platform/Vulkan driver. Zeroing WB or dropping exposure/contrast from the wire
+fixture is detected by the expected neutrality or finish-preservation assertion.
+This adds one JVM test plus native fixtures; the signed-package counts above
+still describe the already built candidate. Application source is unchanged.
+
+To emit fixtures, set `SPK_WB_EVIDENCE_FILE` for `WhiteBalanceWireTest` and force
+execution with `--rerun-tasks`; fixture emission is outside Gradle's declared
+outputs. Pass that same file as `WB_FIXTURE` to `run_jni_selection_preview.sh`.
+
 ## Meter optimisation retained in this change set
 
 Patch 0061 shares each trimmed logarithm between balanced and central metering,

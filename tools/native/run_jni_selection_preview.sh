@@ -25,4 +25,6 @@ flags=(-std=c++20 -O2 -ffp-contract=off -pthread -ffunction-sections -fdata-sect
   -Wl,--gc-sections -Wl,--start-group "$b/engine/libspektralab_engine.a" "$b/engine/libspektralab_core.a" \
   "$raw_build/engine/libspk_image_io.a" "$raw_build/engine/libspk_libraw.a" "$b/engine/libspk_volk.a" "$codec/lib/libjpeg.a" \
   -Wl,--end-group -ldl -lz -fopenmp -o "$build/jni_selection_preview"
-"$build/jni_selection_preview" "${RESOURCES:-$b/engine/resources}" "$build/evidence"
+args=("${RESOURCES:-$b/engine/resources}" "$build/evidence")
+[[ -z "${WB_FIXTURE:-}" ]] || args+=("$WB_FIXTURE")
+"$build/jni_selection_preview" "${args[@]}"
