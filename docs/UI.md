@@ -1,6 +1,7 @@
 # 界面规范 / UI specification
 
-> 状态：**v1，调研完成、尚未实现**。M3 界面重构以本文为准，改界面先改这里。
+> 状态：**历史 v1 设计记录**。早期实现进度与尺寸仅供沿革查阅，不再作为当前界面改动依据。
+> 当前精密暗房组件、胶卷包装、字体、配色和动效合同见 [0.210 验收矩阵](ALPHA_0210_UI_ACCEPTANCE_2026-11-15.md)；后续用户确认优先。本文未被替代的页面结构仍可参考，冲突部分不得覆盖新要求。
 > 依据：获奖与标杆应用（Halide、Darkroom、Photomator、Lightroom、Snapseed、Kino、Not Boring Camera）、同类胶片应用（VSCO、RNI、Dehancer、Dazz、NOMO、Huji、FilmBox、Polarr、Spektrafilm-android）、国内热门应用（醒图、美图秀秀、一甜、黄油、剪映、小米相册）、Hark Pro 的设计取向，以及用户评价里的高频好评与差评。来源链接见文末。
 
 ## 0. 原则
