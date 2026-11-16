@@ -19,9 +19,7 @@ the global sum: its NaN handling differs from the central loop's rejection test.
      // `center` is the same statistic through today's centre-weighted grid:
      // the weights move *where* the mean is taken, not what is trimmed, and
      // they are the same xs/ys and sigma `center_weighted` uses.
-@@ -833,8 +829,14 @@
-         for (size_t j = 0; j < sw; ++j) {
-             const double v = y[i * sw + j];
+@@ -835,6 +831,12 @@
              if (v < p1 || v > p99) continue;
 +            const double ln_v = std::log(v);
 +            if (v >= p1 && v <= p99) {
