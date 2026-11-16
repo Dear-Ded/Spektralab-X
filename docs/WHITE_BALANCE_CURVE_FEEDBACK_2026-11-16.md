@@ -65,7 +65,7 @@ pass in normal and ASan/UBSan builds. LSan is disabled for this platform/Vulkan
 shim driver, so it is not claimed here. Final screenshots were inspected and
 a dark title contrast issue was corrected.
 
-The complete signed candidate passes 470 Debug and 255 Release test executions,
+The complete signed candidate passes 474 Debug and 259 Release test executions,
 with no failures, errors or skips. Lint has zero errors, 117 warnings and six
 hints. Existing-certificate and 16 KiB package checks pass. Candidate packaging
 is complete; physical-device acceptance is still pending. Automated checks and
@@ -77,8 +77,8 @@ also closes a group on undo, redo and clear. This avoids relying on an uptime
 sentinel. The old implementation fails a rapid edit-after-redo regression;
 six history tests now pass, including a confirmation between two fast edits,
 continuous-drag coalescing, redo order and unchanged confirmation. Together
-with the picker, curve and solver suites, 29 focused checks pass. This history
-follow-up has not yet completed signed-candidate packaging.
+with the picker, curve and solver suites, 29 focused checks pass. The complete
+signed candidate includes this history fix and passes the checks above.
 
 ## Meter optimisation retained in this change set
 
