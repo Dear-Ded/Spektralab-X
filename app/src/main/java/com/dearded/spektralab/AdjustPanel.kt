@@ -100,6 +100,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             }
         }
         1 -> {
+            WhiteBalancePickerButton(ui, vm, enabled)
             Adj(tr("色温"), l.temperature, -100.0, 100.0, enabled) { set(l.copy(temperature = it)) }
             Adj(tr("色调"), l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
             Adj(tr("饱和度"), l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
@@ -208,7 +209,7 @@ private val SEGMENT_HINTS get() = listOf(
     "",
     "",
     "",
-    tr("按住点拖动，双击删除。"),
+    tr("点选控制点，精细拖动；也可输入数值。"),
     tr("左右浓淡，上下明暗；双击回到默认点。"),
     "",
 )

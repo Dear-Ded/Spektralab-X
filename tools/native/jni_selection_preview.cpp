@@ -12,6 +12,24 @@ static void JNICALL float_region(JNIEnv*, jfloatArray array, jsize start, jsize 
     std::copy_n(values.data() + start, count, out);
 }
 static jfloatArray floats(std::vector<float>& values) { return reinterpret_cast<jfloatArray>(&values); }
+static jfloatArray JNICALL allocate_floats(JNIEnv*, jsize count) {
+    return reinterpret_cast<jfloatArray>(new std::vector<float>(size_t(count)));
+}
+static void JNICALL write_floats(JNIEnv*, jfloatArray array, jsize start, jsize count, const jfloat* values) {
+    auto& out = *reinterpret_cast<std::vector<float>*>(array);
+    require(start >= 0 && count >= 0 && size_t(start) + size_t(count) <= out.size(), "picker array bounds");
+    std::copy_n(values, count, out.begin() + start);
+}
+static std::vector<float> wb_reference(JNIEnv* env, jlong handle) {
+    auto array = CALL(whiteBalanceReferenceV1)(env, nullptr, handle);
+    require(array != nullptr, "production WB reference available");
+    std::unique_ptr<std::vector<float>> owned(reinterpret_cast<std::vector<float>*>(array));
+    const auto& values = *owned;
+    require(values.size() == 2 + size_t(values[0]) * size_t(values[1]) * 6 &&
+        values[0] > 0 && values[0] <= 512 && values[1] > 0 && values[1] <= 512, "bounded WB reference shape");
+    for (float v : values) require(std::isfinite(v), "finite WB snapshot");
+    return values;
+}
 static PrecisionBitmap* picture(jobject bitmap) {
     require(bitmap != nullptr, "render returned pixels");
     auto* result = reinterpret_cast<PrecisionBitmap*>(bitmap);
@@ -35,7 +53,9 @@ int main(int argc, char** argv) try {
     table.GetStaticFieldID = get_field; table.GetStaticMethodID = get_method; table.GetStaticObjectField = get_object;
     table.CallStaticObjectMethodV = allocate_bitmap;
     table.GetArrayLength = float_length; table.GetFloatArrayRegion = float_region;
+    table.NewFloatArray = allocate_floats; table.SetFloatArrayRegion = write_floats;
     JNIEnv env{&table};
+    require(CALL(whiteBalanceReferenceV1)(&env, nullptr, 0) == nullptr, "picker refuses absent session");
     const jlong engine = CALL(create)(&env, nullptr, text(argv[1]), text(argv[2]));
     require(engine != 0, "create production engine");
     const std::string opening = R"({"input_color_space":"ProPhoto RGB","input_cctf_decoding":false,"output_color_space":"ProPhoto RGB","output_cctf_encoding":true,"product_defaults":true,"x_no_film":true,"x_raw_development":"neutral"})";
@@ -82,12 +102,19 @@ int main(int argc, char** argv) try {
         require(child->session != source->session && child->width == 384 && child->height == 256,
             "preview owns an independent bounded engine session");
         require(CALL(setOutput)(&env, nullptr, child_handle, text(output), JNI_FALSE), "preview display output");
-        auto* ungraded = picture(CALL(renderBitmap)(&env, nullptr, child_handle, text("full")));
+        auto* ungraded = picture(CALL(renderReuse)(&env, nullptr, child_handle, text("full"), nullptr));
+        const auto before_wb = wb_reference(&env, child_handle);
         require(CALL(setLook)(&env, nullptr, child_handle, floats(look)), "complete finish");
         if (mode == 4) require(CALL(setSourceLutV1)(&env, nullptr, child_handle, floats(shaper), floats(lut), 2,
             floats(domains), JNI_TRUE, .7f), "original shaper/table chain");
         else if (mode != 0) require(CALL(setLut)(&env, nullptr, child_handle, floats(lut), 2, .7f), "imported LUT and strength");
-        auto* actual = picture(CALL(renderBitmap)(&env, nullptr, child_handle, text("full")));
+        auto* actual = picture(CALL(renderReuse)(&env, nullptr, child_handle, text("full"), nullptr));
+        const auto after_wb = wb_reference(&env, child_handle);
+        if (mode == 0) require(before_wb == after_wb, "WB sampling excludes finish sliders and display space");
+        else require(before_wb != after_wb, "WB sampling includes the active original colour table");
+        const auto cached = child->last_float;
+        require(picture(CALL(repack)(&env, nullptr, child_handle, nullptr))->pixels == actual->pixels &&
+            child->last_float == cached, "WB snapshot does not mutate cached render or finish");
         require(actual->pixels != ungraded->pixels, "finish changes preview pixels even on the same film");
 
         // Ordinary open/render of the same small input is the main pipeline at this resolution.
@@ -132,7 +159,7 @@ int main(int argc, char** argv) try {
     CALL(release)(&env, nullptr, raw_child);
     require(g_sessions[reinterpret_cast<spk_engine*>(engine)] == 0, "all preview and parent sessions released");
     CALL(destroy)(&env, nullptr, engine);
-    std::cout << "PASS " << cases << " exact small-input pipeline comparisons; RAW metadata/refusal; parent isolation; ownership cleanup\n";
+    std::cout << "PASS " << cases << " exact small-input pipeline comparisons; pre-WB picker stage/LUT/immutable snapshot; RAW metadata/refusal; parent isolation; ownership cleanup\n";
 } catch (const std::exception& error) {
     std::cerr << "FAIL " << error.what() << '\n'; return 1;
 }

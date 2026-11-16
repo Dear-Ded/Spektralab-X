@@ -72,6 +72,10 @@ public:
     // print and ahead of every slider. Null or strength 0 clears it.
     void set_lut(std::shared_ptr<const ColourTable> lut, float strength);
 
+    // The picker's reference stops immediately before white balance, after
+    // the optional colour table, in the same encoded working space.
+    void apply_colour_table(float& r, float& g, float& b) const;
+
     // One pixel, encoded, in place. (u, v) is its position in the frame, 0..1.
     void apply(float& r, float& g, float& b, float u, float v) const { apply(r, g, b, u, v, Frame{}); }
     // The same with `f`, this look's frame(w, h) for the frame (u, v) is in;

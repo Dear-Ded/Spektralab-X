@@ -1,0 +1,39 @@
+From: GPT (OpenAI), AI assistant
+Subject: [PATCH] Share each trimmed logarithm between the two exposure meters
+
+Accumulate the balanced and central sums in their original row-major order.
+Reuse the logarithm, without another sample buffer or changing the percentile,
+Gaussian, gain, or legacy-meter equations. Keep the positive trim predicate for
+the global sum: its NaN handling differs from the central loop's rejection test.
+
+--- a/engine/src/pipeline/pipeline.cpp
++++ b/engine/src/pipeline/pipeline.cpp
+@@ -815,10 +815,6 @@
+     // region and only needs the trim for the near-black one (RFC-015 §2.2).
+     double ln_sum = 0.0;
+     size_t count = 0;
+-    for (size_t i = 0; i < n; ++i)
+-        if (y[i] >= p1 && y[i] <= p99) { ln_sum += std::log(y[i]); ++count; }
+-    out.balanced = -std::log2(std::exp(ln_sum / double(count)) / kMidgray);
+-
+     // `center` is the same statistic through today's centre-weighted grid:
+     // the weights move *where* the mean is taken, not what is trimmed, and
+     // they are the same xs/ys and sigma `center_weighted` uses.
+@@ -833,10 +829,16 @@
+         for (size_t j = 0; j < sw; ++j) {
+             const double v = y[i * sw + j];
+             if (v < p1 || v > p99) continue;
++            const double ln_v = std::log(v);
++            if (v >= p1 && v <= p99) {
++                ln_sum += ln_v;
++                ++count;
++            }
+             const double w = std::exp(-(xs[j] * xs[j] + ys[i] * ys[i]) / (2.0 * sigma * sigma));
+             mass += w;
+-            weighted += std::log(v) * w;
++            weighted += ln_v * w;
+         }
++    out.balanced = -std::log2(std::exp(ln_sum / double(count)) / kMidgray);
+     out.center = -std::log2(std::exp(weighted / mass) / kMidgray);
+ 
+     // The protect modes are **bounds on balanced, not meters of their own**:

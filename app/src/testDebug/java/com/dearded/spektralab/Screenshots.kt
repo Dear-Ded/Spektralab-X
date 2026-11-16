@@ -9,6 +9,8 @@ import android.graphics.Paint
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
@@ -451,6 +453,33 @@ class Screenshots {
         tap("效果")
         tallPanel()
         shot("27_develop_4_grain_off")
+    }
+
+    @Test fun preciseCurves() {
+        content {
+            androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().background(Palette.Surface).padding(16.dp)) {
+                CurveEditor(CurveSet(rgb = Curve(listOf(CurvePoint(0.0, 0.0), CurvePoint(.5, .56), CurvePoint(1.0, 1.0)))),
+                    Fake.ui().image, true, onDrag = {}, onChange = {})
+            }
+        }
+        compose.onNodeWithTag("curve-editor-plot").performTouchInput { click(center) }
+        shot("feedback_precise_curves")
+    }
+
+    @Test fun whiteBalancePicker() {
+        val source = Fake.ui().image!!
+        val bitmap = Bitmap.createScaledBitmap(source, 320, (source.height * 320f / source.width).toInt().coerceIn(1, 512), true)
+        val values = FloatArray(2 + bitmap.width * bitmap.height * 6)
+        values[0] = bitmap.width.toFloat(); values[1] = bitmap.height.toFloat()
+        for (y in 0 until bitmap.height) for (x in 0 until bitmap.width) {
+            val p = bitmap.getPixel(x, y)
+            val i = 2 + (y * bitmap.width + x) * 6
+            for (c in 0..2) { values[i + c] = ((p shr (16 - c * 8)) and 255) / 255f; values[i + c + 3] = values[i + c] }
+        }
+        val reference = WhiteBalanceReference.fromNative(values)!!
+        content { WhiteBalancePickerDialog(reference, false, Look.NEUTRAL, {}, {}) }
+        compose.onNodeWithTag("white-balance-photo").performTouchInput { click(center) }
+        screenShot("feedback_white_balance_picker")
     }
 
     @Test fun borderDateBetweenFrames() {

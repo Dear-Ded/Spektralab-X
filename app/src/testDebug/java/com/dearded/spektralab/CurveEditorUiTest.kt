@@ -215,6 +215,7 @@ class CurveEditorUiTest {
 
     @Test fun endpointHitAreasKeepTheFingerOffsetAndEndpointsKeepTheirX() {
         show()
+        compose.onNodeWithText("Direct drag").performClick()
         val inset = 24f * density
         val grabOffset = 12f * density
         val verticalOffset = 8f * density
@@ -261,9 +262,38 @@ class CurveEditorUiTest {
         }
     }
 
-    @Test fun regularPlotHeightIs192Dp() {
+    @Test fun regularPlotHeightIs380Dp() {
         show()
-        assertEquals(192f, plot().fetchSemanticsNode().boundsInRoot.height / density, 1f)
+        assertEquals(380f, plot().fetchSemanticsNode().boundsInRoot.height / density, 1f)
+    }
+
+    @Test fun defaultFineDragMovesAQuarterDistanceAndKeepsPointSelected() {
+        show()
+        plot().performTouchInput {
+            down(center)
+            moveTo(center + Offset(80f * density, -40f * density))
+            up()
+        }
+        val bounds = plot().fetchSemanticsNode().boundsInRoot
+        compose.runOnIdle {
+            assertEquals(0.5 + 20f * density / (bounds.width - 48f * density), curves.rgb.points[1].x, 0.001)
+            assertEquals(0.5 + 10f * density / (bounds.height - 48f * density), curves.rgb.points[1].y, 0.001)
+        }
+        compose.onNodeWithText("Point input").assertIsDisplayed()
+        compose.onNodeWithText("Point output").assertIsDisplayed()
+        assertReleased()
+    }
+
+    @Test fun tappingAControlPointOnlySelectsItWithoutChangingTheCurve() {
+        show()
+        val before = curves
+        plot().performTouchInput { down(center); up() }
+        compose.onNodeWithText("Point input").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(before, curves)
+            assertTrue(changes.isEmpty())
+            assertTrue(drags.isEmpty())
+        }
     }
 
     @Test
@@ -274,7 +304,7 @@ class CurveEditorUiTest {
         val reset = compose.onNodeWithText("Reset").fetchSemanticsNode().boundsInRoot
         assertEquals(48f * density, reset.width, 1f)
         assertEquals(48f * density, reset.height, 1f)
-        assertEquals(176f, plot().fetchSemanticsNode().boundsInRoot.height / density, 1f)
+        assertEquals(320f, plot().fetchSemanticsNode().boundsInRoot.height / density, 1f)
         for (label in listOf("RGB", "Luma", "Red", "Green", "Blue", "RGB")) {
             channel(label).performScrollTo().assertIsDisplayed().performClick().assertIsSelected()
             val fixed = compose.onNodeWithText("Reset").assertIsDisplayed().fetchSemanticsNode().boundsInRoot

@@ -197,13 +197,17 @@ void Layer2::set_lut(std::shared_ptr<const ColourTable> lut, float strength) {
     lut_strength_ = lut_ ? s : 0;
 }
 
-void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& f, bool unquantised) const {
+void Layer2::apply_colour_table(float& r, float& g, float& b) const {
     if (lut_) {
         float lr = r, lg = g, lb = b;
         lut_->apply(lr, lg, lb);
         r += (lr - r) * lut_strength_; g += (lg - g) * lut_strength_; b += (lb - b) * lut_strength_;
-        if (identity_) return;   // the table alone: the sliders are all neutral
     }
+}
+
+void Layer2::apply(float& r, float& g, float& b, float u, float v, const Frame& f, bool unquantised) const {
+    apply_colour_table(r, g, b);
+    if (lut_ && identity_) return;   // the table alone: the sliders are all neutral
     float c[3] = {r * wb_[0], g * wb_[1], b * wb_[2]};
     if (unquantised ? linear_exposure_gain_ != 1.0 : exposure_gain_ != 1.0f) {
         for (float& x : c) {

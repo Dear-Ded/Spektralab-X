@@ -553,6 +553,24 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         applyEdit(edit, record = true)
     }
 
+    internal suspend fun whiteBalanceReference(edit: Edit, source: Long): WhiteBalanceReference? {
+        val reference = try { withContext(EngineThread.dispatcher) {
+            if (session == 0L || _ui.value.busy != null || _ui.value.previewSource != source ||
+                wanted != edit || applied != edit || override != null) return@withContext null
+            applyLook(edit.look)
+            NativeEngine.whiteBalanceReferenceV1(session)?.let(WhiteBalanceReference::fromNative)
+        } } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
+        return reference.takeIf { _ui.value.previewSource == source && _ui.value.edit == edit && _ui.value.busy == null }
+    }
+
+    internal fun applyWhiteBalancePick(edit: Edit, source: Long, pick: WhiteBalancePick) {
+        if (_ui.value.previewSource != source || _ui.value.edit != edit || _ui.value.busy != null) {
+            showMessage(tr("照片或调整已改变，请重新取样")); return
+        }
+        update(edit.copy(look = edit.look.copy(temperature = pick.temperature, tint = pick.tint)))
+        showMessage(tr("已校正色温和色调，可撤销"))
+    }
+
     private fun rememberPair(current: Edit, edit: Edit) {
         if (edit.film != current.film || edit.paper != current.paper || edit.noFilm != current.noFilm ||
             edit.digitalIntermediate != current.digitalIntermediate || edit.scanFilm != current.scanFilm)

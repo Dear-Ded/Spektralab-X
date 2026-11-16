@@ -1741,6 +1741,56 @@ JNI_FN(jboolean, setSourceLutV1)(JNIEnv* env, jobject, jlong handle, jfloatArray
 }
 
 // The retained display frame through the current look, without developing again.
+// Immutable, bounded picker snapshot: [width, height], then six floats per
+// pixel (pre-WB working RGB, sRGB display RGB). Sampling never reads a graded
+// screen pixel, a paper border, or a cache changed after this call returns.
+JNI_FN(jfloatArray, whiteBalanceReferenceV1)(JNIEnv* env, jobject, jlong handle) {
+    auto* s = reinterpret_cast<Session*>(handle);
+    if (!s || !s->prophoto || (!s->last.rgba16 && s->last_float.empty()) ||
+        s->last_revision != s->render_revision || !s->last.width || !s->last.height) {
+        fail("white balance: current print is not ready"); return nullptr;
+    }
+    try {
+        spk::android::OutputTransform display;
+        std::string error;
+        if (!display.fetch(s->engine, "sRGB", false, error)) {
+            fail("white balance: " + error); return nullptr;
+        }
+        const uint32_t w = s->last.width, h = s->last.height;
+        const double scale = std::min(1.0, 512.0 / std::max(w, h));
+        const uint32_t tw = std::max(1u, uint32_t(std::lround(w * scale)));
+        const uint32_t th = std::max(1u, uint32_t(std::lround(h * scale)));
+        std::vector<float> values(2 + size_t(tw) * th * 6);
+        values[0] = float(tw); values[1] = float(th);
+        const auto* look = s->active_look();
+        const auto* development = s->development();
+        for (uint32_t y = 0; y < th; ++y) {
+            const uint32_t sy = std::min(h - 1, uint32_t((y + 0.5) * h / th));
+            for (uint32_t x = 0; x < tw; ++x) {
+                const uint32_t sx = std::min(w - 1, uint32_t((x + 0.5) * w / tw));
+                const size_t i = size_t(sy) * s->last.row_stride_px + sx;
+                float c[3];
+                for (int k = 0; k < 3; ++k)
+                    c[k] = s->last_float.empty() ? s->last.rgba16[4 * i + k] / 65535.0f : s->last_float[3 * i + k];
+                if (!s->last_float.empty() && development) development->apply_encoded_prophoto(c);
+                if (look) look->apply_colour_table(c[0], c[1], c[2]);
+                const size_t out = 2 + (size_t(y) * tw + x) * 6;
+                std::copy(c, c + 3, values.begin() + out);
+                display.apply(c);
+                std::copy(c, c + 3, values.begin() + out + 3);
+            }
+        }
+        auto out = env->NewFloatArray(jsize(values.size()));
+        if (out) env->SetFloatArrayRegion(out, 0, jsize(values.size()), values.data());
+        return out;
+    } catch (const std::exception& e) {
+        fail(std::string("white balance: ") + e.what());
+    } catch (...) {
+        fail("white balance: unknown failure");
+    }
+    return nullptr;
+}
+
 JNI_FN(jobject, repack)(JNIEnv* env, jobject, jlong handle, jobject reuse) {
     auto* s = reinterpret_cast<Session*>(handle);
     if (!s || (!s->last.rgba16 && s->last_float.empty())) { fail("nothing to repack"); return nullptr; }

@@ -86,6 +86,9 @@ object NativeEngine {
     /** A small sRGB thumbnail of the frame before any film was applied. */
     external fun beforeBitmap(session: Long): Bitmap?
 
+    /** Frozen pre-WB print: width/height and six floats per pixel (working RGB, display sRGB). */
+    external fun whiteBalanceReferenceV1(session: Long): FloatArray?
+
     /** The photo at 384 px through [paramsJson] (complete opening params), in a throwaway session. */
     external fun filmPreview(session: Long, paramsJson: String): Bitmap?
 

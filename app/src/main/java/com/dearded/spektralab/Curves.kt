@@ -24,6 +24,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -273,6 +274,7 @@ internal fun CurveEditor(
     val onDragLatest by rememberUpdatedState(onDrag)
     val recedeLatest by rememberUpdatedState(LocalSliderDrag.current)
     var active by remember(row) { mutableIntStateOf(-1) }
+    var fineDrag by remember { mutableStateOf(true) }
     val histogram by produceState<Histogram?>(null, image) {
         value = image?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(it) } }
     }
@@ -310,7 +312,7 @@ internal fun CurveEditor(
 
     val color = channels.first { it.first == row }.third
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val plotHeight = if (maxWidth <= 320.dp) 176.dp else 192.dp
+        val plotHeight = maxWidth.coerceIn(280.dp, 380.dp)
         Spacer(
             Modifier.fillMaxWidth().height(plotHeight).systemGestureExclusion().testTag("curve-editor-plot")
             .semantics {
@@ -320,7 +322,7 @@ internal fun CurveEditor(
                 if (enabled && editable && !curve.isIdentity)
                     customActions = listOf(CustomAccessibilityAction(tr("重置")) { onChangeLatest(curvesLatest.with(row, Curve.IDENTITY)); true })
             }
-            .pointerInput(enabled, editable, row, maxWidth, plotHeight) {
+            .pointerInput(enabled, editable, row, maxWidth, plotHeight, fineDrag) {
                 if (!enabled || !editable) return@pointerInput
                 val hit = 24.dp.toPx()
                 var lastTap = 0L
@@ -347,6 +349,7 @@ internal fun CurveEditor(
                     // The point keeps its offset from the finger, so it does not jump under it.
                     var grab = Offset.Zero
                     if (grabbed) grab = geometry.position(c.points[index]) - down.position
+                    var origin = if (grabbed) geometry.position(c.points[index]) else down.position
                     try {
                         while (true) {
                             val event = awaitPointerEvent()
@@ -374,12 +377,15 @@ internal fun CurveEditor(
                                     if (i == 0 || i == next.points.size - 1) break
                                     c = next; index = i
                                     grab = geometry.position(c.points[i]) - down.position
+                                    origin = geometry.position(c.points[i])
                                 }
                                 started = true
                                 active = index
                                 onDragLatest(true); recedeLatest(true)
                             }
-                            c = c.move(index, geometry.point(ch.position + grab))
+                            val position = if (fineDrag) origin + (ch.position - down.position) * 0.25f
+                                else ch.position + grab
+                            c = c.move(index, geometry.point(position))
                             onChangeLatest(curvesLatest.with(row, c))
                             ch.consume()
                         }
@@ -390,20 +396,21 @@ internal fun CurveEditor(
                                 if (index == lastTapIndex && now - lastTap < viewConfiguration.doubleTapTimeoutMillis && c.isDeletable(index)) {
                                     view.tick(strong = true)
                                     onChangeLatest(curvesLatest.with(row, c.remove(index)))
+                                    active = -1
                                     lastTapIndex = -1
-                                } else { lastTap = now; lastTapIndex = index }
+                                } else { active = index; lastTap = now; lastTapIndex = index }
                             } else {
                                 val q = geometry.point(down.position)
                                 val (next, i) = c.insert(CurvePoint(q.x, c.evaluate(q.x)))
                                 if (i > 0 && i < next.points.size - 1 && next.points.size <= 16) {
                                     view.tick()
                                     onChangeLatest(curvesLatest.with(row, next))
+                                    active = i
                                 }
                             }
                         } else lastTapIndex = -1
                     } finally {
                         if (started) {
-                            active = -1
                             try { onDragLatest(false) } finally { recedeLatest(false) }
                         }
                     }
@@ -543,6 +550,41 @@ internal fun CurveEditor(
             },
         )
     }
+    if (editable) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            SelectPill(selected = fineDrag, onClick = { fineDrag = true }, enabled = enabled,
+                label = { Text(tr("精细拖动")) })
+            SelectPill(selected = !fineDrag, onClick = { fineDrag = false }, enabled = enabled,
+                label = { Text(tr("直接拖动")) })
+            Text(tr("精细模式为四分之一速度"), style = MaterialTheme.typography.bodySmall,
+                color = Palette.OnSurfaceSoft, modifier = Modifier.weight(1f))
+        }
+        val selectedPoint = curve.points.getOrNull(active)
+        if (selectedPoint != null) {
+            // Reuse the precision ruler and numeric entry used by every other adjustment.
+            // The model's move() remains the single authority for neighbour limits.
+            if (active > 0 && active < curve.points.lastIndex) {
+                val gap = min(0.01, (curve.points[active + 1].x - curve.points[active - 1].x) / 4)
+                val lo = max(Math.nextUp(curve.points[active - 1].x), curve.points[active - 1].x + gap) * 100
+                val hi = min(Math.nextDown(curve.points[active + 1].x), curve.points[active + 1].x - gap) * 100
+                if (lo < hi) LabeledSlider(tr("控制点输入"), selectedPoint.x * 100, lo, hi,
+                    selectedPoint.y * 100, enabled, "%.1f%%", onDrag = onDrag) { x ->
+                    val latest = curvesLatest[row]
+                    latest.points.getOrNull(active)?.let { p ->
+                        onChangeLatest(curvesLatest.with(row, latest.move(active, p.copy(x = x / 100))))
+                    }
+                }
+            }
+            LabeledSlider(tr("控制点输出"), selectedPoint.y * 100, 0.0, 100.0,
+                selectedPoint.x * 100, enabled, "%.1f%%", onDrag = onDrag) { y ->
+                val latest = curvesLatest[row]
+                latest.points.getOrNull(active)?.let { p ->
+                    onChangeLatest(curvesLatest.with(row, latest.move(active, p.copy(y = y / 100))))
+                }
+            }
+        }
+    }
     val outputLabel = tr("输出")
     val inputLabel = tr("输入")
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
@@ -554,7 +596,7 @@ internal fun CurveEditor(
     }
     Text(
         if (!editable) tr("导入的采样曲线按原样保留；重置后可编辑控制点。")
-        else tr("轻点添加控制点，拖动调整，双击控制点删除。") + if (image != null) tr("直方图是当前画面。") else "",
+        else tr("点选控制点后可输入数值；轻点空处添加，双击控制点删除。") + if (image != null) tr("直方图是当前画面。") else "",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
