@@ -15,7 +15,7 @@
 
 SpektraLab 的非官方 Android 移植，在手机本地冲印 RAW 与相册照片。
 
-[English](README.en.md) · [下载 Alpha 预发布版](https://github.com/Dear-Ded/Spektralab-X/releases) · [校验安装包](docs/VERIFY.md) · [更新记录](CHANGELOG.md)
+[在线暗房](https://dear-ded.github.io/Spektralab-X/) · [English](README.en.md) · [下载 Alpha 预发布版](https://github.com/Dear-Ded/Spektralab-X/releases) · [校验安装包](docs/VERIFY.md) · [更新记录](CHANGELOG.md)
 
 ## 样片
 

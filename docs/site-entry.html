@@ -1,0 +1,13 @@
+---
+layout: null
+permalink: /index.html
+---
+{%- comment -%}Keep the supplied HTML intact in Git; unwrap its Markdown-formatted GitHub hrefs only in the published output.{%- endcomment -%}
+{%- capture rendered -%}{% include_relative index.html %}{%- endcapture -%}
+{%- assign targets = 'https://github.com/Dear-Ded/Spektralab-X,https://github.com/Dear-Ded/Spektralab-X/releases,https://github.com/Dear-Ded/Spektralab-X/issues' | split: ',' -%}
+{%- for url in targets -%}
+  {%- capture wrapped -%}href="[{{ url }}]({{ url }})"{%- endcapture -%}
+  {%- capture href -%}href="{{ url }}"{%- endcapture -%}
+  {%- assign rendered = rendered | replace: wrapped, href -%}
+{%- endfor -%}
+{{ rendered }}
