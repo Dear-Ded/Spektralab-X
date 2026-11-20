@@ -45,22 +45,23 @@ import kotlin.math.sin
 /*
  * The launch intro (tools/work/ui-motion_splash.md 6). The system splash shows
  * the launcher's film strip with its spectrum wiping on; this picks up from
- * that exact frame in Compose, so there is no flash, and plays under a second
- * of motion while the engine warms up behind it:
+ * that exact frame in Compose, so there is no flash, and plays a second of
+ * motion while the engine warms up behind it:
  *
  *   0-500 ms    the Gemini glow rises behind the strip (Aura, slowEffects)
  *   0-450 ms    the spectrum finishes its wipe if the splash cut it short
- *   60-600 ms   the sprockets pull one frame to the left (defaultSpatial)
- *   200-900 ms  "Spektralab-X" lands on split-flap tiles under the strip, in place
+ *   60-600 ms   the sprockets pull one frame to the left (slowSpatial)
+ *   100-900 ms  "Spektralab-X" lands on split-flap tiles under the strip, in place
  *
  * No light-leak sweep and no rising wordmark: decoration that says nothing
  * (tools/work/ui_ai_flavor_audit.md 10).
  *
  * It never holds the app up: it leaves when the engine is ready, no sooner
- * than 600 ms (no flicker) and no later than 1.6 s, and a tap after 150 ms
- * skips it. It only runs for a launcher start, with system animations on and
- * the 启动动画 setting on. No sound; one tick when the title settles. No photo is on screen yet,
- * so the colour here breaks no rule about judging a print.
+ * than 1000 ms (complete title display) and no later than 1.6 s, and a tap
+ * after 150 ms skips it. It only runs for a launcher start, with system
+ * animations on and the 启动动画 setting on. No sound; one tick when the title
+ * settles. No photo is on screen yet, so the colour here breaks no rule about
+ * judging a print.
  */
 
 /** The 启动动画 setting, default on. */
@@ -68,7 +69,7 @@ internal const val LAUNCH_INTRO = "launch_intro"
 
 /** The name the intro flaps in, and when it starts (ms after the first frame). */
 private const val NAME = "Spektralab-X"
-private const val NAME_DELAY_MS = 200L
+private const val NAME_DELAY_MS = 100L
 
 /** Where the system splash drew its icon, and how far its wipe had got, handed over by MainActivity. */
 internal object LaunchIcon {
@@ -107,10 +108,10 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
     LaunchedEffect(Unit) {
         launch { glow.animateTo(1f, Motion.slowEffects()) }
         launch { wipe.animateTo(1f, Motion.defaultEffects()) }
-        launch { delay(60); pull.animateTo(1f, Motion.defaultSpatial()) }
-        // Exit at clamp(engine ready, the name settled, 1.6 s), never before 600 ms.
+        launch { delay(60); pull.animateTo(1f, Motion.slowSpatial()) }
+        // Exit at clamp(engine ready, the name settled, 1.6 s), never before 1000 ms.
         withTimeoutOrNull(1600) { snapshotFlow { isReady }.first { it } }
-        val settled = maxOf(600L, NAME_DELAY_MS + splitFlapMs(NAME)).coerceAtMost(1600L)
+        val settled = maxOf(1000L, NAME_DELAY_MS + splitFlapMs(NAME)).coerceAtMost(1600L)
         val wait = settled - (SystemClock.uptimeMillis() - start)
         if (wait > 0) delay(wait)
         leaving = true
