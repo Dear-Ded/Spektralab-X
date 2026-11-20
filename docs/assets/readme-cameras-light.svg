@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="Spektralab-X 光学取景器与精密机械控制">
+  <rect width="1200" height="340" fill="#F5F3EE"/>
+  <rect x="0.5" y="0.5" width="1199" height="339" fill="none" stroke="#D8D3C7"/>
+
+  <!-- 顶部注册条 -->
+  <rect width="1200" height="34" fill="#ECE9E1"/>
+  <line x1="0" y1="34" x2="1200" y2="34" stroke="#DDD8CC"/>
+  <text x="32" y="21" fill="#575550" font-family="ui-monospace,'JetBrains Mono',monospace" font-size="10.5" letter-spacing="1.4">OPTICAL VIEWFINDER HUDS (VIEW ONLY)  //  MACHINED DARKROOM CONTROLS</text>
+  <text x="1168" y="21" text-anchor="end" fill="#575550" font-family="ui-monospace,'JetBrains Mono',monospace" font-size="10.5">ZERO BAKED OVERLAYS · 0MS DIAL · 900MS SHUTTER</text>
+
+  <!-- ==================== 第一排：5 款经典相机光学取景器 ==================== -->
+  <!-- 1. Leica M -->
+  <g transform="translate(32, 50)">
+    <rect width="216" height="170" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <rect x="8" y="8" width="200" height="116" fill="#090B0D" stroke="#222222"/>
+    <g stroke="rgba(236,234,228,0.74)" stroke-width="1" fill="none">
+      <path d="M22 30 V18 H44 M172 18 H194 V30 M194 102 V114 H172 M44 114 H22 V102"/>
+      <path d="M76 18 H140 M76 114 H140 M22 52 V80 M194 52 V80"/>
+    </g>
+    <rect x="96" y="59" width="24" height="14" fill="rgba(242,238,225,0.08)" stroke="rgba(236,234,228,0.48)" stroke-width="0.8"/>
+    <line x1="108" y1="62" x2="108" y2="70" stroke="rgba(236,234,228,0.45)" stroke-width="0.7"/>
+    <rect x="8" y="124" width="200" height="20" fill="#060606"/>
+    <text x="16" y="137" fill="#D6453A" font-family="ui-monospace,monospace" font-size="8.8">35mm</text>
+    <text x="108" y="137" text-anchor="middle" fill="#D6453A" font-family="ui-monospace,monospace" font-size="8.8">◀ ● ▶</text>
+    <text x="200" y="137" text-anchor="end" fill="#D6453A" font-family="ui-monospace,monospace" font-size="8.8">500</text>
+    <text x="10" y="161" fill="#161616" font-family="'Inter',sans-serif" font-size="11.5" font-weight="600">Leica M</text>
+    <text x="206" y="161" text-anchor="end" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">旁轴亮线</text>
+  </g>
+
+  <!-- 2. Nikon FM2 -->
+  <g transform="translate(262, 50)">
+    <rect width="216" height="170" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <rect x="8" y="8" width="200" height="116" fill="#0A0B0D" stroke="#222222"/>
+    <rect x="94" y="10" width="28" height="11" fill="#060606" stroke="rgba(236,234,228,0.28)" stroke-width="0.6"/>
+    <text x="108" y="18" text-anchor="middle" fill="#ECEAE4" font-family="ui-monospace,monospace" font-size="7.5">2.8</text>
+    <circle cx="108" cy="66" r="30" fill="none" stroke="rgba(236,234,228,0.34)" stroke-width="0.8"/>
+    <circle cx="108" cy="66" r="14" fill="none" stroke="rgba(236,234,228,0.52)" stroke-width="1.6" stroke-dasharray="1.4 1.4"/>
+    <circle cx="108" cy="66" r="8" fill="none" stroke="rgba(236,234,228,0.7)" stroke-width="0.8"/>
+    <line x1="100" y1="66" x2="116" y2="66" stroke="rgba(236,234,228,0.65)" stroke-width="0.7"/>
+    <rect x="191" y="38" width="12" height="56" fill="#060606" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+    <text x="197" y="51" text-anchor="middle" fill="rgba(214,69,58,0.34)" font-family="monospace" font-size="8">+</text>
+    <circle cx="197" cy="66" r="2.2" fill="#D6453A"/>
+    <text x="197" y="85" text-anchor="middle" fill="rgba(214,69,58,0.34)" font-family="monospace" font-size="8">−</text>
+    <rect x="8" y="124" width="200" height="20" fill="#060606"/>
+    <text x="16" y="137" fill="#94928C" font-family="ui-monospace,monospace" font-size="8.5">M · 1/500</text>
+    <text x="200" y="137" text-anchor="end" fill="#73716B" font-family="ui-monospace,monospace" font-size="8.5">K2 SCREEN</text>
+    <text x="10" y="161" fill="#161616" font-family="'Inter',sans-serif" font-size="11.5" font-weight="600">Nikon FM2</text>
+    <text x="206" y="161" text-anchor="end" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">裂像磨砂屏</text>
+  </g>
+
+  <!-- 3. Hasselblad 6x6 -->
+  <g transform="translate(492, 50)">
+    <rect width="216" height="170" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <rect x="8" y="8" width="200" height="116" fill="#050505" stroke="#222222"/>
+    <rect x="50" y="8" width="116" height="116" fill="#0D0F11" stroke="#2A2A2A" stroke-width="0.8"/>
+    <polygon points="50,28 56,31 50,34" fill="#050505"/>
+    <polygon points="50,40 56,43 50,46" fill="#050505"/>
+    <g stroke="rgba(236,234,228,0.28)" stroke-width="0.7">
+      <line x1="89" y1="9" x2="89" y2="123"/><line x1="127" y1="9" x2="127" y2="123"/>
+      <line x1="51" y1="47" x2="165" y2="47"/><line x1="51" y1="85" x2="165" y2="85"/>
+    </g>
+    <g stroke="rgba(236,234,228,0.82)" stroke-width="1">
+      <line x1="100" y1="66" x2="116" y2="66"/><line x1="108" y1="58" x2="108" y2="74"/>
+    </g>
+    <rect x="8" y="124" width="200" height="20" fill="#060606"/>
+    <text x="16" y="137" fill="#94928C" font-family="ui-monospace,monospace" font-size="8.5">6×6 · A12</text>
+    <text x="200" y="137" text-anchor="end" fill="#73716B" font-family="ui-monospace,monospace" font-size="8.5">80mm f/2.8</text>
+    <text x="10" y="161" fill="#161616" font-family="'Inter',sans-serif" font-size="11.5" font-weight="600">Hasselblad 500</text>
+    <text x="206" y="161" text-anchor="end" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">腰平 6×6</text>
+  </g>
+
+  <!-- 4. Ricoh GR -->
+  <g transform="translate(722, 50)">
+    <rect width="216" height="170" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <rect x="8" y="8" width="200" height="116" fill="#0A0B0D" stroke="#222222"/>
+    <rect x="14" y="22" width="20" height="88" fill="#060606" stroke="rgba(255,255,255,0.12)" stroke-width="0.6"/>
+    <g font-family="monospace" font-size="6.2" fill="#94928C">
+      <text x="17" y="34">∞</text><text x="17" y="68" fill="#ECEAE4" font-weight="700">2.5</text><text x="17" y="102">1.0</text>
+    </g>
+    <line x1="30" y1="42" x2="30" y2="88" stroke="#4E946C" stroke-width="1.8"/>
+    <line x1="72" y1="66" x2="94" y2="66" stroke="rgba(236,234,228,0.34)" stroke-width="0.9"/>
+    <line x1="122" y1="66" x2="144" y2="66" stroke="rgba(236,234,228,0.34)" stroke-width="0.9"/>
+    <line x1="97" y1="66" x2="119" y2="66" stroke="#4E946C" stroke-width="1.5"/>
+    <rect x="8" y="124" width="200" height="20" fill="#060606"/>
+    <text x="16" y="137" fill="#ECEAE4" font-family="ui-monospace,monospace" font-size="8.5">Av 28mm</text>
+    <text x="200" y="137" text-anchor="end" fill="#94928C" font-family="ui-monospace,monospace" font-size="8.5">SNAP 2.5m</text>
+    <text x="10" y="161" fill="#161616" font-family="'Inter',sans-serif" font-size="11.5" font-weight="600">Ricoh GR</text>
+    <text x="206" y="161" text-anchor="end" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">快拍景深尺</text>
+  </g>
+
+  <!-- 5. Fujifilm X-Pro -->
+  <g transform="translate(952, 50)">
+    <rect width="216" height="170" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <rect x="8" y="8" width="200" height="116" fill="#0A0B0D" stroke="#222222"/>
+    <rect x="22" y="18" width="172" height="96" fill="none" stroke="rgba(236,234,228,0.64)" stroke-width="0.9"/>
+    <rect x="98" y="56" width="20" height="20" fill="none" stroke="#4E946C" stroke-width="1.2"/>
+    <rect x="28" y="96" width="44" height="13" fill="#060606" stroke="rgba(236,234,228,0.32)" stroke-width="0.6"/>
+    <text x="50" y="105" text-anchor="middle" fill="#ECEAE4" font-family="ui-monospace,monospace" font-size="6.4" font-weight="700">PRO NEG</text>
+    <rect x="148" y="92" width="40" height="17" fill="#060606" stroke="rgba(255,255,255,0.16)" stroke-width="0.6"/>
+    <path d="M150 107 L150 103 Q160 97 168 99 T186 95 L186 107 Z" fill="rgba(236,234,228,0.48)"/>
+    <rect x="8" y="124" width="200" height="20" fill="#060606"/>
+    <text x="16" y="137" fill="#94928C" font-family="ui-monospace,monospace" font-size="8.5">OVF · 35mm</text>
+    <text x="200" y="137" text-anchor="end" fill="#73716B" font-family="ui-monospace,monospace" font-size="8.5">DR200</text>
+    <text x="10" y="161" fill="#161616" font-family="'Inter',sans-serif" font-size="11.5" font-weight="600">Fujifilm X-Pro</text>
+    <text x="206" y="161" text-anchor="end" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">混合光电</text>
+  </g>
+
+  <!-- ==================== 第二排：三大精密机械操控铭牌 ==================== -->
+  <!-- Hardware 1: Vernier Optical Ruler -->
+  <g transform="translate(32, 236)">
+    <rect width="368" height="86" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <text x="14" y="21" fill="#161616" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12" font-weight="600">激光蚀刻游标刻度尺</text>
+    <text x="354" y="21" text-anchor="end" fill="#92351B" font-family="ui-monospace,monospace" font-size="10.5">+0.65 EV · 0ms</text>
+    <rect x="14" y="32" width="340" height="28" rx="2" fill="#080808" stroke="#2E2E2E"/>
+    <g stroke="rgba(236,234,228,0.42)" stroke-width="1">
+      <line x1="34" y1="48" x2="34" y2="59"/><line x1="84" y1="48" x2="84" y2="59"/><line x1="134" y1="48" x2="134" y2="59"/><line x1="184" y1="46" x2="184" y2="59"/><line x1="234" y1="48" x2="234" y2="59"/><line x1="284" y1="48" x2="284" y2="59"/><line x1="334" y1="48" x2="334" y2="59"/>
+    </g>
+    <rect x="184" y="57" width="66" height="2.5" fill="#D44D28"/>
+    <circle cx="184" cy="38" r="2.2" fill="#D44D28"/>
+    <line x1="250" y1="32" x2="250" y2="60" stroke="#ECEAE4" stroke-width="2"/>
+    <text x="14" y="75" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">无阻尼拖动 · 跨主刻度触觉阻尼 · 点读数支持直接键盘输入</text>
+  </g>
+
+  <!-- Hardware 2: 900ms Threaded Shutter Release -->
+  <g transform="translate(416, 236)">
+    <rect width="368" height="86" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <circle cx="48" cy="43" r="24" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="1.2"/>
+    <circle cx="48" cy="43" r="27" fill="none" stroke="#262626" stroke-width="2"/>
+    <circle cx="48" cy="43" r="27" fill="none" stroke="#D44D28" stroke-width="2.4" stroke-dasharray="170" stroke-dashoffset="54" transform="rotate(-90 48 43)"/>
+    <circle cx="48" cy="43" r="16" fill="#C44222" stroke="rgba(255,255,255,0.18)"/>
+    <circle cx="48" cy="43" r="4" fill="#080808"/>
+    <text x="88" y="26" fill="#161616" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12" font-weight="600">900ms 螺纹快门蓄力释放</text>
+    <text x="354" y="26" text-anchor="end" fill="#AC381A" font-family="ui-monospace,monospace" font-size="10.5">0.6s / 0.9s</text>
+    <text x="88" y="47" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10.5">专用于「16-bit TIFF 导出」与「重置全部」高成本动作</text>
+    <text x="88" y="67" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">提前松手 140ms 回弹取消，防误触且具机械快门释放手感</text>
+  </g>
+
+  <!-- Hardware 3: Neutral Surround & 3-State Feedback -->
+  <g transform="translate(800, 236)">
+    <rect width="368" height="86" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+    <text x="14" y="21" fill="#161616" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12" font-weight="600">中性围幕与三态严格隔离</text>
+    <text x="354" y="21" text-anchor="end" fill="#575550" font-family="ui-monospace,monospace" font-size="10">18% GRAY #777777</text>
+    <!-- 3 State Chips -->
+    <rect x="14" y="34" width="106" height="24" rx="2" fill="rgba(212,77,40,0.13)" stroke="rgba(212,77,40,0.52)"/>
+    <text x="67" y="50" text-anchor="middle" fill="#92351B" font-family="'Noto Sans SC',sans-serif" font-size="10.5">正式编辑已存</text>
+    <rect x="131" y="34" width="106" height="24" rx="2" fill="rgba(94,142,168,0.12)" stroke="rgba(94,142,168,0.62)" stroke-dasharray="3 2"/>
+    <text x="184" y="50" text-anchor="middle" fill="#484848" font-family="'Noto Sans SC',sans-serif" font-size="10.5">草稿 · 不导出</text>
+    <rect x="248" y="34" width="106" height="24" rx="2" fill="rgba(78,148,108,0.13)" stroke="rgba(78,148,108,0.52)"/>
+    <text x="301" y="50" text-anchor="middle" fill="#296443" font-family="'Noto Sans SC',sans-serif" font-size="10.5">已写入相册</text>
+    <text x="14" y="75" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="10">入队 ≠ 写盘 · 草稿绝不进导出 · 深灰/18%灰/黑/白围幕校色</text>
+  </g>
+</svg>
