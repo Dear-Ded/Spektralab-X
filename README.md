@@ -1,326 +1,114 @@
-<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme-hero-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme-hero-dark.svg">
+  <img src="docs/assets/readme-hero-dark.svg" width="100%" alt="Spektralab-X：Android 光学暗房。六款 35 mm 胶卷与旁轴取景器插图。">
+</picture>
 
-<img src="fastlane/metadata/android/en-US/images/icon.png" width="112" alt="Spektralab-X 图标">
+<p align="center">
+  <a href="https://github.com/Dear-Ded/Spektralab-X/releases"><img src="docs/assets/badges/releases.svg" alt="从 GitHub Releases 下载官方 APK"></a>
+  <a href="docs/DEVICES.md"><img src="docs/assets/badges/platform.svg" alt="平台：Android 10 及以上"></a>
+  <a href="#暗房无损处理管线"><img src="docs/assets/badges/output.svg" alt="输出：JPEG 与 16-bit TIFF"></a>
+  <a href="LICENSE"><img src="docs/assets/badges/license.svg" alt="许可证：GPL-3.0"></a>
+</p>
 
-# Spektralab-X
+> **同一张照片，两条工作流**：给想选好胶卷一键出片的手机用户，也给会看直方图、曲线、色轮和底片参数的摄影者。
 
-**光谱胶片与相纸模拟，在手机上冲洗你的照片。**
+SpektraLab 的非官方 Android 移植，在手机本地冲印 RAW 与相册照片。
 
-按真实胶片的特性曲线和光谱灵敏度，把 RAW 和手机照片“曝光”到胶片上、显影、放大到相纸。<br>
-SpektraLab 的非官方安卓衍生版 · 针对小米数字系列（骁龙 / Adreno）优化 · 开源免费<br>
-胶片建模基于 [spektrafilm](https://github.com/andreavolpato/spektrafilm) · film modeling powered by [spektrafilm](https://github.com/andreavolpato/spektrafilm)<br>
-**免费、无广告、无内购；除了检查更新不联网，照片不离开手机。**
-
-简体中文 | [English](README.en.md)
-
-[![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/Spektralab-X?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
-[![CI](https://github.com/Dear-Ded/Spektralab-X/actions/workflows/android.yml/badge.svg)](https://github.com/Dear-Ded/Spektralab-X/actions/workflows/android.yml)
-[![License](https://img.shields.io/github/license/Dear-Ded/Spektralab-X)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/Dear-Ded/Spektralab-X)](https://github.com/Dear-Ded/Spektralab-X/commits/main)
-![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white)
-![arm64-v8a](https://img.shields.io/badge/ABI-arm64--v8a-informational)
-[![官方版永久免费](https://img.shields.io/badge/%E5%AE%98%E6%96%B9%E7%89%88-%E6%B0%B8%E4%B9%85%E5%85%8D%E8%B4%B9-E8A24A)](#下载与校验)
-
-[![总下载](https://img.shields.io/github/downloads/Dear-Ded/Spektralab-X/total?label=%E6%80%BB%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
-[![最新版下载](https://img.shields.io/github/downloads-pre/Dear-Ded/Spektralab-X/latest/total?label=%E6%9C%80%E6%96%B0%E7%89%88%E4%B8%8B%E8%BD%BD&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
-[![Star](https://img.shields.io/github/stars/Dear-Ded/Spektralab-X?label=Star&style=flat&logo=github)](https://github.com/Dear-Ded/Spektralab-X)
-[![访问](https://hits.sh/github.com/Dear-Ded/Spektralab-X.svg?view=today-total&label=%E8%AE%BF%E9%97%AE)](https://hits.sh/github.com/Dear-Ded/Spektralab-X/)
-
-[写在前面](#写在前面) · [下载](#下载与校验) · [样片](#样片) · [和桌面版的差别](#和桌面版的差别) · [功能](#功能) · [常见问题](#常见问题) · [路线图](docs/ROADMAP.md) · [更新记录](CHANGELOG.md) · [文档](docs/README.md)
-
-</div>
-
-> [!IMPORTANT]
-> **项目正在快速开发迭代中（Beta）。** 几乎每天都有更新，后续会陆续加入更多功能：界面重构、更多边框、真机适配等，详见[路线图](docs/ROADMAP.md)。欢迎点 **Star** 收藏，或 **Watch → Custom → Releases** 关注新版本。
->
-> 本项目由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发。
-
-> [!WARNING]
-> **未大规模真机验证，需要社区反馈。** 目前只在开发者自己的手机上试用过，其余验证都来自 CI 编译和云主机测试，可能闪退、颜色不对或速度很慢。遇到问题请按[反馈问题](#反馈问题)提交，附上应用里的诊断信息。
-
-> [!NOTE]
-> **这不是 SpektraLab 官方版本。** Spektralab-X 是独立开发的安卓衍生项目，与 SpektraLab 的作者和所有者没有关联，也没有得到他们的认可或背书。SpektraLab™ 及其图标是其所有者的商标（注册中）。桌面版请认准[上游仓库](https://github.com/JamesQiu2005/SpektraLab)。
-
-<p align="center"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="样片对比：中性解码与 Kodak Portra 400"></p>
-
-> 胶片真正迷人的，从来不只是色彩和画质，而是拍摄本身：按下快门时的不确定，等待冲洗时的期待，失手时的遗憾，还有出片那一刻的惊喜。
->
-> 希望 Spektralab-X 能把你带回拍摄的过程里，让你重新爱上每一次按下快门的瞬间。
-
-## 写在前面
-
-Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 与 Andrea Volpato 的 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 开发。没有这些开源项目和背后多年的研究，就不会有它。
-
-我不是职业程序员，只是一个热爱胶片影像、想把暗房的质感带进手机的摄影爱好者。这个项目从构思、开发到一遍遍调教，都是在 AI 助手的协助下一点点完成的；开发过程中的 token、云服务器等费用，全部由我个人承担。它没有商业目的，也永远不会收费。
-
-正因为如此，它一定还有许多不完美：可能有 bug，可能在你的手机上不够流畅，色彩也未必合每个人的口味。如果你发现了问题，或者有好的想法，非常欢迎提交 [Issue](https://github.com/Dear-Ded/Spektralab-X/issues) 或 Pull Request，每一条反馈我都会认真看。
-
-如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。
-
-## 这是什么
-
-Spektralab-X 是基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab)（JamesQiu2005/SpektraLab）与 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 的安卓衍生项目。
-
-[SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 是一个 macOS 胶片模拟软件，引擎来自 [spektrafilm](https://github.com/andreavolpato/spektrafilm)。它不套滤镜，而是按光谱模拟整条冲印链路：场景光 → 相机与胶片 → 负片显影 → 放大机与相纸 → 相纸显影 → 扫描。胶片和相纸数据来自实测的特性曲线和光谱灵敏度。
-
-这个仓库把上游的 C++ 渲染引擎用 NDK 编译到安卓上，走它自带的 Vulkan 计算后端，再配一个 Jetpack Compose 编辑界面。胶片效果全部来自上游；本仓库负责安卓集成、手机 GPU 适配和界面。
-
-- **物理模拟，不是 LUT。** 颗粒、光晕、相纸眩光都由胶片和相纸的物理参数算出来。
-- **手机上跑完整链路。** Vulkan 计算着色器跑在 Adreno GPU 上，按机型限制分批提交、控制内存。
-- **只为更新联网。** 唯一的网络请求是检查本仓库的 GitHub Releases、下载新版安装包；没有统计和广告，照片不离开手机。导出的照片默认不写入位置信息（设置里可以打开）。
+[English](README.en.md) · [下载 Alpha 预发布版](https://github.com/Dear-Ded/Spektralab-X/releases) · [校验安装包](docs/VERIFY.md) · [更新记录](CHANGELOG.md)
 
 ## 样片
 
-下面每张图都由本仓库使用的同一个引擎渲染，默认设置，没有任何后期调整。样片渲染于 0.1.18 时期，彩色负片配 Kodak Portra Endura 相纸；应用现在默认使用 Kodak Supra Endura，与桌面版一致，所以实际效果会略有不同，样片会在下一版重新渲染。左边是中性解码（RAW 按 ProPhoto 线性光解出，转 sRGB，按中灰测光），右边是胶片冲印结果。
+同一份 RAW，左边是中性解码，右边是胶片冲印。点图可看大图。
 
 <table>
-<tr><td><img src="docs/images/samples/compare_lake.jpg" alt="Leica Q，Kodak Ektar 100"></td></tr>
-<tr><td align="center"><sub>Leica Q (Typ 116) · Kodak Ektar 100：逆光树叶的高光压进肩部，绿色转暖，船身的蓝保持不变</sub></td></tr>
-<tr><td><img src="docs/images/samples/compare_fruit.jpg" alt="Canon EOS R5，Fujifilm Velvia 100"></td></tr>
-<tr><td align="center"><sub>Canon EOS R5 · Fujifilm Velvia 100：反转片的高反差和饱和度，番茄和柠檬不溢色</sub></td></tr>
-<tr><td><img src="docs/images/samples/compare_skyline.jpg" alt="Google Pixel 2 XL，Kodak Ektar 100"></td></tr>
-<tr><td align="center"><sub>Google Pixel 2 XL · Kodak Ektar 100：手机 DNG 同样走完整条光谱链路</sub></td></tr>
+<tr>
+<td width="50%" valign="top"><a href="docs/images/samples/compare_dunes.jpg"><img src="docs/images/samples/compare_dunes.jpg" width="100%" alt="沙丘与远山：左为中性解码，右为 Portra 400"></a><br><sub><code>Ricoh GR III · Kodak Portra 400</code></sub></td>
+<td width="50%" valign="top"><a href="docs/images/samples/compare_lake.jpg"><img src="docs/images/samples/compare_lake.jpg" width="100%" alt="林间水道与蓝色船头：左为中性解码，右为 Ektar 100"></a><br><sub><code>Leica Q (Typ 116) · Kodak Ektar 100</code></sub></td>
+</tr>
 </table>
 
-**同一张底片，六种胶片**（Ricoh GR III）：
-
-<p align="center"><img src="docs/images/samples/films_dunes.jpg" width="100%" alt="同一画面六种胶片"></p>
-
-**光晕是物理模拟出来的。** CineStill 800T 去掉了防光晕层，强光在片基背面反射后从背后再次曝光乳剂，于是亮天空边缘出现红色光晕；带防光晕层的 Portra 400 没有：
-
-<p align="center"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="光晕细节：中性、Portra 400、CineStill 800T"></p>
-
-<sub>样片 RAW 来自 [raw.pixls.us](https://raw.pixls.us/)，以 CC0 发布。渲染工具和参数见 [`docs/SAMPLES.md`](docs/SAMPLES.md)。</sub>
-
-## 和桌面版的差别
-
-**结论：颜色看不出差别。** 安卓版的色彩链和上游 Linux 版（`spektralab-host`）逐像素对照了 43 组：RAW 导出平均 ΔE00 0.000、最大 ≤ 0.015，手机 JPEG / P3 平均 ≤ 0.016。人眼大约在 ΔE00 1 才能分辨，这些差别小两个数量级。数字来自云主机上的软件 GPU（lavapipe），**还没在 Adreno 真机上大规模验证，需要社区反馈**，也还没和 macOS 版直接比过。
-
-| 方面 | macOS / Windows 桌面版 | 安卓（Spektralab-X） | 原因 |
-|---|---|---|---|
-| RAW 解码 | macOS 用苹果的 `CIRAWFilter`；Windows / Linux 用 LibRaw | LibRaw 0.22.2，和 Windows / Linux 同一个函数；没有镜头校正 | 苹果的相机矩阵、去马赛克和高光处理都是自己的，所以同一个 RAW 在 macOS 上进入引擎前就不一样，上游 Windows / Linux 版也一样。**未实测**（没有 Mac） |
-| GPU 与精度 | Metal / 桌面 Vulkan，fp32 | Vulkan 1.0，Adreno，fp32，代码与 Windows / Linux 相同 | fma 不精确时改用 Dekker 拆分乘积，只影响光晕模糊和旋转重采样两个着色器。云主机 lavapipe 的 fma 本身就不精确，所以全部对照数字走的就是这条路；Adreno 据报告同样会走这条路〔推断〕，**真机待验** |
-| 分辨率上限 | 受电脑显存限制〔推断〕 | 小米 12–14（Adreno 730 / 740 / 750）单块缓冲 128 MiB，约 8 MP，工作尺寸最高 3072；Adreno 650 为 512 MiB，约 33 MP；总上限 4200 万像素。拖动时预览 1024，松手后 3400 | 一个图像平面必须放进一块 GPU 缓冲，超了就无法渲染，所以大图会先缩小再处理。需要原图分辨率时，保存菜单里的“极致渲染”会在后台按原始分辨率出图（内存不够时自动降一档） |
-| 屏幕色彩 | macOS 由 ColorSync 按显示器配置文件转换 | P3 屏幕上开广色域窗口，矩阵加裁切到 Display P3 或 sRGB | 和上游 `render_view` 的显示路径相同。HyperOS 的“鲜艳”模式会把颜色拉得更饱和〔推断〕，对色请切到“原色”。只影响屏幕，不影响导出文件 |
-| 手机 JPEG | 照原样冲印 | 照原样冲印；高光恢复和 Ultra HDR 增益图可选，默认关闭 | 手机 JPEG 已带相机的色调曲线，再冲印等于叠两条曲线。上游也是这样设计的，需要准确颜色请拍 RAW |
-| 尚未移植的功能 | 都有（蒙版、色调蒙版、放大机控制在 macOS 默认关闭） | 还没有：蒙版、色调蒙版、放大机控制；DI / Cineon 导出、打印 LUT（`.cube`）；半格双拼；镜头校正；场景宽容度拟合、中性点吸管；导出软打样；PNG、8 位 TIFF、P3 / ProPhoto 的 TIFF（TIFF 只有 16 位 sRGB） | 先做手机上最常用的部分，其余按[路线图](docs/ROADMAP.md)排期。反过来，安卓新增了自然饱和度、8 段 HSL、褪色、一键风格、边框、Ultra HDR 增益图和后台处理队列 |
-
-完整的对照数据、每项差别的原因和尚未验证的清单见 [docs/PLATFORMS.md](docs/PLATFORMS.md)，对照方法见 [docs/PARITY.md](docs/PARITY.md)。
-
-## 功能
-
-**输入**
-- 相机 RAW：DNG、CR3、NEF、ARW、RAF、RW2、ORF 等，由 LibRaw 0.22.2 解码；DNG 按拍摄白平衡在双光源矩阵之间插值；小米、Pixel 的 DNG 会执行自带的 GainMap 镜头阴影校正；支持索尼 A7 V 的 ARW 6 压缩格式
-- 手机直出照片：JPEG、HEIC/HEIF、PNG、WebP。Display P3 照片按 P3 交给引擎；Ultra HDR 增益图和高光恢复可在设置里打开（默认关闭，与桌面版一致）
-- 可以从相册、文件管理器选择，也可以在其他应用里“分享”或“打开方式”直接打开；文件管理器从上次选照片的文件夹打开
-- 新照片的胶片和相纸：记住上次用的（默认），或固定一对
-
-**冲印**
-- 彩色负片、反转片、黑白负片、电影负片，配对应的相纸；反转片直接扫描，不经过相纸
-- 胶片预览条：每种胶片在当前照片上实时渲染一张小样，点一下切换
-- 一键风格：实验室、负片、反转、电影、黑白、摄影师、相机、手机八组共 87 款，每款同时设定胶片、相纸、放大参数、效果和调整，并注明灵感来源（[docs/STYLES.md](docs/STYLES.md)）；再点一次可调强度（0–100%）；可按名称、灵感、胶片和“富士味”“CCD”这类俗称跨分组搜索，记住上次用的风格
-- 导入风格：`.spklook`、`.cube`、HaldCLUT 图片、Lightroom 预设（`.xmp` / `.dng`）、spektrafilm 预设和胶片数据（`.json`）、富士配方（`.txt`），导入前可预览和调强度，转不过来的项会列出来；当前风格可导出成 `.spklook` 分享
-- 曝光补偿、自动曝光、画幅（影响颗粒和光晕的物理尺度）、放大曝光、黄 / 品红滤镜
-- 颗粒、光晕（Halation）、相纸眩光，可分别开关和调强度；另可调颗粒尺寸、分层颗粒、乳剂散射、色彩分离和扫描锐化（强度、半径）
-- RAW 白平衡：色温 / 色调在解码时生效，算法与上游桌面版一致
-- 冲印后调整（“调整”页）：白平衡、曝光、对比、高光、阴影、黑白点、饱和、八色 HSL、四个色轮、褪色、暗角，以及 RGB / 红 / 绿 / 蓝曲线，拖动时实时预览
-- 调色盘：色调 × 色彩二维调色盘加整体强度（灵感来自 iPhone 的摄影风格），双击回到风格默认点；每款风格有自己的默认点
-
-**构图与边框**
-- 旋转、水平翻转、居中裁剪（原始、3:2、4:3、1:1、16:9、65:24 等）
-- 胶片边框：135、半格、XPan、645、6×6、6×7、6×9 等，带片基边缘字样和片孔；另有宝丽来、拍立得、参数水印条、画廊白边等相纸边框
-- 共 50 款边框预设：片边与日期后背、拍立得卡（600 / i-Type、Instax Square / Wide / Mini、Go）、卡纸与留白、参数数据条（带或不带品牌 logo，印镜头型号，缺等效焦距时用实际焦距）
-- 只加齿孔：任何胶片都能加，画在照片外侧，不裁剪、不改冲印参数；可选位置、片基颜色、齿孔形状、片边字和帧号
-- 品牌 logo 水印：按照片 EXIF 自动识别相机或手机品牌（也可手动选、写自定义文字），五种带 logo 的参数条版式，可加胶片厂牌 logo；共 33 个品牌，来源见 [docs/LOGOS.md](docs/LOGOS.md)
-- 片边细节：片门形状、片夹、真实片名、帧号，可一键重新抽取
-- 日期后背：读取照片 EXIF 拍摄时间压印，可选 LCD / 点阵 / 数据字体、日式或美式顺序、四个角、画面内或片边，大小、亮度、边距可调，可同时印拍摄参数
-
-**查看与导出**
-- 拖动滑块时先出快速预览，松手后自动渲染清晰版；新的改动会取消还没完成的旧渲染
-- 长按预览看原图，轻点照片隐藏界面全屏查看，直方图带溢出提示，全屏 1:1 查看颗粒细节
-- 滑杆：拖动时显示数值，双击复位，点旁边微调一格，手指离开轨道变成慢速微调
-- 撤销 / 重做，最多 50 步；预设保存胶片、相纸和效果组合
-- 观片台：一次导入一卷，网格缩放、筛选、拖动连选；放大镜模式上滑选中、下滑淘汰、打星；可切到胶片小样；复制一张的调整按组粘贴给其他张，批量导出；按胶片和日期自动分卷（也可手动装卷），35 mm 片条带齿孔和帧号，6 列印样，比较风格，整卷导出为一张印样 JPEG
-- 被系统杀掉后再打开，回到原来那张照片和全部编辑
-- 极致渲染：按照片原始分辨率在后台出 4:4:4 JPEG（质量 98，libjpeg-turbo），内存不够时自动降一档
-- 后台导出队列：导出在单独的线程里跑，不挡编辑；进程被杀后下次启动接着做，进度通知支持 Live Update
-- 导出保护：先在相册里占位，写完、校验通过才公开，不会留下半张图；全黑、全白或纯色的画面拒绝保存并自动降一档重试；GPU 掉线时自动换引擎重试
-- P3 屏幕上按广色域预览；导出 JPEG（Display P3 或 sRGB，保留相机、镜头、曝光、时间等 EXIF；拍摄位置默认不写，可在设置里打开）或 16 位 TIFF（Deflate 无损压缩）
-
-> [!NOTE]
-> 应用界面目前只有简体中文。
-
-## 设备支持
-
-主要针对**小米数字系列 10 – 18**。这几代全部使用骁龙旗舰芯片和 Adreno GPU，也就是本项目做驱动适配的对象。
-
-| 机型 | 芯片 | GPU | 状态 |
-|---|---|---|---|
-| 小米 10 系列 | 骁龙 865 | Adreno 650 | 未测试 |
-| 小米 11 系列 | 骁龙 888 | Adreno 660 | 未测试 |
-| 小米 12 / 12S 系列 | 骁龙 8 Gen 1 / 8+ Gen 1 | Adreno 730 | 未测试 |
-| 小米 13 系列 | 骁龙 8 Gen 2 | Adreno 740 | 未测试 |
-| 小米 14 系列 | 骁龙 8 Gen 3 | Adreno 750 | 未测试 |
-| 小米 15 系列 | 骁龙 8 至尊版 | Adreno 830 | 未测试 |
-| 小米 17 系列 | 骁龙 8 至尊版 Gen 5 | Adreno 840 | 未测试 |
-| 小米 18 系列 | 骁龙 8 至尊版 Gen 6 | Adreno | 未测试 |
-
-小米没有发布“16”这一代。各机型的内存、推荐工作尺寸和已知风险见 [docs/DEVICES.md](docs/DEVICES.md)。其他 arm64、安卓 10 以上、支持 Vulkan 的手机理论上也能运行，但不在优化范围内。
-
-## 下载与校验
-
-<p>
-<a href="https://github.com/Dear-Ded/Spektralab-X/releases"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" height="60" alt="从 GitHub 下载"></a>
-<a href="https://github.com/ImranR98/Obtainium"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" height="60" alt="用 Obtainium 获取"></a>
-</p>
-
-> [!CAUTION]
-> **官方安装包只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布，永久免费。** 如果你在应用商店、网盘或二手平台付费买到“Spektralab-X”，那不是官方版本，请申请退款，并按下面的方法核对签名。
-
-1. 打开 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases)，下载最新 `v…-beta` 版本里的 `Spektralab-X-<版本>-arm64-v8a.apk`。
-2. 在手机上安装。小米 / HyperOS 第一次安装未知来源应用时，会要求在“安全”里允许。
-3. 以后的版本可以直接覆盖安装，编辑预设会保留。
-
-### 应用内更新
-
-从 0.1.19 起，应用可以自己检查和安装新版本：
-
-- **什么时候联网：** 启动时最多每 6 小时向本仓库的 GitHub Releases 请求一次版本列表；有新版本时，你点“下载并安装”，或者在不计流量的 Wi-Fi 下自动下载安装包和 `SHA256SUMS`。除了请求本身，不发送任何数据，没有统计。
-- **不打断编辑：** 打开着照片时，自动检查的结果不会弹窗，只在 ⋯ 菜单里显示“有新版本 · 查看”；回到空白页或你主动打开时才提示。
-- **开关：** 设置里有“自动检查更新”（默认开）、“Wi-Fi 下自动下载新版本”（默认开）和“立即检查更新”；⋯ 菜单里有“检查更新”。
-- **安全：** 安装包的 SHA-256 必须和该版本的 `SHA256SUMS` 一致，签名证书必须和已安装的应用一致，安卓系统还会再校验一次签名。第一次自动更新会弹出系统的安装确认（需要允许“安装未知应用”），之后在 Android 12 及以上可以静默更新。
-- **权限：** `INTERNET`、`ACCESS_NETWORK_STATE`、`REQUEST_INSTALL_PACKAGES`、`UPDATE_PACKAGES_WITHOUT_USER_ACTION`。
-- **自己编译的版本**签名不同，应用内更新会拒绝安装，并引导你去 Releases 页面。
-
-**用 Obtainium 自动更新：** 添加仓库地址 `https://github.com/Dear-Ded/Spektralab-X`，并打开 **Include prereleases**（目前所有版本都是预发布，不打开就找不到）。
-
-**欢迎转发分享：** 下载好的安装包可以直接转发到社区、社群、论坛，无需授权，注明本仓库地址即可，见[转载与二次开发](#转载与二次开发)。
-
-### 校验安装包
-
-所有官方版本都用同一个密钥签名。签名证书 SHA-256（也记录在 [`scripts/signing-cert.sha256`](scripts/signing-cert.sha256)）：
-
-```
-CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3
-```
-
-每个版本附带 `SHA256SUMS`，并由 GitHub Actions 生成构建溯源证明（build provenance），可以证明安装包就是由本仓库的公开代码编译出来的：
-
-```bash
-sha256sum -c SHA256SUMS
-gh attestation verify Spektralab-X-<版本>-arm64-v8a.apk -R Dear-Ded/Spektralab-X
-```
-
-在手机上可以用 [AppVerifier](https://github.com/soupslurpr/AppVerifier) 核对证书，在电脑上可以用 `apksigner verify --print-certs`。完整步骤见 [docs/VERIFY.md](docs/VERIFY.md)。
-
-## 使用提示
-
-- **工作尺寸**（设置里调整）决定处理和导出的分辨率。首次启动时按 GPU 自动选择（最高 4096 px；小米 12–14 为 3072），同时受手机可用内存、GPU 单缓冲上限和 4200 万像素的总上限约束。
-- 手机直出照片和 RAW 一样按“均衡”方式自动测光，与桌面版一致。手机照片已经由相机调过色，想要最接近真实胶片的效果，请在小米相机专业模式里打开 RAW 拍摄。
-- Ultra HDR 和小米“超级 HDR”照片默认只读取普通的那一层画面；在设置里打开“手机照片高光恢复”后，Ultra HDR 照片会用增益图恢复高光。
-
-## 常见问题
-
-更完整的解答（为什么慢、为什么发热、暗红偏紫、屏幕和导出的差别、颗粒像彩噪、为什么要网络权限、怎么核对安装包）见 [docs/FAQ.md](docs/FAQ.md)。
+样片用项目引擎在 Mesa lavapipe 上渲染，无后期调整，不是手机实测导出。拍摄底片的中性解码不变；这组彩色负片在 `0.1.18` 时配 Kodak Portra Endura 相纸，现在默认用 Kodak Supra Endura。原片来自 [raw.pixls.us](https://raw.pixls.us/)（CC0）。[渲染参数与复现方法](docs/SAMPLES.md)
 
 <details>
-<summary><b>和普通的胶片滤镜、LUT 有什么区别？</b></summary>
+<summary>更多印样与界面对照</summary>
 
-滤镜和 LUT 是把一种颜色映射成另一种颜色。这里的引擎模拟的是胶片乳剂对不同波长光的感光、显影后的染料密度、再经放大机印到相纸上的过程，所以曝光高低、光源色温、画幅大小都会让结果自然变化，颗粒和光晕也随之改变。
+<table>
+<tr>
+<td width="50%"><a href="docs/images/samples/compare_fruit.jpg"><img src="docs/images/samples/compare_fruit.jpg" width="100%" alt="静物，左为中性解码，右为 Velvia 100"></a><br><sub><code>Canon EOS R5 · Fujifilm Velvia 100</code></sub></td>
+<td width="50%"><a href="docs/images/samples/compare_skyline.jpg"><img src="docs/images/samples/compare_skyline.jpg" width="100%" alt="城市天际线，左为手机 DNG 中性解码，右为 Ektar 100"></a><br><sub><code>Google Pixel 2 XL · Kodak Ektar 100</code></sub></td>
+</tr><tr>
+<td><a href="docs/images/samples/films_dunes.jpg"><img src="docs/images/samples/films_dunes.jpg" width="100%" alt="同一张沙丘底片的六种胶片印样"></a><br><sub><code>Ricoh GR III · 一张底片，六种胶片</code></sub></td>
+<td><a href="docs/images/samples/detail_temple.jpg"><img src="docs/images/samples/detail_temple.jpg" width="100%" alt="建筑高光细节：中性解码、Portra 400、CineStill 800T"></a><br><sub><code>Fujifilm X100F · Portra 400 / CineStill 800T</code></sub></td>
+</tr>
+</table>
+
+以下是界面测试截图：左图用合成色块辨认风格选中态，右图展示窄屏设置。它们不用于评价胶片画质。[截图方法与限制](docs/SCREENSHOTS.md)
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="tools/native/validation/selector-previews-20261113/aoidc/selection-preview-393.png" width="260" alt="风格选择条的选中标记与合成色块"><br><sub><code>风格选择组件 · 393 dp</code></sub></td>
+<td width="50%" valign="top"><img src="docs/validation/alpha8-code-audit-2026-11-14/aoidc/screenshots/90_language_zh_320.png" width="180" alt="中文设置页中的界面语言选项"><br><sub><code>中文设置页 · 320 dp</code></sub></td>
+</tr>
+</table>
+
 </details>
 
-<details>
-<summary><b>收费吗？哪里能下载？</b></summary>
+## 同一张照片，两条工作流
 
-官方版永久免费，只在本仓库的 [GitHub Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 发布。在其他地方付费买到的都不是官方版本，请按[校验安装包](#校验安装包)核对签名证书。
-</details>
+<table>
+<thead><tr><th width="50%" align="left">给日常手机用户 · 3 步出片</th><th width="50%" align="left">给专业摄影师 · 完整光学暗房</th></tr></thead>
+<tbody>
+<tr><td valign="top"><b>1. 打开照片。</b> 从相册选一张手机照片，或从文件中打开相机 RAW / DNG。</td><td valign="top"><b>冲洗。</b> 独立设定 RAW 显影白平衡（K），再依次选胶卷、选相纸、调曝光、调效果。反转片直接扫描，不经相纸。</td></tr>
+<tr><td valign="top"><b>2. 选胶卷，调强度。</b> 从轻、中、重开始，或用 0–100% 游标尺微调。按住画布比原图，松手看冲印效果。</td><td valign="top"><b>调色。</b> 从光线、HSL 到 L/R/G/B 曲线和阴影、中间调、高光色轮；只想改画面的一部分，可用线性、径向或画笔蒙版。</td></tr>
+<tr><td valign="top"><b>3. 加片边，导出分享图。</b> 选留白、胶片片边、拍立得或真实 EXIF 数据条，再保存分享尺寸 JPEG。</td><td valign="top"><b>选片与交付。</b> 在观片台按卷浏览、多选、评级，跨张粘贴调整。将广色域 16-bit TIFF 加入导出队列；失败项目可手动重试。</td></tr>
+</tbody>
+</table>
 
-<details>
-<summary><b>为什么只针对小米数字系列？我的手机能用吗？</b></summary>
+## 暗房无损处理管线
 
-手机 GPU 的 Vulkan 驱动差异很大，同一段计算在不同驱动上可能出图、花屏或直接让 GPU 重置。小米 10–18 全是骁龙 + Adreno，驱动问题集中，可以统一处理。其他 arm64、安卓 10 以上、支持 Vulkan 的手机大概率能运行，只是没有专门调过，欢迎反馈结果。
-</details>
-
-<details>
-<summary><b>颜色和 macOS 版 SpektraLab 一致吗？</b></summary>
-
-在云主机上已经一致。引擎在 ProPhoto 里冲印，屏幕和导出用上游自己的转换代码；与上游 Linux 版逐像素对照 43 组，RAW 输入导出平均色差 ΔE00 0.000、最大 0.015。手机 JPEG 还差 0.20–0.36，原因已查明、正在修。方法和全部数字见 [docs/PARITY.md](docs/PARITY.md)，真机对照还没做。颜色与桌面版不一致时，请在本仓库报告，不要去上游。
-</details>
-
-<details>
-<summary><b>需要联网吗？会上传我的照片吗？</b></summary>
-
-照片不会上传，所有计算都在手机上完成，不收集任何数据。应用联网只做一件事：检查和下载更新，详见[应用内更新](#应用内更新)。导出的 JPEG 会保留相机、镜头、曝光等拍摄信息；GPS 位置默认不写入，只有在设置里打开“导出保留拍摄位置”后才会写。
-</details>
-
-<details>
-<summary><b>为什么导出很慢、手机发烫？</b></summary>
-
-完整的光谱链路计算量很大，全尺寸导出在旧机型上可能要几十秒。长时间导出时手机会降频，小米 11（骁龙 888）最明显。可以在设置里调小工作尺寸，或者用 3400 px 分享尺寸导出。
-</details>
-
-<details>
-<summary><b>以后会有其他平台的版本吗？</b></summary>
-
-有计划。小米优化版稳定到可以日常使用之后，会另开项目做通用安卓版、Windows 版和 iOS 版。这些是计划，还没有时间表，见下方[路线图](#路线图)。
-</details>
-
-<details>
-<summary><b>可以转载、改版或者拿去二次开发吗？</b></summary>
-
-欢迎。请按 GPL-3.0 公开完整源码，并注明本项目、上游项目和二创开发者，改版请换一个名字和图标。详见[转载与二次开发](#转载与二次开发)。
-</details>
-
-## 路线图
-
-按里程碑推进，完整清单、验收标准和调研结论见 [docs/ROADMAP.md](docs/ROADMAP.md)。
-
-- **近期（0.1.x-beta）：** 真机反馈修复、色彩还原与风格体系、界面与交互重构、导出稳定性、小米深度适配（超级岛、后台保活、小米 DNG）。
-- **正式版：** 远程处理，把照片交给自己的电脑或服务器做后处理再传回手机（规范草案见 [docs/REMOTE.md](docs/REMOTE.md)）。
-- **之后的计划：** 小米优化版稳定到可以日常使用后，另开项目做**通用安卓版**、**Windows 版**和 **iOS 版**。这些是计划，没有承诺时间。
-
-## Star 趋势
-
-<a href="https://star-history.com/#Dear-Ded/Spektralab-X&Date">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dear-ded%2FSpektralab-X&type=Date&theme=dark">
-  <img src="https://api.star-history.com/svg?repos=dear-ded%2FSpektralab-X&type=Date" width="600" alt="Star 趋势图">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme-pipeline-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme-pipeline-dark.svg">
+  <img src="docs/assets/readme-pipeline-dark.svg" width="100%" alt="载入与 RAW 显影 → 胶卷与相纸冲洗 → 曲线、色轮与局部蒙版 → JPEG 或广色域 TIFF 导出。编辑不覆盖原片。">
 </picture>
-</a>
 
-<sub>下载数来自 GitHub Releases，包含所有预发布版本的安装包。访问计数和 Star 趋势图由第三方服务 [hits.sh](https://hits.sh/) 和 [star-history.com](https://star-history.com/) 提供；在 GitHub 上浏览时图片经 GitHub 的图片代理加载，在其他网站或镜像里浏览时这些服务会收到你的 IP 地址。</sub>
+调色时，照片四周可用深灰、18% 中灰（`#777777`）、纯黑或纯白。围幕、查看态取景框与参考标不写入成片；封面的旁轴取景器是插图，不是拍摄模式。选用导出片边或数据条时才印入相应内容，缺失的 EXIF 字段留空，不编造参数。
 
-## 反馈问题
+<details>
+<summary>版本边界、导出规格与调试功能说明</summary>
 
-1. 打开应用的 **设置 → 复制诊断信息**。里面有版本、机型、芯片、内存、GPU 探测结果、当前参数和最近 40 条事件，不含文件名和位置。
-2. 用 [问题反馈模板](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose) 提交，把诊断信息贴进去。中文、英文都可以。
+**下载与验证。** `main` 的[显示版本](VERSION)是 `0.2.00-alpha-8`，[内部版本码](VERSION_CODE)为 `128`。同号[官方预发布](https://github.com/Dear-Ded/Spektralab-X/releases/tag/v0.2.00-alpha-8)于 2026 年 11 月 15 日（北京时间）发布；此后工作树的改动不在该 APK 中。官方包永久免费、无广告或内购，仅从本仓库 Releases 分发。同页下载 `Spektralab-X-0.2.00-alpha-8-arm64-v8a.apk` 和 `SHA256SUMS`，按[签名与构建来源校验](docs/VERIFY.md)核实。
 
-使用上的问题请到 [Discussions](https://github.com/Dear-Ded/Spektralab-X/discussions)。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
+小米 13 Ultra 的 Alpha 8 候选包验证了 JPEG、TIFF、HEIF 和观片台批量导出。最后一次安装的候选源码是 `c4a45e5`；后续内存采样、队列文案以云端回归验证。单台设备与合成输入不代表其他相机 RAW 或整代小米机型，软件 Vulkan 数值对照也不等于 Adreno 真机一致性。[真机记录](docs/ALPHA8_EXPANDED_DEVICE_2026-11-14.md) · [发布验收](docs/ALPHA8_RELEASE_2026-11-15.md)
 
-## 参与贡献
+| 导出 | 文件与边界 |
+| :--- | :--- |
+| JPEG | 分享图长边不超过 3400 px；工作尺寸还受设置、GPU 和内存制约，不等于原始像素。高质量导出也受设备上限约束。 |
+| 16-bit TIFF | 可选 sRGB、Display P3、ProPhoto RGB、Adobe RGB (1998)，并嵌入对应 ICC。默认不写 GPS 位置。 |
+| HEIF | 仅在设备具备所需编码能力时提供；菜单对应工作尺寸、sRGB。 |
+| 导出队列 | 入队不是已写入相册。写入、校验并发布后才算保存；失败时查看原因，再手动重试。 |
 
-真机反馈是目前最有价值的贡献，哪怕只是“能打开、能导出”。代码、文档和样片同样欢迎，流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+**实验与调试。** RAW 默认线性显影；相机内嵌曲线或标准曲线属于实验显色，是风格化模拟，不是原厂 JPEG 直出。公开版在本机处理照片；[远程调色建议](docs/REMOTE.md)仍是规范草案。公开 `main` 未提供可用的调试态修图助手：不会由它上传原图，也没有助手草稿进入导出。本地偏好提示不自动修图。
 
-### 工作方式
+[使用问答](docs/FAQ.md) · [风格目录](docs/STYLES.md) · [路线图](docs/ROADMAP.md) · [反馈问题](https://github.com/Dear-Ded/Spektralab-X/issues/new/choose)
 
-```
-Compose 界面 (Kotlin)
-   │  JSON 参数，单独的引擎线程
-   ▼
-JNI 桥接层            app/src/main/cpp/spektralab_jni.cpp
-   │  spk_engine.h（上游的 C 接口）
-   ▼
-SpektraLab 引擎 (C++20) ── Vulkan 计算着色器（SPIR-V）── Adreno GPU
-LibRaw 0.22.2（RAW 解码）
-```
+</details>
 
-- 上游源码在 CI 里按固定提交下载，见 [`scripts/fetch-upstream.sh`](scripts/fetch-upstream.sh)；本仓库只放安卓相关代码。
-- 对上游引擎的修改全部放在 [`patches/`](patches/)，编译前按顺序打上，说明见 [docs/PATCHES.md](docs/PATCHES.md)。
-- 应用层的模块划分、线程模型、渲染档位和内存预算见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+<details>
+<summary>设备优化说明与本地构建命令</summary>
 
-### 自己编译
+**优化对象不是兼容认证。** 本项目用 NDK 将上游 C++20 引擎移植到 Android，由 Kotlin / Jetpack Compose 经 JNI 调用 Vulkan。主要针对小米数字系列的骁龙 / Adreno 驱动；其他 Android 10 及以上、支持 Vulkan 的 arm64 设备理论上可运行，不在专门优化范围内。
 
-需要 JDK 17、Android SDK 35、NDK 27.2、CMake 3.22 和 `glslangValidator`（Ubuntu 上是 `glslang-tools`）：
+| 优化对象 | 骁龙 / Adreno | 验证与限制 |
+| :--- | :--- | :--- |
+| 小米 10 / 11 | 865 / 650；888 / 660 | 旧驱动与 8 GB 机型余量较小，长时导出注意发热降频。 |
+| 小米 12 / 12S、13、14 | 8 Gen 1 或 8+ Gen 1 / 730；8 Gen 2 / 740；8 Gen 3 / 750 | 128 MiB 单缓冲约容 8 MP，首次推荐长边 3072 px；实测记录只覆盖指定的 13 Ultra。12X 的 870 / 650 单列看待。 |
+| 小米 15、17、18 | 8 至尊版 / 830；8 至尊版 Gen 5 / 840；8 至尊版 Gen 6 / Adreno | 属适配目标，没有整系列验收结论；小米数字系列没有 16 代。 |
+
+引擎将大图计算与模糊拆成小批提交，规避驱动超时；首次运行及驱动更新后探测单缓冲读写，探测失败按保守值处理。工作尺寸同时受内存、缓冲及 4200 万像素总上限约束。Adreno 650 的参考上限为 512 MiB（约 33 MP）；加片边扩大画布时仍可能降档。交互预览分拖动 1024 px、松手 3400 px 两档。HyperOS 屏幕对色建议用“原色”；显示模式不改变导出文件。[逐机型限制与风险](docs/DEVICES.md) · [渲染与内存预算](docs/ARCHITECTURE.md) · [桌面差异](docs/PLATFORMS.md) · [对照方法](docs/PARITY.md)
+
+**本地构建。** 按当前 [Gradle 配置](app/build.gradle.kts)准备 JDK 17、Android SDK 36、NDK `27.2.12479018`、CMake `3.22.1`，以及 `glslangValidator`（Ubuntu 包名 `glslang-tools`）。在仓库根目录执行：
 
 ```bash
 bash scripts/fetch-upstream.sh upstream
@@ -328,9 +116,14 @@ bash scripts/stage-assets.sh upstream
 SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 ```
 
-没有设置 `SPK_KEYSTORE` 时用调试密钥签名，装不上正式版的位置。完整流程见 [`.github/workflows/android.yml`](.github/workflows/android.yml)。
+上游源码由[拉取脚本](scripts/fetch-upstream.sh)锁定提交，Android 补丁见 [patches/](patches/) 和[补丁说明](docs/PATCHES.md)。未设置 `SPK_KEYSTORE` 时用调试密钥签名，不能覆盖官方安装包。完整构建与测试命令见 [Android CI](.github/workflows/android.yml)。[文档索引](docs/README.md) · [贡献指南](CONTRIBUTING.md) · [安全反馈](SECURITY.md)
 
-显示版本写在 [`VERSION`](VERSION)，格式为 `主版本.次版本.修订号[-阶段]`，当前为 `0.1.19-beta`。Android 内部版本码独立写在 [`VERSION_CODE`](VERSION_CODE)，当前为 `120`；每次发布必须递增，包括只把 `alpha` 改为 `beta` 的发布，不能再从显示版本推导。发布时使用新的显示版本，同步 [CHANGELOG.md](CHANGELOG.md) 和以内部版本码命名的中英文 fastlane 短说明；推送到 `main` 后由 CI 发布。
+</details>
+
+<details>
+<summary>上游致谢与开源协议</summary>
+
+Spektralab-X 是独立开发的非官方安卓衍生版。感谢 JamesQiu2005 的 SpektraLab 与 Andrea Volpato 的 spektrafilm：前者提供渲染引擎与着色器，后者提供光谱胶片模型。安卓项目负责手机 GPU 适配、集成和界面。项目由一位摄影爱好者与 Claude、GPT、Grok、DeepSeek 协作开发，开发费用由作者承担。
 
 ## 转载与二次开发
 
@@ -370,8 +163,4 @@ SPK_UPSTREAM=$PWD/upstream ./gradlew :app:assembleRelease
 
 边框水印里的相机、手机和胶片品牌 logo 是各自权利人的商标，不属于本项目的 GPL-3.0 授权范围，只用于标识拍摄器材，与各品牌无隶属或背书关系。来源逐个记录在 [docs/LOGOS.md](docs/LOGOS.md)。权利人如有异议，请提 issue，我们会及时移除。
 
-<div align="center">
-
-**觉得有意思？点个 ⭐ Star，让更多人看到。**
-
-</div>
+</details>

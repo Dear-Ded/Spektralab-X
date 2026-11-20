@@ -1,0 +1,316 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="1200" height="480" role="img" aria-label="Spektralab-X Android Optical Darkroom">
+  <defs>
+    <!-- 哑光纸盒纤维微光 -->
+    <linearGradient id="box-sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.14)"/>
+      <stop offset="44%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.26)"/>
+    </linearGradient>
+    <!-- 圆柱阳极金属暗盒光影 -->
+    <linearGradient id="can-cyl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#111111"/>
+      <stop offset="26%" stop-color="#2D2D2D"/>
+      <stop offset="48%" stop-color="#545454"/>
+      <stop offset="68%" stop-color="#262626"/>
+      <stop offset="100%" stop-color="#0A0A0A"/>
+    </linearGradient>
+    <!-- 钢制卷边上下端盖 -->
+    <linearGradient id="steel-cap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#323232"/>
+      <stop offset="40%" stop-color="#9E9C96"/>
+      <stop offset="56%" stop-color="#CAC8C0"/>
+      <stop offset="84%" stop-color="#424240"/>
+      <stop offset="100%" stop-color="#1E1E1E"/>
+    </linearGradient>
+    <!-- 依化学工艺区分的真实片基渐变 -->
+    <linearGradient id="base-c41" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9A5E34"/><stop offset="100%" stop-color="#4E2B14"/>
+    </linearGradient>
+    <linearGradient id="base-800t" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#873C2A"/><stop offset="100%" stop-color="#3B160F"/>
+    </linearGradient>
+    <linearGradient id="base-bw" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5A5D61"/><stop offset="100%" stop-color="#242629"/>
+    </linearGradient>
+    <linearGradient id="base-e6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4D455A"/><stop offset="100%" stop-color="#1E1A26"/>
+    </linearGradient>
+    <!-- 底部 35mm 齿孔 -->
+    <pattern id="sprocket-dark" width="28" height="10" patternUnits="userSpaceOnUse">
+      <rect x="7" y="1" width="14" height="8" rx="1.5" fill="#DFDAD0" stroke="#C8C2B5" stroke-width="0.7"/>
+    </pattern>
+  </defs>
+
+  <!-- 主画布底 -->
+  <rect width="1200" height="480" fill="#F5F3EE"/>
+  <rect x="0.5" y="0.5" width="1199" height="479" fill="none" stroke="#D8D3C7"/>
+
+  <!-- 顶部暗房注册条 -->
+  <rect width="1200" height="36" fill="#ECE9E1"/>
+  <line x1="0" y1="36" x2="1200" y2="36" stroke="#DDD8CC"/>
+  <text x="44" y="22" fill="#68655E" font-family="ui-monospace,'JetBrains Mono','Roboto Mono',monospace" font-size="11" letter-spacing="1.4">SPEKTRALAB-X  //  ANDROID OPTICAL DARKROOM &amp; FILM SIMULATOR</text>
+  <text x="1156" y="22" text-anchor="end" fill="#68655E" font-family="ui-monospace,'JetBrains Mono','Roboto Mono',monospace" font-size="11" letter-spacing="0.8">NEUTRAL 18% REFERENCE  ·  NON-DESTRUCTIVE</text>
+
+  <!-- 左上品牌与双人群宣言 -->
+  <g transform="translate(44, 70)">
+    <!-- 极简旁轴取景框几何徽标 -->
+    <g stroke="#141414" stroke-width="1.5" fill="none">
+      <path d="M0 10 V0 H10 M28 0 H38 V10 M38 28 V38 H28 M10 38 H0 V28"/>
+      <rect x="13" y="14" width="12" height="10" stroke="#73716B" stroke-width="1"/>
+      <circle cx="19" cy="19" r="2" fill="#D44D28" stroke="none"/>
+    </g>
+    <text x="54" y="29" fill="#141414" font-family="'Inter','Noto Sans SC',system-ui,sans-serif" font-size="34" font-weight="600" letter-spacing="-0.8">Spektralab-X</text>
+    <circle cx="272" cy="12" r="3.5" fill="#D44D28"/>
+    <text x="0" y="76" fill="#141414" font-family="'Noto Sans SC','Inter',system-ui,sans-serif" font-size="18.5" font-weight="500" letter-spacing="0.3">随手选卷一键出片，也把整间零色偏光学暗房装进手机。</text>
+    <text x="0" y="104" fill="#575550" font-family="'Inter','Noto Sans SC',system-ui,sans-serif" font-size="13">One-tap film look &amp; full RAW darkroom — curves, color wheels, local masks &amp; 16-bit TIFF.</text>
+  </g>
+
+  <!-- 右上微型 Leica M 光学取景器铭牌（亮/暗模式下取景器内部始终保持深色真实光学腔） -->
+  <g transform="translate(868, 62)">
+    <rect width="288" height="114" rx="2" fill="#0F0F0F" stroke="#2C2C2C"/>
+    <!-- 35mm 悬浮旁轴亮线与视差缺口 -->
+    <g stroke="rgba(236,234,228,0.68)" stroke-width="1" fill="none">
+      <path d="M18 28 V14 H42 M246 14 H270 V28 M270 68 V82 H246 M42 82 H18 V68"/>
+      <path d="M104 14 H184 M104 82 H184"/>
+    </g>
+    <!-- 中央黄斑对焦微亮框 -->
+    <rect x="130" y="40" width="28" height="16" fill="rgba(242,238,225,0.08)" stroke="rgba(236,234,228,0.45)" stroke-width="0.8"/>
+    <circle cx="144" cy="48" r="1.8" fill="#D44D28"/>
+    <!-- 底部棱镜测光槽 -->
+    <rect x="1" y="90" width="286" height="23" fill="#070707"/>
+    <line x1="0" y1="90" x2="288" y2="90" stroke="#1E1E1E"/>
+    <text x="14" y="105" fill="#D6453A" font-family="ui-monospace,monospace" font-size="10">35mm   ◀ ● ▶   500</text>
+    <text x="274" y="105" text-anchor="end" fill="#73716B" font-family="ui-monospace,monospace" font-size="9.5">OVF HUD · VIEW ONLY</text>
+  </g>
+
+  <!-- 展架分隔线 -->
+  <line x1="44" y1="204" x2="1156" y2="204" stroke="#DDD8CC"/>
+
+  <!-- 6 款 35mm 实体胶卷 6 层精绘平拍展架 -->
+  <g transform="translate(44, 222)">
+
+    <!-- 01 · Kodak Portra 400 -->
+    <g transform="translate(0, 0)">
+      <rect width="174" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#8C6822"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#D5A63E" stroke="#E8C670" stroke-width="0.7"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <rect x="21" y="11" width="68" height="23" fill="#141311"/>
+        <rect x="21" y="34" width="68" height="2.4" fill="#C43B2B"/>
+        <line x1="21.5" y1="21" x2="88.5" y2="21" stroke="rgba(255,255,255,0.1)" stroke-width="0.6"/>
+        <text x="55" y="29" text-anchor="middle" fill="#ECEAE4" font-family="sans-serif" font-size="9.2" font-weight="700" letter-spacing="0.8">PORTRA</text>
+        <text x="55" y="70" text-anchor="middle" fill="#141210" font-family="monospace" font-size="24" font-weight="800">400</text>
+        <text x="55" y="96" text-anchor="middle" fill="#262016" font-family="monospace" font-size="6.4">135-36 · C-41</text>
+        <!-- Canister + DX Matrix -->
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#CCA03A"/>
+        <rect x="98" y="34" width="30" height="16" fill="#141311"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.3"/>
+        <g transform="translate(101, 63)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="6" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="12" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="18" width="5.5" height="5" fill="#C8C6BE"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L192 41 C199 41 202 46 202 51 C202 56 194 58 186 61 C178 64 174 70 174 78 L174 89 C174 92 171 94 167 94 L132.5 94 Z" fill="url(#base-c41)" stroke="#B87A4A" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">Portra 400</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">日光人像 · 柔和肤色过渡</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">C-41 · ISO 400 · 36 EXP</text>
+    </g>
+
+    <!-- 02 · Kodak Ektar 100 -->
+    <g transform="translate(188, 0)">
+      <rect width="174" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#6E191B"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#B6282A" stroke="#D85B5D" stroke-width="0.7"/>
+        <polygon points="21,11 89,11 89,40 21,54" fill="#121212"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <text x="29" y="30" fill="#E6B84C" font-family="sans-serif" font-size="11" font-weight="700">EKTAR</text>
+        <text x="55" y="76" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="22" font-weight="800">100</text>
+        <text x="55" y="96" text-anchor="middle" fill="#F0C6C6" font-family="monospace" font-size="6">ULTRA FINE GRAIN</text>
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#A62426"/>
+        <rect x="98" y="34" width="30" height="20" fill="#141414"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.32"/>
+        <g transform="translate(101, 63)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="6" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="12" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="18" width="5.5" height="5" fill="#C8C6BE"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L188 41 C195 41 198 46 198 51 C198 56 190 58 182 61 C174 64 170 70 170 78 L170 89 C170 92 167 94 163 94 L132.5 94 Z" fill="url(#base-c41)" stroke="#B87A4A" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">Ektar 100</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">风光建筑 · 极细颗粒饱和</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">C-41 · ISO 100 · 36 EXP</text>
+    </g>
+
+    <!-- 03 · CineStill 800T -->
+    <g transform="translate(376, 0)">
+      <rect width="174" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#6B1C1E"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#A62A2D" stroke="#D15A5D" stroke-width="0.7"/>
+        <rect x="21" y="11" width="68" height="30" fill="#131B2A"/>
+        <rect x="21" y="41" width="68" height="3" fill="#ECEAE4"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <text x="55" y="23" text-anchor="middle" fill="#9BB5D6" font-family="monospace" font-size="6">TUNGSTEN 3200K</text>
+        <text x="55" y="35" text-anchor="middle" fill="#ECEAE4" font-family="sans-serif" font-size="9.4" font-weight="700">CINESTILL</text>
+        <text x="55" y="75" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="21" font-weight="800">800T</text>
+        <text x="55" y="96" text-anchor="middle" fill="#F2C8C8" font-family="monospace" font-size="6">HALATION · 36 EXP</text>
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#9E272A"/>
+        <rect x="98" y="34" width="30" height="20" fill="#131B2A"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.32"/>
+        <g transform="translate(101, 63)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="6" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="12" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="18" width="5.5" height="5" fill="#141414"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L188 41 C195 41 198 46 198 51 C198 56 190 58 182 61 C174 64 170 70 170 78 L170 89 C170 92 167 94 163 94 L132.5 94 Z" fill="url(#base-800t)" stroke="#AD5B44" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">CineStill 800T</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">夜景霓虹 · 电影冷调光晕</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">3200K · ISO 800 · 36 EXP</text>
+    </g>
+
+    <!-- 04 · Fujifilm Velvia 50 -->
+    <g transform="translate(564, 0)">
+      <rect width="174" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#13422D"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#1C6B47" stroke="#3F966D" stroke-width="0.7"/>
+        <rect x="21" y="11" width="68" height="20" fill="#111212"/>
+        <rect x="21" y="31" width="68" height="4" fill="#B5386B"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <text x="55" y="24" text-anchor="middle" fill="#ECEAE4" font-family="sans-serif" font-size="8" font-weight="700" letter-spacing="1">FUJICHROME</text>
+        <text x="55" y="55" text-anchor="middle" fill="#ECEAE4" font-family="sans-serif" font-size="13" font-weight="700">Velvia</text>
+        <text x="55" y="80" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="22" font-weight="800">50</text>
+        <text x="55" y="96" text-anchor="middle" fill="#A9DBC3" font-family="monospace" font-size="6">RVP 50 · E-6 SLIDE</text>
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#1A6241"/>
+        <rect x="98" y="48" width="30" height="4" fill="#B5386B"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.32"/>
+        <g transform="translate(101, 63)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="6" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="12" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="18" width="5.5" height="5" fill="#141414"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L188 41 C195 41 198 46 198 51 C198 56 190 58 182 61 C174 64 170 70 170 78 L170 89 C170 92 167 94 163 94 L132.5 94 Z" fill="url(#base-e6)" stroke="#6B607D" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">Velvia 50</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">自然风景 · 浓郁透明正片</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">E-6 · ISO 50 · SLIDE</text>
+    </g>
+
+    <!-- 05 · Kodak Tri-X 400 -->
+    <g transform="translate(752, 0)">
+      <rect width="174" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#8C6E18"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#151515" stroke="#424242" stroke-width="0.7"/>
+        <rect x="21" y="11" width="68" height="28" fill="#DFB02C"/>
+        <rect x="21" y="39" width="68" height="14" fill="#ECEAE4"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <text x="55" y="29" text-anchor="middle" fill="#141210" font-family="sans-serif" font-size="11.5" font-weight="800">TRI-X</text>
+        <text x="55" y="49" text-anchor="middle" fill="#141414" font-family="monospace" font-size="8" font-weight="700">400TX · B&amp;W</text>
+        <text x="55" y="80" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="22" font-weight="800">400</text>
+        <text x="55" y="96" text-anchor="middle" fill="#8E8C86" font-family="monospace" font-size="6">PANCHROMATIC</text>
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#181818"/>
+        <rect x="98" y="34" width="30" height="18" fill="#DFB02C"/>
+        <rect x="98" y="52" width="30" height="8" fill="#ECEAE4"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.3"/>
+        <g transform="translate(101, 65)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="6" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="12" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="18" width="5.5" height="5" fill="#C8C6BE"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L188 41 C195 41 198 46 198 51 C198 56 190 58 182 61 C174 64 170 70 170 78 L170 89 C170 92 167 94 163 94 L132.5 94 Z" fill="url(#base-bw)" stroke="#75787D" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">Tri-X 400</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">街头纪实 · 硬朗银盐反差</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">B&amp;W · ISO 400 · 400TX</text>
+    </g>
+
+    <!-- 06 · Ilford HP5 Plus 400 -->
+    <g transform="translate(940, 0)">
+      <rect width="172" height="184" rx="3" fill="#FFFFFF" stroke="#DCD7CB"/>
+      <g transform="translate(10, 14) scale(0.71)">
+        <ellipse cx="104" cy="112" rx="76" ry="4.5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M16 14 L21 11 L21 107 L16 110 Z" fill="#101010"/>
+        <rect x="21" y="11" width="68" height="96" rx="1.5" fill="#171717" stroke="#464646" stroke-width="0.7"/>
+        <rect x="21" y="34" width="68" height="6" fill="#ECEAE4"/>
+        <rect x="21" y="40" width="68" height="32" fill="#23664C"/>
+        <rect x="21" y="11" width="68" height="96" fill="url(#box-sheen)"/>
+        <text x="55" y="26" text-anchor="middle" fill="#ECEAE4" font-family="sans-serif" font-size="9.5" font-weight="700" letter-spacing="1.4">ILFORD</text>
+        <text x="55" y="61" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="18.5" font-weight="800">HP5+</text>
+        <text x="55" y="86" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="10.5" font-weight="700">400</text>
+        <text x="55" y="98" text-anchor="middle" fill="#8C8A84" font-family="monospace" font-size="5.6">BLACK &amp; WHITE</text>
+        <rect x="97" y="29" width="32" height="76" rx="1" fill="url(#can-cyl)" stroke="#3D3D3D" stroke-width="0.6"/>
+        <rect x="95.5" y="26.5" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="95.5" y="103" width="35" height="4.2" rx="1" fill="url(#steel-cap)"/>
+        <rect x="105.5" y="18" width="15" height="8.5" rx="1" fill="url(#steel-cap)"/>
+        <rect x="98" y="34" width="30" height="65" fill="#191919"/>
+        <rect x="98" y="46" width="30" height="4" fill="#ECEAE4"/>
+        <rect x="98" y="50" width="30" height="22" fill="#23664C"/>
+        <rect x="98" y="34" width="30" height="65" fill="url(#can-cyl)" opacity="0.3"/>
+        <g transform="translate(101, 74)">
+          <rect x="0" y="0" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="0" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="6" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="6" width="5.5" height="5" fill="#C8C6BE"/>
+          <rect x="0" y="12" width="5.5" height="5" fill="#C8C6BE"/><rect x="6.5" y="12" width="5.5" height="5" fill="#141414"/>
+          <rect x="0" y="18" width="5.5" height="5" fill="#141414"/><rect x="6.5" y="18" width="5.5" height="5" fill="#C8C6BE"/>
+        </g>
+        <rect x="128" y="34" width="4.5" height="66" fill="#050505"/>
+        <path d="M132.5 41 L188 41 C195 41 198 46 198 51 C198 56 190 58 182 61 C174 64 170 70 170 78 L170 89 C170 92 167 94 163 94 L132.5 94 Z" fill="url(#base-bw)" stroke="#75787D" stroke-width="0.7"/>
+        <g fill="#FFFFFF"><rect x="137" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="167" y="44" width="5.5" height="3.6" rx="0.8"/><rect x="137" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="147" y="87" width="5.5" height="3.6" rx="0.8"/><rect x="157" y="87" width="5.5" height="3.6" rx="0.8"/></g>
+      </g>
+      <text x="14" y="138" fill="#161616" font-family="'Inter',sans-serif" font-size="13" font-weight="600">Ilford HP5+</text>
+      <text x="14" y="156" fill="#575550" font-family="'Noto Sans SC',sans-serif" font-size="11">宽广灰阶 · 经典街头黑白</text>
+      <text x="14" y="173" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5">B&amp;W · ISO 400 · 36 EXP</text>
+    </g>
+  </g>
+
+  <!-- 底部 35mm 连续齿孔边码 -->
+  <line x1="0" y1="432" x2="1200" y2="432" stroke="#DDD8CC"/>
+  <rect x="28" y="442" width="1144" height="10" fill="url(#sprocket-dark)"/>
+  <text x="44" y="468" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5" letter-spacing="1.2">▶ 33A   RAW / DNG INPUT</text>
+  <text x="600" y="468" text-anchor="middle" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5" letter-spacing="1.2">▶ 34A   NON-DESTRUCTIVE DARKROOM PIPELINE</text>
+  <text x="1156" y="468" text-anchor="end" fill="#7A7770" font-family="ui-monospace,monospace" font-size="9.5" letter-spacing="1.2">▶ 35A   JPEG · 16-BIT TIFF · P3 · PROPHOTO</text>
+</svg>

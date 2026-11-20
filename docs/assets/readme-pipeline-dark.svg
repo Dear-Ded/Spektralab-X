@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 204" width="1200" height="204" role="img" aria-label="Spektralab-X 暗房无损处理管线">
+  <rect width="1200" height="204" fill="#0B0B0B"/>
+  <rect x="0.5" y="0.5" width="1199" height="203" fill="none" stroke="#242424"/>
+  <text x="32" y="29" fill="#73716B" font-family="ui-monospace,'JetBrains Mono',monospace" font-size="10.5" letter-spacing="1.4">SIGNAL CHAIN  //  ONE PHOTO · ONE NON-DESTRUCTIVE EDIT STACK</text>
+  <text x="1168" y="29" text-anchor="end" fill="#73716B" font-family="ui-monospace,'JetBrains Mono',monospace" font-size="10.5">KOTLIN · COMPOSE · CANVAS</text>
+  <line x1="0" y1="44" x2="1200" y2="44" stroke="#1E1E1E"/>
+
+  <g transform="translate(32, 64)">
+    <rect width="260" height="116" rx="3" fill="#131313" stroke="#2A2A2A"/>
+    <text x="16" y="25" fill="#D44D28" font-family="ui-monospace,monospace" font-size="10.5" font-weight="600">01 / INGEST &amp; RAW</text>
+    <text x="16" y="52" fill="#ECEAE4" font-family="'Noto Sans SC','Inter',sans-serif" font-size="15" font-weight="600">原片载入与独立显影</text>
+    <text x="16" y="77" fill="#92908A" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12">相册 / 文件 (RAW·DNG) 双入口</text>
+    <text x="16" y="99" fill="#62605C" font-family="ui-monospace,monospace" font-size="10.5">独立 RAW 白平衡 (K) · 观片台选片</text>
+  </g>
+  <path d="M296 122 H320 M315 117 L320 122 L315 127" fill="none" stroke="#484848" stroke-width="1.4"/>
+
+  <g transform="translate(324, 64)">
+    <rect width="260" height="116" rx="3" fill="#131313" stroke="#2A2A2A"/>
+    <text x="16" y="25" fill="#ECEAE4" font-family="ui-monospace,monospace" font-size="10.5" font-weight="600">02 / FILM DARKROOM</text>
+    <text x="16" y="52" fill="#ECEAE4" font-family="'Noto Sans SC','Inter',sans-serif" font-size="15" font-weight="600">风格出片与四步冲洗</text>
+    <text x="16" y="77" fill="#92908A" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12">胶卷 → 相纸 → 曝光 → 颗粒/光晕</text>
+    <text x="16" y="99" fill="#62605C" font-family="ui-monospace,monospace" font-size="10.5">0–100% 连续强度 · 存为个人组合</text>
+  </g>
+  <path d="M588 122 H612 M607 117 L612 122 L607 127" fill="none" stroke="#484848" stroke-width="1.4"/>
+
+  <g transform="translate(616, 64)">
+    <rect width="260" height="116" rx="3" fill="#131313" stroke="#2A2A2A"/>
+    <text x="16" y="25" fill="#ECEAE4" font-family="ui-monospace,monospace" font-size="10.5" font-weight="600">03 / FINE GRADING</text>
+    <text x="16" y="52" fill="#ECEAE4" font-family="'Noto Sans SC','Inter',sans-serif" font-size="15" font-weight="600">曲线、色轮与局部蒙版</text>
+    <text x="16" y="77" fill="#92908A" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12">L/R/G/B 曲线 · 阴影/中间调/高光轮</text>
+    <text x="16" y="99" fill="#62605C" font-family="ui-monospace,monospace" font-size="10.5">线性 / 径向 / 画笔 · 片边与构图</text>
+  </g>
+  <path d="M880 122 H904 M899 117 L904 122 L899 127" fill="none" stroke="#484848" stroke-width="1.4"/>
+
+  <g transform="translate(908, 64)">
+    <rect width="260" height="116" rx="3" fill="#131313" stroke="#3A3A3A"/>
+    <text x="16" y="25" fill="#4E946C" font-family="ui-monospace,monospace" font-size="10.5" font-weight="600">04 / ARCHIVAL EXPORT</text>
+    <text x="16" y="52" fill="#ECEAE4" font-family="'Noto Sans SC','Inter',sans-serif" font-size="15" font-weight="600">广色域导出与恢复队列</text>
+    <text x="16" y="77" fill="#92908A" font-family="'Noto Sans SC','Inter',sans-serif" font-size="12">JPEG 分享/工作尺寸 · 16-bit TIFF</text>
+    <text x="16" y="99" fill="#62605C" font-family="ui-monospace,monospace" font-size="10.5">sRGB / P3 / ProPhoto / Adobe RGB</text>
+  </g>
+</svg>
