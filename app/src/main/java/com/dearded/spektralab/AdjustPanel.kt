@@ -97,8 +97,8 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             }
         }
         1 -> {
-            Adj(tr("色温"), l.temperature, -100.0, 100.0, enabled) { set(l.copy(temperature = it)) }
-            Adj(tr("色调"), l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
+            Adj(tr("色温"), l.temperature, -100.0, 100.0, enabled, DialTints.coolWarm) { set(l.copy(temperature = it)) }
+            Adj(tr("色调"), l.tint, -100.0, 100.0, enabled, DialTints.greenMagenta) { set(l.copy(tint = it)) }
             Adj(tr("饱和度"), l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
             MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
             if (!more) Hint(moreSummary(tr("自然饱和度"), tr("自然饱和度") to l.vibrance.signedOrNull(n.vibrance)))
@@ -215,8 +215,9 @@ private fun Group(title: String) {
 }
 
 @Composable
-private fun Adj(label: String, value: Double, min: Double, max: Double, enabled: Boolean, onChange: (Double) -> Unit) {
-    LabeledSlider(label, value, min, max, 0.0, enabled, "%+.0f", onChange = onChange)
+private fun Adj(label: String, value: Double, min: Double, max: Double, enabled: Boolean,
+                tint: ((Float) -> androidx.compose.ui.graphics.Color)? = null, onChange: (Double) -> Unit) {
+    LabeledSlider(label, value, min, max, 0.0, enabled, "%+.0f", tint = tint, onChange = onChange)
 }
 
 /** A column of controls for a page; keeps AnimatedContent's pages the same shape. */

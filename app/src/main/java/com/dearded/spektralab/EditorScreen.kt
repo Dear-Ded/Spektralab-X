@@ -887,14 +887,13 @@ private fun Controls(
                                 ))
                                 Expandable(moreExposure, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
                                     LabeledSlider(tr("黄滤镜"), e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
-                                        disabledReason = "",
-                                        ends = tr("偏黄") to tr("偏蓝")) {
+                                        ends = tr("偏黄") to tr("偏蓝"), tint = DialTints.warmCool) {
                                         vm.update(e.copy(yShift = it))
                                     }
                                     // Upstream measured it through the engine (EnlargerSection.swift): more
                                     // magenta filtration is a greener print, so the ends read the other way.
                                     LabeledSlider(tr("品红滤镜"), e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
-                                        ends = tr("偏品红") to tr("偏绿")) {
+                                        ends = tr("偏品红") to tr("偏绿"), tint = DialTints.magentaGreen) {
                                         vm.update(e.copy(mShift = it))
                                     }
                                     // A control that cannot be used says why (ui2_derivatives.md 10).
@@ -1310,9 +1309,9 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
     }
     GroupLabel(tr("RAW 白平衡"))
     LabeledSlider(tr("色温"), k.toDouble(), 2000.0, 12000.0, s.asShotK.coerceIn(2000.0, 12000.0), enabled, "%.0f K",
-        onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
+        tint = DialTints.coolWarm, onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
     LabeledSlider(tr("色调"), tint.toDouble(), -150.0, 150.0, s.asShotTint.coerceIn(-150.0, 150.0), enabled, "%+.0f",
-        onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
+        tint = DialTints.greenMagenta, onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
     Hint(tr("松手后重新解码，需要几秒。"))
 }
 
