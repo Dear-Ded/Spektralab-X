@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -155,7 +154,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
         done()
     }
 
-    val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
     val edgeStyle = remember { TextStyle(fontFamily = UiMono, fontWeight = FontWeight.SemiBold) }
     Box(
@@ -215,7 +213,7 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                         }
                         // The edge print, as a lab's printer leaves it.
                         val ink = Color(0xFFDEA046).copy(alpha = 0.7f * stripAlpha)
-                        val small = edgeStyle.copy(fontSize = with(density) { (2.1f * u).toSp() }, color = ink)
+                        val small = edgeStyle.copy(fontSize = (2.1f * u).toSp(), color = ink)
                         drawText(measurer.measure("▸ ${12 + k}", small), topLeft = Offset(fx0 + 2 * u, g.y(40.9f)))
                         drawText(measurer.measure("${12 + k}A", small), topLeft = Offset(fx0 + w - 8 * u, g.y(40.9f)))
                         if (k % 2 == 0) drawText(measurer.measure("SPEKTRALAB 100", small), topLeft = Offset(fx0 + 18 * u, g.y(64.7f)))
