@@ -127,8 +127,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
         queuedExport?.invoke()
         queuedExport = null
     }
+    val exportView = androidx.compose.ui.platform.LocalView.current
     fun exportWithNotice(format: ExportFormat, size: ExportSize, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
         savedAt = System.currentTimeMillis()
+        Feedback.play(exportView, Cue.Shutter)
         val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -169,11 +171,6 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     val panelOpen = panelLevel > 0
     val recede by androidx.compose.animation.core.animateFloatAsState(
         if (dragging) 0.15f else 1f, Motion.defaultEffects(), label = "recede")
-    // The first-run guide waits until there is a photo and nothing over it.
-    val coach = LocalCoach.current
-    val coachAllowed = ui.hasImage && showChrome && ui.busy == null && ui.error == null &&
-        !ui.showQueue && ui.detail == null && !showSettings && !ui.exporting
-    androidx.compose.runtime.SideEffect { coach?.allowed = coachAllowed }
     androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
     val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
     val toggleChrome: () -> Unit = {
@@ -199,7 +196,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         androidx.compose.material3.Button(
                             onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp).coachAnchor(CoachStep.SAVE),
+                            modifier = Modifier.height(48.dp),
                         ) {
                             SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))
@@ -600,7 +597,7 @@ private fun Preview(
                 // is gone before the eye settles on the new one; with animations off it is a cut.
                 try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
             }
-            Box(gestures.coachAnchor(CoachStep.HOLD)) {
+            Box(gestures) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
@@ -1404,7 +1401,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                 placeholder = film.label, size = 88.dp,
                 starred = picks.isFavourite(film.id),
                 onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
-            ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
+            ) { if (!selected) { Feedback.play(view, Cue.Load); picks.used(film.id); onPick(film.id) } }
         }
     }
 }

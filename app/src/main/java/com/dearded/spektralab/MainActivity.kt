@@ -40,6 +40,8 @@ class MainActivity : ComponentActivity() {
         // No keep-on-screen condition: the intro, not the splash, waits for the engine.
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        // The camera sounds load while the first frame lays out (Feedback.kt).
+        Thread({ Feedback.warm(this) }, "feedback").apply { isDaemon = true; start() }
         val intro = savedInstanceState == null && launchIntroWanted(this, intent)
         splash.setOnExitAnimationListener { p ->
             if (intro) {
@@ -66,7 +68,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Always dark: judging a print against a white UI skews it.
             AppLocaleHost { SpektraTheme {
-                CoachHost { AppScreens(viewModel) }; ImportHost(viewModel)
+                AppScreens(viewModel); ImportHost(viewModel)
                 // Over everything, until the engine is ready (600 ms to 1.6 s) or a tap skips it.
                 var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
                 if (showIntro) {

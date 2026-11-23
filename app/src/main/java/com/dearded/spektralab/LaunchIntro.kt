@@ -64,9 +64,6 @@ import kotlin.math.sin
  * judging a print.
  */
 
-/** The 启动动画 setting, default on. */
-internal const val LAUNCH_INTRO = "launch_intro"
-
 /** The name the intro flaps in, and when it starts (ms after the first frame). */
 private const val NAME = "Spektralab-X"
 private const val NAME_DELAY_MS = 100L
@@ -79,10 +76,13 @@ internal object LaunchIcon {
     var wipe: Float = 1f
 }
 
-/** Whether this start gets the intro: a launcher start, animations on, the setting on. */
+/**
+ * Whether this start gets the intro: a launcher start with system animations on. There is no
+ * setting of its own: it plays once per start, and the system's animation switch turns it off.
+ */
+@Suppress("UNUSED_PARAMETER")
 internal fun launchIntroWanted(context: Context, intent: Intent?): Boolean =
-    intent?.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
-        motionAllowed() && context.getSharedPreferences("settings", 0).getBoolean(LAUNCH_INTRO, true)
+    intent?.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER) && motionAllowed()
 
 // The launcher foreground's geometry (ic_launcher_foreground.xml, a 108-unit viewport).
 private const val PITCH = 10.56f

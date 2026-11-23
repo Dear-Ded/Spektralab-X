@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <!-- Update check and download (Updater.kt), from this repository's GitHub Releases
          only; photos never leave the phone. Off in 设置 → 自动检查更新. -->
+    <!-- Composed vibrations for the shutter, the advance lever, the back closing (Feedback.kt). A normal permission, granted at install. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
