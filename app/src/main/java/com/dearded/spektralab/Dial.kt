@@ -170,7 +170,7 @@ internal fun CameraDial(
         val a = Animatable(pos)
         a.animateTo(target.coerceIn(0f, steps.toFloat()),
             if (fast) spring(dampingRatio = 0.6f, stiffness = 800f) else spring(dampingRatio = 0.8f, stiffness = 380f),
-            initialVelocity = velocity) { pos = value; crossed() }
+            initialVelocity = velocity) { pos = this.value; crossed() }
     }
     /** The step nearest [p], or the default when that is nearer. */
     fun snapTarget(p: Float): Float = if (abs(p - defPos) < 0.5f) defPos else p.roundToInt().toFloat().coerceIn(0f, steps.toFloat())
@@ -282,9 +282,9 @@ internal fun CameraDial(
                             if (abs(v) > 6f) runMotion {
                                 val a = Animatable(pos)
                                 a.updateBounds(0f, steps.toFloat())
-                                val r = a.animateDecay(v, exponentialDecay(frictionMultiplier = 2.6f)) { pos = value; crossed(velocity) }
+                                val r = a.animateDecay(v, exponentialDecay(frictionMultiplier = 2.6f)) { pos = this.value; crossed(velocity) }
                                 if (r.endReason == AnimationEndReason.BoundReached) Feedback.play(view, Cue.Limit)
-                                a.animateTo(snapTarget(pos), spring(dampingRatio = 0.8f, stiffness = 380f)) { pos = value; crossed() }
+                                a.animateTo(snapTarget(pos), spring(dampingRatio = 0.8f, stiffness = 380f)) { pos = this.value; crossed() }
                             } else settleTo(snapTarget(pos))
                         } else if (!moved) {
                             // A tap steps one detent towards the side tapped; a second tap soon after resets.
@@ -355,12 +355,14 @@ internal fun CameraDial(
                     if (isMajor && isOn(v, labelEvery)) {
                         val t = tickText(v)
                         val layout = layouts.getOrPut(t) { measurer.measure(t, tickStyle) }
-                        withTransform({ scale(cs, 1f, Offset(x, top + 31.dp.toPx())) }) {
+                        val labelY = top + 31.dp.toPx()
+                        withTransform({ scale(cs, 1f, Offset(x, labelY)) }) {
                             drawText(layout, color = Color(0xFFE8E4DC).copy(alpha = 0.88f * cs * cs),
-                                topLeft = Offset(x - layout.size.width / 2f, top + 31.dp.toPx() - layout.size.height / 2f))
+                                topLeft = Offset(x - layout.size.width / 2f, labelY - layout.size.height / 2f))
                         }
                     }
-                    if (stops.any { abs(it.toFloat() - v) < step / 2 }) drawCircle(Color(0xFFEEEAE2).copy(alpha = 0.9f * cs), 1.7.dp.toPx() * cs + 0.4f, Offset(x + 0.5f, top + dh - 13.dp.toPx()))
+                    val stopDot = 1.7.dp.toPx() * cs + 0.4f
+                    if (stops.any { abs(it.toFloat() - v) < step / 2 }) drawCircle(Color(0xFFEEEAE2).copy(alpha = 0.9f * cs), stopDot, Offset(x + 0.5f, top + dh - 13.dp.toPx()))
                     if (abs(v - def) < step / 2) {
                         val tri = Path().apply {
                             moveTo(x - 3.dp.toPx() * cs, top + dh - 4.dp.toPx()); lineTo(x + 3.dp.toPx() * cs, top + dh - 4.dp.toPx()); lineTo(x, top + dh - 8.dp.toPx()); close()

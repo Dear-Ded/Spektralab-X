@@ -57,23 +57,17 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val nav = LocalEditorNav.current
     var seg by nav::adjustSeg
 
-    // UI2.md 7.2 point 2: title · how many segments changed, the reset on the right.
-    val changedCount = edited.count { it }
+    // One reset, for the segment on screen; the dots on the pills say which ones are changed,
+    // and 重置全部 in the top bar takes everything back.
     PanelHeader(
         title = tr("调整"),
-        summary = if (changedCount == 0) "" else tr("已改 {0} 段", changedCount),
-        // 无 is the panel's reset, not a segment: one row, one thing selected (ui_ai_flavor_audit).
-        resetLabel = tr("重置调整"), changed = !l.neutral, enabled = enabled, onReset = { set(Look.NEUTRAL) },
+        resetLabel = tr("重置"), changed = edited[seg], enabled = enabled, onReset = { resetSegment(seg) },
     )
     PillRow {
         segments.forEachIndexed { i, name ->
             SelectPill(selected = seg == i, onClick = { seg = i },
                 label = { Text(name) }, enabled = enabled, edited = edited[i])
         }
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (SEGMENT_HINTS[seg].isEmpty()) Spacer(Modifier.weight(1f)) else FoldHint(SEGMENT_HINTS[seg], Modifier.weight(1f))
-        if (edited[seg]) QuietButton(tr("重置{0}", segments[seg]), enabled = enabled) { resetSegment(seg) }
     }
 
     // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
@@ -86,9 +80,6 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Adj(tr("亮度"), l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
             MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
                 l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
-            if (!more) Hint(moreSummary(tr("高光、阴影、黑场、白场"),
-                tr("高光") to l.highlights.signedOrNull(n.highlights), tr("阴影") to l.shadows.signedOrNull(n.shadows),
-                tr("黑场") to l.blackPoint.signedOrNull(n.blackPoint), tr("白场") to l.whitePoint.signedOrNull(n.whitePoint)))
             Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
                 Adj(tr("高光"), l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
                 Adj(tr("阴影"), l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
@@ -101,7 +92,6 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Adj(tr("色调"), l.tint, -100.0, 100.0, enabled, DialTints.greenMagenta) { set(l.copy(tint = it)) }
             Adj(tr("饱和度"), l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
             MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
-            if (!more) Hint(moreSummary(tr("自然饱和度"), tr("自然饱和度") to l.vibrance.signedOrNull(n.vibrance)))
             if (more) Adj(tr("自然饱和度"), l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
         }
         2 -> {
@@ -133,10 +123,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                     }
                 }
                 val b = l.hsl.getOrElse(band) { Band() }
-                val name = Look.BANDS[band].first
-                Adj(tr("{0} · 色相", name), b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
-                Adj(tr("{0} · 饱和度", name), b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
-                Adj(tr("{0} · 明亮度", name), b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
+                Adj(tr("色相"), b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
+                Adj(tr("饱和度"), b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
+                Adj(tr("明亮度"), b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
             } else {
                 var zone by remember { mutableIntStateOf(0) }
                 Segmented(listOf(tr("全局"), tr("阴影"), tr("中间调"), tr("高光")), zone, enabled) { zone = it }
@@ -155,9 +144,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         else -> {
             Adj(tr("褪色"), l.fade, 0.0, 100.0, enabled) { set(l.copy(fade = it)) }
             Adj(tr("暗角"), l.vignette, -100.0, 100.0, enabled) { set(l.copy(vignette = it)) }
-            LabeledSlider(tr("暗角范围"), l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f",
-                disabledReason = if (enabled && l.vignette == 0.0) tr("先调暗角，范围才有作用。") else "") {
-                set(l.copy(vignetteMid = it))
+            // The range only does something once there is a vignette, so it is only there then.
+            Expandable(l.vignette != 0.0) {
+                LabeledSlider(tr("暗角范围"), l.vignetteMid, 0.0, 100.0, 50.0, enabled, "%.0f") { set(l.copy(vignetteMid = it)) }
             }
         }
     }
@@ -165,7 +154,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 }
 
 /** The 调整 segments, in page order (UI2.md 2.4). */
-internal val ADJUST_SEGMENTS get() = listOf(tr("光线"), tr("色彩"), tr("分色"), tr("曲线"), tr("调色盘"), tr("暗角"))
+internal val ADJUST_SEGMENTS get() = listOf(tr("光线"), tr("色彩"), tr("混色"), tr("曲线"), tr("调色盘"), tr("暗角"))
 
 /** Which [ADJUST_SEGMENTS] differ from neutral; shared by the page's dots and 修改记录. */
 internal fun adjustEdited(l: Look): List<Boolean> {
@@ -197,16 +186,6 @@ internal fun resetAdjustSegment(l: Look, i: Int): Look {
         else -> l.copy(fade = n.fade, vignette = n.vignette, vignetteMid = n.vignetteMid)
     }
 }
-
-/** A line only where the gesture cannot be seen (ui_ai_flavor_audit): the curve and the pad. */
-private val SEGMENT_HINTS get() = listOf(
-    "",
-    "",
-    "",
-    tr("按住点拖动，双击删除。"),
-    tr("左右浓淡，上下明暗；双击回到默认点。"),
-    "",
-)
 
 @Composable
 private fun Group(title: String) {
@@ -244,10 +223,5 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(tr("观片台"), color = Palette.OnSurface.copy(alpha = 0.85f))
         }
-        Spacer(Modifier.height(20.dp))
-        Text(
-            tr("支持 JPEG、HEIC、PNG 和相机 RAW"),
-            style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
-        )
     }
 }

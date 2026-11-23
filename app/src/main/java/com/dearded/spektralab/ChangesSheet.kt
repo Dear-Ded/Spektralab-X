@@ -105,7 +105,7 @@ internal fun changesOf(e: Edit, catalog: Catalog): List<Change> {
                 cropW = if (it.filmEdge) d.cropW else it.cropW, cropH = if (it.filmEdge) d.cropH else it.cropH)
         }
     if (e.cropAspect != d.cropAspect || e.quarterTurns != d.quarterTurns || e.flipH != d.flipH)
-        out += Change(tr("构图"), listOfNotNull(
+        out += Change(tr("裁剪"), listOfNotNull(
             tr("裁剪").takeIf { e.cropAspect != d.cropAspect }, tr("转 {0}°", e.quarterTurns * 90).takeIf { e.quarterTurns != 0 },
             tr("翻转").takeIf { e.flipH }).joinToString(" · "), 4) {
             it.copy(cropAspect = d.cropAspect, cropX = d.cropX, cropY = d.cropY, cropW = d.cropW, cropH = d.cropH,
