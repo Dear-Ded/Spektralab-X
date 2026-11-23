@@ -147,20 +147,26 @@ internal fun FilmRail(steps: List<String>, selected: Int, enabled: Boolean, edit
                 drawText(t, topLeft = Offset(6.dp.toPx() + i * cell + 2.dp.toPx(), 9.dp.toPx() - t.size.height / 2f + 1.dp.toPx()))
             }
         }
-        Row(Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 13.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        // Each step takes the strip's whole height to the finger (54 dp); the frame drawn inside it is smaller.
+        Row(Modifier.fillMaxSize().padding(horizontal = 6.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             steps.forEachIndexed { i, name ->
                 val on = i == selected
                 Box(
-                    Modifier.weight(1f).fillMaxSize().clip(Corners.xs)
-                        .background(if (on) Brush.verticalGradient(listOf(Color(0xFFF4F0E8), Color(0xFFE6E1D7))) else Brush.verticalGradient(listOf(Color(0xFF262421), Color(0xFF262421))))
+                    Modifier.weight(1f).fillMaxSize()
                         .selectable(on, enabled = enabled, role = Role.Tab) { if (!on) onSelect(i) }
                         .semantics { this.selected = on }
-                        .graphicsLayer { alpha = if (enabled) 1f else 0.5f },
-                    contentAlignment = Alignment.Center,
+                        .graphicsLayer { alpha = if (enabled) 1f else 0.5f }
+                        .padding(vertical = 13.dp),
                 ) {
-                    Text(name, style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal),
-                        color = if (on) Palette.OnAccent else Palette.OnSurfaceSoft, maxLines = 1)
-                    if (edited(i)) EditedDot(onFill = on, modifier = Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 4.dp))
+                    Box(
+                        Modifier.fillMaxSize().clip(Corners.xs)
+                            .background(if (on) Brush.verticalGradient(listOf(Color(0xFFF4F0E8), Color(0xFFE6E1D7))) else Brush.verticalGradient(listOf(Color(0xFF262421), Color(0xFF262421)))),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(name, style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal),
+                            color = if (on) Palette.OnAccent else Palette.OnSurfaceSoft, maxLines = 1)
+                        if (edited(i)) EditedDot(onFill = on, modifier = Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 4.dp))
+                    }
                 }
             }
         }

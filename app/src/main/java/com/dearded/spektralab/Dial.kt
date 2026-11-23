@@ -189,7 +189,7 @@ internal fun CameraDial(
                         .semantics { contentDescription = tr("输入{0}", label) } else Modifier)
                     .padding(horizontal = 8.dp, vertical = 2.dp))
             if (changed && enabled) Box(
-                Modifier.align(Alignment.CenterEnd).size(40.dp).clip(CircleShape)
+                Modifier.align(Alignment.CenterEnd).size(48.dp).clip(CircleShape)
                     .clickable(role = Role.Button) { reset() }
                     .semantics { contentDescription = tr("重置{0}", label) },
                 contentAlignment = Alignment.Center,
