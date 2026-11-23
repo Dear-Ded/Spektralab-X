@@ -88,6 +88,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -119,6 +121,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     var exportMenu by remember { mutableStateOf(false) }
     // ui2_reactbits.md 3.4 C: when 保存 last queued an export, so its icon follows that job (Moments.kt SaveMark).
     var savedAt by remember { mutableLongStateOf(0L) }
+    // Where the print and 保存 are on screen, for the save animation (SaveDevelop.kt).
+    var photoBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var saveBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var saveShot by remember { mutableStateOf<SaveShot?>(null) }
 
     // Android 13+: the export's progress notification needs POST_NOTIFICATIONS.
     // Asked when an export starts; a refusal only hides the notification.
@@ -192,41 +198,28 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         androidx.compose.material3.Button(
                             onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp),
+                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() },
                         ) {
                             SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))
                             Text(tr("保存"))
                         }
-                        DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text(tr("JPEG · 工作尺寸")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
-                            })
-                            DropdownMenuItem(text = { Text(tr("JPEG · 分享尺寸")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
-                            })
-                            for (target in listOf("sRGB", "Display P3")) {
-                                DropdownMenuItem(text = { Text(tr("JPEG 颜色预览 · {0}", target)) },
-                                    enabled = !ui.loadingDetail && ui.busy == null,
-                                    onClick = { exportMenu = false; vm.loadExportProof(target) })
+                        if (exportMenu) ExportSheet(
+                            heif = HeifExport.available,
+                            proofEnabled = !ui.loadingDetail && ui.busy == null,
+                            onProof = { target -> exportMenu = false; vm.loadExportProof(target) },
+                            onDismiss = { exportMenu = false },
+                        ) { choice ->
+                            exportMenu = false
+                            when (choice) {
+                                is SaveChoice.File -> exportWithNotice(choice.format, choice.size, choice.space)
+                                SaveChoice.Highest -> { savedAt = System.currentTimeMillis(); Feedback.play(exportView, Cue.Shutter); vm.exportExtreme() }
                             }
-                            // TIFF target selection is explicit for each export.
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · sRGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · Display P3")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · ProPhoto RGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · Adobe RGB (1998)")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.ADOBE_RGB)
-                            })
-                            if (HeifExport.available) DropdownMenuItem(text = { Text(tr("HEIF · 工作尺寸")) }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text(tr("最高画质")) }, onClick = {
-                                exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
-                            })
+                            // The ceremony over the screen; the export itself is already queued.
+                            val print = ui.image
+                            val from = photoBounds
+                            if (print != null && from != null && saveBounds != null && motionAllowed())
+                                saveShot = SaveShot(print.asImageBitmap(), fitted(from, print.width, print.height), saveBounds!!, from)
                         }
                     }
     }
@@ -350,13 +343,13 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
             val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                    Preview(ui, Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
                     if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome), preview)
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                    Preview(ui, Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
                         onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
                     // shots_review_1 P1: the empty page is the whole screen.
                     if (!ui.hasImage) return@Column
@@ -449,6 +442,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
+            saveShot?.let { SaveDevelop(it) { saveShot = null } }
         }
     }
     }
@@ -1508,4 +1502,12 @@ private class OpenDocumentFromLast(private val context: android.content.Context)
         fun remember(context: android.content.Context, uri: Uri) =
             context.getSharedPreferences("settings", 0).edit().putString(KEY, uri.toString()).apply()
     }
+}
+
+/** Where a [w] by [h] print sits when fitted (ContentScale.Fit) into [box]. */
+private fun fitted(box: androidx.compose.ui.geometry.Rect, w: Int, h: Int): androidx.compose.ui.geometry.Rect {
+    val k = minOf(box.width / w, box.height / h)
+    val fw = w * k
+    val fh = h * k
+    return androidx.compose.ui.geometry.Rect(box.center.x - fw / 2f, box.center.y - fh / 2f, box.center.x + fw / 2f, box.center.y + fh / 2f)
 }

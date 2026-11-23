@@ -116,7 +116,7 @@ class Screenshots {
 
     @Test fun editorDevelop() {
         editor(Fake.ui())
-        tap("冲洗")
+        tap("胶片")
         shot("20_develop_1_film")
         tap("相纸")
         shot("21_develop_2_paper")
@@ -141,7 +141,7 @@ class Screenshots {
         editor(ui.copy(edit = Edit.withBorder(ui.edit, border, ui.source!!.width, ui.source!!.height)))
         tap("边框")
         shot("40_border")
-        tap("构图")
+        tap("裁剪")
         shot("50_crop")
     }
 
@@ -174,7 +174,7 @@ class Screenshots {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.withoutStyle()))
         shot("13_style_none")
-        tap("冲洗")
+        tap("胶片")
         shot("24_develop_none")
     }
 
@@ -328,7 +328,7 @@ class Screenshots {
 
     private fun developExposure(image: Bitmap, name: String) {
         editor(Fake.ui().copy(image = image))
-        tap("冲洗")
+        tap("胶片")
         tap("曝光")
         // The 偏暗 / 偏亮 line comes from a histogram worked out on Dispatchers.Default.
         waitReal(3000)
@@ -338,7 +338,7 @@ class Screenshots {
     @Test fun developGrainOff() {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.copy(grainActive = false)))
-        tap("冲洗")
+        tap("胶片")
         tap("效果")
         tallPanel()
         shot("27_develop_4_grain_off")
