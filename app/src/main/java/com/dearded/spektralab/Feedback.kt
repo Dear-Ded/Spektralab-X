@@ -222,6 +222,9 @@ object Feedback {
     }
 
     /** Plays [steps]; false when this phone cannot, so the caller falls back to the system effect. */
+    // The primitives come from [composition], which only uses Composition.PRIMITIVE_* constants;
+    // lint cannot follow them through the list.
+    @android.annotation.SuppressLint("WrongConstant")
     @RequiresApi(31)
     private fun vibrate(context: Context, steps: List<Step>): Boolean {
         // The system's touch-feedback switch covers these too, as it does performHapticFeedback.

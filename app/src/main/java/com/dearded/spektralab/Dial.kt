@@ -164,8 +164,8 @@ internal fun CameraDial(
     fun runMotion(block: suspend () -> Unit) {
         motion?.cancel()
         motion = scope.launch {
-            onDragLatest(true)
-            try { block() } finally { onDragLatest(false) }
+            onDragLatest(true); recede(true)
+            try { block() } finally { onDragLatest(false); recede(false) }
         }
     }
     fun settleTo(target: Float, velocity: Float = 0f, fast: Boolean = false) = runMotion {

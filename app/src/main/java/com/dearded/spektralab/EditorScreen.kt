@@ -344,13 +344,13 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome, sliderDragging = { dragging })
                     if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome), preview)
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Preview(ui, Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome, sliderDragging = { dragging })
                     // shots_review_1 P1: the empty page is the whole screen.
                     if (!ui.hasImage) return@Column
                     // The handle follows the finger 1:1; on release the panel springs to the
@@ -514,6 +514,8 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
 private fun Preview(
     ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
     onLightTable: () -> Unit = {}, chrome: Boolean = true, onToggleChrome: () -> Unit = {},
+    /** True while a dial is under the finger or still turning: its renders swap in, never cross. */
+    sliderDragging: () -> Boolean = { false },
 ) {
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
@@ -568,18 +570,18 @@ private fun Preview(
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
-            // A film change crosses over from the old print (defaultEffects, no
-            // overshoot); drag renders, tier upgrades and the held original swap
-            // instantly, so live feedback is never delayed by an animation.
-            val film = ui.edit.film
-            var shownFilm by remember { mutableStateOf(film) }
+            // A new look crosses over from the old print; a dial's renders, finer tiers and the
+            // held original swap instantly, so live feedback is never delayed by an animation.
+            var shownEdit by remember { mutableStateOf(ui.edit) }
             var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
             var front by remember { mutableStateOf(bitmap) }
             val fade = remember { androidx.compose.animation.core.Animatable(1f) }
             LaunchedEffect(bitmap) {
                 if (bitmap === front) return@LaunchedEffect
-                val cross = film != shownFilm && !holding && back == null
-                shownFilm = film
+                // A new look (a style, a film, a paper, a reset, an undo) crosses over from the old print;
+                // a dial's renders, the held original and a finer render of the same edit swap at once.
+                val cross = ui.edit != shownEdit && !holding && back == null && !sliderDragging()
+                shownEdit = ui.edit
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
                 back = front; front = bitmap; fade.snapTo(0f)
                 // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
