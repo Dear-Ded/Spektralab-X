@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spektralab-X · Android 胶片冲印模拟</title>
+<meta name="description" content="Spektralab-X 是 SpektraLab 的非官方 Android 移植，用实测的胶片和相纸数据在手机上模拟冲印。免费，开源，照片不上传。">
+<meta name="theme-color" content="#0B0B0C">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="site/mark.svg" type="image/svg+xml">
+<link rel="canonical" href="https://dear-ded.github.io/Spektralab-X/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spektralab-X · Android 胶片冲印模拟">
+<meta property="og:description" content="用实测的胶片和相纸数据，在 Android 上冲印 RAW 和手机照片。">
+<meta property="og:url" content="https://dear-ded.github.io/Spektralab-X/">
+<meta property="og:image" content="https://dear-ded.github.io/Spektralab-X/images/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="image" href="site/img/dunes-portra400.webp" type="image/webp">
+<link rel="stylesheet" href="site/site.css">
+<script defer src="site/site.js"></script>
+</head>
+<body>
+
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="nav" data-nav>
+  <div class="nav__inner wrap">
+    <a class="brand" href="#top" aria-label="Spektralab-X 首页">
+      <img src="site/mark.svg" width="28" height="28" alt="">
+      <span>Spektralab<span class="brand__x">-X</span></span>
+    </a>
+    <nav class="nav__links" aria-label="页面导航">
+      <a href="#samples">样片</a>
+      <a href="#films">胶片</a>
+      <a href="#process">原理</a>
+      <a href="#features">功能</a>
+      <a href="#parity">一致性</a>
+      <a href="#download">下载</a>
+    </nav>
+    <div class="nav__end">
+      <a class="nav__gh" href="https://github.com/Dear-Ded/Spektralab-X" aria-label="GitHub 仓库">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-stars hidden></span>
+      </a>
+      <a class="btn btn--sm btn--light" href="#download">下载</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ───────────────────────── Hero ───────────────────────── -->
+<section class="hero" id="top">
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="wrap hero__head">
+    <p class="eyebrow reveal">
+      <span class="pill"><span class="dot"></span><span data-release-version>0.2.00-alpha-8</span></span>
+      <span>Android 10+ · arm64</span>
+    </p>
+    <h1 class="hero__title reveal">Spektralab-X</h1>
+    <p class="hero__sub reveal">Android 上的胶片冲印模拟</p>
+    <p class="hero__lede reveal">
+      按负片曝光、显影、放大到相纸、扫描的顺序处理 RAW 和手机照片，胶片和相纸用的是实测的特性曲线和光谱灵敏度。计算在手机 GPU 上进行，照片不上传。
+    </p>
+    <div class="hero__cta reveal">
+      <a class="btn btn--light" href="https://github.com/Dear-Ded/Spektralab-X/releases" data-apk-link>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>
+        下载 APK
+      </a>
+      <a class="btn btn--ghost" href="https://github.com/Dear-Ded/Spektralab-X">GitHub</a>
+    </div>
+    <ul class="hero__facts reveal" aria-label="要点">
+      <li>免费，无广告</li>
+      <li>只在检查更新时联网</li>
+      <li>GPL-3.0</li>
+    </ul>
+  </div>
+
+  <div class="wrap wrap--wide reveal" id="samples">
+    <figure class="compare" data-compare>
+      <div class="compare__stage" data-stage style="--pos:50%">
+        <img class="compare__after" data-after src="site/img/dunes-portra400.webp" width="948" height="632" alt="胶片冲印：Kodak Portra 400" decoding="async" fetchpriority="high">
+        <img class="compare__before" data-before src="site/img/dunes-neutral.webp" width="948" height="632" alt="中性解码" decoding="async">
+        <span class="compare__tag compare__tag--l">中性解码</span>
+        <span class="compare__tag compare__tag--r" data-film-label>Kodak Portra 400</span>
+        <div class="compare__handle" aria-hidden="true"><span></span></div>
+        <input class="compare__range" type="range" min="0" max="100" value="50" step="0.1" aria-label="对比位置：左侧中性解码，右侧胶片冲印" data-range>
+      </div>
+      <figcaption class="compare__bar">
+        <div class="tabs" role="tablist" aria-label="切换样片">
+          <button role="tab" aria-selected="true" data-scene="dunes" data-film="Kodak Portra 400" data-meta="Ricoh GR III · RAW">沙丘</button>
+          <button role="tab" aria-selected="false" data-scene="lake" data-film="Kodak Ektar 100" data-meta="Leica Q (Typ 116) · DNG">水道</button>
+          <button role="tab" aria-selected="false" data-scene="fruit" data-film="Fujifilm Velvia 100" data-meta="Canon EOS R5 · CR3">静物</button>
+          <button role="tab" aria-selected="false" data-scene="skyline" data-film="Kodak Ektar 100" data-meta="Google Pixel 2 XL · 手机 DNG">天际线</button>
+        </div>
+        <p class="compare__meta"><span data-scene-meta>Ricoh GR III · RAW</span> <span class="sep">/</span> 引擎默认参数，无后期</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────────────────────── Films ───────────────────────── -->
+<section class="section" id="films">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Films</p>
+      <h2 class="reveal">同一张 RAW，六种胶片</h2>
+      <p class="section__lede reveal">六张图来自同一个 Ricoh GR III RAW 文件，只换了胶片和相纸。除了色彩，高光压缩、颗粒和光晕也随胶片变化。</p>
+    </header>
+
+    <div class="films reveal" data-films>
+      <div class="films__view">
+        <img src="site/img/film-portra400.webp" width="625" height="417" alt="Kodak Portra 400 冲印的沙丘" class="is-on" data-film-img="portra400">
+        <img src="site/img/film-ektar100.webp" width="625" height="417" alt="Kodak Ektar 100 冲印的沙丘" loading="lazy" data-film-img="ektar100">
+        <img src="site/img/film-gold200.webp" width="625" height="416" alt="Kodak Gold 200 冲印的沙丘" loading="lazy" data-film-img="gold200">
+        <img src="site/img/film-cinestill800t.webp" width="625" height="416" alt="CineStill 800T 冲印的沙丘" loading="lazy" data-film-img="cinestill800t">
+        <img src="site/img/film-velvia100.webp" width="625" height="416" alt="Fujifilm Velvia 100 冲印的沙丘" loading="lazy" data-film-img="velvia100">
+        <img src="site/img/film-trix400.webp" width="625" height="416" alt="Kodak Tri-X 400 冲印的沙丘" loading="lazy" data-film-img="trix400">
+        <div class="films__edge" aria-hidden="true">
+          <span data-edge-name>KODAK PORTRA 400</span><span>▸ 12</span><span>12A</span><span data-edge-name2>KODAK PORTRA 400</span>
+        </div>
+      </div>
+      <ol class="films__list" role="tablist" aria-label="选择胶片">
+        <li><button role="tab" aria-selected="true" data-film-btn="portra400" data-edge="KODAK PORTRA 400">
+          <span class="swatch" style="--c1:#d9a571;--c2:#6f8fb4"></span>
+          <span class="films__name">Kodak Portra 400</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 400</span>
+          <span class="films__note">高光过渡平缓，肤色偏暖。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="ektar100" data-edge="KODAK EKTAR 100">
+          <span class="swatch" style="--c1:#d7894a;--c2:#3d74b0"></span>
+          <span class="films__name">Kodak Ektar 100</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 100</span>
+          <span class="films__note">颗粒细，饱和度较高。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="gold200" data-edge="KODAK GOLD 200">
+          <span class="swatch" style="--c1:#e0a54f;--c2:#7f9cba"></span>
+          <span class="films__name">Kodak Gold 200</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 200</span>
+          <span class="films__note">整体偏暖、偏黄。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="cinestill800t" data-edge="CINESTILL 800T">
+          <span class="swatch" style="--c1:#e86d4b;--c2:#3e6f9e"></span>
+          <span class="films__name">CineStill 800T</span>
+          <span class="films__spec">电影负片 · 钨丝灯平衡 · ISO 800</span>
+          <span class="films__note">没有防光晕层，亮部边缘有红色光晕。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="velvia100" data-edge="FUJICHROME VELVIA 100">
+          <span class="swatch" style="--c1:#c9772f;--c2:#2a5fa8"></span>
+          <span class="films__name">Fujifilm Velvia 100</span>
+          <span class="films__spec">E-6 反转片 · ISO 100 · 直接扫描</span>
+          <span class="films__note">反差和饱和度都高。反转片不经过相纸，直接扫描。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="trix400" data-edge="KODAK TRI-X 400">
+          <span class="swatch swatch--mono"></span>
+          <span class="films__name">Kodak Tri-X 400</span>
+          <span class="films__spec">黑白负片 · ISO 400</span>
+          <span class="films__note">颗粒明显，反差较硬。</span>
+        </button></li>
+      </ol>
+    </div>
+    <p class="fine reveal">长边 1600 px 渲染，颗粒相对画面比全尺寸导出粗。负片样张用 Kodak Portra Endura 相纸渲染，应用现在默认用 Kodak Supra Endura，效果会略有不同。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/SAMPLES.md">渲染参数与复现方法 →</a></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Process ───────────────────────── -->
+<section class="section section--process" id="process">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Process</p>
+      <h2 class="reveal">计算流程</h2>
+      <p class="section__lede reveal">渲染引擎来自 SpektraLab，胶片模型来自 spektrafilm。每张照片依次经过下面六步，颗粒、光晕和相纸眩光都由胶片与相纸的物理参数计算，不查表。</p>
+    </header>
+
+    <div class="spectrum reveal" aria-hidden="true">
+      <svg viewBox="0 0 1200 260" preserveAspectRatio="none" class="spectrum__svg">
+        <defs>
+          <linearGradient id="vis" x1="0" x2="1">
+            <stop offset="0" stop-color="#6b5cff"/><stop offset=".18" stop-color="#2F8CFF"/><stop offset=".36" stop-color="#1AA6A0"/>
+            <stop offset=".5" stop-color="#14B866"/><stop offset=".66" stop-color="#F5C400"/><stop offset=".8" stop-color="#FF8A2A"/><stop offset="1" stop-color="#FF4B3A"/>
+          </linearGradient>
+          <linearGradient id="fadeB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2F8CFF" stop-opacity=".35"/><stop offset="1" stop-color="#2F8CFF" stop-opacity="0"/></linearGradient>
+          <linearGradient id="fadeG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#14B866" stop-opacity=".3"/><stop offset="1" stop-color="#14B866" stop-opacity="0"/></linearGradient>
+          <linearGradient id="fadeR" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF4B3A" stop-opacity=".3"/><stop offset="1" stop-color="#FF4B3A" stop-opacity="0"/></linearGradient>
+        </defs>
+        <g class="spectrum__grid">
+          <line x1="0" x2="1200" y1="230" y2="230"/>
+          <line x1="0" x2="1200" y1="150" y2="150"/>
+          <line x1="0" x2="1200" y1="70" y2="70"/>
+        </g>
+        <path class="curve" d="M0 230 C 90 225, 150 60, 260 52 S 420 200, 520 228 L 1200 230" fill="url(#fadeB)" stroke="#2F8CFF"/>
+        <path class="curve" d="M0 230 L 300 229 C 380 220, 450 40, 560 36 S 720 190, 800 228 L 1200 230" fill="url(#fadeG)" stroke="#14B866"/>
+        <path class="curve" d="M0 230 L 560 229 C 640 220, 720 66, 820 60 S 1010 170, 1100 226 L 1200 230" fill="url(#fadeR)" stroke="#FF4B3A"/>
+        <rect x="0" y="244" width="1200" height="6" rx="3" fill="url(#vis)"/>
+      </svg>
+      <div class="spectrum__axis"><span>400 nm</span><span>500</span><span>600</span><span>700 nm</span></div>
+      <p class="spectrum__cap">示意图：彩色负片三层乳剂的光谱灵敏度。引擎使用每款胶片的实测曲线。</p>
+    </div>
+
+    <ol class="chain">
+      <li class="reveal"><span class="chain__n">01</span><h3>解码</h3><p>LibRaw 把 RAW 解码到线性 ProPhoto RGB。</p></li>
+      <li class="reveal"><span class="chain__n">02</span><h3>胶片曝光</h3><p>按胶片的光谱灵敏度，计算蓝、绿、红三层乳剂各自的曝光量。</p></li>
+      <li class="reveal"><span class="chain__n">03</span><h3>负片显影</h3><p>用特性曲线把曝光量换算成密度。颗粒和光晕在这一步生成，尺度取决于画幅。</p></li>
+      <li class="reveal"><span class="chain__n">04</span><h3>放大</h3><p>放大机光源透过负片曝光相纸，可用黄、品红滤镜校色。</p></li>
+      <li class="reveal"><span class="chain__n">05</span><h3>相纸显影</h3><p>相纸的特性曲线决定最终反差，相纸眩光在这一步加入。</p></li>
+      <li class="reveal"><span class="chain__n">06</span><h3>扫描</h3><p>转换到屏幕或导出色域，保存为 JPEG、16-bit TIFF 或 HEIF。</p></li>
+    </ol>
+
+    <div class="halation reveal">
+      <div class="halation__text">
+        <h3>光晕</h3>
+        <p>CineStill 800T 是去掉防光晕层的电影胶片。强光穿过乳剂后在片基背面反射，再次曝光乳剂，亮部边缘出现红色光晕。Portra 400 有防光晕层，同一画面没有这种光晕。</p>
+        <p class="fine">Fujifilm X100F · RAF · 左起：中性解码、Portra 400、CineStill 800T</p>
+      </div>
+      <div class="halation__frames">
+        <figure><img src="site/img/temple-neutral.webp" width="625" height="417" alt="中性解码：高光过曝的白色天空" loading="lazy"><figcaption>中性解码</figcaption></figure>
+        <figure><img src="site/img/temple-portra400.webp" width="625" height="417" alt="Portra 400：天空恢复层次，没有光晕" loading="lazy"><figcaption>Portra 400</figcaption></figure>
+        <figure class="is-hot"><img src="site/img/temple-cinestill800t.webp" width="625" height="417" alt="CineStill 800T：高光边缘出现红橙色光晕" loading="lazy"><figcaption>CineStill 800T</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Interface ───────────────────────── -->
+<section class="section" id="app">
+  <div class="wrap">
+    <header class="section__head section__head--center">
+      <p class="kicker reveal">Interface</p>
+      <h2 class="reveal">界面</h2>
+      <p class="section__lede reveal">可以只选风格、调强度、加边框后保存，也可以继续调曲线、色轮和蒙版。两种操作改的是同一份编辑记录。</p>
+    </header>
+
+    <div class="phones reveal">
+      <figure class="phone phone--side">
+        <div class="phone__screen"><img src="images/interface/light-table.webp" alt="观片台：同一卷照片的网格，可评级与选片" loading="lazy"></div>
+        <figcaption><b>观片台</b>按卷浏览、评级，把调整粘贴到其他照片</figcaption>
+      </figure>
+      <figure class="phone phone--main">
+        <div class="phone__screen"><img src="images/interface/editor.webp" alt="编辑器：照片下方是风格小样、分类与工具栏" loading="lazy"></div>
+        <figcaption><b>风格</b>87 款，每款设定胶片、相纸和效果参数</figcaption>
+      </figure>
+      <figure class="phone phone--side">
+        <div class="phone__screen"><img src="images/interface/curves.webp" alt="曲线编辑器：RGB 与单通道曲线" loading="lazy"></div>
+        <figcaption><b>曲线</b>RGB、红、绿、蓝曲线，另有四个色轮</figcaption>
+      </figure>
+    </div>
+    <p class="fine fine--center reveal">截图由 Alpha 8 的 CI 截图任务生成，使用测试数据，不是手机屏摄。</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Features ───────────────────────── -->
+<section class="section" id="features">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Features</p>
+      <h2 class="reveal">功能</h2>
+    </header>
+
+    <div class="bento">
+      <article class="card card--wide card--raw reveal">
+        <div>
+          <h3>RAW 解码</h3>
+          <p>使用 LibRaw 0.22.2。DNG 按拍摄白平衡在双光源矩阵间插值，小米和 Pixel 的 DNG 会应用文件自带的镜头阴影校正。也可以打开手机拍的 JPEG、HEIC、PNG 和 WebP。</p>
+        </div>
+        <ul class="chips" aria-label="支持的 RAW 格式">
+          <li>DNG</li><li>CR3</li><li>NEF</li><li>ARW</li><li>RAF</li><li>RW2</li><li>ORF</li><li>HEIC</li>
+        </ul>
+      </article>
+
+      <article class="card reveal">
+        <p class="card__big">87</p>
+        <h3>款风格</h3>
+        <p>分八组。每款设定胶片、相纸、放大参数和效果，强度可调，可以按名称或“富士味”这类俗称搜索。</p>
+      </article>
+
+      <article class="card reveal">
+        <p class="card__big">16<span>-bit</span></p>
+        <h3>TIFF 导出</h3>
+        <p>可选 sRGB、Display P3、ProPhoto RGB、Adobe RGB (1998)，嵌入对应 ICC。JPEG 可选 sRGB 或 P3，设备有编码器时可存 HEIF。</p>
+      </article>
+
+      <article class="card reveal">
+        <h3>调整</h3>
+        <p>白平衡、曝光、高光、阴影、八段 HSL、色轮和曲线。线性、径向和画笔蒙版可以把调整限制在局部。</p>
+        <div class="sliders" aria-hidden="true">
+          <div class="sl"><span>曝光</span><i style="--v:.58"></i></div>
+          <div class="sl"><span>高光</span><i style="--v:.32"></i></div>
+          <div class="sl"><span>颗粒</span><i style="--v:.46"></i></div>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <h3>边框</h3>
+        <p>135、半格、XPan、6×6、6×7 等片边，带齿孔和片基字样；另有拍立得和参数条。参数条按 EXIF 识别 33 个相机和手机品牌。</p>
+        <div class="frame-demo" aria-hidden="true"><div class="frame-demo__img"></div><span>KODAK 400TX</span><span>▸ 24</span></div>
+      </article>
+
+      <article class="card reveal">
+        <h3>导入预设</h3>
+        <p>支持 <code>.cube</code>、HaldCLUT、Lightroom 预设和富士配方，无法转换的项目会列出来。当前风格可以导出为 <code>.spklook</code>。</p>
+      </article>
+
+      <article class="card card--wide card--queue reveal">
+        <div>
+          <h3>后台导出</h3>
+          <p>导出在单独的线程排队，编辑时也可以进行。文件先在相册占位，写完并校验后才公开；进程被系统结束后，下次启动会继续。“极致渲染”按原始分辨率输出 4:4:4 JPEG。</p>
+        </div>
+        <ol class="queue" aria-hidden="true">
+          <li><span class="q-dot q-dot--ok"></span>DSCF0412 · Portra 400<em>已保存</em></li>
+          <li><span class="q-dot q-dot--run"></span>L1000412 · Ektar 100<em><i class="q-bar"></i></em></li>
+          <li><span class="q-dot"></span>R0001283 · Tri-X 400<em>排队中</em></li>
+        </ol>
+      </article>
+
+      <article class="card card--private reveal">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6L12 3z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M9 12l2.2 2.2L15.5 10"/></svg>
+        <h3>隐私</h3>
+        <p>没有统计、广告和账号。唯一的网络请求是向本仓库的 GitHub Releases 检查新版本。导出默认不写入拍摄位置。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Parity ───────────────────────── -->
+<section class="section section--parity" id="parity">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Parity</p>
+      <h2 class="reveal">与桌面版的色差</h2>
+      <p class="section__lede reveal">胶片引擎直接使用上游代码。我们用同一组输入，把 Android 的输出和上游 Linux 宿主程序的输出逐像素比较。</p>
+    </header>
+
+    <div class="stats reveal">
+      <div class="stat"><p class="stat__n" data-count="43">43</p><p class="stat__l">组对照，RAW、合成图与手机 JPEG</p></div>
+      <div class="stat"><p class="stat__n">0.000</p><p class="stat__l">RAW 导出平均 ΔE00（最大 ≤ 0.015）</p></div>
+      <div class="stat"><p class="stat__n">≤ 0.016</p><p class="stat__l">手机 JPEG / P3 导出平均 ΔE00</p></div>
+    </div>
+
+    <div class="scale reveal" aria-label="色差刻度：项目实测差别远小于人眼可分辨的约 1.0 ΔE00">
+      <div class="scale__track">
+        <span class="scale__ours" style="--x:1.6%"><b>本项目 ≤ 0.016</b></span>
+        <span class="scale__eye" style="--x:100%"><b>约 1.0：人眼可分辨</b></span>
+      </div>
+      <div class="scale__ticks"><span>0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1.0 ΔE00</span></div>
+    </div>
+
+    <p class="fine reveal">数据在云主机的软件 GPU（Mesa lavapipe）上测得，还没有在 Adreno 手机上大规模验证，也没有和 macOS 版直接比较。macOS 版用 Apple 的 RAW 解码，结果本来就与 LibRaw 不同。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/PARITY.md">方法与完整数据 →</a></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Devices ───────────────────────── -->
+<section class="section" id="devices">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Devices</p>
+      <h2 class="reveal">适配机型</h2>
+      <p class="section__lede reveal">C++20 引擎用 NDK 编译，通过 Vulkan 计算着色器在 GPU 上运行。适配针对小米数字系列的骁龙和 Adreno 驱动：大图拆成小批提交，首次运行时探测单块缓冲上限，再决定工作尺寸。</p>
+    </header>
+
+    <div class="devices reveal" role="list">
+      <div class="device" role="listitem"><b>小米 10</b><span>骁龙 865 · Adreno 650</span></div>
+      <div class="device" role="listitem"><b>小米 11</b><span>骁龙 888 · Adreno 660</span></div>
+      <div class="device" role="listitem"><b>小米 12 / 12S</b><span>8 Gen 1 / 8+ Gen 1 · Adreno 730</span></div>
+      <div class="device device--tested" role="listitem"><b>小米 13</b><span>8 Gen 2 · Adreno 740</span><em>13 Ultra 已实测</em></div>
+      <div class="device" role="listitem"><b>小米 14</b><span>8 Gen 3 · Adreno 750</span></div>
+      <div class="device" role="listitem"><b>小米 15</b><span>8 至尊版 · Adreno 830</span></div>
+      <div class="device" role="listitem"><b>小米 17</b><span>8 至尊版 Gen 5 · Adreno 840</span></div>
+      <div class="device" role="listitem"><b>小米 18</b><span>8 至尊版 Gen 6</span></div>
+    </div>
+    <p class="fine reveal">列表是适配目标，不代表已验证。目前只有小米 13 Ultra 做过真机测试。其他 Android 10 以上、支持 Vulkan 的 arm64 手机应该也能运行，但没有专门优化。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/DEVICES.md">逐机型限制与风险 →</a></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Download ───────────────────────── -->
+<section class="section section--download" id="download">
+  <div class="wrap">
+    <div class="dl">
+      <div class="dl__head">
+        <p class="kicker reveal">Download</p>
+        <h2 class="reveal">下载</h2>
+        <p class="section__lede reveal">安装包只在 GitHub Releases 发布，免费。其他渠道收费出售的不是官方版本。</p>
+        <div class="hero__cta reveal">
+          <a class="btn btn--light" href="https://github.com/Dear-Ded/Spektralab-X/releases" data-apk-link>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>
+            下载 APK<span class="btn__meta" data-apk-meta></span>
+          </a>
+          <a class="btn btn--ghost" href="https://github.com/Dear-Ded/Spektralab-X/releases">全部版本</a>
+        </div>
+        <p class="dl__release reveal"><span data-release-version>0.2.00-alpha-8</span> · <span data-release-date>2026-11-15</span> · arm64-v8a · Android 10+</p>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><span class="steps__n">1</span><div><h3>下载并校验</h3><p>下载 <code>arm64-v8a.apk</code> 和同一页的 <code>SHA256SUMS</code>，核对哈希和签名指纹。</p><pre><code>sha256sum -c SHA256SUMS</code></pre></div></li>
+        <li class="reveal"><span class="steps__n">2</span><div><h3>安装</h3><p>第一次安装需要允许浏览器或文件管理器安装应用。以后的版本可以直接覆盖安装，编辑和风格会保留。</p></div></li>
+        <li class="reveal"><span class="steps__n">3</span><div><h3>更新</h3><p>应用会检查新版本，下载后核对 <code>SHA256SUMS</code> 和签名再安装。用 Obtainium 订阅时需要打开 Include prereleases，因为目前都是预发布版。</p></div></li>
+      </ol>
+    </div>
+    <aside class="alpha reveal">
+      <span class="alpha__tag">Alpha</span>
+      <p>现在是 Alpha 版。真机测试只在小米 13 Ultra 上做过，其余来自 CI 和云端测试，可能出现闪退、颜色不对或速度慢。遇到问题请<a href="https://github.com/Dear-Ded/Spektralab-X/issues/new/choose">提交 issue</a>，附上应用里的诊断信息。</p>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<!-- ───────────────────────── Footer ───────────────────────── -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="brand" href="#top"><img src="site/mark.svg" width="28" height="28" alt=""><span>Spektralab<span class="brand__x">-X</span></span></a>
+        <p>渲染引擎和着色器来自 JamesQiu2005 的 <a href="https://github.com/JamesQiu2005/SpektraLab">SpektraLab</a>，胶片模型来自 Andrea Volpato 的 <a href="https://github.com/andreavolpato/spektrafilm">spektrafilm</a>。本项目做 Android 移植、手机 GPU 适配和界面。</p>
+      </div>
+      <nav class="footer__cols" aria-label="页脚链接">
+        <div><h4>项目</h4><a href="https://github.com/Dear-Ded/Spektralab-X">源代码</a><a href="https://github.com/Dear-Ded/Spektralab-X/releases">版本发布</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/CHANGELOG.md">更新记录</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/ROADMAP.md">路线图</a></div>
+        <div><h4>文档</h4><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/FAQ.md">常见问题</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/ARCHITECTURE.md">架构</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/STYLES.md">风格目录</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md">安装包校验</a></div>
+        <div><h4>社区</h4><a href="https://github.com/Dear-Ded/Spektralab-X/issues">反馈问题</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/CONTRIBUTING.md">参与贡献</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/SECURITY.md">安全反馈</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/README.en.md">English</a></div>
+      </nav>
+    </div>
+    <div class="footer__legal">
+      <p>代码以 <a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/LICENSE">GPL-3.0</a> 发布，附加条款见 <a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/NOTICE">NOTICE</a>；胶片与相纸数据 CC BY-SA 4.0（spektrafilm）；RAW 解码 LibRaw（LGPL-2.1）；样片原图来自 raw.pixls.us（CC0）。</p>
+      <p>Spektralab-X 是非官方衍生项目，与 SpektraLab 的作者和所有者、小米公司均无关联，也未获其背书。SpektraLab™ 及其图标是其所有者的商标；“小米”“骁龙”“Adreno”及文中胶片名称是各自所有者的商标。</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

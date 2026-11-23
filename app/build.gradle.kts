@@ -14,6 +14,29 @@ val appVersionCode: Int = rootProject.file("VERSION_CODE").readText().trim()
     ?: error("VERSION_CODE must be an integer in 1..2100000000")
 val keystorePath: String? = System.getenv("SPK_KEYSTORE")?.takeIf { file(it).isFile }
 
+// Robolectric's android-all runtimes, resolved by Gradle (cached, with retries) instead of
+// Robolectric's own downloader, which Maven Central rate-limits on CI (HTTP 429).
+// One per SDK the tests run on: @Config(sdk = [34]), @Config(sdk = [35]), and targetSdk 36
+// for classes without an sdk. Versions are Robolectric 4.17's DefaultSdkProvider; update
+// them together with the robolectric dependency. All three are versions of one module, so
+// each gets its own configuration; in one configuration Gradle would keep only the newest.
+val robolectricRuntimes = listOf(
+    "14-robolectric-10818077-i7",
+    "15-robolectric-13954326-i7",
+    "16-robolectric-13921718-i7",
+).map { version ->
+    configurations.create("robolectricRuntime${version.substringBefore('-')}") {
+        isTransitive = false
+        isCanBeConsumed = false
+        dependencies.add(project.dependencies.create("org.robolectric:android-all-instrumented:$version"))
+    }
+}
+val robolectricJarDir = layout.buildDirectory.dir("robolectric-jars")
+val robolectricJars = tasks.register<Sync>("robolectricJars") {
+    robolectricRuntimes.forEach { from(it) }
+    into(robolectricJarDir)
+}
+
 android {
     namespace = "com.dearded.spektralab"
     compileSdk = 36
@@ -91,6 +114,10 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.maxHeapSize = "2g"
+                // Robolectric runs offline from jars Gradle resolved (see robolectricJars).
+                it.dependsOn(robolectricJars)
+                it.systemProperty("robolectric.offline", "true")
+                it.systemProperty("robolectric.dependency.dir", robolectricJarDir.get().asFile.absolutePath)
                 System.getenv("SPK_LUT_EVIDENCE_DIR")?.let { dir -> it.outputs.dir(dir) }
             }
         }

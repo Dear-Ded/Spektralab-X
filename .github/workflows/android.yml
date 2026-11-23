@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+      - "tools/site/**"
       - "fastlane/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/*.md"
@@ -14,6 +15,7 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+      - "tools/site/**"
       - "fastlane/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/*.md"

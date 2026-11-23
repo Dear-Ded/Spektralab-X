@@ -72,4 +72,6 @@ Most documents are in Chinese; those marked EN have English.
 
 - [`images/samples/`](images/samples/)：README 样片，由引擎实际渲染，原图来自 raw.pixls.us（CC0）。
 - [`images/social-preview.png`](images/social-preview.png)：GitHub 社交预览图（1280 × 640）。
-- [`images/make-banners.py`](images/make-banners.py)：从样片生成社交预览图和 fastlane 宣传图（需要 Pillow）。
+- [`images/readme-banner.jpg`](images/readme-banner.jpg) / [`readme-banner-en.jpg`](images/readme-banner-en.jpg)：README 顶部横幅。
+- [`images/make-banners.py`](images/make-banners.py)：从样片生成 fastlane 宣传图（需要 Pillow）。
+- [`index.html`](index.html) 与 [`site/`](site/)：项目主页（GitHub Pages，静态文件，无构建步骤）。`site/img/` 的单帧样片由 [`tools/site/crop_samples.py`](../tools/site/crop_samples.py) 从 `images/samples/` 裁出；README 横幅和社交预览图由 [`tools/site/render_banners.py`](../tools/site/render_banners.py) 用无头 Edge / Chrome 渲染 [`tools/site/banner.html`](../tools/site/banner.html)。

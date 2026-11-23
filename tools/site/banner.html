@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- Source for docs/images/readme-banner.jpg and docs/images/social-preview.png.
+     Rendered by tools/site/render_banners.py with headless Edge or Chrome. -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #0a0a0b; }
+  body {
+    width: var(--w); height: var(--h); overflow: hidden; position: relative;
+    font-family: "Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    color: #ededee; -webkit-font-smoothing: antialiased;
+  }
+  .photo { position: absolute; top: 0; right: 0; bottom: 0; width: var(--pw); }
+  .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .photo .before { clip-path: inset(0 50% 0 0); }
+  .photo::before { /* fade the photo into the dark side */
+    content: ""; position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(90deg, #0a0a0b 0%, rgba(10,10,11,.85) 12%, rgba(10,10,11,0) 38%);
+  }
+  .photo::after {
+    content: ""; position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(0deg, rgba(10,10,11,.55), transparent 30%);
+  }
+  .line { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(255,255,255,.85); z-index: 3; }
+  .tag {
+    position: absolute; z-index: 3; bottom: 28px; padding: 6px 12px; border-radius: 999px;
+    font: 500 14px "Cascadia Mono", Consolas, monospace; color: #fff;
+    background: rgba(10,10,11,.55); border: 1px solid rgba(255,255,255,.18);
+  }
+  .tag.l { right: calc(50% + 14px); }
+  .tag.r { left: calc(50% + 14px); }
+  .text { position: absolute; left: var(--pad); top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; z-index: 4; }
+  .mark { width: 60px; height: 60px; margin-bottom: 30px; }
+  h1 { margin: 0; font-size: var(--fs); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
+  .sub { margin-top: 18px; font-size: calc(var(--fs) * .33); font-weight: 600; letter-spacing: -.01em; }
+  .meta { margin-top: 26px; font: 400 15px "Cascadia Mono", Consolas, monospace; color: #8a8a90; letter-spacing: .02em; }
+  .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; z-index: 5;
+    background: linear-gradient(90deg, #2f8cff, #1aa6a0 30%, #14b866 50%, #f5c400 72%, #ff4b3a); }
+</style>
+</head>
+<body>
+  <div class="photo">
+    <img src="../../docs/site/img/dunes-portra400.webp" alt="">
+    <img class="before" src="../../docs/site/img/dunes-neutral.webp" alt="">
+    <span class="line"></span>
+    <span class="tag l">中性解码</span>
+    <span class="tag r">Kodak Portra 400</span>
+  </div>
+  <div class="text">
+    <img class="mark" src="../../docs/site/mark.svg" alt="">
+    <h1>Spektralab-X</h1>
+    <div class="sub">Android 上的胶片冲印模拟</div>
+    <div class="meta">SpektraLab 非官方移植 · GPL-3.0</div>
+  </div>
+  <div class="bar"></div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const v = (k, d) => q.get(k) || d;
+    const st = document.body.style;
+    st.setProperty('--w', v('w', '1280') + 'px');
+    st.setProperty('--h', v('h', '520') + 'px');
+    st.setProperty('--pw', v('pw', '62%'));
+    st.setProperty('--pad', v('pad', '72') + 'px');
+    st.setProperty('--fs', v('fs', '78') + 'px');
+    if (q.get('lang') === 'en') {
+      document.documentElement.lang = 'en';
+      document.querySelector('.sub').textContent = 'Film development simulation for Android';
+      document.querySelector('.meta').textContent = 'Unofficial SpektraLab port · GPL-3.0';
+      document.querySelector('.tag.l').textContent = 'Neutral decode';
+    }
+  </script>
+</body>
+</html>
