@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val e = ui.edit
     val l = e.look
-    val n = Look.NEUTRAL
     fun set(next: Look) = vm.update(e.copy(look = next))
 
     // One segment on screen at a time (UI2.md 2.4); a dot marks the ones changed.
@@ -70,30 +69,23 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         }
     }
 
-    // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
-    val expandAll = rememberExpandAll()
-    var more by remember(seg) { mutableStateOf(expandAll) }
+    // ui-polish: 光线 and 色彩 are a row of knobs and one dial (KnobRow.kt), all in reach.
     when (seg) {
-        0 -> {
-            LabeledSlider(tr("曝光"), l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
-            Adj(tr("对比度"), l.contrast, -50.0, 50.0, enabled) { set(l.copy(contrast = it)) }
-            Adj(tr("亮度"), l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
-            MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
-                l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
-            Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
-                Adj(tr("高光"), l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
-                Adj(tr("阴影"), l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
-                Adj(tr("黑场"), l.blackPoint, 0.0, 50.0, enabled) { set(l.copy(blackPoint = it)) }
-                Adj(tr("白场"), l.whitePoint, 0.0, 50.0, enabled) { set(l.copy(whitePoint = it)) }
-            }
-        }
-        1 -> {
-            Adj(tr("色温"), l.temperature, -100.0, 100.0, enabled, DialTints.coolWarm) { set(l.copy(temperature = it)) }
-            Adj(tr("色调"), l.tint, -100.0, 100.0, enabled, DialTints.greenMagenta) { set(l.copy(tint = it)) }
-            Adj(tr("饱和度"), l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
-            MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
-            if (more) Adj(tr("自然饱和度"), l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
-        }
+        0 -> KnobRow("light", listOf(
+            Knob("exposure", tr("曝光"), l.exposure, -3.0, 3.0, 0.0, "%+.2f EV", short = ::signed1, zone = Zones.all) { set(l.copy(exposure = it)) },
+            Knob("contrast", tr("对比度"), l.contrast, -50.0, 50.0, 0.0, "%+.0f", zone = Zones.contrast) { set(l.copy(contrast = it)) },
+            Knob("brightness", tr("亮度"), l.brightness, -50.0, 50.0, 0.0, "%+.0f", zone = Zones.mids) { set(l.copy(brightness = it)) },
+            Knob("highlights", tr("高光"), l.highlights, -100.0, 100.0, 0.0, "%+.0f", zone = Zones.highlights, divider = true) { set(l.copy(highlights = it)) },
+            Knob("shadows", tr("阴影"), l.shadows, -100.0, 100.0, 0.0, "%+.0f", zone = Zones.shadows) { set(l.copy(shadows = it)) },
+            Knob("black", tr("黑场"), l.blackPoint, 0.0, 50.0, 0.0, "%.0f", short = ::plain0, zone = Zones.blacks) { set(l.copy(blackPoint = it)) },
+            Knob("white", tr("白场"), l.whitePoint, 0.0, 50.0, 0.0, "%.0f", short = ::plain0, zone = Zones.whites) { set(l.copy(whitePoint = it)) },
+        ), enabled, ui.image)
+        1 -> KnobRow("colour", listOf(
+            Knob("temperature", tr("色温"), l.temperature, -100.0, 100.0, 0.0, "%+.0f", tint = DialTints.coolWarm) { set(l.copy(temperature = it)) },
+            Knob("tint", tr("色调"), l.tint, -100.0, 100.0, 0.0, "%+.0f", tint = DialTints.greenMagenta) { set(l.copy(tint = it)) },
+            Knob("saturation", tr("饱和度"), l.saturation, -100.0, 100.0, 0.0, "%+.0f", divider = true) { set(l.copy(saturation = it)) },
+            Knob("vibrance", tr("自然饱和度"), l.vibrance, -100.0, 100.0, 0.0, "%+.0f") { set(l.copy(vibrance = it)) },
+        ), enabled, ui.image)
         2 -> {
             // Two tools that never share the screen: one colour at a time, or one tonal zone.
             var tool by remember { mutableIntStateOf(0) }
@@ -123,9 +115,17 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                     }
                 }
                 val b = l.hsl.getOrElse(band) { Band() }
-                Adj(tr("色相"), b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
-                Adj(tr("饱和度"), b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
-                Adj(tr("明亮度"), b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
+                // Each dial shows where it goes: the hue either side of this colour, grey to the colour,
+                // dark through it to light.
+                val c = Color(Look.BANDS[band].second)
+                val hsv = FloatArray(3).also { android.graphics.Color.colorToHSV(Look.BANDS[band].second.toInt(), it) }
+                val hueTint: (Float) -> Color = { t -> Color.hsv(((hsv[0] + (t - 0.5f) * 60f) % 360f + 360f) % 360f, 0.5f, 0.84f) }
+                KnobRow("band$band", listOf(
+                    Knob("hue", tr("色相"), b.hue, -100.0, 100.0, 0.0, "%+.0f", tint = hueTint) { set(l.withBand(band, b.copy(hue = it))) },
+                    Knob("sat", tr("饱和度"), b.sat, -100.0, 100.0, 0.0, "%+.0f", tint = { t -> androidx.compose.ui.graphics.lerp(Color(0xFF807E79), c, t) }) { set(l.withBand(band, b.copy(sat = it))) },
+                    Knob("lum", tr("明亮度"), b.lum, -100.0, 100.0, 0.0, "%+.0f", tint = { t ->
+                        if (t < 0.5f) androidx.compose.ui.graphics.lerp(Color(0xFF22201D), c, t * 2) else androidx.compose.ui.graphics.lerp(c, Color(0xFFE8E4DA), (t - 0.5f) * 2) }) { set(l.withBand(band, b.copy(lum = it))) },
+                ), enabled, ui.image)
             } else {
                 var zone by remember { mutableIntStateOf(0) }
                 Segmented(listOf(tr("全局"), tr("阴影"), tr("中间调"), tr("高光")), zone, enabled) { zone = it }
@@ -225,3 +225,6 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         }
     }
 }
+
+private fun signed1(v: Double) = String.format(java.util.Locale.ROOT, "%+.1f", v).replace("-", "−")
+private fun plain0(v: Double) = String.format(java.util.Locale.ROOT, "%.0f", v)
