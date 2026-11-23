@@ -1237,8 +1237,9 @@ private val DEVELOP_STEPS get() = listOf(tr("胶卷"), tr("相纸"), tr("曝光"
 private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
     val view = androidx.compose.ui.platform.LocalView.current
     // ui_ai_flavor_audit 9: four equal segments, all on one row; order is the darkroom's.
-    Segmented(DEVELOP_STEPS, step, enabled, Modifier.padding(bottom = 4.dp),
-        edited = { edited.getOrElse(it) { false } }) { i -> view.tick(); onStep(i) }
+    FilmRail(DEVELOP_STEPS, step, enabled, edited = { edited.getOrElse(it) { false } }, Modifier.padding(bottom = 4.dp)) { i ->
+        Feedback.play(view, Cue.Segment); onStep(i)
+    }
 }
 
 /**
@@ -1322,7 +1323,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
         if (recents.isNotEmpty()) SelectPill(selected = kind == RECENT, onClick = { kind = RECENT }, label = { Text(tr("最近")) })
         kinds.forEachIndexed { i, name ->
             val n = ui.catalog.films.count { kindOf(it) == i }
-            if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
+            if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text(name) })
         }
     }
     val films = when (kind) {
@@ -1373,6 +1374,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                 placeholder = film.label, size = 88.dp,
                 starred = picks.isFavourite(film.id),
                 onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
+                overlay = { CassetteBadge(film, selected, Modifier.align(Alignment.BottomStart)) },
             ) { if (!selected) { Feedback.play(view, Cue.Load); picks.used(film.id); onPick(film.id) } }
         }
     }

@@ -395,6 +395,8 @@ internal fun ThumbCard(
     starred: Boolean = false,
     /** A long press, e.g. to star the card; null leaves the card tap-only. */
     onLongClick: (() -> Unit)? = null,
+    /** Drawn over the picture, e.g. a film's cassette on its corner. */
+    overlay: (@Composable androidx.compose.foundation.layout.BoxScope.() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     val chosen = selected
@@ -424,6 +426,7 @@ internal fun ThumbCard(
                         maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(10.dp))
                 }
             }
+            overlay?.invoke(this)
             if (badge != null) Text(
                 badge, style = MaterialTheme.typography.labelSmall, color = Palette.OnSurface,
                 modifier = Modifier.align(Alignment.TopStart).padding(6.dp)
