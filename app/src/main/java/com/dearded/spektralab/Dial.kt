@@ -178,11 +178,11 @@ internal fun CameraDial(
 
     Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         // The name on the left, the value over the index, ↺ on the right once moved.
-        Box(Modifier.fillMaxWidth().height(28.dp)) {
+        Box(Modifier.fillMaxWidth().height(32.dp)) {
             Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
                 color = if (enabled) Palette.OnSurfaceSoft else Palette.OnSurfaceSoft.copy(alpha = 0.5f),
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 2.dp))
-            Text(text(current), style = Readout.copy(fontSize = 15.sp, fontFamily = UiSans, fontWeight = FontWeight.Medium),
+            Text(text(current), style = Readout.copy(fontSize = 19.sp, fontFamily = UiSans, fontWeight = FontWeight.Medium),
                 color = Palette.OnSurface,
                 modifier = Modifier.align(Alignment.Center).clip(Corners.s)
                     .then(if (onTypeValue != null && enabled) Modifier.clickable(role = Role.Button) { onTypeValue() }
@@ -208,7 +208,7 @@ internal fun CameraDial(
         }
 
         val measurer = rememberTextMeasurer()
-        val tickStyle = TextStyle(fontFamily = UiSans, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = Color(0xFFE8E4DC))
+        val tickStyle = TextStyle(fontFamily = UiSans, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFFE8E4DC))
         val layouts = remember(measurer) { HashMap<String, TextLayoutResult>() }
         val decimals = decimalsOf(labelEvery)
         val bipolar = lo < 0f && hi > 0f
@@ -217,7 +217,7 @@ internal fun CameraDial(
             return if (abs(v) < step / 2) "0" else if (bipolar) (if (v > 0) "+" else "−") + n else n
         }
         Canvas(
-            Modifier.fillMaxWidth().height(56.dp)
+            Modifier.fillMaxWidth().height(70.dp)
                 .semantics {
                     contentDescription = label + (ends?.let { "，${it.first} / ${it.second}" } ?: "")
                     stateDescription = text(current)
@@ -301,7 +301,8 @@ internal fun CameraDial(
         ) {
             val w = size.width
             val top = 8.dp.toPx()
-            val dh = 46.dp.toPx()
+            // A drum the thumb lands on without aiming: 58 dp, the whole width.
+            val dh = 58.dp.toPx()
             val cx = w / 2f
             val radius = w * 0.58f
             val px = dialStepPx(span, step, major)
@@ -347,7 +348,7 @@ internal fun CameraDial(
                     val v = lo + q * step
                     val isMajor = isOn(v, major)
                     val isHalf = !isMajor && isOn(v, major / 2)
-                    val len = (if (isMajor) 15 else if (isHalf) 10 else 6).dp.toPx()
+                    val len = (if (isMajor) 19 else if (isHalf) 13 else 8).dp.toPx()
                     val wd = (if (isMajor) 1.6f else 1.05f) * (0.4f + 0.6f * cs) * density
                     val y0 = top + 6.dp.toPx()
                     drawRect(Color.Black.copy(alpha = 0.75f * cs), Offset(x + 0.7f * density, y0 + 0.7f * density), Size(wd, len))
@@ -355,7 +356,7 @@ internal fun CameraDial(
                     if (isMajor && isOn(v, labelEvery)) {
                         val t = tickText(v)
                         val layout = layouts.getOrPut(t) { measurer.measure(t, tickStyle) }
-                        val labelY = top + 31.dp.toPx()
+                        val labelY = top + 40.dp.toPx()
                         withTransform({ scale(cs, 1f, Offset(x, labelY)) }) {
                             drawText(layout, color = Color(0xFFE8E4DC).copy(alpha = 0.88f * cs * cs),
                                 topLeft = Offset(x - layout.size.width / 2f, labelY - layout.size.height / 2f))

@@ -6,6 +6,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +76,7 @@ internal class Knob(
     val tint: ((Float) -> Color)? = null,
     /** Which tones it works on, 0 (black) to 1 (white), as a weight 0..1; null for no tone strip. */
     val zone: ((Float) -> Float)? = null,
-    /** A thin line before this knob: a new group starts. */
+    /** A wider gap before this one in the row: a new group starts. */
     val divider: Boolean = false,
     val onChange: (Double) -> Unit,
 )
@@ -80,15 +87,8 @@ internal fun KnobRow(id: String, knobs: List<Knob>, enabled: Boolean, image: Bit
     var picked by rememberSaveable(id) { mutableStateOf(knobs.first().key) }
     val current = knobs.firstOrNull { it.key == picked } ?: knobs.first()
     Column(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.Top) {
-            for (k in knobs) {
-                if (k.divider) Box(Modifier.padding(top = 12.dp, start = 4.dp, end = 4.dp).size(1.dp, 24.dp).background(Palette.OutlineSoft))
-                KnobCell(k, on = k.key == current.key, enabled = enabled) {
-                    if (picked != k.key) { picked = k.key; Feedback.play(view, Cue.Tab) }
-                }
-            }
-        }
-        Spacer(Modifier.height(10.dp))
+        ParamCarousel(knobs, current.key, enabled) { key -> if (picked != key) { picked = key; Feedback.play(view, Cue.Segment) } }
+        Spacer(Modifier.height(6.dp))
         AnimatedContent(current.key, transitionSpec = { fadeIn(Motion.defaultEffects()) togetherWith fadeOut(Motion.fastEffects()) }, label = "knob") { key ->
             val k = knobs.firstOrNull { it.key == key } ?: return@AnimatedContent
             Column {
@@ -99,39 +99,70 @@ internal fun KnobRow(id: String, knobs: List<Knob>, enabled: Boolean, image: Bit
     }
 }
 
+/**
+ * The parameters as a camera's mode dial: names in a row that scrolls under the thumb and snaps,
+ * the one in the middle being the one on the dial below. Each name is a big target (52 dp tall,
+ * 76 dp at least), its value under it once moved. Swipe to the next, or tap one to bring it to the
+ * middle. The selection is chosen by where the row stops, so a fling lands on a name, never between.
+ */
 @Composable
-private fun KnobCell(k: Knob, on: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    val changed = abs(k.value - k.default) > 1e-6
-    val measurer = rememberTextMeasurer()
-    val style = TextStyle(fontFamily = UiSans, fontWeight = FontWeight.Medium, fontSize = 11.sp, color = Palette.OnSurface)
-    Column(
-        Modifier.width(62.dp).clip(Corners.m)
-            .selectable(on, enabled = enabled, role = Role.Tab, onClick = onClick)
-            .semantics { contentDescription = k.label; stateDescription = String.format(Locale.ROOT, k.format, k.value) }
-            .padding(vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Canvas(Modifier.size(46.dp)) {
-            val c = Offset(size.width / 2, size.height / 2)
-            val r = size.width / 2
-            drawCircle(if (on) Palette.PanelHighest else Palette.PanelHigh, r, c)
-            val ring = r - 4.dp.toPx()
-            drawCircle(Color(0x14FFF6E6), ring, c, style = Stroke(2.5.dp.toPx()))
-            if (changed) {
-                val f = ((k.value - k.default) / (k.max - k.min)).toFloat()
-                val sweep = f * 324f
-                drawArc(if (on) Palette.Accent else Palette.OnSurfaceSoft, -90f, sweep, false, c - Offset(ring, ring), Size(ring * 2, ring * 2),
-                    style = Stroke(2.5.dp.toPx(), cap = StrokeCap.Round))
-                val t = measurer.measure(k.short(k.value), style)
-                drawText(t, topLeft = c - Offset(t.size.width / 2f, t.size.height / 2f))
-            } else {
-                drawRect(if (on) Palette.OnSurface.copy(alpha = 0.8f) else Palette.Track, Offset(c.x - 0.7.dp.toPx(), c.y - r + 8.dp.toPx()), Size(1.4.dp.toPx(), 6.dp.toPx()))
+private fun ParamCarousel(knobs: List<Knob>, selected: String, enabled: Boolean, onSelect: (String) -> Unit) {
+    val state = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = maxOf(0, knobs.indexOfFirst { it.key == selected }))
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val fling = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(state, androidx.compose.foundation.gestures.snapping.SnapPosition.Center)
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val side = (maxWidth - 76.dp) / 2
+        // The item nearest the middle, as the row moves.
+        val centred by androidx.compose.runtime.remember {
+            androidx.compose.runtime.derivedStateOf {
+                val info = state.layoutInfo
+                val mid = (info.viewportStartOffset + info.viewportEndOffset) / 2
+                info.visibleItemsInfo.minByOrNull { abs(it.offset + it.size / 2 - mid) }?.index
             }
-            if (on) drawCircle(Palette.Accent, r - 0.6.dp.toPx(), c, style = Stroke(1.2.dp.toPx()))
         }
-        Spacer(Modifier.height(5.dp))
-        Text(k.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = if (on) FontWeight.Medium else FontWeight.Normal),
-            color = if (on) Palette.OnSurface else Palette.OnSurfaceSoft, maxLines = 1)
+        androidx.compose.runtime.LaunchedEffect(centred) { centred?.let { i -> knobs.getOrNull(i)?.let { onSelect(it.key) } } }
+        androidx.compose.runtime.LaunchedEffect(selected) {
+            val i = knobs.indexOfFirst { it.key == selected }
+            if (i >= 0 && i != centred && !state.isScrollInProgress) state.animateScrollToItem(i)
+        }
+        androidx.compose.foundation.lazy.LazyRow(
+            state = state, flingBehavior = fling, userScrollEnabled = enabled,
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = side),
+            modifier = Modifier.fillMaxWidth().height(56.dp)
+                // The row's ends fade: there is more either side.
+                .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+                .drawWithContent {
+                    drawContent()
+                    val f = 48.dp.toPx()
+                    drawRect(Brush.horizontalGradient(listOf(Color.Transparent, Color.Black), 0f, f), size = Size(f, size.height), blendMode = BlendMode.DstIn)
+                    drawRect(Brush.horizontalGradient(listOf(Color.Black, Color.Transparent), size.width - f, size.width),
+                        topLeft = Offset(size.width - f, 0f), size = Size(f, size.height), blendMode = BlendMode.DstIn)
+                },
+        ) {
+            itemsIndexed(knobs, key = { _, k -> k.key }) { i, k ->
+                val on = k.key == selected
+                val changed = abs(k.value - k.default) > 1e-6
+                Column(
+                    Modifier.padding(start = if (k.divider) 14.dp else 0.dp).widthIn(min = 76.dp).height(56.dp).clip(Corners.l)
+                        .selectable(on, enabled = enabled, role = Role.Tab) { scope.launch { state.animateScrollToItem(i) } }
+                        .semantics { contentDescription = k.label; stateDescription = String.format(Locale.ROOT, k.format, k.value) }
+                        .padding(horizontal = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(k.label, style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal),
+                        color = if (on) Palette.OnSurface else Palette.OnSurfaceSoft, maxLines = 1)
+                    Spacer(Modifier.height(3.dp))
+                    // Moved: its value; at its default: a short mark; the one on the dial: underlined.
+                    Box(Modifier.height(16.dp), contentAlignment = Alignment.Center) {
+                        if (changed) Text(k.short(k.value), style = Readout.copy(fontSize = 12.sp),
+                            color = if (on) Palette.Accent else Palette.OnSurfaceSoft)
+                        else Box(Modifier.size(if (on) 18.dp else 4.dp, if (on) 2.dp else 4.dp)
+                            .background(if (on) Palette.Accent else Palette.Track, if (on) Corners.xs else androidx.compose.foundation.shape.CircleShape))
+                    }
+                }
+            }
+        }
     }
 }
 

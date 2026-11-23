@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val e = ui.edit
     val l = e.look
     fun set(next: Look) = vm.update(e.copy(look = next))
+    val view = androidx.compose.ui.platform.LocalView.current
 
     // One segment on screen at a time (UI2.md 2.4); a dot marks the ones changed.
     val segments = ADJUST_SEGMENTS
@@ -92,25 +95,26 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             Segmented(listOf(tr("单色调整"), tr("色彩平衡")), tool, enabled) { tool = it }
             if (tool == 0) {
                 var band by remember { mutableIntStateOf(0) }
-                Row(
-                    Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                // The eight colours as one ribbon across the width: each a 44 dp segment, no aiming at a dot.
+                // The chosen one stands out of the ribbon with a light edge; a changed one has a dot.
+                Row(Modifier.fillMaxWidth().height(48.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     Look.BANDS.forEachIndexed { i, (bandName, argb) ->
                         val on = band == i
                         val bandEdited = !l.hsl.getOrElse(i) { Band() }.neutral
-                        // A 48 dp target around a 28 dp swatch; the chosen one wears a white ring
-                        // outside a gap, the same signal as a picked card.
+                        val lift by androidx.compose.animation.core.animateFloatAsState(if (on) 1f else 0f, Motion.fastSpatial(), label = "band")
                         Box(
-                            Modifier.size(48.dp).clip(CircleShape)
-                                .selectable(selected = on, enabled = enabled, role = Role.Tab) { band = i }
+                            Modifier.weight(1f).fillMaxHeight()
+                                .graphicsLayer { scaleY = 0.78f + 0.22f * lift; alpha = if (enabled) 1f else 0.5f }
+                                .clip(Corners.s)
+                                .background(Color(argb).copy(alpha = 0.78f + 0.22f * lift))
+                                .border(if (on) 2.dp else 0.dp, if (on) Palette.Accent else Color.Transparent, Corners.s)
+                                .selectable(selected = on, enabled = enabled, role = Role.Tab) {
+                                    if (!on) { band = i; Feedback.play(view, Cue.Detent) }
+                                }
                                 .semantics { contentDescription = bandName },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(Modifier.size(40.dp).border(2.dp, if (on) Palette.Accent else Color.Transparent, CircleShape))
-                            Box(Modifier.size(28.dp).background(Color(argb), CircleShape))
-                            if (bandEdited && !on) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
+                            if (bandEdited) EditedDot(onFill = true, modifier = Modifier.align(Alignment.TopEnd).padding(5.dp))
                         }
                     }
                 }

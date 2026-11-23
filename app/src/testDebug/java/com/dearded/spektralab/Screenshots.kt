@@ -77,13 +77,13 @@ class Screenshots {
         shot("02_editor_busy")
     }
 
-    /** The name mid-flip as the frame develops (about 1.35 s in) and settled with the slide clear (2.7 s), LaunchIntro.kt. */
+    /** The name mid-flip as the frame develops (about 1.65 s in) and settled with the slide clear (2.7 s), LaunchIntro.kt. */
     @Test fun launchNameFlip() {
         content { LaunchIntro(ready = false, onDone = {}) }
         val main = shadowOf(Looper.getMainLooper())
-        repeat(27) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        repeat(33) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
         compose.onRoot().captureRoboImage("$OUT/04_launch_name_flip.png")
-        repeat(27) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        repeat(21) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
         compose.onRoot().captureRoboImage("$OUT/05_launch_name_settled.png")
     }
 
@@ -92,11 +92,11 @@ class Screenshots {
         shot("61_about")
     }
 
-    /** The launch intro about 1.7 s in: the exposed frame in the developer, the strip pushed in (LaunchIntro.kt). */
+    /** The launch intro about 2 s in: the exposed frame in the colour developer, the strip pushed in (LaunchIntro.kt). */
     @Test fun launchIntro() {
         content { LaunchIntro(ready = false, onDone = {}) }
         val main = shadowOf(Looper.getMainLooper())
-        repeat(17) {
+        repeat(20) {
             compose.mainClock.advanceTimeBy(100)
             main.idleFor(java.time.Duration.ofMillis(100))
         }

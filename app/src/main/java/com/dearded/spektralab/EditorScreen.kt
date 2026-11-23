@@ -1189,7 +1189,23 @@ private fun Controls(
                                 SelectPill(
                                     selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
                                     onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
-                                    label = { Text(label) },
+                                    label = {
+                                        // The shape of the ratio, drawn before its name.
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            val ink = androidx.compose.material3.LocalContentColor.current
+                                            androidx.compose.foundation.Canvas(Modifier.size(16.dp)) {
+                                                val r = if (aspect <= 0.0) 1.5f else aspect.toFloat()
+                                                val w = if (r >= 1f) size.width else size.width * r
+                                                val h = if (r >= 1f) size.height / r else size.height
+                                                drawRoundRect(ink, Offset((size.width - w) / 2f, (size.height - h) / 2f), androidx.compose.ui.geometry.Size(w, h),
+                                                    androidx.compose.ui.geometry.CornerRadius(1.5.dp.toPx()),
+                                                    style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx(),
+                                                        pathEffect = if (aspect <= 0.0) androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx())) else null))
+                                            }
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(label)
+                                        }
+                                    },
                                     enabled = enabled && !e.filmEdge,
                                 )
                             }
@@ -1303,7 +1319,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                       preview: suspend (Edit) -> android.graphics.Bitmap? = { null }, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
     // UI2.md 2.3 ①: four kinds of film, the current one's kind open first.
-    val kinds = listOf(tr("彩色负片"), tr("反转片"), tr("电影卷"), tr("黑白"))
+    val kinds = listOf(tr("彩色负片"), tr("反转片"), tr("电影胶片"), tr("黑白"))
     fun kindOf(s: Stock) = when {
         s.bw -> 3
         s.positive -> 1
@@ -1369,7 +1385,8 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                 selected = selected,
                 image = bitmap,
                 title = film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                subtitle = FilmNotes.line(film),
+                // Its speed and kind are on the cassette; the card carries the name only.
+                subtitle = "",
                 enabled = enabled,
                 placeholder = film.label, size = 88.dp,
                 starred = picks.isFavourite(film.id),
