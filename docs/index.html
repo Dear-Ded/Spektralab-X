@@ -2,2030 +2,427 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spektralab-X · Android 胶片冲印模拟</title>
+<meta name="description" content="Spektralab-X 是 SpektraLab 的非官方 Android 移植，用实测的胶片和相纸数据在手机上模拟冲印。免费，开源，照片不上传。">
+<meta name="theme-color" content="#0B0B0C">
 <meta name="color-scheme" content="dark">
-<title>Spektralab-X — Android 光学暗房</title>
-<meta name="description" content="零色偏 Android 光学暗房与光谱胶片模拟工作台：一键选卷出片、独立 RAW 显影、曲线色轮、观片台与 16-bit TIFF 广色域交付。">
-<style>
-:root {
-  /* Pure Achromatic Carbon System (R = G = B · Zero Blue/Purple Tint) */
-  --void: #060606;
-  --canvas: #0A0A0A;
-  --stage: #0D0D0D;
-  --panel: #111111;
-  --module: #171717;
-  --control: #1F1F1F;
-  --pressed: #292929;
-  --well: #080808;
-
-  /* Architectural Hairlines (No Drop-Shadow Card Soup) */
-  --hair: #1C1C1C;
-  --line: #2B2B2B;
-  --line-hi: #464646;
-
-  /* OLED Anti-Halation Archival Ink */
-  --ink: #ECEAE4;
-  --ink-2: #92908A;
-  --ink-3: #5E5C58;
-  --ink-inv: #0A0A0A;
-
-  /* Calibrated Matte Enamel Accents (Zero Neon Glow) */
-  --signal: #D44D28;
-  --signal-tint: rgba(212, 77, 40, 0.12);
-  --signal-line: rgba(212, 77, 40, 0.54);
-  --draft: #5E8EA8;
-  --draft-tint: rgba(94, 142, 168, 0.11);
-  --draft-line: rgba(94, 142, 168, 0.62);
-  --exported: #4E946C;
-  --exported-tint: rgba(78, 148, 108, 0.12);
-  --exported-line: rgba(78, 148, 108, 0.52);
-  --led-red: #D6453A;
-
-  --r: 3px;
-  --font-ui: "Inter", "Noto Sans SC", "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Roboto", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Roboto Mono", "SFMono-Regular", ui-monospace, monospace;
-  --ease: cubic-bezier(0.2, 0.85, 0.25, 1);
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--void); }
-body {
-  margin: 0;
-  background: var(--void);
-  color: var(--ink);
-  font-family: var(--font-ui);
-  line-height: 1.55;
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; color: inherit; cursor: pointer; }
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums lining-nums slashed-zero;
-}
-.wrap {
-  width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 28px;
-}
-
-/* ============================================================================
-   UNIFIED 3PX INSTRUMENT CONTROLS
-   ============================================================================ */
-.k-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: var(--r);
-  font-size: 12px;
-  font-weight: 500;
-  background: var(--control);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  white-space: nowrap;
-  transition: background 90ms var(--ease), border-color 90ms ease, transform 90ms ease;
-}
-.k-btn:hover { background: #262626; border-color: var(--line-hi); }
-.k-btn:active { background: var(--pressed); transform: translateY(1px); }
-.k-btn.is-primary {
-  background: var(--ink);
-  color: var(--ink-inv);
-  border-color: var(--ink);
-  font-weight: 600;
-}
-.k-btn.is-primary:hover { background: #FFFFFF; border-color: #FFFFFF; }
-.k-btn.is-ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--ink-2);
-}
-.k-btn.is-ghost:hover { color: var(--ink); background: rgba(255,255,255,0.04); border-color: var(--hair); }
-.k-btn.is-on {
-  background: var(--signal-tint);
-  border-color: var(--signal-line);
-  color: #E8967E;
-}
-.k-tab {
-  height: 26px;
-  padding: 0 9px;
-  border-radius: var(--r);
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--ink-2);
-  font-size: 11.5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: background 90ms ease, color 90ms ease, border-color 90ms ease;
-}
-.k-tab:hover { color: var(--ink); background: rgba(255,255,255,0.04); }
-.k-tab.is-active {
-  background: var(--ink);
-  color: var(--ink-inv);
-  border-color: var(--ink);
-  font-weight: 600;
-}
-.sig-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--signal);
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-/* ============================================================================
-   CHAPTER 00 · FULL-VIEWPORT IMMERSIVE OPTICAL DARKROOM (100SVH)
-   ============================================================================ */
-.darkroom-hero {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  background: var(--canvas);
-  border-bottom: 1px solid var(--hair);
-  position: relative;
-}
-
-/* Ultra-slim Camera Top Plate Bar */
-.top-plate {
-  height: 52px;
-  padding: 0 20px;
-  background: var(--canvas);
-  border-bottom: 1px solid var(--hair);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-shrink: 0;
-  transition: opacity 220ms var(--ease);
-}
-.plate-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14.5px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-}
-.plate-telemetry {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  font-size: 11px;
-  color: var(--ink-3);
-}
-.plate-telemetry b {
-  color: var(--ink-2);
-  font-weight: 500;
-}
-.plate-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Full-Bleed Main Darkroom Workspace */
-.darkroom-workspace {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 1fr 332px;
-}
-
-/* Optical Grading Stage */
-.stage-bay {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: var(--stage);
-  transition: background 180ms ease;
-  min-height: 500px;
-}
-.stage-bay[data-surround="gray18"] { background: #777777; }
-.stage-bay[data-surround="black"] { background: #000000; }
-.stage-bay[data-surround="white"] { background: #ECEAE4; }
-
-.stage-hud-top {
-  height: 40px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: rgba(10, 10, 10, 0.86);
-  border-bottom: 1px solid var(--hair);
-  flex-shrink: 0;
-  transition: opacity 200ms ease;
-}
-.stage-hud-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.stage-arena {
-  position: relative;
-  flex: 1 1 auto;
-  padding: 24px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 360px;
-}
-.photo-gate {
-  position: relative;
-  width: 100%;
-  max-width: 880px;
-  aspect-ratio: 3 / 2;
-  background: #080808;
-  overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.56);
-  touch-action: none;
-  cursor: ew-resize;
-  transition: max-width 240ms var(--ease);
-}
-.photo-gate.is-hassy {
-  max-width: 560px;
-  aspect-ratio: 1 / 1;
-}
-.gate-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.gate-after {
-  position: absolute;
-  inset: 0;
-  transition: opacity 320ms var(--ease);
-}
-.gate-after.is-developing { opacity: 0.68; }
-.gate-before {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(0 64% 0 0);
-}
-.photo-gate.is-comparing .gate-before { clip-path: inset(0 0 0 0) !important; }
-.photo-gate.is-comparing .curtain-wire,
-.photo-gate.is-comparing .vf-svg { opacity: 0; }
-
-.curtain-wire {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 36%;
-  width: 1px;
-  background: rgba(236, 234, 228, 0.86);
-  z-index: 6;
-  pointer-events: none;
-  transition: opacity 140ms ease;
-}
-.curtain-pip {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #0A0A0A;
-  border: 1.5px solid var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: var(--ink);
-}
-.vf-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
-  transition: opacity 160ms ease;
-}
-.gate-caption-l, .gate-caption-r {
-  position: absolute;
-  bottom: 10px;
-  padding: 2px 7px;
-  background: rgba(6, 6, 6, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 2px;
-  font-size: 10px;
-  z-index: 7;
-  pointer-events: none;
-  transition: opacity 180ms ease;
-}
-.gate-caption-l { left: 10px; color: var(--ink-2); }
-.gate-caption-r { right: 10px; color: var(--ink); display: inline-flex; align-items: center; gap: 5px; }
-
-/* Viewfinder Prism Readout Bar (Strictly Outside Image) */
-.stage-prism {
-  height: 32px;
-  padding: 0 18px;
-  background: #070707;
-  border-top: 1px solid var(--hair);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10.5px;
-  color: var(--ink-2);
-  flex-shrink: 0;
-}
-
-/* Right Precision Optical Console (332px) */
-.console-rail {
-  border-left: 1px solid var(--hair);
-  background: var(--panel);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  transition: opacity 220ms var(--ease);
-}
-.c-cell {
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--hair);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.c-cell:last-child { border-bottom: none; margin-top: auto; }
-.c-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  font-size: 11.5px;
-  color: var(--ink-2);
-}
-.c-head b { color: var(--ink); font-weight: 600; }
-
-/* Live Pixel Histogram */
-.hist-well {
-  height: 54px;
-  background: var(--well);
-  border: 1px solid var(--hair);
-  border-radius: var(--r);
-  position: relative;
-  overflow: hidden;
-  padding: 4px 3px 0;
-}
-.hist-well canvas { width: 100%; height: 100%; display: block; }
-.hist-grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(90deg, transparent 24.8%, #181818 25%, transparent 25.2%, transparent 49.8%, #181818 50%, transparent 50.2%, transparent 74.8%, #181818 75%, transparent 75.2%);
-}
-
-/* Laser-Engraved Vernier Scale */
-.vernier {
-  position: relative;
-  height: 34px;
-  border-radius: var(--r);
-  background: var(--well);
-  border: 1px solid var(--line);
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.82);
-  overflow: hidden;
-}
-.vernier-ticks {
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(90deg, rgba(236,234,228,0.52) 0 1px, transparent 1px 30px),
-    repeating-linear-gradient(90deg, rgba(236,234,228,0.22) 0 1px, transparent 1px 15px),
-    repeating-linear-gradient(90deg, rgba(236,234,228,0.10) 0 1px, transparent 1px 5px);
-  background-size: 100% 12px, 100% 8px, 100% 5px;
-  background-position: 0 bottom;
-  background-repeat: no-repeat;
-  pointer-events: none;
-}
-.vernier-bar { position: absolute; bottom: 0; height: 2px; background: var(--signal); pointer-events: none; }
-.vernier-zero { position: absolute; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--signal); transform: translateX(-50%); pointer-events: none; }
-.vernier-needle { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); transform: translateX(-50%); pointer-events: none; }
-.vernier-needle::before {
-  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; border-top: 4.5px solid var(--signal);
-}
-.vernier input[type="range"] {
-  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: ew-resize;
-}
-
-/* Interactive Real-Time Tone Curve Canvas */
-.curve-well {
-  position: relative;
-  height: 112px;
-  background: var(--well);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  overflow: hidden;
-  touch-action: none;
-  cursor: crosshair;
-}
-.curve-well canvas { width: 100%; height: 100%; display: block; }
-.seg-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding: 2px;
-  background: var(--well);
-  border: 1px solid var(--hair);
-  border-radius: var(--r);
-}
-.seg-3 button {
-  height: 22px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  background: transparent;
-  color: var(--ink-2);
-  font-size: 10.5px;
-}
-.seg-3 button.is-active {
-  background: var(--control);
-  border-color: var(--line);
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.surround-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-}
-.surround-chip {
-  height: 24px;
-  border-radius: var(--r);
-  border: 1px solid var(--line);
-  font-size: 10.5px;
-  font-weight: 500;
-}
-.surround-chip.is-active { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-
-/* Bottom Physical 35mm Film Counter Tray (Pinned to Hero Bottom) */
-.film-tray-dock {
-  background: #090909;
-  border-top: 1px solid var(--hair);
-  padding: 10px 18px 12px;
-  flex-shrink: 0;
-  transition: opacity 220ms var(--ease);
-}
-.film-tray-scroll {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(146px, 1fr));
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #2A2A2A #090909;
-}
-.roll-slot {
-  background: var(--panel);
-  border: 1px solid var(--hair);
-  border-radius: var(--r);
-  padding: 7px 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-align: left;
-  transition: background 120ms ease, border-color 120ms ease;
-}
-.roll-slot:hover { background: var(--module); border-color: var(--line); }
-.roll-slot.is-active {
-  background: var(--module);
-  border-color: var(--ink);
-}
-.roll-slot svg { flex-shrink: 0; }
-.roll-leader { transition: transform 380ms var(--ease); }
-.roll-slot.is-active .roll-leader { transform: translateX(7px); }
-.roll-meta { display: flex; flex-direction: column; min-width: 0; }
-.roll-meta strong { font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.roll-meta span { font-size: 9.5px; color: var(--ink-3); }
-.roll-slot.is-active .roll-meta span { color: #E8967E; }
-
-/* Pure Immersive Focus Mode (Press F or Click Immerse) */
-body.is-immersive .top-plate,
-body.is-immersive .console-rail,
-body.is-immersive .film-tray-dock,
-body.is-immersive .stage-hud-top,
-body.is-immersive .gate-caption-l,
-body.is-immersive .gate-caption-r {
-  opacity: 0;
-  pointer-events: none;
-}
-body.is-immersive .darkroom-workspace { grid-template-columns: 1fr 0px; }
-body.is-immersive .console-rail { width: 0; padding: 0; border: none; overflow: hidden; }
-.exit-immerse {
-  position: fixed;
-  top: 18px;
-  right: 22px;
-  z-index: 90;
-  display: none;
-}
-body.is-immersive .exit-immerse { display: inline-flex; }
-
-/* ============================================================================
-   EDITORIAL MONOGRAPH SECTIONS BELOW THE FOLD (ZERO SAAS BOX CLUTTER)
-   ============================================================================ */
-.monograph-sec {
-  padding: 88px 0;
-  border-bottom: 1px solid var(--hair);
-}
-.chapter-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 40px;
-}
-.chapter-bar h2 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-.chapter-bar h2 span { color: var(--signal); }
-.chapter-bar small { font-size: 12px; color: var(--ink-3); }
-
-/* Chapter I: Manifesto & Dual Paths (Asymmetric Swiss Editorial) */
-.editorial-lead {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 56px;
-  align-items: start;
-}
-.editorial-lead h3 {
-  margin: 0;
-  font-size: clamp(26px, 3vw, 38px);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.22;
-}
-.editorial-lead > div > p {
-  margin: 18px 0 0;
-  font-size: 14.5px;
-  color: var(--ink-2);
-  line-height: 1.75;
-  max-width: 520px;
-}
-.dual-tracks {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-.track-entry {
-  padding-top: 18px;
-  border-top: 1px solid var(--hair);
-}
-.track-entry:first-child { padding-top: 0; border-top: none; }
-.track-kicker {
-  font-size: 11px;
-  color: var(--signal);
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
-  display: block;
-}
-.track-entry h4 {
-  margin: 0 0 10px;
-  font-size: 17px;
-  font-weight: 600;
-}
-.track-entry p {
-  margin: 0;
-  font-size: 13.5px;
-  color: var(--ink-2);
-  line-height: 1.7;
-}
-
-/* Chapter II: 5000K Illuminated 35mm Light Table Contact Sheet (L01) */
-.lightbox-table {
-  position: relative;
-  border-radius: var(--r);
-  padding: 26px 22px;
-  background: radial-gradient(ellipse at 50% 48%, #EFECE3 0%, #D9D4C8 72%, #BFB9AA 100%);
-  border: 1px solid #3A3832;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  transition: background 240ms ease;
-}
-.lightbox-table.is-dark-table {
-  background: #0D0D0D;
-  border-color: var(--line);
-  box-shadow: none;
-}
-.contact-strip {
-  background: #0D0C0B;
-  padding: 10px 14px 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sprocket-band {
-  height: 10px;
-  background-image: repeating-linear-gradient(90deg, transparent 0 8px, #DED9CC 8px 20px, transparent 20px 32px);
-}
-.lightbox-table.is-dark-table .sprocket-band {
-  background-image: repeating-linear-gradient(90deg, transparent 0 8px, #242320 8px 20px, transparent 20px 32px);
-}
-.contact-frames {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-.c-frame {
-  position: relative;
-  aspect-ratio: 3 / 2;
-  background: #171717;
-  overflow: hidden;
-  border: 1px solid #262522;
-  cursor: pointer;
-  transition: transform 180ms var(--ease), border-color 140ms ease;
-}
-.c-frame:hover { transform: scale(1.025); border-color: var(--ink); z-index: 2; }
-.c-frame canvas { width: 100%; height: 100%; display: block; }
-.c-sel {
-  position: absolute; top: 5px; left: 5px;
-  min-width: 20px; height: 18px; padding: 0 4px;
-  background: var(--ink); color: var(--ink-inv);
-  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-}
-.c-edit {
-  position: absolute; top: 5px; right: 5px;
-  padding: 1px 5px; background: rgba(8,8,8,0.85);
-  border-left: 2px solid var(--signal);
-  font-size: 9.5px; color: var(--ink);
-}
-.c-rate {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 3px 6px; background: rgba(6,6,6,0.78);
-  display: flex; justify-content: space-between; font-size: 9.5px; color: var(--ink-2);
-}
-.rebate-edge-nums {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: rgba(232, 174, 88, 0.78);
-  padding: 0 4px;
-}
-.lightbox-caption-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  font-size: 12.5px;
-  color: var(--ink-2);
-}
-
-/* Chapter III: 900ms Mechanical Shutter & Three-State Honesty */
-.tactile-layout {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 56px;
-  align-items: start;
-}
-.shutter-bench {
-  padding: 28px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.shutter-row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.shutter-btn {
-  position: relative;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 1px solid #3C3C3C;
-  background: repeating-conic-gradient(from 0deg, #2D2D2D 0deg 3deg, #121212 3deg 6deg);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.82), inset 0 1px 0 rgba(255,255,255,0.14);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 0;
-  touch-action: none;
-}
-.shutter-cap {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: repeating-radial-gradient(circle at 46% 42%, #DF5A35 0px, #DF5A35 1px, #B43C1C 1px, #B43C1C 2.4px);
-  border: 1px solid rgba(255,255,255,0.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 90ms var(--ease), background 180ms ease;
-}
-.shutter-btn.is-holding .shutter-cap { transform: scale(0.92); }
-.shutter-btn.is-done .shutter-cap {
-  background: repeating-radial-gradient(circle at 46% 42%, #5AA87C 0px, #5AA87C 1px, #3A7654 1px, #3A7654 2.4px);
-}
-.shutter-bore {
-  width: 11px; height: 11px; border-radius: 50%;
-  background: #060606; box-shadow: inset 0 1px 2px #000, 0 1px 0 rgba(255,255,255,0.2);
-}
-.shutter-svg {
-  position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
-  transform: rotate(-90deg); pointer-events: none;
-}
-.tick-meter {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 3px;
-  height: 4px;
-  margin-top: 10px;
-}
-.tick-meter i { display: block; background: #222222; }
-.tick-meter i.lit { background: var(--signal); }
-.tick-meter i.done { background: var(--exported); }
-
-.honest-states {
-  display: flex;
-  flex-direction: column;
-}
-.h-state-item {
-  padding: 20px 0;
-  border-top: 1px solid var(--hair);
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 18px;
-  align-items: baseline;
-}
-.h-state-item:first-child { padding-top: 0; border-top: none; }
-.state-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: var(--r);
-  font-size: 11px;
-  width: fit-content;
-}
-.state-tag.s-formal { background: var(--signal-tint); border: 1px solid var(--signal-line); color: #E8967E; }
-.state-tag.s-draft { background: var(--draft-tint); border: 1px dashed var(--draft-line); color: #96BBD0; }
-.state-tag.s-export { background: var(--exported-tint); border: 1px solid var(--exported-line); color: #8AC2A1; }
-.h-state-item strong { display: block; font-size: 15px; margin-bottom: 4px; }
-.h-state-item p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.65; }
-
-/* Chapter IV: Archival Kodak-Style Technical Datasheet */
-.datasheet {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  border-top: 1px solid var(--line);
-}
-.datasheet th, .datasheet td {
-  padding: 15px 14px 15px 0;
-  border-bottom: 1px solid var(--hair);
-  text-align: left;
-  vertical-align: top;
-}
-.datasheet th {
-  width: 240px;
-  font-weight: 500;
-  color: var(--ink-3);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-}
-.datasheet td { color: var(--ink-2); line-height: 1.65; }
-.datasheet td strong { color: var(--ink); font-weight: 500; }
-code {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--ink);
-  background: var(--module);
-  border: 1px solid var(--hair);
-  padding: 1px 5px;
-  border-radius: 2px;
-}
-
-/* Closing Colophon */
-.colophon {
-  padding: 56px 0 72px;
-}
-.colophon-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-}
-.colophon-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-@media (max-width: 1080px) {
-  .darkroom-workspace { grid-template-columns: 1fr; }
-  .console-rail { border-left: none; border-top: 1px solid var(--hair); }
-  .editorial-lead, .tactile-layout { grid-template-columns: 1fr; gap: 36px; }
-  .contact-frames { grid-template-columns: repeat(3, 1fr); }
-  .plate-telemetry { display: none; }
-}
-@media (max-width: 680px) {
-  .wrap { padding: 0 16px; }
-  .stage-arena { padding: 14px; min-height: 260px; }
-  .contact-frames { grid-template-columns: repeat(2, 1fr); }
-  .h-state-item { grid-template-columns: 1fr; gap: 8px; }
-  .datasheet th { width: 120px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-}
-</style>
+<link rel="icon" href="site/mark.svg" type="image/svg+xml">
+<link rel="canonical" href="https://dear-ded.github.io/Spektralab-X/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spektralab-X · Android 胶片冲印模拟">
+<meta property="og:description" content="用实测的胶片和相纸数据，在 Android 上冲印 RAW 和手机照片。">
+<meta property="og:url" content="https://dear-ded.github.io/Spektralab-X/">
+<meta property="og:image" content="https://dear-ded.github.io/Spektralab-X/images/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="image" href="site/img/dunes-portra400.webp" type="image/webp">
+<link rel="stylesheet" href="site/site.css">
+<script defer src="site/site.js"></script>
 </head>
 <body>
 
-<!-- Shared SVG Physical Material Definitions -->
-<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
-  <defs>
-    <linearGradient id="m-sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.14)"/><stop offset="45%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(0,0,0,0.26)"/></linearGradient>
-    <linearGradient id="m-can" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#111"/><stop offset="28%" stop-color="#303030"/><stop offset="50%" stop-color="#565656"/><stop offset="76%" stop-color="#202020"/><stop offset="100%" stop-color="#090909"/></linearGradient>
-    <linearGradient id="m-cap" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#343434"/><stop offset="48%" stop-color="#C4C2BA"/><stop offset="100%" stop-color="#242424"/></linearGradient>
-    <linearGradient id="b-c41" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9A5E34"/><stop offset="100%" stop-color="#4E2B14"/></linearGradient>
-    <linearGradient id="b-800t" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#873C2A"/><stop offset="100%" stop-color="#3B160F"/></linearGradient>
-    <linearGradient id="b-bw" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5A5D61"/><stop offset="100%" stop-color="#242629"/></linearGradient>
-    <linearGradient id="b-e6" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4D455A"/><stop offset="100%" stop-color="#1E1A26"/></linearGradient>
-  </defs>
-</svg>
+<a class="skip" href="#main">跳到正文</a>
 
-<button type="button" class="k-btn exit-immerse" id="exit-immerse-btn">退出沉浸态 (F)</button>
-
-<!-- ==========================================================================
-     CHAPTER 00 · FULL-VIEWPORT IMMERSIVE OPTICAL DARKROOM
-     ========================================================================== -->
-<section class="darkroom-hero" aria-label="Spektralab-X 在线光学暗房">
-  <header class="top-plate">
-    <a class="plate-brand" href="#">
-      <svg width="20" height="20" viewBox="0 0 28 28" fill="none" stroke="#ECEAE4" stroke-width="1.5">
-        <path d="M1 8V1h7M20 1h7v7M27 20v7h-7M8 27H1v-7"/>
-        <rect x="9" y="10" width="10" height="8" stroke="#73716B" stroke-width="1"/>
-        <circle cx="14" cy="14" r="1.8" fill="#D44D28" stroke="none"/>
-      </svg>
-      <span>Spektralab-X</span>
-      <span class="sig-dot"></span>
+<header class="nav" data-nav>
+  <div class="nav__inner wrap">
+    <a class="brand" href="#top" aria-label="Spektralab-X 首页">
+      <img src="site/mark.svg" width="28" height="28" alt="">
+      <span>Spektralab<span class="brand__x">-X</span></span>
     </a>
+    <nav class="nav__links" aria-label="页面导航">
+      <a href="#samples">样片</a>
+      <a href="#films">胶片</a>
+      <a href="#process">原理</a>
+      <a href="#features">功能</a>
+      <a href="#parity">一致性</a>
+      <a href="#download">下载</a>
+    </nav>
+    <div class="nav__end">
+      <a class="nav__gh" href="https://github.com/Dear-Ded/Spektralab-X" aria-label="GitHub 仓库">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-stars hidden></span>
+      </a>
+      <a class="btn btn--sm btn--light" href="#download">下载</a>
+    </div>
+  </div>
+</header>
 
-    <!-- Live Monospace GitHub Telemetry (Zero Third-Party Badge Clutter) -->
-    <div class="plate-telemetry mono">
-      <span>RELEASE <b id="gh-release">0.210-alpha-1</b></span>
-      <span>DOWNLOADS <b id="gh-downloads">—</b></span>
-      <span>STARS <b id="gh-stars">—</b></span>
-      <span>ANDROID · KOTLIN / COMPOSE</span>
+<main id="main">
+
+<!-- ───────────────────────── Hero ───────────────────────── -->
+<section class="hero" id="top">
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="wrap hero__head">
+    <p class="eyebrow reveal">
+      <span class="pill"><span class="dot"></span><span data-release-version>0.2.00-alpha-8</span></span>
+      <span>Android 10+ · arm64</span>
+    </p>
+    <h1 class="hero__title reveal">Spektralab-X</h1>
+    <p class="hero__sub reveal">Android 上的胶片冲印模拟</p>
+    <p class="hero__lede reveal">
+      按负片曝光、显影、放大到相纸、扫描的顺序处理 RAW 和手机照片，胶片和相纸用的是实测的特性曲线和光谱灵敏度。计算在手机 GPU 上进行，照片不上传。
+    </p>
+    <div class="hero__cta reveal">
+      <a class="btn btn--light" href="https://github.com/Dear-Ded/Spektralab-X/releases" data-apk-link>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>
+        下载 APK
+      </a>
+      <a class="btn btn--ghost" href="https://github.com/Dear-Ded/Spektralab-X">GitHub</a>
+    </div>
+    <ul class="hero__facts reveal" aria-label="要点">
+      <li>免费，无广告</li>
+      <li>只在检查更新时联网</li>
+      <li>GPL-3.0</li>
+    </ul>
+  </div>
+
+  <div class="wrap wrap--wide reveal" id="samples">
+    <figure class="compare" data-compare>
+      <div class="compare__stage" data-stage style="--pos:50%">
+        <img class="compare__after" data-after src="site/img/dunes-portra400.webp" width="948" height="632" alt="胶片冲印：Kodak Portra 400" decoding="async" fetchpriority="high">
+        <img class="compare__before" data-before src="site/img/dunes-neutral.webp" width="948" height="632" alt="中性解码" decoding="async">
+        <span class="compare__tag compare__tag--l">中性解码</span>
+        <span class="compare__tag compare__tag--r" data-film-label>Kodak Portra 400</span>
+        <div class="compare__handle" aria-hidden="true"><span></span></div>
+        <input class="compare__range" type="range" min="0" max="100" value="50" step="0.1" aria-label="对比位置：左侧中性解码，右侧胶片冲印" data-range>
+      </div>
+      <figcaption class="compare__bar">
+        <div class="tabs" role="tablist" aria-label="切换样片">
+          <button role="tab" aria-selected="true" data-scene="dunes" data-film="Kodak Portra 400" data-meta="Ricoh GR III · RAW">沙丘</button>
+          <button role="tab" aria-selected="false" data-scene="lake" data-film="Kodak Ektar 100" data-meta="Leica Q (Typ 116) · DNG">水道</button>
+          <button role="tab" aria-selected="false" data-scene="fruit" data-film="Fujifilm Velvia 100" data-meta="Canon EOS R5 · CR3">静物</button>
+          <button role="tab" aria-selected="false" data-scene="skyline" data-film="Kodak Ektar 100" data-meta="Google Pixel 2 XL · 手机 DNG">天际线</button>
+        </div>
+        <p class="compare__meta"><span data-scene-meta>Ricoh GR III · RAW</span> <span class="sep">/</span> 引擎默认参数，无后期</p>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────────────────────── Films ───────────────────────── -->
+<section class="section" id="films">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Films</p>
+      <h2 class="reveal">同一张 RAW，六种胶片</h2>
+      <p class="section__lede reveal">六张图来自同一个 Ricoh GR III RAW 文件，只换了胶片和相纸。除了色彩，高光压缩、颗粒和光晕也随胶片变化。</p>
+    </header>
+
+    <div class="films reveal" data-films>
+      <div class="films__view">
+        <img src="site/img/film-portra400.webp" width="625" height="417" alt="Kodak Portra 400 冲印的沙丘" class="is-on" data-film-img="portra400">
+        <img src="site/img/film-ektar100.webp" width="625" height="417" alt="Kodak Ektar 100 冲印的沙丘" loading="lazy" data-film-img="ektar100">
+        <img src="site/img/film-gold200.webp" width="625" height="416" alt="Kodak Gold 200 冲印的沙丘" loading="lazy" data-film-img="gold200">
+        <img src="site/img/film-cinestill800t.webp" width="625" height="416" alt="CineStill 800T 冲印的沙丘" loading="lazy" data-film-img="cinestill800t">
+        <img src="site/img/film-velvia100.webp" width="625" height="416" alt="Fujifilm Velvia 100 冲印的沙丘" loading="lazy" data-film-img="velvia100">
+        <img src="site/img/film-trix400.webp" width="625" height="416" alt="Kodak Tri-X 400 冲印的沙丘" loading="lazy" data-film-img="trix400">
+        <div class="films__edge" aria-hidden="true">
+          <span data-edge-name>KODAK PORTRA 400</span><span>▸ 12</span><span>12A</span><span data-edge-name2>KODAK PORTRA 400</span>
+        </div>
+      </div>
+      <ol class="films__list" role="tablist" aria-label="选择胶片">
+        <li><button role="tab" aria-selected="true" data-film-btn="portra400" data-edge="KODAK PORTRA 400">
+          <span class="swatch" style="--c1:#d9a571;--c2:#6f8fb4"></span>
+          <span class="films__name">Kodak Portra 400</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 400</span>
+          <span class="films__note">高光过渡平缓，肤色偏暖。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="ektar100" data-edge="KODAK EKTAR 100">
+          <span class="swatch" style="--c1:#d7894a;--c2:#3d74b0"></span>
+          <span class="films__name">Kodak Ektar 100</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 100</span>
+          <span class="films__note">颗粒细，饱和度较高。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="gold200" data-edge="KODAK GOLD 200">
+          <span class="swatch" style="--c1:#e0a54f;--c2:#7f9cba"></span>
+          <span class="films__name">Kodak Gold 200</span>
+          <span class="films__spec">C-41 彩色负片 · ISO 200</span>
+          <span class="films__note">整体偏暖、偏黄。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="cinestill800t" data-edge="CINESTILL 800T">
+          <span class="swatch" style="--c1:#e86d4b;--c2:#3e6f9e"></span>
+          <span class="films__name">CineStill 800T</span>
+          <span class="films__spec">电影负片 · 钨丝灯平衡 · ISO 800</span>
+          <span class="films__note">没有防光晕层，亮部边缘有红色光晕。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="velvia100" data-edge="FUJICHROME VELVIA 100">
+          <span class="swatch" style="--c1:#c9772f;--c2:#2a5fa8"></span>
+          <span class="films__name">Fujifilm Velvia 100</span>
+          <span class="films__spec">E-6 反转片 · ISO 100 · 直接扫描</span>
+          <span class="films__note">反差和饱和度都高。反转片不经过相纸，直接扫描。</span>
+        </button></li>
+        <li><button role="tab" aria-selected="false" data-film-btn="trix400" data-edge="KODAK TRI-X 400">
+          <span class="swatch swatch--mono"></span>
+          <span class="films__name">Kodak Tri-X 400</span>
+          <span class="films__spec">黑白负片 · ISO 400</span>
+          <span class="films__note">颗粒明显，反差较硬。</span>
+        </button></li>
+      </ol>
+    </div>
+    <p class="fine reveal">长边 1600 px 渲染，颗粒相对画面比全尺寸导出粗。负片样张用 Kodak Portra Endura 相纸渲染，应用现在默认用 Kodak Supra Endura，效果会略有不同。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/SAMPLES.md">渲染参数与复现方法 →</a></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Process ───────────────────────── -->
+<section class="section section--process" id="process">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Process</p>
+      <h2 class="reveal">计算流程</h2>
+      <p class="section__lede reveal">渲染引擎来自 SpektraLab，胶片模型来自 spektrafilm。每张照片依次经过下面六步，颗粒、光晕和相纸眩光都由胶片与相纸的物理参数计算，不查表。</p>
+    </header>
+
+    <div class="spectrum reveal" aria-hidden="true">
+      <svg viewBox="0 0 1200 260" preserveAspectRatio="none" class="spectrum__svg">
+        <defs>
+          <linearGradient id="vis" x1="0" x2="1">
+            <stop offset="0" stop-color="#6b5cff"/><stop offset=".18" stop-color="#2F8CFF"/><stop offset=".36" stop-color="#1AA6A0"/>
+            <stop offset=".5" stop-color="#14B866"/><stop offset=".66" stop-color="#F5C400"/><stop offset=".8" stop-color="#FF8A2A"/><stop offset="1" stop-color="#FF4B3A"/>
+          </linearGradient>
+          <linearGradient id="fadeB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2F8CFF" stop-opacity=".35"/><stop offset="1" stop-color="#2F8CFF" stop-opacity="0"/></linearGradient>
+          <linearGradient id="fadeG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#14B866" stop-opacity=".3"/><stop offset="1" stop-color="#14B866" stop-opacity="0"/></linearGradient>
+          <linearGradient id="fadeR" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF4B3A" stop-opacity=".3"/><stop offset="1" stop-color="#FF4B3A" stop-opacity="0"/></linearGradient>
+        </defs>
+        <g class="spectrum__grid">
+          <line x1="0" x2="1200" y1="230" y2="230"/>
+          <line x1="0" x2="1200" y1="150" y2="150"/>
+          <line x1="0" x2="1200" y1="70" y2="70"/>
+        </g>
+        <path class="curve" d="M0 230 C 90 225, 150 60, 260 52 S 420 200, 520 228 L 1200 230" fill="url(#fadeB)" stroke="#2F8CFF"/>
+        <path class="curve" d="M0 230 L 300 229 C 380 220, 450 40, 560 36 S 720 190, 800 228 L 1200 230" fill="url(#fadeG)" stroke="#14B866"/>
+        <path class="curve" d="M0 230 L 560 229 C 640 220, 720 66, 820 60 S 1010 170, 1100 226 L 1200 230" fill="url(#fadeR)" stroke="#FF4B3A"/>
+        <rect x="0" y="244" width="1200" height="6" rx="3" fill="url(#vis)"/>
+      </svg>
+      <div class="spectrum__axis"><span>400 nm</span><span>500</span><span>600</span><span>700 nm</span></div>
+      <p class="spectrum__cap">示意图：彩色负片三层乳剂的光谱灵敏度。引擎使用每款胶片的实测曲线。</p>
     </div>
 
-    <div class="plate-actions">
-      <button type="button" class="k-btn is-ghost" id="sound-toggle" aria-pressed="false" title="开启纯合成机械拨轮与快门声效">声效：关</button>
-      <button type="button" class="k-btn is-ghost" id="immerse-toggle" title="快捷键 F 切换纯净沉浸查看">沉浸 (F)</button>
-      <a class="k-btn is-ghost" href="[https://github.com/Dear-Ded/Spektralab-X](https://github.com/Dear-Ded/Spektralab-X)" target="_blank" rel="noopener">GitHub</a>
-      <a class="k-btn is-primary" href="[https://github.com/Dear-Ded/Spektralab-X/releases](https://github.com/Dear-Ded/Spektralab-X/releases)" target="_blank" rel="noopener">下载 APK</a>
-    </div>
-  </header>
+    <ol class="chain">
+      <li class="reveal"><span class="chain__n">01</span><h3>解码</h3><p>LibRaw 把 RAW 解码到线性 ProPhoto RGB。</p></li>
+      <li class="reveal"><span class="chain__n">02</span><h3>胶片曝光</h3><p>按胶片的光谱灵敏度，计算蓝、绿、红三层乳剂各自的曝光量。</p></li>
+      <li class="reveal"><span class="chain__n">03</span><h3>负片显影</h3><p>用特性曲线把曝光量换算成密度。颗粒和光晕在这一步生成，尺度取决于画幅。</p></li>
+      <li class="reveal"><span class="chain__n">04</span><h3>放大</h3><p>放大机光源透过负片曝光相纸，可用黄、品红滤镜校色。</p></li>
+      <li class="reveal"><span class="chain__n">05</span><h3>相纸显影</h3><p>相纸的特性曲线决定最终反差，相纸眩光在这一步加入。</p></li>
+      <li class="reveal"><span class="chain__n">06</span><h3>扫描</h3><p>转换到屏幕或导出色域，保存为 JPEG、16-bit TIFF 或 HEIF。</p></li>
+    </ol>
 
-  <div class="darkroom-workspace">
-    <!-- Left / Center Optical Grading Stage -->
-    <div class="stage-bay" id="stage-bay" data-surround="dark">
-      <div class="stage-hud-top">
-        <div class="stage-hud-group" id="scene-tabs">
-          <button type="button" class="k-tab is-active" data-scene="harbor">01 暮色海港</button>
-          <button type="button" class="k-tab" data-scene="neon">02 雨夜霓虹</button>
-          <button type="button" class="k-tab" data-scene="gallery">03 美术馆光影</button>
-        </div>
-        <div class="stage-hud-group">
-          <label class="k-btn" style="height:26px;padding:0 9px;font-size:11.5px;margin:0">
-            导入本地照片试色
-            <input type="file" id="user-photo" accept="image/*" style="display:none">
-          </label>
-          <button type="button" class="k-btn is-ghost" id="compare-btn" style="height:26px;padding:0 9px;font-size:11.5px">按住比原图</button>
-        </div>
+    <div class="halation reveal">
+      <div class="halation__text">
+        <h3>光晕</h3>
+        <p>CineStill 800T 是去掉防光晕层的电影胶片。强光穿过乳剂后在片基背面反射，再次曝光乳剂，亮部边缘出现红色光晕。Portra 400 有防光晕层，同一画面没有这种光晕。</p>
+        <p class="fine">Fujifilm X100F · RAF · 左起：中性解码、Portra 400、CineStill 800T</p>
       </div>
-
-      <div class="stage-arena">
-        <div class="photo-gate" id="photo-gate" aria-label="左右拖动对比原片与胶片冲洗成片">
-          <div class="gate-after" id="gate-after">
-            <canvas id="canvas-after" class="gate-canvas" width="840" height="560"></canvas>
-          </div>
-          <div class="gate-before" id="gate-before">
-            <canvas id="canvas-before" class="gate-canvas" width="840" height="560"></canvas>
-          </div>
-          <svg class="vf-svg" id="vf-svg" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="curtain-wire" id="curtain-wire"><span class="curtain-pip mono">↔</span></div>
-          <span class="gate-caption-l mono" id="cap-left">原片 · DIGITAL RAW</span>
-          <span class="gate-caption-r mono"><i class="sig-dot"></i><span id="cap-right">Portra 400 · 78% · 0.00 EV</span></span>
-        </div>
-      </div>
-
-      <div class="stage-prism mono">
-        <span id="prism-l">LEICA M · 35mm</span>
-        <span id="prism-m">◀  ●  ▶   500</span>
-        <span>查看态叠层 · 绝不写入成片 · 按 1–7 切换胶卷</span>
+      <div class="halation__frames">
+        <figure><img src="site/img/temple-neutral.webp" width="625" height="417" alt="中性解码：高光过曝的白色天空" loading="lazy"><figcaption>中性解码</figcaption></figure>
+        <figure><img src="site/img/temple-portra400.webp" width="625" height="417" alt="Portra 400：天空恢复层次，没有光晕" loading="lazy"><figcaption>Portra 400</figcaption></figure>
+        <figure class="is-hot"><img src="site/img/temple-cinestill800t.webp" width="625" height="417" alt="CineStill 800T：高光边缘出现红橙色光晕" loading="lazy"><figcaption>CineStill 800T</figcaption></figure>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Right Precision Optical Instrument Rail -->
-    <aside class="console-rail" aria-label="暗房精密仪器面板">
-      <!-- Live RGB + Luma Histogram -->
-      <div class="c-cell">
-        <div class="c-head">
-          <b>实时像素直方图</b>
-          <span class="mono" id="hist-label" style="font-size:10px">RGB · LUMA</span>
+<!-- ───────────────────────── Interface ───────────────────────── -->
+<section class="section" id="app">
+  <div class="wrap">
+    <header class="section__head section__head--center">
+      <p class="kicker reveal">Interface</p>
+      <h2 class="reveal">界面</h2>
+      <p class="section__lede reveal">可以只选风格、调强度、加边框后保存，也可以继续调曲线、色轮和蒙版。两种操作改的是同一份编辑记录。</p>
+    </header>
+
+    <div class="phones reveal">
+      <figure class="phone phone--side">
+        <div class="phone__screen"><img src="images/interface/light-table.webp" alt="观片台：同一卷照片的网格，可评级与选片" loading="lazy"></div>
+        <figcaption><b>观片台</b>按卷浏览、评级，把调整粘贴到其他照片</figcaption>
+      </figure>
+      <figure class="phone phone--main">
+        <div class="phone__screen"><img src="images/interface/editor.webp" alt="编辑器：照片下方是风格小样、分类与工具栏" loading="lazy"></div>
+        <figcaption><b>风格</b>87 款，每款设定胶片、相纸和效果参数</figcaption>
+      </figure>
+      <figure class="phone phone--side">
+        <div class="phone__screen"><img src="images/interface/curves.webp" alt="曲线编辑器：RGB 与单通道曲线" loading="lazy"></div>
+        <figcaption><b>曲线</b>RGB、红、绿、蓝曲线，另有四个色轮</figcaption>
+      </figure>
+    </div>
+    <p class="fine fine--center reveal">截图由 Alpha 8 的 CI 截图任务生成，使用测试数据，不是手机屏摄。</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Features ───────────────────────── -->
+<section class="section" id="features">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Features</p>
+      <h2 class="reveal">功能</h2>
+    </header>
+
+    <div class="bento">
+      <article class="card card--wide card--raw reveal">
+        <div>
+          <h3>RAW 解码</h3>
+          <p>使用 LibRaw 0.22.2。DNG 按拍摄白平衡在双光源矩阵间插值，小米和 Pixel 的 DNG 会应用文件自带的镜头阴影校正。也可以打开手机拍的 JPEG、HEIC、PNG 和 WebP。</p>
         </div>
-        <div class="hist-well">
-          <div class="hist-grid"></div>
-          <canvas id="canvas-hist" width="296" height="48"></canvas>
+        <ul class="chips" aria-label="支持的 RAW 格式">
+          <li>DNG</li><li>CR3</li><li>NEF</li><li>ARW</li><li>RAF</li><li>RW2</li><li>ORF</li><li>HEIC</li>
+        </ul>
+      </article>
+
+      <article class="card reveal">
+        <p class="card__big">87</p>
+        <h3>款风格</h3>
+        <p>分八组。每款设定胶片、相纸、放大参数和效果，强度可调，可以按名称或“富士味”这类俗称搜索。</p>
+      </article>
+
+      <article class="card reveal">
+        <p class="card__big">16<span>-bit</span></p>
+        <h3>TIFF 导出</h3>
+        <p>可选 sRGB、Display P3、ProPhoto RGB、Adobe RGB (1998)，嵌入对应 ICC。JPEG 可选 sRGB 或 P3，设备有编码器时可存 HEIF。</p>
+      </article>
+
+      <article class="card reveal">
+        <h3>调整</h3>
+        <p>白平衡、曝光、高光、阴影、八段 HSL、色轮和曲线。线性、径向和画笔蒙版可以把调整限制在局部。</p>
+        <div class="sliders" aria-hidden="true">
+          <div class="sl"><span>曝光</span><i style="--v:.58"></i></div>
+          <div class="sl"><span>高光</span><i style="--v:.32"></i></div>
+          <div class="sl"><span>颗粒</span><i style="--v:.46"></i></div>
         </div>
+      </article>
+
+      <article class="card reveal">
+        <h3>边框</h3>
+        <p>135、半格、XPan、6×6、6×7 等片边，带齿孔和片基字样；另有拍立得和参数条。参数条按 EXIF 识别 33 个相机和手机品牌。</p>
+        <div class="frame-demo" aria-hidden="true"><div class="frame-demo__img"></div><span>KODAK 400TX</span><span>▸ 24</span></div>
+      </article>
+
+      <article class="card reveal">
+        <h3>导入预设</h3>
+        <p>支持 <code>.cube</code>、HaldCLUT、Lightroom 预设和富士配方，无法转换的项目会列出来。当前风格可以导出为 <code>.spklook</code>。</p>
+      </article>
+
+      <article class="card card--wide card--queue reveal">
+        <div>
+          <h3>后台导出</h3>
+          <p>导出在单独的线程排队，编辑时也可以进行。文件先在相册占位，写完并校验后才公开；进程被系统结束后，下次启动会继续。“极致渲染”按原始分辨率输出 4:4:4 JPEG。</p>
+        </div>
+        <ol class="queue" aria-hidden="true">
+          <li><span class="q-dot q-dot--ok"></span>DSCF0412 · Portra 400<em>已保存</em></li>
+          <li><span class="q-dot q-dot--run"></span>L1000412 · Ektar 100<em><i class="q-bar"></i></em></li>
+          <li><span class="q-dot"></span>R0001283 · Tri-X 400<em>排队中</em></li>
+        </ol>
+      </article>
+
+      <article class="card card--private reveal">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6L12 3z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M9 12l2.2 2.2L15.5 10"/></svg>
+        <h3>隐私</h3>
+        <p>没有统计、广告和账号。唯一的网络请求是向本仓库的 GitHub Releases 检查新版本。导出默认不写入拍摄位置。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Parity ───────────────────────── -->
+<section class="section section--parity" id="parity">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Parity</p>
+      <h2 class="reveal">与桌面版的色差</h2>
+      <p class="section__lede reveal">胶片引擎直接使用上游代码。我们用同一组输入，把 Android 的输出和上游 Linux 宿主程序的输出逐像素比较。</p>
+    </header>
+
+    <div class="stats reveal">
+      <div class="stat"><p class="stat__n" data-count="43">43</p><p class="stat__l">组对照，RAW、合成图与手机 JPEG</p></div>
+      <div class="stat"><p class="stat__n">0.000</p><p class="stat__l">RAW 导出平均 ΔE00（最大 ≤ 0.015）</p></div>
+      <div class="stat"><p class="stat__n">≤ 0.016</p><p class="stat__l">手机 JPEG / P3 导出平均 ΔE00</p></div>
+    </div>
+
+    <div class="scale reveal" aria-label="色差刻度：项目实测差别远小于人眼可分辨的约 1.0 ΔE00">
+      <div class="scale__track">
+        <span class="scale__ours" style="--x:1.6%"><b>本项目 ≤ 0.016</b></span>
+        <span class="scale__eye" style="--x:100%"><b>约 1.0：人眼可分辨</b></span>
       </div>
+      <div class="scale__ticks"><span>0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1.0 ΔE00</span></div>
+    </div>
 
-      <!-- Film Strength + Exposure EV Vernier Dials -->
-      <div class="c-cell">
-        <div class="c-head">
-          <b>风格强度</b>
-          <span class="mono" id="str-readout" style="color:var(--ink);font-weight:600">78%</span>
-        </div>
-        <div class="vernier">
-          <div class="vernier-ticks"></div>
-          <div class="vernier-bar" id="str-bar" style="left:0;width:78%"></div>
-          <div class="vernier-needle" id="str-needle" style="left:78%"></div>
-          <input type="range" id="str-input" min="0" max="100" value="78" aria-label="风格强度">
-        </div>
+    <p class="fine reveal">数据在云主机的软件 GPU（Mesa lavapipe）上测得，还没有在 Adreno 手机上大规模验证，也没有和 macOS 版直接比较。macOS 版用 Apple 的 RAW 解码，结果本来就与 LibRaw 不同。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/PARITY.md">方法与完整数据 →</a></p>
+  </div>
+</section>
 
-        <div class="c-head" style="margin-top:4px">
-          <b>曝光补偿 EV</b>
-          <span class="mono" id="ev-readout" style="color:var(--ink);font-weight:600">0.00 EV</span>
+<!-- ───────────────────────── Devices ───────────────────────── -->
+<section class="section" id="devices">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="kicker reveal">Devices</p>
+      <h2 class="reveal">适配机型</h2>
+      <p class="section__lede reveal">C++20 引擎用 NDK 编译，通过 Vulkan 计算着色器在 GPU 上运行。适配针对小米数字系列的骁龙和 Adreno 驱动：大图拆成小批提交，首次运行时探测单块缓冲上限，再决定工作尺寸。</p>
+    </header>
+
+    <div class="devices reveal" role="list">
+      <div class="device" role="listitem"><b>小米 10</b><span>骁龙 865 · Adreno 650</span></div>
+      <div class="device" role="listitem"><b>小米 11</b><span>骁龙 888 · Adreno 660</span></div>
+      <div class="device" role="listitem"><b>小米 12 / 12S</b><span>8 Gen 1 / 8+ Gen 1 · Adreno 730</span></div>
+      <div class="device device--tested" role="listitem"><b>小米 13</b><span>8 Gen 2 · Adreno 740</span><em>13 Ultra 已实测</em></div>
+      <div class="device" role="listitem"><b>小米 14</b><span>8 Gen 3 · Adreno 750</span></div>
+      <div class="device" role="listitem"><b>小米 15</b><span>8 至尊版 · Adreno 830</span></div>
+      <div class="device" role="listitem"><b>小米 17</b><span>8 至尊版 Gen 5 · Adreno 840</span></div>
+      <div class="device" role="listitem"><b>小米 18</b><span>8 至尊版 Gen 6</span></div>
+    </div>
+    <p class="fine reveal">列表是适配目标，不代表已验证。目前只有小米 13 Ultra 做过真机测试。其他 Android 10 以上、支持 Vulkan 的 arm64 手机应该也能运行，但没有专门优化。<a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/DEVICES.md">逐机型限制与风险 →</a></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Download ───────────────────────── -->
+<section class="section section--download" id="download">
+  <div class="wrap">
+    <div class="dl">
+      <div class="dl__head">
+        <p class="kicker reveal">Download</p>
+        <h2 class="reveal">下载</h2>
+        <p class="section__lede reveal">安装包只在 GitHub Releases 发布，免费。其他渠道收费出售的不是官方版本。</p>
+        <div class="hero__cta reveal">
+          <a class="btn btn--light" href="https://github.com/Dear-Ded/Spektralab-X/releases" data-apk-link>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>
+            下载 APK<span class="btn__meta" data-apk-meta></span>
+          </a>
+          <a class="btn btn--ghost" href="https://github.com/Dear-Ded/Spektralab-X/releases">全部版本</a>
         </div>
-        <div class="vernier">
-          <div class="vernier-ticks"></div>
-          <div class="vernier-bar" id="ev-bar" style="left:50%;width:0%"></div>
-          <div class="vernier-zero" style="left:50%"></div>
-          <div class="vernier-needle" id="ev-needle" style="left:50%"></div>
-          <input type="range" id="ev-input" min="-150" max="150" value="0" aria-label="曝光补偿">
-        </div>
+        <p class="dl__release reveal"><span data-release-version>0.2.00-alpha-8</span> · <span data-release-date>2026-11-15</span> · arm64-v8a · Android 10+</p>
       </div>
-
-      <!-- Interactive Live Tone Curve (Drag Midtone Node) -->
-      <div class="c-cell">
-        <div class="c-head">
-          <b>亮度曲线 (拖动中间调节点)</b>
-          <span class="mono" id="curve-readout" style="font-size:10.5px;color:#E8967E">S 曲线</span>
-        </div>
-        <div class="curve-well" id="curve-well" aria-label="实时色调曲线编辑器">
-          <canvas id="canvas-curve" width="300" height="112"></canvas>
-        </div>
-        <div class="seg-3" id="curve-presets">
-          <button type="button" data-curve="linear">线性归零</button>
-          <button type="button" class="is-active" data-curve="film">胶片 S</button>
-          <button type="button" data-curve="fade">哑光褪黑</button>
-        </div>
-      </div>
-
-      <!-- 5 Camera Viewfinders -->
-      <div class="c-cell">
-        <div class="c-head">
-          <b>光学取景器叠层</b>
-          <span class="mono" style="font-size:10px">VIEW ONLY</span>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px" id="vf-tabs">
-          <button type="button" class="k-tab" data-vf="off">关</button>
-          <button type="button" class="k-tab is-active" data-vf="leica">Leica M</button>
-          <button type="button" class="k-tab" data-vf="fm2">FM2</button>
-          <button type="button" class="k-tab" data-vf="hassy">6×6</button>
-          <button type="button" class="k-tab" data-vf="gr">GR</button>
-          <button type="button" class="k-tab" data-vf="xpro">X-Pro</button>
-        </div>
-      </div>
-
-      <!-- 4 Neutral Grading Surrounds -->
-      <div class="c-cell">
-        <div class="c-head">
-          <b>调色中性围幕</b>
-          <span class="mono" style="font-size:10px">ZERO CHROMA</span>
-        </div>
-        <div class="surround-row" id="surround-tabs">
-          <button type="button" class="surround-chip is-active" data-surround="dark" style="background:#0D0D0D;color:#ECEAE4">深灰</button>
-          <button type="button" class="surround-chip" data-surround="gray18" style="background:#777777;color:#0A0A0A">18%灰</button>
-          <button type="button" class="surround-chip" data-surround="black" style="background:#000000;color:#ECEAE4">纯黑</button>
-          <button type="button" class="surround-chip" data-surround="white" style="background:#ECEAE4;color:#0A0A0A">纯白</button>
-        </div>
-      </div>
+      <ol class="steps">
+        <li class="reveal"><span class="steps__n">1</span><div><h3>下载并校验</h3><p>下载 <code>arm64-v8a.apk</code> 和同一页的 <code>SHA256SUMS</code>，核对哈希和签名指纹。</p><pre><code>sha256sum -c SHA256SUMS</code></pre></div></li>
+        <li class="reveal"><span class="steps__n">2</span><div><h3>安装</h3><p>第一次安装需要允许浏览器或文件管理器安装应用。以后的版本可以直接覆盖安装，编辑和风格会保留。</p></div></li>
+        <li class="reveal"><span class="steps__n">3</span><div><h3>更新</h3><p>应用会检查新版本，下载后核对 <code>SHA256SUMS</code> 和签名再安装。用 Obtainium 订阅时需要打开 Include prereleases，因为目前都是预发布版。</p></div></li>
+      </ol>
+    </div>
+    <aside class="alpha reveal">
+      <span class="alpha__tag">Alpha</span>
+      <p>现在是 Alpha 版。真机测试只在小米 13 Ultra 上做过，其余来自 CI 和云端测试，可能出现闪退、颜色不对或速度慢。遇到问题请<a href="https://github.com/Dear-Ded/Spektralab-X/issues/new/choose">提交 issue</a>，附上应用里的诊断信息。</p>
     </aside>
   </div>
-
-  <!-- Pinned Bottom 35mm Physical Film Counter (7 Real Stocks + Bypass) -->
-  <div class="film-tray-dock" aria-label="35毫米实体胶卷架">
-    <div class="film-tray-scroll" id="film-tray">
-      <button type="button" class="roll-slot is-active" data-film="portra400">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#D5A63E"/><rect x="20" y="10" width="68" height="24" fill="#141311"/><rect x="20" y="34" width="68" height="3" fill="#C43B2B"/><text x="54" y="72" text-anchor="middle" fill="#141210" font-family="monospace" font-size="25" font-weight="800">400</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="64" fill="#CCA03A"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L192 40 L199 52 L174 68 L174 92 L131 92 Z" fill="url(#b-c41)"/></g></svg>
-        <div class="roll-meta"><strong>Portra 400</strong><span class="mono">C-41 · 400</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="ektar100">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#B6282A"/><polygon points="20,10 88,10 88,42 20,56" fill="#121212"/><text x="54" y="78" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="23" font-weight="800">100</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="64" fill="#A62426"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-c41)"/></g></svg>
-        <div class="roll-meta"><strong>Ektar 100</strong><span class="mono">C-41 · 100</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="cine800t">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#A62A2D"/><rect x="20" y="10" width="68" height="32" fill="#131B2A"/><rect x="20" y="42" width="68" height="3.5" fill="#ECEAE4"/><text x="54" y="78" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="21" font-weight="800">800T</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="64" fill="#9E272A"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-800t)"/></g></svg>
-        <div class="roll-meta"><strong>Cine 800T</strong><span class="mono">3200K · 光晕</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="velvia50">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#1C6B47"/><rect x="20" y="10" width="68" height="22" fill="#111212"/><rect x="20" y="32" width="68" height="4.5" fill="#B5386B"/><text x="54" y="80" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="23" font-weight="800">50</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="64" fill="#1A6241"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-e6)"/></g></svg>
-        <div class="roll-meta"><strong>Velvia 50</strong><span class="mono">E-6 · 正片</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="provia100f">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#2A5B7A"/><rect x="20" y="10" width="68" height="22" fill="#111316"/><rect x="20" y="32" width="68" height="4" fill="#9CB6C7"/><text x="54" y="78" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="20" font-weight="800">100F</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="64" fill="#275470"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-e6)"/></g></svg>
-        <div class="roll-meta"><strong>Provia 100F</strong><span class="mono">E-6 · 中性</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="trix400">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#151515" stroke="#424242"/><rect x="20" y="10" width="68" height="30" fill="#DFB02C"/><rect x="20" y="40" width="68" height="14" fill="#ECEAE4"/><text x="54" y="84" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="23" font-weight="800">400</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="34" width="30" height="20" fill="#DFB02C"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-bw)"/></g></svg>
-        <div class="roll-meta"><strong>Tri-X 400</strong><span class="mono">B&amp;W · 纪实</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="hp5plus">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="20" y="10" width="68" height="98" rx="2" fill="#171717" stroke="#464646"/><rect x="20" y="34" width="68" height="6" fill="#ECEAE4"/><rect x="20" y="40" width="68" height="34" fill="#23664C"/><text x="54" y="64" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="18" font-weight="800">HP5+</text><rect x="96" y="28" width="32" height="78" fill="url(#m-can)"/><rect x="97" y="50" width="30" height="22" fill="#23664C"/><rect x="127" y="34" width="4" height="64" fill="#050505"/><g class="roll-leader"><path d="M131 40 L188 40 L195 52 L170 68 L170 92 L131 92 Z" fill="url(#b-bw)"/></g></svg>
-        <div class="roll-meta"><strong>Ilford HP5+</strong><span class="mono">B&amp;W · 宽容</span></div>
-      </button>
-
-      <button type="button" class="roll-slot" data-film="none">
-        <svg width="58" height="36" viewBox="0 0 218 124"><rect x="24" y="16" width="164" height="90" fill="none" stroke="#343434" stroke-width="2" stroke-dasharray="6 4"/><circle cx="76" cy="61" r="22" fill="#101010" stroke="#363636" stroke-width="2"/><text x="144" y="67" text-anchor="middle" fill="#73716B" font-family="monospace" font-size="17">BYPASS</text></svg>
-        <div class="roll-meta"><strong>无胶卷</strong><span class="mono">跳过冲洗</span></div>
-      </button>
-    </div>
-  </div>
 </section>
 
-<!-- ==========================================================================
-     CHAPTER I · TWO PATHS, ONE NEGATIVE (SWISS EDITORIAL MANIFESTO)
-     ========================================================================== -->
-<section class="monograph-sec" id="manifesto">
+</main>
+
+<!-- ───────────────────────── Footer ───────────────────────── -->
+<footer class="footer">
   <div class="wrap">
-    <div class="chapter-bar">
-      <h2><span class="mono">I</span>同一张照片 · 两条工作流</h2>
-      <small class="mono">ONE IMAGE · ONE NON-DESTRUCTIVE STACK</small>
-    </div>
-
-    <div class="editorial-lead">
-      <div>
-        <h3>不为噱头堆砌滤镜，只做一块能让照片自己说话的手机暗房。</h3>
-        <p>
-          普通手机用户想在三步内得到自然的胶片色彩与片边；摄影师需要零色偏中性围幕、独立的 RAW 显影白平衡、精准曲线、三段色轮与可靠的 16-bit TIFF 广色域队列。Spektralab-X 让这两条路始终编辑同一张照片，无需割裂切换软件。
-        </p>
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="brand" href="#top"><img src="site/mark.svg" width="28" height="28" alt=""><span>Spektralab<span class="brand__x">-X</span></span></a>
+        <p>渲染引擎和着色器来自 JamesQiu2005 的 <a href="https://github.com/JamesQiu2005/SpektraLab">SpektraLab</a>，胶片模型来自 Andrea Volpato 的 <a href="https://github.com/andreavolpato/spektrafilm">spektrafilm</a>。本项目做 Android 移植、手机 GPU 适配和界面。</p>
       </div>
-
-      <div class="dual-tracks">
-        <div class="track-entry">
-          <span class="track-kicker mono">01 / FAST PATH · 一键直出</span>
-          <h4>选卷、拉强度、按住比原图，三步完成</h4>
-          <p>支持从相册直接打开或读取相机 <code>RAW / DNG</code>。在热门、分类或个人配方库中挑好风格，用轻 / 中 / 重或 <code>0–100%</code> 激光游标微调，搭配留白、胶片片边、拍立得与真实拍摄信息条直接导出分享图。</p>
-        </div>
-
-        <div class="track-entry">
-          <span class="track-kicker mono">02 / DARKROOM PATH · 四步暗房精调</span>
-          <h4>胶卷 → 相纸 → 曝光 → 效果，完整无损控制</h4>
-          <p>RAW 显影白平衡（K）严格独立于后期色温偏移；提供光线、单色 HSL、<code>L / R / G / B</code> 曲线、全局/阴影/中间调/高光色轮及线性/径向/画笔局部蒙版。修改记录按工序分组，可临时隐藏、单组重置或单步撤销。</p>
-        </div>
-      </div>
+      <nav class="footer__cols" aria-label="页脚链接">
+        <div><h4>项目</h4><a href="https://github.com/Dear-Ded/Spektralab-X">源代码</a><a href="https://github.com/Dear-Ded/Spektralab-X/releases">版本发布</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/CHANGELOG.md">更新记录</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/ROADMAP.md">路线图</a></div>
+        <div><h4>文档</h4><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/FAQ.md">常见问题</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/ARCHITECTURE.md">架构</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/STYLES.md">风格目录</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/docs/VERIFY.md">安装包校验</a></div>
+        <div><h4>社区</h4><a href="https://github.com/Dear-Ded/Spektralab-X/issues">反馈问题</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/CONTRIBUTING.md">参与贡献</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/SECURITY.md">安全反馈</a><a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/README.en.md">English</a></div>
+      </nav>
     </div>
-  </div>
-</section>
-
-<!-- ==========================================================================
-     CHAPTER II · 5000K LIGHT TABLE CONTACT SHEET (L01 INTERACTIVE)
-     ========================================================================== -->
-<section class="monograph-sec" id="lighttable">
-  <div class="wrap">
-    <div class="chapter-bar">
-      <h2><span class="mono">II</span>5000K 观片台与 35mm 底片条</h2>
-      <small class="mono">L01 CONTACT SHEET · 点击任意帧载入上方暗房</small>
-    </div>
-
-    <div class="lightbox-table" id="lightbox-table">
-      <div class="contact-strip">
-        <div class="sprocket-band"></div>
-        <div class="contact-frames" id="contact-frames">
-          <div class="c-frame" data-load-film="portra400" data-load-scene="harbor">
-            <canvas width="240" height="160"></canvas>
-            <span class="c-sel mono">01</span>
-            <span class="c-edit mono">P400</span>
-            <div class="c-rate mono"><span>4星</span><span>保留</span></div>
-          </div>
-          <div class="c-frame" data-load-film="cine800t" data-load-scene="neon">
-            <canvas width="240" height="160"></canvas>
-            <span class="c-sel mono">02</span>
-            <span class="c-edit mono">800T</span>
-            <div class="c-rate mono"><span>5星</span><span>保留</span></div>
-          </div>
-          <div class="c-frame" data-load-film="trix400" data-load-scene="gallery">
-            <canvas width="240" height="160"></canvas>
-            <span class="c-edit mono">400TX</span>
-            <div class="c-rate mono"><span>4星</span><span></span></div>
-          </div>
-          <div class="c-frame" data-load-film="velvia50" data-load-scene="harbor">
-            <canvas width="240" height="160"></canvas>
-            <span class="c-sel mono">03</span>
-            <span class="c-edit mono">RVP50</span>
-            <div class="c-rate mono"><span>3星</span><span>保留</span></div>
-          </div>
-          <div class="c-frame" data-load-film="hp5plus" data-load-scene="gallery">
-            <canvas width="240" height="160"></canvas>
-            <span class="c-edit mono">HP5+</span>
-            <div class="c-rate mono"><span>4星</span><span></span></div>
-          </div>
-        </div>
-        <div class="sprocket-band"></div>
-        <div class="rebate-edge-nums mono">
-          <span>SPEKTRALAB-X 135</span>
-          <span>▶ 32A</span><span>▶ 33A</span><span>▶ 34A</span><span>▶ 35A</span><span>▶ 36A</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="lightbox-caption-bar">
-      <span>批量选中（左上序号框）、评级/淘汰（左下星级）与已有编辑（右上红线卷码）三态严格分离；导入观片台不自动冲洗或写入相册。</span>
-      <button type="button" class="k-btn" id="backlight-toggle">切换背光：5000K 匀光板</button>
-    </div>
-  </div>
-</section>
-
-<!-- ==========================================================================
-     CHAPTER III · 900MS SHUTTER INTERLOCK & THREE-STATE HONESTY
-     ========================================================================== -->
-<section class="monograph-sec" id="tactile">
-  <div class="wrap">
-    <div class="chapter-bar">
-      <h2><span class="mono">III</span>机械快门蓄力与三态诚实反馈</h2>
-      <small class="mono">900MS HOLD-TO-CONFIRM · ZERO AMBIGUITY</small>
-    </div>
-
-    <div class="tactile-layout">
-      <div class="shutter-bench">
-        <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <strong style="font-size:15px">900ms 螺纹快门释放钮（直接按住体验）</strong>
-          <span class="mono" style="font-size:11px;color:var(--ink-3)">16-BIT TIFF / 重置全部</span>
-        </div>
-
-        <div class="shutter-row">
-          <button type="button" class="shutter-btn" id="shutter-btn" aria-label="按住900毫秒释放16位TIFF导出">
-            <svg class="shutter-svg" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="37" fill="none" stroke="#242424" stroke-width="2.4"/>
-              <circle id="shutter-arc" cx="40" cy="40" r="37" fill="none" stroke="#D44D28" stroke-width="2.6" stroke-dasharray="232.48" stroke-dashoffset="232.48"/>
-            </svg>
-            <span class="shutter-cap"><span class="shutter-bore"></span></span>
-          </button>
-
-          <div style="flex:1 1 auto">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px">
-              <strong id="shutter-title">按住 900ms 释放 16-bit TIFF</strong>
-              <span class="mono" id="shutter-time" style="font-size:11.5px;color:var(--ink-2)">0.0s / 0.9s</span>
-            </div>
-            <div class="tick-meter" id="tick-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;color:var(--ink-3)">
-              <span id="shutter-sub">提前松手立即回弹取消 · 支持空格键长按</span>
-              <button type="button" id="shutter-reset" style="display:none;background:none;border:none;padding:0;color:var(--ink-2);text-decoration:underline;font-size:11.5px">复位快门</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="honest-states">
-        <div class="h-state-item">
-          <span class="state-tag s-formal mono">FORMAL EDIT</span>
-          <div>
-            <strong>正式编辑已保存</strong>
-            <p>顶栏文件名与底栏已修改工序同步点亮朱砂圆点，修改记录支持按组隐藏（不等于删除）与单步撤销。</p>
-          </div>
-        </div>
-
-        <div class="h-state-item">
-          <span class="state-tag s-draft mono">DEBUG DRAFT</span>
-          <div>
-            <strong>调试助手草稿（绝不进入导出）</strong>
-            <p>画布外围套蓝晒虚线框并锁死导出隔离；远端调用前明确披露目的地、模型与可能计费提示，绝不上传原图与个人档案。</p>
-          </div>
-        </div>
-
-        <div class="h-state-item">
-          <span class="state-tag s-export mono">WRITTEN TO DISK</span>
-          <div>
-            <strong>已写入相册（入队 ≠ 落盘）</strong>
-            <p>导出队列严格区分等待、运行、成功、失败与待恢复；部分成功不算全部完成，不自动重放失败任务，清空队列记录绝不删除相册照片。</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==========================================================================
-     CHAPTER IV · ARCHIVAL TECHNICAL DATASHEET & HONEST BOUNDARIES
-     ========================================================================== -->
-<section class="monograph-sec" id="datasheet" style="border-bottom:none">
-  <div class="wrap">
-    <div class="chapter-bar">
-      <h2><span class="mono">IV</span>技术规格铭牌与诚实边界</h2>
-      <small class="mono">ARCHIVAL DATASHEET · NO UNVERIFIED CLAIMS</small>
-    </div>
-
-    <table class="datasheet">
-      <tbody>
-        <tr>
-          <th class="mono">PLATFORM &amp; ENGINE</th>
-          <td><strong>Android 原生暗房</strong> · 基于 <code>Kotlin</code>、<code>Jetpack Compose</code>、<code>Material 3</code> 与原生 <code>Canvas</code> 精密控件构建；宽屏（<code>≥600 dp</code>）自动切换左画布 + 右侧 <code>360 dp</code> 固定工作台。</td>
-        </tr>
-        <tr>
-          <th class="mono">INPUT &amp; PRESETS</th>
-          <td>支持相册图片与 <code>RAW / DNG</code> 独立显影；支持导入 <code>.spklook</code>、<code>.cube</code> 与 Lightroom 预设并生成转换报告。</td>
-        </tr>
-        <tr>
-          <th class="mono">EXPORT &amp; COLOR SPACE</th>
-          <td><code>JPEG</code> 分享尺寸（长边 <code>≤3400px</code>）与工作尺寸（工作尺寸不等于原始像素）；<code>16-bit TIFF</code> 支持 <code>sRGB</code>、<code>Display P3</code>、<code>ProPhoto RGB</code>、<code>Adobe RGB (1998)</code>；<code>HEIF</code> 仅在设备具备对应硬件能力时启用。</td>
-        </tr>
-        <tr>
-          <th class="mono">ALPHA BOUNDARY</th>
-          <td>当前工作树基于 <code>0.210-alpha-1 (129)</code>，选定 <code>77</code> 套 / <code>735</code> 项 debug 单元测试通过；<strong>不等同于全量公开版、真机流畅度、原生色彩校准或真实模型验收</strong>。「实验显色」为风格化模拟，不称原厂直出。</td>
-        </tr>
-        <tr>
-          <th class="mono">DEBUG SCOPE</th>
-          <td>修图助手与本地偏好观察提示均位于调试入口，不默认暴露于正式底栏；本地观察提示仅提供「查看调整依据」或「忽略」，不自动修图、不自动创建规则。</td>
-        </tr>
-        <tr>
-          <th class="mono">LICENSE &amp; SOURCE</th>
-          <td>遵循 <strong>GPL-3.0</strong> 开源协议 · 上游致谢 SpektraLab 与开源影像社区 · 本地构建命令 <code>./gradlew :app:assembleDebug</code>。</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<footer class="colophon">
-  <div class="wrap colophon-grid">
-    <div>
-      <div style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px">
-        <span>Spektralab-X</span><span class="sig-dot"></span>
-      </div>
-      <div class="mono" style="margin-top:6px;font-size:11.5px;color:var(--ink-3)">
-        ANDROID OPTICAL DARKROOM · ARCHIVE MONOLITH · GPL-3.0
-      </div>
-    </div>
-    <div class="colophon-links">
-      <a class="k-btn is-primary" href="[https://github.com/Dear-Ded/Spektralab-X/releases](https://github.com/Dear-Ded/Spektralab-X/releases)" target="_blank" rel="noopener">下载最新 Release</a>
-      <a class="k-btn" href="[https://github.com/Dear-Ded/Spektralab-X](https://github.com/Dear-Ded/Spektralab-X)" target="_blank" rel="noopener">GitHub 源码</a>
-      <a class="k-btn is-ghost" href="[https://github.com/Dear-Ded/Spektralab-X/issues](https://github.com/Dear-Ded/Spektralab-X/issues)" target="_blank" rel="noopener">反馈问题</a>
+    <div class="footer__legal">
+      <p>代码以 <a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/LICENSE">GPL-3.0</a> 发布，附加条款见 <a href="https://github.com/Dear-Ded/Spektralab-X/blob/main/NOTICE">NOTICE</a>；胶片与相纸数据 CC BY-SA 4.0（spektrafilm）；RAW 解码 LibRaw（LGPL-2.1）；样片原图来自 raw.pixls.us（CC0）。</p>
+      <p>Spektralab-X 是非官方衍生项目，与 SpektraLab 的作者和所有者、小米公司均无关联，也未获其背书。SpektraLab™ 及其图标是其所有者的商标；“小米”“骁龙”“Adreno”及文中胶片名称是各自所有者的商标。</p>
     </div>
   </div>
 </footer>
 
-<script>
-(() => {
-  /* If a real clean sample photo exists in docs/assets/, set its relative path here: */
-  const DEFAULT_REPO_SAMPLE = "assets/sample-before.jpg";
-  const DEFAULT_REPO_SAMPLE_NAME = "sample-before.jpg";
-
-  /* ==================== 1. Procedural Mechanical Web Audio ==================== */
-  let audioCtx = null;
-  let soundEnabled = false;
-  function ensureAudio() {
-    if (!soundEnabled) return null;
-    if (!audioCtx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) audioCtx = new AC();
-    }
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-    return audioCtx;
-  }
-  function playDetent(freq = 1650, gainVal = 0.025) {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(340, ctx.currentTime + 0.016);
-    g.gain.setValueAtTime(gainVal, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.018);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.02);
-  }
-  function playShutterClick() {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    const len = Math.floor(ctx.sampleRate * 0.065);
-    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      const env = Math.exp(-i / (ctx.sampleRate * 0.011)) + (i > len * 0.42 ? 0.55 * Math.exp(-(i - len * 0.42) / (ctx.sampleRate * 0.009)) : 0);
-      data[i] = (Math.random() * 2 - 1) * env * 0.22;
-    }
-    const src = ctx.createBufferSource();
-    const flt = ctx.createBiquadFilter();
-    flt.type = "bandpass"; flt.frequency.value = 1200; flt.Q.value = 0.9;
-    src.buffer = buf; src.connect(flt); flt.connect(ctx.destination);
-    src.start();
-  }
-
-  /* ==================== 2. Live GitHub Telemetry (Graceful Fallback) ==================== */
-  (async () => {
-    try {
-      const [repoRes, relRes] = await Promise.all([
-        fetch("[https://api.github.com/repos/Dear-Ded/Spektralab-X](https://api.github.com/repos/Dear-Ded/Spektralab-X)"),
-        fetch("[https://api.github.com/repos/Dear-Ded/Spektralab-X/releases?per_page=30](https://api.github.com/repos/Dear-Ded/Spektralab-X/releases?per_page=30)")
-      ]);
-      if (repoRes.ok) {
-        const repo = await repoRes.json();
-        if (typeof repo.stargazers_count === "number") {
-          document.getElementById("gh-stars").textContent = repo.stargazers_count.toLocaleString();
-        }
-      }
-      if (relRes.ok) {
-        const rels = await relRes.json();
-        if (Array.isArray(rels) && rels.length) {
-          if (rels[0].tag_name) document.getElementById("gh-release").textContent = rels[0].tag_name;
-          let total = 0;
-          rels.forEach((r) => (r.assets || []).forEach((a) => { total += a.download_count || 0; }));
-          document.getElementById("gh-downloads").textContent = total.toLocaleString();
-        }
-      }
-    } catch (_) {}
-  })();
-
-  /* ==================== 3. Core Optical Pixel Engine ==================== */
-  const W = 840, H = 560;
-  const cBefore = document.getElementById("canvas-before");
-  const cAfter = document.getElementById("canvas-after");
-  const cHist = document.getElementById("canvas-hist");
-  const cCurve = document.getElementById("canvas-curve");
-  const ctxB = cBefore.getContext("2d", { willReadFrequently: true });
-  const ctxA = cAfter.getContext("2d", { willReadFrequently: true });
-  const ctxH = cHist.getContext("2d");
-  const ctxC = cCurve.getContext("2d");
-
-  const offRaw = document.createElement("canvas");
-  offRaw.width = W; offRaw.height = H;
-  const ctxRaw = offRaw.getContext("2d", { willReadFrequently: true });
-
-  const offHal = document.createElement("canvas");
-  offHal.width = 210; offHal.height = 140;
-  const ctxHal = offHal.getContext("2d");
-
-  const FILMS = {
-    portra400:  { short: "Portra 400",  contrast: 1.07, sat: 1.13, lift: [10, 8, 5],   mid: [1.04, 1.01, 0.94], hi: [1.05, 1.00, 0.92], shoulder: 0.16, grain: 10, bw: null, hal: 0.12 },
-    ektar100:   { short: "Ektar 100",   contrast: 1.24, sat: 1.44, lift: [2, 3, 6],    mid: [1.06, 0.99, 1.02], hi: [1.07, 0.99, 0.94], shoulder: 0.08, grain: 5,  bw: null, hal: 0.05 },
-    cine800t:   { short: "Cine 800T",   contrast: 1.18, sat: 1.18, lift: [-2, 11, 19], mid: [0.91, 1.01, 1.11], hi: [1.14, 0.96, 0.89], shoulder: 0.12, grain: 14, bw: null, hal: 0.88 },
-    velvia50:   { short: "Velvia 50",   contrast: 1.32, sat: 1.54, lift: [-4, 2, 4],   mid: [1.05, 1.05, 0.97], hi: [1.08, 1.01, 0.95], shoulder: 0.06, grain: 6,  bw: null, hal: 0.04 },
-    provia100f: { short: "Provia 100F", contrast: 1.15, sat: 1.14, lift: [2, 5, 10],   mid: [0.98, 1.01, 1.05], hi: [1.01, 1.01, 1.02], shoulder: 0.10, grain: 5,  bw: null, hal: 0.03 },
-    trix400:    { short: "Tri-X 400",   contrast: 1.45, sat: 0,    lift: [4, 4, 4],    mid: [1, 1, 1],          hi: [1.02, 1.01, 0.99], shoulder: 0.14, grain: 19, bw: [0.36, 0.50, 0.14], hal: 0 },
-    hp5plus:    { short: "HP5+",        contrast: 1.14, sat: 0,    lift: [12, 12, 11], mid: [1, 1, 1],          hi: [1.01, 1.00, 0.98], shoulder: 0.22, grain: 15, bw: [0.29, 0.56, 0.15], hal: 0 },
-    none:       { short: "无胶卷",       contrast: 1,    sat: 1,    lift: [0, 0, 0],    mid: [1, 1, 1],          hi: [1, 1, 1],          shoulder: 0,    grain: 0,  bw: null, hal: 0 }
-  };
-
-  const VIEWFINDERS = {
-    off:   { svg: "", l: "28mm · f/2.8 · 1/500s · ISO 400", m: "−2 · −1 · 0 <b style='color:var(--signal)'>|</b> +1 · +2" },
-    leica: {
-      svg: `<g stroke="rgba(236,234,228,0.78)" stroke-width="1.25" fill="none"><path d="M44 82 V34 H116 M484 34 H556 V82 M556 318 V366 H484 M116 366 H44 V318"/><path d="M210 34 H390 M210 366 H390 M44 150 V250 M556 150 V250"/></g><g stroke="rgba(236,234,228,0.28)" stroke-width="1" fill="none"><path d="M112 104 V82 H138 M462 82 H488 V104 M488 296 V318 H462 M138 318 H112 V296"/></g><rect x="272" y="182" width="56" height="36" fill="rgba(242,238,225,0.08)" stroke="rgba(236,234,228,0.5)" stroke-width="1"/><line x1="300" y1="191" x2="300" y2="209" stroke="rgba(236,234,228,0.45)" stroke-width="0.9"/>`,
-      l: "<span style='color:var(--led-red)'>LEICA M · 35mm</span>", m: "<span style='color:var(--led-red)'>◀  ●  ▶   500</span>"
-    },
-    fm2: {
-      svg: `<rect x="266" y="8" width="68" height="24" fill="rgba(8,8,8,0.82)" stroke="rgba(236,234,228,0.32)"/><text x="300" y="24" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="13">2.8</text><circle cx="300" cy="200" r="76" fill="none" stroke="rgba(236,234,228,0.36)" stroke-width="1.1"/><circle cx="300" cy="200" r="34" fill="none" stroke="rgba(236,234,228,0.56)" stroke-width="3" stroke-dasharray="2.2 2.2"/><circle cx="300" cy="200" r="20" fill="rgba(236,234,228,0.04)" stroke="rgba(236,234,228,0.74)" stroke-width="1.2"/><line x1="280" y1="200" x2="320" y2="200" stroke="rgba(236,234,228,0.68)" stroke-width="1.1"/><rect x="562" y="124" width="26" height="152" rx="2" fill="rgba(6,6,6,0.78)" stroke="rgba(255,255,255,0.14)"/><text x="575" y="156" text-anchor="middle" fill="rgba(214,69,58,0.32)" font-family="monospace" font-size="16">+</text><circle cx="575" cy="200" r="4.5" fill="#D6453A"/><text x="575" y="254" text-anchor="middle" fill="rgba(214,69,58,0.32)" font-family="monospace" font-size="16">−</text>`,
-      l: "NIKON FM2 · K2 SCREEN", m: "M · 1/500 · 60/40 CENTER"
-    },
-    hassy: {
-      svg: `<path d="M0 0 H600 V400 H0 Z M10 10 V390 H590 V10 Z" fill="#060606" fill-rule="evenodd"/><polygon points="10,72 24,80 10,88" fill="#060606"/><polygon points="10,104 24,112 10,120" fill="#060606"/><g stroke="rgba(236,234,228,0.32)" stroke-width="1"><line x1="203" y1="10" x2="203" y2="390"/><line x1="397" y1="10" x2="397" y2="390"/><line x1="10" y1="136" x2="590" y2="136"/><line x1="10" y1="264" x2="590" y2="264"/></g><g stroke="rgba(236,234,228,0.85)" stroke-width="1.5"><line x1="274" y1="200" x2="326" y2="200"/><line x1="300" y1="174" x2="300" y2="226"/></g><circle cx="300" cy="200" r="36" fill="none" stroke="rgba(236,234,228,0.38)"/>`,
-      l: "HASSELBLAD 6×6 · A12", m: "ACUTE-MATTE D · 80mm f/2.8"
-    },
-    gr: {
-      svg: `<rect x="16" y="72" width="44" height="248" rx="2" fill="rgba(8,8,8,0.72)" stroke="rgba(255,255,255,0.14)"/><g font-family="monospace" font-size="11.5" fill="#94928C"><text x="22" y="96">∞</text><text x="22" y="148">5m</text><text x="22" y="204" fill="#ECEAE4" font-weight="700">2.5</text><text x="22" y="256">1.5</text><text x="22" y="304">1.0</text></g><line x1="52" y1="142" x2="52" y2="258" stroke="#4E946C" stroke-width="3.2"/><rect x="47" y="196" width="10" height="5" fill="#ECEAE4"/><g stroke="rgba(236,234,228,0.36)" stroke-width="1.4"><line x1="204" y1="200" x2="258" y2="200"/><line x1="342" y1="200" x2="396" y2="200"/></g><line x1="266" y1="200" x2="334" y2="200" stroke="#4E946C" stroke-width="2.4"/>`,
-      l: "RICOH GR · SNAP 2.5m", m: "Av · 28mm · 1/500 · F2.8"
-    },
-    xpro: {
-      svg: `<rect x="44" y="34" width="512" height="332" fill="none" stroke="rgba(236,234,228,0.7)" stroke-width="1.3"/><rect x="278" y="178" width="44" height="44" fill="none" stroke="#4E946C" stroke-width="2"/><rect x="58" y="324" width="102" height="28" rx="2" fill="rgba(8,8,8,0.82)" stroke="rgba(236,234,228,0.32)"/><text x="109" y="342" text-anchor="middle" fill="#ECEAE4" font-family="monospace" font-size="12" font-weight="700">PRO NEG</text><g transform="translate(442, 310)"><rect width="100" height="42" fill="rgba(8,8,8,0.8)" stroke="rgba(255,255,255,0.18)"/><path d="M4 38 L4 31 Q22 18 38 22 T72 9 L96 28 L96 38 Z" fill="rgba(236,234,228,0.55)"/></g>`,
-      l: "FUJIFILM X-PRO · OVF", m: "S.S. 500 · F2.8 · DR200"
-    }
-  };
-
-  let state = {
-    scene: "harbor",
-    film: "portra400",
-    strength: 78,
-    ev: 0,
-    vf: "leica",
-    split: 36,
-    curveBlack: 0.04,
-    curveMidX: 0.50,
-    curveMidY: 0.54,
-    curvePreset: "film"
-  };
-  let uploadedImg = null;
-  let cachedRawData = null;
-
-  const noiseBuf = new Float32Array(W * H);
-  for (let i = 0; i < noiseBuf.length; i++) noiseBuf[i] = Math.random() + Math.random() - 1;
-
-  function drawScene(ctx, scene, w = W, h = H) {
-    ctx.clearRect(0, 0, w, h);
-    if (scene === "harbor") {
-      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.64);
-      sky.addColorStop(0, "#1D2835"); sky.addColorStop(0.42, "#4B5967");
-      sky.addColorStop(0.76, "#9A8B7E"); sky.addColorStop(1, "#CBAD90");
-      ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
-      const sun = ctx.createRadialGradient(w * 0.69, h * 0.43, w * 0.01, w * 0.69, h * 0.43, w * 0.35);
-      sun.addColorStop(0, "rgba(255, 242, 216, 0.96)"); sun.addColorStop(0.18, "rgba(238, 178, 126, 0.55)");
-      sun.addColorStop(0.56, "rgba(164, 118, 102, 0.16)"); sun.addColorStop(1, "rgba(30, 42, 56, 0)");
-      ctx.fillStyle = sun; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = "#3A444F";
-      ctx.beginPath(); ctx.moveTo(0, h * 0.56);
-      ctx.bezierCurveTo(w * 0.22, h * 0.45, w * 0.44, h * 0.54, w * 0.62, h * 0.55);
-      ctx.bezierCurveTo(w * 0.78, h * 0.56, w * 0.89, h * 0.48, w, h * 0.53);
-      ctx.lineTo(w, h * 0.65); ctx.lineTo(0, h * 0.65); ctx.closePath(); ctx.fill();
-      const sea = ctx.createLinearGradient(0, h * 0.60, 0, h);
-      sea.addColorStop(0, "#6E655E"); sea.addColorStop(0.32, "#323A43"); sea.addColorStop(1, "#151A1F");
-      ctx.fillStyle = sea; ctx.fillRect(0, h * 0.60, w, h * 0.40);
-      for (let i = 0; i < 40; i++) {
-        const y = h * 0.615 + i * (h * 0.0085);
-        const sw = w * (0.045 + i * 0.0055);
-        ctx.fillStyle = `rgba(252, 218, 170, ${Math.max(0.05, 0.44 - i * 0.009)})`;
-        ctx.fillRect(w * 0.69 - sw / 2 + Math.sin(i * 1.9) * (w * 0.012), y, sw, Math.max(1, h * 0.003));
-      }
-      ctx.fillStyle = "#1B1F24"; ctx.fillRect(0, h * 0.30, w * 0.27, h * 0.70);
-      ctx.fillStyle = "#262C33"; ctx.fillRect(w * 0.27, h * 0.35, w * 0.065, h * 0.65);
-      [[0.055, 0.42], [0.14, 0.42], [0.055, 0.54], [0.14, 0.54], [0.205, 0.54]].forEach(([rx, ry]) => {
-        ctx.fillStyle = "#FBE2B6"; ctx.fillRect(w * rx, h * ry, w * 0.038, h * 0.042);
-      });
-      ctx.fillStyle = "#12161A"; ctx.fillRect(0, h * 0.78, w * 0.52, h * 0.22);
-      ctx.fillStyle = "#23282E"; ctx.fillRect(w * 0.44, h * 0.38, Math.max(2, w * 0.005), h * 0.42);
-      ctx.fillStyle = "#FFF7E6"; ctx.beginPath(); ctx.arc(w * 0.442, h * 0.38, Math.max(3, w * 0.008), 0, Math.PI * 2); ctx.fill();
-    } else if (scene === "neon") {
-      const bg = ctx.createLinearGradient(0, 0, 0, h);
-      bg.addColorStop(0, "#0E141E"); bg.addColorStop(0.55, "#17212B"); bg.addColorStop(1, "#0B0F15");
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = "#141920"; ctx.fillRect(0, 0, w * 0.30, h * 0.72);
-      ctx.fillStyle = "#11161C"; ctx.fillRect(w * 0.70, 0, w * 0.30, h * 0.72);
-      ctx.fillStyle = "#182028"; ctx.fillRect(w * 0.30, h * 0.16, w * 0.40, h * 0.56);
-      const road = ctx.createLinearGradient(0, h * 0.64, 0, h);
-      road.addColorStop(0, "#1A222B"); road.addColorStop(1, "#0C1015");
-      ctx.fillStyle = road; ctx.fillRect(0, h * 0.64, w, h * 0.36);
-      const signs = [
-        { x: 0.12, y: 0.22, rw: 0.10, rh: 0.06, c: "#FFF2E2", g: "rgba(255,140,90,0.28)" },
-        { x: 0.16, y: 0.38, rw: 0.075, rh: 0.13, c: "#E4F8FF", g: "rgba(100,200,235,0.25)" },
-        { x: 0.72, y: 0.18, rw: 0.11, rh: 0.075, c: "#FFF5EA", g: "rgba(255,110,95,0.30)" },
-        { x: 0.76, y: 0.40, rw: 0.065, rh: 0.12, c: "#F7FAFF", g: "rgba(120,185,240,0.24)" },
-        { x: 0.42, y: 0.48, rw: 0.16, rh: 0.044, c: "#FFF9EE", g: "rgba(255,210,140,0.28)" }
-      ];
-      signs.forEach((s) => {
-        const sx = w * s.x, sy = h * s.y, sw = w * s.rw, sh = h * s.rh;
-        const rg = ctx.createRadialGradient(sx + sw / 2, sy + sh / 2, 4, sx + sw / 2, sy + sh / 2, w * 0.14);
-        rg.addColorStop(0, s.g); rg.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = rg; ctx.fillRect(sx - w * 0.1, sy - h * 0.14, sw + w * 0.2, sh + h * 0.28);
-        ctx.fillStyle = s.c; ctx.fillRect(sx, sy, sw, sh);
-        for (let r = 0; r < 12; r++) {
-          ctx.fillStyle = s.g;
-          ctx.fillRect(sx + Math.sin(r * 2.1) * 4, h * 0.66 + r * (h * 0.025), sw * 0.82, Math.max(2, h * 0.008));
-        }
-      });
-      ctx.fillStyle = "#FFECE6";
-      ctx.beginPath(); ctx.arc(w * 0.47, h * 0.63, Math.max(2.5, w * 0.008), 0, Math.PI * 2);
-      ctx.arc(w * 0.53, h * 0.63, Math.max(2.5, w * 0.008), 0, Math.PI * 2); ctx.fill();
-    } else {
-      const sky = ctx.createLinearGradient(0, 0, w, h * 0.75);
-      sky.addColorStop(0, "#34465B"); sky.addColorStop(0.55, "#6C8094"); sky.addColorStop(1, "#BEC6CE");
-      ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = "#E8E5DE";
-      ctx.beginPath(); ctx.moveTo(w * 0.14, h); ctx.lineTo(w * 0.14, h * 0.14); ctx.lineTo(w * 0.62, h * 0.24); ctx.lineTo(w * 0.62, h); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "#24272C";
-      ctx.beginPath(); ctx.moveTo(w * 0.62, h); ctx.lineTo(w * 0.62, h * 0.24); ctx.lineTo(w * 0.88, h * 0.34); ctx.lineTo(w * 0.88, h); ctx.closePath(); ctx.fill();
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 3; col++) {
-          const x = w * (0.20 + col * 0.13), y = h * (0.25 + row * 0.16);
-          ctx.fillStyle = "#1B1F23"; ctx.fillRect(x, y, w * 0.08, h * 0.095);
-          ctx.fillStyle = "#9BA4AE"; ctx.fillRect(x + w * 0.056, y + h * 0.015, w * 0.024, h * 0.08);
-        }
-      }
-      ctx.fillStyle = "rgba(16, 18, 22, 0.72)";
-      ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, h * 0.48); ctx.lineTo(w * 0.56, h); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "#CCC8BF"; ctx.fillRect(w * 0.50, h * 0.86, w * 0.50, h * 0.14);
-      ctx.fillStyle = "#1B1E22"; ctx.fillRect(0, h * 0.86, w * 0.50, h * 0.14);
-    }
-  }
-
-  function drawCover(ctx, img, w, h) {
-    const ir = img.width / img.height, cr = w / h;
-    let sx = 0, sy = 0, sw = img.width, sh = img.height;
-    if (ir > cr) { sw = img.height * cr; sx = (img.width - sw) / 2; }
-    else { sh = img.width / cr; sy = (img.height - sh) / 2; }
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-  }
-
-  function buildCurveLUT() {
-    const lut = new Uint8Array(256);
-    const bY = state.curveBlack;
-    const mx = state.curveMidX, my = state.curveMidY;
-    for (let i = 0; i < 256; i++) {
-      const x = i / 255;
-      // Smooth quadratic interpolation through (0, bY), (mx, my), (1, 1)
-      let y;
-      if (x <= mx) {
-        const t = mx > 0.01 ? x / mx : 0;
-        const sCurve = t * t * (3 - 2 * t);
-        y = bY + (my - bY) * (t * 0.65 + sCurve * 0.35);
-      } else {
-        const t = mx < 0.99 ? (x - mx) / (1 - mx) : 1;
-        const sCurve = t * t * (3 - 2 * t);
-        y = my + (1 - my) * (t * 0.65 + sCurve * 0.35);
-      }
-      lut[i] = Math.max(0, Math.min(255, Math.round(y * 255)));
-    }
-    return lut;
-  }
-
-  function drawToneCurveCanvas(histL) {
-    const cw = cCurve.width, ch = cCurve.height;
-    ctxC.clearRect(0, 0, cw, ch);
-    // 4x4 grid
-    ctxC.strokeStyle = "#1A1A1A"; ctxC.lineWidth = 1;
-    for (let i = 1; i < 4; i++) {
-      const gx = (cw / 4) * i, gy = (ch / 4) * i;
-      ctxC.beginPath(); ctxC.moveTo(gx, 0); ctxC.lineTo(gx, ch); ctxC.stroke();
-      ctxC.beginPath(); ctxC.moveTo(0, gy); ctxC.lineTo(cw, gy); ctxC.stroke();
-    }
-    // Linear diagonal
-    ctxC.strokeStyle = "#292929"; ctxC.setLineDash([3, 3]);
-    ctxC.beginPath(); ctxC.moveTo(0, ch); ctxC.lineTo(cw, 0); ctxC.stroke();
-    ctxC.setLineDash([]);
-
-    // Faint histogram underlay
-    if (histL) {
-      let maxV = 1;
-      for (let i = 1; i < 63; i++) if (histL[i] > maxV) maxV = histL[i];
-      ctxC.fillStyle = "rgba(236,234,228,0.07)";
-      ctxC.beginPath(); ctxC.moveTo(0, ch);
-      for (let i = 0; i < 64; i++) ctxC.lineTo((i / 63) * cw, ch - (histL[i] / maxV) * (ch - 8));
-      ctxC.lineTo(cw, ch); ctxC.closePath(); ctxC.fill();
-    }
-
-    // Active LUT Curve
-    const lut = buildCurveLUT();
-    ctxC.strokeStyle = "#ECEAE4"; ctxC.lineWidth = 1.8;
-    ctxC.beginPath();
-    for (let i = 0; i < 256; i += 2) {
-      const x = (i / 255) * cw;
-      const y = ch - (lut[i] / 255) * ch;
-      if (i === 0) ctxC.moveTo(x, y); else ctxC.lineTo(x, y);
-    }
-    ctxC.stroke();
-
-    // Crosshair + Active Midtone Control Square
-    const px = state.curveMidX * cw;
-    const py = ch - state.curveMidY * ch;
-    ctxC.strokeStyle = "rgba(212, 77, 40, 0.34)"; ctxC.lineWidth = 1;
-    ctxC.beginPath(); ctxC.moveTo(px, 0); ctxC.lineTo(px, ch); ctxC.moveTo(0, py); ctxC.lineTo(cw, py); ctxC.stroke();
-    ctxC.fillStyle = "#D44D28"; ctxC.strokeStyle = "#ECEAE4"; ctxC.lineWidth = 1.4;
-    ctxC.fillRect(px - 4.5, py - 4.5, 9, 9);
-    ctxC.strokeRect(px - 4.5, py - 4.5, 9, 9);
-  }
-
-  function rebuildSource() {
-    ctxRaw.clearRect(0, 0, W, H);
-    if (uploadedImg) drawCover(ctxRaw, uploadedImg, W, H);
-    else {
-      ctxRaw.save();
-      ctxRaw.filter = "saturate(0.75) contrast(0.9)";
-      drawScene(ctxRaw, state.scene, W, H);
-      ctxRaw.restore();
-    }
-    ctxB.drawImage(offRaw, 0, 0);
-    cachedRawData = ctxRaw.getImageData(0, 0, W, H);
-  }
-
-  function renderDarkroom() {
-    if (!cachedRawData) rebuildSource();
-    const film = FILMS[state.film];
-    const s = state.strength / 100;
-    const evGain = Math.pow(2, state.ev * 0.72);
-    const lut = buildCurveLUT();
-
-    const src = cachedRawData.data;
-    const outImg = ctxA.createImageData(W, H);
-    const dst = outImg.data;
-
-    const histR = new Uint32Array(64), histG = new Uint32Array(64), histB = new Uint32Array(64), histL = new Uint32Array(64);
-
-    let halData = null;
-    if (film.hal * s > 0.04) {
-      ctxHal.clearRect(0, 0, 210, 140);
-      ctxHal.save();
-      ctxHal.filter = "blur(8px) brightness(1.15)";
-      ctxHal.drawImage(offRaw, 0, 0, 210, 140);
-      ctxHal.restore();
-      halData = ctxHal.getImageData(0, 0, 210, 140).data;
-    }
-
-    const contrast = 1 + (film.contrast - 1) * s;
-    const sat = 1 + (film.sat - 1) * s;
-    const grainAmp = film.grain * s;
-    const halAmp = film.hal * s;
-
-    for (let y = 0; y < H; y++) {
-      const hy = halData ? Math.min(139, y >> 2) : 0;
-      for (let x = 0; x < W; x++) {
-        const p = y * W + x;
-        const i = p * 4;
-        let r = src[i] * evGain, g = src[i + 1] * evGain, b = src[i + 2] * evGain;
-
-        if (s > 0 && state.film !== "none") {
-          r = (r - 120) * contrast + 120;
-          g = (g - 120) * contrast + 120;
-          b = (b - 120) * contrast + 120;
-
-          if (film.bw) {
-            const mono = r * film.bw[0] + g * film.bw[1] + b * film.bw[2];
-            r = src[i] * evGain + (mono - src[i] * evGain) * s;
-            r = (r - 124) * (1 + (film.contrast - 1) * s * 0.55) + 124;
-            g = r; b = r;
-          } else {
-            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-            r = lum + (r - lum) * sat;
-            g = lum + (g - lum) * sat;
-            b = lum + (b - lum) * sat;
-            const t = Math.max(0, Math.min(1, lum / 255));
-            r = r * (film.mid[0] * (1 - t) + film.hi[0] * t) + film.lift[0] * s * (1 - t);
-            g = g * (film.mid[1] * (1 - t) + film.hi[1] * t) + film.lift[1] * s * (1 - t);
-            b = b * (film.mid[2] * (1 - t) + film.hi[2] * t) + film.lift[2] * s * (1 - t);
-          }
-
-          if (film.shoulder > 0) {
-            const sh = film.shoulder * s;
-            if (r > 205) r = 205 + (r - 205) * (1 - sh);
-            if (g > 205) g = 205 + (g - 205) * (1 - sh);
-            if (b > 205) b = 205 + (b - 205) * (1 - sh);
-          }
-
-          if (halData) {
-            const hiIdx = (hy * 210 + Math.min(209, x >> 2)) * 4;
-            const hlum = halData[hiIdx] * 0.3 + halData[hiIdx + 1] * 0.59 + halData[hiIdx + 2] * 0.11;
-            if (hlum > 158) {
-              const boost = ((hlum - 158) / 97) * halAmp * 95;
-              r += boost * 1.15; g += boost * 0.34; b += boost * 0.10;
-            }
-          }
-
-          if (grainAmp > 0) {
-            const lNorm = Math.max(0, Math.min(1, (r + g + b) / 765));
-            const n = noiseBuf[p] * grainAmp * (4 * lNorm * (1 - lNorm) + 0.25);
-            r += n; g += n; b += n;
-          }
-        }
-
-        // Apply Interactive Tone Curve LUT
-        const cr = lut[r < 0 ? 0 : r > 255 ? 255 : r | 0];
-        const cg = lut[g < 0 ? 0 : g > 255 ? 255 : g | 0];
-        const cb = lut[b < 0 ? 0 : b > 255 ? 255 : b | 0];
-        dst[i] = cr; dst[i + 1] = cg; dst[i + 2] = cb; dst[i + 3] = 255;
-
-        if ((p & 3) === 0) {
-          histR[cr >> 2]++; histG[cg >> 2]++; histB[cb >> 2]++;
-          histL[(cr * 77 + cg * 150 + cb * 29) >> 10]++;
-        }
-      }
-    }
-
-    ctxA.putImageData(outImg, 0, 0);
-    drawHistogram(histR, histG, histB, histL, !!film.bw && s > 0.8);
-    drawToneCurveCanvas(histL);
-
-    const evStr = state.ev === 0 ? "0.00 EV" : (state.ev > 0 ? `+${state.ev.toFixed(2)} EV` : `−${Math.abs(state.ev).toFixed(2)} EV`);
-    document.getElementById("str-readout").textContent = `${state.strength}%`;
-    document.getElementById("str-bar").style.width = `${state.strength}%`;
-    document.getElementById("str-needle").style.left = `${state.strength}%`;
-    document.getElementById("ev-readout").textContent = evStr;
-    const evPct = ((state.ev + 1.5) / 3) * 100;
-    document.getElementById("ev-needle").style.left = `${evPct}%`;
-    document.getElementById("ev-bar").style.left = `${Math.min(50, evPct)}%`;
-    document.getElementById("ev-bar").style.width = `${Math.abs(evPct - 50)}%`;
-    document.getElementById("cap-right").textContent = state.film === "none" ? `无胶卷 · ${evStr}` : `${film.short} · ${state.strength}% · ${evStr}`;
-    document.getElementById("hist-label").textContent = film.bw && s > 0.8 ? "MONOCHROME LUMA" : "RGB · LUMA";
-  }
-
-  function drawHistogram(r, g, b, l, isMono) {
-    const hw = cHist.width, hh = cHist.height;
-    ctxH.clearRect(0, 0, hw, hh);
-    let maxV = 1;
-    for (let i = 1; i < 63; i++) {
-      if (l[i] > maxV) maxV = l[i];
-      if (!isMono) { if (r[i] > maxV) maxV = r[i]; if (g[i] > maxV) maxV = g[i]; if (b[i] > maxV) maxV = b[i]; }
-    }
-    const draw = (arr, fill) => {
-      ctxH.fillStyle = fill;
-      ctxH.beginPath(); ctxH.moveTo(0, hh);
-      for (let i = 0; i < 64; i++) ctxH.lineTo((i / 63) * hw, hh - Math.min(1, arr[i] / maxV) * (hh - 3));
-      ctxH.lineTo(hw, hh); ctxH.closePath(); ctxH.fill();
-    };
-    if (!isMono) {
-      draw(r, "rgba(212,77,40,0.34)"); draw(g, "rgba(78,148,108,0.30)"); draw(b, "rgba(94,142,168,0.34)");
-    }
-    draw(l, "rgba(236,234,228,0.38)");
-  }
-
-  /* Render Contact Sheet Mini Thumbnails */
-  function renderContactSheet() {
-    document.querySelectorAll("#contact-frames .c-frame").forEach((el) => {
-      const cvs = el.querySelector("canvas");
-      const c = cvs.getContext("2d");
-      const f = FILMS[el.dataset.loadFilm];
-      c.save();
-      if (f.bw) c.filter = `grayscale(1) contrast(${f.contrast})`;
-      else c.filter = `contrast(${f.contrast}) saturate(${f.sat})`;
-      drawScene(c, el.dataset.loadScene, cvs.width, cvs.height);
-      c.restore();
-    });
-  }
-
-  /* ==================== 4. Interactive Controls Wiring ==================== */
-  const photoGate = document.getElementById("photo-gate");
-  const gateBefore = document.getElementById("gate-before");
-  const curtainWire = document.getElementById("curtain-wire");
-  const gateAfter = document.getElementById("gate-after");
-  function setSplit(pct) {
-    state.split = Math.max(4, Math.min(96, pct));
-    gateBefore.style.clipPath = `inset(0 ${100 - state.split}% 0 0)`;
-    curtainWire.style.left = `${state.split}%`;
-  }
-  let splitDrag = false;
-  photoGate.addEventListener("pointerdown", (e) => {
-    splitDrag = true; photoGate.setPointerCapture(e.pointerId);
-    const r = photoGate.getBoundingClientRect(); setSplit(((e.clientX - r.left) / r.width) * 100);
-  });
-  photoGate.addEventListener("pointermove", (e) => {
-    if (!splitDrag) return;
-    const r = photoGate.getBoundingClientRect(); setSplit(((e.clientX - r.left) / r.width) * 100);
-  });
-  ["pointerup", "pointercancel"].forEach((ev) => photoGate.addEventListener(ev, () => { splitDrag = false; }));
-
-  // Sound toggle
-  const soundBtn = document.getElementById("sound-toggle");
-  soundBtn.addEventListener("click", () => {
-    soundEnabled = !soundEnabled;
-    soundBtn.textContent = soundEnabled ? "声效：开" : "声效：关";
-    soundBtn.classList.toggle("is-on", soundEnabled);
-    soundBtn.setAttribute("aria-pressed", String(soundEnabled));
-    if (soundEnabled) playDetent(1900, 0.03);
-  });
-
-  // Immersive Focus Toggle (Button + Keyboard F)
-  const toggleImmerse = () => document.body.classList.toggle("is-immersive");
-  document.getElementById("immerse-toggle").addEventListener("click", toggleImmerse);
-  document.getElementById("exit-immerse-btn").addEventListener("click", toggleImmerse);
-
-  // Hold to compare original
-  const cmpBtn = document.getElementById("compare-btn");
-  cmpBtn.addEventListener("pointerdown", () => photoGate.classList.add("is-comparing"));
-  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => cmpBtn.addEventListener(ev, () => photoGate.classList.remove("is-comparing")));
-
-  // Scene tabs
-  document.querySelectorAll("#scene-tabs .k-tab").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      uploadedImg = null;
-      document.querySelectorAll("#scene-tabs .k-tab").forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      state.scene = btn.dataset.scene;
-      document.getElementById("cap-left").textContent = "原片 · DIGITAL RAW";
-      playDetent(1500);
-      rebuildSource(); renderDarkroom();
-    });
-  });
-
-  // Strength & EV Vernier Inputs
-  let lastDetentStr = 78, lastDetentEv = 0;
-  document.getElementById("str-input").addEventListener("input", (e) => {
-    state.strength = Number(e.target.value);
-    if (Math.abs(state.strength - lastDetentStr) >= 10) { lastDetentStr = state.strength; playDetent(1650); }
-    renderDarkroom();
-  });
-  document.getElementById("ev-input").addEventListener("input", (e) => {
-    state.ev = Number(e.target.value) / 100;
-    if (Math.abs(state.ev - lastDetentEv) >= 0.25) { lastDetentEv = state.ev; playDetent(1850); }
-    renderDarkroom();
-  });
-
-  // Interactive Tone Curve Drag & Presets
-  const curveWell = document.getElementById("curve-well");
-  let curveDrag = false;
-  const updateCurvePt = (e) => {
-    const r = curveWell.getBoundingClientRect();
-    state.curveMidX = Math.max(0.18, Math.min(0.82, (e.clientX - r.left) / r.width));
-    state.curveMidY = Math.max(0.15, Math.min(0.88, 1 - (e.clientY - r.top) / r.height));
-    document.querySelectorAll("#curve-presets button").forEach((b) => b.classList.remove("is-active"));
-    document.getElementById("curve-readout").textContent = `IN ${Math.round(state.curveMidX * 255)} → ${Math.round(state.curveMidY * 255)}`;
-    renderDarkroom();
-  };
-  curveWell.addEventListener("pointerdown", (e) => { curveDrag = true; curveWell.setPointerCapture(e.pointerId); updateCurvePt(e); });
-  curveWell.addEventListener("pointermove", (e) => { if (curveDrag) updateCurvePt(e); });
-  ["pointerup", "pointercancel"].forEach((ev) => curveWell.addEventListener(ev, () => { curveDrag = false; }));
-
-  document.querySelectorAll("#curve-presets button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#curve-presets button").forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      const p = btn.dataset.curve;
-      if (p === "linear") { state.curveBlack = 0; state.curveMidX = 0.5; state.curveMidY = 0.5; document.getElementById("curve-readout").textContent = "线性"; }
-      else if (p === "film") { state.curveBlack = 0.04; state.curveMidX = 0.5; state.curveMidY = 0.54; document.getElementById("curve-readout").textContent = "S 曲线"; }
-      else { state.curveBlack = 0.11; state.curveMidX = 0.48; state.curveMidY = 0.56; document.getElementById("curve-readout").textContent = "哑光褪黑"; }
-      playDetent(1500);
-      renderDarkroom();
-    });
-  });
-
-  // Film Roll Tray + Keyboard 1-7 Shortcuts
-  const filmSlots = Array.from(document.querySelectorAll("#film-tray .roll-slot"));
-  function selectFilm(filmKey) {
-    state.film = filmKey;
-    filmSlots.forEach((s) => s.classList.toggle("is-active", s.dataset.film === filmKey));
-    gateAfter.classList.add("is-developing");
-    playDetent(1280, 0.035);
-    renderDarkroom();
-    setTimeout(() => gateAfter.classList.remove("is-developing"), 180);
-  }
-  filmSlots.forEach((slot) => slot.addEventListener("click", () => selectFilm(slot.dataset.film)));
-
-  // Viewfinder Switcher
-  function renderVF() {
-    const v = VIEWFINDERS[state.vf];
-    document.getElementById("vf-svg").innerHTML = v.svg;
-    document.getElementById("prism-l").innerHTML = v.l;
-    document.getElementById("prism-m").innerHTML = v.m;
-    photoGate.classList.toggle("is-hassy", state.vf === "hassy");
-  }
-  document.querySelectorAll("#vf-tabs .k-tab").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#vf-tabs .k-tab").forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      state.vf = btn.dataset.vf;
-      playDetent(1750);
-      renderVF();
-    });
-  });
-
-  // Neutral Surround Switcher
-  document.querySelectorAll("#surround-tabs .surround-chip").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#surround-tabs .surround-chip").forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      document.getElementById("stage-bay").dataset.surround = btn.dataset.surround;
-      playDetent(1600);
-    });
-  });
-
-  // Contact Sheet Click -> Load Film + Scene into Top Darkroom
-  document.querySelectorAll("#contact-frames .c-frame").forEach((frame) => {
-    frame.addEventListener("click", () => {
-      uploadedImg = null;
-      state.scene = frame.dataset.loadScene;
-      document.querySelectorAll("#scene-tabs .k-tab").forEach((b) => b.classList.toggle("is-active", b.dataset.scene === state.scene));
-      rebuildSource();
-      selectFilm(frame.dataset.loadFilm);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  });
-
-  // 5000K Light Table Backlight Toggle
-  const lbTable = document.getElementById("lightbox-table");
-  const lbBtn = document.getElementById("backlight-toggle");
-  lbBtn.addEventListener("click", () => {
-    const isDark = lbTable.classList.toggle("is-dark-table");
-    lbBtn.textContent = isDark ? "切换背光：暗房深灰底" : "切换背光：5000K 匀光板";
-    playDetent(1450);
-  });
-
-  // User Local Photo Import
-  document.getElementById("user-photo").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const img = new Image();
-    img.onload = () => {
-      uploadedImg = img;
-      document.querySelectorAll("#scene-tabs .k-tab").forEach((b) => b.classList.remove("is-active"));
-      document.getElementById("cap-left").textContent = `原片 · ${file.name.slice(0, 18).toUpperCase()}`;
-      rebuildSource(); renderDarkroom();
-    };
-    img.src = URL.createObjectURL(file);
-  });
-
-  if (DEFAULT_REPO_SAMPLE) {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      uploadedImg = img;
-      document.getElementById("cap-left").textContent = `原片 · ${DEFAULT_REPO_SAMPLE_NAME}`;
-      rebuildSource(); renderDarkroom();
-    };
-    img.src = DEFAULT_REPO_SAMPLE;
-  }
-
-  // Keyboard shortcuts: F = immerse, 1-7 = load films
-  const keyMap = ["portra400", "ektar100", "cine800t", "velvia50", "provia100f", "trix400", "hp5plus"];
-  window.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-    if (e.key === "f" || e.key === "F") toggleImmerse();
-    else if (e.key === "Escape" && document.body.classList.contains("is-immersive")) toggleImmerse();
-    else if (e.key >= "1" && e.key <= "7") selectFilm(keyMap[Number(e.key) - 1]);
-  });
-
-  /* ==================== 5. 900ms Mechanical Shutter Interlock ==================== */
-  const sBtn = document.getElementById("shutter-btn");
-  const sArc = document.getElementById("shutter-arc");
-  const sTitle = document.getElementById("shutter-title");
-  const sTime = document.getElementById("shutter-time");
-  const sSub = document.getElementById("shutter-sub");
-  const sReset = document.getElementById("shutter-reset");
-  const ticks = Array.from(document.querySelectorAll("#tick-meter i"));
-  const CIRC = 232.48, HOLD = 900;
-  let raf = null, t0 = 0, done = false, halfTicked = false;
-
-  function setHoldUI(p) {
-    sArc.style.strokeDashoffset = (CIRC * (1 - p)).toFixed(2);
-    sTime.textContent = `${(p * 0.9).toFixed(1)}s / 0.9s`;
-    const lit = Math.floor(p * 9);
-    ticks.forEach((el, idx) => { el.classList.toggle("lit", !done && idx < lit); el.classList.toggle("done", done); });
-  }
-  function beginHold(e) {
-    if (done || raf) return;
-    if (e.type === "keydown" && e.code !== "Space" && e.code !== "Enter") return;
-    if (e.type === "keydown") e.preventDefault();
-    sBtn.classList.add("is-holding");
-    sTitle.textContent = "正在蓄力 · 保持按住…";
-    sSub.textContent = "提前松手将立即回弹取消";
-    halfTicked = false;
-    playDetent(1350, 0.03);
-    t0 = performance.now();
-    const step = (now) => {
-      const p = Math.min(1, (now - t0) / HOLD);
-      if (p >= 0.5 && !halfTicked) { halfTicked = true; playDetent(1800, 0.025); }
-      setHoldUI(p);
-      if (p >= 1) {
-        done = true; raf = null;
-        sBtn.classList.remove("is-holding"); sBtn.classList.add("is-done");
-        sArc.style.stroke = "#4E946C";
-        setHoldUI(1);
-        playShutterClick();
-        sTitle.textContent = "快门释放 · 16-bit TIFF 已写入相册";
-        sSub.textContent = "DCIM/Spektralab/L1002841.tif · Display P3";
-        sReset.style.display = "inline";
-        return;
-      }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-  }
-  function abortHold() {
-    if (done || !raf) return;
-    cancelAnimationFrame(raf); raf = null;
-    sBtn.classList.remove("is-holding");
-    setHoldUI(0);
-    sTitle.textContent = "已松手取消 · 需连续按住 900ms";
-    sSub.textContent = "防误触大体积 16-bit TIFF 渲染或全局重置";
-  }
-  sBtn.addEventListener("pointerdown", beginHold);
-  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => sBtn.addEventListener(ev, abortHold));
-  sBtn.addEventListener("keydown", beginHold);
-  sBtn.addEventListener("keyup", abortHold);
-  sReset.addEventListener("click", () => {
-    done = false; sBtn.classList.remove("is-done"); sArc.style.stroke = "#D44D28";
-    setHoldUI(0); sTitle.textContent = "按住 900ms 释放 16-bit TIFF";
-    sSub.textContent = "提前松手立即回弹取消 · 支持空格键长按"; sReset.style.display = "none";
-  });
-
-  /* Boot */
-  rebuildSource();
-  renderDarkroom();
-  renderVF();
-  setSplit(36);
-  renderContactSheet();
-})();
-</script>
 </body>
 </html>

@@ -1,6 +1,0 @@
-# The HTML entry template includes index.html; do not also copy it as a static page.
-exclude:
-  - index.html
-  - "*.md"
-  - images
-  - validation
