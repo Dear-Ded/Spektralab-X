@@ -71,11 +71,12 @@ internal fun LabeledSlider(
     tint: ((Float) -> androidx.compose.ui.graphics.Color)? = null,
     /** Values that get a dot and a firmer detent. */
     stops: List<Double> = emptyList(),
+    showName: Boolean = true,
     onChange: (Double) -> Unit,
 ) {
     var typing by remember { mutableStateOf(false) }
     CameraDial(label, value, min, max, default, enabled, format, onDrag, disabledReason, ends, tint, stops,
-        onTypeValue = { typing = true }, onChange = onChange)
+        onTypeValue = { typing = true }, showName = showName, onChange = onChange)
 
     // The typed value: digits, sign and point only (a unit such as EV, × or % is ignored),
     // clamped to the range; anything unreadable leaves the value alone.

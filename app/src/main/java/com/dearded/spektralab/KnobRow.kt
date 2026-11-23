@@ -93,7 +93,7 @@ internal fun KnobRow(id: String, knobs: List<Knob>, enabled: Boolean, image: Bit
             val k = knobs.firstOrNull { it.key == key } ?: return@AnimatedContent
             Column {
                 k.zone?.let { ToneStrip(image, it) }
-                LabeledSlider(k.label, k.value, k.min, k.max, k.default, enabled, k.format, onDrag = onDrag, tint = k.tint, onChange = k.onChange)
+                LabeledSlider(k.label, k.value, k.min, k.max, k.default, enabled, k.format, onDrag = onDrag, tint = k.tint, showName = false, onChange = k.onChange)
             }
         }
     }

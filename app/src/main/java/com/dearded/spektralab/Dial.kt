@@ -101,6 +101,8 @@ internal fun CameraDial(
     /** Values that get a dot and a firmer detent (a style's 40 / 70 %). */
     stops: List<Double> = emptyList(),
     onTypeValue: (() -> Unit)? = null,
+    /** False when the name is already on screen right above (a KnobRow's carousel). TalkBack still reads it. */
+    showName: Boolean = true,
     onChange: (Double) -> Unit,
 ) {
     val view = LocalView.current
@@ -179,7 +181,7 @@ internal fun CameraDial(
     Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         // The name on the left, the value over the index, ↺ on the right once moved.
         Box(Modifier.fillMaxWidth().height(32.dp)) {
-            Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
+            if (showName) Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
                 color = if (enabled) Palette.OnSurfaceSoft else Palette.OnSurfaceSoft.copy(alpha = 0.5f),
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = 2.dp))
             Text(text(current), style = Readout.copy(fontSize = 19.sp, fontFamily = UiSans, fontWeight = FontWeight.Medium),
