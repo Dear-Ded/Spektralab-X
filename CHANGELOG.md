@@ -8,6 +8,13 @@
 
 Every user-visible change, newest first. New releases are displayed as `alpha vX.Y.Z`, with `vX.Y.Z-alpha` tags for compatibility with installed versions. English summaries are in `fastlane/metadata/android/en-US/changelogs/`.
 
+## alpha v0.3.02 · 2026-11-24
+
+- 有新版本时，编辑页会显示更新入口。点开才会看到更新详情，修图时不再被弹窗打断。
+- 导出完成后，处理队列会显示实际保存的格式、尺寸等信息。
+- 选相纸和边框可以直接看照片小样；在观片台可以沿星级滑动评分。
+- 调整了界面字体，并换用真实胶片相机录制的操作音效。
+
 ## alpha v0.3.01 · 2026-11-24
 
 快门、过片、装卷和保存等相机音效现在跟随媒体音量，不再受铃声音量或来电静音模式影响。在应用内按音量键即可调节；将媒体音量调到零，或关闭设置里的「相机声音」，都可以关闭这些音效。振动和系统通知提醒保持原样。
