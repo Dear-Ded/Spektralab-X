@@ -111,7 +111,7 @@ internal fun PasteSheet(
             PanelHeader(
                 title = tr("粘贴调整"),
                 summary = tr("「{0}」→ {1} 张", from.fromName, count),
-                hint = tr("粘贴的是设置：每张照片自己测光，日期取自己的拍摄时间。"),
+                hint = "",
             )
             Spacer(Modifier.height(RowGap))
             for (g in LookGroup.entries) {

@@ -57,8 +57,7 @@ internal fun BorderPicker(
     var group by rememberSaveable { mutableStateOf(BorderGroups.groupOf(current)) }
     PillRow {
         BorderGroups.NAMES.forEachIndexed { i, name ->
-            val count = BorderGroups.inGroup(i).size
-            SelectPill(selected = group == i, onClick = { group = i }, label = { Text("$name $count") })
+            SelectPill(selected = group == i, onClick = { group = i }, label = { Text(name) })
         }
     }
     // shots_review_1 S1: every style of the group in view, row after row, not one sideways line.

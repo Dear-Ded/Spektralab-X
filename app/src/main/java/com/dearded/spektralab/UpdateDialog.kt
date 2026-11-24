@@ -87,7 +87,6 @@ fun UpdateDialog(editing: Boolean) {
                         modifier = Modifier.fillMaxWidth().padding(vertical = RowGap),
                         color = Palette.Accent, trackColor = Palette.PanelHigh,
                     )
-                    Hint(tr("可以收起，下载会在后台继续。"))
                     Actions(primary = tr("后台下载"), onPrimary = dismiss)
                 }
                 is Updater.State.Ready -> {

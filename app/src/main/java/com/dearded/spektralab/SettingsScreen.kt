@@ -151,7 +151,6 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 add {
                     SettingRow(
                         tr("默认展开全部参数"), expandAll, true,
-                        note = tr("冲洗和调整直接显示全部参数。"),
                     ) { expandAll = it; prefs.edit().putBoolean(EXPAND_ALL, it).apply() }
                 }
                 // ui-visual's key (Theme.kt SURROUND_KEY / SURROUNDS); the editor follows it while it changes.
@@ -159,7 +158,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     var surround by remember { mutableStateOf(prefs.getString(SURROUND_KEY, "dark") ?: "dark") }
                     ChoiceRow(
                         tr("照片四周"),
-                        tr("判断颜色用 18% 灰。"),
+                        "",
                         value = SURROUND_LABELS[surround] ?: SURROUND_LABELS.getValue("dark"),
                     ) {
                         PillRow {
@@ -283,7 +282,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 {
                     val clipboard = LocalClipboardManager.current
                     var copied by remember { mutableStateOf(false) }
-                    ActionRow(if (copied) tr("已复制诊断信息") else tr("复制诊断信息"), tr("报告问题时一起贴上，里面没有照片和位置。")) {
+                    ActionRow(if (copied) tr("已复制诊断信息") else tr("复制诊断信息")) {
                         clipboard.setText(AnnotatedString(vm.diagnostics())); copied = true
                     }
                 },

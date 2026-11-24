@@ -144,7 +144,7 @@ fun LightTableScreen(
 
         TableHead(
             title = if (selecting) tr("已选 {0}", state.selection.size) else tr("观片台"),
-            subtitle = if (selecting || frames.isEmpty()) "" else tr("{0} 张 · 双指缩放改列数", frames.size),
+            subtitle = "",
             selecting = selecting,
             onBack = { if (selecting) table.clearSelection() else onBack() },
             trailing = {

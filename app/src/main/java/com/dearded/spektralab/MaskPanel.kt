@@ -147,7 +147,6 @@ internal fun MaskSection(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     // ui2_snapseed.md 8 #1: the photo stays uncoloured while you judge it; the coverage
     // shows only while this is held, or while a handle or the brush is dragged.
     HoldToShow(enabled)
-    Hint(tr("按住或拖动手柄时显示作用范围，不会导出。"))
     SwitchRow(tr("反选"), m.inverted, enabled) { on -> set { it.copy(inverted = on) } }
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         TextButton(enabled = enabled && masks.size < LocalEdits.MAX_MASKS, onClick = {
@@ -213,7 +212,6 @@ internal fun DustSection(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit
     LabeledSlider(tr("灰尘数量"), d.count, 0.0, 100.0, 35.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(count = it)) }
     LabeledSlider(tr("灰尘大小"), d.size, 0.0, 100.0, 50.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(size = it)) }
     LabeledSlider(tr("黑点比例"), d.dark, 0.0, 100.0, 20.0, enabled, "%.0f%%", onDrag = onDrag) { set(d.copy(dark = it)) }
-    Hint(tr("白点是底片上的灰尘，黑点是相纸或扫描玻璃上的灰尘。"))
     LabeledSlider(tr("划痕"), d.scratches, 0.0, 100.0, 0.0, enabled, "%.0f", onDrag = onDrag) { set(d.copy(scratches = it)) }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(tr("灰尘位置"), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))

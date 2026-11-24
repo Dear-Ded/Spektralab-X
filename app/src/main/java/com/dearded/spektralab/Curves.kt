@@ -352,9 +352,9 @@ internal fun CurveEditor(
             drawCircle(Palette.Panel, if (i == active) 5.dp.toPx() else 3.5.dp.toPx(), o)
         }
     }
-    Text(
-        if (!editable) tr("导入的采样曲线按原样保留；重置后可编辑控制点。")
-        else tr("轻点添加控制点，拖动调整，双击控制点删除。") + if (image != null) tr("直方图是当前画面。") else "",
+    // A state only: why the points cannot be moved. How to use the curve is the curve's own business.
+    if (!editable) Text(
+        tr("导入的采样曲线按原样保留；重置后可编辑控制点。"),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

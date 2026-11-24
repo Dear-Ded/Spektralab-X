@@ -142,7 +142,7 @@ internal fun ChangesSheet(ui: UiState, vm: EditorViewModel, onGo: (Change) -> Un
             .verticalScroll(rememberScrollState())) {
             PanelHeader(
                 title = tr("修改记录"),
-                summary = if (changes.isEmpty()) "" else tr("{0} 组", changes.size),
+                summary = "",
             )
             Spacer(Modifier.padding(top = RowGap))
             if (changes.isEmpty()) Hint(tr("没有改动"), Modifier.padding(bottom = 24.dp))

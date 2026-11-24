@@ -203,7 +203,7 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
             ) {
                 Text(tr("观片台上还没有照片"), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
-                Hint(tr("用右下角的“+”放上来，冲洗过的照片会按胶片和日期自动分卷。"))
+                Hint(tr("还没有照片"))
             }
         } else {
             LazyColumn(
@@ -216,7 +216,7 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
         }
         TableHead(
             title = tr("按卷查看"),
-            subtitle = tr("{0} 卷 · 按胶片和日期自动分卷", rolls.size),
+            subtitle = "",
             onBack = onBack,
         )
         TableBar(rolls = true, onGrid = onGrid, onRolls = {}, add = add, modifier = Modifier.align(Alignment.BottomCenter))

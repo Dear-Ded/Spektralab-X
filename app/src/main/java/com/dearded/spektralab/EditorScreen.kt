@@ -812,7 +812,6 @@ private fun Controls(
                                     LabeledSlider(tr("RAW 曝光"), e.rawExposureEv, -8.0, 8.0, 0.0, enabled, "%+.2f EV", onDrag = vm::setInteracting) {
                                         vm.update(e.copy(rawExposureEv = it))
                                     }
-                                    Hint(tr("先调曝光，再应用相机内嵌曲线或标准曲线。实验显色不等同相机直出；按住对比仍显示线性原片。"))
                                     TextButton(enabled = enabled, onClick = {
                                         vm.update(e.copy(rawDevelopment = RawDevelopmentMode.NEUTRAL, rawAutoExposure = true, rawExposureEv = 0.0))
                                     }) { Text(tr("重置 RAW 显影")) }
@@ -1078,7 +1077,6 @@ private fun Controls(
                                     label = { Text(tr("签名")) },
                                 )
                             }
-                            Hint(tr("相纸在导出 JPEG 时加上；16 位 TIFF 只含胶片本身。"))
                         }
                         // bughunt_main 1: 胶片「无」 skips the pipeline that draws the edge and the date back.
                         SwitchRow(tr("胶片边框"), e.filmEdge, enabled && src != null && !e.noFilm,

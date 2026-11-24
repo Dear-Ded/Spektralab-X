@@ -214,7 +214,6 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(tr("淡"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
-            Text(tr("上：通透 · 下：浓郁 · 长按后拖动可微调"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
             Text(tr("浓"), style = MaterialTheme.typography.labelSmall, color = Palette.OnSurfaceSoft)
         }
     }

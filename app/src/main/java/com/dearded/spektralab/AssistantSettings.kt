@@ -119,8 +119,7 @@ internal fun AssistantSettingsSheet(port: AssistantSettingsPort, onDismiss: () -
                         s.saving -> tr("正在保存")
                         s.testing -> tr("正在测试连接")
                         s.tested == true -> tr("连接正常")
-                        s.error != null -> errorLabel(s.error)
-                        else -> ""
+                        else -> s.error?.let { errorLabel(it) }.orEmpty()
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = if (s.error != null && !s.testing) Palette.Warning else Palette.OnSurfaceSoft,
