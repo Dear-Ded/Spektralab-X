@@ -99,7 +99,7 @@ class SelectionPreviewUiTest {
                 StyleStrip(state, true, preview = { requests += it; null }) { picked = it.applyTo(state.edit, catalog) }
             } }
         }
-        compose.onNodeWithText("相机").performClick()
+        compose.onNodeWithText("相机直出").performClick()
         compose.waitForIdle()
         // A LazyRow only composes the first visible camera style in this small catalogue.
         compose.onNodeWithText("暖肤人像").performClick()

@@ -88,6 +88,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -113,11 +115,16 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     val ui by vm.ui.collectAsState()
     val jobs by vm.jobs.collectAsState()
     val snackbar = remember { SnackbarHostState() }
+    val snackScope = androidx.compose.runtime.rememberCoroutineScope()
     var showSettings by remember { mutableStateOf(false) }
     var openMenu by remember { mutableStateOf(false) }
     var exportMenu by remember { mutableStateOf(false) }
     // ui2_reactbits.md 3.4 C: when 保存 last queued an export, so its icon follows that job (Moments.kt SaveMark).
     var savedAt by remember { mutableLongStateOf(0L) }
+    // Where the print and 保存 are on screen, for the save animation (SaveDevelop.kt).
+    var photoBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var saveBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var saveShot by remember { mutableStateOf<SaveShot?>(null) }
 
     // Android 13+: the export's progress notification needs POST_NOTIFICATIONS.
     // Asked when an export starts; a refusal only hides the notification.
@@ -127,8 +134,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
         queuedExport?.invoke()
         queuedExport = null
     }
+    val exportView = androidx.compose.ui.platform.LocalView.current
     fun exportWithNotice(format: ExportFormat, size: ExportSize, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
         savedAt = System.currentTimeMillis()
+        Feedback.play(exportView, Cue.Shutter)
         val missing = android.os.Build.VERSION.SDK_INT >= 33 &&
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -169,20 +178,10 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     val panelOpen = panelLevel > 0
     val recede by androidx.compose.animation.core.animateFloatAsState(
         if (dragging) 0.15f else 1f, Motion.defaultEffects(), label = "recede")
-    // The first-run guide waits until there is a photo and nothing over it.
-    val coach = LocalCoach.current
-    val coachAllowed = ui.hasImage && showChrome && ui.busy == null && ui.error == null &&
-        !ui.showQueue && ui.detail == null && !showSettings && !ui.exporting
-    androidx.compose.runtime.SideEffect { coach?.allowed = coachAllowed }
     androidx.activity.compose.BackHandler(enabled = !showChrome) { chrome = true }
-    val hintPrefs = remember(context) { context.getSharedPreferences("settings", 0) }
     val toggleChrome: () -> Unit = {
         if (canHide && ui.hasImage) {
             chrome = !chrome
-            if (!chrome && !hintPrefs.getBoolean("hint_immersive", false)) {
-                hintPrefs.edit().putBoolean("hint_immersive", true).apply()
-                vm.showMessage(tr("轻点照片恢复界面"))
-            }
         }
     }
 
@@ -199,41 +198,28 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         androidx.compose.material3.Button(
                             onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp).coachAnchor(CoachStep.SAVE),
+                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() },
                         ) {
                             SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))
                             Text(tr("保存"))
                         }
-                        DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
-                            DropdownMenuItem(text = { Text(tr("JPEG · 工作尺寸")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.FULL)
-                            })
-                            DropdownMenuItem(text = { Text(tr("JPEG · 分享尺寸（长边不超过 3400）")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.JPEG, ExportSize.SHARE)
-                            })
-                            for (target in listOf("sRGB", "Display P3")) {
-                                DropdownMenuItem(text = { Text(tr("JPEG 颜色预览 · {0}", target)) },
-                                    enabled = !ui.loadingDetail && ui.busy == null,
-                                    onClick = { exportMenu = false; vm.loadExportProof(target) })
+                        if (exportMenu) ExportSheet(
+                            heif = HeifExport.available,
+                            proofEnabled = !ui.loadingDetail && ui.busy == null,
+                            onProof = { target -> exportMenu = false; vm.loadExportProof(target) },
+                            onDismiss = { exportMenu = false },
+                        ) { choice ->
+                            exportMenu = false
+                            when (choice) {
+                                is SaveChoice.File -> exportWithNotice(choice.format, choice.size, choice.space)
+                                SaveChoice.Highest -> { savedAt = System.currentTimeMillis(); Feedback.play(exportView, Cue.Shutter); vm.exportExtreme() }
                             }
-                            // TIFF target selection is explicit for each export.
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · sRGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.SRGB)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · Display P3")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.DISPLAY_P3)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · ProPhoto RGB")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.PROPHOTO)
-                            })
-                            DropdownMenuItem(text = { Text(tr("16 位 TIFF · Adobe RGB (1998)")) }, onClick = {
-                                exportMenu = false; exportWithNotice(ExportFormat.TIFF, ExportSize.FULL, TiffColorSpace.ADOBE_RGB)
-                            })
-                            if (HeifExport.available) DropdownMenuItem(text = { Text(tr("HEIF · 工作尺寸（sRGB）")) }, onClick = { exportMenu = false; exportWithNotice(ExportFormat.HEIF, ExportSize.FULL) })
-                            DropdownMenuItem(text = { Text(tr("高质量导出（受设备上限限制）")) }, onClick = {
-                                exportMenu = false; savedAt = System.currentTimeMillis(); vm.exportExtreme()
-                            })
+                            // The ceremony over the screen; the export itself is already queued.
+                            val print = ui.image
+                            val from = photoBounds
+                            if (print != null && from != null && saveBounds != null && motionAllowed())
+                                saveShot = SaveShot(print.asImageBitmap(), fitted(from, print.width, print.height), saveBounds!!, from)
                         }
                     }
     }
@@ -280,7 +266,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                                 openMenu = false
                                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                             })
-                            DropdownMenuItem(text = { Text(tr("从文件选择（RAW / DNG）")) }, onClick = {
+                            DropdownMenuItem(text = { Text(tr("从文件选择")) }, onClick = {
                                 openMenu = false
                                 pickFile.launch(arrayOf("*/*"))
                             })
@@ -291,18 +277,17 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                     // A running export stays visible: its count rides on the ⋯ button.
                     val canUndo = ui.canUndo && !ui.exporting
                     val canRedo = ui.canRedo && !ui.exporting
-                    var confirmReset by remember { mutableStateOf(false) }
-                    IconButton(onClick = { confirmReset = true }, enabled = ui.hasImage && !ui.exporting) {
+                    IconButton(onClick = {
+                        vm.resetAll()
+                        Feedback.play(exportView, Cue.Zero)
+                        snackScope.launch {
+                            if (snackbar.showSnackbar(tr("已恢复原图"), actionLabel = tr("撤销"), duration = androidx.compose.material3.SnackbarDuration.Short) ==
+                                androidx.compose.material3.SnackbarResult.ActionPerformed) vm.undo()
+                        }
+                    }, enabled = ui.hasImage && !ui.exporting) {
                         Icon(Icons.Default.Refresh, contentDescription = tr("重置全部"),
                             tint = if (ui.hasImage && !ui.exporting) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
                     }
-                    if (confirmReset) AlertDialog(
-                        onDismissRequest = { confirmReset = false },
-                        title = { Text(tr("重置全部调整？")) },
-                        text = { Text(tr("照片会回到刚打开时的样子：风格、胶片、相纸、全部参数、边框和裁剪都会还原，RAW 白平衡回到拍摄时。之后仍可以点撤销找回。")) },
-                        confirmButton = { TextButton(onClick = { confirmReset = false; vm.resetAll() }) { Text(tr("重置"), color = Palette.Warning) } },
-                        dismissButton = { TextButton(onClick = { confirmReset = false }) { Text(tr("取消")) } },
-                    )
                     IconButton(onClick = vm::undo, enabled = canUndo) {
                         HistoryIcon(redo = false, tint = if (canUndo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
                     }
@@ -358,14 +343,14 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
             val landscape = maxWidth > boxHeight
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxHeight(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                    Preview(ui, Modifier.weight(1f).fillMaxHeight().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome, sliderDragging = { dragging })
                     if (ui.hasImage) Controls(ui, vm, saveButton, true, {}, Modifier.width(360.dp).fillMaxHeight().chrome(showChrome), preview)
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    Preview(ui, Modifier.weight(1f).fillMaxWidth(), onDetail = vm::loadDetail, onOpen = { openMenu = true },
-                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome)
+                    Preview(ui, Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { photoBounds = it.boundsInWindow() }, onDetail = vm::loadDetail, onOpen = { openMenu = true },
+                        onLightTable = onLightTable, chrome = barsShown, onToggleChrome = toggleChrome, sliderDragging = { dragging })
                     // shots_review_1 P1: the empty page is the whole screen.
                     if (!ui.hasImage) return@Column
                     // The handle follows the finger 1:1; on release the panel springs to the
@@ -457,6 +442,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
+            saveShot?.let { SaveDevelop(it) { saveShot = null } }
         }
     }
     }
@@ -528,6 +514,8 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
 private fun Preview(
     ui: UiState, modifier: Modifier, onDetail: () -> Unit = {}, onOpen: () -> Unit = {},
     onLightTable: () -> Unit = {}, chrome: Boolean = true, onToggleChrome: () -> Unit = {},
+    /** True while a dial is under the finger or still turning: its renders swap in, never cross. */
+    sliderDragging: () -> Boolean = { false },
 ) {
     val toggle by androidx.compose.runtime.rememberUpdatedState(onToggleChrome)
     var scale by remember(ui.source) { mutableFloatStateOf(1f) }
@@ -582,25 +570,25 @@ private fun Preview(
             val caption = remember(ui.exif, ui.edit.film, ui.catalog) {
                 Caption.of(ui.exif, ui.catalog.film(ui.edit.film)?.label ?: "")
             }
-            // A film change crosses over from the old print (defaultEffects, no
-            // overshoot); drag renders, tier upgrades and the held original swap
-            // instantly, so live feedback is never delayed by an animation.
-            val film = ui.edit.film
-            var shownFilm by remember { mutableStateOf(film) }
+            // A new look crosses over from the old print; a dial's renders, finer tiers and the
+            // held original swap instantly, so live feedback is never delayed by an animation.
+            var shownEdit by remember { mutableStateOf(ui.edit) }
             var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
             var front by remember { mutableStateOf(bitmap) }
             val fade = remember { androidx.compose.animation.core.Animatable(1f) }
             LaunchedEffect(bitmap) {
                 if (bitmap === front) return@LaunchedEffect
-                val cross = film != shownFilm && !holding && back == null
-                shownFilm = film
+                // A new look (a style, a film, a paper, a reset, an undo) crosses over from the old print;
+                // a dial's renders, the held original and a finer render of the same edit swap at once.
+                val cross = ui.edit != shownEdit && !holding && back == null && !sliderDragging()
+                shownEdit = ui.edit
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
                 back = front; front = bitmap; fade.snapTo(0f)
                 // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
                 // is gone before the eye settles on the new one; with animations off it is a cut.
                 try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
             }
-            Box(gestures.coachAnchor(CoachStep.HOLD)) {
+            Box(gestures) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
@@ -793,7 +781,7 @@ private fun Controls(
                             )
                             // The panel head names the pair being developed (ui2_derivatives.md).
                             PanelHeader(
-                                title = tr("冲洗"),
+                                title = tr("胶片"),
                                 // Collapsed state at a glance (upstream SectionHeader): film · paper · exposure.
                                 summary = listOfNotNull(if (e.noFilm) tr("无胶卷") else ui.catalog.film(e.film)?.label,
                                     if (e.noFilm) null else if (e.scanFilm) tr("直接扫描") else if (e.digitalIntermediate) tr("数字中间片") else ui.catalog.paper(e.paper)?.label,
@@ -852,21 +840,12 @@ private fun Controls(
                                 LabeledSlider(tr("曝光补偿"), e.exposureEv, -4.0, 4.0, 0.0, enabled, "%+.1f EV", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(exposureEv = it))
                                 }
-                                // ui2_icecream.md 6.6: a grey word from the print's histogram, never a colour.
-                                val shown = ui.image
-                                val exposureWord by androidx.compose.runtime.produceState<String?>(null, shown) {
-                                    value = shown?.let { b ->
-                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { Histogram.of(b) }
-                                    }?.let(::exposureVerdict)
-                                }
-                                exposureWord?.let { Hint(tr("画面：{0}", it)) }
-                                LabeledSlider(tr("放大曝光"), e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
+                                LabeledSlider(tr("冲印曝光"), e.printExposure, 0.2, 3.0, 1.0, enabled, "×%.2f", onDrag = vm::setInteracting) {
                                     vm.update(e.copy(printExposure = it))
                                 }
-                                SwitchRow(tr("自动曝光"), e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
+                                SwitchRow(tr("自动测光"), e.autoExposure, enabled) { vm.update(e.copy(autoExposure = it)) }
                                 if (!e.noFilm) {
                                     GroupLabel(tr("胶片前曲线"))
-                                    Hint(tr("横轴为胶片曝光，纵轴为映射后的曝光：−8 至 +8 EV，中点为中灰。"))
                                     CurveEditor(e.sceneCurve.display, null, enabled,
                                         includeLuma = true, editable = !e.sceneCurve.isSampled,
                                         onDrag = vm::setInteracting) { curves ->
@@ -882,22 +861,15 @@ private fun Controls(
                                 var moreExposure by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(expandAll) }
                                 MoreRow(open = moreExposure, edited = e.yShift != 0.0 || e.mShift != 0.0 ||
                                     (ui.source?.wbK ?: 0.0) > 0) { moreExposure = !moreExposure }
-                                if (!moreExposure) Hint(moreSummary(
-                                    if (ui.source?.kind == "raw") tr("黄 / 品红滤镜、RAW 白平衡") else tr("黄 / 品红滤镜"),
-                                    tr("黄") to e.yShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
-                                    tr("品红") to e.mShift.takeIf { it != 0.0 }?.let { String.format(java.util.Locale.ROOT, "%+.2f", it) },
-                                    tr("白平衡") to ui.source?.takeIf { it.wbK > 0 }?.let { String.format(java.util.Locale.ROOT, "%.0f K", it.wbK) },
-                                ))
                                 Expandable(moreExposure, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
-                                    LabeledSlider(tr("黄滤镜"), e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
-                                        disabledReason = "",
-                                        ends = tr("偏黄") to tr("偏蓝")) {
+                                    LabeledSlider(tr("冷暖"), e.yShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
+                                        ends = tr("偏黄") to tr("偏蓝"), tint = DialTints.warmCool) {
                                         vm.update(e.copy(yShift = it))
                                     }
                                     // Upstream measured it through the engine (EnlargerSection.swift): more
                                     // magenta filtration is a greener print, so the ends read the other way.
-                                    LabeledSlider(tr("品红滤镜"), e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
-                                        ends = tr("偏品红") to tr("偏绿")) {
+                                    LabeledSlider(tr("色调"), e.mShift, -1.0, 1.0, 0.0, enabled && !e.scanFilm, "%+.2f", onDrag = vm::setInteracting,
+                                        ends = tr("偏品红") to tr("偏绿"), tint = DialTints.magentaGreen) {
                                         vm.update(e.copy(mShift = it))
                                     }
                                     // A control that cannot be used says why (ui2_derivatives.md 10).
@@ -1198,7 +1170,7 @@ private fun Controls(
                         }
                         else -> {
                             PanelHeader(
-                                title = tr("构图"),
+                                title = tr("裁剪"),
                                 summary = listOfNotNull(
                                     ASPECTS.firstOrNull { kotlin.math.abs(e.cropAspect - it.second) < 1e-3 }?.first ?: tr("自定"),
                                     if (e.quarterTurns % 4 != 0) tr("转 {0}°", e.quarterTurns % 4 * 90) else null,
@@ -1219,7 +1191,23 @@ private fun Controls(
                                 SelectPill(
                                     selected = kotlin.math.abs(e.cropAspect - aspect) < 1e-3,
                                     onClick = { vm.update(reframe(e.copy(cropAspect = aspect))) },
-                                    label = { Text(label) },
+                                    label = {
+                                        // The shape of the ratio, drawn before its name.
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            val ink = androidx.compose.material3.LocalContentColor.current
+                                            androidx.compose.foundation.Canvas(Modifier.size(16.dp)) {
+                                                val r = if (aspect <= 0.0) 1.5f else aspect.toFloat()
+                                                val w = if (r >= 1f) size.width else size.width * r
+                                                val h = if (r >= 1f) size.height / r else size.height
+                                                drawRoundRect(ink, Offset((size.width - w) / 2f, (size.height - h) / 2f), androidx.compose.ui.geometry.Size(w, h),
+                                                    androidx.compose.ui.geometry.CornerRadius(1.5.dp.toPx()),
+                                                    style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx(),
+                                                        pathEffect = if (aspect <= 0.0) androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx())) else null))
+                                            }
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(label)
+                                        }
+                                    },
                                     enabled = enabled && !e.filmEdge,
                                 )
                             }
@@ -1267,8 +1255,9 @@ private val DEVELOP_STEPS get() = listOf(tr("胶卷"), tr("相纸"), tr("曝光"
 private fun DevelopSteps(step: Int, edited: List<Boolean>, enabled: Boolean, onStep: (Int) -> Unit) {
     val view = androidx.compose.ui.platform.LocalView.current
     // ui_ai_flavor_audit 9: four equal segments, all on one row; order is the darkroom's.
-    Segmented(DEVELOP_STEPS, step, enabled, Modifier.padding(bottom = 4.dp),
-        edited = { edited.getOrElse(it) { false } }) { i -> view.tick(); onStep(i) }
+    FilmRail(DEVELOP_STEPS, step, enabled, edited = { edited.getOrElse(it) { false } }, Modifier.padding(bottom = 4.dp)) { i ->
+        Feedback.play(view, Cue.Segment); onStep(i)
+    }
 }
 
 /**
@@ -1313,10 +1302,9 @@ private fun WhiteBalance(s: SourceInfo, enabled: Boolean, onCommit: (Double, Dou
     }
     GroupLabel(tr("RAW 白平衡"))
     LabeledSlider(tr("色温"), k.toDouble(), 2000.0, 12000.0, s.asShotK.coerceIn(2000.0, 12000.0), enabled, "%.0f K",
-        onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
+        tint = DialTints.coolWarm, onDrag = { on -> dragging = on; if (!on) commit() }) { k = it.toFloat(); if (!dragging) commit() }
     LabeledSlider(tr("色调"), tint.toDouble(), -150.0, 150.0, s.asShotTint.coerceIn(-150.0, 150.0), enabled, "%+.0f",
-        onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
-    Hint(tr("松手后重新解码，需要几秒。"))
+        tint = DialTints.greenMagenta, onDrag = { on -> dragging = on; if (!on) commit() }) { tint = it.toFloat(); if (!dragging) commit() }
 }
 
 @Composable
@@ -1333,7 +1321,7 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                       preview: suspend (Edit) -> android.graphics.Bitmap? = { null }, onPick: (String) -> Unit) {
     if (!ui.hasImage || ui.catalog.films.isEmpty()) return
     // UI2.md 2.3 ①: four kinds of film, the current one's kind open first.
-    val kinds = listOf(tr("彩色负片"), tr("反转片"), tr("电影卷"), tr("黑白"))
+    val kinds = listOf(tr("彩色负片"), tr("反转片"), tr("电影胶片"), tr("黑白"))
     fun kindOf(s: Stock) = when {
         s.bw -> 3
         s.positive -> 1
@@ -1349,11 +1337,11 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
     val recents = picks.recent.mapNotNull { id -> ui.catalog.films.firstOrNull { it.id == id } }
     if ((kind == FAV && favs.isEmpty()) || (kind == RECENT && recents.isEmpty())) kind = 0
     PillRow(Modifier.padding(bottom = 4.dp)) {
-        if (favs.isNotEmpty()) SelectPill(selected = kind == FAV, onClick = { kind = FAV }, label = { Text(tr("收藏 {0}", favs.size)) })
+        if (favs.isNotEmpty()) SelectPill(selected = kind == FAV, onClick = { kind = FAV }, label = { Text(tr("收藏")) })
         if (recents.isNotEmpty()) SelectPill(selected = kind == RECENT, onClick = { kind = RECENT }, label = { Text(tr("最近")) })
         kinds.forEachIndexed { i, name ->
             val n = ui.catalog.films.count { kindOf(it) == i }
-            if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text("$name $n") })
+            if (n > 0) SelectPill(selected = kind == i, onClick = { kind = i }, label = { Text(name) })
         }
     }
     val films = when (kind) {
@@ -1399,12 +1387,14 @@ internal fun FilmStrip(ui: UiState, enabled: Boolean, onNone: () -> Unit = {},
                 selected = selected,
                 image = bitmap,
                 title = film.label.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                subtitle = FilmNotes.line(film),
+                // Its speed and kind are on the cassette; the card carries the name only.
+                subtitle = "",
                 enabled = enabled,
                 placeholder = film.label, size = 88.dp,
                 starred = picks.isFavourite(film.id),
                 onLongClick = { view.tick(strong = true); picks.toggleFavourite(film.id) },
-            ) { if (!selected) { view.tick(); picks.used(film.id); onPick(film.id) } }
+                overlay = { CassetteBadge(film, selected, Modifier.align(Alignment.BottomStart)) },
+            ) { if (!selected) { Feedback.play(view, Cue.Load); picks.used(film.id); onPick(film.id) } }
         }
     }
 }
@@ -1533,4 +1523,12 @@ private class OpenDocumentFromLast(private val context: android.content.Context)
         fun remember(context: android.content.Context, uri: Uri) =
             context.getSharedPreferences("settings", 0).edit().putString(KEY, uri.toString()).apply()
     }
+}
+
+/** Where a [w] by [h] print sits when fitted (ContentScale.Fit) into [box]. */
+private fun fitted(box: androidx.compose.ui.geometry.Rect, w: Int, h: Int): androidx.compose.ui.geometry.Rect {
+    val k = minOf(box.width / w, box.height / h)
+    val fw = w * k
+    val fh = h * k
+    return androidx.compose.ui.geometry.Rect(box.center.x - fw / 2f, box.center.y - fh / 2f, box.center.x + fw / 2f, box.center.y + fh / 2f)
 }

@@ -77,13 +77,13 @@ class Screenshots {
         shot("02_editor_busy")
     }
 
-    /** The name mid-flip (about 450 ms in) and settled (1100 ms), SplitFlap.kt. */
+    /** The name mid-flip as the frame develops (about 1.65 s in) and settled with the slide clear (2.7 s), LaunchIntro.kt. */
     @Test fun launchNameFlip() {
         content { LaunchIntro(ready = false, onDone = {}) }
         val main = shadowOf(Looper.getMainLooper())
-        repeat(9) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        repeat(33) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
         compose.onRoot().captureRoboImage("$OUT/04_launch_name_flip.png")
-        repeat(13) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
+        repeat(21) { compose.mainClock.advanceTimeBy(50); main.idleFor(java.time.Duration.ofMillis(50)) }
         compose.onRoot().captureRoboImage("$OUT/05_launch_name_settled.png")
     }
 
@@ -92,11 +92,11 @@ class Screenshots {
         shot("61_about")
     }
 
-    /** The launch intro about 700 ms in: glow up, strip developed, leak mid-sweep (LaunchIntro.kt). */
+    /** The launch intro about 2 s in: the exposed frame in the colour developer, the strip pushed in (LaunchIntro.kt). */
     @Test fun launchIntro() {
         content { LaunchIntro(ready = false, onDone = {}) }
         val main = shadowOf(Looper.getMainLooper())
-        repeat(7) {
+        repeat(20) {
             compose.mainClock.advanceTimeBy(100)
             main.idleFor(java.time.Duration.ofMillis(100))
         }
@@ -116,7 +116,7 @@ class Screenshots {
 
     @Test fun editorDevelop() {
         editor(Fake.ui())
-        tap("冲洗")
+        tap("胶片")
         shot("20_develop_1_film")
         tap("相纸")
         shot("21_develop_2_paper")
@@ -141,7 +141,7 @@ class Screenshots {
         editor(ui.copy(edit = Edit.withBorder(ui.edit, border, ui.source!!.width, ui.source!!.height)))
         tap("边框")
         shot("40_border")
-        tap("构图")
+        tap("裁剪")
         shot("50_crop")
     }
 
@@ -174,7 +174,7 @@ class Screenshots {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.withoutStyle()))
         shot("13_style_none")
-        tap("冲洗")
+        tap("胶片")
         shot("24_develop_none")
     }
 
@@ -328,7 +328,7 @@ class Screenshots {
 
     private fun developExposure(image: Bitmap, name: String) {
         editor(Fake.ui().copy(image = image))
-        tap("冲洗")
+        tap("胶片")
         tap("曝光")
         // The 偏暗 / 偏亮 line comes from a histogram worked out on Dispatchers.Default.
         waitReal(3000)
@@ -338,7 +338,7 @@ class Screenshots {
     @Test fun developGrainOff() {
         val ui = Fake.ui()
         editor(ui.copy(edit = ui.edit.copy(grainActive = false)))
-        tap("冲洗")
+        tap("胶片")
         tap("效果")
         tallPanel()
         shot("27_develop_4_grain_off")

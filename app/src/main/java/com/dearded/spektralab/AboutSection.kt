@@ -62,9 +62,8 @@ internal fun AboutSection() {
     val open = { url: String -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
     Column {
         Text(tr("关于"), style = MaterialTheme.typography.labelLarge)
-        // The name on split-flap tiles (SplitFlap.kt); settled at once when 启动动画 is off.
-        val flips = remember(context) { context.getSharedPreferences("settings", 0).getBoolean(LAUNCH_INTRO, true) }
-        SplitFlapText("Spektralab-X", style = MaterialTheme.typography.titleLarge, play = flips,
+        // The name on split-flap tiles (SplitFlap.kt); settled at once with system animations off.
+        SplitFlapText("Spektralab-X", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(vertical = 8.dp))
         Text(tr("Spektralab-X · 版本 {0}（{1}）", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
             style = MaterialTheme.typography.bodySmall)

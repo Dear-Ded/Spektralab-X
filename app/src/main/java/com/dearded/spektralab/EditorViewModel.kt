@@ -705,7 +705,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         val uri = lastUri
         if (src != null && uri != null && src.kind == "raw" && (src.wbK != 0.0 || src.wbTint != 0.0))
             launchOpen(uri, wb = 0.0 to 0.0)
-        _ui.update { it.copy(message = tr("已重置为刚打开时的样子，可撤销")) }
+        // The screen says so, with 撤销 on the message.
     }
 
     // --- presets: film, paper and print/effects only, never per-photo settings ---

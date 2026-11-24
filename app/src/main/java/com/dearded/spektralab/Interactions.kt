@@ -1,8 +1,6 @@
 package com.dearded.spektralab
 
 import android.animation.ValueAnimator
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
@@ -182,7 +180,7 @@ fun Modifier.morphingPill(
 
 // --- haptics -----------------------------------------------------------------
 
-/** The events of UI2.md 3.5. Each maps to one HapticFeedbackConstants value with an API 29 fallback. */
+/** The events of UI2.md 3.5; each is one [Cue] (see [cue]). New code asks for a [Cue] directly. */
 enum class HapticEvent {
     /** A slider passes or snaps to its default. */
     Tick,
@@ -206,40 +204,23 @@ enum class HapticEvent {
     Reject,
 }
 
-/** The constant for [event] on this device, or null when it has none (GestureEnd before API 30). */
-fun hapticConstant(event: HapticEvent): Int? {
-    val sdk = Build.VERSION.SDK_INT
-    return when (event) {
-        HapticEvent.Tick -> HapticFeedbackConstants.CLOCK_TICK
-        HapticEvent.Edge ->
-            if (sdk >= 34) HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE else HapticFeedbackConstants.CLOCK_TICK
-        HapticEvent.Segment ->
-            if (sdk >= 34) HapticFeedbackConstants.SEGMENT_TICK else HapticFeedbackConstants.CLOCK_TICK
-        HapticEvent.Confirm ->
-            if (sdk >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.VIRTUAL_KEY
-        HapticEvent.Click -> HapticFeedbackConstants.CONTEXT_CLICK
-        HapticEvent.GestureStart ->
-            if (sdk >= 30) HapticFeedbackConstants.GESTURE_START else HapticFeedbackConstants.CONTEXT_CLICK
-        HapticEvent.GestureEnd -> if (sdk >= 30) HapticFeedbackConstants.GESTURE_END else null
-        HapticEvent.LongPress -> HapticFeedbackConstants.LONG_PRESS
-        HapticEvent.ToggleOn ->
-            if (sdk >= 34) HapticFeedbackConstants.TOGGLE_ON else HapticFeedbackConstants.CLOCK_TICK
-        HapticEvent.ToggleOff ->
-            if (sdk >= 34) HapticFeedbackConstants.TOGGLE_OFF else HapticFeedbackConstants.CLOCK_TICK
-        HapticEvent.Reject ->
-            if (sdk >= 30) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.LONG_PRESS
-    }
+/** Which [Cue] each of the older events is; they all go through [Feedback] now. */
+fun HapticEvent.cue(): Cue = when (this) {
+    HapticEvent.Tick -> Cue.Zero
+    HapticEvent.Edge -> Cue.Limit
+    HapticEvent.Segment -> Cue.Segment
+    HapticEvent.Confirm -> Cue.Saved
+    HapticEvent.Click -> Cue.Pick
+    HapticEvent.GestureStart -> Cue.Hold
+    HapticEvent.GestureEnd -> Cue.Release
+    HapticEvent.LongPress -> Cue.LongPress
+    HapticEvent.ToggleOn -> Cue.ToggleOn
+    HapticEvent.ToggleOff -> Cue.ToggleOff
+    HapticEvent.Reject -> Cue.Error
 }
 
-/**
- * Plays [event] (UI2.md 3.5). Goes through View.performHapticFeedback, so it
- * follows the system's touch-feedback switch and needs no VIBRATE permission.
- * Once per event: never call this on every frame of a drag, only when a
- * threshold or detent is crossed.
- */
-fun View.haptic(event: HapticEvent) {
-    hapticConstant(event)?.let { performHapticFeedback(it) }
-}
+/** Plays [event] through [Feedback]. Once per event: never on every frame of a drag. */
+fun View.haptic(event: HapticEvent) = Feedback.play(this, event.cue())
 
 /** [View.haptic] on the current view, for use from click lambdas: `val haptic = rememberHaptic(); ... haptic(HapticEvent.Click)`. */
 @Composable

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -46,8 +48,8 @@ import androidx.compose.ui.draw.clip
 internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val e = ui.edit
     val l = e.look
-    val n = Look.NEUTRAL
     fun set(next: Look) = vm.update(e.copy(look = next))
+    val view = androidx.compose.ui.platform.LocalView.current
 
     // One segment on screen at a time (UI2.md 2.4); a dot marks the ones changed.
     val segments = ADJUST_SEGMENTS
@@ -57,13 +59,11 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     val nav = LocalEditorNav.current
     var seg by nav::adjustSeg
 
-    // UI2.md 7.2 point 2: title · how many segments changed, the reset on the right.
-    val changedCount = edited.count { it }
+    // One reset, for the segment on screen; the dots on the pills say which ones are changed,
+    // and 重置全部 in the top bar takes everything back.
     PanelHeader(
         title = tr("调整"),
-        summary = if (changedCount == 0) "" else tr("已改 {0} 段", changedCount),
-        // 无 is the panel's reset, not a segment: one row, one thing selected (ui_ai_flavor_audit).
-        resetLabel = tr("重置调整"), changed = !l.neutral, enabled = enabled, onReset = { set(Look.NEUTRAL) },
+        resetLabel = tr("重置"), changed = edited[seg], enabled = enabled, onReset = { resetSegment(seg) },
     )
     PillRow {
         segments.forEachIndexed { i, name ->
@@ -71,75 +71,65 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                 label = { Text(name) }, enabled = enabled, edited = edited[i])
         }
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (SEGMENT_HINTS[seg].isEmpty()) Spacer(Modifier.weight(1f)) else FoldHint(SEGMENT_HINTS[seg], Modifier.weight(1f))
-        if (edited[seg]) QuietButton(tr("重置{0}", segments[seg]), enabled = enabled) { resetSegment(seg) }
-    }
 
-    // UI2.md 2.4: at most three sliders in reach per segment; the rest behind 更多参数.
-    val expandAll = rememberExpandAll()
-    var more by remember(seg) { mutableStateOf(expandAll) }
+    // ui-polish: 光线 and 色彩 are a row of knobs and one dial (KnobRow.kt), all in reach.
     when (seg) {
-        0 -> {
-            // The 双击归零 hint sits on the first slider a newcomer meets, one tap from the photo.
-            Box(Modifier.coachAnchor(CoachStep.RESET)) {
-                LabeledSlider(tr("曝光"), l.exposure, -3.0, 3.0, 0.0, enabled, "%+.2f EV") { set(l.copy(exposure = it)) }
-            }
-            Adj(tr("对比度"), l.contrast, -50.0, 50.0, enabled) { set(l.copy(contrast = it)) }
-            Adj(tr("亮度"), l.brightness, -50.0, 50.0, enabled) { set(l.copy(brightness = it)) }
-            MoreRow(open = more, edited = l.highlights != n.highlights || l.shadows != n.shadows ||
-                l.blackPoint != n.blackPoint || l.whitePoint != n.whitePoint) { more = !more }
-            if (!more) Hint(moreSummary(tr("高光、阴影、黑场、白场"),
-                tr("高光") to l.highlights.signedOrNull(n.highlights), tr("阴影") to l.shadows.signedOrNull(n.shadows),
-                tr("黑场") to l.blackPoint.signedOrNull(n.blackPoint), tr("白场") to l.whitePoint.signedOrNull(n.whitePoint)))
-            Expandable(more, verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(RowGap)) {
-                Adj(tr("高光"), l.highlights, -100.0, 100.0, enabled) { set(l.copy(highlights = it)) }
-                Adj(tr("阴影"), l.shadows, -100.0, 100.0, enabled) { set(l.copy(shadows = it)) }
-                Adj(tr("黑场"), l.blackPoint, 0.0, 50.0, enabled) { set(l.copy(blackPoint = it)) }
-                Adj(tr("白场"), l.whitePoint, 0.0, 50.0, enabled) { set(l.copy(whitePoint = it)) }
-            }
-        }
-        1 -> {
-            Adj(tr("色温"), l.temperature, -100.0, 100.0, enabled) { set(l.copy(temperature = it)) }
-            Adj(tr("色调"), l.tint, -100.0, 100.0, enabled) { set(l.copy(tint = it)) }
-            Adj(tr("饱和度"), l.saturation, -100.0, 100.0, enabled) { set(l.copy(saturation = it)) }
-            MoreRow(open = more, edited = l.vibrance != n.vibrance) { more = !more }
-            if (!more) Hint(moreSummary(tr("自然饱和度"), tr("自然饱和度") to l.vibrance.signedOrNull(n.vibrance)))
-            if (more) Adj(tr("自然饱和度"), l.vibrance, -100.0, 100.0, enabled) { set(l.copy(vibrance = it)) }
-        }
+        0 -> KnobRow("light", listOf(
+            Knob("exposure", tr("曝光"), l.exposure, -3.0, 3.0, 0.0, "%+.2f EV", short = ::signed1, zone = Zones.all) { set(l.copy(exposure = it)) },
+            Knob("contrast", tr("对比度"), l.contrast, -50.0, 50.0, 0.0, "%+.0f", zone = Zones.contrast) { set(l.copy(contrast = it)) },
+            Knob("brightness", tr("亮度"), l.brightness, -50.0, 50.0, 0.0, "%+.0f", zone = Zones.mids) { set(l.copy(brightness = it)) },
+            Knob("highlights", tr("高光"), l.highlights, -100.0, 100.0, 0.0, "%+.0f", zone = Zones.highlights, divider = true) { set(l.copy(highlights = it)) },
+            Knob("shadows", tr("阴影"), l.shadows, -100.0, 100.0, 0.0, "%+.0f", zone = Zones.shadows) { set(l.copy(shadows = it)) },
+            Knob("black", tr("黑场"), l.blackPoint, 0.0, 50.0, 0.0, "%.0f", short = ::plain0, zone = Zones.blacks) { set(l.copy(blackPoint = it)) },
+            Knob("white", tr("白场"), l.whitePoint, 0.0, 50.0, 0.0, "%.0f", short = ::plain0, zone = Zones.whites) { set(l.copy(whitePoint = it)) },
+        ), enabled, ui.image)
+        1 -> KnobRow("colour", listOf(
+            Knob("temperature", tr("色温"), l.temperature, -100.0, 100.0, 0.0, "%+.0f", tint = DialTints.coolWarm) { set(l.copy(temperature = it)) },
+            Knob("tint", tr("色调"), l.tint, -100.0, 100.0, 0.0, "%+.0f", tint = DialTints.greenMagenta) { set(l.copy(tint = it)) },
+            Knob("saturation", tr("饱和度"), l.saturation, -100.0, 100.0, 0.0, "%+.0f", divider = true) { set(l.copy(saturation = it)) },
+            Knob("vibrance", tr("自然饱和度"), l.vibrance, -100.0, 100.0, 0.0, "%+.0f") { set(l.copy(vibrance = it)) },
+        ), enabled, ui.image)
         2 -> {
             // Two tools that never share the screen: one colour at a time, or one tonal zone.
             var tool by remember { mutableIntStateOf(0) }
             Segmented(listOf(tr("单色调整"), tr("色彩平衡")), tool, enabled) { tool = it }
             if (tool == 0) {
                 var band by remember { mutableIntStateOf(0) }
-                Row(
-                    Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                // The eight colours as one ribbon across the width: each a 44 dp segment, no aiming at a dot.
+                // The chosen one stands out of the ribbon with a light edge; a changed one has a dot.
+                Row(Modifier.fillMaxWidth().height(48.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     Look.BANDS.forEachIndexed { i, (bandName, argb) ->
                         val on = band == i
                         val bandEdited = !l.hsl.getOrElse(i) { Band() }.neutral
-                        // A 48 dp target around a 28 dp swatch; the chosen one wears a white ring
-                        // outside a gap, the same signal as a picked card.
+                        val lift by androidx.compose.animation.core.animateFloatAsState(if (on) 1f else 0f, Motion.fastSpatial(), label = "band")
                         Box(
-                            Modifier.size(48.dp).clip(CircleShape)
-                                .selectable(selected = on, enabled = enabled, role = Role.Tab) { band = i }
+                            Modifier.weight(1f).fillMaxHeight()
+                                .graphicsLayer { scaleY = 0.78f + 0.22f * lift; alpha = if (enabled) 1f else 0.5f }
+                                .clip(Corners.s)
+                                .background(Color(argb).copy(alpha = 0.78f + 0.22f * lift))
+                                .border(if (on) 2.dp else 0.dp, if (on) Palette.Accent else Color.Transparent, Corners.s)
+                                .selectable(selected = on, enabled = enabled, role = Role.Tab) {
+                                    if (!on) { band = i; Feedback.play(view, Cue.Detent) }
+                                }
                                 .semantics { contentDescription = bandName },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(Modifier.size(40.dp).border(2.dp, if (on) Palette.Accent else Color.Transparent, CircleShape))
-                            Box(Modifier.size(28.dp).background(Color(argb), CircleShape))
-                            if (bandEdited && !on) EditedDot(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
+                            if (bandEdited) EditedDot(onFill = true, modifier = Modifier.align(Alignment.TopEnd).padding(5.dp))
                         }
                     }
                 }
                 val b = l.hsl.getOrElse(band) { Band() }
-                val name = Look.BANDS[band].first
-                Adj(tr("{0} · 色相", name), b.hue, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(hue = it))) }
-                Adj(tr("{0} · 饱和度", name), b.sat, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(sat = it))) }
-                Adj(tr("{0} · 明亮度", name), b.lum, -100.0, 100.0, enabled) { set(l.withBand(band, b.copy(lum = it))) }
+                // Each dial shows where it goes: the hue either side of this colour, grey to the colour,
+                // dark through it to light.
+                val c = Color(Look.BANDS[band].second)
+                val hsv = FloatArray(3).also { android.graphics.Color.colorToHSV(Look.BANDS[band].second.toInt(), it) }
+                val hueTint: (Float) -> Color = { t -> Color.hsv(((hsv[0] + (t - 0.5f) * 60f) % 360f + 360f) % 360f, 0.5f, 0.84f) }
+                KnobRow("band$band", listOf(
+                    Knob("hue", tr("色相"), b.hue, -100.0, 100.0, 0.0, "%+.0f", tint = hueTint) { set(l.withBand(band, b.copy(hue = it))) },
+                    Knob("sat", tr("饱和度"), b.sat, -100.0, 100.0, 0.0, "%+.0f", tint = { t -> androidx.compose.ui.graphics.lerp(Color(0xFF807E79), c, t) }) { set(l.withBand(band, b.copy(sat = it))) },
+                    Knob("lum", tr("明亮度"), b.lum, -100.0, 100.0, 0.0, "%+.0f", tint = { t ->
+                        if (t < 0.5f) androidx.compose.ui.graphics.lerp(Color(0xFF22201D), c, t * 2) else androidx.compose.ui.graphics.lerp(c, Color(0xFFE8E4DA), (t - 0.5f) * 2) }) { set(l.withBand(band, b.copy(lum = it))) },
+                ), enabled, ui.image)
             } else {
                 var zone by remember { mutableIntStateOf(0) }
                 Segmented(listOf(tr("全局"), tr("阴影"), tr("中间调"), tr("高光")), zone, enabled) { zone = it }
@@ -158,9 +148,9 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
         else -> {
             Adj(tr("褪色"), l.fade, 0.0, 100.0, enabled) { set(l.copy(fade = it)) }
             Adj(tr("暗角"), l.vignette, -100.0, 100.0, enabled) { set(l.copy(vignette = it)) }
-            LabeledSlider(tr("暗角范围"), l.vignetteMid, 0.0, 100.0, 50.0, enabled && l.vignette != 0.0, "%.0f",
-                disabledReason = if (enabled && l.vignette == 0.0) tr("先调暗角，范围才有作用。") else "") {
-                set(l.copy(vignetteMid = it))
+            // The range only does something once there is a vignette, so it is only there then.
+            Expandable(l.vignette != 0.0) {
+                LabeledSlider(tr("暗角范围"), l.vignetteMid, 0.0, 100.0, 50.0, enabled, "%.0f") { set(l.copy(vignetteMid = it)) }
             }
         }
     }
@@ -168,7 +158,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 }
 
 /** The 调整 segments, in page order (UI2.md 2.4). */
-internal val ADJUST_SEGMENTS get() = listOf(tr("光线"), tr("色彩"), tr("分色"), tr("曲线"), tr("调色盘"), tr("暗角"))
+internal val ADJUST_SEGMENTS get() = listOf(tr("光线"), tr("色彩"), tr("混色"), tr("曲线"), tr("调色盘"), tr("暗角"))
 
 /** Which [ADJUST_SEGMENTS] differ from neutral; shared by the page's dots and 修改记录. */
 internal fun adjustEdited(l: Look): List<Boolean> {
@@ -201,16 +191,6 @@ internal fun resetAdjustSegment(l: Look, i: Int): Look {
     }
 }
 
-/** A line only where the gesture cannot be seen (ui_ai_flavor_audit): the curve and the pad. */
-private val SEGMENT_HINTS get() = listOf(
-    "",
-    "",
-    "",
-    tr("按住点拖动，双击删除。"),
-    tr("左右浓淡，上下明暗；双击回到默认点。"),
-    "",
-)
-
 @Composable
 private fun Group(title: String) {
     Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.Accent,
@@ -218,8 +198,9 @@ private fun Group(title: String) {
 }
 
 @Composable
-private fun Adj(label: String, value: Double, min: Double, max: Double, enabled: Boolean, onChange: (Double) -> Unit) {
-    LabeledSlider(label, value, min, max, 0.0, enabled, "%+.0f", onChange = onChange)
+private fun Adj(label: String, value: Double, min: Double, max: Double, enabled: Boolean,
+                tint: ((Float) -> androidx.compose.ui.graphics.Color)? = null, onChange: (Double) -> Unit) {
+    LabeledSlider(label, value, min, max, 0.0, enabled, "%+.0f", tint = tint, onChange = onChange)
 }
 
 /** A column of controls for a page; keeps AnimatedContent's pages the same shape. */
@@ -246,10 +227,8 @@ internal fun EmptyState(onPick: () -> Unit, onLightTable: () -> Unit = {}) {
         TextButton(onClick = onLightTable, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(tr("观片台"), color = Palette.OnSurface.copy(alpha = 0.85f))
         }
-        Spacer(Modifier.height(20.dp))
-        Text(
-            tr("支持 JPEG、HEIC、PNG 和相机 RAW"),
-            style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
-        )
     }
 }
+
+private fun signed1(v: Double) = String.format(java.util.Locale.ROOT, "%+.1f", v).replace("-", "−")
+private fun plain0(v: Double) = String.format(java.util.Locale.ROOT, "%.0f", v)

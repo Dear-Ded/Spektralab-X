@@ -57,6 +57,20 @@ fun AppScreens(editor: EditorViewModel) {
         }
     }
 
+    // A batch of two or more exports that has all finished, with at least one saved: the rewind crank.
+    // A single export gets its own ending on the 保存 button (Moments.kt SaveMark).
+    val feedbackView = androidx.compose.ui.platform.LocalView.current
+    val jobs by editor.jobs.collectAsState()
+    var batch by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    LaunchedEffect(jobs) {
+        val running = jobs.count { it.active }
+        if (running >= 2) batch = maxOf(batch, running)
+        else if (running == 0 && batch >= 2) {
+            batch = 0
+            if (jobs.any { it.state == JobState.DONE }) Feedback.play(feedbackView, Cue.Rewind)
+        }
+    }
+
     // The 正在处理 sheet lives in the editor (the notification asks for it).
     LaunchedEffect(showQueue) { if (showQueue) screen = Screen.EDITOR }
     // A photo shared or opened from another app lands in the editor: show it there, and

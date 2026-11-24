@@ -67,7 +67,7 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean,
                 enabled = enabled && !(c.id == null && bw && !positive),
             ) {
                 if (!on) {
-                    view.tick()
+                    Feedback.play(view, Cue.Load)
                     onChange(when {
                         c.id != null -> e.copy(scanFilm = false, digitalIntermediate = false, paper = c.id)
                         positive -> e.copy(scanFilm = true)

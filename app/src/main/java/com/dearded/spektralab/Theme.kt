@@ -1,8 +1,6 @@
 package com.dearded.spektralab
 
 import androidx.compose.animation.core.VisibilityThreshold
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.MaterialTheme
@@ -17,31 +15,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * UI2.md 1.1: no hue anywhere in the chrome. Layers are the ground plus white
- * at 6 / 10 / 14 % (written out opaque here), so a panel never tints the
- * photo's surround. The one "accent" is near-white: a selected item is an
- * inverted solid pill (light fill, dark text), not a colour.
+ * The chrome is a warm graphite (ui-polish, after the 1:1 preview in preview/ui-polish.html):
+ * pure black and cold greys read hard next to a print. The warmth is slight (a few points of
+ * yellow-red in each layer) and never reaches the photo: [Surround] stays neutral, so nothing
+ * tints how a print's colour is judged. The one accent is ivory: a selected item is an
+ * inverted solid pill (light fill, dark text), not a colour. [Index] marks a dial's index only.
  */
 object Palette {
-    val Surround = Color(0xFF1E1E1E)       // behind the photo only: neutral mid-dark grey
-    val Background = Color(0xFF0E0E10)     // Ground
-    val Surface = Color(0xFF141416)        // top bar, toolbar
-    val Panel = Color(0xFF1D1D1F)          // Layer1: white 6 % on Ground
-    val PanelHigh = Color(0xFF262628)      // Layer2: white 10 %
-    val PanelHighest = Color(0xFF303032)   // Layer3: white 14 %
-    val OnSurface = Color(0xFFEBEBEB)      // text, white 92 %
-    val OnSurfaceSoft = Color(0xFFA8A8A8)  // secondary text, white 64 %
-    val Outline = Color(0xFF3A3A3C)
+    // ui-polish: warm graphite instead of a cold black and white; the photo's surround stays neutral.
+    val Surround = Color(0xFF1C1C1C)       // behind the photo only: neutral mid-dark grey, no tint
+    val Background = Color(0xFF0F0F0E)     // Ground
+    val Surface = Color(0xFF121211)        // top bar, toolbar
+    val Panel = Color(0xFF191918)          // Layer1
+    val PanelHigh = Color(0xFF232321)      // Layer2
+    val PanelHighest = Color(0xFF2D2D2A)   // Layer3
+    val OnSurface = Color(0xFFECE9E3)      // text: warm white
+    val OnSurfaceSoft = Color(0xFF9E9A92)  // secondary text
+    val Outline = Color(0xFF3B3A37)
     /** A slider's unfilled track: 3:1 against the panel. */
-    val Track = Color(0xFF6A6A6C)
-    val OutlineSoft = Color(0xFF2A2A2C)    // hairline, white 8 %
-    /** Selected and primary: the inverted pill's fill, with [OnAccent] text. */
-    val Accent = Color(0xFFF2F2F2)
-    val OnAccent = Color(0xFF111113)
+    val Track = Color(0xFF6E6C66)
+    val OutlineSoft = Color(0xFF262523)    // hairline
+    /** Selected and primary: an ivory fill, with [OnAccent] text. */
+    val Accent = Color(0xFFEEEAE2)
+    val OnAccent = Color(0xFF161614)
     /** A selected item's quiet container (chips that are on but not the focus). */
-    val AccentDim = Color(0xFF3C3C3E)
+    val AccentDim = Color(0xFF3A3935)
+    /** A dial's index mark, as on a camera's dials; the one warm colour in the controls. */
+    val Index = Color(0xFFD2694F)
     /** Only the confirm text of 重置 / 删除. */
-    val Warning = Color(0xFFFF6B5E)
+    val Warning = Color(0xFFF07560)
 }
 
 private val Scheme = darkColorScheme(
@@ -199,14 +201,8 @@ object Motion {
     )
 }
 
-/** One haptic tick: a firmer segment tick on API 34+, a clock tick before. */
-fun View.tick(strong: Boolean = false) {
-    val c = when {
-        Build.VERSION.SDK_INT >= 34 -> if (strong) HapticFeedbackConstants.SEGMENT_TICK else HapticFeedbackConstants.SEGMENT_FREQUENT_TICK
-        else -> HapticFeedbackConstants.CLOCK_TICK
-    }
-    performHapticFeedback(c)
-}
+/** One detent through [Feedback]: [Cue.Segment] when [strong], else [Cue.Detent]. */
+fun View.tick(strong: Boolean = false) = Feedback.play(this, if (strong) Cue.Segment else Cue.Detent)
 
 /**
  * What sits behind the photo (UI2.md 1.1; ui2_snapseed.md 5, a user asked for a

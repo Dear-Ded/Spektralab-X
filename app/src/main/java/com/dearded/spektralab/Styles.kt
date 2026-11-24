@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -269,6 +272,8 @@ internal const val STYLE_STRENGTH_PREFS = "style_strength"
 private const val HOT_GROUP = "热门"
 private const val FAV_GROUP = "收藏"
 private const val RECENT_GROUP = "最近"
+/** 收藏 and 最近 together, behind a star. */
+private const val STAR_GROUP = "★"
 /** The photos edited last on the light table (ui2_snapseed.md 6): one tap pastes their settings here. */
 private const val EDITS_GROUP = "最近编辑"
 /** Styles saved from this editor; its first card is + 存为风格. */
@@ -337,7 +342,9 @@ private fun StyleStripContent(
             recentFrames.mapNotNull { f -> store.sidecar(f.id)?.let { f to it } }
         }
     }
-    val groups = (listOfNotNull(FAV_GROUP.takeIf { favIds.isNotEmpty() }, RECENT_GROUP.takeIf { recentIds.isNotEmpty() },
+    // 收藏 and 最近 share one star: favourites first, then what was used lately.
+    val starIds = (favIds + recentIds).distinct()
+    val groups = (listOfNotNull(STAR_GROUP.takeIf { starIds.isNotEmpty() },
         EDITS_GROUP.takeIf { recentEdits.isNotEmpty() }) +
         listOf(HOT_GROUP, MINE_GROUP) + Style.GROUPS + imported.map { it.category }).distinct()
 
@@ -349,7 +356,7 @@ private fun StyleStripContent(
         mutableStateOf(all.firstOrNull { applied(it) }?.group ?: last ?: browsed ?: groups.first())
     }
     // Un-starring the last favourite empties 收藏: fall back to 热门 rather than a blank row.
-    if ((group == FAV_GROUP && favIds.isEmpty()) || (group == RECENT_GROUP && recentIds.isEmpty()) ||
+    if ((group == STAR_GROUP && starIds.isEmpty()) || group == FAV_GROUP || group == RECENT_GROUP ||
         (group == EDITS_GROUP && recentEdits.isEmpty())) group = HOT_GROUP
     var naming by remember { mutableStateOf(false) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -363,12 +370,17 @@ private fun StyleStripContent(
     // Search across every group by name, inspiration, film and folk name (StyleTags.kt).
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-    // The panel's title row and the group pills (UI2.md 7.2 point 2); search sits first, as a pill.
+    // The group pills (UI2.md 7.2 point 2): search and the star are icons, the groups their names.
     PillRow {
         SelectPill(selected = searching, onClick = { searching = !searching; if (!searching) query = "" },
-            label = { Text(tr("搜索")) })
+            label = { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.Search, contentDescription = tr("搜索"),
+                modifier = Modifier.size(18.dp)) })
         for (g in groups) SelectPill(selected = !searching && group == g,
-            onClick = { searching = false; query = ""; browse(g) }, label = { Text(if (g in Style.GROUPS || g in listOf(HOT_GROUP, FAV_GROUP, RECENT_GROUP, EDITS_GROUP, MINE_GROUP)) tr(g) else g) })
+            onClick = { searching = false; query = ""; browse(g) }, label = {
+                if (g == STAR_GROUP) androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.Star,
+                    contentDescription = tr("收藏和最近"), modifier = Modifier.size(18.dp))
+                else Text(groupLabel(g, isBuiltIn = g in Style.GROUPS || g in listOf(HOT_GROUP, EDITS_GROUP, MINE_GROUP)))
+            })
     }
     if (searching) {
         OutlinedTextField(value = query, onValueChange = { query = it.take(30) }, singleLine = true,
@@ -379,23 +391,21 @@ private fun StyleStripContent(
             (if (searching) s.matchesQuery(query, ui.catalog.film(s.film)?.label.orEmpty())
              else when (group) {
                  HOT_GROUP -> s.id in HOT
-                 FAV_GROUP -> s.id in favIds
-                 RECENT_GROUP -> s.id in recentIds
+                 STAR_GROUP -> s.id in starIds
                  else -> s.group == group
              })
     }.let { list ->
         when {
             searching -> list
             group == HOT_GROUP -> list.sortedBy { HOT.indexOf(it.id) }
-            group == FAV_GROUP -> list.sortedBy { favIds.indexOf(it.id) }
-            group == RECENT_GROUP -> list.sortedBy { recentIds.indexOf(it.id) }
+            group == STAR_GROUP -> list.sortedBy { starIds.indexOf(it.id) }
             else -> list
         }
     }
     if (searching && styles.isEmpty()) {
         Text(tr("没有找到“{0}”", query.trim()), style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
     }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp).coachAnchor(CoachStep.STYLE)) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
         // 无 first (tools/work/no_film_research.md): no film, no film effects, no adjustments.
         if (!searching) item(key = "_none") {
             val original = rememberSelectionPreview(ui, ui.edit.withoutStyle(), preview)
@@ -425,21 +435,23 @@ private fun StyleStripContent(
         if (searching || group != EDITS_GROUP) items(styles, key = { it.id }) { s ->
             val on = applied(s)
             val bitmap = rememberSelectionPreview(ui, s.atStrength(strengthOf(s.id)).applyTo(ui.edit, ui.catalog), preview)
-            // UI2.md 7.2 points 3-4: the shared picture card; a tap on the chosen one opens its strength.
+            // UI2.md 7.2 points 3-4: the shared picture card, its name only (what it is inspired by
+            // sits under the strength dial). Picking a style opens its strength; a tap on the chosen
+            // one folds it away again.
             ThumbCard(
                 selected = on,
                 image = bitmap,
                 title = s.displayName,
-                subtitle = s.displayInspiration.ifEmpty { ui.catalog.film(s.film)?.label ?: s.film },
+                subtitle = "",
                 enabled = enabled,
                 placeholder = s.displayName,
                 starred = picks.isFavourite(s.id),
-                onLongClick = { view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); picks.toggleFavourite(s.id) },
+                onLongClick = { Feedback.play(view, Cue.LongPress); picks.toggleFavourite(s.id) },
                 onClick = {
                     if (on) open = if (open == s.id) null else s.id
                     else {
-                        open = null
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                        open = s.id
+                        Feedback.play(view, Cue.Pick)
                         pick(s, strengthOf(s.id))
                     }
                 }
@@ -488,21 +500,17 @@ private fun StyleStripContent(
     // they cannot cover the strip (a shared-bounds overlay would).
     Expandable(open = current != null, verticalArrangement = Arrangement.spacedBy(RowGap)) {
         val s = shown ?: return@Expandable
-        // ui2_icecream.md 6.3: three steps to tap, the slider under them stays continuous.
-        // A step is chosen only while the strength sits exactly on it.
+        // ui2_icecream.md 6.3: 轻 40 % and 中 70 % are stops on the dial (a dot and a firmer detent);
+        // 100 % is its default. What the style is after, in one line under it.
         val k = strengthOf(s.id)
-        val steps = listOf(tr("轻") to 0.4, tr("中") to 0.7, tr("重") to 1.0)
-        StepRow(null, steps.map { it.first }, steps.indexOfFirst { kotlin.math.abs(k - it.second) < 0.005 },
-            enabled && current != null) { i ->
-            view.tick()
-            strengths[s.id] = steps[i].second
-            pick(s, steps[i].second)
-        }
-        LabeledSlider(tr("强度 · {0}", s.displayName), k * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%") { v ->
+        LabeledSlider(tr("强度"), k * 100, 0.0, 100.0, 100.0, enabled && current != null, "%.0f%%",
+            stops = listOf(40.0, 70.0)) { v ->
             val k = (v / 100).coerceIn(0.0, 1.0)
             strengths[s.id] = k
             pick(s, k)
         }
+        val about = s.displayInspiration.takeIf { it.isNotBlank() }?.let { tr("参考 {0}", it) } ?: ui.catalog.film(s.film)?.label
+        if (about != null) Hint(about)
     }
 }
 
@@ -528,4 +536,19 @@ internal fun saveAsStyle(library: StyleImports, edit: Edit, name: String, thumbJ
     val look = edit.savedStyle(name, scope, table?.let { library.luts.original(it)?.second } ?: SpkLut.SPACE_SRGB)
         .copy(category = MINE_GROUP)
     library.styles.save(UserStyle(library.styles.newId(), look, table.orEmpty(), System.currentTimeMillis()), thumbJpeg)
+}
+
+/**
+ * A style group's name on screen. The groups are keyed by their old names (saved in prefs and
+ * in shared styles); a reader sees what they are: 冲扫店, 相机直出, 手机色彩. Imported categories
+ * are shown as their author named them.
+ */
+private fun groupLabel(g: String, isBuiltIn: Boolean): String = if (!isBuiltIn) g else when (g) {
+    "实验室" -> tr("冲扫店")
+    "相机" -> tr("相机直出")
+    "负片" -> tr("彩色负片")
+    "反转" -> tr("反转片")
+    "电影" -> tr("电影胶片")
+    "手机" -> tr("手机色彩")
+    else -> tr(g)
 }

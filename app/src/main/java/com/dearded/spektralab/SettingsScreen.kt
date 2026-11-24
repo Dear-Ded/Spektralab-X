@@ -146,7 +146,6 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
             // UI2.md 0.1: the key is ui-visual's (Pill.kt EXPAND_ALL); the editor reads it with rememberExpandAll().
             val prefs = remember(context) { context.getSharedPreferences("settings", 0) }
             var expandAll by remember { mutableStateOf(prefs.getBoolean(EXPAND_ALL, false)) }
-            val coach = LocalCoach.current
             SettingsGroup(tr("编辑"), buildList<@Composable () -> Unit> {
                 add {
                     SettingRow(
@@ -181,17 +180,11 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     }
                 }
                 add { NewPhotoStocks(ui, vm) }
-                // ui-motion_splash.md 6: LaunchIntro reads this at launch; off by itself when animations are off.
+                // Feedback.kt: the shutter, the advance lever, the tank and the back closing. Never
+                // the dials. Silent anyway unless the ringer is on normal.
                 add {
-                    var intro by remember { mutableStateOf(prefs.getBoolean(LAUNCH_INTRO, true)) }
-                    val motion = remember { motionAllowed() }
-                    SettingRow(
-                        tr("启动动画"), intro && motion, motion,
-                        disabledReason = tr("系统已关闭动画，启动动画不会播放。"),
-                    ) { intro = it; prefs.edit().putBoolean(LAUNCH_INTRO, it).apply() }
-                }
-                if (coach != null) add {
-                    ActionRow(tr("重新查看引导"), tr("回到编辑器时再显示一次。")) { coach.replay(); onClose() }
+                    var sound by remember { mutableStateOf(prefs.getBoolean(CAMERA_SOUND, true)) }
+                    SettingRow(tr("相机声音"), sound, true) { sound = it; prefs.edit().putBoolean(CAMERA_SOUND, it).apply() }
                 }
             })
 
