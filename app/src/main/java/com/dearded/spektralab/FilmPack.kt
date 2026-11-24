@@ -116,6 +116,32 @@ private fun DrawScope.cassette(kind: FilmKind, speed: String?, lift: Float, meas
     drawRect(Color.White.copy(alpha = 0.22f), Offset(x + cw * 0.42f, y + 4f * u), Size(0.9f * u, ch - 8f * u))
 }
 
+/**
+ * A box of photographic paper over a card's lower corner, [chosen] lifting its lid a little: a
+ * flat box, the lid's band in the colour of its kind (colour paper warm, black-and-white grey), the
+ * sheet's white edge showing under the lid. Original artwork, no maker's trade dress.
+ */
+@Composable
+internal fun PaperBadge(bw: Boolean, chosen: Boolean, modifier: Modifier = Modifier) {
+    val lift by animateFloatAsState(if (chosen) 1f else 0f, spring(dampingRatio = 0.62f, stiffness = 520f), label = "paper")
+    Canvas(modifier.size(40.dp, 34.dp)) {
+        val u = size.width / 40f
+        val x = 4f * u
+        val w = 30f * u
+        val h = 16f * u
+        val y = size.height - h - 5f * u
+        drawOval(Color.Black.copy(alpha = 0.42f), Offset(x - 2f * u, size.height - 5f * u), Size(w + 4f * u, 3.6f * u))
+        // The box.
+        drawRoundRect(Brush.verticalGradient(listOf(Color(0xFF2C2A26), Color(0xFF1C1B18)), startY = y, endY = y + h), Offset(x, y), Size(w, h), CornerRadius(1.6f * u))
+        // The sheet's edge, then the lid, raised by [lift].
+        val ly = y - 3.2f * u * lift
+        drawRect(Color(0xFFF3EFE6), Offset(x + 1.2f * u, y - 0.8f * u - 1.6f * u * lift), Size(w - 2.4f * u, 1.6f * u + 1.6f * u * lift))
+        drawRoundRect(Brush.verticalGradient(listOf(Color(0xFF3A3833), Color(0xFF262420)), startY = ly, endY = ly + 7f * u), Offset(x - 0.6f * u, ly), Size(w + 1.2f * u, 7f * u), CornerRadius(1.6f * u))
+        drawRect(if (bw) Color(0xFF9C9A94) else Color(0xFFC48A4A), Offset(x - 0.6f * u, ly + 4.6f * u), Size(w + 1.2f * u, 1.4f * u))
+        drawRect(Color.White.copy(alpha = 0.16f), Offset(x + 2f * u, ly + 1f * u), Size(w - 4f * u, 0.8f * u))
+    }
+}
+
 /** A DX-like checker from the speed: 12 cells, metal or black; the first of each row is always metal. */
 private fun dx(speed: String?): BooleanArray {
     val n = speed?.toIntOrNull() ?: 100

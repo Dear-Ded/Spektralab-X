@@ -947,7 +947,7 @@ private fun Controls(
                                     if (e.dateImprint) tr("日期") else null,
                                 ).joinToString(" · "),
                             )
-                        BorderPicker(e.borderId, enabled && src != null, noFilm = e.noFilm) { p ->
+                        BorderPicker(e.borderId, enabled && src != null, noFilm = e.noFilm, photo = borderPhoto(ui)) { p ->
                             if (src != null) vm.update(Edit.withBorder(e, p, src.width, src.height))
                         }
                         Borders.byId(e.borderId)?.let { p ->
@@ -1558,4 +1558,15 @@ private fun fitted(box: androidx.compose.ui.geometry.Rect, w: Int, h: Int): andr
     val fw = w * k
     val fh = h * k
     return androidx.compose.ui.geometry.Rect(box.center.x - fw / 2f, box.center.y - fh / 2f, box.center.x + fw / 2f, box.center.y + fh / 2f)
+}
+
+/** The photo on screen, small, for the border cards' miniatures (scaled once per photo). */
+@Composable
+private fun borderPhoto(ui: UiState): androidx.compose.ui.graphics.ImageBitmap? {
+    val img = ui.image ?: return null
+    return remember(img) {
+        val w = 160
+        val h = (w * img.height / img.width.toFloat()).roundToInt().coerceAtLeast(1)
+        android.graphics.Bitmap.createScaledBitmap(img, w, h, true).asImageBitmap()
+    }
 }

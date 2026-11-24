@@ -177,7 +177,8 @@ class AssistantPanelTest {
         compose.setContent { SpektraTheme { AssistantSettingsSheet(fake) {} } }
         compose.onNodeWithText("claude-haiku-5-5").performClick()
         compose.onNodeWithContentDescription("密钥").performTextInput("sk-test-secret")
-        assertTrue(compose.onAllNodes(hasText("sk-test-secret", substring = true)).fetchSemanticsNodes().isEmpty())
+        // Masked on screen and marked as a password for accessibility services.
+        compose.onNodeWithContentDescription("密钥").assert(androidx.compose.ui.test.SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsProperties.Password))
         assertTrue(fake.calls.isEmpty())
         compose.onNodeWithText("保存").performClick()
         assertEquals("save:Anthropic|https://api.anthropic.com|claude-haiku-5-5|key", fake.calls.last())

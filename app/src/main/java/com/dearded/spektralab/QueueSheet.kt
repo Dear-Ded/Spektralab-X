@@ -58,13 +58,18 @@ fun QueueSheet(
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding()) {
             PanelHeader(
                 title = tr("处理队列"),
-                hint = if (active.isNotEmpty()) "" else tr("当前没有进行中的任务。"),
+                hint = if (active.isNotEmpty()) tr("可以切到后台，进度在实时通知里。") else tr("当前没有进行中的任务。"),
             )
             Spacer(Modifier.height(RowGap))
             Summary(active, saved = done.count { it.state == JobState.DONE },
                 failed = done.count { it.state == JobState.FAILED },
                 cancelled = done.count { it.state == JobState.CANCELLED })
             if (active.isNotEmpty()) QueueNotices()
+            if (done.isNotEmpty()) Text(
+                tr("重启后保留最近 {0} 条已结束记录。清除记录不会删除已保存的照片。", ProcessingQueue.FINISHED_HISTORY_LIMIT),
+                style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
             // Height follows the list, up to about half the screen; the sheet scrolls no further.
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
                 if (active.isNotEmpty()) {

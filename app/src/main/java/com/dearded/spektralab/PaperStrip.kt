@@ -46,11 +46,11 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean,
         items(cards, key = { it.id ?: "_scan" }) { c ->
             val on = if (c.id == null) none else !none && e.paper == c.id
             // 无 is the same card as in the style and film strips (the photo itself, tagged 原图),
-            // a size down so it sits beside the text cards (UI2.md 7.2 point 5).
+            // the size of the paper cards beside it.
             if (c.id == null) {
                 val candidate = if (positive) e.copy(scanFilm = true) else e.copy(scanFilm = false, digitalIntermediate = true)
                 val original = rememberSelectionPreview(ui, candidate, preview)
-                NoneCard(selected = on, original = original, size = 64.dp,
+                NoneCard(selected = on, original = original, size = 88.dp,
                     subtitle = if (positive) tr("直接扫描") else if (bw) tr("需要相纸") else tr("数字中间片"),
                     enabled = enabled && !(bw && !positive)) {
                     if (!on) {
@@ -60,11 +60,19 @@ internal fun PaperStrip(ui: UiState, enabled: Boolean,
                 }
                 return@items
             }
-            TextCard(
+            // The photo printed on this paper (as the film cards show it on each film), a paper box on
+            // its corner; the film's own print paper says 推荐 over it.
+            val candidate = e.copy(scanFilm = false, digitalIntermediate = false, paper = c.id)
+            val print = rememberSelectionPreview(ui, candidate, preview)
+            ThumbCard(
                 selected = on,
+                image = print,
                 title = c.name.removePrefix("Kodak ").removePrefix("Fujifilm ").removePrefix("Ilford "),
-                subtitle = c.note,
-                enabled = enabled && !(c.id == null && bw && !positive),
+                subtitle = "",
+                enabled = enabled,
+                size = 88.dp,
+                badge = if (c.id == recommended) tr("推荐") else null,
+                overlay = { PaperBadge(bw, on, Modifier.align(androidx.compose.ui.Alignment.BottomStart)) },
             ) {
                 if (!on) {
                     Feedback.play(view, Cue.Load)

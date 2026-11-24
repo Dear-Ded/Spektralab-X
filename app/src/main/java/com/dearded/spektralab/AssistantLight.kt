@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
@@ -104,18 +103,16 @@ internal fun EdgeLit(
     }) { content() }
 }
 
-/** Below API 33 and on software canvases: three soft rounded strokes and a slowly turning sheen. */
+/** Below API 33 and on software canvases: three soft rounded rings, breathing slowly, and a fine bright edge. */
 private fun DrawScope.edgeFallback(k: Float, t: Float, r: Float, f: Float) {
+    val breath = 0.75f + 0.25f * kotlin.math.sin(t * 1.6f)
     for (i in 3 downTo 1) {
         val grow = f * i / 3f
-        drawRoundRect(AuraColors.Silver.copy(alpha = 0.07f * k * (1.2f - i / 3f)), Offset(-grow, -grow),
+        drawRoundRect(AuraColors.Silver.copy(alpha = 0.07f * k * breath * (1.2f - i / 3f)), Offset(-grow, -grow),
             Size(size.width + 2 * grow, size.height + 2 * grow), CornerRadius(r + grow), style = Stroke(grow * 0.9f))
     }
-    rotate(t * 24f % 360f, center) {
-        drawRoundRect(Brush.sweepGradient(listOf(Color.Transparent, AuraColors.Ivory.copy(alpha = 0.28f * k), Color.Transparent,
-            AuraColors.Amber.copy(alpha = 0.12f * k), Color.Transparent), center), Offset(-2f, -2f),
-            Size(size.width + 4f, size.height + 4f), CornerRadius(r + 2f), style = Stroke(2f))
-    }
+    drawRoundRect(AuraColors.Ivory.copy(alpha = 0.22f * k * breath), Offset(-1f, -1f), Size(size.width + 2f, size.height + 2f),
+        CornerRadius(r + 1f), style = Stroke(1.5f))
 }
 
 @RequiresApi(33)
