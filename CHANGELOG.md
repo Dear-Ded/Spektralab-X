@@ -2,11 +2,20 @@
 
 [![Pre-release](https://img.shields.io/github/v/release/Dear-Ded/Spektralab-X?include_prereleases&sort=semver&label=pre-release&logo=github)](https://github.com/Dear-Ded/Spektralab-X/releases)
 
-所有用户能看到的改动都记在这里，最新的在最上面。每个版本对应 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 页面的一个预发布版本，标签为 `v<版本号>`，安装包的校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。接下来要做的见[路线图](docs/ROADMAP.md)。
+所有用户能看到的改动都记在这里，最新的在最上面。每个版本对应 [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) 页面的一个预发布版本，安装包的校验方法见 [docs/VERIFY.md](docs/VERIFY.md)。接下来要做的见[路线图](docs/ROADMAP.md)。
 
-版本号格式为 `主版本.次版本.修订号[-阶段序号]`，预发布使用 alpha、beta 或 rc。本轮引擎适配进入 `0.2.00-alpha-1`；内部安装版本码由 `VERSION_CODE` 单独递增。日期为发布日（UTC+8）。
+从本版起，显示版本以 `alpha v` 开头，例如 `alpha v0.3.00`。发布标签仍采用 `v0.3.00-alpha` 格式，以便旧版识别更新；内部安装版本码由 `VERSION_CODE` 单独递增。日期为发布日（UTC+8）。
 
-Every user-visible change, newest first. Each version is a pre-release on the [Releases](https://github.com/Dear-Ded/Spektralab-X/releases) page, tagged `v<version>`; entries are in Chinese, and the English summary of each release is in `fastlane/metadata/android/en-US/changelogs/`.
+Every user-visible change, newest first. New releases are displayed as `alpha vX.Y.Z`, with `vX.Y.Z-alpha` tags for compatibility with installed versions. English summaries are in `fastlane/metadata/android/en-US/changelogs/`.
+
+## alpha v0.3.00 · 2026-11-24
+
+这次更新重做了修图界面，让选胶片、调参数和保存照片更顺手。
+
+- 调整页可以横滑选择要调的项目，再用大刻度细调。混色直接从一整行色带选色。
+- 胶片页换上暗盒图样和底片步骤条，切换风格时可以在同一张照片上看到新旧效果平滑过渡。
+- 保存页把格式和相关选项放在一起，原有编辑和导出选项都保留。点保存后任务立即开始排队，不用等动画结束。
+- 冷启动和保存加入暗房显影动效，开场跟随系统动画设置。装卷、过片、倒片和保存等时刻有相应反馈，相机声音可以在设置中关闭。
 
 ## 0.2.00-alpha-8 · 2026-11-15
 
