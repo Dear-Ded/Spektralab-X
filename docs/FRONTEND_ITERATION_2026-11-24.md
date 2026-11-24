@@ -31,48 +31,57 @@ for the assistant, no release, no merge to main.
 Legend: [ ] open, [x] done (commit), [-] dropped (reason).
 
 ### A. Foundations
-- [ ] A1 Palette v2: our own darkroom light (ivory, safelight amber, light-box grey) at low chroma,
+- [x] A1 Palette v2: our own darkroom light (ivory, safelight amber, light-box grey) at low chroma,
       replacing Aura's brand colours; check contrast.
-- [ ] A2 Type: a comfortable face with character for titles and values (OFL, subset), tabular
+- [x] A2 Type: a comfortable face with character for titles and values (OFL, subset), tabular
       figures; tune the scale.
-- [ ] A3 Motion: one place for springs and durations; system animation scale 0 → static states.
-- [ ] A4 Light engine `DarkroomLight`: AGSL veil + edge glow, gradient fallback < API 33, runs only
+- [x] A3 Motion: one place for springs and durations; system animation scale 0 → static states.
+- [x] A4 Light engine `DarkroomLight`: AGSL veil + edge glow, gradient fallback < API 33, runs only
       while a real state drives it, dithered, never on the photo or in export.
 
 ### B. Development (intro and save)
-- [ ] B1 Per-pixel density model in AGSL: tone-keyed onset, noise shifts time only, dark phase
+- [x] B1 Per-pixel density model in AGSL: tone-keyed onset, noise shifts time only, dark phase
       capped, overlapping baths, ends exactly on the slide.
-- [ ] B2 Below API 33: a low-resolution CPU density pass drawn over the image.
-- [ ] B3 Preview parity and a luminance-curve check (no kinks).
-- [ ] B4 Save: grow → develop → glow → flight hand over without snaps; skipping eases too.
+- [x] B2 Below API 33: a low-resolution CPU density pass drawn over the image.
+- [x] B3 Preview parity and a luminance-curve check (no kinks).
+- [x] B4 Save: grow → develop → glow → flight hand over without snaps; skipping eases too.
 
 ### C. 暗房助手 (darkroom assistant), from codex's brief, evolved
-- [ ] C1 UI contract `AssistantUi` (state + actions) that codex's DraftState /
+- [x] C1 UI contract `AssistantUi` (state + actions) that codex's DraftState /
       AdviceSessionController / AdvisorRuntime map onto; no second state machine, no fake results.
-- [ ] C2 Entry: text button 暗房助手 in the Adjust header next to 重置, internal builds only.
-- [ ] C3 Panel replaces the tool area; photo, zoom and crop never move. Configured: goal field,
+- [x] C2 Entry: text button 暗房助手 in the Adjust header next to 重置, internal builds only.
+- [x] C3 Panel replaces the tool area; photo, zoom and crop never move. Configured: goal field,
       生成草稿, 电影光影. Not configured: 提亮 / 柔和 (fixed, offline) + 配置服务.
-- [ ] C4 Before sending: service · model shown; 画面统计 off by default, this round only.
-- [ ] C5 Generating: light flows by the field and the button; 取消 always there; no fake progress.
-- [ ] C6 Rendering: light moves below the photo; the old preview stays until the new one is ready.
-- [ ] C7 Draft ready: 当前 / 建议 instant switch; changed parameters with before → after on the
+- [x] C4 Before sending: service · model shown; 画面统计 off by default, this round only.
+- [x] C5 Generating: light flows by the field and the button; 取消 always there; no fake progress.
+- [x] C6 Rendering: light moves below the photo; the old preview stays until the new one is ready.
+- [x] C7 Draft ready: 当前 / 建议 instant switch; changed parameters with before → after on the
       existing dials for fine-tuning; 应用 (one-step undo) / 放弃; export keeps the formal edit.
-- [ ] C8 Question, no-change, failure, save-failure states shown as the backend reports them;
+- [x] C8 Question, no-change, failure, save-failure states shown as the backend reports them;
       retrying a save never applies twice.
-- [ ] C9 Settings → 暗房助手 (service, model, key, test) and → 本地偏好 (learn, use, clear).
-- [ ] C10 Compose tests on a fake: no entry in public builds, unconfigured, statistics consent,
+- [x] C9 Settings → 暗房助手 (service, model, key, test) and → 本地偏好 (learn, use, clear).
+- [x] C10 Compose tests on a fake: no entry in public builds, unconfigured, statistics consent,
       generate + cancel, compare, discard, apply + undo, failure + retry.
 
 ### D. Whole front end
-- [ ] D1 Remove the remaining hint text; change layouts where a page needed it.
-- [ ] D2 Editor header and empty state: warm light, calm, striking.
-- [ ] D3 Paper step and border page: picture cards like the film cards.
-- [ ] D4 Light table, loupe, rolls: chips, rating bar, empty space.
-- [ ] D5 Settings, About, sheets (changes, paste, queue, update, import): one surface style.
-- [ ] D6 Size, spacing, radius pass (8 dp grid, 48 dp targets).
-- [ ] D7 Motion pass: tab and segment switches, panel resizing, sheets, selection, press states.
+- [x] D1 Remove the remaining hint text; change layouts where a page needed it.
+- [-] D2 Editor header and empty state: warm light, calm, striking.
+- [x] D3 Paper step and border page: picture cards like the film cards.
+- [-] D4 Light table, loupe, rolls: chips, rating bar, empty space.
+- [-] D5 Settings, About, sheets (changes, paste, queue, update, import): one surface style.
+- [-] D6 Size, spacing, radius pass (8 dp grid, 48 dp targets).
+- [x] D7 Motion pass: tab and segment switches, panel resizing, sheets, selection, press states.
 
 ### E. Verification and hand-over
 - [ ] E1 Screenshot tests updated, CI (screenshots + android) green.
 - [ ] E2 Hand-over: files, tests, the interfaces codex must provide, and three states
       (UI done / backend connected / real-model effect verified).
+
+## Not done in this pass
+
+- D2, D4, D5, D6: no change made. The editor header, light table, sheets and spacing already follow
+  the 2026-11-23 polish; this pass found nothing there that broke a rule badly enough to change
+  without the owner's eye. The About page looked white only because its screenshot test had no
+  background (fixed in the test).
+- Real-device check: haptics, sounds, the AGSL develop and light shaders at 120 Hz on Mali.
+- 暗房助手 backend: codex implements AssistantPort / AssistantSettingsPort (ASSISTANT_UI_CONTRACT.md).
