@@ -88,7 +88,8 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
         }
         step { grow.animateTo(1f, Motion.defaultSpatial()) }
         if (!skip) delay(260)
-        val baths = launch { for (ms in longArrayOf(0, 950, 750, 680)) { delay(ms); if (!skip) Feedback.play(view, Cue.Agitate) } }
+        // One turn of the tank as each bath goes in (FilmDevelop.Fronts: 0.02, 0.28, 0.50, mid-clear).
+        val baths = launch { for (ms in longArrayOf(0, 950, 750, 710)) { delay(ms); if (!skip) Feedback.play(view, Cue.Agitate) } }
         step { dev.animateTo(1f, tween(3400, easing = LinearEasing)) }
         baths.cancel()
         step { glow.animateTo(1f, Motion.slowEffects()) }
@@ -128,7 +129,8 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
         val f = fly.value
         val stripIn = (g * 1.4f).coerceIn(0f, 1f)
         val wave = (SystemClock.uptimeMillis() - start) / 1000f
-        val shift = Offset((wave * 977f) % 160f, (wave * 613f) % 160f)
+        // The grain is the film's: it stays put on the slide.
+        val shift = Offset.Zero
         val r = Rect(lerp(from.left, slide.left, g), lerp(from.top, slide.top, g), lerp(from.right, slide.right, g), lerp(from.bottom, slide.bottom, g))
 
         drawRect(Color(0xFF090908).copy(alpha = 0.86f * stripIn * (1f - f)))

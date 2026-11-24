@@ -137,7 +137,8 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
         cue(Cue.Shutter)
         launch { st.flash.snapTo(1f); st.flash.animateTo(0f, Motion.fastEffects()) }
         launch { delay(180); nameOn = true; st.name.animateTo(1f, Motion.defaultSpatial()) }
-        launch { for (ms in longArrayOf(60, 420, 300, 300)) { delay(ms); cue(Cue.Agitate) } }
+        // One turn of the tank as each bath goes in (FilmDevelop.Fronts: 0.02, 0.28, 0.50, mid-clear).
+        launch { for (ms in longArrayOf(30, 390, 330, 315)) { delay(ms); cue(Cue.Agitate) } }
         // The bath: 1.5 s from cream to a clear slide; the halation blooms as it clears.
         st.dev.animateTo(1f, tween(1500, easing = LinearEasing))
         delay(380)
@@ -188,7 +189,8 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
             val fy = g.y(43f); val fh = 22f * u; val fw = 64f * u; val frameStep = 6 * PITCH * u
             val off = st.pull.value * frameStep
             val t = (SystemClock.uptimeMillis() - start) / 1000f
-            val shift = Offset((t * 977f) % 160f, (t * 613f) % 160f)
+            // The grain is the film's: it moves with the strip and nothing else.
+            val shift = Offset(((-off) % 160f + 160f) % 160f, 0f)
             withTransform({ scale(s, s, g.centre) }) {
                 clipRect(bx0, by, bx1, by + bh) {
                     drawRect(Brush.verticalGradient(0f to Color(0xFF0D0C0B), 0.12f to Color(0xFF1F1D1A), 0.5f to Color(0xFF151412),
@@ -242,10 +244,10 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                 val fr = Rect(g.x(22f) + 1.2f * u, fy, g.x(22f) + 1.2f * u + fw - 2.4f * u, fy + fh)
                 // Halation: real film's red bloom round a bright frame, once it has cleared.
                 val p = st.dev.value
-                val halo = (if (p < 0.72f) 0f else smooth(0.72f, 0.9f, p) * (1f - 0.6f * smooth(0.9f, 1f, p))) * stripAlpha
+                val halo = smooth(0.7f, 0.95f, p) * (1f - 0.5f * smooth(0.92f, 1f, p)) * stripAlpha
                 if (halo > 0.01f) for (n in 1..7) {
                     val grow = n * 2.6f * density
-                    drawRoundRect(Color(0xFFFF4A20).copy(alpha = 0.16f * halo * (1f - n / 8f)), fr.topLeft - Offset(grow, grow),
+                    drawRoundRect(Color(0xFFFF4A20).copy(alpha = 0.11f * halo * (1f - n / 8f)), fr.topLeft - Offset(grow, grow),
                         Size(fr.width + 2 * grow, fr.height + 2 * grow), CornerRadius(grow), style = Stroke(3.2f * density), blendMode = BlendMode.Plus)
                 }
                 val flash = st.flash.value
