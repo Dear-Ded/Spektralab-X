@@ -2,11 +2,13 @@ package com.dearded.spektralab
 
 import android.os.Looper
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.ViewModelProvider
@@ -66,7 +68,8 @@ class LightTableNavigationTest {
     private fun selectWhileEntering(language: UiLanguage) {
         val table = enter(language)
         val start = compose.onNodeWithContentDescription("nav-2.jpg").fetchSemanticsNode().boundsInRoot.center
-        compose.onRoot().performTouchInput {
+        val gridRoot = compose.onNode(isRoot() and hasAnyDescendant(hasContentDescription("nav-2.jpg")))
+        gridRoot.performTouchInput {
             down(start)
             advanceEventTime(800)
             moveTo(start)
@@ -75,7 +78,7 @@ class LightTableNavigationTest {
         compose.waitForIdle()
         assertEquals(setOf("nav-2"), table.state.value.selection)
         val end = compose.onNodeWithContentDescription("nav-3.jpg").fetchSemanticsNode().boundsInRoot.center
-        compose.onRoot().performTouchInput { moveTo(end); up() }
+        gridRoot.performTouchInput { moveTo(end); up() }
         compose.waitForIdle()
         assertEquals(setOf("nav-2", "nav-3"), table.state.value.selection)
         assertEquals(null, table.loupe.value)
