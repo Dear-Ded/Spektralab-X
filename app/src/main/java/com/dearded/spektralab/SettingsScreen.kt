@@ -46,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -252,6 +253,19 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
             ))
 
             // 关于与诊断
+            // 暗房助手 (AssistantSettings.kt): internal builds with a session only.
+            LocalAssistantSettings.current.takeIf { assistantBuildAllowed }?.let { port ->
+                var serviceSheet by remember { mutableStateOf(false) }
+                var preferenceSheet by remember { mutableStateOf(false) }
+                val st by port.settings.collectAsState()
+                SettingsGroup(tr("暗房助手"), listOf<@Composable () -> Unit>(
+                    { ActionRow(tr("服务"), listOf(st.service, st.model).filter { it.isNotBlank() }.joinToString(" · ").ifBlank { tr("未配置") }) { serviceSheet = true } },
+                    { ActionRow(tr("本地偏好")) { preferenceSheet = true } },
+                ))
+                if (serviceSheet) AssistantSettingsSheet(port) { serviceSheet = false }
+                if (preferenceSheet) AssistantPreferencesSheet(port) { preferenceSheet = false }
+            }
+
             SettingsGroup(tr("关于与诊断"), listOf<@Composable () -> Unit>(
                 { InfoRow(tr("设备"), ui.deviceSummary.ifEmpty { "—" }) },
                 { InfoRow(tr("引擎"), ui.engineSummary.ifEmpty { "—" }) },

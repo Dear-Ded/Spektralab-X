@@ -170,4 +170,27 @@ class AssistantPanelTest {
         assertTrue(closed)
         assertEquals("close", fake.calls.last())
     }
+
+    @Test fun serviceSettingsSaveWithoutSendingAndNeverShowTheKey() {
+        val fake = AssistantFake(AssistantFake.configured)
+        fake.settings.value = fake.settings.value.copy(service = "Anthropic", address = "https://api.anthropic.com", model = "claude-sonnet-5-5")
+        compose.setContent { SpektraTheme { AssistantSettingsSheet(fake) {} } }
+        compose.onNodeWithText("claude-haiku-5-5").performClick()
+        compose.onNodeWithContentDescription("密钥").performTextInput("sk-test-secret")
+        assertTrue(compose.onAllNodes(hasText("sk-test-secret", substring = true)).fetchSemanticsNodes().isEmpty())
+        assertTrue(fake.calls.isEmpty())
+        compose.onNodeWithText("保存").performClick()
+        assertEquals("save:Anthropic|https://api.anthropic.com|claude-haiku-5-5|key", fake.calls.last())
+        compose.onNodeWithText("测试连接").performClick()
+        assertEquals("test", fake.calls.last())
+    }
+
+    @Test fun clearingPreferencesTakesASecondTap() {
+        val fake = AssistantFake(AssistantFake.configured)
+        compose.setContent { SpektraTheme { AssistantPreferencesSheet(fake) {} } }
+        compose.onNodeWithText("清除本地偏好").performClick()
+        assertTrue(fake.calls.isEmpty())
+        compose.onNodeWithText("确认清除").performClick()
+        assertEquals(listOf("clear"), fake.calls)
+    }
 }

@@ -3,6 +3,22 @@ package com.dearded.spektralab
 /** Reviewed English UI messages. Co-created with GPT (OpenAI). */
 internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
+        "服务" to "Service",
+        "服务地址" to "Service address",
+        "模型" to "Model",
+        "模型名称" to "Model name",
+        "密钥已保存" to "Key saved",
+        "密钥" to "Key",
+        "正在保存" to "Saving",
+        "正在测试连接" to "Testing the connection",
+        "连接正常" to "Connected",
+        "测试连接" to "Test connection",
+        "本地偏好" to "Local preferences",
+        "学习我的偏好" to "Learn my preferences",
+        "使用已确认的规则" to "Use confirmed rules",
+        "确认清除" to "Confirm clear",
+        "清除本地偏好" to "Clear local preferences",
+        "未配置" to "Not set up",
         "暗房助手" to "Darkroom assistant",
         "返回调整" to "Back to Adjust",
         "请求发往 {0}" to "Requests go to {0}",

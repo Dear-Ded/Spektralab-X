@@ -229,17 +229,20 @@ internal fun AssistantPanel(port: AssistantPort, enabled: Boolean, onClose: () -
 
     Column(Modifier.fillMaxWidth().testTag("assistant-panel"), verticalArrangement = Arrangement.spacedBy(RowGap)) {
         AssistantHeader(v) { close() }
+        // Keyed by mode but carrying the whole state: a screen fading out keeps the state it was drawn
+        // with (a draft's values stay on its dials while the next screen fades in).
         AnimatedContent(
-            targetState = panelMode(v),
+            targetState = v,
+            contentKey = { panelMode(it) },
             transitionSpec = { fadeIn(Motion.defaultEffects()) togetherWith fadeOut(Motion.fastEffects()) },
             label = "assistant",
-        ) { mode ->
+        ) { shown ->
             Column(verticalArrangement = Arrangement.spacedBy(RowGap)) {
-                when (mode) {
+                when (panelMode(shown)) {
                     Mode.Offline -> OfflineTrial(port, enabled)
-                    Mode.Compose -> Composer(port, v, enabled)
-                    Mode.Draft -> Draft(port, v, enabled)
-                    Mode.Done -> Done(port, v, enabled)
+                    Mode.Compose -> Composer(port, shown, enabled)
+                    Mode.Draft -> Draft(port, shown, enabled)
+                    Mode.Done -> Done(port, shown, enabled)
                 }
             }
         }
@@ -322,7 +325,7 @@ private fun Draft(port: AssistantPort, v: AssistantView, enabled: Boolean) {
         Feedback.play(view, Cue.Tab); port.showCurrent(i == 0)
     }
     // The changed values as a carousel over one dial, as on the 调整 page; the formal value is a firm detent.
-    KnobRow("assistant", v.changes.map { c ->
+    if (v.changes.isNotEmpty()) KnobRow("assistant", v.changes.map { c ->
         Knob(c.param.id, c.param.label, c.after, c.param.min, c.param.max, c.after, c.param.format,
             short = { x -> String.format(Locale.ROOT, if (c.param == AssistantParam.EXPOSURE) "%+.1f" else "%+.0f", x).replace("-", "−") },
             tint = c.param.tint, stops = listOf(c.before)) { port.adjust(c.param, it) }
