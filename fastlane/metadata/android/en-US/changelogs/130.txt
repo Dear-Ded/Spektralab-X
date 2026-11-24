@@ -1,0 +1,1 @@
+Camera sounds now follow media volume instead of the ringer. Adjust them with the volume keys in the app, or turn them off in Settings. Haptics and system notifications are unchanged.

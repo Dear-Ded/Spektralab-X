@@ -2,7 +2,6 @@ package com.dearded.spektralab
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
 import android.os.SystemClock
@@ -30,8 +29,8 @@ import androidx.compose.ui.platform.LocalView
  *    supports them, so they have the rhythm of the real thing; elsewhere they fall
  *    back to one system effect. They also follow the system touch-feedback switch.
  *  - Sounds (res/raw/snd_*.ogg, made by tools/sound/make_sounds.py) play only for
- *    those moments, never for a dial or a tab, only with the ringer on normal,
- *    and only while 相机声音 is on in settings.
+ *    those moments, never for a dial or a tab. They follow media volume and
+ *    only play while 相机声音 is on in settings.
  *
  * Each cue is logged (logcat tag "Feedback" and [recent]), so a test or an agent
  * can see what fired without holding the phone.
@@ -105,7 +104,7 @@ object Feedback {
         synchronized(this) {
             if (pool != null) return
             val attrs = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
             val p = SoundPool.Builder().setMaxStreams(3).setAudioAttributes(attrs).build()
@@ -148,8 +147,6 @@ object Feedback {
         val p = pool ?: return
         if (synchronized(loaded) { id !in loaded }) return
         if (!context.getSharedPreferences("settings", 0).getBoolean(CAMERA_SOUND, true)) return
-        val audio = context.getSystemService(AudioManager::class.java) ?: return
-        if (audio.ringerMode != AudioManager.RINGER_MODE_NORMAL) return
         val v = VOLUME[cue] ?: 0.75f
         p.play(id, v, v, 1, 0, 1f)
     }

@@ -8,6 +8,10 @@
 
 Every user-visible change, newest first. New releases are displayed as `alpha vX.Y.Z`, with `vX.Y.Z-alpha` tags for compatibility with installed versions. English summaries are in `fastlane/metadata/android/en-US/changelogs/`.
 
+## alpha v0.3.01 · 2026-11-24
+
+快门、过片、装卷和保存等相机音效现在跟随媒体音量，不再受铃声音量或来电静音模式影响。在应用内按音量键即可调节；将媒体音量调到零，或关闭设置里的「相机声音」，都可以关闭这些音效。振动和系统通知提醒保持原样。
+
 ## alpha v0.3.00 · 2026-11-24
 
 这次更新重做了修图界面，让选胶片、调参数和保存照片更顺手。
