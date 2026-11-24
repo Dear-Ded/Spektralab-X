@@ -172,7 +172,7 @@ internal object FilmDevelop {
 
     private val BlackSlide: Positive by lazy {
         val small = android.graphics.Bitmap.createBitmap(8, 8, android.graphics.Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.BLACK) }
-        Positive({ android.graphics.ColorShader(android.graphics.Color.BLACK) }, small)
+        Positive({ r -> android.graphics.LinearGradient(r.left, 0f, r.right, 0f, android.graphics.Color.BLACK, android.graphics.Color.BLACK, android.graphics.Shader.TileMode.CLAMP) }, small)
     }
 
     /** True draws the CPU twin even on a hardware canvas: the JVM screenshot tests set it. */
