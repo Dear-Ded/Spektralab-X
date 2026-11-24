@@ -157,6 +157,8 @@ class Screenshots {
         fake.view.value = AssistantView(configured = false)
         shot("87_assistant_offline")
         fake.view.value = AssistantFake.configured
+        // The clock is manual: let the panel fade from 87's offline trial back to the composer first.
+        compose.mainClock.advanceTimeBy(1200)
         tap("方向光")
         shot("8a_assistant_consent")
         fake.view.value = AssistantFake.directional
