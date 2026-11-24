@@ -101,18 +101,71 @@ class AssistantPanelTest {
     @Test fun statisticsAreOffAndOnlyForThisRound() {
         val fake = AssistantFake(AssistantFake.configured)
         panel(fake)
-        compose.onNodeWithText("电影光影").assertIsNotEnabled()
+        compose.onNodeWithText("发送 目标文字、参数 · 不发送照片").assertExists()
         compose.onNodeWithText("画面统计").performClick()
         assertEquals("statistics:true", fake.calls.last())
-        fake.view.value = fake.view.value.copy(cinematicReady = true)
+        compose.onNodeWithText("发送 目标文字、参数、亮度与颜色分布 · 不发送照片").assertExists()
         compose.onNodeWithText("电影光影").performClick()
         assertEquals("cinematic", fake.calls.last())
+    }
+
+    @Test fun aRecommendationWithoutStatisticsAsksFirstAndSendsNothing() {
+        val fake = AssistantFake(AssistantFake.configured)
+        panel(fake)
+        compose.onNodeWithText("方向光").performClick()
+        compose.onNodeWithText("需要本次的亮度与颜色分布，不发送照片").assertExists()
+        assertEquals(listOf("open"), fake.calls)
+        compose.onNodeWithText("取消").performClick()
+        compose.onNodeWithText("需要本次的亮度与颜色分布，不发送照片").assertDoesNotExist()
+        assertEquals(listOf("open"), fake.calls)
+        compose.onNodeWithText("方向光").performClick()
+        compose.onNodeWithText("允许").performClick()
+        compose.waitForIdle()
+        assertEquals(listOf("open", "statistics:true", "directional"), fake.calls)
+    }
+
+    @Test fun noClearDirectionIsSaidAsSuch() {
+        val fake = AssistantFake(AssistantFake.configured.copy(statistics = true))
+        panel(fake)
+        compose.onNodeWithText("方向光").performClick()
+        assertEquals("directional", fake.calls.last())
+        fake.view.value = fake.view.value.copy(notice = AssistantNotice.CinematicNoAdjustment)
+        compose.onNodeWithText("没有明确的光向").assertExists()
+        compose.onNodeWithText("没有合适的电影光影").assertDoesNotExist()
+    }
+
+    @Test fun aDirectionalDraftShowsTheMeasuredSideAndStrengthAndNoFollowUp() {
+        val fake = AssistantFake(AssistantFake.directional)
+        panel(fake)
+        compose.onNodeWithText("方向光 · 亮侧在左").assertExists()
+        compose.onNodeWithText("强度").assertExists()
+        compose.onNodeWithText("100%").assertExists()
+        compose.onNodeWithContentDescription("继续调整").assertDoesNotExist()
+        compose.onNodeWithText("应用").performClick()
+        assertEquals("apply", fake.calls.last())
+    }
+
+    @Test fun theTwoWorkingStatesAreNamedApart() {
+        val fake = AssistantFake(AssistantFake.configured.copy(phase = AssistantPhase.Generating))
+        panel(fake)
+        compose.onNodeWithText("正在生成建议").assertExists()
+        fake.view.value = AssistantFake.directional.copy(phase = AssistantPhase.Rendering, canSetStrength = false)
+        compose.onNodeWithText("正在预览调整").assertExists()
+        compose.onNodeWithText("正在生成建议").assertDoesNotExist()
+    }
+
+    @Test fun aLocalTrialIsNeverShownAsAModelResult() {
+        val fake = AssistantFake(AssistantFake.local)
+        panel(fake)
+        compose.onNodeWithText("本地示例").assertExists()
+        compose.onNodeWithText("Anthropic", substring = true).assertDoesNotExist()
+        compose.onNodeWithContentDescription("继续调整").assertDoesNotExist()
     }
 
     @Test fun generatingCanAlwaysBeCancelled() {
         val fake = AssistantFake(AssistantFake.configured.copy(phase = AssistantPhase.Generating))
         panel(fake)
-        compose.onNodeWithText("正在生成").assertExists()
+        compose.onNodeWithText("正在生成建议").assertExists()
         compose.onNodeWithText("取消").performClick()
         assertEquals("cancel", fake.calls.last())
     }

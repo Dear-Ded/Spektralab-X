@@ -7,10 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,18 +20,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 
 /*
  * The darkroom assistant's light (docs/FRONTEND_ITERATION_2026-11-24.md C5, C6): the same liquid
@@ -42,10 +33,11 @@ import kotlin.math.roundToInt
  *
  *  - while the model works on parameters, a soft light flows slowly round the goal field and the
  *    button that sent it (EdgeLight);
- *  - while the engine renders the draft, the light moves to the neutral strip just under the photo,
- *    outside it (UnderLight).
+ *  - while the engine previews the adjustment, the light moves round the photo's edges, outside
+ *    it (PhotoRim).
  *
- * Never over the photo, never in an export, no hard edge, no particles. It fades in over 400 ms and
+ * Both carry a faint refraction on their crests (a spectrum split close to grey, after React Bits
+ * Prism, much quieter). Never over the photo, never in an export, no hard edge, no particles. It fades in over 400 ms and
  * out over 600 ms; its clock runs only while it is visible, at most 30 times a second; with system
  * animations off it is a still glow. Drawn in its own draw pass: nothing recomposes per frame.
  */
@@ -152,6 +144,9 @@ half4 main(float2 p) {
     float bloom = exp(-max(d, 0.0) / (uFeather * 0.45));
     float a = (0.30 * core + 0.55 * bloom) * (0.35 + 0.65 * flow) * uLevel * 0.42;
     float3 col = mix(uSilver, uIvory, flow);
+    // Refraction on the crest: a faint spectrum split along the edge, kept close to grey.
+    float3 spectrum = 0.5 + 0.5 * cos(6.2832 * (ang * 2.0 - uTime * 0.035 + max(d, 0.0) / uFeather * 0.7 + float3(0.0, 0.33, 0.67)));
+    col = mix(col, spectrum, 0.14 * flow * bloom);
     col = mix(col, uAmber, 0.25 * (1.0 - flow) * bloom);
     a *= 1.0 - smoothstep(uFeather * 0.7, uFeather, d);
     a = clamp(a + (hash(p) - 0.5) / 255.0, 0.0, 1.0);
@@ -161,25 +156,100 @@ half4 main(float2 p) {
 }
 
 /**
- * The light under the photo while a draft renders: the liquid-silver band (Aura.kt), turned to hug
- * the photo's lower edge from outside and fade downward. [photo] is the photo's rect in this box's
- * coordinates; nothing is drawn inside it.
+ * The light round the photo while the adjustment previews (C6): a soft refracted glow that hugs the
+ * photo's four edges from outside and travels slowly round them, as light through the edge of a prism.
+ * [photo] is the photo's rect in this box's coordinates; nothing is drawn inside it, so the photo looks
+ * exactly as it will. It waits [patience] before it shows, so a quick render (a strength step) never
+ * flickers it; it leaves in 600 ms when the draft arrives, in 200 ms when the work stopped ([quick]).
  */
 @Composable
-internal fun UnderLight(photo: Rect?, active: Boolean) {
-    val level = rememberLightLevel(active)
-    val lit by remember { androidx.compose.runtime.derivedStateOf { level.value > 0f } }
-    if (photo == null || (!active && !lit)) return
-    val density = LocalDensity.current
-    val h = 36.dp
-    with(density) {
-        Box(
-            Modifier.offset { IntOffset(photo.left.roundToInt(), photo.bottom.roundToInt()) }
-                .width(photo.width.toDp()).height(h)
-                // The band rises from its box's lower edge; flipped, it falls from the photo's.
-                .graphicsLayer { scaleY = -1f; alpha = level.value },
-        ) {
-            Aura(Modifier.fillMaxWidth().height(h), strength = { 0.75f }, ground = Color.Transparent, reach = 1f)
-        }
+internal fun PhotoRim(photo: Rect?, active: Boolean, quick: Boolean = false, patience: Long = 250) {
+    val shown by androidx.compose.runtime.produceState(false, active) {
+        value = false
+        if (active) { kotlinx.coroutines.delay(patience); value = true }
     }
+    val level = remember { Animatable(0f) }
+    LaunchedEffect(shown, quick) { level.animateTo(if (shown) 1f else 0f, tween(if (shown) 420 else if (quick) 200 else 600)) }
+    val lit by remember { androidx.compose.runtime.derivedStateOf { level.value > 0f } }
+    val clock = rememberLightClock(lit)
+    if (photo == null || !lit) return
+    val shader = remember { if (Build.VERSION.SDK_INT >= 33) RimShader.create() else null }
+    val reach = 28.dp
+    Canvas(Modifier.fillMaxSize()) {
+        val k = level.value
+        val f = reach.toPx()
+        val t = clock.floatValue
+        val outer = Rect(photo.left - f, photo.top - f, photo.right + f, photo.bottom + f)
+        if (shader != null && Build.VERSION.SDK_INT >= 33 && drawContext.canvas.nativeCanvas.isHardwareAccelerated && !FilmDevelop.cpuOnly) {
+            shader.setFloatUniform("uRect", photo.left, photo.top, photo.right, photo.bottom)
+            shader.setFloatUniform("uFeather", f)
+            shader.setFloatUniform("uTime", t)
+            shader.setFloatUniform("uLevel", k)
+            drawRect(ShaderBrush(shader), outer.topLeft, outer.size)
+        } else rimFallback(photo, k, t, f)
+    }
+}
+
+/** Below API 33 and on software canvases: soft rings outside the photo, breathing, with a fine edge. */
+private fun DrawScope.rimFallback(photo: Rect, k: Float, t: Float, f: Float) {
+    val breath = 0.75f + 0.25f * kotlin.math.sin(t * 1.2f)
+    for (i in 3 downTo 1) {
+        val grow = f * i / 3f
+        drawRect(AuraColors.Silver.copy(alpha = 0.06f * k * breath * (1.2f - i / 3f)),
+            Offset(photo.left - grow + grow * 0.45f, photo.top - grow + grow * 0.45f),
+            Size(photo.width + 2 * grow - grow * 0.9f, photo.height + 2 * grow - grow * 0.9f), style = Stroke(grow * 0.9f))
+    }
+    drawRect(AuraColors.Ivory.copy(alpha = 0.18f * k * breath), Offset(photo.left - 1f, photo.top - 1f),
+        Size(photo.width + 2f, photo.height + 2f), style = Stroke(1.5f))
+}
+
+@RequiresApi(33)
+private object RimShader {
+    fun create(): RuntimeShader? = runCatching {
+        RuntimeShader(AGSL).apply {
+            fun set(name: String, c: Color) = setFloatUniform(name, c.red, c.green, c.blue)
+            set("uSilver", AuraColors.Silver); set("uIvory", AuraColors.Ivory); set("uAmber", AuraColors.Amber)
+        }
+    }.onFailure { android.util.Log.w("PhotoRim", "shader unavailable", it) }.getOrNull()
+
+    private const val AGSL = """
+uniform float4 uRect;
+uniform float uFeather;
+uniform float uTime;
+uniform float uLevel;
+uniform float3 uSilver;
+uniform float3 uIvory;
+uniform float3 uAmber;
+
+float hash(float2 q) { return fract(sin(dot(q, float2(127.1, 311.7))) * 43758.5453); }
+
+half4 main(float2 p) {
+    float2 c = (uRect.xy + uRect.zw) * 0.5;
+    float2 h = (uRect.zw - uRect.xy) * 0.5;
+    float2 q = p - c;
+    float2 e = abs(q) - h;
+    float d = length(max(e, 0.0)) + min(max(e.x, e.y), 0.0);
+    // Outside only: the photo itself is never lit.
+    if (d <= 0.0) return half4(0.0);
+    // Position round the perimeter, 0..1, aspect-true so the sweep moves at one speed on every edge.
+    float2 n = q / h;
+    float ang = atan(n.y, n.x) / 6.2832;
+    // One slow crest travelling round (about 9 s a lap) and a fainter one opposite; never a spinning dot.
+    float s1 = pow(0.5 + 0.5 * cos(6.2832 * (ang - uTime * 0.11)), 6.0);
+    float s2 = pow(0.5 + 0.5 * cos(6.2832 * (ang - uTime * 0.11 + 0.5)), 10.0) * 0.45;
+    float sweep = 0.28 + 0.72 * max(s1, s2);
+    float core = exp(-d / 1.4);
+    float bloom = exp(-d / (uFeather * 0.38));
+    float a = (0.26 * core + 0.50 * bloom) * sweep * uLevel * 0.55;
+    a *= 1.0 - smoothstep(uFeather * 0.75, uFeather, d);
+    // Refraction: the crest splits into a faint spectrum, kept close to grey.
+    float k = ang * 3.0 - uTime * 0.04 + d / uFeather * 0.6;
+    float3 spectrum = 0.5 + 0.5 * cos(6.2832 * (k + float3(0.0, 0.33, 0.67)));
+    float3 col = mix(uSilver, uIvory, s1);
+    col = mix(col, spectrum, 0.16 * s1);
+    col = mix(col, uAmber, 0.18 * bloom * (1.0 - s1));
+    a = clamp(a + (hash(p) - 0.5) / 255.0, 0.0, 1.0);
+    return half4(half3(col * a), half(a));
+}
+"""
 }

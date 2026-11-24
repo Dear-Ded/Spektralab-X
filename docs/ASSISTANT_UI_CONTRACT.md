@@ -24,6 +24,9 @@ around `EditorScreen` and `SettingsScreen`, in internal builds only. With no por
 | `notice` | `AdviceNotice` (NO_CHANGE, UNSUPPORTED, QUESTION_LIMIT, CANCELLED, CINEMATIC_PREVIEW_NOT_ANALYZED, CINEMATIC_NO_ADJUSTMENT), same order |
 | `error` | `AdviceError` / `AdvisorNetworkError` folded: CONFIGURATION_REQUIRED → Configuration; NETWORK_AUTH, AUTH → Auth; NETWORK_ADDRESS, NOT_FOUND, REDIRECT → Address; NETWORK_RATE_LIMIT, RATE_LIMIT → RateLimit; NETWORK_TIMEOUT, TIMEOUT → Timeout; NETWORK_FAILED, TRANSPORT, SERVER, HTTP → Network; PROVIDER_REFUSED → Refused; INVALID_JSON, SCHEMA_MISMATCH, INVALID_STATUS_PAYLOAD, UNKNOWN_PARAMETER, DUPLICATE_PARAMETER, OUT_OF_RANGE, LOCK_CONFLICT, NO_EFFECT, STALE_RESULT, PROVIDER_INCOMPLETE, PROVIDER_INVALID, OUTPUT_TOO_LARGE, TOO_LARGE, INVALID_RESPONSE → Invalid; RENDER_FAILED → Render; SAVE_FAILED → Save; PREFERENCES_UNAVAILABLE, PREFERENCE_CONFLICT → Preferences |
 | `canApply` | `DraftState.canApply` |
+| `strength`, `canSetStrength` | `DraftState.strengthPercent`, `DraftState.canSetStrength` |
+| `local` | the shown draft's origin is `AdviceOrigin.Local` (提亮 / 柔和): the panel says 本地示例 and never shows the model's name |
+| `lightFrom` | `draft.directionalLight?.brightSide` (LEFT/RIGHT/TOP/BOTTOM → Left/Right/Top/Bottom), as measured |
 
 ## Actions: `AssistantPort` → your calls
 
@@ -33,6 +36,8 @@ around `EditorScreen` and `SettingsScreen`, in internal builds only. With no por
 | `close()` | `discard()` then end the session (restore the formal edit, `endPreview`) |
 | `generate(goal)` | `generate(text)`; during a shown draft it is the follow-up |
 | `cinematic()` | `generateCinematicRecommendation()` |
+| `directional()` | `generateDirectionalLightRecommendation()`; the panel calls it only once 画面统计 is on (it asks first, inline) |
+| `setStrength(p)` | `setStrength(p)`; the dial keeps the finger's value and sends the latest one as soon as `canSetStrength` is true again |
 | `cancel()` | `cancelRequest()` |
 | `statistics(on)` | `includeStatistics(on)` (this round only; reset on `begin`) |
 | `showCurrent(b)` | `compare(showEntry = b)` |
@@ -51,12 +56,18 @@ Settings (`AssistantSettingsPort`): `settings` ← `AdvisorRuntimeState` (`loadi
 array); `testConnection` / `cancelTest`; `preferences`, `learn`, `useRules`, `clearPreferences` →
 your preference store.
 
+Notices for a directional request arrive as `CINEMATIC_NO_ADJUSTMENT` / `CINEMATIC_PREVIEW_NOT_ANALYZED`; the panel
+words them by the button the user pressed (没有明确的光向 / 预览还不能分析). A directional draft has no scalar
+`changes`; the panel shows it by `strength` and `lightFrom`, and offers no follow-up field on it.
+
 ## What the UI guarantees
 
 - Nothing is sent by opening, typing, choosing a model, or ticking 画面统计; only 生成草稿, 电影光影,
   a follow-up, an answer or 测试连接 call the port.
 - The photo, its zoom and its crop never move; the panel replaces the 调整 controls only.
-- The light shows only `Generating` (round the field) and `Rendering` (under the photo, outside it).
+- The light shows only `Generating` (正在生成建议: round the goal field and its buttons) and `Rendering` (正在预览调整:
+  round the photo's edges, outside it, after 250 ms so a strength step does not flicker). It leaves in 600 ms when
+  the draft lands and in 200 ms on cancel, failure or a new photo.
   It is never on the photo and never in an export; it stops on any other phase; it is still with
   system animations off.
 - Export while a draft is shown uses the formal edit (your `PREPARING_EXPORT`); the UI does not export.

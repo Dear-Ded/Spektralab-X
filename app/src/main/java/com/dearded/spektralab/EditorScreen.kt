@@ -450,7 +450,9 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                 val img = ui.image
                 val photo = photoBounds?.let { b -> if (img != null) fitted(b, img.width, img.height).translate(-origin) else null }
                 Box(Modifier.matchParentSize().onGloballyPositioned { origin = it.positionInWindow() }) {
-                    UnderLight(photo, nav.assistant && av.phase == AssistantPhase.Rendering)
+                    // Out quickly when the work stopped (cancel, failure, a new photo), slowly as the draft lands.
+                    PhotoRim(photo, nav.assistant && av.phase == AssistantPhase.Rendering && ui.image != null,
+                        quick = av.error != null || av.phase == AssistantPhase.Ready || av.phase == AssistantPhase.Failed)
                 }
             }
             ui.busy?.let { BusyOverlay(it) }

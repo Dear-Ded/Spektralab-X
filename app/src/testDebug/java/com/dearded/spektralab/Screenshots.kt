@@ -156,6 +156,13 @@ class Screenshots {
         shot("86_assistant_applied")
         fake.view.value = AssistantView(configured = false)
         shot("87_assistant_offline")
+        fake.view.value = AssistantFake.configured
+        tap("方向光")
+        shot("8a_assistant_consent")
+        fake.view.value = AssistantFake.directional
+        shot("8b_assistant_directional")
+        fake.view.value = AssistantFake.local
+        shot("8c_assistant_local")
     }
 
     @Test fun editorBorderAndCrop() {

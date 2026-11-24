@@ -15,6 +15,8 @@ internal class AssistantFake(initial: AssistantView) : AssistantPort, AssistantS
     override fun close() { calls += "close" }
     override fun generate(goal: String) { calls += "generate:$goal" }
     override fun cinematic() { calls += "cinematic" }
+    override fun directional() { calls += "directional" }
+    override fun setStrength(percent: Int) { calls += "strength:$percent" }
     override fun cancel() { calls += "cancel" }
     override fun statistics(on: Boolean) { calls += "statistics:$on"; view.value = view.value.copy(statistics = on) }
     override fun showCurrent(current: Boolean) { calls += "showCurrent:$current"; view.value = view.value.copy(showingCurrent = current) }
@@ -46,5 +48,11 @@ internal class AssistantFake(initial: AssistantView) : AssistantPort, AssistantS
             AssistantChange(AssistantParam.HIGHLIGHTS, 0.0, -24.0),
             AssistantChange(AssistantParam.TEMPERATURE, 0.0, 12.0),
         ))
+        /** A directional-light draft: masks, no scalar changes, strength on the dial. */
+        val directional = configured.copy(phase = AssistantPhase.Previewing, canApply = true, strength = 100,
+            canSetStrength = true, lightFrom = AssistantSide.Left)
+        /** A fixed offline trial on the photo. */
+        val local = AssistantView(configured = false, phase = AssistantPhase.Previewing, canApply = true, local = true,
+            changes = listOf(AssistantChange(AssistantParam.EXPOSURE, 0.0, 0.3)))
     }
 }
