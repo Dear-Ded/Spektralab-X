@@ -77,10 +77,11 @@ private val Scheme = darkColorScheme(
 private val Zh = androidx.compose.ui.text.intl.LocaleList("zh-CN")
 
 /*
- * Bundled faces (tools/work/ui-fonts.md, set A): Inter for Latin and digits,
- * Noto Sans SC (思源黑体) for Chinese, JetBrains Mono for readouts. All OFL 1.1,
- * licences in assets/fonts/licenses, listed in NOTICE. The same on every phone,
- * whatever the maker's system font.
+ * Bundled faces (docs/FRONTEND_ITERATION_2026-11-24.md A2): Instrument Sans for Latin text,
+ * Noto Sans SC (思源黑体) for Chinese, Barlow Semi Condensed for values and edge print -- the
+ * narrow grotesk of a camera's dials and a film's rebate, with tabular figures so a value never
+ * changes width while a dial turns. All OFL 1.1, licences in assets/fonts/licenses, listed in
+ * NOTICE. The same on every phone, whatever the maker's system font.
  *
  * Compose picks a font by weight only, never by script, so each weight is one
  * platform Typeface built with CustomFallbackBuilder (API 29, our minSdk): the
@@ -93,10 +94,15 @@ internal object UiFonts {
     private val cache = HashMap<String, android.graphics.Typeface>()
 
     private fun face(c: android.content.Context, path: String, weight: Int, axis: Int = weight) =
-        android.graphics.fonts.Font.Builder(c.assets, path)
-            .setWeight(weight)
-            .setFontVariationSettings("'wght' $axis")
-            .build()
+        if (path == MONO) {
+            // Static faces, one file a weight.
+            android.graphics.fonts.Font.Builder(c.assets, "$MONO-${STATIC[weight] ?: "Medium"}.ttf").setWeight(weight).build()
+        } else {
+            android.graphics.fonts.Font.Builder(c.assets, path)
+                .setWeight(weight)
+                .setFontVariationSettings("'wght' $axis")
+                .build()
+        }
 
     fun typeface(c: android.content.Context, latin: String, weight: Int): android.graphics.Typeface =
         synchronized(cache) {
@@ -119,8 +125,10 @@ internal object UiFonts {
         for (w in WEIGHTS) { typeface(app, SANS, w); typeface(app, MONO, w) }
     }
 
-    const val SANS = "fonts/Inter-VF.ttf"
-    const val MONO = "fonts/JetBrainsMono-VF.ttf"
+    const val SANS = "fonts/InstrumentSans-VF.ttf"
+    /** The values face: a family of static files, fonts/BarlowSemiCondensed-<weight>.ttf. */
+    const val MONO = "fonts/BarlowSemiCondensed"
+    private val STATIC = mapOf(400 to "Regular", 500 to "Medium", 600 to "SemiBold", 700 to "Bold")
     const val CJK = "fonts/NotoSansSC-VF.ttf"
 
     @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
@@ -142,9 +150,9 @@ internal object UiFonts {
     fun family(latin: String) = androidx.compose.ui.text.font.FontFamily(WEIGHTS.map { Bundled(latin, FontWeight(it)) })
 }
 
-/** Headings, labels and body: Inter with Noto Sans SC behind it. */
+/** Headings, labels and body: Instrument Sans with Noto Sans SC behind it. */
 val UiSans = UiFonts.family(UiFonts.SANS)
-/** Readouts, film codes, frame numbers: JetBrains Mono with Noto Sans SC behind it. */
+/** Values, film codes, frame numbers: Barlow Semi Condensed (tabular figures) with Noto Sans SC behind it. */
 val UiMono = UiFonts.family(UiFonts.MONO)
 
 private fun TextStyle.zh() = copy(letterSpacing = 0.sp, localeList = Zh, fontFamily = UiSans)
@@ -170,7 +178,7 @@ private val Type = Typography().let { t ->
     )
 }
 
-/** Any readout that changes while a finger moves: monospaced, so its width never jitters. */
+/** Any readout that changes while a finger moves: tabular figures, so its width never jitters. */
 val Readout = TextStyle(fontFamily = UiMono, fontFeatureSettings = "tnum", fontWeight = FontWeight.Medium,
     fontSize = 13.sp, localeList = Zh)
 
