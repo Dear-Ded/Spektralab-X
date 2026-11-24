@@ -160,6 +160,13 @@ the EXIF Software field.
   Inter (Copyright 2020 The Inter Project Authors),
   JetBrains Mono (Copyright 2020 The JetBrains Mono Project Authors)
 - README 样片原图 / README sample RAWs: raw.pixls.us — CC0 1.0
+- 相机声音 / camera sounds (app/src/main/res/raw/snd_*.ogg) — cut and processed from
+  Freesound recordings, all CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/):
+  alexradsby "Leica M10 Shutter Sound" (813225); lisaisanut "Canon A-1 Shutter and
+  Film Advance" (734819); keverlyhills "Opening+Closing 35mm film camera back" (585478);
+  alegemaate "Bottle Slosh 2" (667273); jzielke011 "Film Canister Open and Close
+  Sounds" (439640); kulmajaba "Fujifilm Fuji GW670 II" (588608). See
+  tools/sound/cut_sounds.py.
 
 许可文本随应用打包在 assets/engine/licenses/。
 Licence texts ship in the app under assets/engine/licenses/.

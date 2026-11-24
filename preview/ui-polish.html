@@ -718,33 +718,15 @@ function paintThumb(cv,st,k){
 /* =====================================================================
  * Feedback: one entry point for vibration, sound and the event log
  * ===================================================================*/
-const Snd={
-  ctx:null,noise:null,bus:null,
-  ensure(){ if(this.ctx) return this.ctx; const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; const c=this.ctx=new C();
-    const n=c.createBuffer(1,c.sampleRate,c.sampleRate),d=n.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1; this.noise=n;
-    // a short "body": the sound of a small metal camera, not a speaker
-    const comp=c.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=3; comp.connect(c.destination);
-    const conv=c.createConvolver(); const ir=c.createBuffer(2,c.sampleRate*.12,c.sampleRate);
-    for(let ch=0;ch<2;ch++){const x=ir.getChannelData(ch);for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*Math.pow(1-i/x.length,6)*.6}
-    conv.buffer=ir; const wet=c.createGain(); wet.gain.value=.28; conv.connect(wet).connect(comp);
-    this.bus=c.createGain(); this.bus.gain.value=.9; this.bus.connect(comp); this.bus.connect(conv); return c; },
-  noiseHit(t,{f=2000,q=1,type='bandpass',g=.4,a=.0008,d=.02}={}){const c=this.ctx,s=c.createBufferSource();s.buffer=this.noise;const fl=c.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;
-    const e=c.createGain();e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(g,t+a);e.gain.exponentialRampToValueAtTime(.0003,t+a+d);s.connect(fl).connect(e).connect(this.bus);s.start(t,Math.random()*.8);s.stop(t+a+d+.03)},
-  ping(t,{f=3000,g=.05,d=.04,type='sine',to}={}){const c=this.ctx,o=c.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);
-    const e=c.createGain();e.gain.setValueAtTime(g,t);e.gain.exponentialRampToValueAtTime(.0003,t+d);o.connect(e).connect(this.bus);o.start(t);o.stop(t+d+.03)},
-  /* one metal click: a transient, a resonant ring, a little body */
-  click(t,{f=2600,g=.35,ring=.04,body=0}={}){this.noiseHit(t,{f,q:2.2,g,d:.012});this.ping(t,{f:f*1.9,g:g*.12,d:ring,type:'triangle'});this.ping(t,{f:f*1.31,g:g*.08,d:ring*.7});if(body)this.ping(t,{f:150,to:70,g:body,d:.06})},
-  thunk(t,g=.3){this.noiseHit(t,{type:'lowpass',f:420,g,d:.05,a:.002});this.ping(t,{f:120,to:55,g:g*.7,d:.07})},
-  swish(t,dur=.5,g=.08){const c=this.ctx,s=c.createBufferSource();s.buffer=this.noise;const fl=c.createBiquadFilter();fl.type='bandpass';fl.Q.value=.7;
-    fl.frequency.setValueAtTime(500,t);fl.frequency.linearRampToValueAtTime(1300,t+dur*.5);fl.frequency.linearRampToValueAtTime(600,t+dur);
-    const e=c.createGain();e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(g,t+dur*.4);e.gain.linearRampToValueAtTime(0,t+dur);s.connect(fl).connect(e).connect(this.bus);s.start(t,Math.random()*.3);s.stop(t+dur+.05)},
-  buf:{},
+const Snd={ // the app's recordings (res/raw/snd_*.ogg, tools/sound/cut_sounds.py) at the app's volumes (Feedback.VOLUME)
+  ctx:null, buf:{}, VOL:{shutter:.9,counter:.5,agitate:.55},
+  ensure(){ if(this.ctx) return this.ctx; const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; return this.ctx=new C(); },
   load(name){ if(this.buf[name]!==undefined) return; this.buf[name]=null; const c=this.ensure(); if(!c) return;
     fetch(`../app/src/main/res/raw/snd_${name}.ogg`).then(r=>r.arrayBuffer()).then(a=>c.decodeAudioData(a)).then(b=>{this.buf[name]=b}).catch(()=>{}); },
   play(name){
     const c=this.ensure(); if(!c) return; if(c.state==='suspended') c.resume();
     const b=this.buf[name]; if(!b){this.load(name);return}
-    const s=c.createBufferSource(); s.buffer=b; const g=c.createGain(); g.gain.value=.9; s.connect(g).connect(c.destination); s.start(c.currentTime+.004);
+    const s=c.createBufferSource(); s.buffer=b; const g=c.createGain(); g.gain.value=this.VOL[name]??.75; s.connect(g).connect(c.destination); s.start(c.currentTime+.004);
   }
 };
 /* event -> [vibration (ms), sound, strength of the on-screen pulse]; names are camera actions */

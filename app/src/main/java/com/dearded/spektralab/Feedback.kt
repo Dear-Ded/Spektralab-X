@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalView
  *    closing) are composed from vibration primitives on API 30+ where the motor
  *    supports them, so they have the rhythm of the real thing; elsewhere they fall
  *    back to one system effect. They also follow the system touch-feedback switch.
- *  - Sounds (res/raw/snd_*.ogg, made by tools/sound/make_sounds.py) play only for
+ *  - Sounds (res/raw/snd_*.ogg, recordings cut by tools/sound/cut_sounds.py) play only for
  *    those moments, never for a dial or a tab. They follow media volume and
  *    only play while 相机声音 is on in settings.
  *
