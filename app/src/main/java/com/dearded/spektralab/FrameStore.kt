@@ -12,12 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 import java.security.MessageDigest
+import java.util.UUID
 
 /**
- * One photo on the light table (观片台). Who it is comes from the provider's
- * name, size and date, never from its bytes: upstream once matched by content
- * hash and two files with the same bytes inherited each other's grade.
+ * One photo on the light table. The provider URI identifies an import;
+ * only an explicit relink checks byte equality.
  */
 @Immutable
 data class Frame(
@@ -45,6 +46,8 @@ data class Frame(
     val addedAt: Long = 0,
     /** A persistable read grant is held, so the frame still opens after a restart. */
     val persisted: Boolean = true,
+    val sourceMember: String? = null,
+    val sourceSha256: String? = null,
 ) {
     val dimsKnown get() = width > 0 && height > 0
     val landscape get() = !dimsKnown || width >= height
@@ -54,6 +57,7 @@ data class Frame(
         .put("mime", mime).put("raw", raw).put("w", width).put("h", height).put("exifDate", exifDate)
         .put("pick", pick).put("stars", stars).put("edited", edited).put("film", film)
         .put("editedAt", editedAt).put("addedAt", addedAt)
+        .put("sourceMember", sourceMember).put("sourceSha256", sourceSha256)
 
     companion object {
         fun fromJson(o: JSONObject): Frame? = runCatching {
@@ -64,15 +68,32 @@ data class Frame(
                 exifDate = o.optString("exifDate"), pick = o.optInt("pick").coerceIn(-1, 1),
                 stars = o.optInt("stars").coerceIn(0, 5), edited = o.optBoolean("edited"),
                 film = o.optString("film"), editedAt = o.optLong("editedAt"), addedAt = o.optLong("addedAt"),
+                sourceMember = o.opt("sourceMember") as? String, sourceSha256 = o.opt("sourceSha256") as? String,
             )
         }.getOrNull()
 
-        /** The identity: name, size and date, hashed only to make a file name. */
-        fun idOf(name: String, size: Long, date: Long): String {
-            val digest = MessageDigest.getInstance("SHA-1").digest("$name\n$size\n$date".toByteArray())
-            return digest.take(10).joinToString("") { "%02x".format(it) }
+        /** The URI stays private; its digest is only a sidecar filename. */
+        internal fun idOf(uri: String): String {
+            val digest = MessageDigest.getInstance("SHA-1").digest(uri.toByteArray())
+            return "uri-" + digest.joinToString("") { "%02x".format(it) }
         }
     }
+}
+
+internal sealed interface SourceReauthorization {
+    data class Restored(val frame: Frame) : SourceReauthorization
+    data object DifferentDocument : SourceReauthorization
+    data object Removed : SourceReauthorization
+    data object Unavailable : SourceReauthorization
+}
+
+internal sealed interface SourceRelink {
+    data class Linked(val frame: Frame) : SourceRelink
+    data object UnverifiedOriginal : SourceRelink
+    data object DifferentDocument : SourceRelink
+    data object AlreadyAssociated : SourceRelink
+    data object Removed : SourceRelink
+    data object Unavailable : SourceRelink
 }
 
 /**
@@ -135,26 +156,132 @@ data class Sidecar(val edit: Edit, val wbK: Double = 0.0, val wbTint: Double = 0
  *
  * Every function that touches files is IO-thread only.
  */
-class FrameStore private constructor(private val context: Context) {
+class FrameStore internal constructor(private val context: Context) {
     private val dir = File(context.filesDir, "Sidecars")
     private val indexFile = File(dir, "index.json")
     private val lock = SourceGrantLock.monitor
     private val _frames = MutableStateFlow<List<Frame>>(emptyList())
     val frames: StateFlow<List<Frame>> = _frames
+    private var completeIndex = false
     @Volatile private var loaded = false
 
     fun load(): Unit = synchronized(lock) {
         if (loaded) return
         loaded = true
         val list = runCatching {
-            val array = JSONArray(indexFile.readText())
-            (0 until array.length()).mapNotNull { array.optJSONObject(it)?.let(Frame::fromJson) }
+            val array = if (indexFile.exists()) JSONArray(indexFile.readText()) else JSONArray()
+            val entries = (0 until array.length()).mapNotNull { array.optJSONObject(it)?.let(Frame::fromJson) }
+            completeIndex = entries.size == array.length() && entries.distinctBy { it.id }.size == entries.size
+            entries
         }.getOrDefault(emptyList())
         val held = heldGrants()
         _frames.value = list.map { it.copy(persisted = Uri.parse(it.uri).scheme == "file" || it.uri in held) }
     }
 
     fun byId(id: String) = _frames.value.firstOrNull { it.id == id }
+
+    private fun currentMember(target: Frame): Frame? = byId(target.id)?.takeIf {
+        it.uri == target.uri && it.sourceMember == target.sourceMember
+    }
+
+    /** A picker grant for the same document does not migrate the index or edit. */
+    internal fun reauthorizeSource(target: Frame, picked: Uri): SourceReauthorization {
+        if (picked.scheme != "content" || picked.toString() != target.uri) return SourceReauthorization.DifferentDocument
+        val resolver = context.contentResolver
+        return try {
+            resolver.openInputStream(picked)?.close() ?: return SourceReauthorization.Unavailable
+            synchronized(lock) {
+                load()
+                val current = currentMember(target) ?: return@synchronized SourceReauthorization.Removed
+                resolver.takePersistableUriPermission(picked, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                val restored = current.copy(persisted = true)
+                _frames.value = _frames.value.map { if (it.id == restored.id) restored else it }
+                SourceReauthorization.Restored(restored)
+            }
+        } catch (_: IOException) {
+            SourceReauthorization.Unavailable
+        } catch (_: SecurityException) {
+            SourceReauthorization.Unavailable
+        }
+    }
+
+    /** Explicit request while the original is readable. A known fingerprint is never replaced. */
+    internal fun rememberSourceIdentity(target: Frame): Boolean {
+        val current = synchronized(lock) {
+            load()
+            if (!completeIndex) return false
+            currentMember(target)
+        } ?: return false
+        if (current.sourceSha256 != null) return true
+        val digest = sourceDigest(Uri.parse(current.uri)) ?: return false
+        return synchronized(lock) {
+            val latest = currentMember(target) ?: return@synchronized false
+            if (latest.sourceSha256 != null) return@synchronized latest.sourceSha256 == digest
+            commitIndex(_frames.value.map { if (it.id == latest.id) it.copy(sourceSha256 = digest) else it })
+            true
+        }
+    }
+
+    internal fun relinkSource(target: Frame, picked: Uri, inUse: () -> Set<String>): SourceRelink {
+        val replacement = picked.toString()
+        if (picked.scheme != "content" || replacement == target.uri) return SourceRelink.DifferentDocument
+        val current = synchronized(lock) {
+            load()
+            if (!completeIndex) return SourceRelink.Unavailable
+            currentMember(target)
+        } ?: return SourceRelink.Removed
+        val expected = current.sourceSha256 ?: return SourceRelink.UnverifiedOriginal
+        val actual = sourceDigest(picked) ?: return SourceRelink.Unavailable
+        if (actual != expected) return SourceRelink.DifferentDocument
+        return synchronized(lock) {
+            val latest = currentMember(target) ?: return@synchronized SourceRelink.Removed
+            if (_frames.value.any { it.uri == replacement } || File(dir, "${Frame.idOf(replacement)}.json").exists())
+                return@synchronized SourceRelink.AlreadyAssociated
+
+            // The new slot is not visible to imports unless the index publishes it.
+            val moved = latest.copy(id = "relink-${UUID.randomUUID()}", uri = replacement, persisted = true)
+            val oldEdit = File(dir, "${latest.id}.json")
+            val newEdit = File(dir, "${moved.id}.json")
+            val grantWasHeld = replacement in heldGrants()
+            var acquired = false
+            var published = false
+            try {
+                context.contentResolver.takePersistableUriPermission(picked, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                acquired = true
+                if (oldEdit.isFile) writeAtomicText(newEdit, oldEdit.readText())
+                commitIndex(_frames.value.map { if (it.id == latest.id) moved else it })
+                published = true
+            } catch (_: IOException) {
+                return@synchronized SourceRelink.Unavailable
+            } catch (_: SecurityException) {
+                return@synchronized SourceRelink.Unavailable
+            } finally {
+                if (!published) {
+                    newEdit.delete()
+                    if (acquired && !grantWasHeld) releaseReadGrant(replacement)
+                }
+            }
+            releaseUnusedGrants(listOf(latest), inUse)
+            SourceRelink.Linked(moved)
+        }
+    }
+
+    private fun sourceDigest(uri: Uri): String? = try {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            val digest = MessageDigest.getInstance("SHA-256")
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+            digest.digest().joinToString("") { "%02x".format(it) }
+        }
+    } catch (_: IOException) {
+        null
+    } catch (_: SecurityException) {
+        null
+    }
 
     /** True while a frame on the table reads [uri], so its grant must not be released by anyone else. */
     fun holds(uri: String): Boolean {
@@ -170,9 +297,8 @@ class FrameStore private constructor(private val context: Context) {
     }
 
     /**
-     * Adds [uris] (the photo picker's), newest capture first. A photo already
-     * on the table (same name, size, date) only gets its new URI. Returns how
-     * many were new.
+     * Adds [uris] (the photo picker's), newest capture first. An existing URI
+     * keeps its index entry and edit. Returns how many were new.
      */
     fun import(uris: List<Uri>, progress: (Int) -> Unit = {}): Int {
         load()
@@ -185,22 +311,25 @@ class FrameStore private constructor(private val context: Context) {
             progress(i + 1)
         }
         synchronized(lock) {
-            val byId = LinkedHashMap<String, Frame>()
-            _frames.value.forEach { byId[it.id] = it }
+            val byId = _frames.value.associateByTo(LinkedHashMap()) { it.id }
+            val idByUri = HashMap<String, String>()
+            byId.values.forEach { idByUri.putIfAbsent(it.uri, it.id) }
             for (described in incoming) {
                 val persisted = described.persisted || runCatching {
                     context.contentResolver.takePersistableUriPermission(
                         Uri.parse(described.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }.isSuccess
                 val f = described.copy(persisted = persisted)
-                val old = byId[f.id]
+                val old = idByUri[f.uri]?.let(byId::get)
                 if (old == null) {
                     // A sidecar left by an earlier removal still belongs to this photo.
                     val car = readSidecar(f.id)
-                    byId[f.id] = if (car != null) f.copy(edited = true, film = car.edit.film, editedAt = car.updated) else f
+                    val member = f.copy(sourceMember = UUID.randomUUID().toString())
+                    byId[f.id] = if (car != null) member.copy(edited = true, film = car.edit.film, editedAt = car.updated) else member
+                    idByUri[f.uri] = f.id
                     added++
                 } else {
-                    byId[f.id] = old.copy(uri = f.uri, persisted = f.persisted)
+                    byId[old.id] = old.copy(persisted = f.persisted)
                 }
             }
             commitIndex(byId.values.sortedByDescending { it.date })
@@ -246,7 +375,7 @@ class FrameStore private constructor(private val context: Context) {
         if (rotation % 180 != 0) { val t = w; w = h; h = t }
         val exif = ExifCopy.read(context, uri)
         return Frame(
-            id = Frame.idOf(name, size, date), uri = uri.toString(), name = name, size = size, date = date,
+            id = Frame.idOf(uri.toString()), uri = uri.toString(), name = name, size = size, date = date,
             mime = mime, raw = raw, width = w.coerceAtLeast(0), height = h.coerceAtLeast(0),
             exifDate = exif.dateTimeOriginal.orEmpty(), persisted = uri.scheme == "file",
         )
@@ -281,11 +410,29 @@ class FrameStore private constructor(private val context: Context) {
     fun remove(ids: Set<String>, inUse: () -> Set<String>): Unit = synchronized(lock) {
         load()
         val gone = _frames.value.filter { it.id in ids }
+        val uriCounts = _frames.value.groupingBy { it.uri }.eachCount()
+        for (frame in gone) {
+            val sourceId = Frame.idOf(frame.uri)
+            val legacy = File(dir, "${frame.id}.json")
+            if (sourceId != frame.id && uriCounts[frame.uri] == 1 && legacy.isFile) {
+                // An indexed row proves which source owns the old edit.
+                writeAtomicText(File(dir, "$sourceId.json"), legacy.readText())
+            }
+        }
         commitIndex(_frames.value.filter { it.id !in ids })
+        releaseUnusedGrants(gone, inUse)
+    }
+
+    private fun releaseUnusedGrants(gone: List<Frame>, inUse: () -> Set<String>) {
         val editorUri = context.getSharedPreferences("settings", 0).getString("editor_grant", null)
         val still = _frames.value.map { it.uri }.toSet() + inUse() + listOfNotNull(editorUri)
-        for (f in gone) if (f.uri !in still && Uri.parse(f.uri).scheme != "file") {
-            runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(f.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        for (frame in gone) if (frame.uri !in still) releaseReadGrant(frame.uri)
+    }
+
+    private fun releaseReadGrant(uri: String) {
+        val source = Uri.parse(uri)
+        if (source.scheme == "content") runCatching {
+            context.contentResolver.releasePersistableUriPermission(source, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     }
 
