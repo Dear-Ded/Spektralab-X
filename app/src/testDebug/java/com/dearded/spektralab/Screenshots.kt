@@ -379,7 +379,10 @@ class Screenshots {
     }
 
     // The aurora's RuntimeShader cannot draw on Robolectric's software canvas: the CPU band stands in.
-    private fun content(body: @Composable () -> Unit) = compose.setContent { androidx.compose.runtime.CompositionLocalProvider(LocalCpuGlow provides true) { SpektraTheme { body() } } }
+    private fun content(body: @Composable () -> Unit) {
+        FilmDevelop.cpuOnly = true
+        compose.setContent { androidx.compose.runtime.CompositionLocalProvider(LocalCpuGlow provides true) { SpektraTheme { body() } } }
+    }
 
     private fun editor(ui: UiState) {
         val vm = editorVm(ui)

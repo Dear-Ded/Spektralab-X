@@ -851,63 +851,47 @@ function grainOver(ctx,x,y,w,h,alpha){ if(alpha<=.005) return; grainTile=grainTi
 /* KS perforation: a rounded rectangle, punched */
 function perfPath(ctx,x,y,w,h){rr(ctx,x,y,w,h,Math.min(w,h)*.28)}
 /*
- * Reversal (E-6) development, after how the film looks at each bath (Wikipedia E-6 process;
- * Photrio on undeveloped vs developed film); FilmDevelop.kt draws the same:
- *   undeveloped        milky grey cream, nearly opaque
- *   first developer    a grey-black silver negative builds up in the cream; the edge print shows dark
- *   colour developer   all the silver is out: the film goes almost black
- *   bleach and fix     the positive rises out of the black through a milky veil that clears to a slide
- *   wash and dry       one soft sheen runs off
- * The brightness goes down once and up once, never back and forth; each bath starts before the last
- * ends; a bath soaks down as a soft front a third of the frame deep, rocked slowly with the tank.
+ * Reversal (E-6) development, FilmDevelop.kt's model (its CPU twin, line for line): every point
+ * changes at once along exponential curves, its tone deciding when and how fast -- milky stock, a
+ * silver negative (most exposed first), nearly dark (shadows first), the slide clearing out of it
+ * through a dim veil (thin parts first), colour coming up as it clears. Two low-frequency fields
+ * shift each point's clock (uneven development), never a mask. Lands exactly on the slide.
  */
-const DEV_CREAM=['#b9b4a2','#a29d8a'], DEV_FEATHER=.42;
-/* how far each bath has soaked down, and the veil over the clearing slide (FilmDevelop.Fronts) */
-const devFronts=p=>({first:smooth(0,.34,p),colour:smooth(.26,.54,p),clear:smooth(.50,.92,p),
-  veilLight:smooth(.54,.78,p),veil:1-smooth(.66,.96,p),dry:smooth(.88,1,p)});
-let devLayer=null;
-/* draws `draw(c)` where a bath has soaked to k: fully above the soft front, fading over its depth, nothing below */
-function soaked(ctx,box,bounds,k,wave,seed,draw,{blend='source-over',alpha=1}={}){
-  if(k<=0||alpha<=0) return;
-  const cv=ctx.canvas; if(!devLayer) devLayer=document.createElement('canvas');
-  if(devLayer.width!==cv.width||devLayer.height!==cv.height){devLayer.width=cv.width;devLayer.height=cv.height}
-  const l=devLayer.getContext('2d'); l.setTransform(1,0,0,1,0,0); l.globalCompositeOperation='source-over'; l.globalAlpha=1; l.filter='none'; l.clearRect(0,0,cv.width,cv.height);
-  l.setTransform(ctx.getTransform()); l.save(); l.beginPath(); l.rect(bounds.x,bounds.y,bounds.w,bounds.h); l.clip(); draw(l);
-  if(k<1){ const F=box.h*DEV_FEATHER, y=box.y-F+(box.h+2*F)*k, tilt=Math.sin(wave*1.3+seed)*box.w*.03, cx=box.x+box.w/2; // the tank rocks: a slow small tilt
-    const g=l.createLinearGradient(cx+tilt,y-F,cx-tilt,y+F); g.addColorStop(0,'#000'); g.addColorStop(1,'rgba(0,0,0,0)');
-    l.globalCompositeOperation='destination-in'; l.globalAlpha=1; l.fillStyle=g; l.fillRect(bounds.x,bounds.y,bounds.w,bounds.h); }
-  l.restore();
-  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.globalCompositeOperation=blend; ctx.globalAlpha*=alpha; ctx.drawImage(devLayer,0,0); ctx.restore();
+const DEV_SMALL=160, DEV_CREAM=[.70,.68,.60], DEV_DARK=[.045,.042,.040], DEV_VEIL=[.05,.048,.045];
+const devRamp=(x,a,b,k)=>{const u=clamp((x-a)/(b-a),0,1);return (1-Math.exp(-k*u))/(1-Math.exp(-k))};
+const devFract=x=>x-Math.floor(x), devHash=(x,y)=>devFract(Math.sin(x*127.1+y*311.7)*43758.547);
+function devNoise(x,y){const ix=Math.floor(x),iy=Math.floor(y);let fx=x-ix,fy=y-iy;fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
+  const a=devHash(ix,iy),b=devHash(ix+1,iy),c=devHash(ix,iy+1),d=devHash(ix+1,iy+1);return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy}
+function developPixel(r,g,b,u,v,t,seed,out){
+  const l=.2126*r+.7152*g+.0722*b;
+  const n=devNoise(u*2.5+seed*7+t*.6,v*1.6+seed*7)-.5, s=devNoise(u*7+seed*3,v*.9+seed*3)-.5;
+  const ti=clamp(t+(.06*n+.02*s)*(1-t)*smooth(0,.08,t),0,1);
+  const a=devRamp(ti,.02+.14*(1-l),.42,3), dk=devRamp(ti,.28+.08*l,.62,2.5), c=devRamp(ti,.50+.12*(1-l),.95,3.2);
+  const veil=1-devRamp(ti,.62,.98,3), sat=.35+.65*devRamp(ti,.55,1,2.5), land=smooth(.97,1,t);
+  const src=[r,g,b], sl0=[r*(1-.5*veil)+DEV_VEIL[0]*veil,g*(1-.5*veil)+DEV_VEIL[1]*veil,b*(1-.5*veil)+DEV_VEIL[2]*veil];
+  const sl=.2126*sl0[0]+.7152*sl0[1]+.0722*sl0[2];
+  for(let i=0;i<3;i++){let col=DEV_CREAM[i]*(1-.62*a*l);col+=(DEV_DARK[i]-col)*dk;col+=((sl+(sl0[i]-sl)*sat)-col)*c;out[i]=clamp(col+(src[i]-col)*land,0,1)}
 }
-function creamFill(ctx,r){const g=ctx.createLinearGradient(r.x,r.y,r.x+r.w,r.y+r.h);g.addColorStop(0,DEV_CREAM[0]);g.addColorStop(1,DEV_CREAM[1]);ctx.fillStyle=g;ctx.fillRect(r.x,r.y,r.w,r.h)}
-const mixRGB=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
-/* one exposed frame: r is the frame, box the area the fronts run over (the whole strip); drawPos(c) / drawNeg(c) draw into c */
-function drawDevelop(ctx,r,p,drawPos,drawNeg,{wave=0,grain=true,box=r}={}){
-  const f=devFronts(p); ctx.save(); ctx.beginPath(); ctx.rect(r.x,r.y,r.w,r.h); ctx.clip();
-  creamFill(ctx,r);
-  // the negative builds up in the cream, denser the longer it soaks
-  soaked(ctx,box,r,f.first,wave,.7,drawNeg,{blend:'multiply',alpha:.9*(.4+.6*f.first)});
-  soaked(ctx,box,r,f.colour,wave,1.7,c=>{c.fillStyle='rgba(13,12,11,.95)';c.fillRect(r.x,r.y,r.w,r.h)});
-  // the positive rises out of the black under a veil that lightens to milky as it thins away
-  soaked(ctx,box,r,f.clear,wave,2.7,c=>{ drawPos(c); const v=mixRGB([13,12,11],[85,81,74],f.veilLight);
-    c.fillStyle=`rgba(${v},${(.85-.25*f.veilLight)*f.veil})`; c.fillRect(r.x,r.y,r.w,r.h); });
-  if(f.dry>0&&f.dry<1){ // wash and dry: one soft sheen slides off
-    ctx.save(); ctx.globalCompositeOperation='screen'; const sx=r.x+r.w*(f.dry*1.6-.3);
-    const g=ctx.createLinearGradient(sx-r.w*.3,r.y,sx+r.w*.3,r.y+r.h); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,`rgba(255,252,244,${.10*Math.sin(f.dry*Math.PI)})`); g.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=g; ctx.fillRect(r.x,r.y,r.w,r.h); ctx.restore();
-  }
+/* a slide for the developer: draw(c,r) paints it sharp into r, small is a <= 160 px copy */
+function devPositive(draw,aspect){const sm=document.createElement('canvas');sm.width=DEV_SMALL;sm.height=Math.max(1,Math.round(DEV_SMALL/aspect));
+  draw(sm.getContext('2d'),{x:0,y:0,w:sm.width,h:sm.height});return {draw,small:sm,src:sm.getContext('2d').getImageData(0,0,sm.width,sm.height).data,twin:null}}
+let introSlide=null;
+const DEV_BLACK=devPositive((c,r)=>{c.fillStyle='#000';c.fillRect(r.x,r.y,r.w,r.h)},1);
+function developFrame(ctx,r,p,pos,{seed=.37,alpha=1}={}){
+  if(r.w<1||r.h<1) return;
+  const w=Math.min(DEV_SMALL,Math.max(1,Math.round(r.w))), h=clamp(Math.round(w*r.h/r.w),1,256), sm=pos.small;
+  if(!pos.twin||pos.twin.width!==w||pos.twin.height!==h){pos.twin=document.createElement('canvas');pos.twin.width=w;pos.twin.height=h;pos.twinT=-1}
+  if(pos.twinT!==p||pos.twinSeed!==seed){const g=pos.twin.getContext('2d'),img=g.createImageData(w,h),d=img.data,o=[0,0,0];
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const u=(x+.5)/w,v=(y+.5)/h,k=(Math.min(sm.height-1,Math.floor(v*sm.height))*sm.width+Math.min(sm.width-1,Math.floor(u*sm.width)))*4;
+      developPixel(pos.src[k]/255,pos.src[k+1]/255,pos.src[k+2]/255,u,v,p,seed,o);const q=(y*w+x)*4;d[q]=o[0]*255;d[q+1]=o[1]*255;d[q+2]=o[2]*255;d[q+3]=255}
+    g.putImageData(img,0,0);pos.twinT=p;pos.twinSeed=seed}
+  ctx.save();ctx.globalAlpha*=alpha;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(pos.twin,r.x,r.y,r.w,r.h);
+  const sharp=smooth(.9,1,p); if(sharp>0){ctx.globalAlpha*=sharp;ctx.beginPath();ctx.rect(r.x,r.y,r.w,r.h);ctx.clip();pos.draw(ctx,r)}
   ctx.restore();
-  // grain: plain in the cream, buried in the black, fine in the finished slide
-  if(grain) grainOver(ctx,r.x,r.y,r.w,r.h,.2*(1-.85*f.clear)*(1-.5*f.colour*(1-f.clear))+.04);
 }
-/* the rebate and unexposed frames: cream, black from the colour developer on, a faint haze while it clears */
-function drawRebate(ctx,box,p,wave){
-  const f=devFronts(p); creamFill(ctx,box); grainOver(ctx,box.x,box.y,box.w,box.h,.16*(1-f.colour));
-  soaked(ctx,box,box,f.colour,wave,1.7,c=>{const g=c.createLinearGradient(0,box.y,0,box.y+box.h);g.addColorStop(0,'#0a0908');g.addColorStop(.12,'#191714');g.addColorStop(.5,'#110f0d');g.addColorStop(.88,'#171512');g.addColorStop(1,'#090807');c.fillStyle=g;c.fillRect(box.x,box.y,box.w,box.h)});
-  soaked(ctx,box,box,f.clear,wave,2.7,c=>{c.fillStyle='#b4ae9c';c.fillRect(box.x,box.y,box.w,box.h)},{alpha:.16*f.veilLight*f.veil});
-}
-/* the pre-exposed edge print: dark in the first developer, lost in the black, coming up light as it clears */
-function edgeInk(p){const f=devFronts(p),light=.85*smooth(.72,.95,p),dark=.7*f.first*(1-f.colour);
+function drawRebate(ctx,box,p,alpha=1){ const own=Object.assign({},DEV_BLACK); own.twin=box._twin||null; developFrame(ctx,box,p,own,{seed:.61,alpha}); box._twin=own.twin; }
+/* the pre-exposed edge print: dark in the first developer, lost in the dark, coming up light as it clears */
+function edgeInk(p){const light=.85*smooth(.74,.96,p),dark=.7*devRamp(p,.04,.4,3)*(1-devRamp(p,.3,.6,2.5));
   return light>=dark?`rgba(236,206,150,${light})`:`rgba(52,44,34,${dark})`}
 function negativeOf(src,w,h){ // the silver negative: grey, inverted, a little warm
   const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.drawImage(src,0,0,w,h);
@@ -947,9 +931,9 @@ function playIntro(){
     for(let i=0;i<3;i++){ if(st.quick) return; FB.emit('ratchet',{src:`开场过片 ${i+1}/3`}); const sp=new Spring(i);
       await new Promise(r=>sp.animateTo(i+1,{d:.7,k:1100},v=>{st.pull=v;st.vel=sp.vel;if(Math.abs(v-(i+1))<.04)r()},()=>{st.vel=0;r()},{threshold:.002})); await sleep(70); }
     if(st.quick) return; FB.emit('counter',{src:'计数器'}); await sleep(160);
-    if(st.quick) return; FB.emit('shutter',{src:'开场快门'}); st.flash=1; tween(Motion.fastEffects,1,0,v=>st.flash=v);
-    st.nameAt=(now()-start)/SLOW+180; [[30,'首显'],[420,'彩显'],[750,'漂白'],[1065,'定影']].forEach(([ms,nm])=>later(()=>{ if(!st.quick) FB.emit('agitate',{src:nm}); },ms));
-    await timeline(1500,p=>{st.dev=p; st.halo=smooth(.7,.95,p)*(1-.5*smooth(.92,1,p))});
+    if(st.quick) return; FB.emit('shutter',{src:'开场快门'}); st.flash=.55; tween(Motion.defaultEffects,.55,0,v=>st.flash=v);
+    st.nameAt=(now()-start)/SLOW+180; [[36,'首显'],[504,'彩显'],[900,'漂白'],[1278,'定影']].forEach(([ms,nm])=>later(()=>{ if(!st.quick) FB.emit('agitate',{src:nm}); },ms));
+    await timeline(1800,p=>{st.dev=p; st.halo=smooth(.7,.95,p)*(1-.5*smooth(.92,1,p))});
     await sleep(380); if(!st.cancelled) leave();
   })();
   async function leave(){
@@ -985,8 +969,9 @@ function playIntro(){
         const fx0=X(22)+k*F-off+1.2*u, w=fw-2.4*u; if(fx0>bx1||fx0+w<bx0) continue;
         const rect={x:fx0,y:fy,w,h:fh};
         if(k===0){ ctx.fillStyle=specFill(fx0,fx0+w); ctx.fillRect(fx0,fy,w*st.wipe,fh); }
-        else if(k===3){ drawDevelop(ctx,rect,st.dev,c=>{c.fillStyle=specFill(rect.x,rect.x+rect.w);c.fillRect(rect.x,rect.y,rect.w,rect.h)},
-            c=>{const g=c.createLinearGradient(rect.x,0,rect.x+rect.w,0);[[0,'#8a8478'],[.5,'#5d5850'],[.72,'#3e3a34'],[1,'#6f6a60']].forEach(([o,col])=>g.addColorStop(o,col));c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h)},{wave:t/1000,grain:blur<1,box:{x:bx0,y:by,w:bx1-bx0,h:bh}}); }
+        else if(k===3){ const into=smooth(0,.08,st.dev); // unexposed until the shutter, then the developing frame fades in over it
+          if(into<1){ctx.fillStyle='#a3a090';ctx.globalAlpha=stripA*.16;ctx.fillRect(fx0,fy,w,fh);ctx.globalAlpha=stripA}
+          if(st.dev>0){ introSlide=introSlide||devPositive((c,q)=>{c.fillStyle=specFill(q.x,q.x+q.w);c.fillRect(q.x,q.y,q.w,q.h)},w/fh); developFrame(ctx,rect,st.dev,introSlide,{seed:.37}); } }
         else { ctx.fillStyle='#a3a090'; ctx.globalAlpha=stripA*.16; ctx.fillRect(fx0,fy,w,fh); ctx.globalAlpha=stripA; }
         ctx.fillStyle='rgba(222,160,70,.7)'; ctx.font=`600 ${2.1*u}px UiNum, monospace`; ctx.textBaseline='middle';
         ctx.fillText(`▸ ${12+k}`,fx0+2*u,Y(42.1)); ctx.fillText(`${12+k}A`,fx0+w-8*u,Y(42.1));
@@ -1037,7 +1022,7 @@ async function playSave(kind){
   const pos=document.createElement('canvas'); pos.width=Math.round(slide.w*dpr); pos.height=Math.round(slide.h*dpr);
   {const g=pos.getContext('2d'),gl=$('gl'),iw=parseFloat(gl.style.width),ih=parseFloat(gl.style.height),sc=pos.width/from.w,C=S.crop,cover=+(gl.style.transform.match(/scale\(([\d.]+)\)/)||[0,1])[1];
    g.translate(pos.width/2,pos.height/2);g.scale(sc,sc);g.scale(C.flip?-1:1,1);g.rotate(((C.turns%4)*90+(C.angle||0))*Math.PI/180);g.scale(cover,cover);g.drawImage(gl,-iw/2,-ih/2,iw,ih)}
-  const neg=negativeOf(pos,pos.width,pos.height);
+  const slidePos=devPositive((c,q)=>c.drawImage(pos,q.x,q.y,q.w,q.h),pos.width/pos.height);
   const st={grow:0,dev:0,glow:0,fly:0,strip:0,skip:false,t0:now()}; window.__save=st;
   cv.onpointerdown=()=>{st.skip=true};
   FB.emit('shutter',{src:'保存 '+kind});
@@ -1054,7 +1039,7 @@ async function playSave(kind){
     ctx.translate(slide.x+slide.w/2+fx,slide.y+slide.h/2+fyy); ctx.scale(fs,fs); ctx.rotate(-.18*fly); ctx.translate(-(slide.x+slide.w/2),-(slide.y+slide.h/2));
     if(st.strip>0){ // the strip, in whatever bath the fronts have reached
       ctx.save(); ctx.globalAlpha*=st.strip; ctx.beginPath(); ctx.rect(strip.x,strip.y,strip.w,strip.h); ctx.clip();
-      drawRebate(ctx,strip,st.dev,wave);
+      drawRebate(ctx,strip,st.dev);
       ctx.fillStyle=edgeInk(st.dev); ctx.font=`600 ${Math.max(7,rebate*.2)}px UiNum, monospace`; ctx.textBaseline='middle';
       for(const [dx,lab] of [[-slide.w*1.05,'23'],[0,'24'],[slide.w*1.05,'25']]){ctx.fillText(`▸ ${lab}`,slide.x+dx,strip.y+rebate*.8);ctx.fillText(`${lab}A`,slide.x+dx+slide.w-22,strip.y+rebate*.8)}
       ctx.fillText('SPEKTRALAB 100   E-6',slide.x+slide.w*.3,strip.y+strip.h-rebate*.8);
@@ -1066,14 +1051,15 @@ async function playSave(kind){
       ctx.fillStyle=`rgba(238,231,216,${st.strip})`; ctx.fillRect(strip.x,strip.y,strip.w,strip.h); ctx.restore();
     }
     if(st.glow>0){ ctx.save(); ctx.globalAlpha=st.glow*.85; ctx.shadowColor='rgba(255,242,218,.6)'; ctx.shadowBlur=56; ctx.fillStyle='rgba(255,246,228,.9)'; ctx.fillRect(r.x-1,r.y-1,r.w+2,r.h+2); ctx.restore(); }
-    if(st.dev===0) ctx.drawImage(pos,r.x,r.y,r.w,r.h);
-    else drawDevelop(ctx,r,st.dev,c=>c.drawImage(pos,r.x,r.y,r.w,r.h),c=>c.drawImage(neg,r.x,r.y,r.w,r.h),{wave,box:strip});
+    if(st.dev===0){ ctx.drawImage(pos,r.x,r.y,r.w,r.h); const cream=smooth(.35,1,st.grow); // back to undeveloped stock as it shrinks
+      if(cream>0){ctx.save();ctx.globalAlpha*=cream;ctx.fillStyle='rgb(179,173,153)';ctx.fillRect(r.x,r.y,r.w,r.h);ctx.restore()} }
+    else developFrame(ctx,r,st.dev,slidePos);
     ctx.restore();
     requestAnimationFrame(frame);
   })();
   // the print shrinks onto a strip of slide film; its emulsion is still undeveloped cream
   await tween(Motion.defaultSpatial,0,1,v=>{st.grow=v;st.strip=clamp(v*1.4,0,1)},{threshold:.002});
-  st.dev=.0001; await sleep(st.skip?0:260);
+  await sleep(st.skip?0:260); st.dev=.0001;
   const baths=[[0,'首显'],[.28,'彩显'],[.50,'漂白'],[.71,'定影']], DUR=3400;
   const timers=baths.map(([at,nm],i)=>setTimeout(()=>{if(!st.skip)FB.emit('agitate',{src:`${nm} ${i+1}/4`})},at*DUR*SLOW));
   await new Promise(res=>{const t0=now();const f=()=>{const p=st.skip?1:clamp((now()-t0)/(DUR*SLOW),0,1);st.dev=Math.max(.0001,p);p<1?requestAnimationFrame(f):res()};requestAnimationFrame(f)});

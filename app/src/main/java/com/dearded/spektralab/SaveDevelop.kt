@@ -1,6 +1,5 @@
 package com.dearded.spektralab
 
-import android.os.SystemClock
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.spring
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
@@ -50,14 +48,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 /*
- * What 保存 looks like (ui-polish; preview/ui-polish.html playSave): the print on screen shrinks
- * back onto a strip of slide film as an undeveloped frame, develops through the E-6 baths
- * (FilmDevelop, Cue.Agitate at each), is held up to the light box for a moment, and flies into
- * the 保存 button. It is ceremony only: the export is already queued when it starts and runs in
+ * What 保存 looks like (preview/ui-polish.html playSave): the print on screen shrinks back onto a
+ * strip of slide film, fading into undeveloped stock as it goes, develops (FilmDevelop: every
+ * point at once, by its tone; Cue.Agitate as each bath goes in), is held up to the light box for a
+ * moment, and flies into the 保存 button. Each step hands over to the next without a jump. It is ceremony only: the export is already queued when it starts and runs in
  * the background whatever happens here. A tap anywhere skips it.
  */
 
@@ -68,15 +65,14 @@ internal class SaveShot(val print: ImageBitmap, val from: Rect, val button: Rect
 internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
     val view = LocalView.current
     val done by rememberUpdatedState(onDone)
-    val start = remember { SystemClock.uptimeMillis() }
     val grow = remember { Animatable(0f) }
     val dev = remember { Animatable(0f) }
     val glow = remember { Animatable(0f) }
     val fly = remember { Animatable(0f) }
     var skip by remember { mutableStateOf(false) }
-    // The silver negative of the print, made off the main thread while it shrinks.
-    var negative by remember { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(shot) { negative = withContext(Dispatchers.Default) { negativeOf(shot.print) } }
+    // The slide the frame develops into, made off the main thread while the print shrinks.
+    var positive by remember { mutableStateOf<FilmDevelop.Positive?>(null) }
+    LaunchedEffect(shot) { positive = withContext(Dispatchers.Default) { FilmDevelop.positiveOf(shot.print.asAndroidBitmapCompat()) } }
 
     LaunchedEffect(shot) {
         // A tap jumps each step to its end (snapTo interrupts the running animation); the flight
@@ -128,9 +124,6 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
         val g = grow.value
         val f = fly.value
         val stripIn = (g * 1.4f).coerceIn(0f, 1f)
-        val wave = (SystemClock.uptimeMillis() - start) / 1000f
-        // The grain is the film's: it stays put on the slide.
-        val shift = Offset.Zero
         val r = Rect(lerp(from.left, slide.left, g), lerp(from.top, slide.top, g), lerp(from.right, slide.right, g), lerp(from.bottom, slide.bottom, g))
 
         drawRect(Color(0xFF090908).copy(alpha = 0.86f * stripIn * (1f - f)))
@@ -150,7 +143,8 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
                             0.6f to Color(0xFFFFF4E2).copy(alpha = 0.3f * stripIn * alpha), 1f to Color.Transparent,
                             center = slide.center, radius = max(sw, sh) * 0.95f), radius = max(sw, sh) * 0.95f, center = slide.center)
                         clipRect(strip.left, strip.top, strip.right, strip.bottom) {
-                            with(FilmDevelop) { rebate(strip, max(dev.value, 0.0001f), wave, FilmDevelop.grainTile, shift) }
+                            // The strip fades in with the backdrop rather than popping up.
+                            with(FilmDevelop) { rebate(strip, dev.value, alpha = stripIn * alpha) }
                             val ink = FilmDevelop.edgeInk(dev.value).let { it.copy(alpha = it.alpha * stripIn * alpha) }
                             val small = edgeStyle.copy(fontSize = max(7.dp.toPx(), rebate * 0.2f).toSp(), color = ink)
                             for ((d, n) in listOf(-1 to "23", 0 to "24", 1 to "25")) {
@@ -175,13 +169,13 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
                         val gr = n * 8.dp.toPx()
                         drawRect(Color(0xFFFFF6E4).copy(alpha = glow.value * alpha * (if (n == 0) 0.9f else 0.1f)), r.topLeft - Offset(gr, gr), Size(r.width + 2 * gr, r.height + 2 * gr))
                     }
-                    val neg = negative
-                    if (dev.value <= 0f || neg == null) drawPrint(shot.print, r, alpha)
-                    else with(FilmDevelop) {
-                        frame(r, dev.value, strip, wave, FilmDevelop.grainTile, shift,
-                            positive = { drawPrint(shot.print, r, alpha) },
-                            negative = { drawPrint(neg, r, alpha) })
-                    }
+                    val pos = positive
+                    if (dev.value <= 0f || pos == null) {
+                        drawPrint(shot.print, r, alpha)
+                        // Back to undeveloped stock as it shrinks: the cream of FilmDevelop at p = 0.
+                        val cream = smoothstep(0.35f, 1f, g)
+                        if (cream > 0f) drawRect(UndevelopedCream, r.topLeft, r.size, alpha = cream * alpha)
+                    } else with(FilmDevelop) { frame(r, dev.value, pos, alpha = alpha) }
                 }
             }
         }
@@ -195,24 +189,8 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPrint(img: Imag
 private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 private fun smoothstep(e0: Float, e1: Float, x: Float): Float { val v = ((x - e0) / (e1 - e0)).coerceIn(0f, 1f); return v * v * (3f - 2f * v) }
 
-/** The silver negative of a print: grey, inverted, a little warm; at most 720 px wide. */
-private fun negativeOf(print: ImageBitmap): ImageBitmap {
-    val src = print.asAndroidBitmapCompat()
-    val scale = min(1f, 720f / src.width)
-    val b = android.graphics.Bitmap.createScaledBitmap(src, max(1, (src.width * scale).roundToInt()), max(1, (src.height * scale).roundToInt()), true)
-    val px = IntArray(b.width * b.height)
-    b.getPixels(px, 0, b.width, 0, 0, b.width, b.height)
-    for (i in px.indices) {
-        val c = px[i]
-        val l = (((c shr 16) and 0xFF) * 0.3f + ((c shr 8) and 0xFF) * 0.59f + (c and 0xFF) * 0.11f) / 255f
-        val v = 255f - Math.pow(l.toDouble(), 0.85).toFloat() * 210f
-        val rr = v.roundToInt().coerceIn(0, 255)
-        val gg = (v * 0.98f).roundToInt().coerceIn(0, 255)
-        val bb = (v * 0.94f).roundToInt().coerceIn(0, 255)
-        px[i] = (0xFF shl 24) or (rr shl 16) or (gg shl 8) or bb
-    }
-    return android.graphics.Bitmap.createBitmap(px, b.width, b.height, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap()
-}
+/** FilmDevelop's undeveloped stock at p = 0. */
+private val UndevelopedCream = Color(0.70f, 0.68f, 0.60f)
 
 private fun ImageBitmap.asAndroidBitmapCompat(): android.graphics.Bitmap {
     val b = this.asAndroidBitmap()

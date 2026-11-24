@@ -58,9 +58,10 @@ import kotlin.math.sin
  *
  *   the camera moves in on the strip, which runs on beyond the light on a light box;
  *   the advance lever winds three frames on, one stroke each (Cue.Ratchet), the counter steps;
- *   the shutter fires (Cue.Shutter): the new frame flashes, then develops as reversal film does,
- *   cream to a silver negative, to black, to a hazed positive, to a clear slide (FilmDevelop),
- *   a red halation blooming round it as it clears; the tank turns over with each bath (Cue.Agitate);
+ *   the shutter fires (Cue.Shutter): a soft flash, and the new frame develops as reversal film
+ *   does, every point at once by its tone (FilmDevelop): milky stock, a silver negative, nearly
+ *   dark, then the slide clearing out of it, a faint red halation round it as it clears; the tank
+ *   turns over as each bath goes in (Cue.Agitate);
  *   the name lands on split-flap tiles under the strip;
  *   the developed frame opens out over the screen and the editor is under it, the glow on the
  *   same phase.
@@ -135,12 +136,13 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
         cue(Cue.Counter)
         delay(160)
         cue(Cue.Shutter)
-        launch { st.flash.snapTo(1f); st.flash.animateTo(0f, Motion.fastEffects()) }
+        // A soft flash, not a white-out: it rises fast, then dies away over ~250 ms.
+        launch { st.flash.snapTo(0.55f); st.flash.animateTo(0f, Motion.defaultEffects()) }
         launch { delay(180); nameOn = true; st.name.animateTo(1f, Motion.defaultSpatial()) }
-        // One turn of the tank as each bath goes in (FilmDevelop.Fronts: 0.02, 0.28, 0.50, mid-clear).
-        launch { for (ms in longArrayOf(30, 390, 330, 315)) { delay(ms); cue(Cue.Agitate) } }
+        // One turn of the tank as each bath goes in (FilmDevelop: p 0.02, 0.28, 0.50, 0.71 of 1.8 s).
+        launch { for (ms in longArrayOf(36, 468, 396, 378)) { delay(ms); cue(Cue.Agitate) } }
         // The bath: 1.5 s from cream to a clear slide; the halation blooms as it clears.
-        st.dev.animateTo(1f, tween(1500, easing = LinearEasing))
+        st.dev.animateTo(1f, tween(1800, easing = LinearEasing))
         delay(380)
         leaving = true
     }
@@ -157,6 +159,8 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
 
     val measurer = rememberTextMeasurer()
     val edgeStyle = remember { TextStyle(fontFamily = UiMono, fontWeight = FontWeight.SemiBold) }
+    // The slide the exposed frame develops into: the launcher's spectrum.
+    val developing = remember { FilmDevelop.positiveOf(SPECTRUM) }
     Box(
         Modifier.fillMaxSize()
             .graphicsLayer { alpha = st.shown.value }
@@ -188,9 +192,6 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
             val by = g.y(36f); val bh = 36f * u
             val fy = g.y(43f); val fh = 22f * u; val fw = 64f * u; val frameStep = 6 * PITCH * u
             val off = st.pull.value * frameStep
-            val t = (SystemClock.uptimeMillis() - start) / 1000f
-            // The grain is the film's: it moves with the strip and nothing else.
-            val shift = Offset(((-off) % 160f + 160f) % 160f, 0f)
             withTransform({ scale(s, s, g.centre) }) {
                 clipRect(bx0, by, bx1, by + bh) {
                     drawRect(Brush.verticalGradient(0f to Color(0xFF0D0C0B), 0.12f to Color(0xFF1F1D1A), 0.5f to Color(0xFF151412),
@@ -204,11 +205,12 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
                         when (k) {
                             0 -> drawRect(spectrum, r.topLeft, Size(r.width * st.wipe.value, r.height), alpha = stripAlpha)
                             3 -> with(FilmDevelop) {
-                                if (st.dev.value <= 0f) drawRect(Color(0xFFA3A090), r.topLeft, r.size, alpha = 0.16f * stripAlpha)
-                                else frame(r, st.dev.value, Rect(bx0, by, bx1, by + bh), t, FilmDevelop.grainTile, shift,
-                                    positive = { drawRect(spectrum, r.topLeft, r.size, alpha = stripAlpha) },
-                                    negative = { drawRect(Brush.horizontalGradient(listOf(Color(0xFF8A8478), Color(0xFF5D5850), Color(0xFF3E3A34), Color(0xFF6F6A60)),
-                                        startX = r.left, endX = r.right), r.topLeft, r.size, alpha = stripAlpha) })
+                                // Unexposed until the shutter; then the developing frame fades in over it in the
+                                // first 8 % of the bath, under the flash, so nothing jumps.
+                                val p = st.dev.value
+                                val into = smooth(0f, 0.08f, p)
+                                if (into < 1f) drawRect(Color(0xFFA3A090), r.topLeft, r.size, alpha = 0.16f * stripAlpha)
+                                if (p > 0f) frame(r, p, developing, seed = 0.37f, alpha = into * stripAlpha)
                             }
                             // Unexposed frames: a faint milky rectangle on the black.
                             else -> drawRect(Color(0xFFA3A090), r.topLeft, r.size, alpha = 0.16f * stripAlpha)
