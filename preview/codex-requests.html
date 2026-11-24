@@ -130,6 +130,11 @@ body.still .rim::before,body.still .edgeLit::before{animation:none}
 .edgeLit.on::after{border-color:rgba(236,233,227,.18)}
 
 /* camera dial (Dial.kt): knurled drum, readout above, the name */
+.adjSegs{display:flex;gap:8px;overflow:hidden}
+.adjSeg{flex:none;height:40px;padding:0 16px;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair);font:500 14px var(--sans);color:var(--on)}
+.adjSeg.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.adjTabs{display:flex;justify-content:center;gap:36px;font:500 15px var(--sans);color:var(--soft);padding-left:40px}
+.adjTabs .on{color:var(--on);box-shadow:inset 0 -2px 0 var(--on);padding-bottom:6px}
 .dialWrap{display:flex;flex-direction:column;align-items:center;gap:2px;user-select:none}
 .dialName{font:500 15px var(--sans)}
 .dialName.off{color:var(--soft)}
@@ -290,7 +295,7 @@ body.still .rim::before,body.still .edgeLit::before{animation:none}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 // ---------------------------------------------------------------- state
 const S={configured:true,statistics:false,phase:'Ready',consent:null,asked:'Goal',strength:null,canSetStrength:false,
-  lightFrom:null,local:false,showingCurrent:false,notice:null,error:null,goal:'',applied:false};
+  lightFrom:null,local:false,showingCurrent:false,notice:null,error:null,goal:'',applied:false,open:false};
 let timers=[];
 function later(ms,f){timers.push(setTimeout(f,ms))}
 function clearTimers(){timers.forEach(clearTimeout);timers=[]}
@@ -308,7 +313,7 @@ function mode(){
 const working=()=>S.phase==='Generating'||S.phase==='Rendering';
 function header(){
   const route=S.local&&mode()==='Draft'?'本地示例':S.configured?'Anthropic · claude-sonnet-5-5':'';
-  return `<div class="ahead"><div class="icon" style="margin-left:-12px"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+  return `<div class="ahead"><div class="icon" id="back" style="margin-left:-12px;cursor:pointer"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
     <span class="t-titleM">暗房助手</span><span class="route">${route}</span></div>`;
 }
 function statusText(){
@@ -320,8 +325,18 @@ function statusText(){
   return null;
 }
 function statusLine(){const s=statusText();return s?`<div class="statusLine ${s[1]?'err':''}">${s[0]}</div>`:''}
+// The 调整 page (EditorScreen): its own controls; 暗房助手 is an entry at the title's right end and
+// replaces these controls only while open, ← returns here.
+function adjustPage(){
+  const segs=['光线','色彩','混色','曲线','调色盘'].map((t,i)=>`<button class="adjSeg ${i?'':'on'}">${t}</button>`).join('');
+  return `<div class="ahead"><span class="t-titleM">调整</span><div class="spacer"></div><button class="quiet" id="openA">暗房助手</button></div>
+    <div class="adjSegs">${segs}</div>
+    <div class="adjTabs"><span class="on">曝光</span><span>对比度</span><span>亮度</span></div>
+    <div class="dialWrap"><div class="readout">+0.00 EV</div><div class="drum"><canvas id="drumC" width="722" height="140"></canvas></div></div>`;
+}
 function render(){
   const b=$('#pbody'), m=mode(), w=working();
+  if(!S.open){ b.innerHTML=adjustPage(); wire(); drawDrum(); paintPhoto(); paintRim(); return }
   let h=header();
   if(m==='Compose'){
     h+=`<div class="edgeLit ${S.phase==='Generating'?'on':''}" id="edge"><div style="display:flex;flex-direction:column;gap:10px">
@@ -371,6 +386,7 @@ function wire(){
   on('cNo',()=>{S.consent=null;render()});
   on('cYes',()=>{const a=S.consent;S.statistics=true;S.consent=null;tick(1700);render();later(160,()=>ask(a))});
   on('gen',()=>ask('Goal'));
+  on('openA',()=>{S.open=true;tick(1200);render()}); on('back',()=>{S.open=false;tick(1100);render()});
   on('cancel',()=>{clearTimers();S.phase=S.strength!=null?'Previewing':'Ready';S.notice='cancel';rimQuick=true;render()});
   on('cur',()=>{S.showingCurrent=true;tick(1200);render()}); on('sug',()=>{S.showingCurrent=false;tick(1200);render()});
   on('discard',()=>{resetDraft();render()});
@@ -409,7 +425,7 @@ function drawDrum(){
   const c=$('#drumC'); if(!c) return; const g=c.getContext('2d'); const W=c.width,H=c.height; g.clearRect(0,0,W,H);
   const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#2a2a28');grad.addColorStop(.18,'#1d1d1b');grad.addColorStop(.5,'#141413');grad.addColorStop(.85,'#1b1b1a');grad.addColorStop(1,'#262624');
   g.fillStyle=grad;g.fillRect(0,14,W,H-28);
-  const v=S.local?50:dialValue(), px=10, cx=W/2;
+  const v=(!S.open||S.local)?50:dialValue(), px=10, cx=W/2;
   for(let i=-60;i<=60;i++){const val=v+i; if(val<0||val>100) continue; const x=cx+i*px*1.0;
     const z=Math.cos((x-cx)/W*Math.PI*.95); const major=val%10===0, stop=val===50||val===0||val===100;
     g.strokeStyle=`rgba(236,233,227,${(major?.75:.32)*z})`;g.lineWidth=major?2.4:1.4;
@@ -429,7 +445,7 @@ function paintPhoto(){
 // ---------------------------------------------------------------- rim light: after 250 ms of rendering
 let rimTimer=null, rimQuick=false;
 function paintRim(){
-  const r=$('#rim'); const want=S.phase==='Rendering';
+  const r=$('#rim'); const want=S.open&&S.phase==='Rendering';
   r.classList.toggle('quick',rimQuick&&!want);
   if(want){ if(!r.classList.contains('on')&&!rimTimer) rimTimer=setTimeout(()=>{rimTimer=null;if(S.phase==='Rendering')r.classList.add('on')},250) }
   else { clearTimeout(rimTimer);rimTimer=null;r.classList.remove('on');setTimeout(()=>rimQuick=false,250) }
@@ -498,12 +514,12 @@ const SCENES=[
      <button data-k="noDirection" data-v="true" class="${scenario.noDirection?'on':''}">没有明确光向</button></div>
      <div class="tabs"><button data-k="slowRender" data-v="false" class="${!scenario.slowRender?'on':''}">强度渲染快（70 ms）</button>
      <button data-k="slowRender" data-v="true" class="${scenario.slowRender?'on':''}">强度渲染慢（420 ms）</button></div>`,
-   notes:['点“方向光”。画面统计没开时不会发请求，而是在原地展开一行：需要什么、不发送照片，[取消] [允许]。','允许后才打开画面统计，开关确认生效后发出请求。整个过程只有一处同意，不弹窗。',
+   notes:['暗房助手不替代调整：它是调整页标题右侧的入口，打开时临时占用调整控件的位置，← 或系统返回回到调整页，调整参数不受影响。先点“暗房助手”。','点“方向光”。画面统计没开时不会发请求，而是在原地展开一行：需要什么、不发送照片，[取消] [允许]。','允许后才打开画面统计，开关确认生效后发出请求。整个过程只有一处同意，不弹窗。',
      '<b>正在生成建议</b>：目标区一圈缓慢流动的银色光，波峰处有一层很淡的棱镜色散。','<b>正在预览调整</b>：光移到照片外缘，一道柔光沿四边慢慢绕行（约 9 秒一圈），严格画在照片外面。渲染不到 250 ms 不亮，所以拖强度时不闪。',
      '草稿：显示测得的亮侧，强度用相机刻度。0% 是进入本轮时的编辑，100% 是建议。拖动只重新渲染预览，不再请求模型。','方向光草稿上没有“继续调整”输入框，因为后端不会在方向光草稿上叠加新建议。','取消、失败时 200 ms 收光；结果正常到达时 600 ms 渐隐交接。可以切到“系统动画 关”看静态光。']},
   {name:'暗房助手 · 本地示例',setup(){resetAll();S.configured=false;},ctl:()=>'',
    notes:['没有配置服务时，只提供“提亮 / 柔和”两个固定的本地示例。','点击后草稿顶部写“本地示例”，不显示任何模型名；TalkBack 读“本地示例，不是模型结果”。','本地示例上没有“继续调整”（那会发给模型）。']},
-  {name:'暗房助手 · 应用与撤销',setup(){resetAll();Object.assign(S,{statistics:true,phase:'Previewing',strength:62,canSetStrength:true,lightFrom:'左'});},ctl:()=>'',
+  {name:'暗房助手 · 应用与撤销',setup(){resetAll();Object.assign(S,{open:true,statistics:true,phase:'Previewing',strength:62,canSetStrength:true,lightFrom:'左'});},ctl:()=>'',
    notes:['应用后一次撤销就回到进入本轮之前的编辑。','未应用的草稿不进入导出（导出始终用正式编辑）。']},
   {name:'更新入口',setup(){resetAll();U.state='Available';},ctl:()=>`<b>Updater.state</b><div class="tabs">
      <button data-u="Idle" class="${U.state==='Idle'?'on':''}">Idle</button><button data-u="Available" class="${U.state==='Available'?'on':''}">Available</button><button data-u="Ready" class="${U.state==='Ready'?'on':''}">Ready（已下载）</button></div>`,
@@ -518,7 +534,7 @@ const SCENES=[
    notes:['<b>这一项还没写进代码</b>：它要用的 FrameStore 接口只在 codex 的本地工作树里，等合并后接线。这里是交互设计。','原片打不开时，状态就出现在观片台这张照片上：照片变暗，底部一张卡片写“原片无法读取”，旁边是“重新选择原片”。不弹窗，也不打断编辑器里正在修的照片。',
      '点“重新选择原片”打开系统选择器（打开前固定这一张）。同一文件 → 重新授权；不同文件 → 先保存当前编辑，再按原片指纹核对。成功后打开后端返回的新照片。','取消选择就原样返回。其余失败各有一句简短状态，旧记录不变。','原片还能读时，右上 ⋯ 里有“登记原片”，登记后显示“已登记原片”。不按文件名猜，也不扫描图库。']},
 ];
-function resetAll(){clearTimers();resetDraft();Object.assign(S,{configured:true,statistics:false,consent:null,asked:'Goal',goal:''});wanted=null;
+function resetAll(){clearTimers();resetDraft();Object.assign(S,{configured:true,statistics:false,consent:null,asked:'Goal',goal:'',open:false});wanted=null;
   U.sheet=false;Q.sheet=false;$('#moreMenu').classList.remove('on');$('#lMenu').classList.remove('on');}
 let cur=0;
 function show(i){cur=i;const sc=SCENES[i];sc.setup();
@@ -544,6 +560,7 @@ addEventListener('resize',fit);fit();
 show(+(location.hash.slice(1))||0);
 // ?step=consent|gen|render|draft|menu|sheet jumps scene 0 / 3 to a state, for screenshots of the moving parts.
 const step=new URLSearchParams(location.search).get('step');
+if(['consent','gen','render','draft'].includes(step))S.open=true;
 if(step==='consent'){S.consent='Directional';render()}
 if(step==='gen'){S.statistics=true;S.phase='Generating';render()}
 if(step==='render'){Object.assign(S,{statistics:true,phase:'Rendering',strength:100,lightFrom:'左'});render();$('#rim').classList.add('on')}
