@@ -135,6 +135,29 @@ class Screenshots {
         }
     }
 
+    /** 暗房助手 (Assistant.kt) on a fake session: the entry, each state, and the light under the photo. */
+    @Test fun editorAssistant() {
+        val fake = AssistantFake(AssistantFake.configured)
+        val vm = editorVm(Fake.ui())
+        content { androidx.compose.runtime.CompositionLocalProvider(LocalAssistant provides fake) { EditorScreen(vm, preview = Fake::preview) } }
+        tap("调整")
+        shot("80_assistant_entry")
+        tap("暗房助手")
+        shot("81_assistant_compose")
+        fake.view.value = AssistantFake.configured.copy(phase = AssistantPhase.Generating)
+        shot("82_assistant_generating")
+        fake.view.value = AssistantFake.draft.copy(phase = AssistantPhase.Rendering)
+        shot("83_assistant_rendering")
+        fake.view.value = AssistantFake.draft
+        shot("84_assistant_draft")
+        fake.view.value = AssistantFake.configured.copy(question = AssistantQuestion("想要偏暖还是偏冷？", listOf("偏暖", "偏冷", "保持原色")))
+        shot("85_assistant_question")
+        fake.view.value = AssistantFake.configured.copy(phase = AssistantPhase.Saved)
+        shot("86_assistant_applied")
+        fake.view.value = AssistantView(configured = false)
+        shot("87_assistant_offline")
+    }
+
     @Test fun editorBorderAndCrop() {
         val ui = Fake.ui()
         val border = Borders.byId("gallery")!!

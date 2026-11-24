@@ -78,6 +78,8 @@ internal class Knob(
     val zone: ((Float) -> Float)? = null,
     /** A wider gap before this one in the row: a new group starts. */
     val divider: Boolean = false,
+    /** Values with a firmer detent on the dial (the assistant's 当前 value). */
+    val stops: List<Double> = emptyList(),
     val onChange: (Double) -> Unit,
 )
 
@@ -93,7 +95,7 @@ internal fun KnobRow(id: String, knobs: List<Knob>, enabled: Boolean, image: Bit
             val k = knobs.firstOrNull { it.key == key } ?: return@AnimatedContent
             Column {
                 k.zone?.let { ToneStrip(image, it) }
-                LabeledSlider(k.label, k.value, k.min, k.max, k.default, enabled, k.format, onDrag = onDrag, tint = k.tint, showName = false, onChange = k.onChange)
+                LabeledSlider(k.label, k.value, k.min, k.max, k.default, enabled, k.format, onDrag = onDrag, tint = k.tint, stops = k.stops, showName = false, onChange = k.onChange)
             }
         }
     }

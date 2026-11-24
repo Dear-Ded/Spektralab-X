@@ -178,6 +178,8 @@ internal fun PanelHeader(
     changed: Boolean = false,
     enabled: Boolean = true,
     onReset: (() -> Unit)? = null,
+    /** A text action before the reset (调整's 暗房助手). */
+    action: (@Composable () -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -187,6 +189,7 @@ internal fun PanelHeader(
                 Text(summary, style = MaterialTheme.typography.bodyMedium, color = Palette.OnSurfaceSoft,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             } else Spacer(Modifier.weight(1f))
+            action?.invoke()
             if (onReset != null && changed) {
                 QuietButton(resetLabel, enabled = enabled, onClick = onReset)
             }

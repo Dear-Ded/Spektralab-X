@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -36,6 +37,8 @@ internal class EditorNav {
     var tab by mutableIntStateOf(0)
     var step by mutableIntStateOf(0)
     var adjustSeg by mutableIntStateOf(0)
+    /** 调整 shows the darkroom assistant in place of its controls (Assistant.kt). */
+    var assistant by mutableStateOf(false)
 }
 
 internal val LocalEditorNav = staticCompositionLocalOf { EditorNav() }

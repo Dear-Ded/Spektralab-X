@@ -90,6 +90,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -439,6 +440,16 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                         Controls(ui, vm, saveButton, panelOpen, { panelLevel = if (it) maxOf(1, panelLevel) else 0 },
                             Modifier.fillMaxWidth().weight(1f), preview)
                     }
+                }
+            }
+            // The assistant's rendering light, under the photo and outside it (AssistantLight.kt).
+            LocalAssistant.current.takeIf { assistantBuildAllowed }?.let { port ->
+                val av by port.view.collectAsState()
+                var origin by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+                val img = ui.image
+                val photo = photoBounds?.let { b -> if (img != null) fitted(b, img.width, img.height).translate(-origin) else null }
+                Box(Modifier.matchParentSize().onGloballyPositioned { origin = it.positionInWindow() }) {
+                    UnderLight(photo, nav.assistant && av.phase == AssistantPhase.Rendering)
                 }
             }
             ui.busy?.let { BusyOverlay(it) }
@@ -905,7 +916,25 @@ private fun Controls(
                                 }
                             }
                         }
-                        2 -> AdjustPage(ui, vm, enabled)
+                        2 -> {
+                            // The assistant takes the controls' place for a moment: a short rise and fade
+                            // (about 200 ms), the panel and the photo above it staying where they are.
+                            val assistant = LocalAssistant.current.takeIf { assistantBuildAllowed }
+                            androidx.compose.animation.AnimatedContent(
+                                targetState = assistant != null && nav.assistant,
+                                transitionSpec = {
+                                    (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(200, delayMillis = 40)) +
+                                        androidx.compose.animation.slideInVertically(androidx.compose.animation.core.tween(220)) { it / 24 }) togetherWith
+                                        androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(160))
+                                },
+                                label = "assistant",
+                            ) { open ->
+                                Column(verticalArrangement = Arrangement.spacedBy(RowGap)) {
+                                    if (open && assistant != null) AssistantPanel(assistant, enabled) { nav.assistant = false }
+                                    else AdjustPage(ui, vm, enabled)
+                                }
+                            }
+                        }
                         3 -> {
                             val src = ui.source
                             // UI2.md 7.2 point 2: the head says which border is on and offers to take it off.

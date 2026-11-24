@@ -64,6 +64,7 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
     PanelHeader(
         title = tr("调整"),
         resetLabel = tr("重置"), changed = edited[seg], enabled = enabled, onReset = { resetSegment(seg) },
+        action = assistantEntry(enabled) { nav.assistant = true },
     )
     PillRow {
         segments.forEachIndexed { i, name ->
