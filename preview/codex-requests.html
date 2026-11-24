@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spektralab-X · codex 前端需求预览（暗房助手 / 原片恢复 / 更新入口 / 导出结果）</title>
+<!--
+  1:1 preview of branch ui-iteration (Assistant.kt, AssistantLight.kt, EditorScreen.kt UpdateEntry,
+  QueueSheet.kt) and the design of 原片恢复 (not in code yet: waits for codex's FrameStore API).
+  One CSS px = one dp on a 393 dp phone, the size of the CI screenshots. Serve the repo root.
+-->
+<style>
+@font-face{font-family:UiSans;src:url(../app/src/main/assets/fonts/InstrumentSans-VF.ttf);font-weight:400 700}
+@font-face{font-family:UiCjk;src:url(../app/src/main/assets/fonts/NotoSansSC-VF.ttf);font-weight:100 900}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-Medium.ttf);font-weight:500}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-SemiBold.ttf);font-weight:600}
+:root{
+  --surround:#1C1C1C;--bg:#0F0F0E;--surface:#121211;--panel:#191918;--panelHigh:#232321;--panelHighest:#2D2D2A;
+  --on:#ECE9E3;--soft:#9E9A92;--outline:#3B3A37;--track:#6E6C66;--hair:#262523;--accent:#EEEAE2;--onAccent:#161614;
+  --index:#D2694F;--warn:#F07560;--s:8px;--m:12px;--l:16px;
+  --sans:UiSans,UiCjk,sans-serif;--mono:UiMono,UiCjk,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0a0a0a;color:var(--on);font-family:var(--sans)}
+body{display:flex;gap:28px;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:disabled{cursor:default}
+
+/* console */
+#console{width:330px;align-self:stretch;display:flex;flex-direction:column;gap:14px;overflow:auto;padding-right:6px;scrollbar-width:thin}
+#console h1{font-size:17px;font-weight:600}
+.sub{font-size:12px;color:var(--soft);line-height:18px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp>b{font-size:12px;color:var(--soft);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{min-height:34px;padding:0 11px;border-radius:17px;background:var(--panel);border:1px solid var(--hair);font-size:12.5px}
+.tabs button.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+#notes{font-size:12.5px;line-height:20px;color:#d8d4cc;padding-left:16px}
+#notes li{margin-bottom:6px}
+#notes i{font-style:normal;color:var(--soft)}
+a{color:var(--accent)}
+
+/* phone */
+#phoneWrap{position:relative;flex:none}
+#phone{width:393px;height:873px;border-radius:30px;overflow:hidden;position:absolute;left:0;top:0;background:var(--bg);
+  box-shadow:0 0 0 10px #1a1a1a,0 0 0 11px #333,0 30px 80px rgba(0,0,0,.6);transform-origin:top left;display:flex;flex-direction:column}
+.status{height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:500 12px var(--sans);flex:none;background:var(--surface)}
+.t-titleM{font:600 16px/24px var(--sans)}
+.t-body{font:400 14px/22px var(--sans)}
+.t-small{font:400 12px/18px var(--sans)}
+.t-label{font:500 13px/20px var(--sans)}
+.soft{color:var(--soft)}
+.icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex:none}
+.icon svg{width:24px;height:24px;stroke:var(--on);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon.dis svg{stroke:rgba(158,154,146,.38)}
+
+/* editor */
+.topbar{height:56px;padding:0 4px 0 16px;display:flex;align-items:center;background:var(--surface);flex:none}
+.topbar .ttl{flex:1;min-width:0}
+.topbar .ttl div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photoArea{flex:1;position:relative;background:var(--surround);display:flex;flex-direction:column;align-items:center;min-height:0;overflow:hidden}
+.photoBox{position:relative;width:393px;height:262px;flex:none}
+.photoBox img{width:100%;height:100%;object-fit:cover;display:block}
+.photoBox .dir{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:0;transition:opacity .12s}
+/* 直方图 / 1:1 sit in their own band above the photo, as in the app (not over it) */
+.chips{align-self:stretch;height:52px;flex:none;padding:0 8px;display:flex;align-items:center;gap:6px;z-index:4}
+.ochip{height:48px;display:flex;align-items:center}
+.ochip span{height:36px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:var(--s);background:rgba(0,0,0,.45);font:500 13px var(--sans);color:rgba(255,255,255,.9)}
+.ochip .dot,.qdot{width:6px;height:6px;border-radius:50%;background:var(--index)}
+.spacer{flex:1}
+
+/* rim light: drawn only outside the photo (four bands + a travelling crest); the photo stays untouched */
+.rim{position:absolute;inset:-28px;pointer-events:none;opacity:0;transition:opacity .6s ease}
+.rim.on{opacity:1;transition:opacity .42s ease}
+.rim.quick{transition:opacity .2s ease}
+.rim::before{content:"";position:absolute;inset:0;border-radius:6px;
+  background:conic-gradient(from var(--a,0deg),rgba(236,233,227,.05),rgba(236,233,227,.55) 8%,rgba(214,232,255,.35) 10%,rgba(255,226,196,.32) 12%,rgba(236,233,227,.07) 22%,rgba(236,233,227,.05) 50%,rgba(236,233,227,.26) 56%,rgba(236,233,227,.05) 64%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:28px;filter:blur(9px);
+  animation:spin 9s linear infinite}
+.rim::after{content:"";position:absolute;inset:26px;border:1px solid rgba(236,233,227,.22);border-radius:2px}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes spin{to{--a:360deg}}
+body.still .rim::before,body.still .edgeLit::before{animation:none}
+
+/* panel */
+.panel{height:367px;flex:none;background:var(--surface);display:flex;flex-direction:column;border-top:1px solid var(--hair)}
+.handle{height:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.handle i{width:32px;height:4px;border-radius:2px;background:var(--outline)}
+.pbody{flex:1;overflow:auto;padding:0 16px 8px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none;position:relative}
+.pbody::-webkit-scrollbar{display:none}
+.ahead{min-height:48px;display:flex;align-items:center}
+.ahead .route{font:400 12px var(--sans);color:var(--soft);margin-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field{min-height:88px;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair);padding:13px 14px;font:400 16px/24px var(--sans);color:var(--on);outline:0;resize:none;width:100%}
+.field::placeholder{color:rgba(158,154,146,.7)}
+.row{display:flex;align-items:center;gap:8px}
+.chipStat{min-height:48px;padding:0 14px;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair);display:flex;align-items:center;gap:8px;font:500 13px var(--sans)}
+.chipStat i{width:8px;height:8px;border-radius:50%;background:var(--track);transition:background .2s}
+.chipStat.on{background:var(--panelHighest);border-color:var(--outline)}
+.chipStat.on i{background:var(--accent)}
+.primary{min-height:48px;padding:0 20px;border-radius:var(--m);background:var(--accent);color:var(--onAccent);font:500 13px var(--sans);transition:transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.primary:active{transform:scale(.96)}
+.primary:disabled{opacity:.45}
+.tonal{min-height:48px;padding:0 16px;border-radius:var(--m);background:var(--panelHigh);font:500 13px var(--sans)}
+.quiet{min-height:48px;padding:0 12px;font:500 13px var(--sans);color:var(--on)}
+.quiet:disabled{color:rgba(158,154,146,.5)}
+.reco{flex:1;min-height:48px;border-radius:var(--m);background:var(--panelHigh);border:1px solid var(--hair);font:500 13px var(--sans);transition:background .2s,border-color .2s,transform .2s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.reco:active{transform:scale(.97)}
+.reco.chosen{background:var(--panelHighest);border-color:var(--outline)}
+.reco:disabled{opacity:.45}
+.sends{font:400 12px/18px var(--sans);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.consent{display:flex;align-items:center;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair);padding:4px 4px 4px 14px;
+  animation:rise .32s cubic-bezier(.3,1.3,.5,1)}
+.consent .t-small{flex:1;color:var(--on)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.statusLine{min-height:32px;display:flex;align-items:center;font:400 12px var(--sans);color:var(--soft)}
+.statusLine.err{color:var(--warn)}
+.seg{height:48px;display:flex;gap:4px;padding:4px;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair)}
+.seg button{flex:1;border-radius:var(--s);font:500 13px var(--sans);transition:background .25s,color .25s}
+.seg button.on{background:var(--accent);color:var(--onAccent)}
+.seg button:disabled{color:rgba(158,154,146,.45)}
+
+/* edge light round the composer while generating: silver crests with a faint prism split */
+.edgeLit{position:relative;border-radius:14px}
+.edgeLit::before{content:"";position:absolute;inset:-22px;border-radius:34px;pointer-events:none;opacity:0;transition:opacity .6s;
+  background:conic-gradient(from var(--a,0deg),rgba(236,233,227,.0),rgba(236,233,227,.30) 10%,rgba(205,225,255,.22) 13%,rgba(255,222,190,.20) 16%,rgba(236,233,227,.02) 28%,rgba(236,233,227,0) 50%,rgba(236,233,227,.24) 60%,rgba(236,233,227,.0) 72%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:22px;filter:blur(8px);
+  animation:spin 11s linear infinite}
+.edgeLit.on::before{opacity:1;transition:opacity .4s}
+.edgeLit::after{content:"";position:absolute;inset:-1px;border-radius:13px;pointer-events:none;border:1px solid rgba(236,233,227,0);transition:border-color .5s}
+.edgeLit.on::after{border-color:rgba(236,233,227,.18)}
+
+/* camera dial (Dial.kt): knurled drum, readout above, the name */
+.dialWrap{display:flex;flex-direction:column;align-items:center;gap:2px;user-select:none}
+.dialName{font:500 15px var(--sans)}
+.dialName.off{color:var(--soft)}
+.readout{font:600 19px/26px var(--mono);font-feature-settings:"tnum";letter-spacing:.2px}
+.drum{width:100%;height:70px;position:relative;touch-action:none;cursor:ew-resize}
+.drum canvas{width:100%;height:100%;display:block}
+.drum.off{opacity:.45;cursor:default}
+.sideLine{font:400 14px/22px var(--sans)}
+
+/* bottom bar */
+.bbar{height:88px;flex:none;display:flex;align-items:center;padding:0 12px 8px;gap:8px;background:var(--surface)}
+.tools{flex:1;height:64px;border-radius:32px;background:var(--panel);border:1px solid var(--hair);display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tool{width:52px;height:56px;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:400 11px var(--sans)}
+.tool svg{width:20px;height:20px;stroke:var(--on);fill:none;stroke-width:1.7}
+.tool.on{background:var(--accent);color:var(--onAccent)}
+.tool.on svg{stroke:var(--onAccent)}
+.save{height:56px;padding:0 18px;border-radius:28px;background:var(--accent);color:var(--onAccent);font:500 14px var(--sans);display:flex;align-items:center;gap:6px}
+
+/* sheets */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--panel);border-radius:28px 28px 0 0;padding:0 20px 28px;z-index:21;
+  transform:translateY(105%);transition:transform .42s cubic-bezier(.2,1,.3,1)}
+.sheet.on{transform:none}
+.sheet .grab{height:28px;display:flex;align-items:center;justify-content:center}
+.sheet .grab i{width:32px;height:4px;border-radius:2px;background:var(--outline)}
+.notes{background:var(--panelHigh);border-radius:var(--l);padding:14px 16px;font:400 13px/22px var(--sans);margin:12px 0 16px}
+.big{width:100%;height:56px;border-radius:28px;background:var(--accent);color:var(--onAccent);font:500 15px var(--sans)}
+.snack{position:absolute;left:16px;right:16px;bottom:100px;min-height:48px;border-radius:var(--m);background:var(--panelHighest);display:flex;align-items:center;padding:0 8px 0 16px;
+  font:400 14px var(--sans);z-index:30;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+.snack.on{opacity:1;transform:none;pointer-events:auto}
+
+/* queue */
+.qrow{min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 0}
+.qmark{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;font-size:14px}
+.qmark.done{background:var(--accent);color:var(--onAccent)}
+.qtx{flex:1;min-width:0}
+.qtx .t-small{font-feature-settings:"tnum"}
+.num{font-family:var(--mono);font-weight:500;letter-spacing:.2px}
+
+/* light table loupe */
+.loupe{flex:1;background:#000;position:relative;display:flex;align-items:center;justify-content:center}
+.loupe img{width:100%;display:block;transition:filter .3s,opacity .3s}
+.loupe.unread img{filter:grayscale(.6) brightness(.45)}
+.lHead{position:absolute;top:0;left:0;right:0;height:72px;padding:0 4px;display:flex;align-items:center;gap:8px;background:linear-gradient(rgba(0,0,0,.55),transparent);z-index:3}
+.lchip{height:40px;padding:0 14px;border-radius:20px;background:var(--accent);color:var(--onAccent);font:500 13px var(--sans);margin-left:auto}
+.recover{position:absolute;left:12px;right:12px;bottom:104px;border-radius:var(--l);background:rgba(25,25,24,.94);border:1px solid var(--hair);padding:14px 8px 8px 16px;z-index:4;
+  backdrop-filter:blur(10px);animation:rise .32s cubic-bezier(.3,1.3,.5,1)}
+.recover .t-titleM{font-size:15px}
+.recover .res{font:400 12px/18px var(--sans);color:var(--soft);min-height:18px}
+.recover .res.err{color:var(--warn)}
+.fbar{position:absolute;left:0;right:0;bottom:0;padding:8px 12px 24px;display:flex;align-items:center}
+.pill{flex:1;min-width:0;height:64px;background:var(--panel);border:1px solid var(--hair);border-radius:32px;padding:4px 8px;display:flex;align-items:center;gap:4px;overflow:hidden}
+.fab{width:64px;height:64px;border-radius:50%;background:var(--accent);color:var(--onAccent);margin-left:8px;flex:none;display:flex;align-items:center;justify-content:center;font:500 13px var(--sans)}
+.menu{position:absolute;top:56px;right:8px;background:var(--panelHigh);border-radius:var(--s);padding:8px 0;min-width:180px;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+.menu.on{display:block}
+.menu button{display:block;width:100%;text-align:left;height:48px;padding:0 16px;font:400 14px var(--sans)}
+.menu button:disabled{color:rgba(158,154,146,.5)}
+</style>
+</head>
+<body>
+<div id="console">
+  <div>
+    <h1>codex 前端需求 · 预览</h1>
+    <p class="sub">分支 ui-iteration · 393 dp 手机，1 px = 1 dp，和 CI 截图同尺寸。颜色、字体、尺寸都取自代码。上一轮打磨见 <a href="frontend-iteration.html">frontend-iteration.html</a>。</p>
+  </div>
+  <div class="grp"><b>场景</b><div class="tabs" id="tabs"></div></div>
+  <div class="grp" id="ctl"></div>
+  <div class="grp"><b>系统动画</b><div class="tabs"><button id="aOn" class="on">开</button><button id="aOff">关（静态光）</button></div></div>
+  <div class="grp"><b>说明</b><ul id="notes"></ul></div>
+</div>
+
+<div id="phoneWrap"><div id="phone">
+  <div class="status"><span>9:41</span><span>▴ ▮▮▮ 86%</span></div>
+  <div class="topbar">
+    <div class="ttl"><div class="t-titleM" id="fname">L1000412.DNG</div><div class="t-small soft">Leica Q (Typ 116) · 6000×4000</div></div>
+    <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></div>
+    <div class="icon"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></div>
+    <div class="icon dis"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></div>
+    <div class="icon" id="more"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="#ECE9E3"/><circle cx="12" cy="12" r="1" fill="#ECE9E3"/><circle cx="12" cy="19" r="1" fill="#ECE9E3"/></svg></div>
+  </div>
+  <div class="menu" id="moreMenu">
+    <button>观片台</button><button>修改记录</button><button disabled>粘贴调整（先在观片台复制）</button><button id="mQueue">正在处理</button>
+    <button id="mCheck">检查更新</button><button>设置</button>
+  </div>
+
+  <!-- editor -->
+  <div class="photoArea" id="photoArea">
+    <div class="chips">
+      <div class="ochip"><span>直方图</span></div><div class="ochip"><span>1:1</span></div>
+      <div class="spacer"></div>
+      <div class="ochip" id="updEntry" style="display:none;cursor:pointer"><span><i class="dot"></i><b style="font-weight:500" id="updText">有新版本</b></span></div>
+    </div>
+    <div class="photoBox" id="photoBox">
+      <div class="rim" id="rim"></div>
+      <img id="pic" src="assets/photo_lake.jpg">
+      <div class="dir" id="dir"></div>
+    </div>
+  </div>
+  <div class="panel" id="panel">
+    <div class="handle"><i></i></div>
+    <div class="pbody" id="pbody"></div>
+  </div>
+  <div class="bbar" id="bbar">
+    <div class="tools">
+      <div class="tool"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>风格</div>
+      <div class="tool"><svg viewBox="0 0 24 24"><rect x="5" y="9" width="14" height="10" rx="2"/><path d="M8 9V5h8v4"/></svg>胶片</div>
+      <div class="tool on"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M4 12h16"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>调整</div>
+      <div class="tool"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/><path d="M7 9h10v6H7z"/></svg>边框</div>
+      <div class="tool"><svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg>裁剪</div>
+    </div>
+    <div class="save">✓ 保存</div>
+  </div>
+
+  <!-- light table loupe (原片恢复 design) -->
+  <div class="loupe" id="loupe" style="display:none">
+    <div class="lHead">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+      <div><div class="t-titleM" style="font-size:15px">DSC_4120.JPG</div><div class="t-small soft num">1 / 14</div></div>
+      <button class="lchip">自动下一张</button>
+      <div class="icon" id="lMore"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="#ECE9E3"/><circle cx="12" cy="12" r="1" fill="#ECE9E3"/><circle cx="12" cy="19" r="1" fill="#ECE9E3"/></svg></div>
+    </div>
+    <div class="menu" id="lMenu" style="top:64px"><button id="lReg">登记原片</button></div>
+    <img id="lpic" src="assets/photo_lake.jpg">
+    <div class="recover" id="recover" style="display:none">
+      <div class="row"><div style="flex:1"><div class="t-titleM">原片无法读取</div><div class="res" id="recRes"></div></div>
+        <button class="primary" id="recPick">重新选择原片</button></div>
+    </div>
+    <div class="fbar">
+      <div class="pill" style="justify-content:space-between">
+        <div style="width:56px;text-align:center;font-size:12px" class="soft">✕<br>淘汰</div>
+        <div style="font-size:20px;letter-spacing:12px;color:var(--accent)">★★★<span class="soft">☆☆</span></div>
+        <div style="width:56px;text-align:center;font-size:12px" class="soft">✓<br>选中</div>
+      </div>
+      <div class="fab" id="lEdit">编辑</div>
+    </div>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="updSheet">
+    <div class="grab"><i></i></div>
+    <div class="row" style="align-items:baseline"><span class="t-titleM">新版本 0.3.02-alpha</span><span class="t-small soft" style="margin-left:10px">安装包 <span class="num">48.0 MB</span> · 当前 alpha v0.3.01</span></div>
+    <div class="notes">- 暗房助手：方向光、强度刻度<br>- 观片台：原片打不开时可重新选择<br>- 高质量 JPEG：完成后显示尺寸和编码</div>
+    <button class="big" id="updMain">下载并安装</button>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:8px"><button class="quiet" id="updLater">以后再说</button><button class="quiet">跳过这个版本</button></div>
+  </div>
+  <div class="sheet" id="queueSheet" style="background:var(--panel)">
+    <div class="grab"><i></i></div>
+    <div class="t-titleM" style="margin:4px 0 2px">处理队列</div>
+    <div class="row" style="justify-content:space-between;margin-top:12px"><span class="t-label soft">处理记录 <span class="num">3</span></span><button class="quiet">清除</button></div>
+    <div id="qrows"></div>
+  </div>
+  <div class="snack" id="snack"><span id="snackText" style="flex:1"></span><button class="quiet" id="snackAct" style="color:var(--accent)"></button></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+// ---------------------------------------------------------------- state
+const S={configured:true,statistics:false,phase:'Ready',consent:null,asked:'Goal',strength:null,canSetStrength:false,
+  lightFrom:null,local:false,showingCurrent:false,notice:null,error:null,goal:'',applied:false};
+let timers=[];
+function later(ms,f){timers.push(setTimeout(f,ms))}
+function clearTimers(){timers.forEach(clearTimeout);timers=[]}
+const ac=window.AudioContext?new AudioContext():null;
+function tick(f=1900,g=.04,d=.025){if(!ac)return;const o=ac.createOscillator(),v=ac.createGain();o.type='triangle';o.frequency.value=f;
+  v.gain.setValueAtTime(g,ac.currentTime);v.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(v).connect(ac.destination);o.start();o.stop(ac.currentTime+d+.01)}
+
+// ---------------------------------------------------------------- panel rendering (Assistant.kt)
+function mode(){
+  if(S.applied) return 'Done';
+  if((S.strength!=null||S.local)&&S.phase!=='Ready') return 'Draft';
+  if(!S.configured) return 'Offline';
+  return 'Compose';
+}
+const working=()=>S.phase==='Generating'||S.phase==='Rendering';
+function header(){
+  const route=S.local&&mode()==='Draft'?'本地示例':S.configured?'Anthropic · claude-sonnet-5-5':'';
+  return `<div class="ahead"><div class="icon" style="margin-left:-12px"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+    <span class="t-titleM">暗房助手</span><span class="route">${route}</span></div>`;
+}
+function statusText(){
+  if(S.phase==='Generating') return ['正在生成建议',false];
+  if(S.phase==='Rendering') return ['正在预览调整',false];
+  if(S.error) return [S.error,true];
+  if(S.notice==='none') return [S.asked==='Directional'?'没有明确的光向':'没有合适的电影光影',false];
+  if(S.notice==='cancel') return ['已取消',false];
+  return null;
+}
+function statusLine(){const s=statusText();return s?`<div class="statusLine ${s[1]?'err':''}">${s[0]}</div>`:''}
+function render(){
+  const b=$('#pbody'), m=mode(), w=working();
+  let h=header();
+  if(m==='Compose'){
+    h+=`<div class="edgeLit ${S.phase==='Generating'?'on':''}" id="edge"><div style="display:flex;flex-direction:column;gap:10px">
+      <textarea class="field" id="goal" placeholder="修图目标" ${w?'disabled':''}>${S.goal}</textarea>
+      <div class="row"><button class="chipStat ${S.statistics?'on':''}" id="stat" ${w?'disabled':''}><i></i>画面统计</button><div class="spacer"></div>
+      ${w?'<button class="tonal" id="cancel">取消</button>':`<button class="primary" id="gen" ${S.goal.trim()?'':'disabled'}>生成草稿</button>`}</div></div></div>
+      <div class="row"><button class="reco ${S.consent==='Cinematic'?'chosen':''}" id="cine" ${w?'disabled':''}>电影光影</button>
+      <button class="reco ${S.consent==='Directional'?'chosen':''}" id="dirb" ${w?'disabled':''}>方向光</button></div>`;
+    h+=S.consent?`<div class="consent"><span class="t-small">需要本次的亮度与颜色分布，不发送照片</span><button class="quiet" id="cNo">取消</button><button class="primary" id="cYes">允许</button></div>`
+      :`<div class="sends">${S.statistics?'发送 目标文字、参数、亮度与颜色分布 · 不发送照片':'发送 目标文字、参数 · 不发送照片'}</div>`;
+    h+=statusLine();
+  } else if(m==='Draft'){
+    const idle=S.phase==='Previewing';
+    h+=`<div class="seg"><button id="cur" class="${S.showingCurrent?'on':''}" ${w?'disabled':''}>当前</button><button id="sug" class="${S.showingCurrent?'':'on'}" ${w?'disabled':''}>建议</button></div>`;
+    if(S.lightFrom) h+=`<div class="sideLine">方向光 · 亮侧在${S.lightFrom}</div>`;
+    if(S.strength!=null) h+=`<div class="dialWrap"><div class="dialName">强度</div><div class="readout" id="ro">${Math.round(dialValue())}%</div>
+      <div class="drum ${S.showingCurrent?'off':''}" id="drum"><canvas id="drumC" width="722" height="140"></canvas></div></div>`;
+    if(S.local) h+=`<div class="dialWrap"><div class="dialName">曝光</div><div class="readout">+0.30 EV</div><div class="drum"><canvas id="drumC" width="722" height="140"></canvas></div></div>`;
+    h+=`<div class="row"><button class="quiet" id="discard" ${w?'disabled':''}>放弃</button><div class="spacer"></div>
+      ${w&&S.phase==='Generating'?'<button class="tonal" id="cancel">取消</button>':`<button class="primary" id="apply" ${idle?'':'disabled'}>应用</button>`}</div>`;
+    h+=statusLine();
+  } else if(m==='Offline'){
+    h+=`<div class="row" style="gap:10px"><button class="tonal" style="flex:1;min-height:56px" id="pBright">提亮</button><button class="tonal" style="flex:1;min-height:56px" id="pSoft">柔和</button></div>
+      <div class="row"><div class="spacer"></div><button class="quiet">配置服务</button></div>`;
+  } else {
+    h+=`<div class="row"><span class="t-body" style="flex:1">${S.phase==='Saved'?'已应用并保存':'已应用，正在保存'}</span><button class="quiet" id="undo">撤销</button></div>`;
+  }
+  b.innerHTML=h; wire(); drawDrum(); paintPhoto(); paintRim();
+}
+// ---------------------------------------------------------------- actions (each = one AssistantPort call)
+function ask(a){S.asked=a;S.notice=null;S.error=null;tick(1400,.05,.05);
+  if(a==='Directional') runDirectional(); else if(a==='Cinematic') runCinematic(); else runGoal()}
+function recommend(a){ if(S.statistics) ask(a); else {S.consent=a; render()} }
+function runDirectional(){
+  S.phase='Generating';render();
+  later(2600,()=>{ if(scenario.noDirection){S.phase='Ready';S.notice='none';render();return}
+    S.phase='Rendering';S.strength=100;S.lightFrom='左';S.canSetStrength=false;render();
+    later(1300,()=>{S.phase='Previewing';S.canSetStrength=true;tick(900,.06,.08);render()}) });
+}
+function runCinematic(){S.phase='Generating';render();later(2400,()=>{S.phase='Ready';S.notice='none';render()})}
+function runGoal(){S.phase='Generating';render();later(2400,()=>{S.phase='Ready';S.error='请求超时';render()})}
+function wire(){
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f};
+  const g=$('#goal'); if(g) g.oninput=()=>{S.goal=g.value;const p=$('#gen');if(p)p.disabled=!S.goal.trim()};
+  on('stat',()=>{S.statistics=!S.statistics;S.consent=null;tick(S.statistics?1700:1100);render()});
+  on('cine',()=>recommend('Cinematic')); on('dirb',()=>recommend('Directional'));
+  on('cNo',()=>{S.consent=null;render()});
+  on('cYes',()=>{const a=S.consent;S.statistics=true;S.consent=null;tick(1700);render();later(160,()=>ask(a))});
+  on('gen',()=>ask('Goal'));
+  on('cancel',()=>{clearTimers();S.phase=S.strength!=null?'Previewing':'Ready';S.notice='cancel';rimQuick=true;render()});
+  on('cur',()=>{S.showingCurrent=true;tick(1200);render()}); on('sug',()=>{S.showingCurrent=false;tick(1200);render()});
+  on('discard',()=>{resetDraft();render()});
+  on('apply',()=>{S.applied=true;S.phase='Applied';tick(700,.08,.12);render();later(900,()=>{S.phase='Saved';render()})});
+  on('undo',()=>{resetDraft();tick(500,.06,.1);render()});
+  on('pBright',()=>{S.local=true;S.phase='Previewing';render()}); on('pSoft',()=>{S.local=true;S.phase='Previewing';render()});
+  const d=$('#drum'); if(d&&S.strength!=null) dialDrag(d);
+}
+function resetDraft(){clearTimers();Object.assign(S,{phase:'Ready',strength:null,lightFrom:null,local:false,showingCurrent:false,applied:false,canSetStrength:false,notice:null,error:null})}
+// ---------------------------------------------------------------- strength dial: the finger's value shows at once;
+// the session takes one between renders, the latest goes as soon as it can (Assistant.kt `wanted`).
+let wanted=null, renderTimer=null;
+const dialValue=()=>wanted??S.strength??100;
+function setStrength(p){ // the fake session: a short render; while it runs it takes nothing
+  S.canSetStrength=false;S.phase='Rendering';S.strength=p;
+  const ms=scenario.slowRender?420:70;
+  renderTimer=setTimeout(()=>{S.phase='Previewing';S.canSetStrength=true;
+    if(wanted!=null&&wanted!==S.strength) setStrength(wanted); else {wanted=null; refreshDraftChrome()}},ms);
+  refreshDraftChrome();
+}
+function refreshDraftChrome(){const st=$('.statusLine');const s=statusText();
+  const ap=$('#apply'); if(ap) ap.disabled=S.phase!=='Previewing';
+  const pb=$('#pbody'); let line=pb.querySelector('.statusLine');
+  if(s){ if(!line){line=document.createElement('div');pb.appendChild(line)} line.className='statusLine'; line.textContent=s[0] } else if(line) line.remove();
+  paintRim();paintPhoto()}
+function dialDrag(el){
+  let x0=null,v0=0;
+  el.onpointerdown=e=>{if(S.showingCurrent)return;x0=e.clientX;v0=dialValue();el.setPointerCapture(e.pointerId)};
+  el.onpointermove=e=>{if(x0==null)return;const k=$('#phone').getBoundingClientRect().width/393;
+    const v=Math.max(0,Math.min(100,Math.round(v0-(e.clientX-x0)/k/3)));
+    if(v!==dialValue()){ if(v%10===0)tick(v===50||v===100||v===0?1000:1900,.05); wanted=v; $('#ro').textContent=v+'%'; drawDrum(); paintPhoto();
+      if(S.canSetStrength) setStrength(v)}};
+  el.onpointerup=()=>{x0=null};
+}
+function drawDrum(){
+  const c=$('#drumC'); if(!c) return; const g=c.getContext('2d'); const W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#2a2a28');grad.addColorStop(.18,'#1d1d1b');grad.addColorStop(.5,'#141413');grad.addColorStop(.85,'#1b1b1a');grad.addColorStop(1,'#262624');
+  g.fillStyle=grad;g.fillRect(0,14,W,H-28);
+  const v=S.local?50:dialValue(), px=10, cx=W/2;
+  for(let i=-60;i<=60;i++){const val=v+i; if(val<0||val>100) continue; const x=cx+i*px*1.0;
+    const z=Math.cos((x-cx)/W*Math.PI*.95); const major=val%10===0, stop=val===50||val===0||val===100;
+    g.strokeStyle=`rgba(236,233,227,${(major?.75:.32)*z})`;g.lineWidth=major?2.4:1.4;
+    const h=stop?44:major?34:20; g.beginPath();g.moveTo(x,H/2-h/2);g.lineTo(x,H/2+h/2);g.stroke();
+    if(stop){g.fillStyle=`rgba(236,233,227,${.8*z})`;g.beginPath();g.arc(x,H-30,3.5,0,7);g.fill()}}
+  const sh=g.createLinearGradient(0,0,W,0);sh.addColorStop(0,'rgba(15,15,14,.95)');sh.addColorStop(.18,'rgba(15,15,14,0)');sh.addColorStop(.82,'rgba(15,15,14,0)');sh.addColorStop(1,'rgba(15,15,14,.95)');
+  g.fillStyle=sh;g.fillRect(0,0,W,H);
+  g.fillStyle='#D2694F';g.beginPath();g.moveTo(cx-9,6);g.lineTo(cx+9,6);g.lineTo(cx,22);g.fill();g.fillRect(cx-1.5,14,3,H-40);
+}
+// the preview of the directional draft: the measured bright side lifted, the other side lowered, by strength
+function paintPhoto(){
+  const d=$('#dir'); const k=(S.strength!=null&&!S.showingCurrent&&mode()==='Draft')?dialValue()/100:0;
+  d.style.background=`linear-gradient(90deg,rgba(255,250,240,${.55*k}),rgba(128,128,128,0) 45%,rgba(128,128,128,0) 55%,rgba(0,0,0,${.6*k}))`;
+  d.style.opacity=k?1:0;
+  const l=S.local&&!S.showingCurrent&&mode()==='Draft'; $('#pic').style.filter=l?'brightness(1.12)':'';
+}
+// ---------------------------------------------------------------- rim light: after 250 ms of rendering
+let rimTimer=null, rimQuick=false;
+function paintRim(){
+  const r=$('#rim'); const want=S.phase==='Rendering';
+  r.classList.toggle('quick',rimQuick&&!want);
+  if(want){ if(!r.classList.contains('on')&&!rimTimer) rimTimer=setTimeout(()=>{rimTimer=null;if(S.phase==='Rendering')r.classList.add('on')},250) }
+  else { clearTimeout(rimTimer);rimTimer=null;r.classList.remove('on');setTimeout(()=>rimQuick=false,250) }
+}
+// ---------------------------------------------------------------- update entry (UpdateEntry, Updater.state)
+const U={state:'Idle',sheet:false};
+function paintUpdate(){
+  const e=$('#updEntry'); const t=U.state==='Available'?'有新版本':U.state==='Ready'?'可安装':null;
+  e.style.display=t?'flex':'none'; if(t) $('#updText').textContent=t;
+  $('#mCheck').style.display=t?'none':'block';
+  $('#updMain').textContent=U.state==='Ready'?'安装':'下载并安装';
+  $('#scrim').classList.toggle('on',U.sheet||Q.sheet); $('#updSheet').classList.toggle('on',U.sheet);
+}
+$('#updEntry').onclick=()=>{tick(1300);U.sheet=true;paintUpdate()};
+$('#updLater').onclick=()=>{U.sheet=false;paintUpdate()};
+$('#updMain').onclick=()=>{U.sheet=false;paintUpdate();snack(U.state==='Ready'?'正在安装…':'正在下载新版本…')};
+$('#more').onclick=()=>$('#moreMenu').classList.toggle('on');
+$('#mCheck').onclick=()=>{$('#moreMenu').classList.remove('on');snack('已是最新版本')};
+$('#mQueue').onclick=()=>{$('#moreMenu').classList.remove('on');Q.sheet=true;paintQueue()};
+// ---------------------------------------------------------------- queue (QueueSheet.kt JobRow)
+const Q={sheet:false,restart:false};
+function paintQueue(){
+  const rows=[
+    {n:'L1000412.DNG',m:Q.restart?'Spektralab_L1000412.jpg · 6000×4000':'Spektralab_L1000412.jpg · 6000×4000 · 8.21 MB · JPEG 4:4:4'},
+    {n:'DSC_4121.JPG',m:'Spektralab_DSC_4121.jpg · 4000×2667 · 3.10 MB · 系统 JPEG 编码'},
+    {n:'DSC_4119.JPG',m:''},
+  ];
+  $('#qrows').innerHTML=rows.map(r=>{const vis=r.m||'已保存 · JPEG · 工作尺寸';
+    const html=vis.replace(/(\d+×\d+|\d+\.\d+ MB|4:4:4)/g,'<span class="num">$1</span>');
+    const spoken=r.n+'，'+(r.m?'已保存，'+r.m:vis);
+    return `<div class="qrow" title="TalkBack：${spoken}"><div class="qmark done">✓</div><div class="qtx"><div class="t-body">${r.n}</div><div class="t-small soft">${html}</div></div></div>`}).join('');
+  $('#queueSheet').classList.toggle('on',Q.sheet); paintUpdate();
+}
+$('#scrim').onclick=()=>{U.sheet=false;Q.sheet=false;paintQueue()};
+// ---------------------------------------------------------------- source recovery (design; codex's FrameStore API)
+const R={state:'unreadable',registered:false};
+const OUT={
+  same:['ok','同一份原片已重新授权，正在打开'],
+  linked:['ok','已关联到新的位置，正在打开'],
+  cancel:['', ''],
+  different:['err','不是这张照片的原片'],
+  unverified:['err','这张照片没有登记原片，无法确认替代文件'],
+  removed:['err','这张照片已从观片台移除'],
+  held:['err','所选文件已关联到另一张照片'],
+  unreadable:['err','无法读取所选文件'],
+};
+function paintLoupe(){
+  const rec=$('#recover'); rec.style.display=R.state==='unreadable'||R.result?'block':'none';
+  $('#loupe').classList.toggle('unread',R.state==='unreadable');
+  const r=OUT[R.result||'']; const res=$('#recRes');
+  res.textContent=r?r[1]:''; res.className='res'+(r&&r[0]==='err'?' err':'');
+  $('#lReg').textContent=R.registered?'已登记原片':'登记原片'; $('#lReg').disabled=R.registered||R.state==='unreadable';
+}
+$('#recPick').onclick=()=>{R.result=scenario.pick; tick(1300);
+  if(R.result==='same'||R.result==='linked'){paintLoupe();later(900,()=>{R.state='ok';R.result=null;paintLoupe();snack('已打开 DSC_4120.JPG')})}
+  else paintLoupe()};
+$('#lMore').onclick=()=>$('#lMenu').classList.toggle('on');
+$('#lReg').onclick=()=>{$('#lMenu').classList.remove('on');R.registered=true;paintLoupe();snack('已登记原片')};
+$('#lEdit').onclick=()=>{ if(R.state==='ok') snack('打开编辑器'); else {R.state='unreadable';R.result=null;paintLoupe()} };
+function snack(t,act){$('#snackText').textContent=t;$('#snackAct').textContent=act||'';const s=$('#snack');s.classList.add('on');clearTimeout(s._t);s._t=setTimeout(()=>s.classList.remove('on'),2200)}
+// ---------------------------------------------------------------- scenarios
+const scenario={noDirection:false,slowRender:false,pick:'linked'};
+const SCENES=[
+  {name:'暗房助手 · 方向光',setup(){resetAll();},ctl:()=>`<b>后端返回（假会话）</b><div class="tabs">
+     <button data-k="noDirection" data-v="false" class="${!scenario.noDirection?'on':''}">测得亮侧：左</button>
+     <button data-k="noDirection" data-v="true" class="${scenario.noDirection?'on':''}">没有明确光向</button></div>
+     <div class="tabs"><button data-k="slowRender" data-v="false" class="${!scenario.slowRender?'on':''}">强度渲染快（70 ms）</button>
+     <button data-k="slowRender" data-v="true" class="${scenario.slowRender?'on':''}">强度渲染慢（420 ms）</button></div>`,
+   notes:['点“方向光”。画面统计没开时不会发请求，而是在原地展开一行：需要什么、不发送照片，[取消] [允许]。','允许后才打开画面统计，开关确认生效后发出请求。整个过程只有一处同意，不弹窗。',
+     '<b>正在生成建议</b>：目标区一圈缓慢流动的银色光，波峰处有一层很淡的棱镜色散。','<b>正在预览调整</b>：光移到照片外缘，一道柔光沿四边慢慢绕行（约 9 秒一圈），严格画在照片外面。渲染不到 250 ms 不亮，所以拖强度时不闪。',
+     '草稿：显示测得的亮侧，强度用相机刻度。0% 是进入本轮时的编辑，100% 是建议。拖动只重新渲染预览，不再请求模型。','方向光草稿上没有“继续调整”输入框，因为后端不会在方向光草稿上叠加新建议。','取消、失败时 200 ms 收光；结果正常到达时 600 ms 渐隐交接。可以切到“系统动画 关”看静态光。']},
+  {name:'暗房助手 · 本地示例',setup(){resetAll();S.configured=false;},ctl:()=>'',
+   notes:['没有配置服务时，只提供“提亮 / 柔和”两个固定的本地示例。','点击后草稿顶部写“本地示例”，不显示任何模型名；TalkBack 读“本地示例，不是模型结果”。','本地示例上没有“继续调整”（那会发给模型）。']},
+  {name:'暗房助手 · 应用与撤销',setup(){resetAll();Object.assign(S,{statistics:true,phase:'Previewing',strength:62,canSetStrength:true,lightFrom:'左'});},ctl:()=>'',
+   notes:['应用后一次撤销就回到进入本轮之前的编辑。','未应用的草稿不进入导出（导出始终用正式编辑）。']},
+  {name:'更新入口',setup(){resetAll();U.state='Available';},ctl:()=>`<b>Updater.state</b><div class="tabs">
+     <button data-u="Idle" class="${U.state==='Idle'?'on':''}">Idle</button><button data-u="Available" class="${U.state==='Available'?'on':''}">Available</button><button data-u="Ready" class="${U.state==='Ready'?'on':''}">Ready（已下载）</button></div>`,
+   notes:['有照片时，入口在照片上方小工具条的右端：琥珀色小点 + “有新版本” / “可安装”。顶栏已经放满 5 个按钮，没有空间。','只看 Updater.state：Available / Ready 时出现，其他时候没有。后台检查发现新版本不会弹窗，也不打断编辑。',
+     '点入口只打开现有的更新面板。“以后再说”关闭后入口还在，状态不变，不触发检查。','有入口时，“更多”菜单里不再出现“检查更新”，避免重复入口（打开 ⋯ 看）。','设置里的“立即检查更新”照旧主动检查。']},
+  {name:'处理队列 · 导出结果',setup(){resetAll();Q.sheet=true;},ctl:()=>`<b>重启后</b><div class="tabs">
+     <button data-r="false" class="${!Q.restart?'on':''}">刚导出完</button><button data-r="true" class="${Q.restart?'on':''}">重启后只能确认尺寸</button></div>`,
+   notes:['完成行第二行原样显示队列确认过的结果：文件名 · 尺寸 · 大小 · 编码。数字用等宽字体，一眼可读。','重启后只能确认尺寸时就只显示尺寸，界面不会自己补“4:4:4”。','没有确认信息时，沿用“已保存 · JPEG · 工作尺寸”。','TalkBack 读法：文件名，已保存，加上同样的信息（鼠标悬停在行上可以看到）。']},
+  {name:'观片台 · 原片恢复（设计稿）',setup(){resetAll();R.state='unreadable';R.result=null;},ctl:()=>`<b>在系统选择器里选了</b><div class="tabs">
+     ${[['same','同一文件（重新授权）'],['linked','正确的替代文件'],['cancel','取消'],['different','选错文件'],['unverified','未登记原片'],['removed','照片已移除'],['held','已关联到别的照片'],['unreadable','无法读取']]
+       .map(([k,t])=>`<button data-p="${k}" class="${scenario.pick===k?'on':''}">${t}</button>`).join('')}</div>`,
+   notes:['<b>这一项还没写进代码</b>：它要用的 FrameStore 接口只在 codex 的本地工作树里，等合并后接线。这里是交互设计。','原片打不开时，状态就出现在观片台这张照片上：照片变暗，底部一张卡片写“原片无法读取”，旁边是“重新选择原片”。不弹窗，也不打断编辑器里正在修的照片。',
+     '点“重新选择原片”打开系统选择器（打开前固定这一张）。同一文件 → 重新授权；不同文件 → 先保存当前编辑，再按原片指纹核对。成功后打开后端返回的新照片。','取消选择就原样返回。其余失败各有一句简短状态，旧记录不变。','原片还能读时，右上 ⋯ 里有“登记原片”，登记后显示“已登记原片”。不按文件名猜，也不扫描图库。']},
+];
+function resetAll(){clearTimers();resetDraft();Object.assign(S,{configured:true,statistics:false,consent:null,asked:'Goal',goal:''});wanted=null;
+  U.sheet=false;Q.sheet=false;$('#moreMenu').classList.remove('on');$('#lMenu').classList.remove('on');}
+let cur=0;
+function show(i){cur=i;const sc=SCENES[i];sc.setup();
+  $$('#tabs button').forEach((b,j)=>b.classList.toggle('on',j===i));
+  const lt=sc.name.startsWith('观片台');
+  ['#photoArea','#panel','#bbar'].forEach(s=>$(s).style.display=lt?'none':'');
+  $('.topbar').style.display=lt?'none':''; $('#loupe').style.display=lt?'flex':'none';
+  $('#notes').innerHTML=sc.notes.map(n=>`<li>${n}</li>`).join('');
+  paintCtl(); render(); paintUpdate(); paintQueue(); paintLoupe(); location.hash=i;
+}
+function paintCtl(){const c=$('#ctl');c.innerHTML=SCENES[cur].ctl();
+  c.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{scenario[b.dataset.k]=b.dataset.v==='true';paintCtl()});
+  c.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{U.state=b.dataset.u;paintCtl();paintUpdate()});
+  c.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{Q.restart=b.dataset.r==='true';paintCtl();paintQueue()});
+  c.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{scenario.pick=b.dataset.p;R.state='unreadable';R.result=null;paintCtl();paintLoupe()});
+}
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s.name;b.onclick=()=>show(i);$('#tabs').appendChild(b)});
+$('#aOn').onclick=()=>{document.body.classList.remove('still');$('#aOn').classList.add('on');$('#aOff').classList.remove('on')};
+$('#aOff').onclick=()=>{document.body.classList.add('still');$('#aOff').classList.add('on');$('#aOn').classList.remove('on')};
+function fit(){const k=Math.min(1.15,(innerHeight-50)/873,(innerWidth-400)/400);const p=$('#phone');p.style.transform=`scale(${k})`;
+  $('#phoneWrap').style.width=393*k+'px';$('#phoneWrap').style.height=873*k+'px'}
+addEventListener('resize',fit);fit();
+show(+(location.hash.slice(1))||0);
+// ?step=consent|gen|render|draft|menu|sheet jumps scene 0 / 3 to a state, for screenshots of the moving parts.
+const step=new URLSearchParams(location.search).get('step');
+if(step==='consent'){S.consent='Directional';render()}
+if(step==='gen'){S.statistics=true;S.phase='Generating';render()}
+if(step==='render'){Object.assign(S,{statistics:true,phase:'Rendering',strength:100,lightFrom:'左'});render();$('#rim').classList.add('on')}
+if(step==='draft'){Object.assign(S,{statistics:true,phase:'Previewing',strength:72,canSetStrength:true,lightFrom:'左'});render()}
+if(step==='menu'){$('#moreMenu').classList.add('on')}
+if(step==='sheet'){U.sheet=true;paintUpdate()}
+</script>
+</body>
+</html>
