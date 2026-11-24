@@ -125,7 +125,10 @@ class SelectionPreviewUiTest {
         state = state.copy(edit = Edit(look = Look(temperature = -12.0)))
         compose.setContent { SpektraTheme { PaperStrip(state, true, preview = { requests += it; null }) {} } }
         compose.waitForIdle()
-        assertEquals(listOf(state.edit.copy(scanFilm = false, digitalIntermediate = true).forSelectionPreview()), requests)
+        // 无 previews the intermediate; each paper card previews this photo printed on that paper; all keep the finish.
+        assertTrue(requests.contains(state.edit.copy(scanFilm = false, digitalIntermediate = true).forSelectionPreview()))
+        assertTrue(requests.contains(state.edit.copy(scanFilm = false, digitalIntermediate = false, paper = "kodak_supra_endura").forSelectionPreview()))
+        assertTrue(requests.all { it.look == state.edit.look })
     }
 
     @Test fun existingCardLayoutDisplaysDistinctPreviewImages() {
