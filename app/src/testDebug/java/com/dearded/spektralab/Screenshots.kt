@@ -88,7 +88,7 @@ class Screenshots {
     }
 
     @Test fun aboutHeader() {
-        content { androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.padding(20.dp)) { AboutSection() } }
+        content { androidx.compose.material3.Surface(color = Palette.Background) { androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.padding(20.dp)) { AboutSection() } } }
         shot("61_about")
     }
 

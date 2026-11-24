@@ -40,11 +40,16 @@ class AssistantPanelTest {
     // System animations off: the light is still, so the test clock can go idle (and that path is covered).
     @Before fun internalBuild() {
         assistantBuildAllowed = true; FilmDevelop.cpuOnly = true
-        org.robolectric.shadows.ShadowValueAnimator.setDurationScale(0f)
+        animatorScale(0f)
     }
     @After fun restore() {
         assistantBuildAllowed = BuildConfig.DEBUG
-        org.robolectric.shadows.ShadowValueAnimator.setDurationScale(1f)
+        animatorScale(1f)
+    }
+
+    /** ValueAnimator's duration scale (hidden API; Robolectric's shadow takes the call). */
+    private fun animatorScale(scale: Float) {
+        android.animation.ValueAnimator::class.java.getMethod("setDurationScale", Float::class.javaPrimitiveType).invoke(null, scale)
     }
 
     private fun panel(fake: AssistantFake) = compose.setContent {
