@@ -61,7 +61,7 @@ jobs:
       - name: Contact sheet
         run: |
           command -v montage >/dev/null || { sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick; }
-          font="$PWD/app/src/main/assets/fonts/Inter-VF.ttf"
+          font="$PWD/app/src/main/assets/fonts/InstrumentSans-VF.ttf"
           cd app/build/outputs/roborazzi
           montage *.png -resize 270x600 -geometry +8+8 -tile 5x -background '#0E0E10' \
             -font "$font" -fill '#EBEBEB' -pointsize 14 -set label '%t' ../contact-sheet.png
