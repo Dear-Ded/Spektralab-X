@@ -57,36 +57,28 @@ private const val AURORA_FRAME_MS = 33L
 private const val AURORA_STILL_TIME = 40f
 
 /*
- * The colour-drifting glow behind waiting screens, after the Gemini app as it
- * looks since the 2025 rebrand (tools/work/ui-motion_gemini_glow.md): a blue
- * haze rising from the bottom edge, with teal, green and a little yellow as
- * small accents low down that drift through it, as Gemini's thinking glow
- * goes blue -> cyan -> green. No purple in any frame: red never touches blue
- * (blue and red mix to violet whatever the blend mode), so red stays out of
- * the glow and sits next to yellow only, in the spectrum band.
+ * Darkroom light: the glow behind waiting screens (launch, engine start, the empty editor, the
+ * light table). Our own look, not a borrowed one: liquid silver. Slow, low-chroma sheens of silver
+ * and ivory, domain-warped like a film of developer moving over a tray, on warm graphite, with a
+ * breath of safelight amber drifting through. No saturated hue anywhere, so it sits with the
+ * palette (Theme.kt) and never tints how a print reads.
  *
- * Only where there is no print to judge -- engine start, opening a photo,
- * the empty editor. Never behind a photo being edited: a moving colour
- * field next to a print skews how its colour reads.
+ * Only where there is no print to judge. Never behind a photo being edited.
  *
- * Plain radial gradients on a Canvas, so it runs on API 29 without a
- * RuntimeShader; a handful of circles a frame cost next to nothing. With
- * system animations off it holds still.
+ * API 33+: one RuntimeShader band along the bottom edge (below, with a CPU twin for software
+ * canvases). API 29-32: a few radial gradients in the same colours. With system animations off it
+ * holds still.
  */
 object AuraColors {
-    // Gemini's 2025 spark stops (the Commons SVG), sampled against frames of the app.
-    val Blue = Color(0xFF3186FF)
-    val Teal = Color(0xFF24A2CA)
-    val Red = Color(0xFFFC413D)
-    val Yellow = Color(0xFFFBBC04)
-    val Green = Color(0xFF00B95C)
+    /** The light's colours: dim warm graphite, silver, ivory, and the safelight's amber. */
+    val Graphite = Color(0xFF5E5A53)
+    val Silver = Color(0xFFB5B1A8)
+    val Ivory = Color(0xFFEEEAE2)
+    val Amber = Color(0xFFB5763C)
 
-    /**
-     * The accents' loop: teal to green to yellow and back the same way, so it
-     * never passes through red or a blue-red mix.
-     */
+    /** The fallback glow's accent loop: silver to amber to ivory and back. */
     private val stops = listOf(
-        0.00f to Teal, 0.40f to Green, 0.65f to Yellow, 0.85f to Green, 1.00f to Teal,
+        0.00f to Silver, 0.40f to Amber, 0.65f to Ivory, 0.85f to Amber, 1.00f to Silver,
     )
 
     /** Position [t] (any real) along the loop above. */
@@ -97,16 +89,23 @@ object AuraColors {
             val (b, cb) = stops[i + 1]
             if (x <= b) return lerp(ca, cb, if (b > a) (x - a) / (b - a) else 0f)
         }
-        return Blue
+        return Silver
     }
+
+    // The brand spectrum (launcher icon, the intro's exposed frame): it is the picture, not the light.
+    private val Blue = Color(0xFF3186FF)
+    private val Teal = Color(0xFF24A2CA)
+    private val Red = Color(0xFFFC413D)
+    private val Yellow = Color(0xFFFBBC04)
+    private val Green = Color(0xFF00B95C)
 
     /** The launcher strip's spectrum and the splash's, in rainbow order so red only meets yellow. */
     val spectrum = listOf(
         0.00f to Blue, 0.25f to Teal, 0.50f to Green, 0.72f to Yellow, 1.00f to Red,
     )
 
-    /** The working bar: the spectrum there and back, so its repeat never joins red to blue. */
-    val bar = listOf(Blue, Teal, Green, Yellow, Red, Yellow, Green, Teal, Blue)
+    /** The working bar: a silver sheen running along graphite. */
+    val bar = listOf(Graphite, Graphite, Silver, Ivory, Silver, Graphite, Graphite)
 }
 
 /** One circle: where it rests (fractions of the box), how far and how fast it drifts. */
@@ -117,8 +116,8 @@ private class Blob(
     val hue: Float?, val weight: Float = 1f,
 )
 
-// Gemini's rest state is one blue haze from the bottom edge; the accents are
-// smaller and dimmer, low down, and only pass through on their way round.
+// One wide graphite-silver haze from the bottom edge; the accents are smaller and dimmer, low
+// down, and only pass through on their way round.
 private val Blobs = listOf(
     Blob(0.50f, 1.02f, 0.80f, 0.10f, 0.04f, 1, 1, 0.0f, null),
     Blob(0.15f, 0.92f, 0.60f, 0.12f, 0.05f, 1, 2, 1.7f, null, 0.8f),
@@ -157,15 +156,11 @@ fun Aura(modifier: Modifier, strength: () -> Float, ground: Color = Palette.Back
 }
 
 /**
- * The aurora band (after React Bits' Aurora, rebuilt from how it looks, never
- * from its source: MIT + Commons Clause does not mix with GPL-3.0,
- * ui2_reactbits.md 8.1). A wide band along the bottom edge whose top edge rises
- * and falls slowly, with wide soft folds swelling through it like a
- * curtain, fading into the near-black ground. Colour runs across it blue ->
- * teal -> green -> yellow, mostly blue; red never enters it.
+ * The light band: a wide band along the bottom edge whose top edge rises and falls slowly, with
+ * liquid-silver sheens moving through it, fading into the near-black ground.
  *
- * Time moves at most 30 times a second, only while the screen is started
- * (nothing runs in the background), and stands still with animations off.
+ * Time moves at most 30 times a second, only while the screen is started (nothing runs in the
+ * background), and stands still with animations off.
  */
 @RequiresApi(33)
 @Composable
@@ -226,29 +221,37 @@ private class CpuAurora {
 
     private fun render(bw: Int, bh: Int, t: Float, strength: Float, reach: Float): androidx.compose.ui.graphics.ImageBitmap {
         val px = IntArray(bw * bh)
-        val blue = AuraColors.Blue; val teal = AuraColors.Teal; val green = AuraColors.Green; val yellow = AuraColors.Yellow
-        val shift = 0.08f * snoise(t * 0.02f, 7.3f)
         for (y in 0 until bh) {
             val d = 1f - (y + 0.5f) / bh
             if (d > reach) continue   // above the band's highest edge: nothing to draw
             for (x in 0 until bw) {
-                val u = (x + 0.5f) / bw
-                val lift = 0.5f + 0.5f * snoise(u * 1.3f + t * 0.045f, t * 0.03f)
-                val edge = reach * (1f - AURORA_AMPLITUDE + AURORA_AMPLITUDE * lift)
-                var body = 1f - smooth(0.2f * edge, edge, d)
-                body *= body
-                if (body <= 0f) continue
-                val folds = 0.86f + 0.14f * snoise(u * 1.6f - t * 0.03f, d * 2.2f + t * 0.02f)
-                val s = (u + shift).coerceIn(0f, 1f)
-                val g = smooth(0.80f, 0.95f, s)
-                var c = lerp(blue, teal, smooth(0.45f, 0.72f, s))
-                c = lerp(c, green, 0.6f * g)
-                c = lerp(c, yellow, 0.25f * smooth(0.92f, 1f, s))
-                val a = (body * folds * strength * (1f - 0.5f * g)).coerceIn(0f, 1f)
-                px[y * bw + x] = c.copy(alpha = a).toArgb()
+                val c = light((x + 0.5f) / bw, d, t, strength, reach)
+                if (c.alpha > 0f) px[y * bw + x] = c.toArgb()
             }
         }
         return android.graphics.Bitmap.createBitmap(px, bw, bh, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap()
+    }
+
+    /** One point of the band, as in the SKSL's main(). */
+    private fun light(u: Float, d: Float, t: Float, strength: Float, reach: Float): Color {
+        val lift = 0.5f + 0.5f * snoise(u * 1.1f + t * 0.035f, t * 0.025f)
+        val edge = reach * (1f - AURORA_AMPLITUDE + AURORA_AMPLITUDE * lift)
+        var body = 1f - smooth(0.15f * edge, edge, d)
+        body *= body
+        if (body <= 0f) return Color.Transparent
+        val wx = snoise(u * 1.2f + t * 0.03f, d * 1.5f - t * 0.02f)
+        val wy = snoise(u * 2.1f - t * 0.025f, d * 2.4f + 4.1f)
+        val bands = kotlin.math.sin(18f * d + 2.4f * wx + 1.2f * wy + t * 0.15f)
+        val sheen = 0.5f + 0.5f * bands
+        var hi = smooth(0.55f, 1f, bands)
+        hi *= hi
+        val shimmer = 0.6f + 0.4f * snoise(u * 1.8f - t * 0.05f, 3.3f)
+        val warm = smooth(-0.3f, 0.7f, snoise(u * 0.6f - t * 0.02f, 5.7f))
+        var c = lerp(AuraColors.Graphite, AuraColors.Amber, 0.7f * warm * (1f - sheen))
+        c = lerp(c, AuraColors.Silver, 0.2f + 0.4f * sheen)
+        c = lerp(c, AuraColors.Ivory, hi * 0.65f * shimmer)
+        val k = (body * strength * (0.45f + 0.3f * sheen + 0.45f * hi * shimmer)).coerceIn(0f, 1f)
+        return c.copy(alpha = k)
     }
 
     private fun smooth(e0: Float, e1: Float, x: Float): Float {
@@ -297,24 +300,24 @@ private object Aurora {
     fun create(): RuntimeShader? = runCatching {
         RuntimeShader(SKSL).apply {
             fun set(name: String, c: Color) = setFloatUniform(name, c.red, c.green, c.blue)
-            set("uBlue", AuraColors.Blue); set("uTeal", AuraColors.Teal)
-            set("uGreen", AuraColors.Green); set("uYellow", AuraColors.Yellow)
+            set("uGraphite", AuraColors.Graphite); set("uSilver", AuraColors.Silver)
+            set("uIvory", AuraColors.Ivory); set("uAmber", AuraColors.Amber)
         }
     }.onFailure { android.util.Log.w("Aurora", "shader unavailable, radial glow instead", it) }.getOrNull()
 
     // snoise() below is the 2D simplex noise of webgl-noise (Ian McEwan, Ashima Arts;
     // Stefan Gustavson), MIT licence, https://github.com/ashima/webgl-noise (NOTICE).
-    // Everything after it -- the band, its folds, the colour ramp -- is written here.
+    // Everything after it -- the band, the silver sheens, the colours -- is written here.
     private const val SKSL = """
 uniform float2 uSize;
 uniform float uTime;
 uniform float uStrength;
 uniform float uReach;
 uniform float uAmp;
-uniform float3 uBlue;
-uniform float3 uTeal;
-uniform float3 uGreen;
-uniform float3 uYellow;
+uniform float3 uGraphite;
+uniform float3 uSilver;
+uniform float3 uIvory;
+uniform float3 uAmber;
 
 float3 mod289(float3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 float2 mod289(float2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -346,20 +349,27 @@ half4 main(float2 p) {
     float d = 1.0 - uv.y;
     float t = uTime;
     // The band's top edge rises and falls along its length.
-    float lift = 0.5 + 0.5 * snoise(float2(uv.x * 1.3 + t * 0.045, t * 0.03));
+    float lift = 0.5 + 0.5 * snoise(float2(uv.x * 1.1 + t * 0.035, t * 0.025));
     float edge = uReach * (1.0 - uAmp + uAmp * lift);
-    // Full at the bottom, fading over the upper 80 % of the band: one long soft edge, no step.
-    float body = 1.0 - smoothstep(0.2 * edge, edge, d);
+    // Full at the bottom, fading over the upper 85 % of the band: one long soft edge, no step.
+    float body = 1.0 - smoothstep(0.15 * edge, edge, d);
     body = body * body;
-    // Wide horizontal folds, slow and low: the curtain swells instead of standing in columns.
-    float folds = 0.86 + 0.14 * snoise(float2(uv.x * 1.6 - t * 0.03, d * 2.2 + t * 0.02));
-    // Blue and teal carry the band; green and a touch of yellow only at the far right, dimmer.
-    float x = clamp(uv.x + 0.08 * snoise(float2(t * 0.02, 7.3)), 0.0, 1.0);
-    float g = smoothstep(0.80, 0.95, x);
-    float3 c = mix(uBlue, uTeal, smoothstep(0.45, 0.72, x));
-    c = mix(c, uGreen, 0.6 * g);
-    c = mix(c, uYellow, 0.25 * smoothstep(0.92, 1.0, x));
-    float k = clamp(body * folds * uStrength * (1.0 - 0.5 * g), 0.0, 1.0);
+    // Liquid silver: light lying on developer in a tray. Soft ribbons across the band, their
+    // course bent sideways by two slow noise fields, so they undulate instead of standing still;
+    // the brightest crest of each ribbon goes ivory and shimmers along its length.
+    float wx = snoise(float2(uv.x * 1.2 + t * 0.03, d * 1.5 - t * 0.02));
+    float wy = snoise(float2(uv.x * 2.1 - t * 0.025, d * 2.4 + 4.1));
+    float bands = sin(18.0 * d + 2.4 * wx + 1.2 * wy + t * 0.15);
+    float sheen = 0.5 + 0.5 * bands;
+    float hi = smoothstep(0.55, 1.0, bands);
+    hi = hi * hi;
+    float shimmer = 0.6 + 0.4 * snoise(float2(uv.x * 1.8 - t * 0.05, 3.3));
+    // The safelight's amber lies in the troughs, wide and slow.
+    float warm = smoothstep(-0.3, 0.7, snoise(float2(uv.x * 0.6 - t * 0.02, 5.7)));
+    float3 c = mix(uGraphite, uAmber, 0.7 * warm * (1.0 - sheen));
+    c = mix(c, uSilver, 0.2 + 0.4 * sheen);
+    c = mix(c, uIvory, hi * 0.65 * shimmer);
+    float k = clamp(body * uStrength * (0.45 + 0.3 * sheen + 0.45 * hi * shimmer), 0.0, 1.0);
     // One step of dither, so the dark tail does not band.
     k = clamp(k + (fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0, 0.0, 1.0);
     return half4(float4(c * k, k));
@@ -400,7 +410,7 @@ private fun DrawScope.drawRadial(t: Float, strength: Float) {
         )
         // Breathe: the radius swells and settles twice a period.
         val r = span * b.r * (0.92f + 0.08f * sin(2f * a + b.phase))
-        val colour = b.hue?.let { AuraColors.at(it + t) } ?: AuraColors.Blue
+        val colour = b.hue?.let { AuraColors.at(it + t) } ?: lerp(AuraColors.Graphite, AuraColors.Silver, 0.45f)
         val alpha = 0.55f * b.weight * strength
         drawCircle(
             brush = Brush.radialGradient(
@@ -417,8 +427,8 @@ private fun DrawScope.drawRadial(t: Float, strength: Float) {
 }
 
 /**
- * The thin working bar along the top of the preview: the glow's colours
- * sliding past, in place of an indeterminate progress line.
+ * The thin working bar (import, update download): a silver sheen running along graphite, in place
+ * of an indeterminate progress line.
  */
 @Composable
 fun AuraBar(modifier: Modifier = Modifier) {

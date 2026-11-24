@@ -467,6 +467,7 @@ const SLOW=Math.max(1,Number(new URLSearchParams(location.search).get('slow'))||
 const PAL = {codex:{bg:'#0E0E10',surface:'#141416',panel:'#1D1D1F',panelHigh:'#262628',on:'#EBEBEB',soft:'#A8A8A8',track:'#6A6A6C',accent:'#F2F2F2',onAccent:'#111113',outline:'#3A3A3C'},
   polish:{bg:'#0F0F0E',surface:'#0F0F0E',panel:'#191918',panelHigh:'#232321',on:'#ECE9E3',soft:'#9E9A92',track:'#56544F',accent:'#EEEAE2',onAccent:'#161614',outline:'#3B3A37'}};
 let P=PAL.polish;
+const LIGHT={graphite:[0x5E,0x5A,0x53],silver:[0xB5,0xB1,0xA8],ivory:[0xEE,0xEA,0xE2],amber:[0xB5,0x76,0x3C]};
 const AURA={blue:[0x31,0x86,0xFF],teal:[0x24,0xA2,0xCA],red:[0xFC,0x41,0x3D],yellow:[0xFB,0xBC,0x04],green:[0x00,0xB9,0x5C]};
 const SPECTRUM=[[0,AURA.blue],[.25,AURA.teal],[.5,AURA.green],[.72,AURA.yellow],[1,AURA.red]];
 const Motion={ // Theme.kt + Interactions.kt
@@ -761,10 +762,10 @@ function logEvent(ev,src,fired){
 }
 
 /* =====================================================================
- * Aurora: Aura.kt's SKSL, line for line
+ * Darkroom light (liquid silver): Aura.kt's SKSL, line for line
  * ===================================================================*/
 const AURORA_FS=`precision highp float;
-uniform vec2 uSize;uniform float uTime,uStrength,uReach,uAmp;uniform vec3 uBlue,uTeal,uGreen,uYellow,uGround;
+uniform vec2 uSize;uniform float uTime,uStrength,uReach,uAmp;uniform vec3 uGraphite,uSilver,uIvory,uAmber,uGround;
 vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}vec2 mod289(vec2 x){return x-floor(x*(1./289.))*289.;}
 vec3 permute(vec3 x){return mod289(((x*34.)+10.)*x);}
 float snoise(vec2 v){const vec4 C=vec4(.211324865405187,.366025403784439,-.577350269189626,.024390243902439);
@@ -773,12 +774,14 @@ vec3 p=permute(permute(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));vec3 m=max(.5
 vec3 x=2.*fract(p*C.www)-1.;vec3 h=abs(x)-.5;vec3 ox=floor(x+.5);vec3 a0=x-ox;m*=1.79284291400159-.85373472095314*(a0*a0+h*h);
 vec3 g=vec3(a0.x*x0.x+h.x*x0.y,a0.y*x12.x+h.y*x12.y,a0.z*x12.z+h.z*x12.w);return 130.*dot(m,g);}
 void main(){vec2 p=vec2(gl_FragCoord.x,uSize.y-gl_FragCoord.y);vec2 uv=p/uSize;float d=1.-uv.y;float t=uTime;
-float lift=.5+.5*snoise(vec2(uv.x*1.3+t*.045,t*.03));float edge=uReach*(1.-uAmp+uAmp*lift);
-float body=1.-smoothstep(.2*edge,edge,d);body=body*body;
-float folds=.86+.14*snoise(vec2(uv.x*1.6-t*.03,d*2.2+t*.02));
-float x=clamp(uv.x+.08*snoise(vec2(t*.02,7.3)),0.,1.);float g=smoothstep(.80,.95,x);
-vec3 c=mix(uBlue,uTeal,smoothstep(.45,.72,x));c=mix(c,uGreen,.6*g);c=mix(c,uYellow,.25*smoothstep(.92,1.,x));
-float k=clamp(body*folds*uStrength*(1.-.5*g),0.,1.);k=clamp(k+(fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453)-.5)/255.,0.,1.);
+float lift=.5+.5*snoise(vec2(uv.x*1.1+t*.035,t*.025));float edge=uReach*(1.-uAmp+uAmp*lift);
+float body=1.-smoothstep(.15*edge,edge,d);body=body*body;
+float wx=snoise(vec2(uv.x*1.2+t*.03,d*1.5-t*.02));float wy=snoise(vec2(uv.x*2.1-t*.025,d*2.4+4.1));
+float bands=sin(18.*d+2.4*wx+1.2*wy+t*.15);float sheen=.5+.5*bands;float hi=smoothstep(.55,1.,bands);hi*=hi;
+float shimmer=.6+.4*snoise(vec2(uv.x*1.8-t*.05,3.3));
+float warm=smoothstep(-.3,.7,snoise(vec2(uv.x*.6-t*.02,5.7)));
+vec3 c=mix(uGraphite,uAmber,.7*warm*(1.-sheen));c=mix(c,uSilver,.2+.4*sheen);c=mix(c,uIvory,hi*.65*shimmer);
+float k=clamp(body*uStrength*(.45+.3*sheen+.45*hi*shimmer),0.,1.);k=clamp(k+(fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453)-.5)/255.,0.,1.);
 gl_FragColor=vec4(c*k+uGround*(1.-k),1.);}`;
 const t0Aura=now(), auroraSeconds=()=>((now()-t0Aura+40000)%3600000)/1000; // one clock: the intro's band and the editor's are the same frame
 class Aurora{
@@ -790,7 +793,7 @@ class Aurora{
     const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
     const a=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
     const u=n=>gl.getUniformLocation(pr,n);this.u={size:u('uSize'),time:u('uTime'),st:u('uStrength'),reach:u('uReach'),amp:u('uAmp'),ground:u('uGround')};
-    const col=(n,c)=>gl.uniform3f(u(n),c[0]/255,c[1]/255,c[2]/255);col('uBlue',AURA.blue);col('uTeal',AURA.teal);col('uGreen',AURA.green);col('uYellow',AURA.yellow);
+    const col=(n,c)=>gl.uniform3f(u(n),c[0]/255,c[1]/255,c[2]/255);col('uGraphite',LIGHT.graphite);col('uSilver',LIGHT.silver);col('uIvory',LIGHT.ivory);col('uAmber',LIGHT.amber);
     this.last=0;this.loop=this.loop.bind(this);
   }
   start(){if(!this.gl||this.running)return;this.running=true;requestAnimationFrame(this.loop)}
