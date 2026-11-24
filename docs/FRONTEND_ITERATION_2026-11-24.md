@@ -73,8 +73,8 @@ Legend: [ ] open, [x] done (commit), [-] dropped (reason).
 - [x] D7 Motion pass: tab and segment switches, panel resizing, sheets, selection, press states.
 
 ### E. Verification and hand-over
-- [ ] E1 Screenshot tests updated, CI (screenshots + android) green.
-- [ ] E2 Hand-over: files, tests, the interfaces codex must provide, and three states
+- [x] E1 Screenshot tests updated, CI (screenshots + android) green (dcc6601: both runs green).
+- [x] E2 Hand-over (`docs/ASSISTANT_UI_CONTRACT.md`): files, tests, the interfaces codex must provide, and three states
       (UI done / backend connected / real-model effect verified).
 
 ## Not done in this pass
