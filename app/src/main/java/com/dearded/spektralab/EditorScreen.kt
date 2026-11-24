@@ -278,6 +278,8 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                     // A running export stays visible: its count rides on the ⋯ button.
                     val canUndo = ui.canUndo && !ui.exporting
                     val canRedo = ui.canRedo && !ui.exporting
+                    // No photo: reset, undo and redo have nothing to act on, so the bar carries only 打开 and ⋯.
+                    if (ui.hasImage) {
                     IconButton(onClick = {
                         vm.resetAll()
                         Feedback.play(exportView, Cue.Zero)
@@ -294,6 +296,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                     }
                     IconButton(onClick = vm::redo, enabled = canRedo) {
                         HistoryIcon(redo = true, tint = if (canRedo) Palette.OnSurface else Palette.OnSurfaceSoft.copy(alpha = 0.38f))
+                    }
                     }
                     Box {
                         var moreMenu by remember { mutableStateOf(false) }

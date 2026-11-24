@@ -11,6 +11,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -180,10 +181,14 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
             ) {
                 MarkButton("✕", tr("淘汰"), on = current.pick < 0) { mark(current, if (current.pick < 0) 0 else -1) }
                 Spacer(Modifier.weight(1f))
-                Stars(current.stars) { n ->
-                    table.rate(setOf(current.id), stars = if (n == current.stars) 0 else n)
-                    view.tick()
-                }
+                Stars(
+                    current.stars,
+                    onTap = { n ->
+                        table.rate(setOf(current.id), stars = if (n == current.stars) 0 else n)
+                        view.tick()
+                    },
+                    onScrub = { n -> if (n != current.stars) table.rate(setOf(current.id), stars = n) },
+                )
                 Spacer(Modifier.weight(1f))
                 MarkButton("✓", tr("选中"), on = current.pick > 0) { mark(current, if (current.pick > 0) 0 else 1) }
             }
@@ -277,18 +282,43 @@ private fun MarkButton(glyph: String, label: String, on: Boolean, onClick: () ->
     }
 }
 
-/** 0-5 stars; tapping the current count clears it. */
+/**
+ * 0-5 stars. A tap sets a count (tapping the current one clears it); a slide along the row
+ * scrubs the count under the finger, one detent per star, and keeps it on release. A star
+ * is 32 dp wide, so the slide is what makes the row comfortable for a thumb.
+ */
 @Composable
-private fun Stars(stars: Int, onSet: (Int) -> Unit) {
-    Row {
+private fun Stars(stars: Int, onTap: (Int) -> Unit, onScrub: (Int) -> Unit) {
+    val view = LocalView.current
+    var scrub by remember { mutableStateOf<Int?>(null) }
+    val shown = scrub ?: stars
+    val scrubbed by androidx.compose.runtime.rememberUpdatedState(onScrub)
+    Row(
+        Modifier.pointerInput(Unit) {
+            fun at(x: Float) = (x / (size.width / 5f)).toInt().coerceIn(0, 4) + 1
+            detectHorizontalDragGestures(
+                onDragStart = { scrub = at(it.x); view.tick() },
+                onDragEnd = { scrub?.let { scrubbed(it) }; scrub = null },
+                onDragCancel = { scrub = null },
+            ) { change, _ ->
+                change.consume()
+                val n = at(change.position.x)
+                if (n != scrub) { scrub = n; view.tick() }
+            }
+        },
+    ) {
         for (n in 1..5) {
+            val lit = n <= shown
+            val grow by androidx.compose.animation.core.animateFloatAsState(
+                if (scrub == n) 1.25f else 1f, Motion.fastSpatial(), label = "star")
             Box(
-                Modifier.size(width = 32.dp, height = 48.dp).clickable { onSet(n) }
+                Modifier.size(width = 32.dp, height = 48.dp).clickable { onTap(n) }
                     .semantics { contentDescription = tr("{0} 星", n) + if (n == stars) tr("，当前") else "" },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(if (n <= stars) "★" else "☆", fontSize = 20.sp,
-                    color = if (n <= stars) Palette.Accent else Palette.OnSurfaceSoft)
+                Text(if (lit) "★" else "☆", fontSize = 20.sp,
+                    color = if (lit) Palette.Accent else Palette.OnSurfaceSoft,
+                    modifier = Modifier.graphicsLayer { scaleX = grow; scaleY = grow })
             }
         }
     }

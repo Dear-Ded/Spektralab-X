@@ -43,6 +43,7 @@ Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab �
 胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm
 胶片建模基于 spektrafilm（film modeling powered by spektrafilm）
 RAW 解码：LibRaw（LGPL-2.1）；全分辨率导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。
+界面字体：Noto Sans SC、Instrument Sans、Barlow Semi Condensed（OFL 1.1）。
 SpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与小米公司无关联。
 
 ## English
@@ -79,6 +80,7 @@ Rendering engine: SpektraLab (GPL-3.0) · github.com/JamesQiu2005/SpektraLab
 Film process model, film and paper data: spektrafilm by Andrea Volpato (GPL-3.0 / CC BY-SA 4.0) · github.com/andreavolpato/spektrafilm
 Film modeling powered by spektrafilm
 RAW decoding: LibRaw (LGPL-2.1); full-resolution export JPEG: libjpeg-turbo (BSD-3-Clause / IJG); volk and stb (MIT); Liberation Sans (OFL 1.1) and DejaVu Sans Mono. Licence texts ship with the app.
+Interface fonts: Noto Sans SC, Instrument Sans, Barlow Semi Condensed (OFL 1.1).
 SpektraLab™ and its icon are trademarks of their owner (registration pending). Not affiliated with Xiaomi.
 
 ## 字符串资源 / String resources

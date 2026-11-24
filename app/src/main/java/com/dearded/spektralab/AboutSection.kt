@@ -2,10 +2,13 @@ package com.dearded.spektralab
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /*
  * The 关于 block in 设置, text as finalised in docs/ABOUT_TEXT.md (edit the
@@ -52,8 +56,24 @@ private val BLOCKS get() = listOf(
         tr("胶片建模基于 spektrafilm（film modeling powered by spektrafilm）\n") +
         tr("RAW 解码：LibRaw（LGPL-2.1）；高质量导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；") +
         tr("Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。\n") +
+        tr("界面字体：Noto Sans SC、Instrument Sans、Barlow Semi Condensed（OFL 1.1）。\n") +
         tr("SpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与小米公司无关联。"),
 )
+
+private val Flush = PaddingValues(0.dp)
+private val BodyColour get() = Palette.OnSurface.copy(alpha = 0.82f)
+
+@Composable
+private fun bodyStyle() = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp)
+
+/** One block: its accent title, 4 dp, then the text; 16 dp of air above (8 dp grid). */
+@Composable
+private fun Block(title: String, body: @Composable () -> Unit) {
+    Spacer(Modifier.height(16.dp))
+    Text(title, style = MaterialTheme.typography.labelMedium, color = Palette.Accent)
+    Spacer(Modifier.height(4.dp))
+    body()
+}
 
 @Composable
 internal fun AboutSection() {
@@ -67,21 +87,23 @@ internal fun AboutSection() {
             modifier = Modifier.padding(vertical = 8.dp))
         Text(tr("Spektralab-X · 版本 {0}（{1}）", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
             style = MaterialTheme.typography.bodySmall)
-        TextButton(onClick = { open(SOURCE) }) { Text(tr("源码：github.com/Dear-Ded/Spektralab-X")) }
-        for ((title, body) in BLOCKS) {
-            Spacer(Modifier.height(8.dp))
-            Text(title, style = MaterialTheme.typography.labelMedium, color = Palette.Accent)
-            Text(body, style = MaterialTheme.typography.bodySmall)
+        // Link buttons sit flush with the text column: no TextButton inset, still 48 dp tall.
+        TextButton(onClick = { open(SOURCE) }, contentPadding = Flush, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text(tr("源码：github.com/Dear-Ded/Spektralab-X"))
         }
-        Spacer(Modifier.height(8.dp))
-        Text(tr("官方签名证书 SHA-256"), style = MaterialTheme.typography.labelMedium, color = Palette.Accent)
-        Text(CERT, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
+        for ((title, body) in BLOCKS) Block(title) { Text(body, style = bodyStyle(), color = BodyColour) }
+        Block(tr("官方签名证书 SHA-256")) {
+            Text(CERT, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = BodyColour)
+        }
         var copied by remember { mutableStateOf(false) }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { clipboard.setText(AnnotatedString(CERT)); copied = true }) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            TextButton(onClick = { clipboard.setText(AnnotatedString(CERT)); copied = true },
+                contentPadding = Flush, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(if (copied) tr("已复制") else tr("复制"))
             }
-            TextButton(onClick = { open(VERIFY) }) { Text(tr("校验方法")) }
+            TextButton(onClick = { open(VERIFY) }, contentPadding = Flush, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(tr("校验方法"))
+            }
         }
     }
 }

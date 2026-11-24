@@ -133,7 +133,8 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 8.dp))
 
             var languageError by remember { mutableStateOf(false) }
-            SettingsGroup(tr("语言 / Language"), listOf<@Composable () -> Unit>({
+            // The first card sits under 设置 with no group name: its one row already says 语言 / Language.
+            SettingsGroup(null, listOf<@Composable () -> Unit>({
                 ChoiceRow(tr("语言 / Language"), tr("应用界面语言。切换后保留当前照片和编辑。"),
                     AppLocale.language.nativeName) {
                     Segmented(options = UiLanguage.entries.map { it.nativeName }, selected = AppLocale.language.ordinal) { i ->
@@ -181,7 +182,7 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 }
                 add { NewPhotoStocks(ui, vm) }
                 // Feedback.kt: the shutter, the advance lever, the tank and the back closing. Never
-                // the dials. Silent anyway unless the ringer is on normal.
+                // the dials. They follow media volume.
                 add {
                     var sound by remember { mutableStateOf(prefs.getBoolean(CAMERA_SOUND, true)) }
                     SettingRow(tr("相机声音"), sound, true) { sound = it; prefs.edit().putBoolean(CAMERA_SOUND, it).apply() }
@@ -206,8 +207,8 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                 },
                 {
                     SettingRow(
-                        tr("广色域导出（Display P3）"), ui.wideGamut, true,
-                        note = tr("仅用于 JPEG；TIFF 色彩空间在保存菜单中选择。"),
+                        // The name carries the scope (TIFF picks its space in the save sheet), no note under it.
+                        tr("JPEG 广色域（Display P3）"), ui.wideGamut, true,
                     ) { vm.setWideGamut(it) }
                 },
                 {
@@ -299,9 +300,10 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
  * a hairline between them, no seams.
  */
 @Composable
-private fun SettingsGroup(title: String, rows: List<@Composable () -> Unit>) {
-    Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurfaceSoft,
+private fun SettingsGroup(title: String?, rows: List<@Composable () -> Unit>) {
+    if (title != null) Text(title, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurfaceSoft,
         modifier = Modifier.padding(start = 4.dp, top = GroupGap, bottom = 8.dp))
+    else Spacer(Modifier.height(8.dp))
     Column(Modifier.fillMaxWidth().clip(Corners.l).background(Palette.Panel)) {
         rows.forEachIndexed { i, row ->
             if (i > 0) Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(1.dp).background(Palette.OutlineSoft))

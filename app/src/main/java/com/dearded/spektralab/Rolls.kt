@@ -99,7 +99,8 @@ data class Roll(
 
     /** The card's edge line: process, speed, date, frames used ("C–41 · 400 · 11.03 · 24/36"). */
     val edgeLine get() = listOf(
-        process.label, iso, SimpleDateFormat("MM.dd", Locale.ROOT).format(Date(day)), "${frames.size}/$LENGTH",
+        // An automatic undeveloped roll is already titled 未冲洗; the edge does not say it twice.
+        if (process == FilmProcess.NONE && !manual) "" else process.label, iso, SimpleDateFormat("MM.dd", Locale.ROOT).format(Date(day)), "${frames.size}/$LENGTH",
         if (manual) tr("手动") else "",
     ).filter { it.isNotEmpty() }.joinToString(" · ")
 
@@ -202,8 +203,6 @@ fun RollList(table: LightTableViewModel, rolls: List<Roll>, onOpen: (Roll) -> Un
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(tr("观片台上还没有照片"), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(8.dp))
-                Hint(tr("还没有照片"))
             }
         } else {
             LazyColumn(
