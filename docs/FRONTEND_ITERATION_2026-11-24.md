@@ -65,11 +65,11 @@ Legend: [ ] open, [x] done (commit), [-] dropped (reason).
 
 ### D. Whole front end
 - [x] D1 Remove the remaining hint text; change layouts where a page needed it.
-- [-] D2 Editor header and empty state: warm light, calm, striking.
+- [x] D2 Editor header and empty state: without a photo the bar carries only 打开 and ⋯ (751ed0e).
 - [x] D3 Paper step and border page: picture cards like the film cards.
-- [-] D4 Light table, loupe, rolls: chips, rating bar, empty space.
-- [-] D5 Settings, About, sheets (changes, paste, queue, update, import): one surface style.
-- [-] D6 Size, spacing, radius pass (8 dp grid, 48 dp targets).
+- [x] D4 Light table, loupe, rolls: no doubled 未冲洗 on roll edges, no doubled empty line, slide-to-rate stars (751ed0e).
+- [x] D5 Settings and About: no group name repeating its row, P3 named by scope, About on an 8 dp rhythm with flush 48 dp links and the UI fonts credited (751ed0e). Sheets already share one surface.
+- [x] D6 Size pass: every explicit touch target is 48 dp or more except the 32 dp stars, now a slide target too.
 - [x] D7 Motion pass: tab and segment switches, panel resizing, sheets, selection, press states.
 
 ### E. Verification and hand-over
@@ -79,9 +79,6 @@ Legend: [ ] open, [x] done (commit), [-] dropped (reason).
 
 ## Not done in this pass
 
-- D2, D4, D5, D6: no change made. The editor header, light table, sheets and spacing already follow
-  the 2026-11-23 polish; this pass found nothing there that broke a rule badly enough to change
-  without the owner's eye. The About page looked white only because its screenshot test had no
-  background (fixed in the test).
+- Preview of D2/D4/D5: `preview/frontend-iteration.html` (改前 / 改后, serve the repo root).
 - Real-device check: haptics, sounds, the AGSL develop and light shaders at 120 Hz on Mali.
 - 暗房助手 backend: codex implements AssistantPort / AssistantSettingsPort (ASSISTANT_UI_CONTRACT.md).

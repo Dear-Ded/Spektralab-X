@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spektralab-X · 前端打磨预览（D2 / D4 / D5 / D6）</title>
+<!--
+  1:1 preview of the 2026-11-24 polish pass on branch ui-iteration. One CSS px is one dp at
+  scale 1; colours, type, radii and sizes are the app's (Theme.kt, Corners.kt, Pill.kt,
+  LightTableBar.kt, Rolls.kt, SettingsScreen.kt, AboutSection.kt, LightTableLoupe.kt).
+  改前 / 改后 switches every changed detail back to how the app looked at dcc6601.
+  Editor screens: preview/ui-polish.html. Serve the repo root (fonts load from app assets).
+-->
+<style>
+@font-face{font-family:UiSans;src:url(../app/src/main/assets/fonts/InstrumentSans-VF.ttf);font-weight:400 700}
+@font-face{font-family:UiCjk;src:url(../app/src/main/assets/fonts/NotoSansSC-VF.ttf);font-weight:100 900}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-Regular.ttf);font-weight:400}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-Medium.ttf);font-weight:500}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-SemiBold.ttf);font-weight:600}
+:root{
+  --surround:#1C1C1C;--bg:#0F0F0E;--surface:#121211;--panel:#191918;--panelHigh:#232321;--panelHighest:#2D2D2A;
+  --on:#ECE9E3;--soft:#9E9A92;--outline:#3B3A37;--track:#6E6C66;--hair:#262523;--accent:#EEEAE2;--onAccent:#161614;
+  --index:#D2694F;--s:8px;--m:12px;--l:16px;--xl:24px;
+  --sans:UiSans,UiCjk,sans-serif;--mono:UiMono,UiCjk,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0a0a0a;color:var(--on);font-family:var(--sans)}
+body{display:flex;gap:28px;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ---------- console ---------- */
+#console{width:300px;align-self:stretch;display:flex;flex-direction:column;gap:14px;overflow:auto;padding-right:6px}
+#console h1{font-size:17px;font-weight:600}
+#console .sub{font-size:12px;color:var(--soft);line-height:18px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp b{font-size:12px;color:var(--soft);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{height:36px;padding:0 12px;border-radius:18px;background:var(--panel);border:1px solid var(--hair);font-size:13px}
+.tabs button.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+#notes{font-size:12.5px;line-height:20px;color:#d8d4cc;padding-left:16px}
+#notes li{margin-bottom:6px}
+#notes li i{font-style:normal;color:var(--soft)}
+a{color:var(--accent)}
+
+/* ---------- phone ---------- */
+#phoneWrap{position:relative;flex:none}
+#phone{width:360px;height:800px;border-radius:28px;overflow:hidden;position:relative;background:var(--bg);
+  box-shadow:0 0 0 10px #1a1a1a,0 0 0 11px #333,0 30px 80px rgba(0,0,0,.6);transform-origin:center}
+.status{position:absolute;top:0;left:0;right:0;height:24px;display:flex;justify-content:space-between;align-items:center;
+  padding:0 18px;font:500 12px var(--sans);color:var(--on);z-index:50;pointer-events:none}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.t-head{font:600 24px/32px var(--sans)}
+.t-titleM{font:600 16px/24px var(--sans)}
+.t-body{font:400 14px/22px var(--sans)}
+.t-small{font:400 12px/18px var(--sans)}
+.t-label{font:500 13px/20px var(--sans)}
+.soft{color:var(--soft)}
+.edge{font:500 11px/14px var(--mono);letter-spacing:.4px;font-feature-settings:"tnum";color:var(--soft)}
+.icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex:none}
+.icon:active{background:rgba(236,233,227,.08)}
+.icon svg{width:24px;height:24px;stroke:var(--on);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon.dis svg{stroke:rgba(158,154,146,.38)}
+
+/* old / new switch */
+.old{display:none!important}
+body.before .old{display:revert!important}
+body.before .new{display:none!important}
+.mark{outline:1.5px dashed rgba(210,105,79,.0);outline-offset:2px;transition:outline-color .3s}
+body.marks .mark{outline-color:rgba(210,105,79,.85)}
+
+/* ---------- editor, empty ---------- */
+.topbar{height:80px;padding:24px 4px 0 16px;display:flex;align-items:center;background:var(--surface);flex:none}
+.topbar .ttl{flex:1;font:600 16px/24px var(--sans)}
+.empty{flex:1;position:relative;background:var(--surround);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.aura{position:absolute;inset:0;pointer-events:none}
+.aura i{position:absolute;left:-30%;right:-30%;height:120px;bottom:-40px;border-radius:50%;filter:blur(26px);
+  background:linear-gradient(90deg,transparent,rgba(236,233,227,.22) 30%,rgba(214,190,150,.20) 55%,rgba(236,233,227,.18) 75%,transparent);
+  animation:drift 14s ease-in-out infinite alternate}
+.aura i:nth-child(2){bottom:10px;height:70px;opacity:.7;animation-duration:19s;animation-direction:alternate-reverse;
+  background:linear-gradient(90deg,transparent,rgba(200,200,196,.18) 40%,rgba(236,226,206,.16) 65%,transparent)}
+.aura i:nth-child(3){bottom:60px;height:40px;opacity:.45;animation-duration:23s}
+@keyframes drift{0%{transform:translateX(-8%) scaleY(1)}50%{transform:translateX(4%) scaleY(1.25)}100%{transform:translateX(9%) scaleY(.85)}}
+.emptyCol{position:relative;display:flex;flex-direction:column;align-items:center;padding:32px}
+.primary{height:52px;min-width:200px;padding:0 24px;border-radius:26px;background:var(--accent);color:var(--onAccent);
+  font:600 16px/24px var(--sans);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.primary:active{transform:scale(.96)}
+.textBtn{min-height:48px;padding:0 12px;font:500 14px var(--sans);color:rgba(236,233,227,.85)}
+
+/* ---------- light table ---------- */
+.tHead{height:80px;padding:24px 4px 0 4px;display:flex;align-items:center;gap:4px;flex:none;position:absolute;top:0;left:0;right:0;z-index:5;
+  background:linear-gradient(var(--bg) 60%,rgba(15,15,14,0))}
+.tHead .tt{display:flex;flex-direction:column}
+.scroll{flex:1;overflow:auto;padding:88px 16px 96px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.roll{background:var(--panel);border-radius:var(--l);padding:16px;margin-bottom:12px;cursor:pointer;transition:transform .2s}
+.roll:active{transform:scale(.985)}
+.roll .h{display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;flex:none}
+.thumbs{display:flex;gap:4px;margin-top:10px}
+.thumbs img{width:56px;height:56px;border-radius:var(--s);object-fit:cover;background:var(--panelHigh)}
+.fbar{position:absolute;left:0;right:0;bottom:0;padding:8px 12px 24px;display:flex;align-items:center;
+  background:linear-gradient(rgba(15,15,14,0),rgba(15,15,14,.9))}
+.pill{flex:1;min-width:0;overflow:hidden;white-space:nowrap;height:64px;background:var(--panel);border:1px solid var(--hair);border-radius:32px;padding:4px 8px;display:flex;align-items:center;gap:4px}
+.seg{flex:1;height:48px;display:flex;gap:4px;padding:4px;border-radius:var(--m);background:var(--panel);border:1px solid var(--hair)}
+.seg button{flex:1;border-radius:var(--s);font:500 13px var(--sans);transition:background .25s,color .25s}
+.seg button.on{background:var(--accent);color:var(--onAccent)}
+.fab{width:64px;height:64px;border-radius:50%;background:var(--accent);color:var(--onAccent);margin-left:8px;flex:none;
+  display:flex;align-items:center;justify-content:center;font:500 13px var(--sans)}
+.fab svg{width:24px;height:24px;stroke:var(--onAccent);stroke-width:2;fill:none;stroke-linecap:round}
+.centerMsg{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+
+/* strip */
+.strip{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding-top:40px}
+.film{position:relative;height:190px;width:100%;overflow:hidden}
+.film .row{position:absolute;left:68px;top:0;display:flex;gap:6px;height:100%;align-items:center}
+.frm{width:224px;height:150px;position:relative;background:#111;padding:0}
+.frm img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.perf{position:absolute;left:0;right:-6px;height:6px;background:repeating-linear-gradient(90deg,#cfcac0 0 9px,transparent 9px 17px);opacity:.75}
+.perf.t{top:-12px}.perf.b{bottom:-12px}
+.ticks{display:flex;justify-content:space-between;width:280px;margin-top:28px}
+.ticks i{width:1px;height:12px;background:var(--soft)}.ticks i:first-child{height:22px;width:2px;background:var(--on)}
+
+/* loupe */
+.loupe{flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative}
+.loupe img{width:100%;height:auto}
+.lHead{position:absolute;top:0;left:0;right:0;height:96px;padding:24px 8px 16px 4px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(rgba(0,0,0,.55),transparent);z-index:3}
+.chip{height:40px;padding:0 14px;border-radius:20px;background:var(--accent);color:var(--onAccent);font:500 13px var(--sans);margin-left:auto}
+.mark56{width:56px;min-width:40px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 1 56px}
+.mark56 span{width:28px;height:28px;border-radius:50%;background:var(--panelHighest);display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .2s,color .2s}
+.mark56.on span{background:var(--accent);color:var(--onAccent)}
+.mark56 em{font:400 12px var(--sans);font-style:normal;color:var(--soft)}
+.stars{display:flex;touch-action:none;user-select:none;position:relative}
+.stars b{width:32px;height:48px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:400;color:var(--soft);
+  transition:transform .22s cubic-bezier(.3,1.6,.5,1),color .12s}
+.stars b.lit{color:var(--accent)}
+.stars b.grow{transform:scale(1.25)}
+.stars .hit{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;border-radius:8px;outline:1.5px dashed rgba(210,105,79,0);outline-offset:0}
+body.marks .stars .hit{outline-color:rgba(210,105,79,.85)}
+.badge{position:absolute;top:96px;left:12px;background:rgba(15,15,14,.6);border-radius:var(--s);padding:4px 10px;font-size:13px;z-index:3;display:none}
+
+/* settings */
+.page{flex:1;overflow:auto;padding:24px 16px 32px;scrollbar-width:none;background:var(--bg)}
+.page::-webkit-scrollbar{display:none}
+.gTitle{font:500 13px/20px var(--sans);color:var(--soft);padding:20px 0 8px 4px}
+.card{background:var(--panel);border-radius:var(--l);overflow:hidden}
+.card>.r{padding:4px 16px;position:relative}
+.card>.r+.r::before{content:"";position:absolute;top:0;left:16px;right:16px;height:1px;background:var(--hair)}
+.row56{min-height:56px;display:flex;align-items:center;padding:6px 0;gap:12px;cursor:pointer}
+.row56 .tx{flex:1;display:flex;flex-direction:column}
+.chev{width:20px;height:20px;flex:none;transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
+.chev path{stroke:var(--soft);stroke-width:1.6;fill:none;stroke-linecap:round}
+.open .chev{transform:rotate(90deg)}
+.choices{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.3,1.1,.5,1),opacity .2s;opacity:0}
+.open .choices{max-height:200px;opacity:1}
+.choices .in{padding-bottom:12px}
+.sw{width:52px;height:32px;border-radius:16px;border:2px solid var(--outline);background:var(--panelHigh);position:relative;flex:none;transition:background .2s,border-color .2s}
+.sw::after{content:"";position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:var(--soft);
+  transition:all .25s cubic-bezier(.3,1.4,.5,1)}
+.sw.on{background:var(--accent);border-color:var(--accent)}
+.sw.on::after{left:22px;top:2px;width:24px;height:24px;background:var(--onAccent)}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.spill{height:40px;padding:0 14px;border-radius:var(--m);background:var(--panelHigh);font:500 13px var(--sans);display:flex;align-items:center;gap:8px}
+.spill.on{background:var(--accent);color:var(--onAccent)}
+.spill i{width:14px;height:14px;border-radius:50%;border:1px solid var(--outline)}
+
+/* about */
+.flap{display:flex;gap:3px;margin:8px 0}
+.flap span{width:20px;height:30px;background:#1f1f1d;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font:600 20px/28px var(--sans);position:relative;box-shadow:inset 0 -1px 0 rgba(255,255,255,.04)}
+.flap span::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.6)}
+.link{min-height:48px;display:inline-flex;align-items:center;font:500 14px var(--sans);color:var(--accent)}
+.link.inset{padding:0 12px}
+.blk h4{font:500 13px/20px var(--sans);color:var(--accent)}
+.blk p{font:400 12px/20px var(--sans);color:rgba(236,233,227,.82);white-space:pre-line}
+.blk.oldb p{line-height:18px;color:var(--on)}
+.mono{font-family:ui-monospace,Menlo,monospace!important;word-break:break-all}
+</style>
+</head>
+<body class="marks">
+
+<div id="console">
+  <div>
+    <h1>前端打磨预览</h1>
+    <p class="sub">分支 ui-iteration · 1 px = 1 dp · 颜色、字体、圆角和尺寸都取自代码。编辑器内的界面见 <a href="ui-polish.html">ui-polish.html</a>。</p>
+  </div>
+  <div class="grp"><b>界面</b><div class="tabs" id="tabs"></div></div>
+  <div class="grp"><b>对比</b><div class="tabs">
+    <button id="bAfter" class="on">改后</button><button id="bBefore">改前</button><button id="bMarks" class="on">标出改动</button>
+  </div></div>
+  <div class="grp"><b>缩放</b><div class="tabs" id="zoom">
+    <button data-z="fit" class="on">适合窗口</button><button data-z="1">100%</button>
+  </div></div>
+  <div class="grp"><b>这一页改了什么</b><ul id="notes"></ul></div>
+</div>
+
+<div id="phoneWrap"><div id="phone">
+  <div class="status"><span>9:41</span><span>▴ ▮▮▮ 86%</span></div>
+
+  <!-- ============ 编辑器 · 空白页 (D2) ============ -->
+  <section class="screen" data-name="编辑器 · 空白页">
+    <div class="topbar">
+      <div class="ttl">Spektralab-X</div>
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="icon dis old"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></div>
+      <div class="icon dis old"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></div>
+      <div class="icon dis old"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></div>
+      <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="#ECE9E3"/><circle cx="12" cy="12" r="1" fill="#ECE9E3"/><circle cx="12" cy="19" r="1" fill="#ECE9E3"/></svg></div>
+    </div>
+    <div class="empty">
+      <div class="aura"><i></i><i></i><i></i></div>
+      <div class="emptyCol">
+        <button class="primary">打开照片</button>
+        <div style="height:8px"></div>
+        <button class="textBtn" data-go="rolls">观片台</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 观片台 · 按卷 (D4) ============ -->
+  <section class="screen" data-name="观片台 · 按卷">
+    <div class="tHead">
+      <div class="icon" data-go="empty"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+      <div class="t-titleM">按卷查看</div>
+    </div>
+    <div class="scroll" id="rollList"></div>
+    <div class="fbar">
+      <div class="pill"><div class="seg"><button>网格</button><button class="on">按卷</button></div></div>
+      <div class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    </div>
+  </section>
+
+  <!-- ============ 观片台 · 空 (D4) ============ -->
+  <section class="screen" data-name="观片台 · 空">
+    <div class="tHead">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+      <div class="t-titleM">按卷查看</div>
+    </div>
+    <div class="centerMsg">
+      <div class="t-titleM">观片台上还没有照片</div>
+      <div class="old" style="height:8px"></div>
+      <div class="t-small soft old mark">还没有照片</div>
+    </div>
+    <div class="fbar">
+      <div class="pill"><div class="seg"><button>网格</button><button class="on">按卷</button></div></div>
+      <div class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    </div>
+  </section>
+
+  <!-- ============ 片条 (D4) ============ -->
+  <section class="screen" data-name="片条">
+    <div class="tHead">
+      <div class="icon" data-go="rolls"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+      <div class="tt">
+        <div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:#3A3A40"></span><span class="t-titleM">未冲洗</span></div>
+        <div class="edge mark"><span class="old">未冲洗 · </span>10.09 · 6/36</div>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="film"><div class="row">
+        <div class="frm"><div class="perf t"></div><img src="assets/photo_dunes.jpg"><div class="perf b"></div></div>
+        <div class="frm"><div class="perf t"></div><img src="assets/photo_beach.jpg"><div class="perf b"></div></div>
+      </div></div>
+      <div class="t-small soft" style="margin-top:12px">DSC_4127.JPG</div>
+      <div class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="edge" style="margin-top:10px">1 / 6</div>
+    </div>
+    <div class="fbar">
+      <div class="pill" style="gap:2px">
+        <div class="seg" style="flex:none;width:110px;border:0;background:none;padding:0"><button class="on">片条</button><button>印样</button></div>
+        <button class="t-label" style="padding:0 8px;height:48px">比较风格</button>
+        <button class="t-label" style="padding:0 8px;height:48px">复制调整</button>
+      </div>
+      <div class="fab">导出</div>
+    </div>
+  </section>
+
+  <!-- ============ 放大看片 (D4) ============ -->
+  <section class="screen" data-name="放大看片 · 评星">
+    <div class="loupe">
+      <div class="lHead">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+        <div class="tt"><div class="t-titleM" style="font-size:15px">DSC_4120.JPG</div><div class="edge">1 / 14</div></div>
+        <button class="chip">自动下一张</button>
+      </div>
+      <div class="badge" id="lBadge"></div>
+      <img src="assets/photo_lake.jpg">
+    </div>
+    <div class="fbar" style="background:none">
+      <div class="pill">
+        <button class="mark56" id="mReject"><span>✕</span><em>淘汰</em></button>
+        <div style="flex:1"></div>
+        <div class="stars" id="stars"><div class="hit new"></div></div>
+        <div style="flex:1"></div>
+        <button class="mark56" id="mPick"><span>✓</span><em>选中</em></button>
+      </div>
+      <div class="fab">编辑</div>
+    </div>
+  </section>
+
+  <!-- ============ 设置 (D5) ============ -->
+  <section class="screen" data-name="设置">
+    <div class="page" id="settings">
+      <div style="height:56px;display:flex;align-items:center"><div class="icon"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div></div>
+      <div class="t-head" style="padding:4px 0 8px 4px">设置</div>
+
+      <div class="gTitle old mark">语言 / Language</div>
+      <div class="new" style="height:8px"></div>
+      <div class="card"><div class="r choice">
+        <div class="row56"><div class="tx"><span class="t-body">语言 / Language</span><span class="t-small soft val">中文</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div>
+        <div class="choices"><div class="in"><div class="t-small soft" style="padding-bottom:10px">应用界面语言。切换后保留当前照片和编辑。</div>
+          <div class="seg"><button class="on">中文</button><button>English</button></div></div></div>
+      </div></div>
+
+      <div class="gTitle">编辑</div>
+      <div class="card">
+        <div class="r"><div class="row56 tog"><div class="tx"><span class="t-body">默认展开全部参数</span></div><div class="sw"></div></div></div>
+        <div class="r choice"><div class="row56"><div class="tx"><span class="t-body">照片四周</span><span class="t-small soft val">深灰（默认）</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div>
+          <div class="choices"><div class="in"><div class="pills">
+            <button class="spill on"><i style="background:#2e2e2e"></i>深灰（默认）</button><button class="spill"><i style="background:#000"></i>黑</button><button class="spill"><i style="background:#fff"></i>白</button>
+          </div></div></div></div>
+        <div class="r choice"><div class="row56"><div class="tx"><span class="t-body">新照片的胶片和相纸</span><span class="t-small soft val">无，打开就是原图</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div>
+          <div class="choices"><div class="in"><div class="t-small soft" style="padding-bottom:10px">只对没编辑过的照片生效。</div><div class="seg"><button class="on">无</button><button>记住上次用的</button><button>固定为</button></div></div></div></div>
+        <div class="r"><div class="row56 tog"><div class="tx"><span class="t-body">相机声音</span></div><div class="sw on"></div></div></div>
+      </div>
+
+      <div class="gTitle">画质与导出</div>
+      <div class="card">
+        <div class="r choice"><div class="row56"><div class="tx"><span class="t-body">工作尺寸（长边）</span><span class="t-small soft val">4096 px（默认）</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div>
+          <div class="choices"><div class="in"><div class="t-small soft" style="padding-bottom:10px">预览和导出都用这个尺寸，越大越慢。原始尺寸仍受 GPU 和内存上限限制。</div><div class="pills"><button class="spill">2048 px</button><button class="spill on">4096 px（默认）</button><button class="spill">原始尺寸</button></div></div></div></div>
+        <div class="r"><div class="row56 tog"><div class="tx">
+          <span class="t-body new mark">JPEG 广色域（Display P3）</span>
+          <span class="t-body old">广色域导出（Display P3）</span>
+          <span class="t-small soft old mark">仅用于 JPEG；TIFF 色彩空间在保存菜单中选择。</span>
+        </div><div class="sw on"></div></div></div>
+        <div class="r choice"><div class="row56"><div class="tx"><span class="t-body">手机照片高光恢复</span><span class="t-small soft val">关（默认）</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div>
+          <div class="choices"><div class="in"><div class="t-small soft" style="padding-bottom:10px">展开手机照片中灰以上的高光，结果更亮更浓，和桌面版不同。</div><div class="seg"><button class="on">关</button><button>1 档</button><button>2 档</button></div></div></div></div>
+        <div class="r"><div class="row56 tog"><div class="tx"><span class="t-body">导出保留拍摄位置</span></div><div class="sw"></div></div></div>
+      </div>
+
+      <div class="gTitle">更新</div>
+      <div class="card">
+        <div class="r"><div class="row56 tog"><div class="tx"><span class="t-body">自动检查更新</span><span class="t-small soft">只连 GitHub 上本项目的发布页，不上传任何内容。</span></div><div class="sw on"></div></div>
+          <div class="row56 tog"><div class="tx"><span class="t-body">Wi-Fi 下自动下载新版本</span></div><div class="sw"></div></div></div>
+        <div class="r"><div class="row56"><div class="tx"><span class="t-body">立即检查更新</span><span class="t-small soft">当前 alpha v0.3.01</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div></div>
+      </div>
+
+      <div class="gTitle">关于与诊断</div>
+      <div class="card">
+        <div class="r"><div class="row56" style="cursor:default"><div class="tx"><span class="t-body">设备</span><span class="t-small soft">示例设备 · Android 16</span></div></div></div>
+        <div class="r"><div class="row56" style="cursor:default"><div class="tx"><span class="t-body">引擎</span><span class="t-small soft">示例引擎信息</span></div></div></div>
+        <div class="r"><div class="row56"><div class="tx"><span class="t-body">性能测试</span><span class="t-small soft">测量本机的预览、切换风格、导出速度，给出工作尺寸建议。</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div></div>
+        <div class="r"><div class="row56"><div class="tx"><span class="t-body">复制诊断信息</span></div><svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg></div></div>
+        <div class="r" id="about" style="padding-top:16px;padding-bottom:16px">
+        <div class="t-label">关于</div>
+        <div class="flap" id="flap"></div>
+        <div class="t-small">Spektralab-X · 版本 alpha v0.3.01（130）</div>
+        <a class="link new mark">源码：github.com/Dear-Ded/Spektralab-X</a>
+        <a class="link inset old mark">源码：github.com/Dear-Ded/Spektralab-X</a>
+        <div id="blocks"></div>
+        <div style="display:flex;gap:24px" class="new mark"><a class="link">复制</a><a class="link">校验方法</a></div>
+        <div style="display:flex" class="old"><a class="link inset">复制</a><a class="link inset">校验方法</a></div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+  </section>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NOTES={
+  '编辑器 · 空白页':['还没打开照片时，顶栏去掉了“重置全部 / 撤销 / 重做”三个灰色图标，只留“打开”和“更多”。<i>它们在空白页上永远点不了，只是噪音。</i>','中间仍然是一个主按钮“打开照片”，下面是次要的“观片台”（可点，跳到按卷视图）。'],
+  '观片台 · 按卷':['自动归档的“未冲洗”卷，标题已经写着“未冲洗”，片边信息不再重复一遍，只留日期和张数。<i>切到“改前”可以看到 “未冲洗 · 10.09 · 6/36”。</i>','冲洗过的卷照旧显示工艺（C–41 / E–6 …）和感光度；手动建的卷仍显示“未冲洗”，因为卷名是你自己起的。','点任意一卷进入片条。'],
+  '观片台 · 空':['空状态去掉了紧跟在标题下面、意思相同的第二行“还没有照片”。'],
+  '片条':['片条页标题下方同样不再重复“未冲洗”。'],
+  '放大看片 · 评星':['星级每颗只有 32 dp 宽（一排要放下 ✕、五颗星、✓ 和“编辑”），单独点不够顺手。<b>现在可以按住在星星上左右滑动</b>：经过一颗就有一下档位振动，当前那颗放大 1.25 倍，松手即保存。','单点照旧：点某颗设为该星级，再点当前星级清零。','✕ / ✓ 可点，状态用填色和颜色一起表示。','在预览里用鼠标按住星星拖动试试。'],
+  '设置':['第一张卡片“语言 / Language”上方不再有同名的分组标题。','“广色域导出（Display P3）”改名为“JPEG 广色域（Display P3）”，名字本身说明了适用范围，去掉下面那行解释。','其余行照旧：点带箭头的行在原地展开选项，开关整行可点。'],
+  '设置 · 关于':['各段之间留白从 8 dp 改为 16 dp，标题和正文之间多出 4 dp，正文行高 18 → 20 sp，颜色略降到 82%，长文更好读。','“源码”“复制”“校验方法”三个链接不再带按钮的 12 dp 内缩，和正文左对齐，高度仍保持 48 dp。','致谢里补上界面字体的许可署名：Noto Sans SC、Instrument Sans、Barlow Semi Condensed（OFL 1.1）。<i>这三款字体已经打包进 App，NOTICE 里有，但关于页漏了。</i>'],
+};
+// --- screens ---
+const screens=$$('.screen'); const names=screens.map(s=>s.dataset.name).concat(['设置 · 关于']);
+const tabs=$('#tabs');
+names.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>show(i);tabs.appendChild(b)});
+function show(i){const about=i===screens.length;const k=about?screens.length-1:i;
+  screens.forEach((s,j)=>s.classList.toggle('on',k===j));
+  const pg=$('#settings');if(about)requestAnimationFrame(()=>pg.scrollTo({top:$('#about').offsetTop-80,behavior:'smooth'}));else if(k===screens.length-1)pg.scrollTop=0;$$('#tabs button').forEach((b,j)=>b.classList.toggle('on',i===j));
+  $('#notes').innerHTML=(NOTES[names[i]]||[]).map(n=>`<li>${n}</li>`).join('');location.hash=i}
+const GO={empty:0,rolls:1,strip:3};
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)show(GO[g.dataset.go])});
+// --- old / new ---
+$('#bAfter').onclick=()=>{document.body.classList.remove('before');$('#bAfter').classList.add('on');$('#bBefore').classList.remove('on')};
+$('#bBefore').onclick=()=>{document.body.classList.add('before');$('#bBefore').classList.add('on');$('#bAfter').classList.remove('on')};
+$('#bMarks').onclick=()=>{document.body.classList.toggle('marks');$('#bMarks').classList.toggle('on')};
+// --- zoom ---
+let zoom='fit';
+function fit(){const p=$('#phone');const k=zoom==='fit'?Math.min(1.25,(innerHeight-60)/800,(innerWidth-380)/380):1;
+  p.style.transform=`scale(${k})`;$('#phoneWrap').style.width=360*k+'px';$('#phoneWrap').style.height=800*k+'px';
+  p.style.position='absolute';p.style.left=(360*k-360)/2+'px';p.style.top=(800*k-800)/2+'px'}
+$$('#zoom button').forEach(b=>b.onclick=()=>{zoom=b.dataset.z;$$('#zoom button').forEach(x=>x.classList.toggle('on',x===b));fit()});
+addEventListener('resize',fit);fit();
+// --- rolls ---
+const ROLLS=[
+  {t:'Portra 400 风格',c:'#B07A4E',e:'C–41 · 400 · 10.09 · 3/36',p:['beach','fruit','lake']},
+  {t:'未冲洗',c:'#3A3A40',e:'10.09 · 6/36',old:'未冲洗 · 10.09 · 6/36',p:['dunes','beach','fruit','skyline','skyline']},
+  {t:'未冲洗',c:'#3A3A40',e:'10.08 · 4/36',old:'未冲洗 · 10.08 · 4/36',p:['dunes','beach','lake','dunes']},
+  {t:'Provia 100F 风格',c:'#8FA0B2',e:'E–6 · 100 · 10.08 · 2/36',p:['lake','skyline']},
+  {t:'海边那天',c:'#3A3A40',e:'未冲洗 · 10.07 · 2/36 · 手动',p:['beach','dunes']},
+];
+$('#rollList').innerHTML=ROLLS.map(r=>`<div class="roll" data-go="strip"><div class="h"><span class="dot" style="background:${r.c}"></span><span class="t-titleM">${r.t}</span></div>
+  <div style="height:2px"></div>${r.old?`<div class="edge new mark">${r.e}</div><div class="edge old">${r.old}</div>`:`<div class="edge">${r.e}</div>`}
+  <div class="thumbs">${r.p.map(p=>`<img src="assets/sq_${p}.jpg">`).join('')}</div></div>`).join('');
+// --- stars: tap sets / clears, slide scrubs with a detent per star ---
+let stars=3, scrub=null; const S=$('#stars');
+for(let n=1;n<=5;n++){const b=document.createElement('b');b.dataset.n=n;S.appendChild(b)}
+const ac=window.AudioContext?new AudioContext():null;
+function tick(){ // stands in for the Detent haptic: a very short, quiet click
+  if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=1900;
+  g.gain.setValueAtTime(.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.025);
+  o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.03)}
+function paint(){const shown=scrub??stars;[...S.querySelectorAll('b')].forEach(b=>{const n=+b.dataset.n;
+  b.textContent=n<=shown?'★':'☆';b.classList.toggle('lit',n<=shown);b.classList.toggle('grow',scrub===n)})}
+const at=x=>{const r=S.getBoundingClientRect();return Math.min(4,Math.max(0,Math.floor((x-r.left)/(r.width/5))))+1};
+let down=null,moved=false;
+S.addEventListener('pointerdown',e=>{down=e.clientX;moved=false;S.setPointerCapture(e.pointerId)});
+S.addEventListener('pointermove',e=>{if(down==null)return;
+  if(!moved&&Math.abs(e.clientX-down)<8/((S.getBoundingClientRect().width/160)||1))return;
+  if(document.body.classList.contains('before'))return; // the old row had no slide
+  if(!moved){moved=true;scrub=at(e.clientX);tick()}
+  const n=at(e.clientX);if(n!==scrub){scrub=n;tick()}paint()});
+S.addEventListener('pointerup',e=>{if(moved){stars=scrub;scrub=null}else{const n=at(e.clientX);stars=n===stars?0:n;tick()}down=null;paint()});
+S.addEventListener('pointercancel',()=>{scrub=null;down=null;paint()});
+paint();
+function markBtn(id,v){$(id).onclick=()=>{const on=!$(id).classList.contains('on');$('#mReject').classList.remove('on');$('#mPick').classList.remove('on');
+  if(on)$(id).classList.add('on');const b=$('#lBadge');b.style.display=on?'block':'none';b.textContent=v;tick()}}
+markBtn('#mReject','✕ 淘汰');markBtn('#mPick','✓ 选中');
+// --- settings ---
+$$('.tog').forEach(r=>r.onclick=()=>r.querySelector('.sw').classList.toggle('on'));
+$$('.choice').forEach(c=>c.querySelector('.row56').onclick=()=>c.classList.toggle('open'));
+$$('.choices .seg button, .choices .spill').forEach(b=>b.onclick=e=>{e.stopPropagation();
+  [...b.parentElement.children].forEach(x=>x.classList.toggle('on',x===b));
+  const v=b.closest('.choice').querySelector('.val');if(v)v.textContent=b.textContent});
+// --- about ---
+$('#flap').innerHTML=[...'Spektralab-X'].map(c=>`<span>${c}</span>`).join('');
+const BLOCKS=[
+ ['关于本项目','光谱胶片与相纸模拟。Spektralab-X 是基于 SpektraLab（JamesQiu2005/SpektraLab）与 spektrafilm 的安卓衍生项目，由一位独立开发者在 AI 助手（Claude、GPT、Grok、DeepSeek）的协助下开发，目前是预发布版本。这不是 SpektraLab 官方版本，与 SpektraLab 的作者和所有者无关联，未获其背书。\n作者：Spektralab-X 贡献者\n引擎适配共创：GPT（OpenAI，AI 助手）'],
+ ['项目初心','胶片真正迷人的，从来不只是色彩和画质，而是拍摄本身：按下快门时的不确定，等待冲洗时的期待，失手时的遗憾，还有出片那一刻的惊喜。\n希望 Spektralab-X 能把你带回拍摄的过程里，让你重新爱上每一次按下快门的瞬间。'],
+ ['写在前面','Spektralab-X 站在巨人的肩膀上：它基于 JamesQiu2005 的 SpektraLab 与 Andrea Volpato 的 spektrafilm 开发。没有这些开源项目和背后多年的研究，就不会有它。\n如果它帮你冲出了一张喜欢的照片，点一个 Star，就是对我最大的鼓励。'],
+ ['本应用永久免费','官方安装包只在 GitHub Releases 发布，不收费。转发安装包无需授权，注明源码地址即可。付费买到的不是官方版本，可以申请退款。\n应用内更新只从本仓库的 GitHub Releases 下载，SHA-256 和签名证书都对上才安装。除了检查更新不联网，照片不离开手机。'],
+ ['许可与署名','本应用以 GPL-3.0 发布，你可以自由使用、修改和分发。分发修改版时，请同时提供完整源码，在“关于”页保留原项目名称“Spektralab-X”、源码地址和“Spektralab-X 贡献者”署名，并换用自己的名称和图标（GPL-3.0 第 7 条附加条款，见 NOTICE）。'],
+ ['致谢','渲染引擎：SpektraLab（GPL-3.0）· github.com/JamesQiu2005/SpektraLab\n胶片过程模型与胶片、相纸数据：spektrafilm，Andrea Volpato（GPL-3.0 / CC BY-SA 4.0）· github.com/andreavolpato/spektrafilm\n胶片建模基于 spektrafilm（film modeling powered by spektrafilm）\nRAW 解码：LibRaw（LGPL-2.1）；高质量导出 JPEG：libjpeg-turbo（BSD-3-Clause / IJG）；volk、stb（MIT）；Liberation Sans（OFL 1.1）、DejaVu Sans Mono。许可证文本随应用附带。\n@@界面字体：Noto Sans SC、Instrument Sans、Barlow Semi Condensed（OFL 1.1）。@@\nSpektraLab™ 及其图标是其所有者的商标（注册中）。本应用与小米公司无关联。'],
+ ['官方签名证书 SHA-256','CD:C5:E3:D0:AC:6F:C9:0B:53:E8:8C:57:E0:40:93:36:72:5A:E3:C2:6F:D1:9D:1A:7E:58:51:70:94:5F:6D:E3'],
+];
+$('#blocks').innerHTML=BLOCKS.map(([t,b],i)=>{const mono=i===BLOCKS.length-1?' mono':'';
+  const nb=b.replace(/@@(.*?)@@/,'<span class="mark" style="color:var(--on)">$1</span>');
+  const ob=b.replace(/@@.*?@@\n/,'');
+  return `<div class="blk new mark" style="padding-top:16px"><h4>${t}</h4><div style="height:4px"></div><p class="${mono}">${nb}</p></div>
+          <div class="blk oldb old" style="padding-top:8px"><h4>${t}</h4><p class="${mono}">${ob}</p></div>`}).join('');
+show(+(location.hash.slice(1))||0);
+</script>
+</body>
+</html>
