@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -258,6 +259,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                     }
                 },
                 actions = {
+                    if (!ui.hasImage) UpdateEntry(onPhoto = false)
                     Box {
                         IconButton(onClick = { openMenu = true }, enabled = ui.ready && !ui.exporting) {
                             Icon(Icons.Default.Add, contentDescription = tr("打开"))
@@ -323,13 +325,9 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
                                 onClick = { moreMenu = false; vm.showQueue(true) },
                             )
                             val update by Updater.state.collectAsState()
-                            val waiting = update is Updater.State.Available || update is Updater.State.Ready
-                            DropdownMenuItem(
-                                text = { Text(if (waiting) tr("有新版本 · 查看") else tr("检查更新")) },
-                                onClick = {
-                                    moreMenu = false
-                                    if (waiting) Updater.show() else { Updater.show(); Updater.check(context, manual = true) }
-                                },
+                            if (updateWaiting(update) == null) DropdownMenuItem(
+                                text = { Text(tr("检查更新")) },
+                                onClick = { moreMenu = false; Updater.show(); Updater.check(context, manual = true) },
                             )
                             DropdownMenuItem(
                                 text = { Text(tr("设置")) },
@@ -521,7 +519,7 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
             title = if (target == null) "1:1" else tr("JPEG 颜色预览 · {0}", target),
             note = if (target == null) null else tr("预览尺寸；不含纸框和 JPEG 压缩"))
     }
-    UpdateDialog(editing = ui.hasImage)
+    UpdateDialog()
 }
 
 @Composable
@@ -640,6 +638,7 @@ private fun Preview(
                         enabled = !ui.loadingDetail && ui.imageTier.isNotEmpty(), onClick = onDetail)
                     // ui2_icecream.md 6.9: zoomed in, a visible way back besides the double tap.
                     if (scale != 1f || offset != Offset.Zero) OverlayChip(tr("适应")) { scale = 1f; offset = Offset.Zero }
+                    UpdateEntry(onPhoto = true)
                 }
                 Spacer(Modifier.height(6.dp))
                 histogram?.let { h ->
@@ -705,25 +704,72 @@ private fun MonoHistogram(h: Histogram, modifier: Modifier) {
  * Pressed it shrinks to 0.96 (UI.md 1, 按钮按下).
  */
 @Composable
-private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
+private fun OverlayChip(text: String, on: Boolean = false, enabled: Boolean = true,
+                        lead: (@Composable () -> Unit)? = null, onClick: () -> Unit) {
     val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val pressed by press.collectIsPressedAsState()
     val scale by androidx.compose.animation.core.animateFloatAsState(
         if (pressed) 0.96f else 1f, Motion.fastSpatial(), label = "chip")
+    // 36 dp to see, 48 dp to touch: the clickable is the taller box, the block sits in its middle.
     Box(
-        Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(Corners.s)   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
-            .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
-            .clickable(enabled = enabled, interactionSource = press,
-                indication = androidx.compose.material3.ripple(), onClick = onClick)
-            .padding(horizontal = 14.dp),
+        Modifier.heightIn(min = 48.dp)
+            .clickable(enabled = enabled, interactionSource = press, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge, color = when {
-            !enabled -> Color.White.copy(alpha = 0.4f)
-            on -> Palette.Accent
-            else -> Color.White.copy(alpha = 0.9f)
-        })
+        Row(
+            Modifier.heightIn(min = 36.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+                .clip(Corners.s)   // photo overlays: 8 dp blocks, not pills (ui_ai_flavor_audit 8)
+                .background(if (on) Palette.PanelHighest.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.45f))
+                .indication(press, androidx.compose.material3.ripple())
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            lead?.invoke()
+            Text(text, style = MaterialTheme.typography.labelLarge, color = when {
+                !enabled -> Color.White.copy(alpha = 0.4f)
+                on -> Palette.Accent
+                else -> Color.White.copy(alpha = 0.9f)
+            })
+        }
+    }
+}
+
+/** What the update entry says: 有新版本 (Available), 可安装 (Ready, verified and downloaded), or nothing. */
+private fun updateWaiting(s: Updater.State): String? = when (s) {
+    is Updater.State.Available -> tr("有新版本")
+    is Updater.State.Ready -> tr("可安装")
+    else -> null
+}
+
+/**
+ * The update entry: shown while Updater.state is Available or Ready, whatever happened to the sheet;
+ * a tap opens the existing sheet (Updater.show) and nothing else -- no check, no download, no install.
+ * Over the photo it is an overlay chip; in the empty editor's bar a quiet block of the same shape.
+ * The dot is the safelight amber of the edge print, the one warm mark that says something is waiting.
+ */
+@Composable
+internal fun UpdateEntry(onPhoto: Boolean) {
+    val state by Updater.state.collectAsState()
+    val text = updateWaiting(state) ?: return
+    val view = androidx.compose.ui.platform.LocalView.current
+    val dot: @Composable () -> Unit = {
+        Box(Modifier.size(6.dp).background(Palette.Index, androidx.compose.foundation.shape.CircleShape))
+        Spacer(Modifier.width(8.dp))
+    }
+    val open = { Feedback.play(view, Cue.Tab); Updater.show() }
+    if (onPhoto) OverlayChip(text, lead = dot, onClick = open)
+    else Box(
+        Modifier.heightIn(min = 48.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = open)
+            .semantics { contentDescription = tr("{0}，打开更新", text) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            Modifier.heightIn(min = 36.dp).clip(Corners.s).background(Palette.PanelHigh).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            dot()
+            Text(text, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface)
+        }
     }
 }
 

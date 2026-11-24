@@ -2,6 +2,7 @@ package com.dearded.spektralab
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import org.junit.After
@@ -27,8 +28,8 @@ class QueueSheetUiTest {
         outPixels = 1_000_000L, state = state,
     )
 
-    private fun show(jobs: List<ProcessingJob>) {
-        AppLocale.select(compose.activity, UiLanguage.ENGLISH)
+    private fun show(jobs: List<ProcessingJob>, language: UiLanguage = UiLanguage.ENGLISH) {
+        AppLocale.select(compose.activity, language)
         compose.setContent { AppLocaleHost { SpektraTheme {
             QueueSheet(jobs, onCancel = {}, onRetry = {}, onClear = {}, onDismiss = {})
         } } }
@@ -49,5 +50,26 @@ class QueueSheetUiTest {
         show(listOf(job(3, JobState.RUNNING)))
         compose.onNodeWithText("You can leave the app. Progress is shown in live notifications.").assertIsDisplayed()
         compose.onNodeWithText("There are no active tasks.").assertDoesNotExist()
+    }
+
+    @Test fun finishedRowShowsTheConfirmedFileDetailsAndSpeaksThem() {
+        val saved = "Spektralab_DSC_4120.jpg · 6000×4000 · 8.21 MB · JPEG 4:4:4"
+        show(listOf(job(4, JobState.DONE).copy(message = saved)), UiLanguage.CHINESE)
+        compose.onNodeWithText(saved).assertIsDisplayed()
+        compose.onNodeWithText("已保存 · JPEG", substring = true).assertDoesNotExist()
+        compose.onNodeWithContentDescription("synthetic-4.jpg，已保存，$saved").assertExists()
+    }
+
+    @Test fun finishedRowWithOnlyThePixelsShowsOnlyThePixels() {
+        // After a restart the queue may confirm the pixels alone; the row adds no encoder of its own.
+        val saved = "Spektralab_DSC_4120.jpg · 6000×4000"
+        show(listOf(job(5, JobState.DONE).copy(message = saved)), UiLanguage.CHINESE)
+        compose.onNodeWithText(saved).assertIsDisplayed()
+        compose.onNodeWithText("4:4:4", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun finishedRowWithoutDetailsKeepsTheExportKind() {
+        show(listOf(job(6, JobState.DONE)), UiLanguage.CHINESE)
+        compose.onNodeWithText("已保存 · JPEG · 工作尺寸").assertIsDisplayed()
     }
 }

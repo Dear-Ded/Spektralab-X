@@ -148,13 +148,17 @@ private fun JobRow(job: ProcessingJob, onCancel: (Long) -> Unit, onRetry: (Long)
         JobState.QUEUED -> tr("排队中 · {0}", job.label)
         JobState.RUNNING -> tr("{0} · {1} · 剩余约 ", job.phase.ifEmpty { tr("处理中") }, job.label) +
             ProcessingQueue.formatEta(job.etaSeconds)
-        JobState.DONE -> tr("已保存 · {0}", job.label)
+        // What the queue confirmed about the saved file (name, pixels, size, encoder), word for word;
+        // nothing is added here. Without it, the kind of export.
+        JobState.DONE -> job.message.ifEmpty { tr("已保存 · {0}", job.label) }
         JobState.FAILED -> tr("没有完成：{0}", job.message)
         JobState.CANCELLED -> tr("已取消")
     }
+    // The ✓ says saved on screen; TalkBack hears it in words, then the same confirmed details.
+    val spoken = if (job.state == JobState.DONE && job.message.isNotEmpty()) tr("已保存，{0}", job.message) else status
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 6.dp)
-            .semantics(mergeDescendants = true) { contentDescription = "${job.name}，$status" },
+            .semantics(mergeDescendants = true) { contentDescription = "${job.name}，$spoken" },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StateMark(job)

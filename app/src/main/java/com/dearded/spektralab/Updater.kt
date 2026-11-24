@@ -115,12 +115,13 @@ object Updater {
     /** Bring the dialog back for whatever state the update is in. */
     fun show() { explicit = true; prompt.value = true }
 
-    fun later() { prompt.value = false }
+    /** The sheet closed: the next one waits for the user again (an entry tap or a manual check). */
+    fun later() { prompt.value = false; explicit = false }
 
     fun skip(context: Context, r: Release) {
         prefs(context).edit().putString(KEY_SKIP, r.version).apply()
         state.value = State.Idle
-        prompt.value = false
+        later()
     }
 
     fun download(context: Context, r: Release, background: Boolean = false) {

@@ -46,12 +46,14 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateDialog(editing: Boolean) {
+fun UpdateDialog() {
     val context = LocalContext.current
     val state by Updater.state.collectAsState()
     val prompt by Updater.prompt.collectAsState()
     if (!prompt) return
-    if (editing && !Updater.explicit) return
+    // Never on its own: only after the user tapped 有新版本 / 可安装 or checked by hand. A background
+    // check or download only changes Updater.state, which the editor's entry shows.
+    if (!Updater.explicit) return
     val s = state
     if (s is Updater.State.Downloading && s.background) return
     if (s == Updater.State.Idle) { Updater.later(); return }
