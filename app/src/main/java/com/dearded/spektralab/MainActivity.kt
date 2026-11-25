@@ -9,8 +9,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -70,7 +76,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Always dark: judging a print against a white UI skews it.
             AppLocaleHost { SpektraTheme {
-                AppScreens(viewModel); ImportHost(viewModel)
+                ProvideDarkroomAssistant(viewModel) { AppScreens(viewModel) }
+                ImportHost(viewModel)
                 // Over everything, until the engine is ready (600 ms to 1.6 s) or a tap skips it.
                 var showIntro by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(intro) }
                 if (showIntro) {
@@ -129,5 +136,25 @@ class MainActivity : ComponentActivity() {
             if (photo) { viewModel.open(uris.first()); viewModel.externalOpens.tryEmit(Unit) }
             else ImportRequests.add(uris)
         }
+    }
+}
+
+@Composable
+internal fun ProvideDarkroomAssistant(editor: EditorViewModel, content: @Composable () -> Unit) {
+    if (!BuildConfig.DEBUG || !assistantBuildAllowed) {
+        content()
+        return
+    }
+    var showService by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val runtime = editor.assistantRuntime
+    val settings = remember(editor, scope) { AssistantRuntimeSettingsPort(scope, runtime, editor.assistantPreferences) }
+    val session = remember(editor, scope) {
+        AssistantSessionPort(scope, editor.assistantSession, runtime.state, editor.ui,
+            editor::canOpenAssistant, editor::canAnalyzeAssistantPreview, editor::undo) { showService = true }
+    }
+    CompositionLocalProvider(LocalAssistant provides session, LocalAssistantSettings provides settings) {
+        content()
+        if (showService) AssistantSettingsSheet(settings) { showService = false }
     }
 }
