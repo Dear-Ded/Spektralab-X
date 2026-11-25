@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "catalog_version": "2026-11-16.2",
+  "as_of": "2026-11-16",
+  "purpose": "design_reference_not_runtime_implementation",
+  "verification": "official_documentation_review_only",
+  "live_api_tests_performed": false,
+  "scope": "text_and_optional_image_input_to_local_edit_parameters",
+  "source_index": "BYOK_SOURCES.md",
+  "implementation_review": {
+    "derived_from": "2026-11-16.1",
+    "reviewed_at": "2026-11-16",
+    "interactions_revision_header": "ignored_by_official_endpoint_since_2026-06-08",
+    "source": "https://aistudio.google.com/docs/interactions-breaking-changes-may-2026"
+  },
+  "global_policy": {
+    "vision_enabled_by_default": false,
+    "automatic_paid_retry": false,
+    "automatic_model_fallback": false,
+    "automatic_protocol_fallback": false,
+    "send_profile_database": false,
+    "send_reasoning_history": false,
+    "unknown_capabilities": "disabled_until_declared_and_verified",
+    "custom_model_allowed": true,
+    "custom_model_default_reasoning": "omit_fields_not_disable_thinking",
+    "sampling_parameters": "omit_unless_adapter_explicitly_allows",
+    "reasoning_summary": "not_requested",
+    "max_output_budget": "per_request_including_reasoning_where_provider_counts_it",
+    "initial_settings_status": "product_evaluation_starting_point_not_quality_benchmark"
+  },
+  "transports": {
+    "openai_responses": {
+      "path": "/responses",
+      "reasoning_path": "reasoning.effort",
+      "structured_output": "text.format",
+      "output_limit_path": "max_output_tokens",
+      "conversation_storage": {"store": false},
+      "auth": "bearer"
+    },
+    "openai_chat": {
+      "path": "/chat/completions",
+      "reasoning_path": "reasoning_effort",
+      "structured_output": "response_format",
+      "output_limit_path": "model_and_endpoint_specific",
+      "auth": "bearer"
+    },
+    "anthropic_messages": {
+      "path": "/messages",
+      "reasoning_path": "output_config.effort",
+      "thinking_mode_path": "thinking.type",
+      "structured_output": "output_config.format",
+      "output_limit_path": "max_tokens",
+      "auth": "x-api-key",
+      "headers": {"anthropic-version": "2026-10-21"}
+    },
+    "gemini_interactions": {
+      "path": "/interactions",
+      "reasoning_path": "generation_config.thinking_level",
+      "structured_output": "response_format",
+      "output_limit_path": "generation_config.max_output_tokens",
+      "conversation_storage": {"store": false},
+      "auth": "x-goog-api-key",
+      "headers": {},
+      "response_items_path": "steps",
+      "legacy_ignored_headers": {"Api-Revision": "2026-05-20"}
+    },
+    "gemini_generate_content": {
+      "path_template": "/models/{encoded_model_id}:generateContent",
+      "reasoning_path": "generationConfig.thinkingConfig.thinkingLevel",
+      "structured_output": "generationConfig.responseFormat.text.schema",
+      "mime_type_path": "generationConfig.responseFormat.text.mimeType",
+      "json_mime_type_value": "APPLICATION_JSON",
+      "schema_dialect": "documented_rest_response_format_text",
+      "legacy_schema_dialect": "explicit_endpoint_override_after_verification_only",
+      "output_limit_path": "generationConfig.maxOutputTokens",
+      "auth": "x-goog-api-key"
+    }
+  },
+  "provider_templates": {
+    "openai": {
+      "base_url": "https://api.openai.com/v1",
+      "primary_transport": "openai_responses",
+      "secondary_transport": "openai_chat",
+      "output_mode": "json_schema",
+      "source_ids": ["O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08"]
+    },
+    "deepseek": {
+      "base_url": "https://api.deepseek.com/v1",
+      "primary_transport": "openai_chat",
+      "dialect": "deepseek_chat",
+      "output_mode": "json_object",
+      "output_limit_path": "max_tokens",
+      "source_ids": ["D01", "D02", "D03"]
+    },
+    "anthropic": {
+      "base_url": "https://api.anthropic.com/v1",
+      "primary_transport": "anthropic_messages",
+      "output_mode": "json_schema",
+      "source_ids": ["C01", "C02", "C03", "C04", "C05"]
+    },
+    "google": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta",
+      "primary_transport": "gemini_interactions",
+      "secondary_transport": "gemini_generate_content",
+      "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G03", "G04", "G05"]
+    }
+  },
+  "reasoning_profiles": {
+    "openai_optional": {
+      "kind": "effort",
+      "efforts": ["none", "low", "medium", "high", "xhigh", "max"],
+      "none_means_disabled": true
+    },
+    "openai_required": {
+      "kind": "effort",
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "none_means_disabled": false,
+      "disable_supported": false
+    },
+    "deepseek_mode_effort": {
+      "kind": "mode_and_effort",
+      "modes": ["enabled", "disabled"],
+      "efforts": ["low", "high", "max"],
+      "effort_applicable_modes": ["enabled"],
+      "mode_path": "thinking.type",
+      "effort_path": "reasoning_effort",
+      "omit_effort_when_disabled": true,
+      "compatibility_aliases_not_shown_as_distinct_levels": {
+        "minimal": "low", "medium": "high", "xhigh": "high", "ultra": "max"
+      }
+    },
+    "claude_always_on": {
+      "kind": "mode_and_effort",
+      "modes": ["adaptive"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "disable_supported": false,
+      "manual_budget_tokens_supported": false
+    },
+    "claude_sonnet55": {
+      "kind": "mode_and_effort",
+      "modes": ["adaptive", "between_tools"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "disable_supported": false,
+      "manual_budget_tokens_supported": false,
+      "mode_effort_constraints": {"between_tools": ["low", "medium", "high"]},
+      "between_tools_label": "no_upfront_thinking_not_universal_off"
+    },
+    "claude_haiku55": {
+      "kind": "mode_and_effort",
+      "modes": ["adaptive", "disabled"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "disable_supported": true,
+      "manual_budget_tokens_supported": false,
+      "mode_effort_constraints": {"disabled": ["low", "medium", "high"]}
+    },
+    "gemini_lmh": {
+      "kind": "thinking_level",
+      "efforts": ["low", "medium", "high"],
+      "disable_supported": false,
+      "thinking_budget_enabled": false
+    },
+    "gemini_hydrogen": {
+      "kind": "thinking_level",
+      "efforts": ["low", "medium", "high", "xhigh"],
+      "disable_supported": false,
+      "thinking_budget_enabled": false
+    },
+    "gemini_minimal_lmh": {
+      "kind": "thinking_level",
+      "efforts": ["minimal", "low", "medium", "high"],
+      "disable_supported": false,
+      "minimal_means_disabled": false,
+      "thinking_budget_enabled": false
+    }
+  },
+  "models": [
+    {
+      "catalog_id": "openai/gpt-6-luna", "model_id": "gpt-6-luna", "provider": "openai",
+      "display_name": "GPT-6 Luna", "reasoning_profile": "openai_optional",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["O02", "O06"]
+    },
+    {
+      "catalog_id": "openai/gpt-6.1-terra", "model_id": "gpt-6.1-terra", "provider": "openai",
+      "display_name": "GPT-6.1 Terra", "reasoning_profile": "openai_optional",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["O03", "O06"]
+    },
+    {
+      "catalog_id": "openai/gpt-6.1-sol", "model_id": "gpt-6.1-sol", "provider": "openai",
+      "display_name": "GPT-6.1 Sol", "reasoning_profile": "openai_required",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["O04", "O06"]
+    },
+    {
+      "catalog_id": "openai/gpt-6-astra", "model_id": "gpt-6-astra", "provider": "openai",
+      "display_name": "GPT-6 Astra", "reasoning_profile": "openai_required",
+      "documented_default_effort": null, "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["O05", "O06"]
+    },
+    {
+      "catalog_id": "deepseek/deepseek-flash", "model_id": "deepseek-flash", "provider": "deepseek",
+      "display_name": "DeepSeek Flash", "reasoning_profile": "deepseek_mode_effort",
+      "documented_default_effort": "high", "documented_default_mode": "enabled",
+      "initial_settings": {"mode": "enabled", "effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_object",
+      "identity_kind": "moving_alias", "resolved_version_at_review": "DeepSeek-V4.1-Flash-1017",
+      "source_ids": ["D01", "D02", "D03"]
+    },
+    {
+      "catalog_id": "deepseek/deepseek-v4-pro", "model_id": "deepseek-v4-pro", "provider": "deepseek",
+      "display_name": "DeepSeek V4 Pro", "reasoning_profile": "deepseek_mode_effort",
+      "documented_default_effort": "high", "documented_default_mode": "enabled",
+      "initial_settings": {"mode": "enabled", "effort": "low"},
+      "input_modalities": ["text"], "output_mode": "json_object",
+      "identity_kind": "provider_alias", "resolved_version_at_review": "DeepSeek-V4-Pro-0813",
+      "source_ids": ["D01", "D02", "D03"]
+    },
+    {
+      "catalog_id": "anthropic/claude-haiku-5-5", "model_id": "claude-haiku-5-5", "provider": "anthropic",
+      "display_name": "Claude Haiku 5.5", "reasoning_profile": "claude_haiku55",
+      "documented_default_effort": "medium", "initial_settings": {"mode": "adaptive", "effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "identity_kind": "provider_documented_snapshot", "source_ids": ["C01", "C02", "C03", "C04"]
+    },
+    {
+      "catalog_id": "anthropic/claude-sonnet-5-5", "model_id": "claude-sonnet-5-5", "provider": "anthropic",
+      "display_name": "Claude Sonnet 5.5", "reasoning_profile": "claude_sonnet55",
+      "documented_default_effort": "high", "initial_settings": {"mode": "adaptive", "effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "identity_kind": "provider_documented_snapshot", "source_ids": ["C01", "C02", "C03", "C04"]
+    },
+    {
+      "catalog_id": "anthropic/claude-opus-5-5", "model_id": "claude-opus-5-5", "provider": "anthropic",
+      "display_name": "Claude Opus 5.5", "reasoning_profile": "claude_always_on",
+      "documented_default_effort": "medium", "initial_settings": {"mode": "adaptive", "effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "identity_kind": "provider_documented_snapshot", "source_ids": ["C01", "C02", "C03", "C04"]
+    },
+    {
+      "catalog_id": "anthropic/claude-fable-5-2", "model_id": "claude-fable-5-2", "provider": "anthropic",
+      "display_name": "Claude Fable 5.2", "reasoning_profile": "claude_always_on",
+      "documented_default_effort": "high", "initial_settings": {"mode": "adaptive", "effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "identity_kind": "provider_documented_snapshot", "source_ids": ["C01", "C02", "C03", "C04", "C05"]
+    },
+    {
+      "catalog_id": "google/gemini-3.5-flash-lite", "model_id": "gemini-3.5-flash-lite", "provider": "google",
+      "display_name": "Gemini 3.5 Flash-Lite", "reasoning_profile": "gemini_minimal_lmh",
+      "documented_default_effort": "minimal", "initial_settings": {"effort": "minimal"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G04", "G10"]
+    },
+    {
+      "catalog_id": "google/gemini-3.8-flash", "model_id": "gemini-3.8-flash", "provider": "google",
+      "display_name": "Gemini 3.8 Flash", "reasoning_profile": "gemini_lmh",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G04", "G09"]
+    },
+    {
+      "catalog_id": "google/gemini-4-argon", "model_id": "gemini-4-argon", "provider": "google",
+      "display_name": "Gemini 4 Argon", "reasoning_profile": "gemini_lmh",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G04", "G07"]
+    },
+    {
+      "catalog_id": "google/gemini-4-carbon", "model_id": "gemini-4-carbon", "provider": "google",
+      "display_name": "Gemini 4 Carbon", "reasoning_profile": "gemini_lmh",
+      "documented_default_effort": "medium", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G04", "G08"]
+    },
+    {
+      "catalog_id": "google/gemini-4-hydrogen", "model_id": "gemini-4-hydrogen", "provider": "google",
+      "display_name": "Gemini 4 Hydrogen", "reasoning_profile": "gemini_hydrogen",
+      "documented_default_effort": "high", "initial_settings": {"effort": "low"},
+      "input_modalities": ["text", "image"], "output_mode": "json_schema",
+      "source_ids": ["G01", "G02", "G04", "G06"]
+    }
+  ],
+  "relay_policy": {
+    "catalog_model_id_is_not_remote_model_id": true,
+    "protocol_selected_explicitly": true,
+    "native_capabilities_inherited_automatically": false,
+    "verification_key": ["endpoint_id", "endpoint_revision", "credential_revision", "protocol", "remote_model_id", "catalog_version", "adapter_version"],
+    "generic_openai_chat": {
+      "default_output_mode": "prompt_json_with_local_validation",
+      "default_reasoning": "omit_fields",
+      "default_vision": false,
+      "output_token_parameter": "explicit_endpoint_configuration"
+    },
+    "openrouter_chat": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "reasoning_path": "reasoning.effort",
+      "default_provider_policy": {"require_parameters": true, "allow_fallbacks": false},
+      "backend_pinning": "requires_user_selected_provider_only_list",
+      "model_ids": "provider_slugs_from_verified_account_catalog_not_prefix_inference",
+      "source_ids": ["P08", "P09"]
+    }
+  }
+}

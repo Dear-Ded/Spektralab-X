@@ -1,0 +1,125 @@
+{
+  "fixture_version": 1,
+  "business_schema_version": 2,
+  "purpose": "test_inputs_and_expected_results_not_a_validator_implementation",
+  "default_context": {
+    "stored_values": "all_eight_parameters_zero",
+    "resolution": "neutral_palette_100_and_pad_at_home",
+    "allowed_parameters": "all_registry_parameters",
+    "locks": [],
+    "ticket_current": true,
+    "provider_completed": true
+  },
+  "cases": [
+    {
+      "id": "valid_sparse_proposal", "expected": "ACCEPT_PROPOSAL",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}, {"parameter": "layer2.saturation", "target": -12}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "valid_choice_question", "expected": "ACCEPT_QUESTION",
+      "payload": {"schema_version": 2, "status": "needs_input", "changes": [], "question": {"kind": "choice", "prompt": "Which adjustment matters more?", "options": [{"id": "color", "label": "Less saturation"}, {"id": "tone", "label": "Softer contrast"}]}}
+    },
+    {
+      "id": "valid_text_question", "expected": "ACCEPT_QUESTION",
+      "payload": {"schema_version": 2, "status": "needs_input", "changes": [], "question": {"kind": "text", "prompt": "Which adjustment should be preserved?", "options": []}}
+    },
+    {
+      "id": "valid_no_change", "expected": "ACCEPT_NO_CHANGE",
+      "payload": {"schema_version": 2, "status": "no_change", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "valid_unsupported", "expected": "ACCEPT_UNSUPPORTED",
+      "payload": {"schema_version": 2, "status": "unsupported", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "unknown_top_field", "expected": "SCHEMA_MISMATCH", "rejection_layer": "schema",
+      "payload": {"schema_version": 2, "status": "no_change", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}, "profile_update": {}}
+    },
+    {
+      "id": "unknown_parameter", "expected": "UNKNOWN_PARAMETER", "rejection_layer": "schema_or_semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "engine.exposureEv", "target": 1}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "string_number", "expected": "SCHEMA_MISMATCH", "rejection_layer": "schema",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.exposure", "target": "0.5"}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "out_of_range", "expected": "OUT_OF_RANGE", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.contrast", "target": 51}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "duplicate_parameter", "expected": "DUPLICATE_PARAMETER", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}, {"parameter": "layer2.temperature", "target": 9}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "locked_parameter", "expected": "LOCK_CONFLICT", "rejection_layer": "semantic",
+      "context_override": {"locks": ["layer2.temperature"]},
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "proposal_without_changes", "expected": "INVALID_STATUS_PAYLOAD", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "question_with_changes", "expected": "INVALID_STATUS_PAYLOAD", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "needs_input", "changes": [{"parameter": "layer2.temperature", "target": 8}], "question": {"kind": "text", "prompt": "How warm?", "options": []}}
+    },
+    {
+      "id": "proposal_with_question", "expected": "INVALID_STATUS_PAYLOAD", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}], "question": {"kind": "text", "prompt": "How warm?", "options": []}}
+    },
+    {
+      "id": "duplicate_option_id", "expected": "INVALID_STATUS_PAYLOAD", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "needs_input", "changes": [], "question": {"kind": "choice", "prompt": "Choose an adjustment", "options": [{"id": "a", "label": "Warm"}, {"id": "a", "label": "Cool"}]}}
+    },
+    {
+      "id": "unchanged_proposal", "expected": "NO_EFFECT", "rejection_layer": "semantic",
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 0}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "palette_zero_no_effect", "expected": "NO_EFFECT", "rejection_layer": "effective_evaluator",
+      "context_override": {"resolution": "palette_zero_and_pad_at_home"},
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "stale_ticket", "expected": "STALE_RESULT", "rejection_layer": "lifecycle",
+      "context_override": {"ticket_current": false},
+      "payload": {"schema_version": 2, "status": "proposal", "changes": [{"parameter": "layer2.temperature", "target": 8}], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "old_business_version", "expected": "SCHEMA_MISMATCH", "rejection_layer": "schema",
+      "payload": {"schema_version": 1, "status": "no_change", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}}
+    },
+    {
+      "id": "duplicate_json_key", "expected": "INVALID_JSON", "rejection_layer": "parser",
+      "raw_json": "{\"schema_version\":2,\"status\":\"no_change\",\"status\":\"unsupported\",\"changes\":[],\"question\":{\"kind\":\"none\",\"prompt\":\"\",\"options\":[]}}"
+    },
+    {
+      "id": "trailing_text", "expected": "INVALID_JSON", "rejection_layer": "parser",
+      "raw_json": "{\"schema_version\":2,\"status\":\"no_change\",\"changes\":[],\"question\":{\"kind\":\"none\",\"prompt\":\"\",\"options\":[]}} extra"
+    },
+    {
+      "id": "nonfinite_number", "expected": "INVALID_JSON", "rejection_layer": "parser",
+      "raw_json": "{\"schema_version\":2,\"status\":\"proposal\",\"changes\":[{\"parameter\":\"layer2.exposure\",\"target\":NaN}],\"question\":{\"kind\":\"none\",\"prompt\":\"\",\"options\":[]}}"
+    },
+    {
+      "id": "truncated_provider", "expected": "PROVIDER_INCOMPLETE", "rejection_layer": "provider_envelope",
+      "context_override": {"provider_completed": false},
+      "payload": {"schema_version": 2, "status": "no_change", "changes": [], "question": {"kind": "none", "prompt": "", "options": []}}
+    }
+  ],
+  "required_generated_cases": [
+    "Each parameter at minimum and maximum is valid when unlocked and effective.",
+    "Each parameter below minimum and above maximum is rejected without clamping.",
+    "More than eight changes, more than three options, invalid option IDs and empty labels are rejected.",
+    "Unicode prompt and option lengths are counted by codepoints, not UTF-16 code units.",
+    "Duplicate keys are rejected at every object depth, including escaped equivalent names.",
+    "Boolean, null, overflowed number, array root, extra object and fenced JSON are rejected.",
+    "Exceeding response size or nesting limits fails before candidate construction.",
+    "All non-proposal states with changes are rejected.",
+    "Needs-input with kind none, and none with a nonempty prompt or options, are rejected.",
+    "Provider refusal, unexpected tool calls and missing final text are rejected.",
+    "Publication is rejected if the ticket becomes stale during native rendering.",
+    "Full-edit normalization must not mutate fields outside the granted write set."
+  ]
+}

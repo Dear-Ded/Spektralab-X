@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:spektralab:advisor:directional-light:3",
+  "title": "Spektralab Directional Light v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "directional_light"],
+  "properties": {
+    "schema_version": {"type": "integer", "enum": [3]},
+    "status": {"type": "string", "enum": ["proposal", "no_change", "unsupported"]},
+    "directional_light": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bright_side", "bright_ev", "dark_ev"],
+      "properties": {
+        "bright_side": {"type": "string", "enum": ["left", "right", "top", "bottom", "none"]},
+        "bright_ev": {"type": "number"},
+        "dark_ev": {"type": "number"}
+      }
+    }
+  }
+}
