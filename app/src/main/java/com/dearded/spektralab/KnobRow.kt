@@ -178,22 +178,38 @@ private fun ToneStrip(image: Bitmap?, zone: (Float) -> Float) {
         value = image?.let { b -> withContext(Dispatchers.Default) { Histogram.of(b) } }
     }
     val h = hist ?: run { Spacer(Modifier.height(30.dp)); return }
-    Canvas(Modifier.fillMaxWidth().height(30.dp).padding(bottom = 2.dp).semantics { }) {
+    // A meter's backlit window (Skeuo.kt): smoked glass, an etched scale, the counts lit from behind in
+    // grey, the tones the dial works on brighter; a lamp at either end lights only when that end clips.
+    Canvas(Modifier.fillMaxWidth().height(36.dp).padding(bottom = 4.dp).semantics { }) {
+        val corner = 7.dp.toPx()
+        drawWindowCut(corner)
+        drawRoundRect(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF121211), Color(0xFF0A0A09))),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(corner))
         val bins = h.y
         val n = bins.size
         val mx = bins.maxOf { sqrt(it.toFloat()) }.coerceAtLeast(1f)
-        val bw = size.width / n
-        val dim = Color(0xFF6E6B65)
-        val lit = Color(0xFFECE2D0)
+        val px = 12.dp.toPx(); val pw = size.width - 2 * px
+        val top = 4.dp.toPx(); val ph = size.height - 8.dp.toPx()
+        val bw = pw / n
+        for (k in 0..4) drawRect(Color(0x12FFF8EC), Offset(px + pw * k / 4, top), Size(0.6f * density, ph))
+        val dim = Color(0xFF8A877F)
+        val lit = Color(0xFFF0ECE4)
         for (i in 0 until n) {
             val x = (i + 0.5f) / n
             val w = zone(x).coerceIn(0f, 1f)
-            val hh = (sqrt(bins[i].toFloat()) / mx * (size.height - 6.dp.toPx())).coerceAtLeast(1f)
-            drawRect(lerp(dim, lit, w).copy(alpha = 0.32f + 0.58f * w), Offset(i * bw + 0.3f, size.height - 2f - hh), Size(bw - 0.6f, hh))
+            val hh = (sqrt(bins[i].toFloat()) / mx * ph).coerceAtLeast(0.6f)
+            val c = lerp(dim, lit, w)
+            // the glow behind, then the bar
+            drawRect(c.copy(alpha = 0.12f + 0.12f * w), Offset(px + i * bw - bw, top + ph - hh - 1.dp.toPx()), Size(bw * 3, hh + 1.dp.toPx()))
+            drawRect(c.copy(alpha = 0.4f + 0.5f * w), Offset(px + i * bw + 0.15f, top + ph - hh), Size(bw - 0.3f, hh))
         }
-        drawRect(Color(0x14FFF6E6), Offset(0f, size.height - 1f), Size(size.width, 1f))
-        if (h.clippedLow > 0.02f) drawRect(Color(0xFF8FB3D9), Offset(0f, size.height - 3.dp.toPx()), Size(3.dp.toPx(), 3.dp.toPx()))
-        if (h.clippedHigh > 0.02f) drawRect(Color(0xFFE0956F), Offset(size.width - 3.dp.toPx(), size.height - 3.dp.toPx()), Size(3.dp.toPx(), 3.dp.toPx()))
+        drawWindowGlass(corner)
+        for ((cx, on) in listOf(6.dp.toPx() to (h.clippedLow > 0.02f), size.width - 6.dp.toPx() to (h.clippedHigh > 0.02f))) {
+            val c = Offset(cx, size.height / 2)
+            drawCircle(androidx.compose.ui.graphics.Brush.radialGradient(
+                listOf(if (on) Color(0xFFFFF6EA) else Color(0xFF3A3936), if (on) Color(0x66F0E8DC) else Color(0xFF141413)),
+                center = c - Offset(0.6f * density, 0.6f * density), radius = 2.6.dp.toPx()), 2.4.dp.toPx(), c)
+        }
     }
 }
 

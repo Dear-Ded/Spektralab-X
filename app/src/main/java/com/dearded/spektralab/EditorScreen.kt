@@ -706,7 +706,10 @@ private fun MonoHistogram(h: Histogram, modifier: Modifier) {
             }
             lineTo(size.width, size.height); close()
         }
-        drawPath(path, Color.White.copy(alpha = 0.72f))
+        // Backlit grey under smoked glass: a soft glow, then the counts.
+        drawPath(path, Color.White.copy(alpha = 0.1f), style = androidx.compose.ui.graphics.drawscope.Stroke(4.dp.toPx()))
+        drawPath(path, Color(0xFFF0ECE4).copy(alpha = 0.72f))
+        drawWindowGlass(8.dp.toPx())
         fun tick(x: Float, share: Float) {
             if (share <= 0.001f) return
             val hgt = size.height * minOf(1f, share * 10)
