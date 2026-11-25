@@ -1,5 +1,7 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.lerp
+import kotlin.math.asin
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationEndReason
 import androidx.compose.animation.core.exponentialDecay
@@ -310,23 +312,42 @@ internal fun CameraDial(
             val px = dialStepPx(span, step, major)
             val p = pos
             val corner = CornerRadius(10.dp.toPx())
-            // The drum: warm graphite, lit from above.
+            // The window, cut into the panel: a chamfer catching the light along its lower edge.
+            drawRoundRect(Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.55f), 0.5f to Color.Black.copy(alpha = 0.1f),
+                1f to Color(0x29FFF8EC), startY = top - 1.5f * density, endY = top + dh + 1.5f * density),
+                Offset(-1.5f * density, top - 1.5f * density), Size(w + 3f * density, dh + 3f * density), CornerRadius(corner.x + 1.5f * density))
+            // The drum: turned metal round an upright axis, lit from the upper left (preview/ui-feel-parts.js dial).
             clipRect(0f, top, w, top + dh) {
-                drawRoundRect(Brush.verticalGradient(listOf(Color(0xFF3B3A36), Color(0xFF2B2A27), Color(0xFF1F1E1C), Color(0xFF121110)),
-                    startY = top, endY = top + dh), Offset(0f, top), Size(w, dh), corner)
-                // Knurling round both rims, turning with the drum.
-                val pitch = 3.6.dp.toPx()
-                val shift = (p * px) % pitch
-                for (k in -120..120) {
+                val shadeStops = Array(25) { i ->
+                    val th = asin(((w * i / 24f - cx) / radius).coerceIn(-0.999f, 0.999f))
+                    val l = minOf(1f, 0.1f + 0.82f * maxOf(0f, cos(th + 0.42f)) * cos(th).pow(0.5f))
+                    i / 24f to lerp(Color(0xFF0B0A09), Color(0xFF5F5B53), l)
+                }
+                drawRoundRect(Brush.horizontalGradient(*shadeStops, startX = 0f, endX = w), Offset(0f, top), Size(w, dh), corner)
+                drawRect(Brush.verticalGradient(0f to Color(0x21FFF8EC), 0.22f to Color(0x05FFF8EC), 0.62f to Color.Transparent, 1f to Color(0x52000000),
+                    startY = top, endY = top + dh), Offset(0f, top), Size(w, dh))
+                val sx = cx + radius * sin(-0.4f)
+                drawRect(Brush.horizontalGradient(0f to Color.Transparent, 0.5f to Color(0x16FFFAF0), 1f to Color.Transparent,
+                    startX = sx - 55.dp.toPx(), endX = sx + 55.dp.toPx()), Offset(0f, top), Size(w, dh))
+                // Fine straight knurling round both rims, turning with the drum: a lit face and a shaded one per tooth.
+                val pitch = 2.5.dp.toPx()
+                val shift = ((p * px) % pitch + pitch) % pitch
+                val kh = 4.dp.toPx()
+                for (k in -200..200) {
                     val a = (k * pitch - shift) / radius
-                    if (abs(a) >= PI / 2) continue
-                    val x = cx + radius * sin(a).toFloat()
-                    val cs = cos(a).toFloat()
-                    for (y0 in floatArrayOf(top, top + dh - 4.dp.toPx())) {
-                        drawRect(Color(0xFFFFF8EB).copy(alpha = 0.11f * cs), Offset(x, y0), Size(0.7f * cs + 0.3f, 4.dp.toPx()))
-                        drawRect(Color.Black.copy(alpha = 0.5f * cs), Offset(x + 0.9f * cs, y0), Size(0.7f * cs + 0.3f, 4.dp.toPx()))
+                    if (abs(a) >= 1.48f) continue
+                    val x = cx + radius * sin(a)
+                    val x2 = cx + radius * sin(a + pitch * 0.5f / radius)
+                    val x3 = cx + radius * sin(a + pitch / radius)
+                    val cs = cos(a)
+                    val lit = maxOf(0f, cos(a + 0.42f)) * cs
+                    for (y0 in floatArrayOf(top + 1.5f * density, top + dh - kh - 1.5f * density)) {
+                        drawRect(Color(0xFFFFF8EC).copy(alpha = 0.025f + 0.1f * lit), Offset(x, y0), Size(maxOf(0.3f, x2 - x), kh))
+                        drawRect(Color.Black.copy(alpha = 0.16f + 0.2f * cs), Offset(x2, y0), Size(maxOf(0.3f, x3 - x2), kh))
                     }
                 }
+                drawRect(Color.Black.copy(alpha = 0.5f), Offset(0f, top + kh + 1.5f * density), Size(w, 0.6f * density))
+                drawRect(Color.Black.copy(alpha = 0.5f), Offset(0f, top + dh - kh - 2.1f * density), Size(w, 0.6f * density))
                 val first = (p - radius / px).toInt() - 1
                 val last = (p + radius / px).toInt() + 1
                 // The direction as colour, when there is one.
@@ -352,16 +373,22 @@ internal fun CameraDial(
                     val isHalf = !isMajor && isOn(v, major / 2)
                     val len = (if (isMajor) 19 else if (isHalf) 13 else 8).dp.toPx()
                     val wd = (if (isMajor) 1.6f else 1.05f) * (0.4f + 0.6f * cs) * density
-                    val y0 = top + 6.dp.toPx()
-                    drawRect(Color.Black.copy(alpha = 0.75f * cs), Offset(x + 0.7f * density, y0 + 0.7f * density), Size(wd, len))
-                    drawRect(Color(0xFFEEEAE2).copy(alpha = (if (isMajor) 0.95f else 0.55f) * cs.pow(1.6f)), Offset(x, y0), Size(wd, len))
+                    val y0 = top + 7.dp.toPx()
+                    // Cut into the metal and filled with paint: the cut's upper-left wall in shadow, its lower-right lit.
+                    val light = (0.5f + 0.5f * maxOf(0f, cos(a + 0.42f))) * cs.pow(1.2f)
+                    drawRect(Color.Black.copy(alpha = 0.72f * cs), Offset(x - 0.45f * density, y0 - 0.45f * density), Size(wd + 0.45f * density, len + 0.45f * density))
+                    drawRect(Color(0x2EFFF8EC), Offset(x + wd, y0 + 0.6f * density), Size(0.45f * density, len))
+                    drawRect(Color(0xFFECE8E0).copy(alpha = (if (isMajor) 0.94f else if (isHalf) 0.72f else 0.5f) * light), Offset(x, y0), Size(wd, len))
                     if (isMajor && isOn(v, labelEvery)) {
                         val t = tickText(v)
                         val layout = layouts.getOrPut(t) { measurer.measure(t, tickStyle) }
                         val labelY = top + 40.dp.toPx()
                         withTransform({ scale(cs, 1f, Offset(x, labelY)) }) {
-                            drawText(layout, color = Color(0xFFE8E4DC).copy(alpha = 0.88f * cs * cs),
-                                topLeft = Offset(x - layout.size.width / 2f, labelY - layout.size.height / 2f))
+                            val tl = Offset(x - layout.size.width / 2f, labelY - layout.size.height / 2f)
+                            // Engraved numerals too: shadow above-left, a glint below-right, then the paint.
+                            drawText(layout, color = Color.Black.copy(alpha = 0.7f * cs), topLeft = tl - Offset(0.45f * density, 0.45f * density))
+                            drawText(layout, color = Color(0x29FFF8EC), topLeft = tl + Offset(0.45f * density, 0.45f * density))
+                            drawText(layout, color = Color(0xFFECE8E0).copy(alpha = 0.86f * light), topLeft = tl)
                         }
                     }
                     val stopDot = 1.7.dp.toPx() * cs + 0.4f
@@ -385,21 +412,31 @@ internal fun CameraDial(
                         Offset(minOf(x, x + out * ww), top + 3.dp.toPx()), Size(ww, dh - 6.dp.toPx()))
                     drawRect(Color(0xFFEEEAE2).copy(alpha = 0.5f * cs), Offset(x - 0.6f * density, top + 4.dp.toPx()), Size(1.2f * density, dh - 8.dp.toPx()))
                 }
-                // The cylinder turning away at both ends, and a highlight along its top.
-                drawRect(Brush.horizontalGradient(0f to Color(0xF0090807), 0.17f to Color(0x57090807), 0.42f to Color.Transparent,
-                    0.58f to Color.Transparent, 0.83f to Color(0x66090807), 1f to Color(0xF5090807)), Offset(0f, top), Size(w, dh))
-                drawRect(Brush.verticalGradient(listOf(Color(0x2BFFFAF0), Color.Transparent), startY = top, endY = top + 7.dp.toPx()),
-                    Offset(0f, top), Size(w, 7.dp.toPx()))
-                if (dragging) drawRect(Color(0x0DFFF6E6), Offset(0f, top), Size(w, dh))
+                // The drum turning into its own shadow at both ends (not cut off).
+                drawRect(Brush.horizontalGradient(0f to Color(0xC7060606), 0.08f to Color(0x4D060606), 0.22f to Color.Transparent,
+                    0.78f to Color.Transparent, 0.92f to Color(0x61060606), 1f to Color(0xD9060606)), Offset(0f, top), Size(w, dh))
+                // Under the finger the metal warms a little.
+                if (dragging) drawRect(Color(0x0AFFF6E6), Offset(0f, top), Size(w, dh))
+                // The recess's own shadow under the top edge.
+                drawRect(Brush.verticalGradient(0f to Color(0xB3000000), 1f to Color.Transparent, startY = top, endY = top + 10.dp.toPx()),
+                    Offset(0f, top), Size(w, 10.dp.toPx()))
             }
-            drawRoundRect(Color(0x0FFFF6E6), Offset(0.5f, top + 0.5f), Size(w - 1f, dh - 1f), corner, style = Stroke(1f))
-            // The index: fixed and warm, a mark above and a short line into the window.
+            // The index: a red line printed under the glass, and a small steel fin over the window.
             val ink = if (enabled) Palette.Index else Palette.Outline
-            val mark = Path().apply {
-                moveTo(cx - 4.5.dp.toPx(), top - 5.dp.toPx()); lineTo(cx + 4.5.dp.toPx(), top - 5.dp.toPx()); lineTo(cx, top + 1.5.dp.toPx()); close()
+            drawRect(ink.copy(alpha = 0.22f), Offset(cx - 1.8f * density, top + 3.dp.toPx()), Size(3.6f * density, 28.dp.toPx()))
+            drawRect(ink, Offset(cx - 0.6f * density, top + 3.dp.toPx()), Size(1.2f * density, 28.dp.toPx()))
+            val fin = Path().apply {
+                moveTo(cx - 6.dp.toPx(), top - 8.dp.toPx()); lineTo(cx + 6.dp.toPx(), top - 8.dp.toPx())
+                lineTo(cx + 1.dp.toPx(), top - 1.5.dp.toPx()); lineTo(cx - 1.dp.toPx(), top - 1.5.dp.toPx()); close()
             }
-            drawPath(mark, ink)
-            drawRect(ink.copy(alpha = 0.8f), Offset(cx - 0.6f * density, top + 2.dp.toPx()), Size(1.2f * density, 22.dp.toPx()))
+            drawPath(fin, Brush.horizontalGradient(0f to Color(0xFF3A3834), 0.45f to Color(0xFFC9C4BA), 0.55f to Color(0xFF8C877E),
+                1f to Color(0xFF2C2A27), startX = cx - 6.dp.toPx(), endX = cx + 6.dp.toPx()))
+            drawRect(ink, Offset(cx - 0.6f * density, top - 7.dp.toPx()), Size(1.2f * density, 4.5.dp.toPx()))
+            // Cover glass: one broad, soft reflection across the top.
+            clipRect(0f, top, w, top + dh) {
+                drawRect(Brush.linearGradient(0f to Color(0x0EFFFFFF), 0.45f to Color(0x05FFFFFF), 0.46f to Color.Transparent,
+                    start = Offset(0f, top), end = Offset(w * 0.4f, top + dh)), Offset(0f, top), Size(w, dh))
+            }
             if (fine) {
                 val t = tr("微调")
                 val layout = layouts.getOrPut("\u0000$t") { measurer.measure(t, tickStyle) }
