@@ -46,7 +46,8 @@ Treat commercial products as behavior references only. Do not download or reuse 
 | --- | --- | --- |
 | P0.1 | Closed | Fetched main at `4330fae773424e14e8a8939ed4c5f9545bb84095`, created `codex/darkroom-scene-pilot`, and ran `:app:compileReleaseKotlin` on the unmodified main snapshot. Legacy source was inspected at `e7fd4b7a747e6ed006c26d24f71998010cff8b30`; that dirty worktree was not edited. |
 | P0.2 | Closed (core) | Imported domain, session, network and editor ports only, four contract assets, and focused tests. Cloud `:app:testReleaseUnitTest --tests com.dearded.spektralab.Advisor*` passed 134 tests in 19 suites. Bitmap and clipping tests run alongside P1; no APK or actual editor port is implied. |
-| P1.1 | In progress | Bounded local strip and region evidence implemented separately. Close after the bitmap geometry/domain and legacy regression tests, then record real-engine RAW status separately. |
+| P1.1 | Closed | Added versioned local strip/region evidence without changing legacy statistics. The three focused Android JVM suites passed all 22 tests: 7 statistics, 10 rendered highlight checks and 5 scene tests, including JPEG and Display P3. |
+| P1.2 | Open | Run the sampler on rendered RAW from the current pinned engine. Do not count synthetic bitmap tests or older build evidence as the RAW control. |
 | P2.1 | Open | Evidence is opt-in input, with unchanged result schemas. Compare global statistics, spatial evidence and a local rule with the same engine and frozen, permitted inputs. |
 | P3.1 | Gated | Start zero or one isolated experiment based on the observed P2 failure class. |
 | P4.1 | Gated | Separate internal port wiring, Android/native/screenshot results, and real-provider and on-device acceptance where available. No publish. |

@@ -5,7 +5,7 @@ import kotlin.math.abs
 /** Ephemeral display-domain measurements, never a profile or image identifier. */
 data class AdviceStatistics(val sourceRevision: Long, val sampleRevision: Long? = null,
     val width: Int = 0, val height: Int = 0, val values: AdviceStatisticsValues? = null,
-    val measuredBrightSide: BrightSide? = null) {
+    val measuredBrightSide: BrightSide? = null, val scene: SceneEvidence? = null) {
     val available get() = values != null
     init {
         require(sourceRevision >= 0)
