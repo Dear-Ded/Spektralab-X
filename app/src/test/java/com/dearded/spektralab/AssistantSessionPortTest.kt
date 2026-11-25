@@ -278,6 +278,31 @@ class AssistantSessionPortTest {
         assertEquals(DraftPhase.IDLE, controller.state.value.phase)
     }
 
+    @Test fun undoReopensTheSessionOnTheRestoredEditWithoutLeavingThePanel() = withPort {
+        val original = editor.formal
+        onUndo = {
+            controller.invalidate()
+            editor.formal = original
+            editor.displayed = original
+        }
+        port.open()
+        port.tryPreset(AssistantPreset.Brighten)
+        shown { it.canApply }
+        port.apply()
+        editor.saved.complete(Unit)
+        shown { it.phase == AssistantPhase.Saved }
+        assertEquals(.35, editor.formal.look.exposure, 0.0)
+
+        port.undo()
+        assertEquals(1, undos)
+        assertEquals(DraftPhase.READY, controller.state.value.phase)
+        assertEquals(original, controller.state.value.entry!!.edit)
+        port.tryPreset(AssistantPreset.Soften)
+        assertEquals(listOf(AssistantChange(AssistantParam.CONTRAST, 0.0, -8.0)),
+            shown { it.phase == AssistantPhase.Previewing }.changes)
+        assertEquals(original, editor.formal)
+    }
+
     @Test fun failedDiscardKeepsThePreviewButFailedCloseHandsItBack() = withPort {
         port.open()
         port.tryPreset(AssistantPreset.Brighten)
@@ -310,9 +335,10 @@ class AssistantSessionPortTest {
         val ui = MutableStateFlow(UiState(previewSource = 1))
         var canBegin = true
         var undos = 0
+        var onUndo: () -> Unit = {}
         var settings = 0
         val port = AssistantSessionPort(scope, controller, runtime, ui, { canBegin }, { ui.value.ready },
-            { undos++ }, { settings++ })
+            { undos++; onUndo() }, { settings++ })
         suspend fun shown(predicate: (AssistantView) -> Boolean) = port.view.first(predicate)
         suspend fun scopePrompt(except: AssistantQuestion? = null) = checkNotNull(shown {
             it.question?.let { q -> q != except && q.options.size == 2 && q.options.all { o -> '#' in o } } == true

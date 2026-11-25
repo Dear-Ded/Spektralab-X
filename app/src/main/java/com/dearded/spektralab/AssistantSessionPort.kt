@@ -71,7 +71,10 @@ internal class AssistantSessionPort(
         controller.adjust(listOf(ParameterChange(param.id, value)))
     override fun apply() = controller.apply()
     override fun discard() = controller.discardDraft()
-    override fun undo() = undoEdit()
+    override fun undo() {
+        undoEdit()
+        if (controller.state.value.phase == DraftPhase.IDLE && canBegin()) controller.begin()
+    }
     override fun retrySave() = controller.retrySave()
     override fun answer(text: String) {
         val prompt = controller.state.value.scopePrompt
