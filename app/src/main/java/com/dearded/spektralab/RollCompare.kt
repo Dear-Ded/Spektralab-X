@@ -146,7 +146,7 @@ fun RollCompare(table: LightTableViewModel, frame: Frame, catalog: Catalog, onCl
                             val s = picked ?: return@clickable
                             val e = s.applyTo(start, catalog) ?: return@clickable
                             table.saveLook(frame, e, s.name)
-                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                            Feedback.play(view, Cue.Pick)
                             onClose()
                         }
                         .padding(horizontal = 22.dp),

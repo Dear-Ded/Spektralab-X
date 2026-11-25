@@ -9,51 +9,34 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /*
- * A frame of reversal film (E-6) being developed, drawn: the launch intro's frame and the save
- * animation both use it (docs/FRONTEND_ITERATION_2026-11-24.md, B).
+ * A frame being developed, drawn: the launch intro's frame and the save animation both use it,
+ * with the same formula as the project site's opening print (docs/site/src/hero.js).
  *
- * Chemistry does not sweep a front down the film: every point changes at once, along smooth
- * exponential curves, and a point's tone decides when it starts and how fast it goes. So each
- * pixel here runs its own clock:
+ * The frame starts as its colour negative on a light box (the positive inverted, under the orange
+ * mask) and the print comes up through it the way it does in the tray: a developer front that is
+ * uneven (fbm noise), where the print's dark tones come up a little ahead of its light ones, a warm
+ * edge along the front and grain only where it is still developing. At p = 1 every pixel is the
+ * positive exactly (the front's threshold is past every point's noise, and the last 3 % lands on it).
  *
- *   undeveloped        milky cream, no image
- *   first developer    a silver negative builds up in the cream, the most exposed parts (the
- *                      slide's highlights) first
- *   colour developer   what is left goes dark too, shadows first: the film nearly black, never a
- *                      cut to black (it stays a dim grey-brown)
- *   bleach and fix     the slide clears out of the dark through a dim veil, thin (bright) parts
- *                      first, its colour coming up as it clears
- *
- * Uneven development (agitation, bromide drag) is two low-frequency fields that shift each
- * point's clock a little; they never threshold a mask, so no edge or blob can form, and they are
- * gone by the end. Grain is the film's own, fixed to it. At p = 1 the frame is exactly the slide.
- *
- * API 33+: one RuntimeShader with the slide as a child shader. Elsewhere (API 29-32, and software
+ * API 33+: one RuntimeShader with the positive as a child shader. Elsewhere (API 29-32, and software
  * canvases such as the JVM screenshot tests): the same formula on the CPU at a low resolution,
- * drawn scaled, handing over to the sharp slide as it finishes. Keep the two in step, and the
- * preview's (preview/ui-polish.html developPixel).
+ * drawn scaled, handing over to the sharp positive as it finishes. Keep the two in step, and the
+ * site's hero.js.
  */
 internal object FilmDevelop {
-    /** The undeveloped stock on a light box: milky, warm grey. */
-    private val Cream = floatArrayOf(0.70f, 0.68f, 0.60f)
-    /** The deepest it goes in the colour developer: dim, warm, not black. */
-    private val Dark = floatArrayOf(0.045f, 0.042f, 0.040f)
-    /** The bleach's veil. */
-    private val Veil = floatArrayOf(0.05f, 0.048f, 0.045f)
-
     /**
      * The slide a frame develops into: [shader] draws it into the frame's rect (an image or a
      * gradient), [small] is a copy at most [SMALL] px wide for the CPU twin.
@@ -64,11 +47,6 @@ internal object FilmDevelop {
     const val SMALL = 160
 
     // --- the model, shared by the shader and the CPU twin -------------------------------------
-
-    private fun ramp(x: Float, a: Float, b: Float, k: Float): Float {
-        val u = ((x - a) / (b - a)).coerceIn(0f, 1f)
-        return (1f - exp(-k * u)) / (1f - exp(-k))
-    }
 
     private fun smooth(e0: Float, e1: Float, x: Float): Float {
         val v = ((x - e0) / (e1 - e0)).coerceIn(0f, 1f)
@@ -85,33 +63,33 @@ internal object FilmDevelop {
         return (a + (b - a) * fx) + ((c + (d - c) * fx) - (a + (b - a) * fx)) * fy
     }
 
-    /** One pixel of the CPU twin, as the shader's main(): [r],[g],[b] the slide there, [u],[v] 0..1 in the frame. */
-    private fun pixel(r: Float, g: Float, b: Float, u: Float, v: Float, t: Float, seed: Float, out: FloatArray) {
-        val l = 0.2126f * r + 0.7152f * g + 0.0722f * b
-        val n = vnoise(u * 2.5f + seed * 7f + t * 0.6f, v * 1.6f + seed * 7f) - 0.5f
-        val s = vnoise(u * 7f + seed * 3f, v * 0.9f + seed * 3f) - 0.5f
-        val ti = (t + (0.06f * n + 0.02f * s) * (1f - t) * smooth(0f, 0.08f, t)).coerceIn(0f, 1f)
-        val a = ramp(ti, 0.02f + 0.14f * (1f - l), 0.42f, 3f)
-        val dk = ramp(ti, 0.28f + 0.08f * l, 0.62f, 2.5f)
-        val c = ramp(ti, 0.50f + 0.12f * (1f - l), 0.95f, 3.2f)
-        val veil = 1f - ramp(ti, 0.62f, 0.98f, 3f)
-        val sat = 0.35f + 0.65f * ramp(ti, 0.55f, 1f, 2.5f)
-        val land = smooth(0.97f, 1f, t)
-        val sr = r * (1f - 0.5f * veil) + Veil[0] * veil
-        val sg = g * (1f - 0.5f * veil) + Veil[1] * veil
-        val sb = b * (1f - 0.5f * veil) + Veil[2] * veil
-        val sl = 0.2126f * sr + 0.7152f * sg + 0.0722f * sb
-        out[0] = channel(0, l, a, dk, c, sl + (sr - sl) * sat, r, land)
-        out[1] = channel(1, l, a, dk, c, sl + (sg - sl) * sat, g, land)
-        out[2] = channel(2, l, a, dk, c, sl + (sb - sl) * sat, b, land)
+    private fun fbm(x: Float, y: Float): Float {
+        var v = 0f; var amp = 0.5f; var px = x; var py = y
+        repeat(5) { v += amp * vnoise(px, py); px *= 2.03f; py *= 2.03f; amp *= 0.5f }
+        return v
     }
 
-    private fun channel(i: Int, l: Float, a: Float, dk: Float, c: Float, slide: Float, src: Float, land: Float): Float {
-        var col = Cream[i] * (1f - 0.62f * a * l)
-        col += (Dark[i] - col) * dk
-        col += (slide - col) * c
-        return (col + (src - col) * land).coerceIn(0f, 1f)
+    /** One pixel of the CPU twin, as the shader's main(): [r],[g],[b] the positive there, [u],[v] 0..1 in the frame. */
+    private fun pixel(r: Float, g: Float, b: Float, u: Float, v: Float, t: Float, seed: Float, out: FloatArray) {
+        val l = 0.2126f * r + 0.7152f * g + 0.0722f * b
+        val n = fbm(u * 3.2f + seed * 7f, v * 2.2f + seed * 7f + t * 0.6f) * 0.55f + (l - 0.5f) * 0.22f
+        val k = smooth(n - 0.1f, n + 0.1f, t * 1.55f - 0.32f)
+        val wip = 1f - k
+        val grain = (hash(u * 977f + seed, v * 613f + t) - 0.5f) * 0.06f * wip
+        val land = smooth(0.97f, 1f, t)
+        val src = floatArrayOf(r, g, b)
+        for (i in 0..2) {
+            val neg = (1f - src[i]) * Mask[i] + Base[i]
+            var c = neg + (src[i] - neg) * k + grain + Edge[i] * k * wip * 0.55f
+            c += (src[i] - c) * land
+            out[i] = c.coerceIn(0f, 1f)
+        }
     }
+
+    /** The colour negative's orange mask and base, and the warm edge along the front. */
+    private val Mask = floatArrayOf(0.96f, 0.60f, 0.36f)
+    private val Base = floatArrayOf(0.03f, 0.012f, 0f)
+    private val Edge = floatArrayOf(1f, 0.72f, 0.45f)
 
     // --- drawing ------------------------------------------------------------------------------
 
@@ -134,11 +112,11 @@ internal object FilmDevelop {
     fun DrawScope.rebate(box: Rect, p: Float, seed: Float = 0.61f, alpha: Float = 1f) =
         frame(box, p, BlackSlide, seed, alpha)
 
-    /** The pre-exposed edge print: dark in the first developer, lost in the dark, coming up light as it clears. */
+    /** The pre-exposed edge print: dark on the orange negative, coming up light as the rebate goes black. */
     fun edgeInk(p: Float): Color {
-        val light = 0.85f * smooth(0.74f, 0.96f, p)
-        val dark = 0.7f * ramp(p, 0.04f, 0.4f, 3f) * (1f - ramp(p, 0.3f, 0.6f, 2.5f))
-        return if (light >= dark) Color(0xFFECCE96).copy(alpha = light) else Color(0xFF342C22).copy(alpha = dark)
+        val light = 0.85f * smooth(0.5f, 0.85f, p)
+        val dark = 0.7f * (1f - smooth(0.3f, 0.6f, p))
+        return if (light >= dark) Color(0xFFECCE96).copy(alpha = light) else Color(0xFF3A2414).copy(alpha = dark)
     }
 
     /** A KS perforation: a rounded rectangle. */
@@ -173,6 +151,64 @@ internal object FilmDevelop {
     private val BlackSlide: Positive by lazy {
         val small = android.graphics.Bitmap.createBitmap(8, 8, android.graphics.Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.BLACK) }
         Positive({ r -> android.graphics.LinearGradient(r.left, 0f, r.right, 0f, android.graphics.Color.BLACK, android.graphics.Color.BLACK, android.graphics.Shader.TileMode.CLAMP) }, small)
+    }
+
+    /**
+     * A new look coming up over the old one (EditorScreen's photo): a RenderEffect for the new
+     * print's layer, [t] 0..1. The same developer front as [frame], the new print's dark tones a
+     * little ahead, a warm edge along it; where it has not reached, the layer is transparent and the
+     * old print under it shows. At t = 1 the layer is the new print exactly. Null below API 33 or
+     * where the shader will not compile (the caller cross-fades instead).
+     */
+    fun swapEffect(size: Size, t: Float, seed: Float): androidx.compose.ui.graphics.RenderEffect? {
+        if (Build.VERSION.SDK_INT < 33 || cpuOnly || size.width < 1f) return null
+        val sh = Swap.shader ?: return null
+        sh.setFloatUniform("uSize", size.width, size.height)
+        sh.setFloatUniform("uT", t)
+        sh.setFloatUniform("uSeed", seed)
+        return android.graphics.RenderEffect.createRuntimeShaderEffect(sh, "content").asComposeRenderEffect()
+    }
+
+    @RequiresApi(33)
+    private object Swap {
+        val shader: RuntimeShader? by lazy {
+            runCatching { RuntimeShader(AGSL) }
+                .onFailure { android.util.Log.w("FilmDevelop", "swap shader unavailable, cross-fade instead", it) }.getOrNull()
+        }
+        private const val AGSL = """
+uniform shader content;
+uniform float2 uSize;
+uniform float uT;
+uniform float uSeed;
+
+float hash(float2 q) { return fract(sin(q.x * 127.1 + q.y * 311.7) * 43758.547); }
+float vnoise(float2 q) {
+    float2 i = floor(q);
+    float2 f = fract(q);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + float2(1.0, 0.0)), f.x), mix(hash(i + float2(0.0, 1.0)), hash(i + float2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(float2 q) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 5; i++) { v += a * vnoise(q); q *= 2.03; a *= 0.5; }
+    return v;
+}
+
+half4 main(float2 p) {
+    half4 c = content.eval(p);
+    if (c.a <= 0.0) return c;
+    float3 rgb = float3(c.rgb) / float(c.a);
+    float2 uv = p / uSize;
+    float l = dot(rgb, float3(0.2126, 0.7152, 0.0722));
+    float n = fbm(float2(uv.x * 3.2 + uSeed * 7.0, uv.y * 2.2 + uSeed * 7.0 + uT * 0.6)) * 0.55 + (l - 0.5) * 0.22;
+    float k = smoothstep(n - 0.10, n + 0.10, uT * 1.55 - 0.32);
+    k = mix(k, 1.0, smoothstep(0.97, 1.0, uT));
+    rgb = clamp(rgb + float3(1.0, 0.72, 0.45) * k * (1.0 - k) * 0.35, 0.0, 1.0);
+    float a = float(c.a) * k;
+    return half4(half3(rgb * a), half(a));
+}
+"""
     }
 
     /** True draws the CPU twin even on a hardware canvas: the JVM screenshot tests set it. */
@@ -252,36 +288,28 @@ float vnoise(float2 q) {
     float d = hash(i + float2(1.0, 1.0));
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
-float ramp(float x, float a, float b, float k) {
-    float u = clamp((x - a) / (b - a), 0.0, 1.0);
-    return (1.0 - exp(-k * u)) / (1.0 - exp(-k));
+
+float fbm(float2 q) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 5; i++) { v += a * vnoise(q); q *= 2.03; a *= 0.5; }
+    return v;
 }
 
 half4 main(float2 p) {
     float2 uv = (p - uRect.xy) / uRect.zw;
     float3 pos = float3(img.eval(p).rgb);
-    float l = dot(pos, float3(0.2126, 0.7152, 0.0722));
     float t = uT;
-    // Uneven development: two low-frequency fields shift each point's clock, never a mask.
-    float n = vnoise(float2(uv.x * 2.5 + uSeed * 7.0 + t * 0.6, uv.y * 1.6 + uSeed * 7.0)) - 0.5;
-    float s = vnoise(float2(uv.x * 7.0 + uSeed * 3.0, uv.y * 0.9 + uSeed * 3.0)) - 0.5;
-    float ti = clamp(t + (0.06 * n + 0.02 * s) * (1.0 - t) * smoothstep(0.0, 0.08, t), 0.0, 1.0);
-    // First developer: the negative, most exposed first. Colour developer: the rest goes dark,
-    // shadows first. Bleach and fix: the slide clears, thin parts first, through a veil.
-    float a = ramp(ti, 0.02 + 0.14 * (1.0 - l), 0.42, 3.0);
-    float dk = ramp(ti, 0.28 + 0.08 * l, 0.62, 2.5);
-    float c = ramp(ti, 0.50 + 0.12 * (1.0 - l), 0.95, 3.2);
-    float veil = 1.0 - ramp(ti, 0.62, 0.98, 3.0);
-    float sat = 0.35 + 0.65 * ramp(ti, 0.55, 1.0, 2.5);
-    float3 slide = pos * (1.0 - 0.5 * veil) + float3(0.05, 0.048, 0.045) * veil;
-    float sl = dot(slide, float3(0.2126, 0.7152, 0.0722));
-    slide = mix(float3(sl), slide, sat);
-    float3 col = float3(0.70, 0.68, 0.60) * (1.0 - 0.62 * a * l);
-    col = mix(col, float3(0.045, 0.042, 0.040), dk);
-    col = mix(col, slide, c);
-    // Grain: the film's own, fixed to it, finer once it has cleared.
-    float g = hash(floor(p * 0.75) + uSeed * 13.0) - 0.5;
-    col += g * (0.05 * (1.0 - c) + 0.012) * (1.0 - smoothstep(0.97, 1.0, t));
+    // The colour negative on a light box: inverted, under the orange mask.
+    float3 neg = (1.0 - pos) * float3(0.96, 0.60, 0.36) + float3(0.03, 0.012, 0.0);
+    // The developer front: uneven, the print's dark tones a little ahead.
+    float l = dot(pos, float3(0.2126, 0.7152, 0.0722));
+    float n = fbm(float2(uv.x * 3.2 + uSeed * 7.0, uv.y * 2.2 + uSeed * 7.0 + t * 0.6)) * 0.55 + (l - 0.5) * 0.22;
+    float k = smoothstep(n - 0.10, n + 0.10, t * 1.55 - 0.32);
+    float wip = 1.0 - k;
+    float3 col = mix(neg, pos, k);
+    col += (hash(floor(p * 0.75) + uSeed * 13.0 + floor(t * 30.0)) - 0.5) * 0.06 * wip;   // grain while it develops
+    col += float3(1.0, 0.72, 0.45) * k * wip * 0.55;                                      // a warm edge along the front
     col = mix(col, pos, smoothstep(0.97, 1.0, t));
     return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
 }

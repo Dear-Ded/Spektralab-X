@@ -551,7 +551,7 @@ private fun Preview(
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
                             onLongPress = {
                                 holding = true
-                                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                                Feedback.play(view, Cue.LongPress)
                             },
                             onPress = {
                                 tryAwaitRelease()
@@ -590,6 +590,7 @@ private fun Preview(
             var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
             var front by remember { mutableStateOf(bitmap) }
             val fade = remember { androidx.compose.animation.core.Animatable(1f) }
+            var swapSeed by remember { mutableFloatStateOf(0.37f) }
             LaunchedEffect(bitmap) {
                 if (bitmap === front) return@LaunchedEffect
                 // A new look (a style, a film, a paper, a reset, an undo) crosses over from the old print;
@@ -597,16 +598,23 @@ private fun Preview(
                 val cross = ui.edit != shownEdit && !holding && back == null && !sliderDragging()
                 shownEdit = ui.edit
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
-                back = front; front = bitmap; fade.snapTo(0f)
-                // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
-                // is gone before the eye settles on the new one; with animations off it is a cut.
-                try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
+                back = front; front = bitmap; fade.snapTo(0f); swapSeed = (swapSeed + 0.618f) % 10f
+                // The new look comes up through the old as the site's opening print does (FilmDevelop.swapEffect),
+                // about 0.55 s; below API 33 a 110 ms cross-fade. With animations off it is a cut either way.
+                val developing = android.os.Build.VERSION.SDK_INT >= 33
+                try {
+                    if (developing) fade.animateTo(1f, androidx.compose.animation.core.tween(560, easing = androidx.compose.animation.core.LinearOutSlowInEasing))
+                    else fade.animateTo(1f, Motion.fastEffects())
+                } finally { back = null }
             }
             Box(gestures) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
-                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
+                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer {
+                        val effect = FilmDevelop.swapEffect(size, fade.value, swapSeed)
+                        if (effect != null) renderEffect = effect else alpha = fade.value
+                    })
                 } else {
                     FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
                 }
