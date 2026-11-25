@@ -35,12 +35,11 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install -q meson==1.9.2 'ninja>=1.13,<1.14' numpy
           echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: deps
         with:
-          path: |
-            upstream
-            deps
-          key: samples-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
+          path: deps
+          key: samples-deps-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
       - name: Upstream and codecs
         run: |
           bash scripts/fetch-upstream.sh upstream
@@ -53,11 +52,20 @@ jobs:
               --install "$D/lens-codecs/install-linux" --generator Ninja --jobs "$THREADS"
             touch "$D/.done"
           fi
+      - uses: actions/cache/save@v4
+        if: steps.deps.outputs.cache-hit != 'true'
+        with:
+          path: deps
+          key: samples-deps-${{ hashFiles('scripts/fetch-upstream.sh', 'patches/*.patch') }}
       - name: Engine (as scripts/parity.sh builds it)
         run: |
           UP="$PWD/upstream"; D="$PWD/deps"; L="$RUNNER_TEMP/libraw-spk"; B="$PWD/build-host"
           cp -a "$UP/build/deps/LibRaw-0.22.2" "$L"
-          for p in $(ls patches/libraw/*.patch | sort); do patch -d "$L" -p1 --forward --batch -i "$PWD/$p" >/dev/null; done
+          # as engine-gpu.yml: crx.cpp ships with CRLF line ends, the patches expect LF
+          sed -i 's/\r$//' "$L/src/decoders/crx.cpp"
+          for p in $(ls patches/libraw/*.patch | sort); do
+            echo "patch $p"; patch -d "$L" -p1 --fuzz=0 --forward --batch < "$p"
+          done
           cmake -S "$UP" -B "$B" -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DSPEKTRALAB_BUILD_NATIVE_RAW=ON -DSPEKTRALAB_BUILD_HOST=ON -DSPEKTRALAB_REQUIRE_VULKAN=ON \
             -DSPEKTRALAB_STATIC_RUNTIME=ON -DSPEKTRALAB_DEPS_DIR="$UP/build/deps" \
