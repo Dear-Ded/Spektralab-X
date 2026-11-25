@@ -66,10 +66,13 @@ internal data class AssistantSettings(
 internal data class AssistantPreferences(
     val learn: Boolean = false,
     val useRules: Boolean = false,
-    /** Confirmed rules are actually applied to edits; until then the switch is shown off and explained. */
-    val rulesActive: Boolean = false,
     val busy: Boolean = false,
     val error: AssistantError? = null,
+    /**
+     * Confirmed rules are actually applied to edits; until then the switch is shown off and explained.
+     * Last, so the store's positional AssistantPreferences(learn, useRules, busy, error) still builds.
+     */
+    val rulesActive: Boolean = false,
 )
 
 /** The settings side of the session (AdvisorRuntime and the preference store). */
