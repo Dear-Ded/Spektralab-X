@@ -1,19 +1,22 @@
 package com.dearded.spektralab.advisor.session
 
 import android.content.Context
+import com.dearded.spektralab.advisor.domain.AdviceFailure
 import com.dearded.spektralab.advisor.domain.AdviceResult
 import com.dearded.spektralab.advisor.network.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-enum class AdvisorSettingsError { LOAD, SAVE, CONFLICT, CONFIGURATION, CREDENTIAL, CONNECTION }
+enum class AdvisorSettingsError { LOAD, SAVE, CONFLICT, CONFIGURATION, CREDENTIAL }
+enum class AdvisorProbeResult { PASSED, AUTH, ADDRESS, RATE_LIMIT, TIMEOUT, NETWORK, REFUSED, INVALID, CONFIGURATION }
 data class AdvisorRuntimeState(val loading: Boolean = true, val saving: Boolean = false, val testing: Boolean = false,
     val catalog: ModelCatalog? = null, val configuration: AdvisorConfiguration = AdvisorConfiguration(),
-    val error: AdvisorSettingsError? = null, val probePassed: Boolean = false, val probeUsage: AdvisorTokenUsage? = null,
+    val error: AdvisorSettingsError? = null, val probeResult: AdvisorProbeResult? = null, val probeUsage: AdvisorTokenUsage? = null,
     val configurationReady: Boolean = false) {
     val selected get() = configuration.selected()
     val requestSelection get() = selected.takeIf { configurationReady }
+    val probePassed get() = probeResult == AdvisorProbeResult.PASSED
 }
 
 /** Synchronous disk boundary, called only on IO. A failed settings write removes its new orphan secret. */
@@ -99,7 +102,7 @@ class AdvisorRuntime internal constructor(private val scope: CoroutineScope,
     fun reload() {
         if (job?.isActive == true) return
         connect(null)
-        _state.value = _state.value.copy(loading = true, error = null, testing = false, probePassed = false,
+        _state.value = _state.value.copy(loading = true, error = null, testing = false, probeResult = null,
             probeUsage = null, configurationReady = false)
         job = scope.launch {
             try {
@@ -131,7 +134,7 @@ class AdvisorRuntime internal constructor(private val scope: CoroutineScope,
         val previousJob = job
         previousJob?.cancel()
         connect(null)
-        _state.value = state.value.copy(saving = true, testing = false, error = null, probePassed = false,
+        _state.value = state.value.copy(saving = true, testing = false, error = null, probeResult = null,
             probeUsage = null, configurationReady = false)
         job = scope.launch {
             previousJob?.join()
@@ -163,27 +166,40 @@ class AdvisorRuntime internal constructor(private val scope: CoroutineScope,
         val active = checkNotNull(service)
         val config = state.value.configuration
         connect(null)
-        _state.value = state.value.copy(testing = true, error = null, probePassed = false, probeUsage = null)
+        _state.value = state.value.copy(testing = true, error = null, probeResult = null, probeUsage = null)
         job = scope.launch {
-            try {
+            val (result, usage) = try {
                 val reply = active.probe(config)
-                ensureActive()
-                _state.value = state.value.copy(testing = false, probePassed = reply.result == AdviceResult.NoChange,
-                    probeUsage = reply.usage, error = if (reply.result == AdviceResult.NoChange) null else AdvisorSettingsError.CONNECTION)
-                connect(AdviceConnection.from(config, active.catalog.version, active.gateway))
+                (if (reply.result == AdviceResult.NoChange) AdvisorProbeResult.PASSED else AdvisorProbeResult.INVALID) to reply.usage
             } catch (e: CancellationException) { throw e
-            } catch (e: Exception) {
-                _state.value = state.value.copy(testing = false, error = if (e is CredentialUnavailable ||
-                    e is AdvisorNetworkFailure && e.category == AdvisorNetworkError.AUTH) AdvisorSettingsError.CREDENTIAL else AdvisorSettingsError.CONNECTION)
-                connect(AdviceConnection.from(config, active.catalog.version, active.gateway))
-            }
+            } catch (e: Exception) { probeFailure(e) to null }
+            ensureActive()
+            _state.value = state.value.copy(testing = false, probeResult = result, probeUsage = usage)
+            connect(AdviceConnection.from(config, active.catalog.version, active.gateway))
         }
+    }
+
+    private fun probeFailure(error: Exception): AdvisorProbeResult = when (error) {
+        is CredentialUnavailable -> AdvisorProbeResult.AUTH
+        is AdvisorNetworkFailure -> when (error.category) {
+            AdvisorNetworkError.AUTH -> AdvisorProbeResult.AUTH
+            AdvisorNetworkError.NOT_FOUND, AdvisorNetworkError.REDIRECT -> AdvisorProbeResult.ADDRESS
+            AdvisorNetworkError.RATE_LIMIT -> AdvisorProbeResult.RATE_LIMIT
+            AdvisorNetworkError.TIMEOUT -> AdvisorProbeResult.TIMEOUT
+            AdvisorNetworkError.TOO_LARGE, AdvisorNetworkError.INVALID_RESPONSE -> AdvisorProbeResult.INVALID
+            AdvisorNetworkError.SERVER, AdvisorNetworkError.HTTP, AdvisorNetworkError.TRANSPORT -> AdvisorProbeResult.NETWORK
+        }
+        is AdvisorProtocolFailure -> if (error.category == AdvisorCompletionError.REFUSED) AdvisorProbeResult.REFUSED
+            else AdvisorProbeResult.INVALID
+        is AdviceFailure -> AdvisorProbeResult.INVALID
+        is IllegalArgumentException -> AdvisorProbeResult.CONFIGURATION
+        else -> AdvisorProbeResult.NETWORK
     }
 
     fun cancelTest() {
         if (!state.value.testing) return
         job?.cancel()
-        _state.value = state.value.copy(testing = false, probePassed = false, probeUsage = null)
+        _state.value = state.value.copy(testing = false, probeResult = null, probeUsage = null)
         service?.let { connect(AdviceConnection.from(state.value.configuration, it.catalog.version, it.gateway)) }
     }
 }

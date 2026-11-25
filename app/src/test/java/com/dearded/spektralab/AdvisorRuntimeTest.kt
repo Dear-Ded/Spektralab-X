@@ -6,6 +6,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
@@ -109,6 +110,45 @@ class AdvisorRuntimeTest {
         }
     }
 
+    @Test(timeout = 15000) fun explicitProbePreservesTypedFailuresAndRequiresTheSyntheticNoChangeResult() = runBlocking<Unit> {
+        AdvisorAdapterFixture().use { f ->
+            val dir = java.nio.file.Files.createTempDirectory("advisor-probe-errors").toFile()
+            val file = File(dir, "settings.json")
+            val service = AdvisorSettingsService(catalog, f.gateway(ResponsesAdapter(AdvisorWireFixtures.schema)), AdvisorConfigurationStore(file), f.credentials)
+            val (endpoint, binding) = config()
+            val saved = service.save(0, endpoint, binding, "synthetic-key".toCharArray())
+            val runtime = AdvisorRuntime(this, { service }, {})
+            try {
+                assertNull(runtime.idle().probeResult)
+                val refusal = AdvisorWireFixtures.responses().apply {
+                    getJSONArray("output").getJSONObject(0)
+                        .put("content", JSONArray().put(JSONObject().put("type", "refusal")))
+                }
+                val cases = listOf(
+                    MockResponse().setResponseCode(401) to AdvisorProbeResult.AUTH,
+                    MockResponse().setResponseCode(404) to AdvisorProbeResult.ADDRESS,
+                    MockResponse().setResponseCode(302) to AdvisorProbeResult.ADDRESS,
+                    MockResponse().setResponseCode(429) to AdvisorProbeResult.RATE_LIMIT,
+                    MockResponse().setResponseCode(503) to AdvisorProbeResult.NETWORK,
+                    MockResponse().setBody(refusal.toString()) to AdvisorProbeResult.REFUSED,
+                    MockResponse().setBody(AdvisorWireFixtures.responses("not a result").toString()) to AdvisorProbeResult.INVALID,
+                    MockResponse().setBody(AdvisorWireFixtures.responses().toString()) to AdvisorProbeResult.INVALID,
+                )
+                for ((response, expected) in cases) {
+                    f.server.enqueue(response)
+                    runtime.testConnection()
+                    val state = runtime.idle()
+                    assertEquals(expected, state.probeResult)
+                    assertNull(state.error)
+                    assertEquals(saved.selected(), state.requestSelection)
+                }
+                assertEquals(cases.size, f.server.requestCount)
+            } finally {
+                service.remove(saved.revision, binding.id); file.delete(); dir.delete()
+            }
+        }
+    }
+
     @Test(timeout = 15000) fun failedSettingsWriteBlocksAProbeUntilTheSavedConfigurationIsReloaded() = runBlocking<Unit> {
         AdvisorAdapterFixture().use { f ->
             val dir = java.nio.file.Files.createTempDirectory("advisor-probe-after-save").toFile()
@@ -167,6 +207,7 @@ class AdvisorRuntimeTest {
             assertNotNull(withContext(Dispatchers.IO) { f.server.takeRequest(3, TimeUnit.SECONDS) })
             runtime.select(null); runtime.idle()
             assertNull(runtime.state.value.selected); assertFalse(runtime.state.value.testing); assertFalse(runtime.state.value.probePassed)
+            assertNull(runtime.state.value.probeResult)
             assertEquals(1, f.server.requestCount)
             service.remove(service.load().revision, binding.id); file.delete(); dir.delete()
         }
