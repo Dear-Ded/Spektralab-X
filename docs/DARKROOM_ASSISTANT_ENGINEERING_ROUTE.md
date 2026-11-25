@@ -52,14 +52,21 @@ Treat commercial products as behavior references only. Do not download or reuse 
 | P2.2 | Decision recorded: default adoption not passed | 22 development captures, 28 rows; 21 paired previews yielded 10 B wins, 8 ties, 3 losses, including protected detail loss on one RAW. Independent reflective and lighting holdouts: four scored captures (1 B win, 2 ties, 1 loss), four unscored. Keep scene transmission off. Actual provider and production host render receipts are archived separately; not device or app end-to-end. Local-only prompt replay is separate. |
 | P2.3 | Open (prompt regression) | v2.6 clarified all eight controls are whole-image. 136 focused release JVM tests passed. Six live scalar probes: both model arms refused the exact-only tree task and projected the allowed lift, but both still suggested a global change for the only-water task. Do not treat prompt compliance as an authorization check. |
 | P3.1 | Not selected | P2 did not isolate repeatable amplitude or subject-evidence errors warranting one extra production algorithm. No local ML, extra render loop or alternate renderer. |
-| P4.1 | Started | `a68bbb0`: discrete undo and exact writer receipts; 27 focused cloud JVM tests passed. Actual sidecar/index integration test not run; no active UI port consumer yet. Next: formal revision and exclusive preview ownership, editor apply/undo/retry/export integration, then internal port binding. Record Android/native/screenshot, real-provider and device acceptance separately. No publish. |
+| P4.1 | Closed (editor and disk contract) | Exact writer receipts and a separate undo entry use the formal editor. The Android JVM runs exercised actual editor state and frame sidecar/index writes, including failure/retry, without modifying the accepted edit twice. |
+| P4.2 | Partial (preview and queue verified) | The existing preview pipeline rejects late frames at ownership changes. Android JVM tests with a synthetic published frame check apply/undo and formal-only TIFF/source-size JPEG recipes. Graphics fixtures cover measured statistics, highlight protection and directional contrast. Native candidate preview and final device exports remain unverified. |
+| P4.3 | Partial (ports verified) | Both internal interface adapters pass focused tests with typed runtime state and simulated connections. No application-root provider yet. Land real no-backup preferences and saved-decision recording before connecting the debug-only root. |
+| P4.4–5 | Open | Real local preferences and confirmed-rule lifecycle; complete Android/screenshot CI, live model through the debug candidate, device and export acceptance. No publish. |
 
 Branch aligned with `origin/main` at `3294552c2304daf87da19e6c969dff41c101b6f2`
 via `8998a1f`; the three upstream commits did not change the Android/engine
 code or the two candidate CI workflows used for these tests.
 
+The focused P4 cloud test baseline at `abf3ff1` is 26 suites, 181 tests, no
+failures or skips; Release Kotlin compilation also passed. These are focused
+checks, not a complete Android workflow or candidate APK.
+
 The import leaves out the legacy UI, profile/Room rules, original recovery and old editor implementation.
 No request advertises local rule targets that this branch cannot apply. The result schemas and existing
-scalar and direction permissions are unchanged. Runtime tests now construct the connection directly.
-Save tests here validate the controller/coordinator against a supplied acknowledgement; exact receipts
-from current app writers and an isolated history step are P4 integration requirements.
+scalar and direction permissions are unchanged. Runtime tests construct the connection directly, and
+P4 integration tests exercise writer acknowledgements against real local files. Java host tests do not
+claim the complete app or Android GPU path has been exercised.
