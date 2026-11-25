@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.animation.togetherWith
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -197,10 +198,18 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     // UI2.md 2.1: 保存 sits at the right end of the bottom toolbar, under the thumb.
     val saveButton: @Composable () -> Unit = {
                     Box {
+                        val savePress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                        val saveDown by savePress.collectIsPressedAsState()
+                        val saveSink by androidx.compose.animation.core.animateFloatAsState(if (saveDown) 1f else 0f, Motion.fastEffects(), label = "save-press")
+                        val saveOn = ui.hasImage && !ui.exporting
                         androidx.compose.material3.Button(
-                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
+                            onClick = { exportMenu = true }, enabled = saveOn,
+                            interactionSource = savePress,
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Transparent,
+                                contentColor = Palette.OnAccent, disabledContainerColor = Color.Transparent, disabledContentColor = Palette.OnAccent.copy(alpha = 0.5f)),
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() },
+                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() }
+                                .drawBehind { drawKey(size.height / 2, 1f, saveSink, alpha = if (saveOn) 1f else 0.5f) },
                         ) {
                             SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))

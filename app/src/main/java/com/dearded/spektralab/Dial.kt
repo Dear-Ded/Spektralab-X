@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.lerp
 import kotlin.math.asin
 import androidx.compose.animation.core.Animatable
@@ -317,7 +318,7 @@ internal fun CameraDial(
                 1f to Color(0x29FFF8EC), startY = top - 1.5f * density, endY = top + dh + 1.5f * density),
                 Offset(-1.5f * density, top - 1.5f * density), Size(w + 3f * density, dh + 3f * density), CornerRadius(corner.x + 1.5f * density))
             // The drum: turned metal round an upright axis, lit from the upper left (preview/ui-feel-parts.js dial).
-            clipRect(0f, top, w, top + dh) {
+            clipPath(Path().apply { addRoundRect(androidx.compose.ui.geometry.RoundRect(0f, top, w, top + dh, corner)) }) {
                 val shadeStops = Array(25) { i ->
                     val th = asin(((w * i / 24f - cx) / radius).coerceIn(-0.999f, 0.999f))
                     val l = minOf(1f, 0.1f + 0.82f * maxOf(0f, cos(th + 0.42f)) * cos(th).pow(0.5f))
@@ -433,7 +434,7 @@ internal fun CameraDial(
                 1f to Color(0xFF2C2A27), startX = cx - 6.dp.toPx(), endX = cx + 6.dp.toPx()))
             drawRect(ink, Offset(cx - 0.6f * density, top - 7.dp.toPx()), Size(1.2f * density, 4.5.dp.toPx()))
             // Cover glass: one broad, soft reflection across the top.
-            clipRect(0f, top, w, top + dh) {
+            clipPath(Path().apply { addRoundRect(androidx.compose.ui.geometry.RoundRect(0f, top, w, top + dh, corner)) }) {
                 drawRect(Brush.linearGradient(0f to Color(0x0EFFFFFF), 0.45f to Color(0x05FFFFFF), 0.46f to Color.Transparent,
                     start = Offset(0f, top), end = Offset(w * 0.4f, top + dh)), Offset(0f, top), Size(w, dh))
             }
