@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CompletableDeferred
@@ -101,6 +102,7 @@ class FrameEditAutosaveTest {
                 writing.complete(Unit)
                 check(finish.await(3, TimeUnit.SECONDS))
                 stored = it
+                true
             }
             saves.opened("a", neutral, 0.0, 0.0, reopening = false)
             saves.changed(adjusted)
@@ -124,6 +126,7 @@ class FrameEditAutosaveTest {
                 writing.complete(Unit)
                 check(finish.await(3, TimeUnit.SECONDS))
                 written += it
+                true
             }
             saves.opened("a", neutral, 0.0, 0.0, reopening = false)
             saves.changed(adjusted)
@@ -154,6 +157,7 @@ class FrameEditAutosaveTest {
             val saves = FrameEditAutosave(scope, onFailure = { failures++ }) {
                 if (fail) throw java.io.IOException("synthetic unavailable storage")
                 written += it
+                true
             }
             saves.opened("a", neutral, 0.0, 0.0, reopening = false)
             saves.changed(adjusted)
@@ -188,6 +192,7 @@ class FrameEditAutosaveTest {
                     check(finish.await(3, TimeUnit.SECONDS))
                 }
                 written += it
+                true
             }
             saves.opened("a", neutral, 0.0, 0.0, reopening = false)
             saves.changed(adjusted)
@@ -208,6 +213,41 @@ class FrameEditAutosaveTest {
             saves.opened("a", neutral, 0.0, 0.0, reopening = false)
             saves.changed(adjusted)
             assertEquals(adjusted, written.await().edit)
+        }
+    }
+
+    @Test fun exactReceiptWritesOnlyItsFrameEvenWithAnUnwritableFramePending() = runBlocking {
+        scenario { scope ->
+            val exact = FrameEditSave("a", adjusted, 4800.0, -0.2)
+            val other = FrameEditSave("b", adjusted, 5200.0, 0.1)
+            val error = IOException("synthetic failure for b")
+            val entered = CompletableDeferred<FrameEditSave>()
+            val release = CountDownLatch(1)
+            val written = mutableListOf<FrameEditSave>()
+            var failOther = true
+            val saves = FrameEditAutosave(scope) {
+                if (it.id == "b" && failOther) throw error
+                entered.complete(it)
+                check(release.await(4, TimeUnit.SECONDS))
+                written.add(it)
+            }
+            saves.opened("b", neutral, other.wbK, other.wbTint, reopening = false)
+            saves.changed(other.edit)
+            saves.opened("a", neutral, 0.0, 0.0, reopening = false)
+            saves.changed(adjusted)
+            saves.opened("b", other.edit, other.wbK, other.wbTint, reopening = false)
+            val receipt = saves.saveNow(exact)
+            try {
+                assertEquals(exact, entered.await())
+                assertFalse(receipt.isCompleted)
+            } finally { release.countDown() }
+            receipt.await()
+            assertEquals("b", saves.frameId)
+            val failure = runCatching { saves.flush() }.exceptionOrNull()
+            assertEquals(error.message, (failure as? IOException)?.message)
+            failOther = false
+            saves.close()
+            assertEquals(listOf(exact, other), written)
         }
     }
 }

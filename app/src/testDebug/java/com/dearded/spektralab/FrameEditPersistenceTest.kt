@@ -154,6 +154,30 @@ class FrameEditPersistenceTest {
         } finally { blocked.delete() }
     }
 
+    @Test fun exactReceiptFailsForAMissingFrameAndSucceedsAfterBothFilesAreWritten() = runBlocking {
+        val owner = SupervisorJob()
+        try {
+            withTimeout(5000) {
+                val store = FrameStore.of(app).also { it.load() }
+                val saves = FrameEditAutosave(CoroutineScope(owner)) { store.saveEdit(it.id, it.edit, it.wbK, it.wbTint) }
+                val snapshot = FrameEditSave("missing", Edit.NONE.copy(exposureEv = 0.5), 4700.0, -0.1)
+                val index = File(app.filesDir, "Sidecars/index.json")
+                val before = index.readText()
+                assertTrue(runCatching { saves.saveNow(snapshot).await() }.exceptionOrNull() is IOException)
+                assertFalse(File(app.filesDir, "Sidecars/missing.json").exists())
+                assertEquals(before, index.readText())
+
+                saves.saveNow(snapshot.copy(id = "one")).await()
+                val car = store.sidecar("one")!!
+                assertEquals(snapshot.edit, car.edit)
+                assertEquals(snapshot.wbK, car.wbK, 0.0)
+                assertEquals(snapshot.wbTint, car.wbTint, 0.0)
+                assertTrue(JSONArray(index.readText()).getJSONObject(0).getBoolean("edited"))
+                saves.close()
+            }
+        } finally { owner.cancelAndJoin() }
+    }
+
     @Test fun failedRatingAndDimensionsKeepPublishedAndPersistedFramesUnchanged() {
         val store = FrameStore.of(app).also { it.load() }
         val before = store.frames.value
