@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spektralab-X · 界面手感预览（显影切换 / 放大镜 / 3D 片条）</title>
+<!--
+  1:1 preview for branch ui-feel, before any Kotlin: one CSS px = one dp on a 393 dp phone.
+  The photos are engine renders (tools/samples/hires.sh); assets in preview/assets/feel/ come from
+  them by resizing only. Serve the repo root (python -m http.server) and open /preview/ui-feel.html.
+  The formulas here are the ones the Compose code will use (DevelopSwap, Drum, Loupe): keep in step.
+-->
+<style>
+@font-face{font-family:UiSans;src:url(../app/src/main/assets/fonts/InstrumentSans-VF.ttf);font-weight:400 700}
+@font-face{font-family:UiCjk;src:url(../app/src/main/assets/fonts/NotoSansSC-VF.ttf);font-weight:100 900}
+@font-face{font-family:UiMono;src:url(../app/src/main/assets/fonts/BarlowSemiCondensed-Medium.ttf);font-weight:500}
+:root{
+  --surround:#1C1C1C;--bg:#0F0F0E;--surface:#121211;--panel:#191918;--panelHigh:#232321;--panelHighest:#2D2D2A;
+  --on:#ECE9E3;--soft:#9E9A92;--outline:#3B3A37;--hair:#262523;--accent:#EEEAE2;--onAccent:#161614;
+  --filmBase:#0E0D0C;--sprocket:#6A6A72;--c41:#B07A4E;
+  --sans:UiSans,UiCjk,sans-serif;--mono:UiMono,UiCjk,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0a0a0a;color:var(--on);font-family:var(--sans)}
+body{display:flex;gap:28px;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+#console{width:330px;align-self:stretch;display:flex;flex-direction:column;gap:14px;overflow:auto;padding-right:6px;scrollbar-width:thin}
+#console h1{font-size:17px;font-weight:600}
+.sub{font-size:12px;color:var(--soft);line-height:18px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp>b{font-size:12px;color:var(--soft);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{min-height:34px;padding:0 11px;border-radius:17px;background:var(--panel);border:1px solid var(--hair);font-size:12.5px}
+.tabs button.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+#notes{font-size:12.5px;line-height:20px;color:#d8d4cc;padding-left:16px}
+#notes li{margin-bottom:6px}
+
+#phoneWrap{position:relative;flex:none}
+#phone{width:393px;height:873px;border-radius:30px;overflow:hidden;position:absolute;left:0;top:0;background:var(--bg);
+  box-shadow:0 0 0 10px #1a1a1a,0 0 0 11px #333,0 30px 80px rgba(0,0,0,.6);transform-origin:top left}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.status{height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:500 12px var(--sans);flex:none;background:var(--surface)}
+.t-titleM{font:600 16px/24px var(--sans)}
+.t-small{font:400 12px/18px var(--sans)}
+.soft{color:var(--soft)}
+.icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex:none}
+.icon svg{width:24px;height:24px;stroke:var(--on);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon.dis svg{stroke:rgba(158,154,146,.38)}
+.topbar{height:56px;padding:0 4px 0 16px;display:flex;align-items:center;background:var(--surface);flex:none}
+.topbar .ttl{flex:1;min-width:0}
+.topbar .ttl div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* editor */
+.photoArea{flex:1;position:relative;background:var(--surround);display:flex;flex-direction:column;align-items:center;min-height:0;overflow:hidden}
+.chips{align-self:stretch;height:52px;flex:none;padding:0 8px;display:flex;align-items:center;gap:6px;z-index:4}
+.ochip span{height:36px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:8px;background:rgba(0,0,0,.45);font:500 13px var(--sans);color:rgba(255,255,255,.9)}
+.ochip.on span{background:var(--accent);color:var(--onAccent)}
+.photoBox{position:relative;width:393px;height:263px;flex:none;touch-action:none;user-select:none}
+.photoBox canvas,.photoBox img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.held{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.55);font:500 12px var(--sans);display:none}
+.loupe{position:absolute;width:132px;height:132px;margin:-66px 0 0 -66px;border-radius:50%;overflow:hidden;pointer-events:none;
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.78),0 0 0 6px rgba(0,0,0,.32),0 18px 40px rgba(0,0,0,.6);background:#000 no-repeat;
+  opacity:0;transform:scale(.6);transition:opacity .22s cubic-bezier(.2,.8,.2,1),transform .32s cubic-bezier(.2,1.4,.4,1)}
+.loupe.on{opacity:1;transform:scale(1)}
+.loupe i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border:1px solid rgba(255,255,255,.55);border-radius:50%}
+.panel{height:367px;flex:none;background:var(--surface);display:flex;flex-direction:column;border-top:1px solid var(--hair)}
+.handle{height:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.handle i{width:32px;height:4px;border-radius:2px;background:var(--outline)}
+.phead{display:flex;align-items:baseline;gap:10px;padding:6px 16px 10px}
+.phead .route{font:400 12px var(--sans);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pills{display:flex;gap:8px;padding:0 16px 10px}
+.pill{height:36px;padding:0 14px;border-radius:12px;background:var(--panel);border:1px solid var(--hair);font:500 13px var(--sans);display:flex;align-items:center}
+.pill.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.cards{position:relative;display:flex;gap:8px;overflow-x:auto;padding:6px 16px 4px;scroll-snap-type:x mandatory;scrollbar-width:none;perspective:none}
+.cards::-webkit-scrollbar{display:none}
+.card{flex:none;width:112px;display:flex;flex-direction:column;align-items:center;scroll-snap-align:center;will-change:transform}
+.card .pic{width:112px;height:112px;padding:4px;border-radius:16px;border:2px solid transparent;transition:border-color .25s}
+.card.on .pic{border-color:var(--accent)}
+.card .pic div{width:100%;height:100%;border-radius:12px;background:var(--panelHigh) center/cover}
+.card b{margin-top:6px;padding:1px 8px;border-radius:8px;font:400 13px var(--sans);white-space:nowrap}
+.card.on b{background:var(--accent);color:var(--onAccent);font-weight:600}
+.bbar{height:88px;flex:none;display:flex;align-items:center;padding:0 12px 8px;gap:8px;background:var(--surface)}
+.tools{flex:1;height:64px;border-radius:32px;background:var(--panel);border:1px solid var(--hair);display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+.tool{width:52px;height:56px;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:400 11px var(--sans)}
+.tool svg{width:20px;height:20px;stroke:var(--on);fill:none;stroke-width:1.7}
+.tool.on{background:var(--accent);color:var(--onAccent)}
+.tool.on svg{stroke:var(--onAccent)}
+.save{height:56px;padding:0 18px;border-radius:28px;background:var(--accent);color:var(--onAccent);font:500 14px var(--sans);display:flex;align-items:center;gap:6px}
+.viewer{position:absolute;inset:0;z-index:20;background:#000;display:none;flex-direction:column}
+.viewer.on{display:flex}
+.viewer .vbar{height:56px;display:flex;align-items:center;padding:0 4px;background:rgba(0,0,0,.6)}
+.viewer .vimg{flex:1;overflow:auto;scrollbar-width:none}
+.viewer .vimg img{display:block;max-width:none}
+
+/* light table: the strip */
+.lt{flex:1;background:#000;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.strip{position:relative;height:262px;background:var(--filmBase);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab}
+.strip::-webkit-scrollbar{display:none}
+.strip.drag{scroll-snap-type:none;cursor:grabbing}
+.track{display:flex;height:100%;align-items:center}
+.fr{flex:none;width:262px;height:100%;display:flex;flex-direction:column;scroll-snap-align:center;position:relative;will-change:transform;background:var(--filmBase)}
+.fr .edge{height:14px;display:flex;align-items:center;justify-content:center;position:relative;font:500 11px/14px var(--mono);letter-spacing:.4px;color:var(--c41)}
+.fr .edge em{position:absolute;right:6px;font-style:normal;opacity:.7}
+.fr .sp{height:12px;display:flex;justify-content:space-around;align-items:center;padding:0 2px}
+.fr .sp i{width:14px;height:7px;border-radius:2px;background:var(--sprocket)}
+.fr .img{flex:1;margin:0 2px;background:#000 center/cover}
+.fr .dim{position:absolute;inset:0;background:#000;pointer-events:none;opacity:0}
+.ltName{margin-top:16px;text-align:center;font:400 12px var(--sans);color:var(--soft)}
+.scrub{margin:12px 16px 0;height:32px;position:relative}
+.scrub .ticks{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:space-between}
+.scrub .ticks i{width:1px;height:8px;background:#3a3a3a;margin-top:-4px}
+.scrub .ticks i.on{background:var(--on);height:16px;margin-top:-8px;width:2px}
+.scrub p{text-align:center;font:500 12px var(--mono);color:var(--soft);margin-top:30px}
+.ltBar{height:88px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 8px;background:var(--surface)}
+.seg{flex:1;height:56px;border-radius:28px;background:var(--panel);border:1px solid var(--hair);display:flex;align-items:center;padding:4px;gap:4px}
+.seg button{flex:1;height:46px;border-radius:23px;font:500 12.5px var(--sans)}
+.seg button.on{background:var(--accent);color:var(--onAccent)}
+
+/* parts: physical keys, a switch in its groove, a tray for the tools */
+.parts{flex:1;overflow-y:auto;background:var(--surface);padding:6px 16px 24px;scrollbar-width:none}
+.parts::-webkit-scrollbar{display:none}
+.parts h3{font:600 15px/22px var(--sans);margin:18px 0 8px}
+.parts .lab{font:500 11px var(--mono);letter-spacing:.08em;color:var(--soft);margin:10px 0 6px;text-transform:uppercase}
+.parts img.now{width:393px;margin-left:-16px;display:block;opacity:.95}
+.key{height:36px;padding:0 14px;border-radius:12px;font:500 13px var(--sans);display:inline-flex;align-items:center;color:var(--on);
+  background:linear-gradient(180deg,#252523,#1b1b1a);
+  box-shadow:inset 0 1px 0 rgba(255,250,240,.07),inset 0 -1px 0 rgba(0,0,0,.45),0 1px 1.5px rgba(0,0,0,.55),0 0 0 .5px rgba(0,0,0,.7);
+  transition:transform .12s,box-shadow .12s,background .2s}
+.key:active{transform:translateY(1px);box-shadow:inset 0 1px 2.5px rgba(0,0,0,.6),0 0 0 .5px rgba(0,0,0,.7)}
+.key.sel{color:var(--onAccent);background:linear-gradient(180deg,#f4f0e8,#d9d4c9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(0,0,0,.18),0 2px 4px rgba(0,0,0,.55),0 0 0 .5px rgba(0,0,0,.6)}
+.key.sel:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.25),0 1px 1px rgba(0,0,0,.5),0 0 0 .5px rgba(0,0,0,.6)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.sw{position:relative;width:52px;height:32px;border-radius:16px;cursor:pointer;flex:none;
+  background:linear-gradient(180deg,#0d0d0c,#1a1a19);box-shadow:inset 0 1.5px 3px rgba(0,0,0,.75),inset 0 -1px 0 rgba(255,250,240,.05),0 0 0 .5px rgba(0,0,0,.6);transition:background .25s}
+.sw.on{background:linear-gradient(180deg,#b9b1a2,#e4ddd0);box-shadow:inset 0 1.5px 3px rgba(0,0,0,.45),inset 0 -1px 0 rgba(255,255,255,.25),0 0 0 .5px rgba(0,0,0,.6)}
+.sw i{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 36% 30%,#fdfbf6 0,#e2ddd2 45%,#b7b1a5 100%);
+  box-shadow:0 2px 3px rgba(0,0,0,.55),0 0 0 .5px rgba(0,0,0,.35),inset 0 -1px 1px rgba(0,0,0,.15);transition:transform .32s cubic-bezier(.3,1.45,.5,1)}
+.sw.on i{transform:translateX(20px)}
+.swrow{display:flex;align-items:center;justify-content:space-between;min-height:56px;font:400 15px var(--sans)}
+.tray{flex:1;height:64px;border-radius:32px;display:flex;align-items:center;justify-content:space-around;padding:0 4px;
+  background:linear-gradient(180deg,#141413,#191918);box-shadow:inset 0 1.5px 3px rgba(0,0,0,.65),inset 0 -1px 0 rgba(255,250,240,.04),0 0 0 .5px rgba(0,0,0,.6)}
+.tray .tool{transition:transform .12s,box-shadow .12s;cursor:pointer}
+.tray .tool.on{background:linear-gradient(180deg,#f4f0e8,#d9d4c9);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(0,0,0,.18),0 2px 4px rgba(0,0,0,.6)}
+.tray .tool:active{transform:translateY(1px)}
+.save.k{background:linear-gradient(180deg,#f4f0e8,#d9d4c9);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(0,0,0,.18),0 3px 6px rgba(0,0,0,.6),0 0 0 .5px rgba(0,0,0,.6);transition:transform .12s,box-shadow .12s}
+.save.k:active{transform:translateY(1px);box-shadow:inset 0 1px 2px rgba(0,0,0,.25),0 1px 1px rgba(0,0,0,.5)}
+.pcards{display:flex;gap:8px}
+.pcard{width:112px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.pcard .pic{position:relative;width:112px;height:112px;padding:4px;border-radius:16px;border:2px solid transparent;transition:border-color .25s}
+.pcard.on .pic{border-color:var(--accent)}
+.pcard .pic>div{width:100%;height:100%;border-radius:12px;background:center/cover}
+.pcard canvas{position:absolute;left:4px;bottom:4px}
+.pcard b{margin-top:6px;padding:1px 8px;border-radius:8px;font:400 13px var(--sans)}
+.pcard.on b{background:var(--accent);color:var(--onAccent);font-weight:600}
+</style>
+</head>
+<body>
+<div id="console">
+  <h1>界面手感 · 预览</h1>
+  <p class="sub">分支 ui-feel。393 dp 手机，1 px = 1 dp。照片是引擎渲染（tools/samples/hires.sh），只缩放过。这里的公式就是 Compose 要用的。</p>
+  <div class="grp"><b>场景</b><div class="tabs" id="tabs">
+    <button data-s="0" class="on">修图 · 换胶片显影</button><button data-s="1">修图 · 放大镜</button><button data-s="2">观片台 · 3D 片条</button><button data-s="3">拟物组件</button>
+  </div></div>
+  <div class="grp"><b>系统动画</b><div class="tabs"><button id="aOn" class="on">开</button><button id="aOff">关</button></div></div>
+  <div class="grp"><b>说明</b><ul id="notes"></ul></div>
+</div>
+<div id="phoneWrap"><div id="phone">
+
+  <!-- editor (scenes 0 and 1) -->
+  <section class="screen on" id="editor">
+    <div class="status"><span>9:41</span><span>▴ ▮▮▮ 86%</span></div>
+    <div class="topbar">
+      <div class="ttl"><div class="t-titleM">R0001283.DNG</div><div class="t-small soft">Ricoh GR III · 6000×4000</div></div>
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></div>
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></div>
+      <div class="icon dis"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></div>
+      <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="#ECE9E3"/><circle cx="12" cy="12" r="1" fill="#ECE9E3"/><circle cx="12" cy="19" r="1" fill="#ECE9E3"/></svg></div>
+    </div>
+    <div class="photoArea">
+      <div class="chips">
+        <button class="ochip"><span>直方图</span></button>
+        <button class="ochip" id="oneToOne"><span>1:1</span></button>
+        <button class="ochip" id="full" style="display:none"><span>全屏</span></button>
+      </div>
+      <div class="photoBox" id="photo">
+        <canvas id="gl" width="1080" height="722"></canvas>
+        <div class="loupe" id="loupe"><i></i></div>
+        <div class="held" id="held">原图</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="handle"><i></i></div>
+      <div class="phead"><span class="t-titleM">胶片</span><span class="route" id="route">Kodak Portra 400 · Kodak Supra Endura</span></div>
+      <div class="pills"><span class="pill on">最近</span><span class="pill">彩色负片</span><span class="pill">反转片</span><span class="pill">黑白</span></div>
+      <div class="cards" id="cards"></div>
+    </div>
+    <div class="bbar">
+      <div class="tools">
+        <div class="tool"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>风格</div>
+        <div class="tool on"><svg viewBox="0 0 24 24"><rect x="5" y="9" width="14" height="10" rx="2"/><path d="M8 9V5h8v4"/></svg>胶片</div>
+        <div class="tool"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M4 12h16"/></svg>调整</div>
+        <div class="tool"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>边框</div>
+        <div class="tool"><svg viewBox="0 0 24 24"><path d="M6 2v14h14M2 6h14v14"/></svg>裁剪</div>
+      </div>
+      <button class="save">✓ 保存</button>
+    </div>
+    <div class="viewer" id="viewer">
+      <div class="vbar"><button class="icon" id="vClose"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button><span class="t-titleM">1:1</span></div>
+      <div class="vimg" id="vimg"><img id="vpic" alt=""></div>
+    </div>
+  </section>
+
+  <!-- light table: one roll on the strip (scene 2) -->
+  <section class="screen" id="table">
+    <div class="status"><span>9:41</span><span>▴ ▮▮▮ 86%</span></div>
+    <div class="topbar">
+      <div class="icon" style="margin-left:-12px"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
+      <div class="ttl"><div class="t-titleM">未冲洗</div><div class="t-small soft">10.09 · 10/36</div></div>
+    </div>
+    <div class="lt">
+      <div class="strip" id="strip"><div class="track" id="track"></div></div>
+      <div class="ltName" id="ltName"></div>
+      <div class="scrub"><div class="ticks" id="ticks"></div><p id="count"></p></div>
+    </div>
+    <div class="ltBar"><div class="seg"><button class="on">片条</button><button>印样</button><button>比较风格</button><button>复制调整</button></div></div>
+  </section>
+
+  <!-- parts: the skeuomorphic controls, as they are and as proposed (scene 3) -->
+  <section class="screen" id="partsScreen">
+    <div class="status"><span>9:41</span><span>&#9652; &#9646;&#9646;&#9646; 86%</span></div>
+    <div class="parts">
+      <h3>相机拨盘（调整）</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-dial.png" alt="">
+      <p class="lab">改后 · 可以拖</p><canvas id="pDial"></canvas>
+      <h3>暗盒（胶片卡片）</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-cards.png" alt="">
+      <p class="lab">改后 · 点一张</p><div class="pcards" id="pCards"></div>
+      <h3>分类按钮</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-pills.png" alt="">
+      <p class="lab">改后 · 按一下</p><div class="row" id="pPills"><button class="key sel">彩色负片</button><button class="key">反转片</button><button class="key">电影胶片</button><button class="key">黑白</button></div>
+      <h3>开关</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-switch.png" alt="">
+      <p class="lab">改后 · 拨一下</p>
+      <div class="swrow">只加齿孔<span class="sw" id="pSw1"><i></i></span></div>
+      <div class="swrow">保留拍摄位置<span class="sw on" id="pSw2"><i></i></span></div>
+      <h3>工具栏与保存</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-bar.png" alt="">
+      <p class="lab">改后</p>
+      <div style="display:flex;align-items:center;gap:8px;margin:0 -4px">
+        <div class="tray" id="pTray">
+          <div class="tool on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>风格</div>
+          <div class="tool"><svg viewBox="0 0 24 24"><rect x="5" y="9" width="14" height="10" rx="2"/><path d="M8 9V5h8v4"/></svg>胶片</div>
+          <div class="tool"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M4 12h16"/></svg>调整</div>
+          <div class="tool"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>边框</div>
+          <div class="tool"><svg viewBox="0 0 24 24"><path d="M6 2v14h14M2 6h14v14"/></svg>裁剪</div>
+        </div>
+        <button class="save k">&#10003; 保存</button>
+      </div>
+    </div>
+  </section>
+
+</div></div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+let motion = true;
+const A = 'assets/feel/';
+const FILMS = [
+  ['portra400', 'Portra 400', 'Kodak Portra 400 · Kodak Supra Endura'],
+  ['ektar100', 'Ektar 100', 'Kodak Ektar 100 · Kodak Supra Endura'],
+  ['gold200', 'Gold 200', 'Kodak Gold 200 · Kodak Supra Endura'],
+  ['cinestill800t', 'CineStill 800T', 'CineStill 800T · Kodak 2383'],
+  ['velvia100', 'Velvia 100', 'Fujifilm Velvia 100 · 直接扫描'],
+  ['trix400', 'Tri-X 400', 'Kodak Tri-X 400 · Ilford Multigrade IV'],
+];
+const load = src => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.src = src; });
+
+// ───────────── DevelopSwap: the old print becomes the new one, every point on its own clock ─────────────
+// No front sweeps the frame (FilmDevelop.kt): a point starts by its tone in the new print (the new
+// print's shadows come up first, as on paper in the developer) and by two low-frequency fields
+// (uneven development), then eases over 0.52 of the run. Since every start is at most 0.48, at t = 1
+// every pixel is exactly the new render. A faint wet darkening rides the middle of each point's change.
+const gl = $('#gl').getContext('webgl', { premultipliedAlpha: false, preserveDrawingBuffer: true });
+const VS = 'attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;v.y=1.-v.y;gl_Position=vec4(p,0,1);}';
+const FS = `precision highp float;varying vec2 v;uniform sampler2D a,b;uniform float t,seed;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),u.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x),u.y);}
+void main(){
+  vec3 A=texture2D(a,v).rgb, B=texture2D(b,v).rgb;
+  float l=dot(B,vec3(.2126,.7152,.0722));
+  float f=.5*n(v*vec2(2.3,1.6)+seed)+.5*n(v*vec2(5.1,3.4)+seed*1.7);
+  float s=.30*l+.18*f;
+  float k=smoothstep(s,s+.52,t);
+  vec3 c=mix(A,B,k)*(1.-.05*sin(3.14159*k));
+  gl_FragColor=vec4(c,1);
+}`;
+const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const U = n => gl.getUniformLocation(prog, n);
+gl.uniform1i(U('a'), 0); gl.uniform1i(U('b'), 1);
+const texOf = im => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im); return t; };
+const tex = {};
+const draw = (ta, tb, t, seed = .37) => {
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ta);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tb);
+  gl.uniform1f(U('t'), t); gl.uniform1f(U('seed'), seed); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+};
+let cur = 'portra400', run = 0;
+const swap = async id => {
+  if (id === cur) return;
+  const from = tex[cur], to = tex[id] ??= texOf(await load(A + `dunes-${id}.webp`));
+  cur = id; const me = ++run;
+  if (!motion) { draw(to, to, 1); return; }
+  const t0 = performance.now(), D = 520, seed = Math.random() * 10;
+  const f = now => { if (me !== run) return; const t = Math.min(1, (now - t0) / D); draw(from, to, t, seed); if (t < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+  if (loupeOn) paintLoupe();
+};
+
+// ───────────── film cards on a gentle arc (Drum with a wide radius) ─────────────
+const cards = $('#cards');
+FILMS.forEach(([id, name, route], i) => {
+  const c = document.createElement('button'); c.className = 'card' + (i ? '' : ' on'); c.dataset.id = id;
+  c.innerHTML = `<div class="pic"><div style="background-image:url(${A}dunes-${id}.webp)"></div></div><b>${name}</b>`;
+  c.onclick = () => { $$('.card').forEach(o => o.classList.toggle('on', o === c)); $('#route').textContent = route; swap(id); };
+  cards.append(c);
+});
+// Drum: an item d widths from the centre sits on a drum of radius R (in widths) seen from D widths:
+// rotated by φ = d / R, moved to R·sin φ, scaled by D / (D + R·(1 − cos φ)); dimmed with distance.
+// In Compose this is graphicsLayer { rotationY, translationX, scaleX/Y, cameraDistance } and a scrim.
+function drum(items, box, R, D, dimK, maxDim) {
+  const mid = box.scrollLeft + box.clientWidth / 2;
+  for (const el of items) {
+    const w = el.offsetWidth + 8, cx = el.offsetLeft + el.offsetWidth / 2;
+    const d = (cx - mid) / w, phi = Math.max(-1.3, Math.min(1.3, d / R));
+    const x = (R * Math.sin(phi) - d) * w, z = R * (1 - Math.cos(phi));
+    const s = D / (D + z);
+    el.style.transform = `translateX(${x.toFixed(2)}px) perspective(${(D * w).toFixed(0)}px) rotateY(${(-phi * 180 / Math.PI).toFixed(2)}deg) scale(${s.toFixed(4)})`;
+    const dim = el.querySelector('.dim'); if (dim) dim.style.opacity = Math.min(maxDim, Math.abs(d) * dimK).toFixed(3);
+  }
+}
+const cardArc = () => drum($$('.card'), cards, 4.2, 6, 0, 0);
+cards.addEventListener('scroll', cardArc, { passive: true });
+
+// ───────────── Loupe: 1:1 from the detail render, above the finger ─────────────
+const photo = $('#photo'), loupe = $('#loupe');
+let loupeOn = false, lx = 196, ly = 130, full = {};
+const paintLoupe = async () => {
+  const im = full[cur] ??= await load(A + `dunes-${cur}-full.webp`);
+  // 1:1 means one render pixel per device pixel: 2.75 px per dp on the reference phone.
+  const k = 2.75, W = im.naturalWidth / k, H = im.naturalHeight / k;
+  const px = lx / photo.clientWidth * W, py = ly / photo.clientHeight * H;
+  loupe.style.left = lx + 'px'; loupe.style.top = ly + 'px';
+  loupe.style.backgroundImage = `url(${im.src})`;
+  loupe.style.backgroundSize = `${W}px ${H}px`;
+  loupe.style.backgroundPosition = `${66 - px}px ${66 - py}px`;
+};
+$('#oneToOne').onclick = async () => {
+  const b = $('#oneToOne span');
+  if (loupeOn) { loupeOn = false; loupe.classList.remove('on'); b.textContent = '1:1'; $('#oneToOne').classList.remove('on'); $('#full').style.display = 'none'; return; }
+  b.textContent = '渲染中…';
+  await Promise.all([new Promise(r => setTimeout(r, 700)), (full[cur] ??= await load(A + `dunes-${cur}-full.webp`))]);
+  loupeOn = true; await paintLoupe(); loupe.classList.add('on');
+  b.textContent = '关闭放大镜'; $('#oneToOne').classList.add('on'); $('#full').style.display = '';
+};
+$('#full').onclick = () => { $('#vpic').src = A + `dunes-${cur}-full.webp`; $('#viewer').classList.add('on');
+  requestAnimationFrame(() => { const v = $('#vimg'); v.scrollLeft = (v.scrollWidth - v.clientWidth) * lx / 393; v.scrollTop = (v.scrollHeight - v.clientHeight) * ly / 263; }); };
+$('#vClose').onclick = () => $('#viewer').classList.remove('on');
+// gestures on the photo: with the loupe, a drag moves it (96 dp above a finger); a long press is still 原图
+let holdTimer = 0, holding = false;
+const at = e => { const r = photo.getBoundingClientRect(), k = r.width / 393; return [(e.clientX - r.left) / k, (e.clientY - r.top) / k]; };
+photo.addEventListener('pointerdown', e => {
+  photo.setPointerCapture(e.pointerId);
+  if (loupeOn) { [lx, ly] = at(e); if (e.pointerType === 'touch') ly -= 96; ly = Math.max(0, Math.min(263, ly)); paintLoupe(); return; }
+  holdTimer = setTimeout(async () => { holding = true; $('#held').style.display = 'block';
+    tex.none ??= texOf(await load(A + 'dunes-none.webp')); if (holding) draw(tex.none, tex.none, 1); }, 450);
+});
+photo.addEventListener('pointermove', e => {
+  if (!loupeOn || !e.buttons) return;
+  [lx, ly] = at(e); if (e.pointerType === 'touch') ly -= 96;
+  lx = Math.max(0, Math.min(393, lx)); ly = Math.max(0, Math.min(263, ly)); paintLoupe();
+});
+const release = () => { clearTimeout(holdTimer); if (holding) { holding = false; $('#held').style.display = 'none'; draw(tex[cur], tex[cur], 1); } };
+photo.addEventListener('pointerup', release); photo.addEventListener('pointercancel', release);
+
+// ───────────── the strip on a drum ─────────────
+const ROLL = [
+  ...FILMS.map(([id, name]) => ({ src: A + `dunes-${id}.webp`, name: `R0001283.DNG · ${name}` })),
+  { src: A + 'lake-ektar100.webp', name: 'L1000412.DNG · Ektar 100' }, { src: A + 'fruit-velvia100.webp', name: 'IMG_0412.CR3 · Velvia 100' },
+  { src: A + 'skyline-ektar100.webp', name: 'PXL_0412.dng · Ektar 100' }, { src: A + 'temple-cinestill800t.webp', name: 'DSCF0412.RAF · CineStill 800T' },
+];
+const strip = $('#strip'), track = $('#track');
+const num = i => i === 0 ? '00' : String(Math.ceil(i / 2) * (i % 2 ? 1 : 1)) ;
+ROLL.forEach((f, i) => {
+  const el = document.createElement('div'); el.className = 'fr';
+  const holes = '<i></i>'.repeat(8);
+  el.innerHTML = `<div class="edge">${i % 2 || i === 0 ? 'KODAK PORTRA 400' : ''}</div><div class="sp">${holes}</div>
+    <div class="img" style="background-image:url(${f.src})"></div><div class="sp">${holes}</div>
+    <div class="edge">${i % 2 || i === 0 ? (i === 0 ? '00' : String((i + 1) / 2 | 0)) : ''}<em>${i === 0 ? '00A' : (i + 1) / 2 | 0}A</em></div><div class="dim"></div>`;
+  track.append(el);
+});
+const pad = () => { const w = 262; track.style.padding = `0 ${(strip.clientWidth - w) / 2}px`; };
+const ticks = $('#ticks'); ticks.innerHTML = '<i></i>'.repeat(ROLL.length);
+let centre = -1;
+const stripTick = () => {
+  drum($$('.fr'), strip, 1.55, 5, 0.24, 0.72);
+  const i = Math.round(strip.scrollLeft / 262);
+  if (i !== centre) {
+    centre = Math.max(0, Math.min(ROLL.length - 1, i));
+    $('#ltName').textContent = ROLL[centre].name; $('#count').textContent = `${centre + 1} / ${ROLL.length}`;
+    $$('#ticks i').forEach((t, j) => t.classList.toggle('on', j === centre));
+    navigator.vibrate?.(8);   // one tick per frame crossed, as RollView does
+  }
+};
+strip.addEventListener('scroll', stripTick, { passive: true });
+// mouse: drag the strip like a finger would
+let dragX = null;
+strip.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; dragX = e.clientX; strip.classList.add('drag'); strip.setPointerCapture(e.pointerId); });
+strip.addEventListener('pointermove', e => { if (dragX === null) return; const k = strip.getBoundingClientRect().width / 393; strip.scrollLeft -= (e.clientX - dragX) / k; dragX = e.clientX; });
+strip.addEventListener('pointerup', () => { if (dragX === null) return; dragX = null; strip.classList.remove('drag');
+  strip.scrollTo({ left: Math.round(strip.scrollLeft / 262) * 262, behavior: motion ? 'smooth' : 'auto' }); });
+
+// ───────────── scenes ─────────────
+const NOTES = [
+  ['点下面的胶片：新效果按每个点自己的时钟冲出来，新照片的暗部先出来，另有两层低频的不均匀；没有一道扫过画面的前沿，和开场、保存动画是同一套显影（FilmDevelop.kt）。',
+   '约 0.5 秒。只在换风格、换胶片、相纸、撤销、重置时出现；拖刻度时仍然直接替换，不做动画。结束时每个像素就是新的渲染结果。',
+   '系统动画关：直接切换。胶片卡片排在一个很缓的弧上，越往两边越侧过去一点。'],
+  ['点“1:1”：先渲染全分辨率（显示“渲染中…”），然后照片上出现放大镜，里面是 1:1 的原始像素。手指拖动它，放大镜浮在手指上方 96 dp，不被手指挡住；鼠标就在指针处。',
+   '“全屏”打开现在的 1:1 查看器，并停在放大镜所在的位置；“关闭放大镜”退出。',
+   '长按照片看原图照旧（放大镜关着时）。换胶片时放大镜里也跟着换。'],
+  ['观片台的片条绕在一个圆鼓上：越往两边越侧过去、越小、越暗，正中那一格不变形、不变暗。',
+   '拖动或滑动，松手吸附到格；每过一格一次轻振动（现在的行为）。只改变形状，不改照片的颜色。',
+   '系统动画关：仍然是弧面（这是形状不是动画），只是吸附不再滑过去。'],
+  ['一个光源（左上方），真实的材质，压低的对比：看起来真，但不刺眼。上面是 App 现在的样子（alpha v0.3.02 CI 截图），下面是改后的，可以直接操作。',
+   '拨盘：车削金属的圆柱，刻度按真实的圆柱透视收窄、按光照变暗；两边滚花随转动；窗口像开在机身上（上沿压一道阴影，下沿一线亮边），盖着一层玻璃。',
+   '暗盒：印刷铁皮的圆柱明暗、车削钢的封盖和带棱的轴头、黑绒遮光口；拉出来的是一截真正的片头（半宽舌头、齿孔、片基颜色随冲洗工艺），选中时多拉出一截，不再是一个黑方块。',
+   '按钮和工具栏：按键有上沿高光和下沿阴影，按下时下沉 1 dp、阴影收紧；工具栏是一道凹槽，选中的工具像一颗凸起的键。开关：凹槽里一颗有体积的圆钮，拨过去有一点回弹。'],
+];
+const show = i => {
+  $$('#tabs button').forEach((b, j) => b.classList.toggle('on', j === i));
+  $('#editor').classList.toggle('on', i < 2); $('#table').classList.toggle('on', i === 2); $('#partsScreen').classList.toggle('on', i === 3);
+  $('#notes').innerHTML = NOTES[i].map(n => `<li>${n}</li>`).join('');
+  if (i === 2) { pad(); stripTick(); } else cardArc();
+  location.hash = i;
+};
+$$('#tabs button').forEach(b => b.onclick = () => show(+b.dataset.s));
+$('#aOn').onclick = () => { motion = true; $('#aOn').classList.add('on'); $('#aOff').classList.remove('on'); };
+$('#aOff').onclick = () => { motion = false; $('#aOff').classList.add('on'); $('#aOn').classList.remove('on'); };
+const fit = () => { const k = Math.min(1.1, (innerHeight - 40) / 873, (innerWidth - 400) / 400); $('#phone').style.transform = `scale(${k})`;
+  $('#phoneWrap').style.width = 393 * k + 'px'; $('#phoneWrap').style.height = 873 * k + 'px'; };
+addEventListener('resize', fit); fit();
+load(A + 'dunes-portra400.webp').then(im => { tex.portra400 = texOf(im); draw(tex.portra400, tex.portra400, 1); });
+show(+(location.hash.slice(1)) || 0);
+// ?swap=t freezes a change from Portra 400 to Tri-X 400 at t (screenshots of the in-between)
+const q = new URLSearchParams(location.search);
+if (q.has('swap')) Promise.all([load(A + 'dunes-portra400.webp'), load(A + 'dunes-trix400.webp')]).then(([a, b]) => {
+  tex.portra400 ??= texOf(a); tex.trix400 ??= texOf(b); run++; draw(tex.portra400, tex.trix400, +q.get('swap')); });
+if (q.has('loupe')) setTimeout(() => $('#oneToOne').click(), 300);
+if (q.has('strip')) setTimeout(() => { strip.scrollLeft = +q.get('strip') * 262; }, 300);
+</script>
+<script type="module">
+import { dial, cassette } from './ui-feel-parts.js';
+dial(document.getElementById('pDial'), { onTick: () => navigator.vibrate?.(4) });
+const box = document.getElementById('pCards');
+const C = [['portra400', 'Portra 400', 'negative', '400'], ['velvia100', 'Velvia 100', 'slide', '100'], ['trix400', 'Tri-X 400', 'mono', '400']];
+const made = C.map(([id, name, kind, iso], i) => {
+  const c = document.createElement('div'); c.className = 'pcard' + (i ? '' : ' on');
+  c.innerHTML = `<div class="pic"><div style="background-image:url(assets/feel/dunes-${id}.webp)"></div><canvas></canvas></div><b>${name}</b>`;
+  box.append(c); return { c, k: cassette(c.querySelector('canvas'), kind, iso, i === 0) };
+});
+made.forEach(m => m.c.onclick = () => made.forEach(o => { o.c.classList.toggle('on', o === m); o.k.set(o === m); }));
+const pills = document.querySelectorAll('#pPills .key');
+pills.forEach(b => b.onclick = () => pills.forEach(o => o.classList.toggle('sel', o === b)));
+document.querySelectorAll('.sw').forEach(x => x.onclick = () => x.classList.toggle('on'));
+const tools = document.querySelectorAll('#pTray .tool');
+tools.forEach(t => t.onclick = () => tools.forEach(o => o.classList.toggle('on', o === t)));
+</script>
+</body>
+</html>
