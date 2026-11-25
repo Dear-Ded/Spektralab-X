@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -123,7 +124,7 @@ internal fun GrooveSwitch(checked: Boolean, enabled: Boolean, modifier: Modifier
  * rest. [corner] null rounds it fully. Pass the same [press] to the clickable (indication = null).
  */
 internal fun Modifier.key(ivory: Float, press: androidx.compose.foundation.interaction.InteractionSource, corner: androidx.compose.ui.unit.Dp? = null): Modifier =
-    androidx.compose.ui.composed {
+    composed {
         val down by press.collectIsPressedAsState()
         val sink by animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "key-press")
         drawBehind { drawKey(corner?.toPx() ?: (size.minDimension / 2), ivory, sink) }
