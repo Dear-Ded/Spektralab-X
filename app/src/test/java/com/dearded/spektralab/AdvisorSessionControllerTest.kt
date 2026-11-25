@@ -10,6 +10,18 @@ import org.junit.Assert.*
 import org.junit.Test
 import java.io.IOException
 
+internal fun AdviceSessionController.generate(text: String) {
+    requestCustomScope(text)
+    state.value.scopePrompt?.let { resolveScope(it.id, wholePhoto = true) }
+}
+
+private fun AdviceSessionController.answer(text: String) {
+    val question = state.value.question ?: return
+    val label = if (question.kind == "choice") requireNotNull(question.options.singleOrNull { it.id == text }).label else text
+    requestAnswerScope(label)
+    state.value.scopePrompt?.let { resolveScope(it.id, wholePhoto = true) }
+}
+
 internal fun cinematicStatistics(snapshot: EditSnapshot, luma: List<Double> = listOf(.24, .50, .68),
     black: Double = 0.0, white: Double = 0.0, rgb: Int = 21): AdviceStatistics {
     val channel = List(16) { if (it == 6) 1.0 else 0.0 }

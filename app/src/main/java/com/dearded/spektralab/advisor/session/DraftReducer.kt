@@ -8,6 +8,8 @@ import com.dearded.spektralab.advisor.network.AdvisorTokenUsage
 enum class DraftPhase { IDLE, READY, GENERATING, RENDERING, PREVIEWING, COMPARING, PREPARING_EXPORT, RESTORING, COMMITTING, APPLIED, SAVED, FAILED }
 enum class AdviceNotice { NO_CHANGE, UNSUPPORTED, QUESTION_LIMIT, CANCELLED, CINEMATIC_PREVIEW_NOT_ANALYZED, CINEMATIC_NO_ADJUSTMENT }
 
+data class AdviceScopePrompt(val id: Long, val text: String, internal val answer: String?)
+
 data class DraftState(
     val phase: DraftPhase = DraftPhase.IDLE,
     val entry: EditSnapshot? = null,
@@ -24,13 +26,14 @@ data class DraftState(
     val inputRevision: Long = 0,
     val visible: Boolean = phase != DraftPhase.IDLE,
     val strengthPercent: Int? = null,
+    val scopePrompt: AdviceScopePrompt? = null,
 ) {
     val edit: Edit? get() = draft?.edit ?: entry?.edit
     val hasPreview get() = phase == DraftPhase.PREVIEWING && draft != null
     val canApply get() = hasPreview &&
         (draft?.directionalLight == null || AdviceParameter.EXPOSURE in constraints.ranges) &&
         (strengthPercent == null || entry?.let { AdviceProjection.hasEffectiveChange(it.edit, checkNotNull(draft).edit) } == true)
-    val canSetStrength get() = hasPreview && strengthPercent != null && question == null &&
+    val canSetStrength get() = hasPreview && strengthPercent != null && question == null && scopePrompt == null &&
         (draft?.directionalLight == null || AdviceParameter.EXPOSURE in constraints.ranges)
 }
 
@@ -62,7 +65,7 @@ class DraftReducer {
             constraintsRevision = state.constraints.revision, inputRevision = state.inputRevision)
         val snapshot = EditSnapshot(checkNotNull(state.edit), ticket)
         state = state.copy(phase = DraftPhase.GENERATING, ticket = ticket, pending = null, error = null,
-            question = state.question.takeIf { answering }, notice = null, usage = null)
+            question = state.question.takeIf { answering }, scopePrompt = null, notice = null, usage = null)
         return snapshot
     }
 
@@ -83,11 +86,23 @@ class DraftReducer {
         return true
     }
 
-    fun clearQuestion() { state = state.copy(question = null, notice = null) }
-    fun constraints(value: AdviceConstraints) { state = state.copy(constraints = value, question = null, notice = null) }
+    internal fun askScope(prompt: AdviceScopePrompt) {
+        state = state.copy(scopePrompt = prompt, question = state.question.takeIf { prompt.answer != null },
+            notice = null, error = null)
+    }
+
+    internal fun declineScope() {
+        state = state.copy(scopePrompt = null, question = null, notice = AdviceNotice.UNSUPPORTED, error = null)
+    }
+
+    fun clearQuestion() { state = state.copy(question = null, scopePrompt = null, notice = null) }
+    fun constraints(value: AdviceConstraints) {
+        state = state.copy(constraints = value, question = null, scopePrompt = null, notice = null)
+    }
     fun configurationRequired() { state = state.copy(error = AdviceError.CONFIGURATION_REQUIRED) }
     fun statistics(value: Boolean) {
-        state = state.copy(includeStatistics = value, inputRevision = state.inputRevision + 1, question = null, notice = null)
+        state = state.copy(includeStatistics = value, inputRevision = state.inputRevision + 1,
+            question = null, scopePrompt = null, notice = null)
     }
 
     internal fun stageStrength(percent: Int, catalog: Catalog): AdviceCandidate? {
@@ -179,13 +194,14 @@ class DraftReducer {
 
     fun restoring() {
         generation++
-        state = state.copy(phase = DraftPhase.RESTORING, pending = null, ticket = null)
+        state = state.copy(phase = DraftPhase.RESTORING, pending = null, ticket = null, scopePrompt = null)
     }
 
     fun viewing(export: Boolean = false, retainQuestion: Boolean = false) {
         generation++
         state = state.copy(phase = if (export) DraftPhase.PREPARING_EXPORT else DraftPhase.COMPARING,
             pending = null, ticket = null, error = null,
+            scopePrompt = state.scopePrompt.takeUnless { export },
             question = state.question.takeUnless { state.phase == DraftPhase.GENERATING && !retainQuestion })
     }
 
@@ -195,6 +211,7 @@ class DraftReducer {
             if (state.draft == null) DraftPhase.READY else DraftPhase.PREVIEWING
         } else DraftPhase.FAILED, showingEntry = if (success) showEntry else state.showingEntry,
             question = state.question.takeIf { success },
+            scopePrompt = state.scopePrompt.takeIf { success },
             notice = if (success && cancelled) AdviceNotice.CANCELLED else state.notice,
             usage = state.usage.takeUnless { cancelled },
             error = if (success) null else AdviceError.RENDER_FAILED)
@@ -215,7 +232,7 @@ class DraftReducer {
     fun committing(): AdviceCandidate {
         check(state.canApply)
         generation++
-        state = state.copy(phase = DraftPhase.COMMITTING, ticket = null)
+        state = state.copy(phase = DraftPhase.COMMITTING, ticket = null, scopePrompt = null, question = null)
         return checkNotNull(state.draft)
     }
 

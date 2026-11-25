@@ -7,6 +7,7 @@ import com.dearded.spektralab.advisor.domain.BrightSide
 import com.dearded.spektralab.advisor.domain.ParameterChange
 import com.dearded.spektralab.advisor.domain.effectiveValueChanged
 import com.dearded.spektralab.advisor.session.AdviceNotice
+import com.dearded.spektralab.advisor.session.AdviceScopePrompt
 import com.dearded.spektralab.advisor.session.AdviceSessionController
 import com.dearded.spektralab.advisor.session.AdvisorRuntimeState
 import com.dearded.spektralab.advisor.session.DraftPhase
@@ -59,7 +60,7 @@ internal class AssistantSessionPort(
         }
     }
 
-    override fun generate(goal: String) = controller.generate(goal)
+    override fun generate(goal: String) = controller.requestCustomScope(goal)
     override fun cinematic() = controller.generateCinematicRecommendation()
     override fun directional() = controller.generateDirectionalLightRecommendation()
     override fun setStrength(percent: Int) = controller.setStrength(percent)
@@ -73,17 +74,29 @@ internal class AssistantSessionPort(
     override fun undo() = undoEdit()
     override fun retrySave() = controller.retrySave()
     override fun answer(text: String) {
-        val question = controller.state.value.question ?: return
-        val answer = if (question.kind == "choice") {
-            question.options.singleOrNull { it.label == text }?.id ?: return
-        } else text
-        controller.answer(answer)
+        val prompt = controller.state.value.scopePrompt
+        if (prompt == null) controller.requestAnswerScope(text)
+        else {
+            val choice = prompt.scopeView().options.indexOf(text)
+            if (choice >= 0) controller.resolveScope(prompt.id, wholePhoto = choice == 0)
+        }
     }
     override fun tryPreset(preset: AssistantPreset) = controller.tryLocalPreset(when (preset) {
         AssistantPreset.Brighten -> LocalAdvicePreset.BRIGHTEN
         AssistantPreset.Soften -> LocalAdvicePreset.SOFTEN
     })
     override fun openSettings() = openAssistantSettings()
+}
+
+// The existing panel returns only visible labels. Include the request ID so an old button
+// cannot confirm a later request, even if both ask for the same edit to different photos.
+private fun AdviceScopePrompt.scopeView(): AssistantQuestion {
+    val summary = text.take(72) + if (text.length > 72) "..." else ""
+    return if (AppLocale.language == UiLanguage.ENGLISH) {
+        AssistantQuestion("Adjustment scope: $summary", listOf("Whole photo #$id", "Only this area #$id"))
+    } else {
+        AssistantQuestion("调整范围：$summary", listOf("整张照片 #$id", "仅指定区域 #$id"))
+    }
 }
 
 private fun DraftState.toAssistantView(runtime: AdvisorRuntimeState, canAnalyzePreview: () -> Boolean): AssistantView {
@@ -118,7 +131,7 @@ private fun DraftState.toAssistantView(runtime: AdvisorRuntimeState, canAnalyzeP
         changes = changes,
         statistics = includeStatistics,
         cinematicReady = includeStatistics && canAnalyzePreview(),
-        question = question?.let { AssistantQuestion(it.prompt, it.options.map { option -> option.label }) },
+        question = scopePrompt?.scopeView() ?: question?.let { AssistantQuestion(it.prompt, it.options.map { option -> option.label }) },
         notice = when (notice) {
             null -> null
             AdviceNotice.NO_CHANGE -> AssistantNotice.NoChange

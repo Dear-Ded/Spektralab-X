@@ -21,6 +21,7 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
     private var goal: String? = null
     private var goalMode = GoalMode.CUSTOM
     private var operation = 0L
+    private var scopeSequence = 0L
     private data class CinematicSample(val snapshot: EditSnapshot, val statistics: AdviceStatistics) {
         fun forAnswer(next: EditSnapshot): AdviceStatistics? = statistics.takeIf {
             next.copy(ticket = next.ticket.copy(requestId = snapshot.ticket.requestId)) == snapshot
@@ -135,8 +136,48 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
         publish()
     }
 
-    /** A fresh explicit operation. Duplicate clicks during generation are single-flight. */
-    fun generate(text: String) = generate(text, GoalMode.CUSTOM)
+    /** A free-text goal does not itself authorize a whole-photo edit. */
+    internal fun requestCustomScope(text: String) {
+        if (!canAskScope()) return
+        validateGoal(text)
+        if (connection == null) { reducer.configurationRequired(); publish(); return }
+        questions.reset(); goal = null
+        pendingCinematicSample = null
+        reducer.askScope(AdviceScopePrompt(++scopeSequence, text, null))
+        publish()
+    }
+
+    internal fun requestAnswerScope(text: String) {
+        val question = state.value.question ?: return
+        if (!canAskScope() || state.value.scopePrompt != null) return
+        val answer = if (question.kind == "choice") {
+            question.options.singleOrNull { it.label == text }?.id ?: return
+        } else text
+        reducer.askScope(AdviceScopePrompt(++scopeSequence, text, answer))
+        publish()
+    }
+
+    internal fun resolveScope(id: Long, wholePhoto: Boolean) {
+        val prompt = state.value.scopePrompt?.takeIf { it.id == id } ?: return
+        if (!canAskScope()) return
+        if (wholePhoto) {
+            if (prompt.answer == null) generate(prompt.text, GoalMode.CUSTOM) else answer(prompt.answer)
+        } else {
+            questions.reset(); goal = null
+            pendingCinematicSample = null
+            reducer.declineScope()
+            publish()
+        }
+    }
+
+    private fun canAskScope(): Boolean {
+        val current = state.value
+        if (current.phase !in setOf(DraftPhase.READY, DraftPhase.PREVIEWING) || current.draft?.directionalLight != null) return false
+        if (!editor.current(checkNotNull(current.entry))) { invalidate(); return false }
+        return true
+    }
+
+    private fun validateGoal(text: String) = require(text.isNotBlank() && text.codePointCount(0, text.length) <= 2000)
 
     fun generateCinematicRecommendation() = generate(CINEMATIC_RECOMMENDATION_GOAL, GoalMode.CINEMATIC)
 
@@ -149,14 +190,14 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
 
     private fun generate(text: String, mode: GoalMode) {
         if (state.value.phase !in setOf(DraftPhase.READY, DraftPhase.PREVIEWING)) return
-        require(text.isNotBlank() && text.codePointCount(0, text.length) <= 2000)
+        validateGoal(text)
         val selected = connection ?: run { reducer.configurationRequired(); publish(); return }
         questions.reset(); goal = text
         goalMode = mode
         send(selected, text, null, mode)
     }
 
-    fun answer(text: String) {
+    private fun answer(text: String) {
         if (state.value.phase !in setOf(DraftPhase.READY, DraftPhase.PREVIEWING) || state.value.question == null) return
         val selected = connection ?: return
         val currentGoal = goal ?: return

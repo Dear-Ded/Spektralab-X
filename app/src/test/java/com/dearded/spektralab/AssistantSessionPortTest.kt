@@ -98,8 +98,15 @@ class AssistantSessionPortTest {
         port.statistics(true)
         assertTrue(received.isEmpty())
         port.generate("Keep the color restrained.")
-        assertEquals(AssistantQuestion("How strong?", listOf("Subtle", "Strong")), shown { it.question != null }.question)
+        val initialScope = scopePrompt()
+        assertTrue(received.isEmpty())
+        port.answer(initialScope.options.first())
+        assertEquals(AssistantQuestion("How strong?", listOf("Subtle", "Strong")), shown { it.question?.prompt == "How strong?" }.question)
         port.answer("Subtle")
+        val answerScope = scopePrompt(except = initialScope)
+        port.answer(initialScope.options.first())
+        assertEquals(1, received.size)
+        port.answer(answerScope.options.first())
         val draft = shown { it.phase == AssistantPhase.Previewing }
         assertFalse(draft.local)
         assertEquals(mapOf(AssistantParam.EXPOSURE to .4, AssistantParam.SATURATION to 12.0),
@@ -125,6 +132,119 @@ class AssistantSessionPortTest {
         val corrected = shown { it.changes.any { c -> c.param == AssistantParam.EXPOSURE && c.after == .2 } }
         assertEquals(12.0, corrected.changes.single { it.param == AssistantParam.SATURATION }.after, 0.0)
         assertEquals(2, received.size)
+    }
+
+    @Test fun exactWaterTargetDoesNotSampleSendOrRenderAndCannotReuseAnOldConfirmation() = withPort {
+        val received = mutableListOf<AdviceRequest>()
+        connect { request, _ ->
+            received += request
+            AdviceResult.Proposal(listOf(ParameterChange(AdviceParameter.EXPOSURE.id, .4)))
+        }
+        port.open()
+        port.statistics(true)
+        port.generate("Darken only the water, leaving the rocks unchanged.")
+        val water = scopePrompt()
+        port.answer(water.options.last())
+        shown { it.notice == AssistantNotice.Unsupported }
+        port.answer(water.options.first())
+        assertTrue(received.isEmpty())
+        assertEquals(0, editor.samples)
+        assertEquals(0, editor.renders)
+        assertEquals(editor.formal, editor.displayed)
+
+        port.generate("Bring up the exposure of the whole photo.")
+        val whole = scopePrompt(except = water)
+        port.answer(water.options.first())
+        assertTrue(received.isEmpty())
+        port.answer(whole.options.first())
+        port.answer(whole.options.first())
+        shown { it.canApply }
+        assertEquals(listOf("Bring up the exposure of the whole photo."), received.map { it.goal })
+        assertEquals(1, editor.samples)
+        assertEquals(1, editor.renders)
+
+        port.generate("Lift only the water next.")
+        val followUp = scopePrompt(except = whole)
+        port.answer(followUp.options.last())
+        shown { it.notice == AssistantNotice.Unsupported }
+        assertEquals(1, received.size)
+        assertEquals(1, editor.samples)
+        assertEquals(1, editor.renders)
+        assertTrue(port.view.value.canApply)
+        assertEquals(.4, editor.displayed.look.exposure, 0.0)
+        assertEquals(0.0, editor.formal.look.exposure, 0.0)
+    }
+
+    @Test fun exactRegionInAFreeTextClarificationIsNeverDispatched() = withPort {
+        val received = mutableListOf<TaskClarification?>()
+        connect { _, clarification ->
+            received += clarification
+            AdviceResult.Question("text", "Which area?", emptyList())
+        }
+        port.open()
+        port.generate("Bring up the exposure.")
+        port.answer(scopePrompt().options.first())
+        shown { it.question?.prompt == "Which area?" }
+        port.answer("The water only; leave the rocks alone.")
+        val answerScope = scopePrompt()
+        port.answer(answerScope.options.last())
+        shown { it.notice == AssistantNotice.Unsupported }
+        assertEquals(listOf<TaskClarification?>(null), received)
+        assertEquals(0, editor.samples)
+        assertEquals(0, editor.renders)
+    }
+
+    @Test fun sourceAndStatisticsChangesRequireFreshScopeEvenForTheSameGoal() = withPort {
+        val received = mutableListOf<AdviceRequest>()
+        connect { request, _ -> received += request; AdviceResult.NoChange }
+        port.open()
+        val goal = "Raise the exposure."
+        port.generate(goal)
+        val oldSource = scopePrompt()
+        editor.source = 2
+        ui.value = ui.value.copy(previewSource = 2)
+        port.answer(oldSource.options.first())
+        assertEquals(DraftPhase.IDLE, controller.state.value.phase)
+        port.open()
+        port.generate(goal)
+        val oldStatistics = scopePrompt(except = oldSource)
+        port.statistics(true)
+        port.answer(oldStatistics.options.first())
+        port.generate(goal)
+        val fresh = scopePrompt(except = oldStatistics)
+        port.answer(oldSource.options.first())
+        port.answer(oldStatistics.options.first())
+        assertTrue(received.isEmpty())
+        assertEquals(0, editor.samples)
+        port.answer(fresh.options.first())
+        shown { it.notice == AssistantNotice.NoChange }
+        assertEquals(1, received.size)
+        assertEquals(1, editor.samples)
+    }
+
+    @Test fun exportClearsPendingScopeWithoutApplyingTheLastDraft() = withPort {
+        val received = mutableListOf<AdviceRequest>()
+        connect { request, _ ->
+            received += request
+            AdviceResult.Proposal(listOf(ParameterChange(AdviceParameter.EXPOSURE.id, .4)))
+        }
+        port.open()
+        port.generate("Raise the exposure.")
+        val first = scopePrompt()
+        port.answer(first.options.first())
+        shown { it.canApply }
+        port.generate("Make the whole photo a little warmer.")
+        val followUp = scopePrompt(except = first)
+
+        val ready = CompletableDeferred<Unit>()
+        controller.prepareExport { ready.complete(Unit) }
+        ready.await()
+        port.answer(followUp.options.first())
+        shown { it.question == null && it.showingCurrent && it.canApply }
+        assertEquals(1, received.size)
+        assertEquals(0, editor.commits)
+        assertEquals(editor.formal, editor.displayed)
+        assertEquals(.4, controller.state.value.draft!!.edit.look.exposure, 0.0)
     }
 
     @Test fun closingDuringApplyPreservesTheCommitAndSaveRetry() = withPort {
@@ -194,6 +314,19 @@ class AssistantSessionPortTest {
         val port = AssistantSessionPort(scope, controller, runtime, ui, { canBegin }, { ui.value.ready },
             { undos++ }, { settings++ })
         suspend fun shown(predicate: (AssistantView) -> Boolean) = port.view.first(predicate)
+        suspend fun scopePrompt(except: AssistantQuestion? = null) = checkNotNull(shown {
+            it.question?.let { q -> q != except && q.options.size == 2 && q.options.all { o -> '#' in o } } == true
+        }.question)
+
+        fun connect(reply: (AdviceRequest, TaskClarification?) -> AdviceResult) {
+            val endpoint = EndpointConfig("test", 1, "Test Service", "https://example.test/v1".toHttpUrl(),
+                AdvisorTransport.CHAT, AdvisorDialect.OPENAI, AdvisorAuth.BEARER)
+            val binding = ModelBinding("binding", 1, endpoint.id, "test-model")
+            val configuration = AdvisorConfiguration(1, listOf(endpoint), listOf(binding), binding.id)
+            controller.configure(AdviceConnection(AdviceConnectionIdentity(1, endpoint.id, 1, 0, binding.id, 1,
+                "catalog", "chat")) { request, clarification -> AdvisorReply(reply(request, clarification), AdvisorTokenUsage()) })
+            runtime.value = AdvisorRuntimeState(configuration = configuration, configurationReady = true)
+        }
     }
 
     private class Editor : AdvisorEditorPort {
@@ -203,17 +336,21 @@ class AssistantSessionPortTest {
         var releases = 0
         var commits = 0
         var retries = 0
+        var samples = 0
+        var renders = 0
+        var source = 1L
         var restoreSuccess = true
         var restoreGate: CompletableDeferred<Unit>? = null
         var commitGate: CompletableDeferred<Unit>? = null
         val saved = CompletableDeferred<Unit>()
         private val receipt = AppliedReceipt("test-commit", 1, 2)
 
-        override fun capture() = EditSnapshot(formal, RequestTicket(1, 1, 0, 1, 0, 0)).also { captures++ }
+        override fun capture() = EditSnapshot(formal, RequestTicket(source, 1, 0, 1, 0, 0)).also { captures++ }
         override fun catalog() = Catalog.EMPTY
-        override fun current(snapshot: EditSnapshot) = snapshot.edit == formal
+        override fun current(snapshot: EditSnapshot) = snapshot.ticket.photoSessionId == source && snapshot.edit == formal
         override suspend fun render(edit: Edit, entry: EditSnapshot): Boolean {
             if (!current(entry)) return false
+            renders++
             displayed = edit
             return true
         }
@@ -222,7 +359,7 @@ class AssistantSessionPortTest {
             return restoreSuccess && render(entry.edit, entry)
         }
         override suspend fun statistics(snapshot: EditSnapshot, entry: EditSnapshot) =
-            cinematicStatistics(snapshot).copy(scene = SceneEvidence(4, 4, List(16) { .5 }, null))
+            cinematicStatistics(snapshot).copy(scene = SceneEvidence(4, 4, List(16) { .5 }, null)).also { samples++ }
         override fun endPreview() { releases++ }
         override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot, learnAdoption: Boolean): CommittedDraft {
             commitGate?.await()
