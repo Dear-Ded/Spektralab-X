@@ -6,7 +6,13 @@ import android.os.Looper
 import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
 import com.dearded.spektralab.advisor.domain.AdviceError
+import com.dearded.spektralab.advisor.domain.AdviceOrigin
+import com.dearded.spektralab.advisor.domain.AdviceResult
 import com.dearded.spektralab.advisor.domain.ParameterChange
+import com.dearded.spektralab.advisor.network.AdvisorReply
+import com.dearded.spektralab.advisor.network.AdvisorTokenUsage
+import com.dearded.spektralab.advisor.session.AdviceConnection
+import com.dearded.spektralab.advisor.session.AdviceConnectionIdentity
 import com.dearded.spektralab.advisor.session.DraftPhase
 import java.io.File
 import kotlinx.coroutines.delay
@@ -133,5 +139,41 @@ class AdvisorEditorIntegrationTest {
         assertEquals(formal, ui.value.edit)
         assertFalse(ui.value.canUndo)
         jobs.forEach { editor.cancelJob(it.id) }
+    }
+
+    @Test fun onlyAnAcknowledgedModelApplyEntersLocalPreferences() = runBlocking {
+        val formal = opening()
+        val proposed = formal.copy(look = formal.look.copy(exposure = .4))
+        val preferences = editor.assistantPreferences
+        until { !preferences.preferences.value.busy }
+        preferences.learn(true)
+        until { preferences.preferences.value.learn }
+        val snapshot = File(app.noBackupFilesDir, "assistant-preferences.json")
+        fun adoptions() = JSONObject(snapshot.readText()).getJSONArray("adoptions")
+        val session = editor.assistantSession
+        val binding = "98479a84-21f7-4a7e-9560-5007bd05124c"
+        val identity = AdviceConnectionIdentity(1, "fixture", 1, 1, binding, 1, "catalog.test", "adapter.test")
+        val origin = AdviceOrigin.Model(binding, 1, identity.catalogVersion, identity.adapterVersion, "prompt.test")
+        session.configure(AdviceConnection(identity, origin) { _, _ ->
+            AdvisorReply(AdviceResult.Proposal(listOf(ParameterChange("layer2.exposure", .4))), AdvisorTokenUsage())
+        })
+        session.begin()
+        present(proposed)
+        session.generate("synthetic model draft")
+        until { session.state.value.hasPreview }
+        val candidate = checkNotNull(session.state.value.draft)
+        assertEquals(0, adoptions().length())
+        val blocked = File(file.parentFile, file.name + ".part")
+        assertTrue(blocked.mkdir())
+        try {
+            session.apply()
+            until { session.state.value.error == AdviceError.SAVE_FAILED }
+            assertEquals(0, adoptions().length())
+        } finally { assertTrue(blocked.delete()) }
+        session.retrySave()
+        until { session.state.value.phase == DraftPhase.SAVED }
+        until { adoptions().length() == 1 }
+        assertEquals(proposed, persisted())
+        assertEquals(candidate.id, adoptions().getJSONObject(0).getString("commitId"))
     }
 }

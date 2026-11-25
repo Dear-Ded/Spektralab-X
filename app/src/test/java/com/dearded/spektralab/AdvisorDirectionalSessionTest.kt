@@ -42,7 +42,8 @@ class AdvisorDirectionalSessionTest {
             cinematicStatistics(snapshot).copy(measuredBrightSide = side)
         override suspend fun restore(entry: EditSnapshot) = render(entry.edit, entry)
         override fun endPreview() = Unit
-        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot): CommittedDraft {
+        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot, learnAdoption: Boolean): CommittedDraft {
+            check(!learnAdoption)
             val verified = AdviceProjection.commitEdit(entry, candidate, catalog())
             history.record(formal, verified, 1)
             formal = verified

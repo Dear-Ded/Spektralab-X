@@ -47,6 +47,8 @@ class AdvisorSessionControllerTest {
         val saved = CompletableDeferred<Unit>()
         val retried = CompletableDeferred<Unit>()
         var retries = 0
+        var learnAdoption = false
+        val recorded = mutableListOf<SaveReceipt>()
         override fun capture() = EditSnapshot(formal, RequestTicket(1, revision, 0, 1, 0, 0))
         override fun catalog() = Catalog.EMPTY
         override fun current(snapshot: EditSnapshot) = snapshot.ticket.formalRevision == revision && snapshot.edit == formal
@@ -80,12 +82,14 @@ class AdvisorSessionControllerTest {
             return statisticsGate?.invoke(snapshot)
         }
         override fun endPreview() { releases++ }
-        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot): CommittedDraft {
+        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot, learnAdoption: Boolean): CommittedDraft {
             check(current(entry))
             formal = candidate.edit
             revision++
             commits++
-            return CommittedDraft(AppliedReceipt("commit", 1, revision), SaveTarget.SIDECAR, saved)
+            this.learnAdoption = learnAdoption
+            val record: ((SaveReceipt) -> Unit)? = if (learnAdoption) ({ recorded += it }) else null
+            return CommittedDraft(AppliedReceipt("commit", 1, revision), SaveTarget.SIDECAR, saved, record)
         }
         override fun retrySave(applied: AppliedReceipt): Deferred<Unit> {
             check(applied.revision == revision)
@@ -453,6 +457,31 @@ class AdvisorSessionControllerTest {
         assertNull(controller.state.value.error)
         editor.retried.complete(Unit)
         controller.phase(DraftPhase.SAVED)
+        assertEquals(1, editor.commits)
+        assertFalse(editor.learnAdoption)
+        assertTrue(editor.recorded.isEmpty())
+    }
+
+    @Test fun onlyFailedModelSaveRetryDeliversTheSameSuccessfulAdoptionReceipt() = runBlocking<Unit> {
+        val editor = Editor()
+        val controller = AdviceSessionController(this, editor)
+        val route = identity().copy(bindingId = "98479a84-21f7-4a7e-9560-5007bd05124c")
+        val origin = AdviceOrigin.Model(route.bindingId, route.bindingRevision, route.catalogVersion,
+            route.adapterVersion, "prompt.test")
+        controller.configure(AdviceConnection(route, origin) { _, _ -> reply(AdviceResult.Proposal(changes(10.0))) })
+        controller.begin(); controller.generate("synthetic saved adoption")
+        controller.phase(DraftPhase.PREVIEWING)
+        assertTrue(editor.recorded.isEmpty())
+        controller.apply(); controller.phase(DraftPhase.APPLIED)
+        assertTrue(editor.learnAdoption)
+        assertTrue(editor.recorded.isEmpty())
+        editor.saved.completeExceptionally(IOException("synthetic full disk"))
+        withTimeout(3000) { controller.state.first { it.error == AdviceError.SAVE_FAILED } }
+        assertTrue(editor.recorded.isEmpty())
+        controller.retrySave(); editor.retried.complete(Unit)
+        controller.phase(DraftPhase.SAVED)
+        assertEquals(listOf(SaveReceipt(AppliedReceipt("commit", 1, editor.revision), SaveTarget.SIDECAR, true)),
+            editor.recorded)
         assertEquals(1, editor.commits)
     }
 

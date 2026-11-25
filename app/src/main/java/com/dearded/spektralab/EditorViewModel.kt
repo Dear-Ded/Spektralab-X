@@ -153,6 +153,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
     private val advisorController = lazy { AdviceSessionController(viewModelScope, advisorEditor()) }
     internal val assistantSession: AdviceSessionController get() = advisorController.value
     internal val assistantRuntime by lazy { AdvisorRuntime(app, viewModelScope, assistantSession) }
+    internal val assistantPreferences get() = (app as SpektraLabApp).assistantPreferences
 
     private fun log(event: String) = host.events.add(event)
     private fun saveFailed(kind: String, error: Exception) {
@@ -698,7 +699,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
                     ?.takeIf { matches() }
             }
 
-        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot): CommittedDraft {
+        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot, learnAdoption: Boolean): CommittedDraft {
             if (!current(entry) || offeredDraft !== candidate) throw AdviceFailure(AdviceError.STALE_RESULT)
             val verified = AdviceProjection.commitEdit(entry, candidate, catalog())
             applyEdit(verified, record = true, render = false, advisorCommit = true)
@@ -706,7 +707,13 @@ class EditorViewModel internal constructor(private val app: Application, startEn
             val save = AdvisorSave(receipt, checkNotNull(editorStateSnapshot()))
             advisorSave = save
             val target = if (save.snapshot.frameId == null) SaveTarget.EDITOR_STATE else SaveTarget.SIDECAR
-            return CommittedDraft(receipt, target, writeAdvisorSave(save.snapshot))
+            val record: ((SaveReceipt) -> Unit)? = if (BuildConfig.DEBUG && learnAdoption) {
+                val preferences = assistantPreferences
+                preferences.capture(entry, candidate, verified, receipt, target)?.let { pending ->
+                    { saved -> preferences.record(pending, saved) }
+                }
+            } else null
+            return CommittedDraft(receipt, target, writeAdvisorSave(save.snapshot), record)
         }
 
         override fun retrySave(applied: AppliedReceipt): Deferred<Unit> {

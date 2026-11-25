@@ -29,6 +29,7 @@ import java.util.Locale
 /** The process. Owns the one [EngineHost]. */
 class SpektraLabApp : Application() {
     val host: EngineHost by lazy { EngineHost(this) }
+    internal val assistantPreferences by lazy { AssistantPreferenceStore(this, host.scope) }
 
     override fun attachBaseContext(base: Context) {
         AppLocale.load(base)

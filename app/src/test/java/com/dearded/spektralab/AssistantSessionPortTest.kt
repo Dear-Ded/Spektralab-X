@@ -224,7 +224,7 @@ class AssistantSessionPortTest {
         override suspend fun statistics(snapshot: EditSnapshot, entry: EditSnapshot) =
             cinematicStatistics(snapshot).copy(scene = SceneEvidence(4, 4, List(16) { .5 }, null))
         override fun endPreview() { releases++ }
-        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot): CommittedDraft {
+        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot, learnAdoption: Boolean): CommittedDraft {
             commitGate?.await()
             check(current(entry))
             formal = candidate.edit

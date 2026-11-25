@@ -219,6 +219,10 @@ class DraftReducer {
         return checkNotNull(state.draft)
     }
 
+    internal fun canLearnAdoption(): Boolean = state.strengthPercent == 100 && manualOverrides.isEmpty() &&
+        state.draft?.let { it.origin is AdviceOrigin.Model && !it.manuallyAdjusted && it.directionalLight == null &&
+            it.edit == strengthAnchor?.recommendation } == true
+
     fun applied() {
         check(state.phase == DraftPhase.COMMITTING)
         state = state.copy(phase = DraftPhase.APPLIED, showingEntry = false)
