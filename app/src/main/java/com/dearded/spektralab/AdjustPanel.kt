@@ -1,5 +1,7 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.widthIn
@@ -106,9 +108,22 @@ internal fun AdjustPage(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
                         Box(
                             Modifier.weight(1f).fillMaxHeight()
                                 .graphicsLayer { scaleY = 0.78f + 0.22f * lift; alpha = if (enabled) 1f else 0.5f }
+                                // A gel from a swatch book (Skeuo.kt): light through it, brightest in the middle,
+                                // a sheen across the film; the chosen one is lifted out on a light rim.
+                                .drawBehind {
+                                    val r = androidx.compose.ui.geometry.CornerRadius(8.dp.toPx())
+                                    val c = Color(argb)
+                                    drawRoundRect(Color.Black.copy(alpha = 0.5f), Offset(0f, 1.5f * density), size, r)
+                                    drawRoundRect(androidx.compose.ui.graphics.Brush.radialGradient(
+                                        listOf(androidx.compose.ui.graphics.lerp(c, Color.White, 0.18f + 0.1f * lift), c, androidx.compose.ui.graphics.lerp(c, Color.Black, 0.28f)),
+                                        center = Offset(size.width * 0.5f, size.height * 0.42f), radius = size.maxDimension * 0.75f), cornerRadius = r)
+                                    drawRoundRect(androidx.compose.ui.graphics.Brush.linearGradient(
+                                        0f to Color.Transparent, 0.35f to Color.White.copy(alpha = 0.16f), 0.5f to Color.Transparent,
+                                        start = Offset.Zero, end = Offset(size.width, size.height)), cornerRadius = r)
+                                    drawRoundRect(Color.White.copy(alpha = 0.2f + 0.5f * lift), cornerRadius = r,
+                                        style = androidx.compose.ui.graphics.drawscope.Stroke((0.6f + 1.4f * lift) * density))
+                                }
                                 .clip(Corners.s)
-                                .background(Color(argb).copy(alpha = 0.78f + 0.22f * lift))
-                                .border(if (on) 2.dp else 0.dp, if (on) Palette.Accent else Color.Transparent, Corners.s)
                                 .selectable(selected = on, enabled = enabled, role = Role.Tab) {
                                     if (!on) { band = i; Feedback.play(view, Cue.Detent) }
                                 }

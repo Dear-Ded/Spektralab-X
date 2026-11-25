@@ -538,12 +538,14 @@ private fun Check(color: Color) {
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     val shape = Corners.m
+    val down by press.collectIsPressedAsState()
+    val sink by animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "tonal-press")
     Box(
         modifier.heightIn(min = 48.dp)
-            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
-            .clip(shape).background(Palette.PanelHigh)
-            .border(1.dp, Palette.OutlineSoft, shape)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.5f }
+            .drawBehind { drawKey(12.dp.toPx(), 0f, sink) }
+            .clip(shape)
+            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 18.dp),
         contentAlignment = Alignment.Center,
     ) {
