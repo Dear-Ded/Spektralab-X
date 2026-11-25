@@ -49,9 +49,14 @@ Treat commercial products as behavior references only. Do not download or reuse 
 | P1.1 | Closed | Added versioned local strip/region evidence without changing legacy statistics. The three focused Android JVM suites passed all 22 tests: 7 statistics, 10 rendered highlight checks and 5 scene tests, including JPEG and Display P3. |
 | P1.2 | Closed (host engine + Android JVM) | Current production JNI and freshly built pinned upstream rendered verified RAW samples `6001` (RAF), `6645` (CR3) and `7751` (DNG). The Kotlin sampler matched the exact ROI luma and near-white oracle on all three. Two X-E5 RAFs failed host RAW color conversion and were not counted. No physical-device claim. |
 | P2.1 | Closed (request only) | Added explicit internal scalar opt-in. Default wire/prompt and v3 direction are unchanged; the 19 focused cloud suites passed all 135 tests. No current app caller opts in. |
-| P2.2 | Open (reflective pair run) | Real Gemini A/B and the local rule rendered against four pinned neutral/Portra baselines from two independently sourced CC0 object photos. The blinded automated review scored B vs A at 0 wins, 3 ties, 1 loss, grouped as two captures; two neutral local-rule renders lost protected detail. Do not enable scene evidence by default. Broader holdout and failure attribution remain required. Archived in `P2_REFLECTIVE_PAIR_RESULT.md`; not a device or app-integration result. |
-| P3.1 | Gated | Start zero or one isolated experiment based on the observed P2 failure class. |
-| P4.1 | Gated | Separate internal port wiring, Android/native/screenshot results, and real-provider and on-device acceptance where available. No publish. |
+| P2.2 | Decision recorded: default adoption not passed | 22 development captures, 28 rows; 21 paired previews yielded 10 B wins, 8 ties, 3 losses, including protected detail loss on one RAW. Independent reflective and lighting holdouts: four scored captures (1 B win, 2 ties, 1 loss), four unscored. Keep scene transmission off. Actual provider and production host render receipts are archived separately; not device or app end-to-end. Local-only prompt replay is separate. |
+| P2.3 | Open (prompt regression) | v2.6 clarified all eight controls are whole-image. 136 focused release JVM tests passed. Six live scalar probes: both model arms refused the exact-only tree task and projected the allowed lift, but both still suggested a global change for the only-water task. Do not treat prompt compliance as an authorization check. |
+| P3.1 | Not selected | P2 did not isolate repeatable amplitude or subject-evidence errors warranting one extra production algorithm. No local ML, extra render loop or alternate renderer. |
+| P4.1 | Started | `a68bbb0`: discrete undo and exact writer receipts; 27 focused cloud JVM tests passed. Actual sidecar/index integration test not run; no active UI port consumer yet. Next: formal revision and exclusive preview ownership, editor apply/undo/retry/export integration, then internal port binding. Record Android/native/screenshot, real-provider and device acceptance separately. No publish. |
+
+Branch aligned with `origin/main` at `3294552c2304daf87da19e6c969dff41c101b6f2`
+via `8998a1f`; the three upstream commits did not change the Android/engine
+code or the two candidate CI workflows used for these tests.
 
 The import leaves out the legacy UI, profile/Room rules, original recovery and old editor implementation.
 No request advertises local rule targets that this branch cannot apply. The result schemas and existing
