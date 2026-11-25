@@ -17,6 +17,7 @@ internal class PreviewPublication<T>(initial: T) {
     private var session = 0L
     private var sequence = 0L
     private var requested = PreviewIntent(0L, initial)
+    private var oldestLive = 0L
     private var cached: PreviewFrame<T>? = null
     private var shown: PreviewFrame<T>? = null
 
@@ -26,6 +27,15 @@ internal class PreviewPublication<T>(initial: T) {
     }
 
     @Synchronized fun intent(): PreviewIntent<T> = requested
+
+    /** Unlike slider updates, an ownership change does not accept any older live frame. */
+    @Synchronized fun changeOwner(edit: T): PreviewIntent<T> {
+        requested = PreviewIntent(requested.revision + 1, edit)
+        oldestLive = requested.revision
+        return requested
+    }
+
+    @Synchronized fun shownFrame(): PreviewFrame<T>? = shown
 
     @Synchronized fun replaceSource(handle: Long) {
         source++
@@ -48,7 +58,7 @@ internal class PreviewPublication<T>(initial: T) {
         belongs(frame) && frame.intent == requested
 
     @Synchronized fun publish(frame: PreviewFrame<T>, allowStaleLive: Boolean = false): Boolean {
-        if (!belongs(frame)) return false
+        if (!belongs(frame) || frame.intent.revision < oldestLive) return false
         // A live pass may finish mid-drag so the slider keeps making progress.
         // Slow previews and re-packs must still belong to the current edit.
         if (frame.intent != requested && !(allowStaleLive && frame.tier == "live")) return false

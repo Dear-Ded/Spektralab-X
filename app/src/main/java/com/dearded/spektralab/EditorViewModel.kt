@@ -11,7 +11,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.dearded.spektralab.advisor.domain.*
+import com.dearded.spektralab.advisor.editor.*
+import com.dearded.spektralab.advisor.session.AdviceSessionController
+import com.dearded.spektralab.advisor.session.AdvisorRuntime
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
@@ -93,7 +98,8 @@ data class UiState(
 
 class EngineException(message: String, val errorCode: String = ErrorCodes.ENGINE_EXCEPTION) : Exception(ErrorCodes.format(errorCode, message))
 
-class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
+class EditorViewModel internal constructor(private val app: Application, startEngineWork: Boolean) : AndroidViewModel(app) {
+    constructor(app: Application) : this(app, startEngineWork = true)
     private val prefs = app.getSharedPreferences("settings", 0)
     private val presetStore = PresetStore(prefs)
     private val _ui = MutableStateFlow(UiState(workingEdge = prefs.getInt("working_edge", 4096),
@@ -139,6 +145,14 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     }
     private val loader = SourceLoader(app)
     private val history = EditHistory(kSettleMs, kMaxUndo)
+    @Volatile private var formalRevision = 0L
+    @Volatile private var advisorOwnsPreview = false
+    private var offeredDraft: AdviceCandidate? = null
+    private data class AdvisorSave(val receipt: AppliedReceipt, val snapshot: EditorStateSave)
+    private var advisorSave: AdvisorSave? = null
+    private val advisorController = lazy { AdviceSessionController(viewModelScope, advisorEditor()) }
+    internal val assistantSession: AdviceSessionController get() = advisorController.value
+    internal val assistantRuntime by lazy { AdvisorRuntime(app, viewModelScope, assistantSession) }
 
     private fun log(event: String) = host.events.add(event)
     private fun saveFailed(kind: String, error: Exception) {
@@ -162,20 +176,19 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private var benchmarkJob: kotlinx.coroutines.Job? = null
 
     init {
-        viewModelScope.launch { startEngine() }
-        viewModelScope.launch { renderLoop() }
-        viewModelScope.launch { repackLoop() }
-        // A lost GPU device (here or in an export) makes EngineHost build a new
-        // engine and bump generation; the open photo is reopened on it with the
-        // whole edit kept, the way a white-balance re-decode keeps it.
-        viewModelScope.launch {
-            host.generation.drop(1).collect { onEngineReplaced() }
+        if (startEngineWork) {
+            viewModelScope.launch { startEngine() }
+            viewModelScope.launch { renderLoop() }
+            viewModelScope.launch { repackLoop() }
+            // A lost GPU device reopens the same photo on the new engine, keeping the formal edit.
+            viewModelScope.launch { host.generation.drop(1).collect { onEngineReplaced() } }
         }
     }
 
     private suspend fun onEngineReplaced() {
         val ready = try { host.start(wanted.film, wanted.paper) } catch (e: Throwable) { return }
         if (ready.engine == engine) return
+        invalidateAdvisor()
         openJob?.cancelAndJoin()
         withContext(EngineThread.dispatcher) { releaseSession() }
         engine = ready.engine
@@ -266,6 +279,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      */
     private fun launchOpen(uri: Uri, wb: Pair<Double, Double>?, savedEdit: Edit? = null, change: ReopenEdit? = null,
         frameId: String? = if (wb != null && savedEdit == null) frameEdits.frameId else null) {
+        formalRevision++
+        invalidateAdvisor()
         invalidateDetail()
         clearOverride(render = false)
         val previous = openJob
@@ -559,7 +574,8 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
                 .putBoolean("last_scan_film", edit.scanFilm).apply()
     }
 
-    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, moveHistory: (() -> Unit)? = null) {
+    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, moveHistory: (() -> Unit)? = null,
+        advisorCommit: Boolean = false) {
         val edit = _ui.value.catalog.normalize(raw)
         val src = _ui.value.source
         val uri = lastUri
@@ -572,12 +588,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
         // The real edit renders below; after an override the engine holds the override's
         // params, so even a look-only change must develop again, not re-pack.
-        val wasOverridden = clearOverride(render = false)
         val current = _ui.value.edit
+        val wasAdvisorPreview = advisorOwnsPreview
+        if (edit != current) {
+            formalRevision++
+            if (!advisorCommit) invalidateAdvisor()
+        }
+        val wasOverridden = clearOverride(render = false)
         if (edit != current || wasOverridden) invalidateDetail()
         // "记住上次用的" across a restart: a new process would start on 无 otherwise.
         rememberPair(current, edit)
-        if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
+        if (advisorCommit) history.recordSeparate(current, edit)
+        else if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
         moveHistory?.invoke()
         wanted = edit
         previewPublication.request(edit)
@@ -588,14 +610,194 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         }
         frameEdits.changed(edit)
         saveEditorState()
+        if (advisorCommit) endAdvisorPreview()
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
         // Only the look moved: the print is the same, so re-pack it (a few ms)
         // instead of developing again. Anything else renders, look included.
-        val outputOnly = !wasOverridden && edit != current && edit.sameRenderInputAs(current)
+        val outputOnly = !wasOverridden && !wasAdvisorPreview && edit != current && edit.sameRenderInputAs(current)
         if (outputOnly && _ui.value.image != null) { if (render) repacks.trySend(Unit); return }
         cancelStalePreview()
         if (render) renders.trySend(Unit)
+    }
+
+    internal fun canOpenAssistant(): Boolean = _ui.value.let {
+        it.hasImage && it.busy == null && !it.exporting && session != 0L
+    }
+
+    internal fun canAnalyzeAssistantPreview(): Boolean = _ui.value.let { state ->
+        canOpenAssistant() && !state.rendering && state.image != null &&
+            previewPublication.shownFrame()?.let(previewPublication::current) == true
+    }
+
+    private fun currentAdvisorEntry(entry: EditSnapshot): Boolean {
+        val state = _ui.value
+        val ticket = entry.ticket
+        return state.busy == null && session != 0L && state.previewSource == ticket.photoSessionId &&
+            formalRevision == ticket.formalRevision && host.generation.value.toLong() == ticket.engineGeneration &&
+            state.edit == entry.edit
+    }
+
+    private fun invalidateAdvisor() {
+        advisorSave = null
+        if (advisorController.isInitialized()) assistantSession.invalidate()
+    }
+
+    private fun endAdvisorPreview() {
+        offeredDraft = null
+        if (!advisorOwnsPreview) return
+        val shown = previewPublication.shownFrame()
+        if (shown?.intent?.edit != wanted || !previewPublication.current(shown)) {
+            previewPublication.changeOwner(wanted)
+            cancelStalePreview()
+            renders.trySend(Unit)
+        }
+        advisorOwnsPreview = false
+        _ui.update { it.copy(rendering = false) }
+    }
+
+    private fun advisorEditor(): AdvisorEditorPort = object : AdvisorEditorPort {
+        override fun capture(): EditSnapshot {
+            check(canOpenAssistant())
+            val state = _ui.value
+            return EditSnapshot(state.edit, RequestTicket(state.previewSource, formalRevision, 0,
+                host.generation.value.toLong(), 0, 0))
+        }
+
+        override fun catalog(): Catalog = _ui.value.catalog
+        override fun current(snapshot: EditSnapshot) = currentAdvisorEntry(snapshot)
+        override fun endPreview() = endAdvisorPreview()
+
+        override suspend fun render(edit: Edit, entry: EditSnapshot): Boolean =
+            renderAdvisor(edit, entry) == AdvisorRenderResult.SHOWN
+
+        override suspend fun restore(entry: EditSnapshot) = render(entry.edit, entry)
+
+        override fun offered(candidate: AdviceCandidate, entry: EditSnapshot) {
+            val shown = previewPublication.shownFrame()
+            if (current(entry) && shown?.intent?.edit == candidate.edit && previewPublication.current(shown))
+                offeredDraft = candidate
+        }
+
+        override suspend fun renderCinematicCandidate(candidate: AdviceCandidate, entry: EditSnapshot, base: EditSnapshot) =
+            renderAdvisor(candidate.edit, entry, base.edit, candidate.directionalLight?.let { CinematicRetryGoal.Direction(it.brightSide) })
+
+        override suspend fun renderReducedCinematicCandidate(candidate: AdviceCandidate, entry: EditSnapshot, base: EditSnapshot) =
+            renderAdvisor(candidate.edit, entry, base.edit,
+                candidate.directionalLight?.let { CinematicRetryGoal.Direction(it.brightSide) } ?: CinematicRetryGoal.Contrast)
+
+        override suspend fun statistics(snapshot: EditSnapshot, entry: EditSnapshot): AdviceStatistics? =
+            withContext(EngineThread.dispatcher) {
+                val bitmap = _ui.value.image ?: return@withContext null
+                val frame = previewPublication.shownFrame() ?: return@withContext null
+                fun matches() = current(entry) && !ui.value.rendering && ui.value.image === bitmap &&
+                    previewPublication.shownFrame() == frame && previewPublication.current(frame) &&
+                    frame.intent.edit == snapshot.edit && frame.output == sessionOutput
+                if (!matches()) return@withContext null
+                AdvisorStatisticsSampler.sample(bitmap, frame.output, entry.ticket.formalRevision, frame.sequence)
+                    ?.takeIf { matches() }
+            }
+
+        override suspend fun commit(candidate: AdviceCandidate, entry: EditSnapshot): CommittedDraft {
+            if (!current(entry) || offeredDraft !== candidate) throw AdviceFailure(AdviceError.STALE_RESULT)
+            val verified = AdviceProjection.commitEdit(entry, candidate, catalog())
+            applyEdit(verified, record = true, render = false, advisorCommit = true)
+            val receipt = AppliedReceipt(candidate.id, entry.ticket.photoSessionId, formalRevision)
+            val save = AdvisorSave(receipt, checkNotNull(editorStateSnapshot()))
+            advisorSave = save
+            val target = if (save.snapshot.frameId == null) SaveTarget.EDITOR_STATE else SaveTarget.SIDECAR
+            return CommittedDraft(receipt, target, writeAdvisorSave(save.snapshot))
+        }
+
+        override fun retrySave(applied: AppliedReceipt): Deferred<Unit> {
+            val save = advisorSave
+            if (save?.receipt != applied || applied.revision != formalRevision ||
+                applied.photoSessionId != ui.value.previewSource || ui.value.busy != null)
+                throw AdviceFailure(AdviceError.STALE_RESULT)
+            return writeAdvisorSave(save.snapshot)
+        }
+    }
+
+    private fun writeAdvisorSave(snapshot: EditorStateSave): Deferred<Unit> = snapshot.frameId?.let {
+        frameEdits.saveNow(FrameEditSave(it, snapshot.edit, snapshot.wbK, snapshot.wbTint))
+    } ?: editorState.saveNow(snapshot)
+
+    private suspend fun renderAdvisor(edit: Edit, entry: EditSnapshot, base: Edit? = null,
+        goal: CinematicRetryGoal? = null): AdvisorRenderResult {
+        val failed = AdvisorRenderResult.FAILED
+        if (!currentAdvisorEntry(entry)) return failed
+        val previous = previewPublication.shownFrame()
+        if (base == null && previous?.intent?.edit == edit && previewPublication.current(previous))
+            return AdvisorRenderResult.SHOWN
+        val intent = if (!advisorOwnsPreview) {
+            invalidateDetail()
+            override = null
+            advisorOwnsPreview = true
+            previewPublication.changeOwner(edit)
+        } else previewPublication.request(edit)
+        cancelStalePreview()
+        _ui.update { it.copy(rendering = true) }
+        fun current() = advisorOwnsPreview && currentAdvisorEntry(entry) && previewPublication.intent() == intent
+
+        try {
+            host.yieldToExport()
+            var result = failed
+            val preview = withContext(EngineThread.dispatcher) {
+                if (!current()) return@withContext null
+                inFlightTier = "preview"
+                try {
+                    val whites = if (base == null) null else
+                        advisorReferenceWhites(base, previous, goal) ?: return@withContext null
+                    if (!current() || applyIntent(intent) != null) return@withContext null
+                    val frame = previewPublication.frame(session, intent, "preview", sessionOutput)
+                    val bitmap = renderPooled("preview") ?: run {
+                        if (NativeEngine.lastWasDeviceLost()) {
+                            val lost = engine
+                            viewModelScope.launch { runCatching { host.recover(lost) } }
+                        }
+                        return@withContext null
+                    }
+                    if (whites != null) {
+                        val after = CinematicWhites.measure(bitmap, frame.output, goal)
+                        if (after == null || !whites.permits(after) || goal != null && !whites.improves(after, goal)) {
+                            result = when {
+                                after == null -> failed
+                                !whites.permits(after) -> AdvisorRenderResult.HIGHLIGHTS_CLIPPED
+                                else -> AdvisorRenderResult.NO_IMPROVEMENT
+                            }
+                            synchronized(pool) { spare[frame.tier] = bitmap }
+                            return@withContext null
+                        }
+                    }
+                    previewPublication.keep(frame)
+                    frame to bitmap
+                } finally { inFlightTier = null }
+            } ?: return result
+            val (frame, bitmap) = preview
+            if (!current() || !previewPublication.publish(frame)) return failed
+            retire(frame.tier, bitmap)
+            _ui.update { it.copy(image = bitmap, imageTier = frame.tier) }
+            return AdvisorRenderResult.SHOWN
+        } catch (_: OutOfMemoryError) {
+            return failed
+        } finally {
+            if (current()) _ui.update { it.copy(rendering = false) }
+        }
+    }
+
+    /** Engine thread; only a sharp reference in the same output space can be reused. */
+    private suspend fun advisorReferenceWhites(base: Edit, previous: PreviewFrame<Edit>?,
+        goal: CinematicRetryGoal?): CinematicWhites? {
+        val shown = _ui.value.image
+        if (shown != null && previous?.intent?.edit == base && previous.tier == "preview" &&
+            previous.output == sessionOutput && previewPublication.shownFrame() == previous)
+            return CinematicWhites.measure(shown, previous.output, goal)
+        if (applyIntent(PreviewIntent(previewPublication.intent().revision, base)) != null) return null
+        val scratch = NativeEngine.renderBitmap(session, "preview") ?: return null
+        return try {
+            DisplayColor.tagOutput(scratch, sessionOutput)
+            CinematicWhites.measure(scratch, sessionOutput, goal)
+        } finally { scratch.recycle() }
     }
 
     /**
@@ -612,7 +814,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun loadInspection(target: String?) {
         val state = _ui.value
         val src = state.source ?: return
-        if (state.loadingDetail || state.detail != null || state.exporting || state.busy != null) return
+        if (advisorOwnsPreview || state.loadingDetail || state.detail != null || state.exporting || state.busy != null) return
         if (target == null && src.width.toLong() * src.height > kMaxDetailPixels) {
             _ui.update { it.copy(message = tr("工作尺寸超过 1600 万像素，1:1 查看已关闭；导出不受影响")) }
             return
@@ -630,7 +832,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             try {
                 val bitmap = withContext(EngineThread.dispatcher) {
                     if (!current() || session == 0L) return@withContext null
-                    applyWanted()?.let { throw EngineException(tr("参数无效：{0}", it)) }
+                    applyWanted(intent)?.let { throw EngineException(tr("参数无效：{0}", it)) }
                     identity = previewPublication.frame(session, appliedIntent,
                         if (target == null) "full" else "preview", target ?: sessionOutput)
                     inFlightTier = "detail"
@@ -808,6 +1010,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun previewOverride(edit: Edit?) {
         val next = edit?.let { _ui.value.catalog.normalize(it) }?.takeIf { it != wanted }
         if (next == override) return
+        if (advisorOwnsPreview) invalidateAdvisor()
         override = next
         previewPublication.request(next ?: wanted)
         cancelStalePreview()
@@ -823,23 +1026,28 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         return true
     }
 
-    private fun applyWanted(): String? {
-        val intent = previewPublication.intent()
+    private fun applyIntent(intent: PreviewIntent<Edit>): String? {
         val target = intent.edit
         applyLook(target.look)
         if (target == applied) { appliedIntent = intent; return null }
         val delta = target.delta(applied)
         if (delta.length() == 0) { applied = target; appliedIntent = intent; return null }
-        if (NativeEngine.setParams(session, delta.toString()) == null) {
+        if (NativeEngine.setParams(session, delta.toString()) == null) return NativeEngine.lastError()
+        applied = target
+        appliedIntent = intent
+        return null
+    }
+
+    private fun applyWanted(intent: PreviewIntent<Edit>): String? {
+        val error = applyIntent(intent) ?: return null
+        val target = intent.edit
+        if (!advisorOwnsPreview && previewPublication.intent() == intent) {
             if (target === override) {
                 override = null
                 previewPublication.request(wanted)
             } else rejected = target
-            return NativeEngine.lastError()
         }
-        applied = target
-        appliedIntent = intent
-        return null
+        return error
     }
 
     // True while a finger is on a slider. Set from the UI thread.
@@ -869,17 +1077,18 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun repackLoop() {
         for (request in repacks) {
-            if (_ui.value.imageTier.isEmpty() || _ui.value.busy != null) continue
+            if (advisorOwnsPreview || _ui.value.imageTier.isEmpty() || _ui.value.busy != null) continue
             var identity: PreviewFrame<Edit>? = null
             val out = try {
                 withContext(EngineThread.dispatcher) {
-                    if (session == 0L || _ui.value.busy != null) return@withContext null
+                    val intent = previewPublication.intent()
+                    if (advisorOwnsPreview || session == 0L || _ui.value.busy != null) return@withContext null
                     val tier = previewPublication.cachedTier(session) ?: return@withContext null
-                    val target = override ?: wanted
+                    val target = intent.edit
                     // A preceding film/geometry edit may still be waiting for a
                     // render. Its old cache cannot be repacked as the new input.
                     if (!target.sameRenderInputAs(applied)) return@withContext null
-                    applyWanted()?.let { throw EngineException(tr("参数无效：{0}", it)) }
+                    applyWanted(intent)?.let { throw EngineException(tr("参数无效：{0}", it)) }
                     identity = previewPublication.frame(session, appliedIntent, tier, sessionOutput)
                     val reuse = synchronized(pool) { spare.remove(tier) }?.takeIf { !it.isRecycled }
                     val bitmap = NativeEngine.repack(session, reuse)?.also { DisplayColor.tagOutput(it, sessionOutput) }
@@ -895,7 +1104,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
             // Nothing kept to re-pack (a fresh session): develop instead.
             if (out == null) { renders.trySend(Unit); continue }
             val frame = identity ?: continue
-            if (_ui.value.busy != null || !previewPublication.publish(frame)) continue
+            if (advisorOwnsPreview || _ui.value.busy != null || !previewPublication.publish(frame)) continue
             val tier = frame.tier
             retire(tier, out)
             _ui.update { it.copy(image = out, imageTier = tier) }
@@ -970,7 +1179,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     // progress bar up), so everything but cancellation is turned into a message,
     // and the busy flag is cleared in finally.
     private suspend fun renderOnce(tier: String): Boolean {
-        if (_ui.value.busy != null) return false
+        if (advisorOwnsPreview || _ui.value.busy != null) return false
         _ui.update { it.copy(rendering = true) }
         var failure: String? = null
         var reverted: Edit? = null
@@ -979,17 +1188,12 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         try {
             val started = android.os.SystemClock.elapsedRealtime()
             bitmap = withContext(EngineThread.dispatcher) {
-                if (session == 0L || _ui.value.busy != null) return@withContext null
-                identity = previewPublication.frame(session, previewPublication.intent(), tier, sessionOutput)
-                applyWanted()?.let { error ->
+                val intent = previewPublication.intent()
+                if (advisorOwnsPreview || session == 0L || _ui.value.busy != null) return@withContext null
+                identity = previewPublication.frame(session, intent, tier, sessionOutput)
+                applyWanted(intent)?.let { error ->
                     failure = tr("参数无效：{0}", error)
-                    // Only if the user has not asked for something newer meanwhile.
-                    if (wanted == rejected) {
-                        wanted = applied
-                        val restored = previewPublication.request(applied)
-                        identity = previewPublication.frame(session, restored, tier, sessionOutput)
-                        reverted = applied
-                    }
+                    if (wanted == rejected) reverted = applied
                     return@withContext null
                 }
                 identity = previewPublication.frame(session, appliedIntent, tier, sessionOutput)
@@ -1020,24 +1224,32 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
         } finally {
             failure?.let { log("render $tier failed: $it") }
             val frame = identity
-            val current = frame != null && previewPublication.current(frame)
+            val current = !advisorOwnsPreview && frame != null && previewPublication.current(frame)
             val shown = bitmap?.takeIf {
-                frame != null && _ui.value.busy == null && previewPublication.publish(frame, allowStaleLive = true)
+                !advisorOwnsPreview && frame != null && _ui.value.busy == null &&
+                    previewPublication.publish(frame, allowStaleLive = true)
             }
             // Outside update: its lambda may run more than once.
             if (shown != null) retire(tier, shown)
-            _ui.update {
-                var next = it.copy(rendering = false)
-                if (shown != null) next = next.copy(image = shown, imageTier = tier)
-                if (current && it.busy == null) {
-                    reverted?.let { e -> next = next.copy(edit = e) }
-                    failure?.let { f -> next = next.copy(message = f) }
+            if (!advisorOwnsPreview) {
+                val restored = reverted?.takeIf { current && _ui.value.busy == null }
+                if (restored != null) {
+                    formalRevision++
+                    invalidateAdvisor()
+                    wanted = restored
+                    previewPublication.request(restored)
                 }
-                next
-            }
-            if (current && _ui.value.busy == null && reverted != null) {
-                frameEdits.changed(_ui.value.edit)
-                saveEditorState()
+                _ui.update {
+                    var next = it.copy(rendering = false)
+                    if (shown != null) next = next.copy(image = shown, imageTier = tier)
+                    if (restored != null) next = next.copy(edit = restored)
+                    if (current && it.busy == null) failure?.let { f -> next = next.copy(message = f) }
+                    next
+                }
+                if (restored != null) {
+                    frameEdits.changed(restored)
+                    saveEditorState()
+                }
             }
         }
         return bitmap != null
@@ -1061,7 +1273,19 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * open the next photo, or leave the app. Progress and the remaining time are
      * in 正在处理 and in the notification (on HyperOS, the island).
      */
-    fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) {
+    fun export(format: ExportFormat, size: ExportSize = ExportSize.FULL, tiffColorSpace: TiffColorSpace = TiffColorSpace.SRGB) =
+        preparePhotoExport { enqueueExport(format, size, tiffColorSpace) }
+
+    private fun preparePhotoExport(enqueue: () -> Unit) {
+        if (!advisorController.isInitialized()) { enqueue(); return }
+        val photo = ui.value.previewSource
+        val revision = formalRevision
+        assistantSession.prepareExport {
+            if (ui.value.busy == null && ui.value.previewSource == photo && formalRevision == revision) enqueue()
+        }
+    }
+
+    private fun enqueueExport(format: ExportFormat, size: ExportSize, tiffColorSpace: TiffColorSpace) {
         clearOverride(render = true)
         val state = _ui.value
         val src = state.source ?: return
@@ -1099,7 +1323,9 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
      * device's pixel cap applies), the whole-frame full tier, in the background
      * queue. The queue steps it down on a lost GPU or a blank frame.
      */
-    fun exportExtreme() {
+    fun exportExtreme() = preparePhotoExport(::enqueueExtremeExport)
+
+    private fun enqueueExtremeExport() {
         clearOverride(render = true)
         val state = _ui.value
         val src = state.source ?: return
@@ -1180,13 +1406,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     // nothing to open, so a photo the system killed us under comes back as it was.
 
     // Main only, in the same transaction as accepted source/edit/WB publication.
-    private fun saveEditorState() {
+    private fun saveEditorState() { editorStateSnapshot()?.let(editorState::changed) }
+
+    private fun editorStateSnapshot(): EditorStateSave? {
         val state = _ui.value
-        if (state.busy != null) return
-        val uri = lastUri ?: return
-        val src = state.source ?: return
-        editorState.changed(EditorStateSave(uri.toString(), frameEdits.frameId, src.name,
-            src.kind == "raw", state.edit, src.wbK, src.wbTint))
+        if (state.busy != null) return null
+        val uri = lastUri ?: return null
+        val src = state.source ?: return null
+        return EditorStateSave(uri.toString(), frameEdits.frameId, src.name,
+            src.kind == "raw", state.edit, src.wbK, src.wbTint)
     }
 
     /**
@@ -1387,10 +1615,15 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     suspend fun exportLook(name: String, scope: StyleScope = StyleScope.COMBINATION): File? {
         val state = _ui.value
         if (!state.hasImage) return null
-        return try { withContext(Dispatchers.IO) {
-            val library = UserLibrary.get(app)
-            library.exportLook(state.edit, name, StyleImports.thumbnail(state.image), scope)
-        } } catch (e: kotlinx.coroutines.CancellationException) { throw e
+        return try {
+            val thumbnail = withContext(EngineThread.dispatcher) {
+                val shown = previewPublication.shownFrame()
+                if (shown?.intent?.edit == state.edit && previewPublication.current(shown) &&
+                    ui.value.previewSource == state.previewSource && ui.value.image === state.image)
+                    StyleImports.thumbnail(state.image) else null
+            }
+            withContext(Dispatchers.IO) { UserLibrary.get(app).exportLook(state.edit, name, thumbnail, scope) }
+        } catch (e: kotlinx.coroutines.CancellationException) { throw e
         } catch (e: Exception) {
             showMessage(tr("分享风格失败：{0}", e.message.orEmpty()))
             null
@@ -1402,6 +1635,7 @@ class EditorViewModel(private val app: Application) : AndroidViewModel(app) {
     fun dismissError() = _ui.update { it.copy(error = null) }
 
     override fun onCleared() {
+        invalidateAdvisor()
         flushPendingEdits()
         // The engine stays warm in EngineHost for the next editor. The session
         // is released after a pending open has either committed or cleaned up.
