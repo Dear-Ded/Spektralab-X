@@ -82,6 +82,15 @@ class AdvisorRequestContextTest {
         policy.reset(); assertTrue(policy.offer(question))
     }
 
+    @Test fun scalarInstructionDoesNotAuthorizeAGlobalSubstituteForALocalEdit() {
+        val request = AdviceRequest.from(EditSnapshot(edit, ticket), constraints, "Lift only the tree trunk")
+        val instruction = RequestContextBuilder.instructionFor(request)
+        assertTrue(instruction.contains("If the goal requires editing only a subject or area, use unsupported."))
+        assertTrue(instruction.contains("Never substitute a global edit for a required local edit."))
+        assertFalse(RequestContextBuilder.instructionFor(request.copy(schemaVersion = 3, brightSide = BrightSide.RIGHT))
+            .contains("Never substitute a global edit"))
+    }
+
     @Test fun sceneEvidenceRequiresExplicitOptInAndDoesNotChangeParameterAuthority() {
         val snapshot = EditSnapshot(edit, ticket)
         val bins = List(16) { if (it == 8) 1.0 else 0.0 }
