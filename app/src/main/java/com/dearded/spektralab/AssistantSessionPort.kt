@@ -60,21 +60,18 @@ internal class AssistantSessionPort(
         }
     }
 
-    override fun generate(goal: String) = controller.requestCustomScope(goal)
-    override fun cinematic() = controller.generateCinematicRecommendation()
-    override fun directional() = controller.generateDirectionalLightRecommendation()
+    override fun generate(goal: String) = withCurrentEdit { controller.requestCustomScope(goal) }
+    override fun cinematic() = withCurrentEdit { controller.generateCinematicRecommendation() }
+    override fun directional() = withCurrentEdit { controller.generateDirectionalLightRecommendation() }
     override fun setStrength(percent: Int) = controller.setStrength(percent)
     override fun cancel() = controller.cancelRequest()
-    override fun statistics(on: Boolean) = controller.includeStatistics(on)
+    override fun statistics(on: Boolean) = withCurrentEdit { controller.includeStatistics(on) }
     override fun showCurrent(current: Boolean) = controller.compare(showEntry = current)
     override fun adjust(param: AssistantParam, value: Double) =
         controller.adjust(listOf(ParameterChange(param.id, value)))
     override fun apply() = controller.apply()
     override fun discard() = controller.discardDraft()
-    override fun undo() {
-        undoEdit()
-        if (controller.state.value.phase == DraftPhase.IDLE && canBegin()) controller.begin()
-    }
+    override fun undo() = undoEdit()
     override fun retrySave() = controller.retrySave()
     override fun answer(text: String) {
         val prompt = controller.state.value.scopePrompt
@@ -84,11 +81,19 @@ internal class AssistantSessionPort(
             if (choice >= 0) controller.resolveScope(prompt.id, wholePhoto = choice == 0)
         }
     }
-    override fun tryPreset(preset: AssistantPreset) = controller.tryLocalPreset(when (preset) {
-        AssistantPreset.Brighten -> LocalAdvicePreset.BRIGHTEN
-        AssistantPreset.Soften -> LocalAdvicePreset.SOFTEN
-    })
+    override fun tryPreset(preset: AssistantPreset) = withCurrentEdit {
+        controller.tryLocalPreset(when (preset) {
+            AssistantPreset.Brighten -> LocalAdvicePreset.BRIGHTEN
+            AssistantPreset.Soften -> LocalAdvicePreset.SOFTEN
+        })
+    }
     override fun openSettings() = openAssistantSettings()
+
+    private inline fun withCurrentEdit(action: () -> Unit) {
+        // Editor history can invalidate the snapshot without dismissing the assistant.
+        if (controller.state.value.phase == DraftPhase.IDLE && canBegin()) controller.begin()
+        action()
+    }
 }
 
 // The existing panel returns only visible labels. Include the request ID so an old button

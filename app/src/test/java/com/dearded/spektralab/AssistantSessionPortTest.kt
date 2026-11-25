@@ -295,12 +295,32 @@ class AssistantSessionPortTest {
 
         port.undo()
         assertEquals(1, undos)
-        assertEquals(DraftPhase.READY, controller.state.value.phase)
-        assertEquals(original, controller.state.value.entry!!.edit)
         port.tryPreset(AssistantPreset.Soften)
         assertEquals(listOf(AssistantChange(AssistantParam.CONTRAST, 0.0, -8.0)),
             shown { it.phase == AssistantPhase.Previewing }.changes)
+        assertEquals(original, controller.state.value.entry!!.edit)
         assertEquals(original, editor.formal)
+    }
+
+    @Test fun toolbarHistoryInvalidationUsesTheNewEditOnTheNextAssistantRequest() = withPort {
+        val received = mutableListOf<AdviceRequest>()
+        connect { request, _ -> received += request; AdviceResult.NoChange }
+        port.open()
+        controller.invalidate()
+        val restored = editor.formal.copy(look = editor.formal.look.copy(exposure = .25))
+        editor.formal = restored
+        editor.displayed = restored
+
+        port.generate("Lift the midtones.")
+        port.answer(scopePrompt().options.first())
+        shown { it.notice == AssistantNotice.NoChange }
+        assertEquals(.25, received.single().stored.getValue(AdviceParameter.EXPOSURE.id), 0.0)
+
+        controller.invalidate()
+        port.statistics(true)
+        assertTrue(shown { it.statistics }.statistics)
+        assertEquals(restored, controller.state.value.entry!!.edit)
+        assertEquals(1, received.size)
     }
 
     @Test fun failedDiscardKeepsThePreviewButFailedCloseHandsItBack() = withPort {
