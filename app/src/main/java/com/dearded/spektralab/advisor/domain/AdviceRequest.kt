@@ -11,10 +11,13 @@ data class AdviceRequest(
     val dependencies: ResolutionDependencies,
     val statistics: AdviceStatistics? = null,
     val brightSide: BrightSide? = null,
+    val includeSceneEvidence: Boolean = false,
 ) {
+    internal val authorizedSceneEvidence get() = if (schemaVersion == 2 && includeSceneEvidence) statistics?.scene else null
+
     companion object {
         fun from(snapshot: EditSnapshot, constraints: AdviceConstraints, goal: String, statistics: AdviceStatistics? = null,
-            brightSide: BrightSide? = null): AdviceRequest {
+            brightSide: BrightSide? = null, includeSceneEvidence: Boolean = false): AdviceRequest {
             require(goal.isNotBlank() && goal.codePointCount(0, goal.length) <= 2000)
             require(snapshot.ticket.constraintsRevision == constraints.revision)
             require(statistics == null || statistics.sourceRevision == snapshot.ticket.formalRevision)
@@ -23,7 +26,7 @@ data class AdviceRequest(
                 constraints.ranges.mapKeys { it.key.id }, ResolutionDependencies(
                     look.palette, look.tone, look.colour, look.toneHome, look.colourHome,
                     snapshot.edit.noFilm, look.lut.isNotEmpty(), !look.curves.isIdentity,
-                    look.masks.any { it.active }), statistics, brightSide)
+                    look.masks.any { it.active }), statistics, brightSide, includeSceneEvidence)
         }
     }
 }

@@ -2,8 +2,10 @@
 
 This is a local measurement of a rendered edit preview, not a model's description of a photograph.
 The sampler uses the existing `AdviceStatistics` source and sample revisions. It does not decode the
-original, infer subject classes, create an edit mask, or change the result schemas. The evidence is
-not included in network requests at this stage.
+original, infer subject classes, create an edit mask, or change the result schemas. An internal
+scalar-request comparison can explicitly pass `includeSceneEvidence = true` when the sample and
+its outbound use are authorized. Current app callers leave this off, and the existing statistics
+permission is not permission to send regions. Directional v3 requests are unchanged.
 
 ## Frame and measurement
 
@@ -26,6 +28,10 @@ not included in network requests at this stage.
 - If a legacy sample center is translucent, the whole sample remains unavailable. If translucency
   is only outside that grid, global values remain usable but spatial evidence and measured light
   direction are absent. Global quantiles and per-channel histograms keep their original semantics.
+
+The opt-in scalar request writes only `scene_evidence` (measurement/domain, tile geometry and means,
+optional normalized rectangle and measurements). It leaves the rest of the request unchanged. The
+serializer does not write bitmap data, revision identifiers, paths, scoring annotations or edit masks.
 
 ## Verification
 

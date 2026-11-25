@@ -82,6 +82,49 @@ class AdvisorRequestContextTest {
         policy.reset(); assertTrue(policy.offer(question))
     }
 
+    @Test fun sceneEvidenceRequiresExplicitOptInAndDoesNotChangeParameterAuthority() {
+        val snapshot = EditSnapshot(edit, ticket)
+        val bins = List(16) { if (it == 8) 1.0 else 0.0 }
+        val values = AdviceStatisticsValues(listOf(.5, .5, .5), 0.0, 0.0, bins, bins, bins,
+            List(64) { if (it == 42) 1.0 else 0.0 })
+        val base = AdviceStatistics(ticket.formalRevision, 18, 8, 8, values, BrightSide.RIGHT)
+        val reference = SceneReference(.25, .25, .5, .5, 1.0 / 16, .4, 0.0, .1, .3)
+        val measured = base.copy(scene = SceneEvidence(4, 4, List(16) { if (it % 4 == 3) .75 else .4 }, reference))
+        for (side in listOf(null, BrightSide.RIGHT)) {
+            val withoutScene = AdviceRequest.from(snapshot, constraints, "Synthetic", base, brightSide = side)
+            val default = AdviceRequest.from(snapshot, constraints, "Synthetic", measured, brightSide = side)
+            assertEquals(RequestContextBuilder.parameters(withoutScene), RequestContextBuilder.parameters(default))
+            assertEquals(RequestContextBuilder.instructionFor(withoutScene), RequestContextBuilder.instructionFor(default))
+
+            val allowed = AdviceRequest.from(snapshot, constraints, "Synthetic", measured,
+                brightSide = side, includeSceneEvidence = true)
+            if (side != null) {
+                assertEquals(RequestContextBuilder.parameters(default), RequestContextBuilder.parameters(allowed))
+                assertEquals(RequestContextBuilder.instructionFor(default), RequestContextBuilder.instructionFor(allowed))
+                continue
+            }
+            val input = JSONObject(RequestContextBuilder.parameters(allowed))
+            val scene = input.remove("scene_evidence") as JSONObject
+            assertTrue(input.similar(JSONObject(RequestContextBuilder.parameters(default))))
+            assertEquals(setOf("measurement_version", "domain", "coordinates", "columns", "rows",
+                "tile_luma_means", "reference"), scene.keys().asSequence().toSet())
+            assertEquals(SceneEvidence.VERSION, scene.getString("measurement_version"))
+            assertEquals(AdviceStatistics.DOMAIN, scene.getString("domain"))
+            assertEquals("rendered_content_top_left_normalized", scene.getString("coordinates"))
+            assertEquals(4, scene.getInt("rows")); assertEquals(4, scene.getInt("columns"))
+            assertEquals(16, scene.getJSONArray("tile_luma_means").length())
+            assertEquals(.75, scene.getJSONArray("tile_luma_means").getDouble(3), 0.0)
+            val roi = scene.getJSONObject("reference")
+            assertEquals(setOf("bounds", "area_fraction", "luma_mean", "near_black_fraction", "near_white_fraction",
+                "ring_luma_mean"), roi.keys().asSequence().toSet())
+            assertEquals(.5, roi.getJSONArray("bounds").getDouble(2), 0.0)
+            assertEquals(.3, roi.getDouble("ring_luma_mean"), 0.0)
+            assertTrue(RequestContextBuilder.instructionFor(allowed).contains("not a subject or edit mask"))
+            val noEvidence = allowed.copy(statistics = null)
+            assertFalse(JSONObject(RequestContextBuilder.parameters(noEvidence)).has("scene_evidence"))
+        }
+    }
+
     @Test fun generatedParameterBoundaryPayloadsUseTheRealParserAndProjection() {
         val baseline = Catalog.EMPTY.normalize(Edit.NONE)
         val fresh = EditSnapshot(baseline, ticket.copy(constraintsRevision = 0))
