@@ -5,6 +5,13 @@ internal object EnglishCatalog {
     val text: Map<String, String> = mapOf(
         "服务" to "Service",
         "服务地址" to "Service address",
+        "服务地址（https://…，留空用默认）" to "Service address (https://…, empty for the default)",
+        "服务地址无效，需要 https 地址" to "Invalid address: an https address is needed",
+        "暂未启用：已确认的规则还不会用到修图" to "Not active yet: confirmed rules are not applied to edits",
+        "会调整整张照片：{0}" to "Adjusts the whole photo: {0}",
+        "只改一部分" to "Only part of it",
+        "调整整张" to "Whole photo",
+        "暂时只能调整整张照片；只改一部分请用蒙版" to "Only the whole photo can be adjusted for now; use a mask for part of it",
         "模型" to "Model",
         "模型名称" to "Model name",
         "密钥已保存" to "Key saved",

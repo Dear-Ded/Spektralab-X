@@ -20,7 +20,8 @@ around `EditorScreen` and `SettingsScreen`, in internal builds only. With no por
 | `changes` | for each `AdviceParameter` whose value differs between `entry.edit.look` and `draft.edit.look`: `AssistantChange(AssistantParam.of(id), before, after)` (ids are the registry's, `layer2.*`) |
 | `statistics` | `includeStatistics` |
 | `cinematicReady` | statistics granted **and** a preview that can be analysed (your rule) |
-| `question` | `AdviceResult.Question` → prompt, option labels |
+| `question` | `AdviceResult.Question` → prompt, option labels (the model's question only; never the scope) |
+| `scope` | `DraftState.scopePrompt` → `AssistantScope(id, text)`: a custom goal, follow-up or typed answer waiting for its scope. The panel asks in place: 会调整整张照片：… [只改一部分] [调整整张] |
 | `notice` | `AdviceNotice` (NO_CHANGE, UNSUPPORTED, QUESTION_LIMIT, CANCELLED, CINEMATIC_PREVIEW_NOT_ANALYZED, CINEMATIC_NO_ADJUSTMENT), same order |
 | `error` | `AdviceError` / `AdvisorNetworkError` folded: CONFIGURATION_REQUIRED → Configuration; NETWORK_AUTH, AUTH → Auth; NETWORK_ADDRESS, NOT_FOUND, REDIRECT → Address; NETWORK_RATE_LIMIT, RATE_LIMIT → RateLimit; NETWORK_TIMEOUT, TIMEOUT → Timeout; NETWORK_FAILED, TRANSPORT, SERVER, HTTP → Network; PROVIDER_REFUSED → Refused; INVALID_JSON, SCHEMA_MISMATCH, INVALID_STATUS_PAYLOAD, UNKNOWN_PARAMETER, DUPLICATE_PARAMETER, OUT_OF_RANGE, LOCK_CONFLICT, NO_EFFECT, STALE_RESULT, PROVIDER_INCOMPLETE, PROVIDER_INVALID, OUTPUT_TOO_LARGE, TOO_LARGE, INVALID_RESPONSE → Invalid; RENDER_FAILED → Render; SAVE_FAILED → Save; PREFERENCES_UNAVAILABLE, PREFERENCE_CONFLICT → Preferences |
 | `canApply` | `DraftState.canApply` |
@@ -45,13 +46,16 @@ around `EditorScreen` and `SettingsScreen`, in internal builds only. With no por
 | `apply()` / `discard()` | `apply()` / `discard()` |
 | `undo()` | the editor's one-step undo of the applied commit |
 | `retrySave()` | `retrySave()` (must not apply again) |
-| `answer(text)` | `answer(text)` |
+| `answer(text)` | `requestAnswerScope(text)`, or the model question's option |
+| `confirmScope(id, whole)` | `resolveScope(id, wholePhoto = whole)`; ignore an `id` that is not the pending prompt's. After 只改一部分 the panel words `UNSUPPORTED` as 暂时只能调整整张照片；只改一部分请用蒙版 |
 | `tryPreset(Brighten/Soften)` | `propose(...)` with your fixed offline changes (not a model) |
 | `openSettings()` | open 设置 → 暗房助手 |
 
 Settings (`AssistantSettingsPort`): `settings` ← `AdvisorRuntimeState` (`loading`, `saving`,
 `testing`, catalog services and models, selected endpoint and binding, a key stored, `probePassed`,
-`AdvisorSettingsError` folded as above); `save(service, address, model, key)` →
+`AdvisorSettingsError` folded as above; an address that is not https is `Address`, worded 需要 https 地址);
+`AssistantPreferences.rulesActive`: true only once confirmed rules are applied to edits (until then the
+switch shows off and explains); `save(service, address, model, key)` →
 `AdvisorRuntime.save(expected, endpoint, binding, secret)` (null key keeps the stored one; wipe the
 array); `testConnection` / `cancelTest`; `preferences`, `learn`, `useRules`, `clearPreferences` →
 your preference store.
