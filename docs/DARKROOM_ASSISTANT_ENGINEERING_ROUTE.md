@@ -50,13 +50,13 @@ Treat commercial products as behavior references only. Do not download or reuse 
 | P1.2 | Closed (host engine + Android JVM) | Current production JNI and freshly built pinned upstream rendered verified RAW samples `6001` (RAF), `6645` (CR3) and `7751` (DNG). The Kotlin sampler matched the exact ROI luma and near-white oracle on all three. Two X-E5 RAFs failed host RAW color conversion and were not counted. No physical-device claim. |
 | P2.1 | Closed (request only) | Added explicit internal scalar opt-in. Default wire/prompt and v3 direction are unchanged; the 19 focused cloud suites passed all 135 tests. No current app caller opts in. |
 | P2.2 | Decision recorded: default adoption not passed | 22 development captures, 28 rows; 21 paired previews yielded 10 B wins, 8 ties, 3 losses, including protected detail loss on one RAW. Independent reflective and lighting holdouts: four scored captures (1 B win, 2 ties, 1 loss), four unscored. Keep scene transmission off. Actual provider and production host render receipts are archived separately; not device or app end-to-end. Local-only prompt replay is separate. |
-| P2.3 | Open (prompt regression) | v2.6 clarified all eight controls are whole-image. 136 focused release JVM tests passed. Six live scalar probes: both model arms refused the exact-only tree task and projected the allowed lift, but both still suggested a global change for the only-water task. Do not treat prompt compliance as an authorization check. |
+| P2.3 | Partial (explicit scope through the debug port) | v2.6 did not stop both live model arms from proposing a global change for an only-water request. `1d5f0fd` now asks for explicit scope before custom goals, continuations and model answers. Region-only stops locally before sampling, dispatch or render; whole-photo approval is specific to the pending submission. This does not implement exact-region editing or certify live model behavior. |
 | P3.1 | Not selected | P2 did not isolate repeatable amplitude or subject-evidence errors warranting one extra production algorithm. No local ML, extra render loop or alternate renderer. |
 | P4.1 | Closed (editor and disk contract) | Exact writer receipts and a separate undo entry use the formal editor. The Android JVM runs exercised actual editor state and frame sidecar/index writes, including failure/retry, without modifying the accepted edit twice. |
 | P4.2 | Partial (preview and queue verified) | The existing preview pipeline rejects late frames at ownership changes. Android JVM tests with a synthetic published frame check apply/undo and formal-only TIFF/source-size JPEG recipes. Graphics fixtures cover measured statistics, highlight protection and directional contrast. Native candidate preview and final device exports remain unverified. |
 | P4.3 | Closed (internal application-root binding) | `e4bdcae` supplies both real ports at the root in Debug; the existing sheet opens through the session port. Both gate states and the setup path passed on Android JVM. No product UI layout or release gate change. |
 | P4.4 | Partial (saved adoption verified) | `c080ac3` persists independent permissions and exact saved model adoptions in private no-backup storage; checks clear, pause, restart, retry and write errors. No automatic rules. A legitimate source and actual application of confirmed rules remain open. |
-| P4.5 | Open | 91 targeted regressions, 31 screenshot tests, all 21 supporting screenshot workflow tests and Release Kotlin compile passed on `e4bdcae`. Full Android/engine CI, a debug candidate APK, live-model app path, device and final export acceptance are separate outstanding gates. No publish. |
+| P4.5 | Open | `e4bdcae`: 91 targeted regressions, 31 screenshot tests, 21 supporting checks, Release Kotlin compile. `1d5f0fd`: 79 focused session/port/editor/panel/root regressions and Release Kotlin compile. Full Android/engine CI, a debug candidate APK, live-model app path, device and final export acceptance remain open. No publish. |
 
 Branch aligned with `origin/main` at `3294552c2304daf87da19e6c969dff41c101b6f2`
 via `8998a1f`; the three upstream commits did not change the Android/engine
@@ -71,3 +71,10 @@ No request advertises local rule targets that this branch cannot apply. The resu
 scalar and direction permissions are unchanged. Runtime tests construct the connection directly, and
 P4 integration tests exercise writer acknowledgements against real local files. Java host tests do not
 claim the complete app or Android GPU path has been exercised.
+
+The debug adapter owns scope selection; no provider question or reply grants scope. The
+existing UI returns the displayed option label, so local scope options temporarily carry a
+request number. A later UI contract revision should pass a stable choice ID instead. The
+statistics permission still governs whether an authorized request contains measurements;
+scene evidence and the Release entry remain off. No rule is inferred from existing styles,
+adoptions or the use-rules permission.
