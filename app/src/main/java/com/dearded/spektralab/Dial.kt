@@ -334,18 +334,19 @@ internal fun CameraDial(
                 val pitch = 2.5.dp.toPx()
                 val shift = ((p * px) % pitch + pitch) % pitch
                 val kh = 4.dp.toPx()
+                // The grooves between the teeth as one dark band per rim; then only each tooth's lit face
+                // (the ends are in the drum's shadow anyway): about a third of the draws of tooth-by-tooth.
+                for (y0 in floatArrayOf(top + 1.5f * density, top + dh - kh - 1.5f * density))
+                    drawRect(Color.Black.copy(alpha = 0.3f), Offset(0f, y0), Size(w, kh))
                 for (k in -200..200) {
                     val a = (k * pitch - shift) / radius
-                    if (abs(a) >= 1.48f) continue
+                    if (abs(a) >= 1.3f) continue
                     val x = cx + radius * sin(a)
                     val x2 = cx + radius * sin(a + pitch * 0.5f / radius)
-                    val x3 = cx + radius * sin(a + pitch / radius)
-                    val cs = cos(a)
-                    val lit = maxOf(0f, cos(a + 0.42f)) * cs
-                    for (y0 in floatArrayOf(top + 1.5f * density, top + dh - kh - 1.5f * density)) {
-                        drawRect(Color(0xFFFFF8EC).copy(alpha = 0.025f + 0.1f * lit), Offset(x, y0), Size(maxOf(0.3f, x2 - x), kh))
-                        drawRect(Color.Black.copy(alpha = 0.16f + 0.2f * cs), Offset(x2, y0), Size(maxOf(0.3f, x3 - x2), kh))
-                    }
+                    val lit = maxOf(0f, cos(a + 0.42f)) * cos(a)
+                    val c = Color(0xFFFFF8EC).copy(alpha = 0.03f + 0.11f * lit)
+                    drawRect(c, Offset(x, top + 1.5f * density), Size(maxOf(0.3f, x2 - x), kh))
+                    drawRect(c, Offset(x, top + dh - kh - 1.5f * density), Size(maxOf(0.3f, x2 - x), kh))
                 }
                 drawRect(Color.Black.copy(alpha = 0.5f), Offset(0f, top + kh + 1.5f * density), Size(w, 0.6f * density))
                 drawRect(Color.Black.copy(alpha = 0.5f), Offset(0f, top + dh - kh - 2.1f * density), Size(w, 0.6f * density))

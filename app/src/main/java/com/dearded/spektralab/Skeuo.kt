@@ -1,5 +1,7 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
@@ -113,5 +115,59 @@ internal fun GrooveSwitch(checked: Boolean, enabled: Boolean, modifier: Modifier
         drawCircle(Brush.radialGradient(0f to Color(0xFFFDFBF6), 0.45f to Color(0xFFE2DDD2), 1f to Color(0xFFB7B1A5),
             center = c + Offset(-kr * 0.28f, -kr * 0.4f), radius = kr * 1.3f), kr, c, alpha = a)
         drawCircle(Color.Black.copy(alpha = 0.3f), kr, c, style = androidx.compose.ui.graphics.drawscope.Stroke(0.5f * d))
+    }
+}
+
+/**
+ * Any clickable surface as a key: [ivory] 1 for the primary (保存, 编辑, 导出, 下载并安装), 0 for the
+ * rest. [corner] null rounds it fully. Pass the same [press] to the clickable (indication = null).
+ */
+internal fun Modifier.key(ivory: Float, press: androidx.compose.foundation.interaction.InteractionSource, corner: androidx.compose.ui.unit.Dp? = null): Modifier =
+    androidx.compose.ui.composed {
+        val down by press.collectIsPressedAsState()
+        val sink by animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "key-press")
+        drawBehind { drawKey(corner?.toPx() ?: (size.minDimension / 2), ivory, sink) }
+    }
+
+/** A text field's ground: a window cut into the panel (with [windowFieldColors] on an OutlinedTextField). */
+internal fun Modifier.windowField(): Modifier = drawBehind {
+    val r = 12.dp.toPx()
+    drawWindowCut(r)
+    drawRoundRect(Color(0xFF111110), cornerRadius = CornerRadius(r))
+    clipPath(roundRectPath(size, r)) {
+        drawRect(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent), endY = 8 * density), size = Size(size.width, 8 * density))
+    }
+}
+
+@Composable
+internal fun windowFieldColors() = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = Palette.Accent.copy(alpha = 0.35f), unfocusedBorderColor = Color.Transparent,
+    disabledBorderColor = Color.Transparent, errorBorderColor = Palette.Warning,
+    focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent,
+    cursorColor = Palette.Accent, focusedLabelColor = Palette.OnSurfaceSoft, unfocusedLabelColor = Palette.OnSurfaceSoft,
+    focusedTextColor = Palette.OnSurface, unfocusedTextColor = Palette.OnSurface,
+)
+
+/** A check: a small well pressed into the panel, an ivory key with a tick in it when checked. 22 dp. */
+@Composable
+internal fun CheckKey(checked: Boolean, enabled: Boolean = true, modifier: Modifier = Modifier) {
+    val t by animateFloatAsState(if (checked) 1f else 0f, Motion.fastEffects(), label = "check")
+    Canvas(modifier.size(22.dp)) {
+        val r = 6.dp.toPx()
+        val a = if (enabled) 1f else 0.45f
+        drawGroove(r)
+        if (t > 0.01f) {
+            val inset = 2.dp.toPx()
+            drawContext.transform.translate(inset, inset)
+            val inner = Size(size.width - 2 * inset, size.height - 2 * inset)
+            drawRoundRect(Brush.verticalGradient(listOf(Color(0xFFF4F0E8), Color(0xFFD9D4C9)), endY = inner.height),
+                size = inner, cornerRadius = CornerRadius(r - inset), alpha = t * a)
+            drawContext.transform.translate(-inset, -inset)
+            val p = Path().apply {
+                moveTo(size.width * 0.28f, size.height * 0.52f); lineTo(size.width * 0.44f, size.height * 0.68f); lineTo(size.width * 0.74f, size.height * 0.34f)
+            }
+            drawPath(p, Palette.OnAccent.copy(alpha = t * a), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+        }
     }
 }

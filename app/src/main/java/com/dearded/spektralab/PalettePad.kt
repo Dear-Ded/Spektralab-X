@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.geometry.Size
 import android.content.Context
 import android.view.accessibility.AccessibilityManager
@@ -200,11 +201,7 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
             drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.Transparent,
                 Color.Black.copy(alpha = 0.6f))), cornerRadius = corner)
             // Frosted glass: a fine grain over the colour, the grid etched into it.
-            for (k in 0 until 900) {
-                val hx = ((k * 0.754877666f) % 1f) * size.width
-                val hy = ((k * 0.569840291f) % 1f) * size.height
-                drawRect(if (k % 2 == 0) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.06f), Offset(hx, hy), Size(density, density))
-            }
+            drawRoundRect(FrostBrush, cornerRadius = corner)
             for (i in 1..3) {
                 val gx = size.width * i / 4; val gy = size.height * i / 4
                 drawRect(Color.White.copy(alpha = 0.16f), Offset(gx, 0f), Size(0.6f * density, size.height))
@@ -236,4 +233,20 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
     LabeledSlider(tr("风格强度"), look.palette, 0.0, 100.0, 100.0, enabled, "%.0f", onDrag) {
         onChange(lookLatest.copy(palette = it))
     }
+}
+
+/** Frosted glass's grain: one small tile made once and repeated, not dots drawn every frame. */
+private val FrostBrush: androidx.compose.ui.graphics.ShaderBrush by lazy {
+    val n = 96
+    val px = IntArray(n * n) { k ->
+        val h = ((k * 2654435761L) ushr 7).toInt() and 0xFF
+        when {
+            h < 14 -> android.graphics.Color.argb(13, 255, 255, 255)
+            h < 28 -> android.graphics.Color.argb(15, 0, 0, 0)
+            else -> 0
+        }
+    }
+    val tile = android.graphics.Bitmap.createBitmap(px, n, n, android.graphics.Bitmap.Config.ARGB_8888)
+    androidx.compose.ui.graphics.ShaderBrush(androidx.compose.ui.graphics.ImageShader(tile.asImageBitmap(),
+        androidx.compose.ui.graphics.TileMode.Repeated, androidx.compose.ui.graphics.TileMode.Repeated))
 }

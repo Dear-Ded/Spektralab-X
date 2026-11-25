@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
@@ -168,9 +169,10 @@ fun LightTableLoupe(table: LightTableViewModel, loupe: Loupe, onEdit: (Frame) ->
             FloatingBar(
                 trailing = {
                     Spacer(Modifier.width(8.dp))
+                    val editPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                     Box(
-                        Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
-                            .clickable(role = Role.Button) { onEdit(current) },
+                        Modifier.size(64.dp).key(1f, editPress).clip(Corners.full)
+                            .clickable(interactionSource = editPress, indication = null, role = Role.Button) { onEdit(current) },
                         contentAlignment = Alignment.Center,
                     ) { Text(tr("编辑"), style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
                 },
@@ -271,7 +273,7 @@ private fun MarkButton(glyph: String, label: String, on: Boolean, onClick: () ->
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
-            Modifier.size(28.dp).background(if (on) Palette.Accent else Palette.PanelHighest, CircleShape),
+            Modifier.size(28.dp).drawBehind { drawKey(size.minDimension / 2, if (on) 1f else 0f, 0f) },
             contentAlignment = Alignment.Center,
         ) { Text(glyph, color = if (on) Palette.OnAccent else Palette.OnSurface, fontSize = 14.sp) }
         Text(label, fontSize = 12.sp, color = Palette.OnSurfaceSoft)

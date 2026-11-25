@@ -100,12 +100,14 @@ internal fun TableBar(rolls: Boolean, onGrid: () -> Unit, onRolls: () -> Unit, a
 internal fun AddButton(add: AddPhotos) {
     Box {
         var menu by remember { mutableStateOf(false) }
+        val addPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
         IconButton(
             onClick = { menu = true },
-            modifier = Modifier.size(64.dp),
-            colors = IconButtonDefaults.iconButtonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
+            modifier = Modifier.size(64.dp).key(1f, addPress),
+            interactionSource = addPress,
+            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent, contentColor = Palette.OnAccent),
         ) {
-            Box(Modifier.size(64.dp).background(Palette.Accent, Corners.full), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Add, contentDescription = tr("添加照片"), tint = Palette.OnAccent)
             }
         }

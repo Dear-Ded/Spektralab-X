@@ -122,8 +122,7 @@ internal fun PasteSheet(
                         .semantics { role = Role.Checkbox; stateDescription = if (on) tr("已勾选") else tr("未勾选") },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(checked = on, onCheckedChange = null,
-                        colors = CheckboxDefaults.colors(checkedColor = Palette.Accent, checkmarkColor = Palette.OnAccent))
+                    CheckKey(on)
                     Spacer(Modifier.padding(start = 12.dp))
                     Text(g.label)
                 }

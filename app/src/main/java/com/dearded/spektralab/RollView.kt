@@ -173,9 +173,10 @@ fun RollView(
 private fun ExportButton(onRoll: () -> Unit, onContactSheet: () -> Unit) {
     Box {
         var menu by remember { mutableStateOf(false) }
+        val exportPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
         Box(
-            Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
-                .clickable(role = androidx.compose.ui.semantics.Role.Button) { menu = true }
+            Modifier.size(64.dp).key(1f, exportPress).clip(Corners.full)
+                .clickable(interactionSource = exportPress, indication = null, role = androidx.compose.ui.semantics.Role.Button) { menu = true }
                 .semantics { contentDescription = tr("导出") },
             contentAlignment = Alignment.Center,
         ) { Text(tr("导出"), style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }

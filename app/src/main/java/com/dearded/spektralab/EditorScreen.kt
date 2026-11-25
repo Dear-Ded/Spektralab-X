@@ -1050,9 +1050,8 @@ private fun Controls(
                                 }
                             }
                             SwitchRow(tr("片基字"), perf.edgeText, enabled) { setPerf(perf.copy(edgeText = it)) }
-                            androidx.compose.material3.OutlinedTextField(
-                                value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
-                                singleLine = true, enabled = enabled && perf.edgeText, modifier = Modifier.fillMaxWidth(),
+                            androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
+                                singleLine = true, enabled = enabled && perf.edgeText, modifier = Modifier.fillMaxWidth().windowField(),
                                 label = { Text(tr("片基文字（留空用胶片名）")) },
                             )
                             SwitchRow(tr("帧号"), perf.numbers, enabled && perf.edgeText,
@@ -1141,10 +1140,9 @@ private fun Controls(
                             SwitchRow(tr("参数文字"), e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
                             BrandPanel(ui, vm, enabled)
                             if (e.frame.sign) {
-                                androidx.compose.material3.OutlinedTextField(
-                                    value = e.frame.signText,
+                                androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), value = e.frame.signText,
                                     onValueChange = { vm.update(e.copy(frame = e.frame.copy(signText = it.take(40)))) },
-                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth().windowField(),
                                     label = { Text(tr("签名")) },
                                 )
                             }
@@ -1538,10 +1536,8 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             title = { Text(tr("存为预设")) },
             text = {
                 Column {
-                    androidx.compose.material3.OutlinedTextField(
-                        value = name, onValueChange = { name = it.take(40) }, singleLine = true,
-                        label = { Text(tr("名称")) },
-                    )
+                    androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), modifier = Modifier.windowField(), value = name, onValueChange = { name = it.take(40) }, singleLine = true,
+                        label = { Text(tr("名称")) },)
                     Text(
                         tr("保存胶片、相纸、放大和效果参数；曝光、裁剪和白平衡属于单张照片，不保存。同名会覆盖。"),
                         style = MaterialTheme.typography.bodySmall,

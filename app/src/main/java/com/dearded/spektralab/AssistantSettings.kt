@@ -187,8 +187,7 @@ private fun Field(text: String, onText: (String) -> Unit, label: String, enabled
         modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(Corners.m).background(Palette.Panel)
-                    .border(1.dp, Palette.OutlineSoft, Corners.m).padding(horizontal = 14.dp),
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).windowField().padding(horizontal = 14.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 if (text.isEmpty()) Text(label, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurfaceSoft.copy(alpha = 0.7f))

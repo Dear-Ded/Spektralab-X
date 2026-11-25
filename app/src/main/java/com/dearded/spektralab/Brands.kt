@@ -643,9 +643,8 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             "custom" -> {
                 var text by remember(f.brandText) { mutableStateOf(f.brandText) }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = text, onValueChange = { text = it.take(24) }, singleLine = true, enabled = enabled,
-                        label = { Text(tr("文字")) }, modifier = Modifier.weight(1f),
+                    OutlinedTextField(colors = windowFieldColors(), value = text, onValueChange = { text = it.take(24) }, singleLine = true, enabled = enabled,
+                        label = { Text(tr("文字")) }, modifier = Modifier.weight(1f).windowField(),
                     )
                     TextButton(onClick = { set(f.copy(brandText = text.trim())) }, enabled = enabled && text.trim() != f.brandText) {
                         Text(tr("应用"))

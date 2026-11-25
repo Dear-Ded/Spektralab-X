@@ -224,8 +224,9 @@ internal interface AssistantPort {
     /**
      * The scope of [AssistantView.scope] request [id] (resolveScope): the whole photo, or not (the
      * session stops it locally: only part of the photo cannot be edited yet). Ignored for any other id.
+     * Empty by default, so a session that still asks through [AssistantView.question] keeps building.
      */
-    fun confirmScope(id: Long, wholePhoto: Boolean)
+    fun confirmScope(id: Long, wholePhoto: Boolean) {}
     /** A fixed offline trial (propose with local changes). */
     fun tryPreset(preset: AssistantPreset)
     /** Opens 设置 → 暗房助手. */
