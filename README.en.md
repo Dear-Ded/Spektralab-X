@@ -53,15 +53,18 @@ CineStill 800T has no anti-halation layer. Bright light reflects off the back of
 
 <table>
 <tr>
-<td width="33%" align="center"><img src="docs/images/interface/editor.webp" width="240" alt="Styles page: style thumbnails and toolbar under the photo"><br><sub>Styles</sub></td>
-<td width="33%" align="center"><img src="docs/images/interface/light-table.webp" width="240" alt="Light table: grid of one roll"><br><sub>Light table</sub></td>
-<td width="33%" align="center"><img src="docs/images/interface/curves.webp" width="240" alt="Curve editor"><br><sub>Curves</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-style.webp" width="200" alt="Styles page: style thumbnails under the photo"><br><sub>Styles</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-film.webp" width="200" alt="Film page: cassette artwork and the develop steps"><br><sub>Film</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-adjust.webp" width="200" alt="Adjust page: swipe to pick a control, fine-tune on a large dial"><br><sub>Adjust</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-table.webp" width="200" alt="Light table: grid of one roll"><br><sub>Light table</sub></td>
 </tr>
 </table>
 
-<sub>Captured by the Alpha 8 [CI screenshot job](https://github.com/Dear-Ded/Spektralab-X/actions/runs/43625578680) with test data, not photographed from a phone. Method: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).</sub>
+<sub>Captured by the alpha v0.3.02 [CI screenshot job](https://github.com/Dear-Ded/Spektralab-X/actions/runs/45393154860) with test data, not photographed from a phone. Method: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).</sub>
 
 You can pick a style, set its strength, add a border and save; or keep going with curves, colour wheels and masks. Both work on the same edit. The interface is available in Chinese and English (Settings).
+
+The editor was redone in alpha v0.3: on the Adjust page you swipe to pick a control and fine-tune it on a large dial; the Film page goes through cassette, paper, exposure and effects in darkroom order; Save queues the job at once and the queue then shows the format, size and file size actually written. Cold start and saving have a developing animation, and the shutter, film advance and other actions use sounds recorded from real film cameras. They follow the media volume and can be turned off in Settings.
 
 ## Features
 

@@ -77,6 +77,18 @@ python3 tools/samples/compose.py compare:lake:ektar100 compare:fruit:velvia100 \
 spaces replaced by underscores. Any Vulkan 1.2 device works; the published set
 was rendered on Mesa lavapipe (CPU), so results do not depend on a GPU vendor.
 
+## Project site renders
+
+The photos on the [project site](https://dear-ded.github.io/Spektralab-X/) (`docs/site/img/`) are the
+same scenes rendered at 3200 px on the long edge, with the paper the app uses by
+default for colour negatives (`kodak_supra_endura`; CineStill 800T on `kodak_2383`,
+Tri-X 400 on `ilford_multigrade_iv_rc`, Velvia 100 scanned directly).
+[`tools/samples/hires.sh`](../tools/samples/hires.sh) lists them, and the
+[`samples` workflow](../.github/workflows/samples.yml) builds the engine as
+`scripts/parity.sh` does, renders them on lavapipe and uploads the PNGs as an
+artifact. [`tools/site/images.py`](../tools/site/images.py) only resizes them and
+encodes WebP; nothing is retouched.
+
 ## RAW regression set
 
 [`tools/samples/manifest.tsv`](../tools/samples/manifest.tsv) lists 33 CC0

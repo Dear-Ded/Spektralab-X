@@ -53,15 +53,18 @@ CineStill 800T 没有防光晕层，强光在片基背面反射后再次曝光�
 
 <table>
 <tr>
-<td width="33%" align="center"><img src="docs/images/interface/editor.webp" width="240" alt="风格页：照片下方是风格小样和工具栏"><br><sub>风格</sub></td>
-<td width="33%" align="center"><img src="docs/images/interface/light-table.webp" width="240" alt="观片台：同一卷照片的网格"><br><sub>观片台</sub></td>
-<td width="33%" align="center"><img src="docs/images/interface/curves.webp" width="240" alt="曲线编辑"><br><sub>曲线</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-style.webp" width="200" alt="风格页：照片下方是风格小样"><br><sub>风格</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-film.webp" width="200" alt="胶片页：暗盒图样和冲洗步骤条"><br><sub>胶片</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-adjust.webp" width="200" alt="调整页：横滑选项目，大刻度细调"><br><sub>调整</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-table.webp" width="200" alt="观片台：一卷照片的网格"><br><sub>观片台</sub></td>
 </tr>
 </table>
 
-<sub>截图由 Alpha 8 的 [CI 截图任务](https://github.com/Dear-Ded/Spektralab-X/actions/runs/43625578680)生成，使用测试数据，不是手机屏摄。方法见 [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)。</sub>
+<sub>截图由 alpha v0.3.02 的 [CI 截图任务](https://github.com/Dear-Ded/Spektralab-X/actions/runs/45393154860)生成，使用测试数据，不是手机屏摄。方法见 [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)。</sub>
 
 可以只选风格、调强度、加边框后保存，也可以继续调曲线、色轮和蒙版。两种操作改的是同一份编辑记录。界面支持中文和英文，在设置里切换。
+
+修图界面在 alpha v0.3 重做：调整页横滑选项目，用大刻度细调；胶片页按暗盒、相纸、曝光、效果的顺序一步步冲；点保存后任务立刻进入后台队列，完成后显示实际保存的格式、尺寸和大小。冷启动和保存时有显影动效，快门、过片等操作配有真实胶片相机录制的音效，跟随媒体音量，可以在设置里关闭。
 
 ## 功能
 
