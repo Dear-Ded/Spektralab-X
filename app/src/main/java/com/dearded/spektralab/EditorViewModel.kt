@@ -270,7 +270,9 @@ class EditorViewModel internal constructor(private val app: Application, startEn
     }
 
     private var openJob: kotlinx.coroutines.Job? = null
-    private data class ReopenEdit(val edit: Edit, val record: Boolean, val moveHistory: (() -> Unit)?)
+    private enum class HistoryMove { UNDO, REDO }
+
+    private data class ReopenEdit(val edit: Edit, val record: Boolean, val historyMove: HistoryMove?)
 
     /**
      * Opens run one at a time: a newer one first cancels and waits for the
@@ -472,14 +474,16 @@ class EditorViewModel internal constructor(private val app: Application, startEn
                         openedEdit = if (savedEdit != null) requested else edit
                         history.clear()
                     }
+                    val historyMove = change?.historyMove
+                    val adoption = historyMove?.let { moveHistory(it, _ui.value.edit) }
                     if (change != null) {
                         if (change.record) history.record(_ui.value.edit, edit, android.os.SystemClock.uptimeMillis())
-                        change.moveHistory?.invoke()
                         rememberPair(_ui.value.edit, edit)
                     }
                     frameEdits.opened(frameId, edit, nextUi.source!!.wbK, nextUi.source.wbTint, reopening = !resetHistory)
                     _ui.value = nextUi.copy(canUndo = history.canUndo, canRedo = history.canRedo)
                     saveEditorState()
+                    updateHistoryAdoption(historyMove, adoption)
                     cardCache.evictAll()
                     committed = true
                 }
@@ -575,7 +579,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
                 .putBoolean("last_scan_film", edit.scanFilm).apply()
     }
 
-    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, moveHistory: (() -> Unit)? = null,
+    private fun applyEdit(raw: Edit, record: Boolean, render: Boolean = true, historyMove: HistoryMove? = null,
         advisorCommit: Boolean = false) {
         val edit = _ui.value.catalog.normalize(raw)
         val src = _ui.value.source
@@ -584,7 +588,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
         // has decoded and validated the requested development metadata.
         if (src != null && uri != null && edit.requiresRawDevelopmentSource(src)) {
             cancelStalePreview()
-            launchOpen(uri, wb = src.wbK to src.wbTint, change = ReopenEdit(edit, record, moveHistory))
+            launchOpen(uri, wb = src.wbK to src.wbTint, change = ReopenEdit(edit, record, historyMove))
             return
         }
         // The real edit renders below; after an override the engine holds the override's
@@ -601,7 +605,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
         rememberPair(current, edit)
         if (advisorCommit) history.recordSeparate(current, edit)
         else if (record) history.record(current, edit, android.os.SystemClock.uptimeMillis())
-        moveHistory?.invoke()
+        val adoption = historyMove?.let { moveHistory(it, current) }
         wanted = edit
         previewPublication.request(edit)
         host.lastInteraction = android.os.SystemClock.uptimeMillis()
@@ -611,6 +615,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
         }
         frameEdits.changed(edit)
         saveEditorState()
+        updateHistoryAdoption(historyMove, adoption)
         if (advisorCommit) endAdvisorPreview()
         // A sharp preview of the previous edit is now wasted work: stop it so the
         // live render of this one starts at once.
@@ -709,9 +714,8 @@ class EditorViewModel internal constructor(private val app: Application, startEn
             val target = if (save.snapshot.frameId == null) SaveTarget.EDITOR_STATE else SaveTarget.SIDECAR
             val record: ((SaveReceipt) -> Unit)? = if (BuildConfig.DEBUG && learnAdoption) {
                 val preferences = assistantPreferences
-                preferences.capture(entry, candidate, verified, receipt, target)?.let { pending ->
-                    { saved -> preferences.record(pending, saved) }
-                }
+                preferences.capture(entry, candidate, verified, receipt, target)
+                    ?.also(history::attachAdoption)?.let { pending -> { saved -> preferences.record(pending, saved) } }
             } else null
             return CommittedDraft(receipt, target, writeAdvisorSave(save.snapshot), record)
         }
@@ -891,14 +895,27 @@ class EditorViewModel internal constructor(private val app: Application, startEn
 
     fun undo() {
         if (_ui.value.busy != null) return
-        val current = _ui.value.edit
-        applyEdit(history.undoTarget ?: return, record = false, moveHistory = { history.undo(current) })
+        applyEdit(history.undoTarget ?: return, record = false, historyMove = HistoryMove.UNDO)
     }
 
     fun redo() {
         if (_ui.value.busy != null) return
-        val current = _ui.value.edit
-        applyEdit(history.redoTarget ?: return, record = false, moveHistory = { history.redo(current) })
+        applyEdit(history.redoTarget ?: return, record = false, historyMove = HistoryMove.REDO)
+    }
+
+    private fun moveHistory(move: HistoryMove, current: Edit) = when (move) {
+        HistoryMove.UNDO -> history.undoAdoption.also { history.undo(current) }
+        HistoryMove.REDO -> history.redoAdoption.also { history.redo(current) }
+    }
+
+    private fun updateHistoryAdoption(move: HistoryMove?, adoption: PendingAssistantAdoption?) {
+        if (adoption == null) return
+        when (checkNotNull(move)) {
+            HistoryMove.UNDO -> assistantPreferences.undo(adoption)
+            HistoryMove.REDO -> assistantPreferences.redo(adoption) {
+                writeAdvisorSave(checkNotNull(editorStateSnapshot()))
+            }
+        }
     }
 
     /**

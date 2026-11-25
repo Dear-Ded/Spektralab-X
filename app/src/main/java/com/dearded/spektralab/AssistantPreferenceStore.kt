@@ -15,7 +15,9 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,7 @@ import org.json.JSONTokener
 internal sealed interface PendingAssistantAdoption
 
 /** One instance per app runtime. The editor owns the photo and its save outcome. */
-internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope) : AssistantPreferenceControls {
+internal class AssistantPreferenceStore(context: Context, private val scope: CoroutineScope) : AssistantPreferenceControls {
     private val gate = Any()
     private var fence = Any()
     private var captureAllowed = false
@@ -82,8 +84,33 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
         val frozen = pending as? FrozenAdoption ?: return
         if (!receipt.success || receipt.commit != frozen.evidence.commit || receipt.target != frozen.evidence.target) return
         synchronized(gate) {
-            if (!current(frozen) || frozen.submitted) return
+            if (!current(frozen) || frozen.submitted || frozen.undoVersion != 0L) return
             if (commands.trySend(Command.Append(frozen)).isSuccess) frozen.submitted = true
+        }
+    }
+
+    internal fun undo(pending: PendingAssistantAdoption) {
+        val frozen = pending as FrozenAdoption
+        synchronized(gate) {
+            frozen.undoVersion++
+            if (frozen.submitted) commands.trySend(Command.Activate(frozen.evidence.commit, false))
+        }
+    }
+
+    internal fun redo(pending: PendingAssistantAdoption, save: () -> Deferred<Unit>) {
+        val frozen = pending as FrozenAdoption
+        val version = synchronized(gate) {
+            if (!frozen.submitted) return
+            frozen.undoVersion
+        }
+        val write = save()
+        scope.launch {
+            try { write.await() }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { return@launch }
+            synchronized(gate) {
+                if (frozen.undoVersion == version) commands.trySend(Command.Activate(frozen.evidence.commit, true))
+            }
         }
     }
 
@@ -139,6 +166,9 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
                     }) continue
                     before.copy(evidence = (before.evidence + frozen.evidence).takeLast(MAX_RECORDS))
                 }
+                is Command.Activate -> before?.copy(evidence = before.evidence.map {
+                    if (it.commit == command.commit) it.copy(active = command.active) else it
+                })
             }
             if (next != null) {
                 if (next == persisted || storage { write(file, next); true } == true) {
@@ -163,6 +193,7 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
 
     private sealed interface Command {
         data class Append(val pending: FrozenAdoption) : Command
+        data class Activate(val commit: AppliedReceipt, val active: Boolean) : Command
     }
 
     private sealed interface Control : Command {
@@ -175,6 +206,7 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
 
     private class FrozenAdoption(val fence: Any, val tokens: Tokens, val evidence: Evidence) : PendingAssistantAdoption {
         var submitted = false // Guarded by the issuing store's gate.
+        var undoVersion = 0L
     }
 
     private data class Scalars(val stored: List<Double>, val effective: List<Double>) {
@@ -207,19 +239,24 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
 
     private data class Evidence(
         val commit: AppliedReceipt, val target: SaveTarget, val entry: Scalars, val offered: Scalars, val final: Scalars,
+        val active: Boolean = true,
     ) {
         fun encode() = JSONObject().put("origin", "model").put("registryVersion", AdviceParameter.VERSION)
             .put("commitId", commit.commitId).put("photoSessionId", commit.photoSessionId).put("revision", commit.revision)
             .put("target", target.name).put("entry", entry.encode()).put("offered", offered.encode()).put("final", final.encode())
+            .put("active", active)
 
         companion object {
-            fun decode(json: JSONObject): Evidence {
-                require(json.length() == 9 && json.get("origin") == "model" && json.get("registryVersion") == AdviceParameter.VERSION)
+            fun decode(json: JSONObject, version: Long): Evidence {
+                val hasHistoryState = version == VERSION
+                require(json.length() == if (hasHistoryState) 10 else 9)
+                require(json.get("origin") == "model" && json.get("registryVersion") == AdviceParameter.VERSION)
                 val id = json.getString("commitId")
                 require(UUID.fromString(id).toString() == id)
                 val commit = AppliedReceipt(id, integer(json, "photoSessionId"), integer(json, "revision"))
                 return Evidence(commit, SaveTarget.valueOf(json.getString("target")), Scalars.decode(json.getJSONObject("entry")),
-                    Scalars.decode(json.getJSONObject("offered")), Scalars.decode(json.getJSONObject("final")))
+                    Scalars.decode(json.getJSONObject("offered")), Scalars.decode(json.getJSONObject("final")),
+                    active = hasHistoryState && (json.get("active") as? Boolean ?: errorValue()))
             }
         }
     }
@@ -231,7 +268,7 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
 
     private companion object {
         const val FILE_NAME = "assistant-preferences.json"
-        const val VERSION = 1
+        const val VERSION = 2L
         const val MAX_RECORDS = 64
         const val MAX_BYTES = 256 * 1024
 
@@ -264,13 +301,14 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
             }
             val input = JSONTokener(raw.toString(Charsets.UTF_8))
             val json = JSONObject(input)
-            require(input.nextClean() == '\u0000' && json.length() == 6 && json.get("version") == VERSION)
+            val version = integer(json, "version")
+            require(input.nextClean() == '\u0000' && json.length() == 6 && version in 1..VERSION)
             val tokens = Tokens(integer(json, "generation"), integer(json, "clearEpoch"))
             require(tokens.generation >= 0 && tokens.epoch >= 0)
             val records = json.getJSONArray("adoptions")
             require(records.length() <= MAX_RECORDS)
             return StoreData(json.get("learn") as? Boolean ?: errorValue(), json.get("useRules") as? Boolean ?: errorValue(), tokens,
-                List(records.length()) { Evidence.decode(records.getJSONObject(it)) })
+                List(records.length()) { Evidence.decode(records.getJSONObject(it), version) })
         }
 
         fun write(file: AtomicFile, data: StoreData) {

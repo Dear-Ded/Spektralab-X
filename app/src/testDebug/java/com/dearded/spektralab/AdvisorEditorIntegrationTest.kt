@@ -141,7 +141,7 @@ class AdvisorEditorIntegrationTest {
         jobs.forEach { editor.cancelJob(it.id) }
     }
 
-    @Test fun onlyAnAcknowledgedModelApplyEntersLocalPreferences() = runBlocking {
+    @Test fun savedModelAdoptionFollowsTheSameEditorHistoryStepAndRequiresASavedRedo() = runBlocking {
         val formal = opening()
         val proposed = formal.copy(look = formal.look.copy(exposure = .4))
         val preferences = editor.assistantPreferences
@@ -150,6 +150,7 @@ class AdvisorEditorIntegrationTest {
         until { preferences.preferences.value.learn }
         val snapshot = File(app.noBackupFilesDir, "assistant-preferences.json")
         fun adoptions() = JSONObject(snapshot.readText()).getJSONArray("adoptions")
+        fun isActive() = adoptions().getJSONObject(0).getBoolean("active")
         val session = editor.assistantSession
         val binding = "98479a84-21f7-4a7e-9560-5007bd05124c"
         val identity = AdviceConnectionIdentity(1, "fixture", 1, 1, binding, 1, "catalog.test", "adapter.test")
@@ -174,6 +175,33 @@ class AdvisorEditorIntegrationTest {
         until { session.state.value.phase == DraftPhase.SAVED }
         until { adoptions().length() == 1 }
         assertEquals(proposed, persisted())
+        assertEquals(candidate.id, adoptions().getJSONObject(0).getString("commitId"))
+        assertTrue(isActive())
+
+        editor.update(proposed.copy(look = proposed.look.copy(tint = 6.0)))
+        editor.undo()
+        assertEquals(proposed, ui.value.edit)
+        assertTrue(isActive())
+        editor.undo()
+        assertEquals(formal, ui.value.edit)
+        until { !isActive() }
+        writer.flush()
+        assertEquals(formal, persisted())
+
+        assertTrue(blocked.mkdir())
+        try {
+            editor.redo()
+            assertEquals(proposed, ui.value.edit)
+            writer.flush()
+            assertFalse(isActive())
+            assertEquals(formal, persisted())
+        } finally { assertTrue(blocked.delete()) }
+
+        editor.undo()
+        editor.redo()
+        until { isActive() }
+        assertEquals(proposed, persisted())
+        assertEquals(1, adoptions().length())
         assertEquals(candidate.id, adoptions().getJSONObject(0).getString("commitId"))
     }
 }

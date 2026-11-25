@@ -89,11 +89,12 @@ class AssistantPreferenceStoreTest {
         drain(store)
         val json = snapshot()
         assertEquals(setOf("version", "learn", "useRules", "generation", "clearEpoch", "adoptions"), json.keys().asSequence().toSet())
-        assertEquals(1, json.getInt("version"))
+        assertEquals(2, json.getInt("version"))
         assertEquals(1, count())
         val record = json.getJSONArray("adoptions").getJSONObject(0)
-        assertEquals(setOf("origin", "registryVersion", "commitId", "photoSessionId", "revision", "target", "entry", "offered", "final"),
+        assertEquals(setOf("origin", "registryVersion", "commitId", "photoSessionId", "revision", "target", "entry", "offered", "final", "active"),
             record.keys().asSequence().toSet())
+        assertTrue(record.getBoolean("active"))
         assertEquals("model", record.getString("origin"))
         assertEquals(AdviceParameter.VERSION, record.getString("registryVersion"))
         assertEquals(offer.commit.commitId, record.getString("commitId"))
@@ -110,6 +111,38 @@ class AssistantPreferenceStoreTest {
         store.record(requireNotNull(offer.capture(store)), retry)
         drain(store)
         assertEquals(1, count())
+    }
+
+    @Test fun restoresVersionOneEvidenceAsInactiveWithItsOriginalValues() = runBlocking {
+        var store = learning()
+        val offer = offer()
+        store.record(requireNotNull(offer.capture(store)), offer.success)
+        drain(store)
+        val previous = snapshot().put("version", 1)
+        val record = previous.getJSONArray("adoptions").getJSONObject(0)
+        record.remove("active")
+        job.cancelAndJoin()
+        file.writeText(previous.toString())
+
+        store = open()
+        assertTrue(store.preferences.value.learn)
+        drain(store)
+        assertEquals(2, snapshot().getInt("version"))
+        val migrated = snapshot().getJSONArray("adoptions").getJSONObject(0)
+        assertFalse(migrated.getBoolean("active"))
+        migrated.remove("active")
+        assertEquals(record.toString(), migrated.toString())
+    }
+
+    @Test fun undoBeforeRecordingRejectsTheLateApplyReceiptAndRedoDoesNotCreateEvidence() = runBlocking {
+        val store = learning()
+        val offer = offer()
+        val pending = requireNotNull(offer.capture(store))
+        store.undo(pending)
+        store.record(pending, offer.success)
+        store.redo(pending) { error("An unrecorded apply does not require a redo receipt") }
+        drain(store)
+        assertEquals(0, count())
     }
 
     @Test fun captureRejectsOfflineManualNonScalarAndChangedOrMismatchedCommits() = runBlocking {
