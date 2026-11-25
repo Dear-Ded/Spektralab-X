@@ -30,8 +30,8 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
     private fun publish() { _state.value = reducer.state }
 
     fun begin() {
-        if (state.value.phase == DraftPhase.APPLIED) {
-            reducer.showApplied(true)
+        if (state.value.phase in setOf(DraftPhase.COMMITTING, DraftPhase.APPLIED)) {
+            reducer.showCommit(true)
             publish()
             return
         }
@@ -359,8 +359,13 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
         } else editor.restore(entry)
     } catch (e: CancellationException) { throw e } catch (_: Exception) { false }
 
-    fun discard() {
+    fun discard() = discard(keepSession = false)
+
+    internal fun discardDraft() = discard(keepSession = true)
+
+    private fun discard(keepSession: Boolean) {
         if (state.value.phase in setOf(DraftPhase.COMMITTING, DraftPhase.APPLIED)) return
+        if (keepSession && state.value.phase in setOf(DraftPhase.RESTORING, DraftPhase.SAVED)) return
         val entry = state.value.entry ?: return
         pendingCinematicSample = null
         questions.reset(); goal = null
@@ -374,8 +379,9 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
             val restored = try { editor.restore(entry) }
                 catch (e: CancellationException) { throw e } catch (_: Exception) { false }
             if (operation != this@AdviceSessionController.operation) return@launch
-            if (restored) editor.endPreview()
-            reducer.restored(restored)
+            // Close hands back ownership even on failure so the editor can render the formal edit.
+            if (restored || !keepSession) editor.endPreview()
+            reducer.restored(restored, keepSession)
             publish()
         }
     }
@@ -391,7 +397,7 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
             onReady(); return
         }
         if (state.value.phase !in setOf(DraftPhase.READY, DraftPhase.PREVIEWING, DraftPhase.GENERATING,
-            DraftPhase.RENDERING, DraftPhase.COMPARING)) return
+            DraftPhase.RENDERING, DraftPhase.COMPARING, DraftPhase.FAILED)) return
         view(showEntry = true, export = true, onReady = onReady)
     }
 
@@ -479,7 +485,7 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
 
     fun returnToEditing() {
         when (state.value.phase) {
-            DraftPhase.APPLIED -> { reducer.showApplied(false); publish() }
+            DraftPhase.COMMITTING, DraftPhase.APPLIED -> { reducer.showCommit(false); publish() }
             DraftPhase.SAVED -> invalidate()
             else -> Unit
         }

@@ -393,17 +393,26 @@ class AdvisorSessionControllerTest {
         assertEquals(0, editor.commits)
     }
 
-    @Test fun failedRestoreBlocksExportAndAllowsDiscardRetry() = runBlocking {
+    @Test fun failedRestoreBlocksExportUntilARetryShowsTheFormalEdit() = runBlocking {
         val editor = Editor()
         val controller = AdviceSessionController(this, editor)
         controller.begin(); controller.propose(changes(15.0)); controller.phase(DraftPhase.PREVIEWING)
         editor.restoreSuccess = false
         var exports = 0
         controller.prepareExport { exports++ }; controller.phase(DraftPhase.FAILED)
-        controller.prepareExport { exports++ }
+        controller.prepareExport { exports++ }; controller.phase(DraftPhase.FAILED)
         assertEquals(0, exports)
+        assertNotEquals(editor.formal, editor.displayed)
+        assertFalse(controller.state.value.showingEntry)
         assertFalse(controller.state.value.canApply)
         editor.restoreSuccess = true
+        controller.prepareExport {
+            assertEquals(editor.formal, editor.displayed)
+            exports++
+        }
+        controller.phase(DraftPhase.PREVIEWING)
+        assertEquals(1, exports)
+        assertTrue(controller.state.value.showingEntry)
         controller.discard(); controller.phase(DraftPhase.IDLE)
         assertEquals(editor.formal, editor.displayed)
     }

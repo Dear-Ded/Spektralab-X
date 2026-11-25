@@ -193,16 +193,23 @@ class DraftReducer {
         if (state.phase !in setOf(DraftPhase.COMPARING, DraftPhase.PREPARING_EXPORT)) return
         state = state.copy(phase = if (success) {
             if (state.draft == null) DraftPhase.READY else DraftPhase.PREVIEWING
-        } else DraftPhase.FAILED, showingEntry = showEntry,
+        } else DraftPhase.FAILED, showingEntry = if (success) showEntry else state.showingEntry,
             question = state.question.takeIf { success },
             notice = if (success && cancelled) AdviceNotice.CANCELLED else state.notice,
             usage = state.usage.takeUnless { cancelled },
             error = if (success) null else AdviceError.RENDER_FAILED)
     }
 
-    fun restored(success: Boolean) {
+    fun restored(success: Boolean, keepSession: Boolean = false) {
         if (state.phase != DraftPhase.RESTORING) return
-        state = if (success) DraftState() else state.copy(phase = DraftPhase.FAILED, error = AdviceError.RENDER_FAILED)
+        state = if (!success) state.copy(phase = DraftPhase.FAILED, error = AdviceError.RENDER_FAILED)
+            else if (!keepSession) DraftState()
+            else {
+                val previous = state
+                begin(checkNotNull(previous.entry))
+                state.copy(constraints = previous.constraints, includeStatistics = previous.includeStatistics,
+                    inputRevision = previous.inputRevision, showingEntry = true)
+            }
     }
 
     fun committing(): AdviceCandidate {
@@ -217,8 +224,8 @@ class DraftReducer {
         state = state.copy(phase = DraftPhase.APPLIED, showingEntry = false)
     }
 
-    internal fun showApplied(visible: Boolean) {
-        check(state.phase == DraftPhase.APPLIED)
+    internal fun showCommit(visible: Boolean) {
+        check(state.phase == DraftPhase.COMMITTING || state.phase == DraftPhase.APPLIED)
         state = state.copy(visible = visible)
     }
 
