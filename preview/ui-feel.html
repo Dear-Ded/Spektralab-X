@@ -95,16 +95,42 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .viewer .vimg img{display:block;max-width:none}
 
 /* light table: the strip */
-.lt{flex:1;background:#000;display:flex;flex-direction:column;justify-content:center;min-height:0}
-.strip{position:relative;height:262px;background:var(--filmBase);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab}
+/* the light box: 5000 K, even, frosted; dimmable like a real one (Kaiser Slimlite: ~700 cd/m2, CRI 95) */
+.lt{flex:1;background:#0b0b0a;display:flex;flex-direction:column;min-height:0;--lv:1;padding:18px 0 0}
+/* the panel: a lit slab in an aluminium frame, brightest in the middle, the room dark round it */
+.box{position:relative;flex:1;display:flex;align-items:center;overflow:hidden;margin:0 -2px;border-radius:6px;
+  border-top:5px solid #2e2d2a;border-bottom:5px solid #2e2d2a;
+  box-shadow:0 0 0 1px #000,0 -1px 0 1px rgba(255,255,255,.06),0 0 48px rgba(255,246,230,calc(var(--lv)*.22));
+  background:radial-gradient(90% 75% at 50% 50%,
+    color-mix(in srgb,#FFFDF9 calc(var(--lv)*100%),#0b0b0a) 0%,
+    color-mix(in srgb,#F8F5EF calc(var(--lv)*100%),#0b0b0a) 55%,
+    color-mix(in srgb,#E9E5DD calc(var(--lv)*100%),#0b0b0a) 100%);transition:background .5s,box-shadow .5s}
+.box::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:calc(var(--lv)*.09);mix-blend-mode:multiply;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.box::after{content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.35),inset 0 -1px 2px rgba(0,0,0,.25)}
+.lamp{position:absolute;right:12px;bottom:20px;width:40px;height:40px;border-radius:50%;z-index:3;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.5),rgba(255,255,255,.12) 60%,rgba(0,0,0,.08));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.25)}
+.lamp svg{width:20px;height:20px;stroke:#3a3935;fill:none;stroke-width:1.8;stroke-linecap:round}
+.lvl{position:absolute;right:58px;bottom:30px;font:500 12px var(--sans);color:color-mix(in srgb,#2a2926 calc(var(--lv)*100%),#ECE9E3);opacity:0;transition:opacity .3s;z-index:3}
+.lvl.on{opacity:.8}
+.ltFoot{flex:none;padding:14px 0 6px}
+.strip{position:relative;height:262px;width:100%;background:transparent;filter:drop-shadow(0 0 1px rgba(0,0,0,.4));overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab}
 .strip::-webkit-scrollbar{display:none}
 .strip.drag{scroll-snap-type:none;cursor:grabbing}
 .track{display:flex;height:100%;align-items:center}
-.fr{flex:none;width:262px;height:100%;display:flex;flex-direction:column;scroll-snap-align:center;position:relative;will-change:transform;background:var(--filmBase)}
-.fr .edge{height:14px;display:flex;align-items:center;justify-content:center;position:relative;font:500 11px/14px var(--mono);letter-spacing:.4px;color:var(--c41)}
+.fr{flex:none;width:262px;height:100%;display:flex;flex-direction:column;scroll-snap-align:center;position:relative;will-change:transform;background:#050505;
+  box-shadow:0 -1px 0 rgba(255,250,240,calc(var(--lv)*.6)),0 1px 0 rgba(255,250,240,calc(var(--lv)*.6))}
+.fr::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  box-shadow:inset 0 3px 5px -2px rgba(255,248,236,calc(var(--lv)*.32)),inset 0 -3px 5px -2px rgba(255,248,236,calc(var(--lv)*.32))}
+/* positive film: the rebate is black, so the edge print and the perforations are where the light comes through */
+.fr .edge{height:14px;display:flex;align-items:center;justify-content:center;position:relative;font:500 11px/14px var(--mono);letter-spacing:.4px;
+  color:color-mix(in srgb,#F6F0E2 calc(25% + var(--lv)*75%),#050505);text-shadow:0 0 3px rgba(255,246,228,calc(var(--lv)*.55))}
 .fr .edge em{position:absolute;right:6px;font-style:normal;opacity:.7}
 .fr .sp{height:12px;display:flex;justify-content:space-around;align-items:center;padding:0 2px}
-.fr .sp i{width:14px;height:7px;border-radius:2px;background:var(--sprocket)}
+.fr .sp i{width:14px;height:7px;border-radius:2px;background:color-mix(in srgb,#F2EEE6 calc(var(--lv)*100%),#0b0b0a);
+  box-shadow:0 0 4px rgba(255,248,236,calc(var(--lv)*.6))}
 .fr .img{flex:1;margin:0 2px;background:#000 center/cover}
 .fr .dim{position:absolute;inset:0;background:#000;pointer-events:none;opacity:0}
 .ltName{margin-top:16px;text-align:center;font:400 12px var(--sans);color:var(--soft)}
@@ -222,10 +248,16 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       <div class="icon" style="margin-left:-12px"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></div>
       <div class="ttl"><div class="t-titleM">未冲洗</div><div class="t-small soft">10.09 · 10/36</div></div>
     </div>
-    <div class="lt">
-      <div class="strip" id="strip"><div class="track" id="track"></div></div>
-      <div class="ltName" id="ltName"></div>
-      <div class="scrub"><div class="ticks" id="ticks"></div><p id="count"></p></div>
+    <div class="lt" id="lt">
+      <div class="box">
+        <div class="strip" id="strip"><div class="track" id="track"></div></div>
+        <span class="lvl" id="lvl">开</span>
+        <button class="lamp" id="lamp" aria-label="灯箱亮度"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></button>
+      </div>
+      <div class="ltFoot">
+        <div class="ltName" id="ltName"></div>
+        <div class="scrub"><div class="ticks" id="ticks"></div><p id="count"></p></div>
+      </div>
     </div>
     <div class="ltBar"><div class="seg"><button class="on">片条</button><button>印样</button><button>比较风格</button><button>复制调整</button></div></div>
   </section>
@@ -234,6 +266,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <section class="screen" id="partsScreen">
     <div class="status"><span>9:41</span><span>&#9652; &#9646;&#9646;&#9646; 86%</span></div>
     <div class="parts">
+      <h3>直方图</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-hist.png" alt="">
+      <p class="lab">改后</p><canvas id="pHist"></canvas>
+      <h3>曲线</h3>
+      <p class="lab">现在</p><img class="now" src="assets/feel/now-curve.png" alt="">
+      <p class="lab">改后 · 拖点，点空白处加点</p><canvas id="pCurve"></canvas>
       <h3>相机拨盘（调整）</h3>
       <p class="lab">现在</p><img class="now" src="assets/feel/now-dial.png" alt="">
       <p class="lab">改后 · 可以拖</p><canvas id="pDial"></canvas>
@@ -414,7 +452,7 @@ const pad = () => { const w = 262; track.style.padding = `0 ${(strip.clientWidth
 const ticks = $('#ticks'); ticks.innerHTML = '<i></i>'.repeat(ROLL.length);
 let centre = -1;
 const stripTick = () => {
-  drum($$('.fr'), strip, 1.55, 5, 0.24, 0.72);
+  drum($$('.fr'), strip, 2.0, 5, 0.2, 0.6);
   const i = Math.round(strip.scrollLeft / 262);
   if (i !== centre) {
     centre = Math.max(0, Math.min(ROLL.length - 1, i));
@@ -424,6 +462,10 @@ const stripTick = () => {
   }
 };
 strip.addEventListener('scroll', stripTick, { passive: true });
+// the light box's touch switch: a tap steps the brightness (60 → 90 → 30 % → off), as Kaiser's does
+const LV = [1, 0]; let lvi = 0, lvT = 0;
+$('#lamp').onclick = () => { lvi = (lvi + 1) % LV.length; $('#lt').style.setProperty('--lv', LV[lvi]);
+  const l = $('#lvl'); l.textContent = LV[lvi] ? '开灯' : '关灯'; l.classList.add('on'); clearTimeout(lvT); lvT = setTimeout(() => l.classList.remove('on'), 1200); };
 // mouse: drag the strip like a finger would
 let dragX = null;
 strip.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; dragX = e.clientX; strip.classList.add('drag'); strip.setPointerCapture(e.pointerId); });
@@ -439,11 +481,14 @@ const NOTES = [
   ['点“1:1”：先渲染全分辨率（显示“渲染中…”），然后照片上出现放大镜，里面是 1:1 的原始像素。手指拖动它，放大镜浮在手指上方 96 dp，不被手指挡住；鼠标就在指针处。',
    '“全屏”打开现在的 1:1 查看器，并停在放大镜所在的位置；“关闭放大镜”退出。',
    '长按照片看原图照旧（放大镜关着时）。换胶片时放大镜里也跟着换。'],
-  ['观片台的片条绕在一个圆鼓上：越往两边越侧过去、越小、越暗，正中那一格不变形、不变暗。',
-   '拖动或滑动，松手吸附到格；每过一格一次轻振动（现在的行为）。只改变形状，不改照片的颜色。',
-   '系统动画关：仍然是弧面（这是形状不是动画），只是吸附不再滑过去。'],
+  ['观片台是一块灯箱：5000K 的均匀白光，磨砂表面，四边略暗（按真实灯箱：Kaiser Slimlite Plano 约 700 cd/m²、显色指数 95）。灯箱必须是画面里最亮的东西：透光的胶片永远比背后的光暗，所以它接近纯白，不能为了柔和去压暗（压暗了照片的白就比灯亮，看起来只是一块灰板）。右下角的触摸开关：开灯 / 关灯（关了就是现在的黑底，夜里用）。灯箱上下露出铝边框和暗处。',
+   '片条举在灯箱前看：冲好的是正片，片边是不透光的黑，光从齿孔和片边字里透出来，胶片上下沿被背光勾出一线亮边，黑边的边缘被光吃进去一点（真实的眩光）。照片本身的颜色不动。',
+   '胶片举着看会自然弯：所以保留弧面，幅度比上一版小。两边侧过去的格子透光少，所以更暗。',
+   '拖动或滑动，松手吸附到格；每过一格一次轻振动（现在的行为）。'],
   ['一个光源（左上方），真实的材质，压低的对比：看起来真，但不刺眼。上面是 App 现在的样子（alpha v0.3.02 CI 截图），下面是改后的，可以直接操作。',
-   '拨盘：车削金属的圆柱，刻度按真实的圆柱透视收窄、按光照变暗；两边滚花随转动；窗口像开在机身上（上沿压一道阴影，下沿一线亮边），盖着一层玻璃。',
+   '直方图：测光表的背光读数窗。烟色玻璃、刻出来的刻度，柱子是从背后透出的灰光；两端各一盏小灯，只有暗部或高光溢出时才亮。照片旁边仍然只用灰色。',
+   '曲线：胶片说明书的特性曲线图，刻在深色玻璃上（十分之一细线、四分之一粗线），照片的影调淡淡地衬在后面；曲线像墨线，控制点是立在玻璃上的钢钉，有高光和投影。',
+   '拨盘：车削金属的圆柱，刻度和数字是刻进去再填漆的（上沿一道阴影、下沿一线反光），按圆柱透视收窄；直纹滚花每个齿有受光面和背光面；窗口有倒角，盖着玻璃；指针是一片钢质小鳍加红色标线；两端自然转进背光面，不再像被截断。按住时金属微微提亮。',
    '暗盒：印刷铁皮的圆柱明暗、车削钢的封盖和带棱的轴头、黑绒遮光口；拉出来的是一截真正的片头（半宽舌头、齿孔、片基颜色随冲洗工艺），选中时多拉出一截，不再是一个黑方块。',
    '按钮和工具栏：按键有上沿高光和下沿阴影，按下时下沉 1 dp、阴影收紧；工具栏是一道凹槽，选中的工具像一颗凸起的键。开关：凹槽里一颗有体积的圆钮，拨过去有一点回弹。'],
 ];
@@ -470,7 +515,8 @@ if (q.has('loupe')) setTimeout(() => $('#oneToOne').click(), 300);
 if (q.has('strip')) setTimeout(() => { strip.scrollLeft = +q.get('strip') * 262; }, 300);
 </script>
 <script type="module">
-import { dial, cassette } from './ui-feel-parts.js';
+import { dial, cassette, histogram, curve } from './ui-feel-parts.js';
+{ const im = new Image(); im.onload = () => { histogram(document.getElementById('pHist'), im); curve(document.getElementById('pCurve'), im); }; im.src = 'assets/feel/dunes-portra400.webp'; }
 dial(document.getElementById('pDial'), { onTick: () => navigator.vibrate?.(4) });
 const box = document.getElementById('pCards');
 const C = [['portra400', 'Portra 400', 'negative', '400'], ['velvia100', 'Velvia 100', 'slide', '100'], ['trix400', 'Tri-X 400', 'mono', '400']];
