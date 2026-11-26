@@ -1,0 +1,4 @@
+On Android 13 and later, the new look develops out of the old one when you change style or film. At launch and when you save, a colour negative develops into a photo.
+Dials, buttons, switches, curves, histograms, film canisters and filters now look more like real camera gear.
+On the light table, light shines through the sprocket holes and edge lettering. Tap the lower-right corner to switch it off.
+Haptics are finer. Turn off Vibration in Settings to disable them all.

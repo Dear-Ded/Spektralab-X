@@ -8,6 +8,13 @@
 
 Every user-visible change, newest first. New releases are displayed as `alpha vX.Y.Z`, with `vX.Y.Z-alpha` tags for compatibility with installed versions. English summaries are in `fastlane/metadata/android/en-US/changelogs/`.
 
+## alpha v0.3.03
+
+- 在 Android 13 及以上版本，换风格或胶片时，新效果会从旧效果中慢慢显影。开屏和保存时，彩色负片也会逐渐显影成照片。
+- 重绘了相机拨盘、按键、开关、曲线、直方图、暗盒和滤色片，让它们更接近真实器材的质感。
+- 观片台的片条现在放在灯箱上，光从齿孔和片边字透出来。轻点灯箱右下角就能关灯。
+- 振动反馈更细腻。设置里新增「振动反馈」开关，可关闭全部振动。
+
 ## alpha v0.3.02 · 2026-11-24
 
 - 有新版本时，编辑页会显示更新入口。点开才会看到更新详情，修图时不再被弹窗打断。
