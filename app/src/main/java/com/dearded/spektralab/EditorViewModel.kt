@@ -909,7 +909,7 @@ class EditorViewModel internal constructor(private val app: Application, startEn
     }
 
     private fun updateHistoryAdoption(move: HistoryMove?, adoption: PendingAssistantAdoption?) {
-        if (adoption == null) return
+        if (!BuildConfig.DEBUG || adoption == null) return
         when (checkNotNull(move)) {
             HistoryMove.UNDO -> assistantPreferences.undo(adoption)
             HistoryMove.REDO -> assistantPreferences.redo(adoption) {
