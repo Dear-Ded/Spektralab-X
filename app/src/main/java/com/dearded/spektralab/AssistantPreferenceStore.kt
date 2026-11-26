@@ -15,7 +15,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +30,10 @@ import org.json.JSONTokener
 internal sealed interface PendingAssistantAdoption
 
 /** One instance per app runtime. The editor owns the photo and its save outcome. */
-internal class AssistantPreferenceStore(context: Context, private val scope: CoroutineScope) : AssistantPreferenceControls {
+internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope) : AssistantPreferenceControls {
     private val gate = Any()
     private var fence = Any()
+    private var clearFence = Any()
     private var captureAllowed = false
     private var controlsPending = 0
     private var privacyPending = 0
@@ -93,23 +93,21 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
         val frozen = pending as FrozenAdoption
         synchronized(gate) {
             frozen.undoVersion++
-            if (frozen.submitted) commands.trySend(Command.Activate(frozen.evidence.commit, false))
+            if (frozen.submitted) commands.trySend(Command.Deactivate(frozen.evidence.commit))
         }
     }
 
     internal fun redo(pending: PendingAssistantAdoption, save: () -> Deferred<Unit>) {
         val frozen = pending as FrozenAdoption
-        val version = synchronized(gate) {
+        val (version, confirmation) = synchronized(gate) {
             if (!frozen.submitted) return
-            frozen.undoVersion
+            frozen.undoVersion to clearFence
         }
-        val write = save()
-        scope.launch {
-            try { write.await() }
-            catch (e: CancellationException) { throw e }
-            catch (_: Exception) { return@launch }
+        save().invokeOnCompletion { failure ->
+            if (failure != null) return@invokeOnCompletion
             synchronized(gate) {
-                if (frozen.undoVersion == version) commands.trySend(Command.Activate(frozen.evidence.commit, true))
+                if (frozen.undoVersion == version && clearFence === confirmation)
+                    commands.trySend(Command.Activate(frozen.evidence.commit, confirmation))
             }
         }
     }
@@ -125,6 +123,7 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
             ) return
             if (commands.trySend(control).isFailure) return
             controlsPending++
+            if (control == Control.Clear) clearFence = Any()
             if (control !is Control.Rules) {
                 // Invalidate captures now, even if the writer has not reached this command yet.
                 privacyPending++
@@ -137,6 +136,7 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
     private suspend fun drain(open: () -> AtomicFile) {
         val file by lazy(open)
         var persisted = storage { read(file) }
+        val deactivations = mutableSetOf<AppliedReceipt>()
         var privacyWriteFailed = false
         var error: AssistantError? = if (persisted == null) AssistantError.Preferences else null
 
@@ -149,7 +149,10 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
 
         synchronized(gate) { publish() }
         for (command in commands) {
-            val before = persisted
+            if (command is Command.Deactivate) deactivations.add(command.commit)
+            val before = persisted?.let { saved ->
+                if (deactivations.isEmpty()) saved else saved.withActivity(deactivations, false)
+            }
             val privacyChange = command is Control.Learn || command == Control.Clear
             val next = when (command) {
                 is Control.Learn -> before?.copy(learn = command.on,
@@ -166,13 +169,14 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
                     }) continue
                     before.copy(evidence = (before.evidence + frozen.evidence).takeLast(MAX_RECORDS))
                 }
-                is Command.Activate -> before?.copy(evidence = before.evidence.map {
-                    if (it.commit == command.commit) it.copy(active = command.active) else it
-                })
+                is Command.Deactivate -> before
+                is Command.Activate -> if (!privacyWriteFailed && synchronized(gate) { command.fence === clearFence })
+                    before?.withActivity(setOf(command.commit), true) else before
             }
             if (next != null) {
                 if (next == persisted || storage { write(file, next); true } == true) {
                     persisted = next
+                    deactivations.clear()
                     if (privacyChange) privacyWriteFailed = false
                     error = AssistantError.Save.takeIf { privacyWriteFailed }
                 } else {
@@ -193,7 +197,8 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
 
     private sealed interface Command {
         data class Append(val pending: FrozenAdoption) : Command
-        data class Activate(val commit: AppliedReceipt, val active: Boolean) : Command
+        data class Deactivate(val commit: AppliedReceipt) : Command
+        data class Activate(val commit: AppliedReceipt, val fence: Any) : Command
     }
 
     private sealed interface Control : Command {
@@ -264,7 +269,11 @@ internal class AssistantPreferenceStore(context: Context, private val scope: Cor
     private data class StoreData(
         val learn: Boolean = false, val useRules: Boolean = false, val tokens: Tokens = Tokens(),
         val evidence: List<Evidence> = emptyList(),
-    )
+    ) {
+        fun withActivity(commits: Set<AppliedReceipt>, active: Boolean) = copy(evidence = evidence.map {
+            if (it.commit in commits) it.copy(active = active) else it
+        })
+    }
 
     private companion object {
         const val FILE_NAME = "assistant-preferences.json"

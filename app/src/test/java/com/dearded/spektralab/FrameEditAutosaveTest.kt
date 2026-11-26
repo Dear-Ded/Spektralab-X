@@ -250,4 +250,22 @@ class FrameEditAutosaveTest {
             assertEquals(listOf(exact, other), written)
         }
     }
+
+    @Test fun failedExactWriteKeepsTheMatchingQueuedGalleryEditForFlush() = runBlocking {
+        scenario { scope ->
+            val written = mutableListOf<FrameEditSave>()
+            var fail = true
+            val saves = FrameEditAutosave(scope) {
+                if (fail) throw IOException("synthetic transient storage error")
+                written.add(it)
+            }
+            val edit = FrameEditSave("a", adjusted, 4800.0, -0.2)
+            saves.opened(edit.id, neutral, edit.wbK, edit.wbTint, reopening = false)
+            saves.changed(edit.edit)
+            assertTrue(runCatching { saves.saveNow(edit).await() }.exceptionOrNull() is IOException)
+            fail = false
+            saves.flush()
+            assertEquals(listOf(edit), written)
+        }
+    }
 }

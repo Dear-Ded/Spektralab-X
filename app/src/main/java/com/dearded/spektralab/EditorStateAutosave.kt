@@ -56,8 +56,9 @@ internal class EditorStateAutosave(
             try {
                 if (request is Request.SaveNow) {
                     // All restart snapshots target the same file, even when the source changes.
-                    pending = null
+                    if (pending != request.value) pending = null
                     write(request.value)
+                    pending = null
                 } else {
                     pending?.let(write)
                     pending = null

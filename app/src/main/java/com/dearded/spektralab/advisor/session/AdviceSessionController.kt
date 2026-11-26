@@ -488,14 +488,16 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
         publish()
         task = scope.launch {
             try {
-                val committed = withContext(NonCancellable) { editor.commit(candidate, entry, learnAdoption) }
+                val committed = withContext(NonCancellable) {
+                    editor.commit(candidate, entry, learnAdoption).also { observeAdoption(it, it.saved) }
+                }
                 if (operation != this@AdviceSessionController.operation) return@launch
                 committedDraft = committed
                 reducer.applied()
                 publish()
                 val receipt = SaveCoordinator().awaitSaved(committed.applied, committed.target, committed.saved)
                 if (operation != this@AdviceSessionController.operation) return@launch
-                completeSave(committed, receipt)
+                reducer.saved(receipt.success)
             } catch (e: CancellationException) { throw e
             } catch (_: Exception) {
                 if (operation != this@AdviceSessionController.operation) return@launch
@@ -516,20 +518,23 @@ class AdviceSessionController(private val scope: CoroutineScope, private val edi
         publish()
         task = scope.launch {
             val receipt = try {
-                SaveCoordinator().awaitSaved(committed.applied, committed.target,
-                    editor.retrySave(committed.applied))
+                val write = editor.retrySave(committed.applied)
+                observeAdoption(committed, write)
+                SaveCoordinator().awaitSaved(committed.applied, committed.target, write)
             } catch (e: CancellationException) { throw e } catch (_: Exception) {
                 SaveReceipt(committed.applied, committed.target, false)
             }
             if (operation != this@AdviceSessionController.operation) return@launch
-            completeSave(committed, receipt)
+            reducer.saved(receipt.success)
             publish()
         }
     }
 
-    private fun completeSave(commit: CommittedDraft, receipt: SaveReceipt) {
-        reducer.saved(receipt.success)
-        if (receipt.success) commit.recordAdoption?.invoke(receipt)
+    private fun observeAdoption(commit: CommittedDraft, write: Deferred<Unit>) {
+        val record = commit.recordAdoption ?: return
+        write.invokeOnCompletion { failure ->
+            if (failure == null) record(SaveReceipt(commit.applied, commit.target, true))
+        }
     }
 
     fun returnToEditing() {

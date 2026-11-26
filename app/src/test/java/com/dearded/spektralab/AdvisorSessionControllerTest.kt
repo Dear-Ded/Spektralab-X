@@ -497,6 +497,24 @@ class AdvisorSessionControllerTest {
         assertEquals(1, editor.commits)
     }
 
+    @Test fun anAcceptedModelSaveStillRecordsAfterAnUnrelatedEditInvalidatesTheSession() = runBlocking<Unit> {
+        val editor = Editor()
+        val controller = AdviceSessionController(this, editor)
+        val route = identity().copy(bindingId = "98479a84-21f7-4a7e-9560-5007bd05124c")
+        val origin = AdviceOrigin.Model(route.bindingId, route.bindingRevision, route.catalogVersion,
+            route.adapterVersion, "prompt.test")
+        controller.configure(AdviceConnection(route, origin) { _, _ -> reply(AdviceResult.Proposal(changes(10.0))) })
+        controller.begin(); controller.generate("synthetic saved adoption")
+        controller.phase(DraftPhase.PREVIEWING)
+        controller.apply(); controller.phase(DraftPhase.APPLIED)
+        val revision = editor.revision
+        editor.revision++
+        controller.invalidate()
+        editor.saved.complete(Unit)
+        assertEquals(DraftPhase.IDLE, controller.state.value.phase)
+        assertEquals(listOf(SaveReceipt(AppliedReceipt("commit", 1, revision), SaveTarget.SIDECAR, true)), editor.recorded)
+    }
+
     @Test fun failedProposalAfterComparisonLabelsTheRestoredDraftCorrectly() = runBlocking {
         val editor = Editor()
         val controller = AdviceSessionController(this, editor)

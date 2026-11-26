@@ -54,8 +54,9 @@ internal class FrameEditAutosave(
                 when (request) {
                     is Request.Save -> pending[request.value.id] = request.value
                     is Request.SaveNow -> {
-                        pending.remove(request.value.id)
+                        if (pending[request.value.id] != request.value) pending.remove(request.value.id)
                         if (!write(request.value)) throw IOException("Frame not found: ${request.value.id}")
+                        pending.remove(request.value.id)
                         reportedFailure = false
                         request.done.complete(Unit)
                     }

@@ -145,6 +145,44 @@ class AssistantPreferenceStoreTest {
         assertEquals(0, count())
     }
 
+    @Test fun deactivationSurvivesAPreferenceWriteFailureUntilTheNextSave() = runBlocking {
+        val store = learning()
+        val offer = offer()
+        val pending = requireNotNull(offer.capture(store))
+        store.record(pending, offer.success)
+        drain(store)
+        val blocked = File(file.parentFile, file.name + ".new")
+        assertTrue(blocked.mkdir())
+        try {
+            store.undo(pending)
+            withTimeout(8_000) { store.preferences.first { it.error == AssistantError.Save } }
+        } finally { assertTrue(blocked.delete()) }
+        drain(store)
+        open()
+        assertFalse(snapshot().getJSONArray("adoptions").getJSONObject(0).getBoolean("active"))
+    }
+
+    @Test fun failedClearInvalidatesAnInFlightRedoReceipt() = runBlocking {
+        val store = learning()
+        val offer = offer()
+        val pending = requireNotNull(offer.capture(store))
+        store.record(pending, offer.success)
+        store.undo(pending)
+        drain(store)
+        val redo = CompletableDeferred<Unit>()
+        store.redo(pending) { redo }
+        val blocked = File(file.parentFile, file.name + ".new")
+        assertTrue(blocked.mkdir())
+        try {
+            store.clearPreferences()
+            assertEquals(AssistantError.Save, store.settled().error)
+        } finally { assertTrue(blocked.delete()) }
+        redo.complete(Unit)
+        store.useRules(false)
+        assertEquals(AssistantError.Save, store.settled().error)
+        assertFalse(snapshot().getJSONArray("adoptions").getJSONObject(0).getBoolean("active"))
+    }
+
     @Test fun captureRejectsOfflineManualNonScalarAndChangedOrMismatchedCommits() = runBlocking {
         val store = learning()
         val offer = offer()

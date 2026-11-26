@@ -192,10 +192,13 @@ class AdvisorEditorIntegrationTest {
         try {
             editor.redo()
             assertEquals(proposed, ui.value.edit)
-            writer.flush()
+            assertTrue(runCatching { writer.flush() }.isFailure)
             assertFalse(isActive())
             assertEquals(formal, persisted())
         } finally { assertTrue(blocked.delete()) }
+        writer.flush()
+        assertEquals(proposed, persisted())
+        assertFalse(isActive())
 
         editor.undo()
         editor.redo()
