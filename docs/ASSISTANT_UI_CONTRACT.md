@@ -80,3 +80,16 @@ words them by the button the user pressed (没有明确的光向 / 预览还不�
 | Backend connected | Internal builds: both ports are bound to the session, settings and local preference store. The Release entry remains disabled. |
 | Real-model effect verified | An installed internal build generated a directional draft through Gemini and exported its local render on a synthetic fixture. This covers that provider and example only. See the [candidate ledger](DARKROOM_ASSISTANT_ENGINEERING_ROUTE.md#d5-work-ledger). |
 | Remember a specific adjustment | Open: `learn`, `useRules`, `clearPreferences` and `apply` do not confirm a rule. Before wiring this feature, the UI owner must provide a distinct user confirmation carrying the reviewed parameter, mode, value or offset and scope. Dismissing the review must leave rules unchanged. |
+
+### 给前端的接线需求：记住这一调整（待实现）
+
+在内部版本提供一次独立的「记住这一调整」确认操作。它保存的是以后怎么调，不是再次应用当前照片，也不依赖开启「学习」。展示当前参数、规则含义和适用范围；用户确认后，把刚刚看到的同一条规则交给后端。普通应用、导出、回答模型问题、取消和返回都不发送这个事件。
+
+| 用户确认的内容 | 接线约定 |
+| --- | --- |
+| 参数 | 传现有注册表 ID，例如 `layer2.saturation`；展示值和单位来自同一份注册表。不要把翻译后的名称作标识。 |
+| 调整方式 | `fixed` 传固定的存储目标；`offset` 传相对未个性化基底的增量；`disabled` 表示不准自动修改这个参数，没有数值。没有可核实的原基底时，不从当前照片倒算偏移。 |
+| 适用范围 | 默认当前可确认的最窄范围，例如准确的风格 ID 和版本。如果没有合适的范围，由用户选择；不自动扩大成全局。 |
+| 保存结果 | 后端本地写入成功后才显示已记住。取消不写入；写入失败不改变照片或导出，不显示成功。此操作不请求模型、不发送照片或规则。 |
+
+联调验收：饱和度原基底为 `18`，用户为当前风格明确确认偏移 `-5`，新基底草稿应为 `13`。在这个草稿上继续调到 `10`，就保持 `10`，不再减一次；换到另一个风格不生效。关闭学习仍可主动确认；单独打开「使用已确认的规则」不会创建规则。前端负责确认交互，后端负责保存、求值、权限和草稿；正式版入口不变。
