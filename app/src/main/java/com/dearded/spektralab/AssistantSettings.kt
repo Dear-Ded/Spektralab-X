@@ -68,6 +68,11 @@ internal data class AssistantPreferences(
     val useRules: Boolean = false,
     val busy: Boolean = false,
     val error: AssistantError? = null,
+    /**
+     * Confirmed rules are actually applied to edits; until then the switch is shown off and explained.
+     * Last, so the store's positional AssistantPreferences(learn, useRules, busy, error) still builds.
+     */
+    val rulesActive: Boolean = false,
 )
 
 /** The settings side of the session (AdvisorRuntime and the preference store). */
@@ -105,7 +110,7 @@ internal fun AssistantSettingsSheet(port: AssistantSettingsPort, onDismiss: () -
                     service = sv.name; if (model !in sv.models) model = sv.models.firstOrNull().orEmpty()
                 }, label = { Text(sv.name) }, enabled = !busy)
             }
-            Field(address, { address = it }, tr("服务地址"), !busy, KeyboardType.Uri)
+            Field(address, { address = it }, tr("服务地址（https://…，留空用默认）"), !busy, KeyboardType.Uri)
             val models = s.services.firstOrNull { it.name == service }?.models.orEmpty()
             GroupLabel(tr("模型"))
             if (models.isNotEmpty()) PillRow {
@@ -146,7 +151,8 @@ internal fun AssistantPreferencesSheet(port: AssistantSettingsPort, onDismiss: (
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             PanelHeader(tr("本地偏好"))
             SettingRow(tr("学习我的偏好"), p.learn, !p.busy) { port.learn(it) }
-            SettingRow(tr("使用已确认的规则"), p.useRules, !p.busy) { port.useRules(it) }
+            SettingRow(tr("使用已确认的规则"), p.useRules && p.rulesActive, !p.busy && p.rulesActive,
+                disabledReason = tr("暂未启用：已确认的规则还不会用到修图")) { port.useRules(it) }
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(p.error?.let { errorLabel(it) }.orEmpty(), style = MaterialTheme.typography.bodySmall, color = Palette.Warning,
                     modifier = Modifier.weight(1f))
@@ -161,7 +167,7 @@ internal fun AssistantPreferencesSheet(port: AssistantSettingsPort, onDismiss: (
 private fun errorLabel(e: AssistantError) = when (e) {
     AssistantError.Configuration -> tr("服务未配置")
     AssistantError.Auth -> tr("密钥无效")
-    AssistantError.Address -> tr("服务地址无效")
+    AssistantError.Address -> tr("服务地址无效，需要 https 地址")
     AssistantError.RateLimit -> tr("请求太频繁")
     AssistantError.Timeout -> tr("请求超时")
     AssistantError.Network -> tr("网络连接失败")
@@ -184,8 +190,7 @@ private fun Field(text: String, onText: (String) -> Unit, label: String, enabled
         modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(Corners.m).background(Palette.Panel)
-                    .border(1.dp, Palette.OutlineSoft, Corners.m).padding(horizontal = 14.dp),
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).windowField().padding(horizontal = 14.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 if (text.isEmpty()) Text(label, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurfaceSoft.copy(alpha = 0.7f))

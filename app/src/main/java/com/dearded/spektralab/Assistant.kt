@@ -1,5 +1,9 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -139,6 +143,14 @@ internal enum class AssistantSide(private val zh: String) {
 /** Which recommendation the user last asked for; the panel words a notice by it. */
 internal enum class AssistantAsk { Goal, Cinematic, Directional }
 
+/**
+ * A request waiting for its scope (AdviceScopePrompt): what it would ask for, and the request's own
+ * [id], so a button left on screen can never confirm a later request. The session asks this before a
+ * custom goal, a follow-up or a typed answer goes out; only the whole photo can be edited today.
+ */
+@Immutable
+internal data class AssistantScope(val id: Long, val goal: String)
+
 /** The model asking before it proposes (AdviceResult.Question). */
 @Immutable
 internal data class AssistantQuestion(val prompt: String, val options: List<String>)
@@ -160,6 +172,8 @@ internal data class AssistantView(
     /** 电影光影 can be asked for: statistics granted and a preview that can be analysed. */
     val cinematicReady: Boolean = false,
     val question: AssistantQuestion? = null,
+    /** A request waiting for 整张照片 or 只改一部分 (AssistantPort.confirmScope). */
+    val scope: AssistantScope? = null,
     val notice: AssistantNotice? = null,
     val error: AssistantError? = null,
     val canApply: Boolean = false,
@@ -207,6 +221,12 @@ internal interface AssistantPort {
     fun retrySave()
     /** An answer to [AssistantView.question]: one of its options, or the user's own words. */
     fun answer(text: String)
+    /**
+     * The scope of [AssistantView.scope] request [id] (resolveScope): the whole photo, or not (the
+     * session stops it locally: only part of the photo cannot be edited yet). Ignored for any other id.
+     * Empty by default, so a session that still asks through [AssistantView.question] keeps building.
+     */
+    fun confirmScope(id: Long, wholePhoto: Boolean) {}
     /** A fixed offline trial (propose with local changes). */
     fun tryPreset(preset: AssistantPreset)
     /** Opens 设置 → 暗房助手. */
@@ -357,9 +377,12 @@ private fun Composer(port: AssistantPort, v: AssistantView, enabled: Boolean) {
         Recommendation(tr("方向光"), AssistantAsk.Directional, consent, ready, Modifier.weight(1f)) { recommend(AssistantAsk.Directional) }
     }
     val pending = consent
-    if (pending != null) Consent(enabled, onAllow = { port.statistics(true) }, onCancel = { consent = null })
+    var partOnly by rememberSaveable { mutableStateOf(false) }
+    val sc = v.scope
+    if (sc != null) ScopeConfirm(sc, enabled) { whole -> partOnly = !whole; port.confirmScope(sc.id, whole) }
+    else if (pending != null) Consent(enabled, onAllow = { port.statistics(true) }, onCancel = { consent = null })
     else Sends(v.statistics)
-    Status(port, v, asked, retry = { if (goal.isNotBlank()) port.generate(goal.trim()) })
+    Status(port, v, asked, retry = { if (goal.isNotBlank()) port.generate(goal.trim()) }, partOnly = partOnly)
 }
 
 /** A recommendation button: tonal; the one waiting for consent reads as chosen. */
@@ -367,11 +390,13 @@ private fun Composer(port: AssistantPort, v: AssistantView, enabled: Boolean) {
 private fun Recommendation(text: String, ask: AssistantAsk, consent: AssistantAsk?, enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     val chosen = consent == ask
+    val down by press.collectIsPressedAsState()
+    val sink by androidx.compose.animation.core.animateFloatAsState(if (down || chosen) 1f else 0f, Motion.fastEffects(), label = "reco-press")
     Box(
-        modifier.heightIn(min = 48.dp).pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.45f }
-            .clip(Corners.m).background(if (chosen) Palette.PanelHighest else Palette.PanelHigh)
-            .border(1.dp, if (chosen) Palette.Outline else Palette.OutlineSoft, Corners.m)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick),
+        modifier.heightIn(min = 48.dp).graphicsLayer { alpha = if (enabled) 1f else 0.45f }
+            .drawBehind { drawKey(12.dp.toPx(), 0f, sink) }
+            .clip(Corners.m)
+            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Text(text, style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface, maxLines = 1) }
 }
@@ -449,6 +474,8 @@ private fun Draft(port: AssistantPort, v: AssistantView, enabled: Boolean) {
         else PrimaryButton(tr("应用"), idle && v.canApply) { Feedback.play(view, Cue.Saved); port.apply() }
     }
     v.question?.let { Question(port, it, idle) }
+    var partOnly by rememberSaveable { mutableStateOf(false) }
+    v.scope?.let { sc -> ScopeConfirm(sc, enabled) { whole -> partOnly = !whole; port.confirmScope(sc.id, whole) } }
     // A follow-up goes to the model: not on a local trial, and a directional draft never stacks another.
     if (v.configured && !v.local && v.lightFrom == null) {
         var more by rememberSaveable { mutableStateOf("") }
@@ -458,7 +485,33 @@ private fun Draft(port: AssistantPort, v: AssistantView, enabled: Boolean) {
             }
         }
     }
-    Status(port, v, AssistantAsk.Goal, retry = null)
+    Status(port, v, AssistantAsk.Goal, retry = null, partOnly = partOnly)
+}
+
+/**
+ * The scope, asked in place before a request goes (no dialog): what will be adjusted, on the whole
+ * photo; 只改一部分 says so, and the session stops the request locally (only the whole photo can be
+ * edited today; a mask does part of it).
+ */
+@Composable
+private fun ScopeConfirm(s: AssistantScope, enabled: Boolean, onPick: (Boolean) -> Unit) {
+    val view = LocalView.current
+    Column(
+        Modifier.fillMaxWidth().drawWithContent {
+            drawWindowCut(12.dp.toPx())
+            drawRoundRect(Palette.Panel, cornerRadius = androidx.compose.ui.geometry.CornerRadius(12.dp.toPx()))
+            drawContent()
+            drawWindowGlass(12.dp.toPx())
+        }.padding(start = 14.dp, end = 6.dp, top = 10.dp, bottom = 6.dp),
+    ) {
+        Text(tr("会调整整张照片：{0}", s.goal), style = MaterialTheme.typography.bodySmall, color = Palette.OnSurface,
+            maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            QuietButton(tr("只改一部分"), enabled) { Feedback.play(view, Cue.Release); onPick(false) }
+            PrimaryButton(tr("调整整张"), enabled) { Feedback.play(view, Cue.Pick); onPick(true) }
+        }
+    }
 }
 
 /** Applied: undo in one step; while it saves, its state; a failed save can be tried again. */
@@ -496,13 +549,13 @@ private fun Question(port: AssistantPort, q: AssistantQuestion, enabled: Boolean
 
 /** The outcome as the backend reports it: a notice, or an error with 重试 when trying again can help. */
 @Composable
-private fun Status(port: AssistantPort, v: AssistantView, asked: AssistantAsk, retry: (() -> Unit)?) {
+private fun Status(port: AssistantPort, v: AssistantView, asked: AssistantAsk, retry: (() -> Unit)?, partOnly: Boolean = false) {
     val text = when {
         v.phase == AssistantPhase.Generating -> tr("正在生成建议")
         v.phase == AssistantPhase.Rendering -> tr("正在预览调整")
         v.phase == AssistantPhase.Failed -> tr("预览无法恢复")
         v.error != null -> errorText(v.error)
-        v.notice != null -> noticeText(v.notice, asked)
+        v.notice != null -> noticeText(v.notice, asked, partOnly)
         else -> null
     } ?: return
     val isError = v.error != null || v.phase == AssistantPhase.Failed
@@ -532,9 +585,9 @@ private fun errorText(e: AssistantError) = when (e) {
 }
 
 // The session reports a directional request's outcome with the cinematic notices; the ask words them.
-private fun noticeText(n: AssistantNotice, asked: AssistantAsk) = when (n) {
+private fun noticeText(n: AssistantNotice, asked: AssistantAsk, partOnly: Boolean = false) = when (n) {
     AssistantNotice.NoChange -> tr("没有需要调整的地方")
-    AssistantNotice.Unsupported -> tr("这类调整还做不到")
+    AssistantNotice.Unsupported -> if (partOnly) tr("暂时只能调整整张照片；只改一部分请用蒙版") else tr("这类调整还做不到")
     AssistantNotice.QuestionLimit -> tr("追问次数已用完")
     AssistantNotice.Cancelled -> tr("已取消")
     AssistantNotice.CinematicNotAnalyzed -> tr("预览还不能分析")
@@ -559,8 +612,14 @@ private fun GoalField(
         modifier = Modifier.fillMaxWidth().heightIn(min = minHeight).semantics { contentDescription = label },
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxWidth().heightIn(min = minHeight).clip(Corners.m).background(Palette.Panel)
-                    .border(1.dp, Palette.OutlineSoft, Corners.m).padding(horizontal = 14.dp, vertical = 13.dp),
+                Modifier.fillMaxWidth().heightIn(min = minHeight)
+                    .drawWithContent {
+                        drawWindowCut(12.dp.toPx())
+                        drawRoundRect(Color(0xFF111110), cornerRadius = androidx.compose.ui.geometry.CornerRadius(12.dp.toPx()))
+                        drawContent()
+                        drawWindowGlass(12.dp.toPx())
+                    }
+                    .padding(horizontal = 14.dp, vertical = 13.dp),
             ) {
                 if (text.isEmpty()) Text(label, style = MaterialTheme.typography.bodyLarge, color = Palette.OnSurfaceSoft.copy(alpha = 0.7f))
                 inner()
@@ -574,16 +633,26 @@ private fun GoalField(
 private fun StatisticsChip(on: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val view = LocalView.current
     val press = remember { MutableInteractionSource() }
+    val down by press.collectIsPressedAsState()
+    val sink by androidx.compose.animation.core.animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "stat-press")
     Row(
-        Modifier.heightIn(min = 48.dp).clip(Corners.m)
-            .background(if (on) Palette.PanelHighest else Palette.Panel)
-            .border(1.dp, if (on) Palette.Outline else Palette.OutlineSoft, Corners.m)
-            .toggleable(on, press, ripple(), enabled, Role.Switch) { Feedback.play(view, if (it) Cue.ToggleOn else Cue.ToggleOff); onChange(it) }
+        Modifier.heightIn(min = 48.dp)
+            .drawBehind { drawKey(12.dp.toPx(), 0f, sink) }
+            .clip(Corners.m)
+            .toggleable(on, press, null, enabled, Role.Switch) { Feedback.play(view, if (it) Cue.ToggleOn else Cue.ToggleOff); onChange(it) }
             .graphicsLayer { alpha = if (enabled) 1f else 0.5f }
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(8.dp).background(if (on) Palette.Accent else Palette.Track, androidx.compose.foundation.shape.CircleShape))
+        // A small lamp: lit warm while the measurements go with the request.
+        androidx.compose.foundation.Canvas(Modifier.size(10.dp)) {
+            val c = center
+            if (on) drawCircle(Color(0x55FFE2B0), size.minDimension * 0.9f, c)
+            drawCircle(Brush.radialGradient(
+                if (on) listOf(Color(0xFFFFF6E4), Color(0xFFE6B866)) else listOf(Color(0xFF4A4844), Color(0xFF1C1B19)),
+                center = c - androidx.compose.ui.geometry.Offset(size.width * 0.12f, size.height * 0.12f), radius = size.minDimension * 0.5f),
+                size.minDimension * 0.4f, c)
+        }
         Spacer(Modifier.width(8.dp))
         Text(tr("画面统计"), style = MaterialTheme.typography.labelLarge, color = Palette.OnSurface)
     }
@@ -593,11 +662,14 @@ private fun StatisticsChip(on: Boolean, enabled: Boolean, onChange: (Boolean) ->
 @Composable
 internal fun PrimaryButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
+    val down by press.collectIsPressedAsState()
+    val sink by androidx.compose.animation.core.animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "primary-press")
     Box(
         modifier.heightIn(min = 48.dp)
-            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.45f }
-            .clip(Corners.m).background(Palette.Accent)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(color = Palette.OnAccent), role = Role.Button, onClick = onClick)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.45f }
+            .drawBehind { drawKey(12.dp.toPx(), 1f, sink) }
+            .clip(Corners.m)
+            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 20.dp),
         contentAlignment = Alignment.Center,
     ) {

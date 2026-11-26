@@ -58,10 +58,9 @@ import kotlin.math.sin
  *
  *   the camera moves in on the strip, which runs on beyond the light on a light box;
  *   the advance lever winds three frames on, one stroke each (Cue.Ratchet), the counter steps;
- *   the shutter fires (Cue.Shutter): a soft flash, and the new frame develops as reversal film
- *   does, every point at once by its tone (FilmDevelop): milky stock, a silver negative, nearly
- *   dark, then the slide clearing out of it, a faint red halation round it as it clears; the tank
- *   turns over as each bath goes in (Cue.Agitate);
+ *   the shutter fires (Cue.Shutter): a soft flash, and the new frame comes up from its colour
+ *   negative as the site's opening print does (FilmDevelop): an uneven developer front with a warm
+ *   edge, a faint red halation round it as it clears; the tank turns over as it goes (Cue.Agitate);
  *   the name lands on split-flap tiles under the strip;
  *   the developed frame opens out over the screen and the editor is under it, the glow on the
  *   same phase.
@@ -139,9 +138,9 @@ fun LaunchIntro(ready: Boolean, onDone: () -> Unit) {
         // A soft flash, not a white-out: it rises fast, then dies away over ~250 ms.
         launch { st.flash.snapTo(0.55f); st.flash.animateTo(0f, Motion.defaultEffects()) }
         launch { delay(180); nameOn = true; st.name.animateTo(1f, Motion.defaultSpatial()) }
-        // One turn of the tank as each bath goes in (FilmDevelop: p 0.02, 0.28, 0.50, 0.71 of 1.8 s).
+        // The tank turns over as the front moves (FilmDevelop), four times in the 1.8 s.
         launch { for (ms in longArrayOf(36, 468, 396, 378)) { delay(ms); cue(Cue.Agitate) } }
-        // The bath: 1.5 s from cream to a clear slide; the halation blooms as it clears.
+        // The bath: 1.8 s from the negative to the print; the halation blooms as it clears.
         st.dev.animateTo(1f, tween(1800, easing = LinearEasing))
         delay(380)
         leaving = true

@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.runtime.remember
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -144,9 +145,10 @@ private fun Notes(r: Updater.Release) {
 @Composable
 private fun Actions(primary: String, onPrimary: () -> Unit, quiet: List<Pair<String, () -> Unit>> = emptyList()) {
     Spacer(Modifier.height(RowGap))
+    val press = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Box(
-        Modifier.fillMaxWidth().height(56.dp).clip(Corners.full).background(Palette.Accent)
-            .clickable(role = Role.Button, onClick = onPrimary),
+        Modifier.fillMaxWidth().height(56.dp).key(1f, press).clip(Corners.full)
+            .clickable(interactionSource = press, indication = null, role = Role.Button, onClick = onPrimary),
         contentAlignment = Alignment.Center,
     ) { Text(primary, style = MaterialTheme.typography.titleSmall, color = Palette.OnAccent) }
     if (quiet.isNotEmpty()) Row(

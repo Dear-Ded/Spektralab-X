@@ -166,16 +166,16 @@ fun ImportHost(vm: EditorViewModel) {
                         tr("导入风格"), summary = listOf(pending.fileName, left).filter { it.isNotEmpty() }.joinToString(" · "),
                         hint = if (before != null) tr("已套用到当前照片。") else tr("打开一张照片后可以预览和调强度。"),
                     )
-                    OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
-                        label = { Text(tr("名称")) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(colors = windowFieldColors(), value = name, onValueChange = { name = it.take(60) }, singleLine = true,
+                        label = { Text(tr("名称")) }, modifier = Modifier.fillMaxWidth().windowField())
                     // The categories already in use first, so a batch lands in one place; a new name below.
                     val known by library.styles.all.collectAsState()
                     val categories = remember(known) { known.map { it.category }.filter { it.isNotBlank() }.distinct() }
                     if (categories.isNotEmpty()) PillRow(Modifier.padding(bottom = 4.dp)) {
                         for (c in categories) SelectPill(selected = category == c, onClick = { category = c }, label = { Text(c) })
                     }
-                    OutlinedTextField(value = category, onValueChange = { category = it.take(20) }, singleLine = true,
-                        label = { Text(if (categories.isEmpty()) tr("分类") else tr("或新建分类")) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(colors = windowFieldColors(), value = category, onValueChange = { category = it.take(20) }, singleLine = true,
+                        label = { Text(if (categories.isEmpty()) tr("分类") else tr("或新建分类")) }, modifier = Modifier.fillMaxWidth().windowField())
                     if (before != null) {
                         Spacer(Modifier.height(RowGap))
                         LabeledSlider(tr("强度"), strength * 100, 0.0, 100.0, 100.0, true, "%.0f%%") { v ->
@@ -375,7 +375,7 @@ fun UserLibrarySection(vm: EditorViewModel) {
                 Column {
                     Text(tr("胶片、相纸、冲印参数和冲印后调整会打包成 .spklook，照片本身、裁切和边框不会带上。"),
                         style = MaterialTheme.typography.bodySmall)
-                    OutlinedTextField(value = name, onValueChange = { name = it.take(60) }, singleLine = true,
+                    OutlinedTextField(colors = windowFieldColors(), modifier = Modifier.windowField(), value = name, onValueChange = { name = it.take(60) }, singleLine = true,
                         label = { Text(tr("名称")) })
                 }
             },

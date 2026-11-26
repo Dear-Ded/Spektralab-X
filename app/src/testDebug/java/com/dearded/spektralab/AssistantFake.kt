@@ -26,6 +26,7 @@ internal class AssistantFake(initial: AssistantView) : AssistantPort, AssistantS
     override fun undo() { calls += "undo" }
     override fun retrySave() { calls += "retrySave" }
     override fun answer(text: String) { calls += "answer:$text" }
+    override fun confirmScope(id: Long, wholePhoto: Boolean) { calls += "scope:$id:${if (wholePhoto) "whole" else "part"}" }
     override fun tryPreset(preset: AssistantPreset) { calls += "preset:${preset.name}" }
     override fun openSettings() { calls += "settings" }
 
@@ -51,6 +52,8 @@ internal class AssistantFake(initial: AssistantView) : AssistantPort, AssistantS
         /** A directional-light draft: masks, no scalar changes, strength on the dial. */
         val directional = configured.copy(phase = AssistantPhase.Previewing, canApply = true, strength = 100,
             canSetStrength = true, lightFrom = AssistantSide.Left)
+        /** A custom goal waiting for its scope. */
+        val scope = configured.copy(scope = AssistantScope(12, "把天空压暗一点，水面保持亮"))
         /** A fixed offline trial on the photo. */
         val local = AssistantView(configured = false, phase = AssistantPhase.Previewing, canApply = true, local = true,
             changes = listOf(AssistantChange(AssistantParam.EXPOSURE, 0.0, 0.3)))

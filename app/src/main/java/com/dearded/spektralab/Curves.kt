@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.Brush
 import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -311,7 +312,11 @@ internal fun CurveEditor(
             },
     ) {
         val w = size.width; val h = size.height
-        drawRect(Palette.Panel)
+        // A window in the plate (Skeuo.kt), dark glass behind it.
+        val corner = 10.dp.toPx()
+        drawWindowCut(corner)
+        drawRoundRect(Brush.verticalGradient(listOf(Color(0xFF141413), Color(0xFF0C0C0B))),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(corner))
         histogram?.let { hist ->
             val bins = when (row) { 2 -> hist.r; 3 -> hist.g; 4 -> hist.b; else -> hist.y }
             val peak = sqrt(max(1, bins.max()).toFloat())
@@ -324,12 +329,17 @@ internal fun CurveEditor(
                 }
                 lineTo(w, h); close()
             }
-            drawPath(path, color.copy(alpha = 0.16f))
+            drawPath(path, color.copy(alpha = 0.09f))
         }
-        val grid = Palette.OutlineSoft
-        for (k in 1..3) {
-            drawLine(grid, Offset(w * k / 4, 0f), Offset(w * k / 4, h), 1.dp.toPx())
-            drawLine(grid, Offset(0f, h * k / 4), Offset(w, h * k / 4), 1.dp.toPx())
+        // Etched graph paper: tenths faint, quarters firmer, each line a lit edge and its shadow.
+        for (k in 1..19) {
+            val major = k % 5 == 0
+            val a = if (major) 0.1f else 0.04f
+            val x = w * k / 20; val y = h * k / 20
+            drawRect(Color(0xFFFFF8EC).copy(alpha = a), Offset(x, 0f), androidx.compose.ui.geometry.Size(0.6f * density, h))
+            drawRect(Color.Black.copy(alpha = a * 4), Offset(x + 0.6f * density, 0f), androidx.compose.ui.geometry.Size(0.5f * density, h))
+            drawRect(Color(0xFFFFF8EC).copy(alpha = a), Offset(0f, y), androidx.compose.ui.geometry.Size(w, 0.6f * density))
+            drawRect(Color.Black.copy(alpha = a * 4), Offset(0f, y + 0.6f * density), androidx.compose.ui.geometry.Size(w, 0.5f * density))
         }
         drawLine(Palette.Outline, Offset(0f, h), Offset(w, 0f), 1.dp.toPx(),
             pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
@@ -345,11 +355,19 @@ internal fun CurveEditor(
         for ((r, _, col) in channels) if (r != row && !curves[r].isIdentity)
             drawPath(curvePath(curves[r]), col.copy(alpha = 0.35f), style = Stroke(1.5.dp.toPx()))
         val stroke = if (enabled) color else Palette.Outline
-        drawPath(curvePath(curve), stroke, style = Stroke(2.dp.toPx()))
+        // Ink on the glass: a faint glow under a fine line.
+        val line = curvePath(curve)
+        drawPath(line, stroke.copy(alpha = 0.18f), style = Stroke(5.dp.toPx()))
+        drawPath(line, stroke, style = Stroke(1.8.dp.toPx()))
+        drawWindowGlass(corner)
+        // The points: steel pins standing on the glass, lit from the upper left, a shadow under each.
         if (editable) curve.points.forEachIndexed { i, p ->
             val o = Offset((p.x * w).toFloat(), ((1 - p.y) * h).toFloat())
-            drawCircle(stroke, if (i == active) 8.dp.toPx() else 6.dp.toPx(), o)
-            drawCircle(Palette.Panel, if (i == active) 5.dp.toPx() else 3.5.dp.toPx(), o)
+            val r = (if (i == active) 8.dp else 6.5.dp).toPx()
+            drawCircle(Color.Black.copy(alpha = 0.5f), r, o + Offset(1.5f * density, 2.5f * density))
+            drawCircle(Brush.radialGradient(0f to Color.White, 0.25f to Color(0xFFE4E0D7), 0.75f to Color(0xFF8D887F), 1f to Color(0xFF4A4741),
+                center = o + Offset(-r * 0.38f, -r * 0.42f), radius = r * 1.4f), r, o, alpha = if (enabled) 1f else 0.5f)
+            drawCircle(Color.Black.copy(alpha = 0.45f), r, o, style = Stroke(0.6f * density))
         }
     }
     // A state only: why the points cannot be moved. How to use the curve is the curve's own business.

@@ -85,12 +85,10 @@ fun RollNameDialog(title: String, hint: String, initial: String, confirm: String
                     Text(hint, style = MaterialTheme.typography.bodySmall, color = Palette.OnSurfaceSoft)
                     Spacer(Modifier.height(8.dp))
                 }
-                OutlinedTextField(
-                    value = name, onValueChange = { name = it.take(40) }, singleLine = true,
+                OutlinedTextField(colors = windowFieldColors(), modifier = Modifier.windowField(), value = name, onValueChange = { name = it.take(40) }, singleLine = true,
                     label = { Text(tr("卷名")) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { if (ok) onDone(name.trim()) }),
-                )
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { if (ok) onDone(name.trim()) }),)
             }
         },
         confirmButton = { TextButton(onClick = { onDone(name.trim()) }, enabled = ok) { Text(confirm) } },

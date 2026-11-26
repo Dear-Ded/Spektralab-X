@@ -52,8 +52,8 @@ import kotlin.math.roundToInt
 
 /*
  * What 保存 looks like (preview/ui-polish.html playSave): the print on screen shrinks back onto a
- * strip of slide film, fading into undeveloped stock as it goes, develops (FilmDevelop: every
- * point at once, by its tone; Cue.Agitate as each bath goes in), is held up to the light box for a
+ * strip of film, fading into its colour negative as it goes, develops (FilmDevelop: the site's
+ * developer front; Cue.Agitate as the tank turns), is held up to the light box for a
  * moment, and flies into the 保存 button. Each step hands over to the next without a jump. It is ceremony only: the export is already queued when it starts and runs in
  * the background whatever happens here. A tap anywhere skips it.
  */
@@ -84,7 +84,7 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
         }
         step { grow.animateTo(1f, Motion.defaultSpatial()) }
         if (!skip) delay(260)
-        // One turn of the tank as each bath goes in (FilmDevelop.Fronts: 0.02, 0.28, 0.50, mid-clear).
+        // The tank turns over as the front moves (FilmDevelop), four times in the 3.4 s.
         val baths = launch { for (ms in longArrayOf(0, 950, 750, 710)) { delay(ms); if (!skip) Feedback.play(view, Cue.Agitate) } }
         step { dev.animateTo(1f, tween(3400, easing = LinearEasing)) }
         baths.cancel()
@@ -172,7 +172,7 @@ internal fun SaveDevelop(shot: SaveShot, onDone: () -> Unit) {
                     val pos = positive
                     if (dev.value <= 0f || pos == null) {
                         drawPrint(shot.print, r, alpha)
-                        // Back to undeveloped stock as it shrinks: the cream of FilmDevelop at p = 0.
+                        // Back to its negative as it shrinks: the orange of FilmDevelop at p = 0.
                         val cream = smoothstep(0.35f, 1f, g)
                         if (cream > 0f) drawRect(UndevelopedCream, r.topLeft, r.size, alpha = cream * alpha)
                     } else with(FilmDevelop) { frame(r, dev.value, pos, alpha = alpha) }
@@ -189,8 +189,8 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPrint(img: Imag
 private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 private fun smoothstep(e0: Float, e1: Float, x: Float): Float { val v = ((x - e0) / (e1 - e0)).coerceIn(0f, 1f); return v * v * (3f - 2f * v) }
 
-/** FilmDevelop's undeveloped stock at p = 0. */
-private val UndevelopedCream = Color(0.70f, 0.68f, 0.60f)
+/** FilmDevelop at p = 0 for a mid-toned frame: the colour negative's orange. */
+private val UndevelopedCream = Color(0.55f, 0.35f, 0.21f)
 
 private fun ImageBitmap.asAndroidBitmapCompat(): android.graphics.Bitmap {
     val b = this.asAndroidBitmap()

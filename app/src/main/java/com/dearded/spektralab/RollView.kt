@@ -173,9 +173,10 @@ fun RollView(
 private fun ExportButton(onRoll: () -> Unit, onContactSheet: () -> Unit) {
     Box {
         var menu by remember { mutableStateOf(false) }
+        val exportPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
         Box(
-            Modifier.size(64.dp).clip(Corners.full).background(Palette.Accent)
-                .clickable(role = androidx.compose.ui.semantics.Role.Button) { menu = true }
+            Modifier.size(64.dp).key(1f, exportPress).clip(Corners.full)
+                .clickable(interactionSource = exportPress, indication = null, role = androidx.compose.ui.semantics.Role.Button) { menu = true }
                 .semantics { contentDescription = tr("导出") },
             contentAlignment = Alignment.Center,
         ) { Text(tr("导出"), style = MaterialTheme.typography.labelLarge, color = Palette.OnAccent) }
@@ -210,21 +211,29 @@ private fun Strip(table: LightTableViewModel, roll: Roll, start: Int, onCentre: 
     }
     LaunchedEffect(Unit) { if (start > 0) list.scrollToItem(start) }
 
+    val (lit, toggleLight) = rememberLightBox()
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        // The strip's height leaves room for the edges, the name line and the scrubber.
-        val imageH = minOf(maxWidth * 0.62f / 1.5f, maxHeight - 160.dp).coerceAtLeast(96.dp)
-        val sidePad = (maxWidth - imageH * 1.5f) / 2
+        // The strip's height leaves room for the light box, the name line and the scrubber.
+        val imageH = minOf(maxWidth * 0.58f / 1.5f, maxHeight - 260.dp).coerceAtLeast(96.dp)
+        val sidePad = (maxWidth - 38.dp - imageH * 1.5f) / 2
+        val boxH = minOf(maxHeight - 110.dp, imageH + 44.dp + 150.dp)
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-            Box(Modifier.fillMaxWidth().background(FilmBase)) {
+            LightBox(lit, toggleLight, Modifier.fillMaxWidth().padding(horizontal = 10.dp).height(boxH)) {
                 LazyRow(
                     state = list,
                     flingBehavior = rememberSnapFlingBehavior(list, SnapPosition.Center),
                     contentPadding = PaddingValues(horizontal = sidePad.coerceAtLeast(0.dp)),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().sleeve(lit),
                 ) {
                     itemsIndexed(frames, key = { _, f -> f.id }, contentType = { _, _ -> "frame" }) { i, f ->
                         StripFrame(
-                            table, roll, f, i, imageH,
+                            table, roll, f, i, imageH, lit,
+                            Modifier.drum {
+                                val info = list.layoutInfo
+                                val it = info.visibleItemsInfo.firstOrNull { v -> v.index == i } ?: return@drum null
+                                val mid = (info.viewportStartOffset + info.viewportEndOffset) / 2f
+                                (it.offset + it.size / 2f - mid) / it.size
+                            },
                             priority = { abs(i - currentCentre) },
                             onClick = {
                                 if (i == currentCentre) onOpen(i)
@@ -254,25 +263,26 @@ private fun Strip(table: LightTableViewModel, roll: Roll, start: Int, onCentre: 
  */
 @Composable
 private fun StripFrame(
-    table: LightTableViewModel, roll: Roll, f: Frame, index: Int, imageH: Dp,
+    table: LightTableViewModel, roll: Roll, f: Frame, index: Int, imageH: Dp, lit: Boolean, modifier: Modifier,
     priority: () -> Int, onClick: () -> Unit,
 ) {
     val wide = f.landscape
     val gateW = if (wide) imageH * 1.5f else imageH * 0.75f
     val px = with(LocalDensity.current) { maxOf(gateW, imageH).roundToPx() }
-    val ink = roll.process.color
+    // On the lit box the positive's rebate is black and the light comes through its print and holes.
+    val ink = if (lit) EdgeLit else roll.process.color
     Column(
-        Modifier.width(gateW + 4.dp)
+        modifier.width(gateW + 4.dp).background(if (lit) RebateBlack else FilmBase)
             .clickable(onClick = onClick)
             .semantics { contentDescription = tr("第 {0} 格，", frameNumber(index)) + describe(f) },
     ) {
         EdgeText(if (index % 2 == 1 || index == 0) roll.edgeModel else "", "", ink)
-        Sprockets(holes = if (wide) 8 else 4)
+        Sprockets(holes = if (wide) 8 else 4, lit)
         Box(Modifier.fillMaxWidth().height(imageH).padding(horizontal = 2.dp).background(Color.Black)) {
             FrameImage(table, f, px, priority, ContentScale.Crop)
             FrameMarks(f, selected = false)
         }
-        Sprockets(holes = if (wide) 8 else 4)
+        Sprockets(holes = if (wide) 8 else 4, lit)
         // Numbers only on odd frames and 00 (appendix D), the half mark at each frame's trailing edge.
         EdgeText(if (index == 0 || index % 2 == 1) frameNumber(index) else "", halfMark(index), ink)
     }
@@ -288,14 +298,14 @@ private fun EdgeText(centre: String, trailing: String, ink: Color) {
 
 /** A row of 135 perforations: eight per full frame, as on the film. */
 @Composable
-private fun Sprockets(holes: Int) {
+private fun Sprockets(holes: Int, lit: Boolean) {
     Canvas(Modifier.fillMaxWidth().height(10.dp)) {
         val pitch = size.width / holes
         val w = pitch * 0.5f
         val h = size.height * 0.62f
         val y = (size.height - h) / 2
         for (k in 0 until holes) {
-            drawRoundRect(SprocketLight, Offset(k * pitch + (pitch - w) / 2, y), Size(w, h), CornerRadius(h * 0.25f))
+            drawRoundRect(if (lit) PanelLight else SprocketLight, Offset(k * pitch + (pitch - w) / 2, y), Size(w, h), CornerRadius(h * 0.25f))
         }
     }
 }

@@ -296,7 +296,7 @@ private fun FrameGrid(
                         val start = gridState.frameAt(held.position, currentIds, gap.toPx())
                             ?: return@awaitEachGesture
                         val base = currentSelection
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        Feedback.play(view, Cue.LongPress)
                         table.selectRange(base, listOf(currentIds[start]))
                         try {
                             while (true) {
@@ -496,5 +496,6 @@ private fun EmptyTable(add: AddPhotos) {
 
 /** One haptic event from the map in docs/UI.md 1: [api30] on Android 11+, else [fallback]. */
 internal fun View.feel(api30: Int, fallback: Int) {
+    if (!Feedback.vibrationOn(context)) return
     performHapticFeedback(if (Build.VERSION.SDK_INT >= 30) api30 else fallback)
 }

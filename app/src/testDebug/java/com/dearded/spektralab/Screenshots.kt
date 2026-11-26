@@ -165,6 +165,8 @@ class Screenshots {
         shot("8b_assistant_directional")
         fake.view.value = AssistantFake.local
         shot("8c_assistant_local")
+        fake.view.value = AssistantFake.scope
+        shot("8d_assistant_scope")
     }
 
     @Test fun editorBorderAndCrop() {

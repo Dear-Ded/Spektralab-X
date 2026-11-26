@@ -240,6 +240,30 @@ class AssistantPanelTest {
         assertEquals("test", fake.calls.last())
     }
 
+    @Test fun theScopeIsAskedInPlaceForItsOwnRequest() {
+        val fake = AssistantFake(AssistantFake.scope)
+        panel(fake)
+        compose.onNodeWithText("会调整整张照片：把天空压暗一点，水面保持亮").assertExists()
+        compose.onNodeWithText("#12", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("调整整张").performClick()
+        assertEquals("scope:12:whole", fake.calls.last())
+    }
+
+    @Test fun partOnlyIsStoppedAndSaysWhatCanBeDone() {
+        val fake = AssistantFake(AssistantFake.scope)
+        panel(fake)
+        compose.onNodeWithText("只改一部分").performClick()
+        assertEquals("scope:12:part", fake.calls.last())
+        fake.view.value = AssistantFake.configured.copy(notice = AssistantNotice.Unsupported)
+        compose.onNodeWithText("暂时只能调整整张照片；只改一部分请用蒙版").assertExists()
+    }
+
+    @Test fun rulesAreExplainedUntilTheyApply() {
+        val fake = AssistantFake(AssistantFake.configured)
+        compose.setContent { SpektraTheme { AssistantPreferencesSheet(fake) {} } }
+        compose.onNodeWithText("暂未启用：已确认的规则还不会用到修图").assertExists()
+    }
+
     @Test fun clearingPreferencesTakesASecondTap() {
         val fake = AssistantFake(AssistantFake.configured)
         compose.setContent { SpektraTheme { AssistantPreferencesSheet(fake) {} } }

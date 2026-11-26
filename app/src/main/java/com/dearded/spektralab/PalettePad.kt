@@ -1,5 +1,7 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.geometry.Size
 import android.content.Context
 import android.view.accessibility.AccessibilityManager
 import androidx.compose.foundation.Canvas
@@ -191,25 +193,34 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
                 },
         ) {
             val corner = CornerRadius(10.dp.toPx())
+            drawWindowCut(corner.x)
             // Colour: grey on the left to a rich warm-to-cool sweep on the right.
             drawRoundRect(Brush.horizontalGradient(listOf(Color(0xFF6E6A66), Color(0xFFB0705A), Color(0xFFD08A3A))),
                 cornerRadius = corner)
             // Tone: airy at the top, deep at the bottom.
             drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.Transparent,
                 Color.Black.copy(alpha = 0.6f))), cornerRadius = corner)
-            val grid = Color.White.copy(alpha = 0.18f)
+            // Frosted glass: a fine grain over the colour, the grid etched into it.
+            drawRoundRect(FrostBrush, cornerRadius = corner)
             for (i in 1..3) {
-                drawLine(grid, Offset(size.width * i / 4, 0f), Offset(size.width * i / 4, size.height), 1.dp.toPx())
-                drawLine(grid, Offset(0f, size.height * i / 4), Offset(size.width, size.height * i / 4), 1.dp.toPx())
+                val gx = size.width * i / 4; val gy = size.height * i / 4
+                drawRect(Color.White.copy(alpha = 0.16f), Offset(gx, 0f), Size(0.6f * density, size.height))
+                drawRect(Color.Black.copy(alpha = 0.22f), Offset(gx + 0.6f * density, 0f), Size(0.5f * density, size.height))
+                drawRect(Color.White.copy(alpha = 0.16f), Offset(0f, gy), Size(size.width, 0.6f * density))
+                drawRect(Color.Black.copy(alpha = 0.22f), Offset(0f, gy + 0.6f * density), Size(size.width, 0.5f * density))
             }
+            drawWindowGlass(corner.x)
             fun at(t: Float, c: Float) = Offset((c + 100f) / 200f * size.width, (100f - t) / 200f * size.height)
             // The style's home point, a ring; the centre is the grid's crossing.
             if (homeT != 0f || homeC != 0f) drawCircle(Color.White.copy(alpha = 0.7f), 7.dp.toPx(), at(homeT, homeC),
                 style = Stroke(1.5.dp.toPx()))
             val p = at(tone, colour)
             val r = (if (pressed) 12.dp else 10.dp).toPx()
-            drawCircle(Color.Black.copy(alpha = 0.35f), r + 2.dp.toPx(), p)
-            drawCircle(if (enabled) Palette.OnSurface else Palette.Outline, r, p)
+            // An ivory puck resting on the glass, lit from the upper left; pressed, it sits lower.
+            drawCircle(Color.Black.copy(alpha = 0.45f), r + 1.dp.toPx(), p + Offset(1.dp.toPx(), (if (pressed) 1.5f else 3f) * density))
+            drawCircle(Brush.radialGradient(0f to Color(0xFFFDFBF6), 0.45f to Color(0xFFE2DDD2), 1f to Color(0xFFB7B1A5),
+                center = p + Offset(-r * 0.3f, -r * 0.4f), radius = r * 1.35f), r, p, alpha = if (enabled) 1f else 0.5f)
+            drawCircle(Color.Black.copy(alpha = 0.3f), r, p, style = Stroke(0.6f * density))
             if (fine) drawCircle(Palette.Accent, r + 5.dp.toPx(), p, style = Stroke(2.dp.toPx()))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -222,4 +233,20 @@ internal fun PalettePad(look: Look, enabled: Boolean, onDrag: (Boolean) -> Unit,
     LabeledSlider(tr("风格强度"), look.palette, 0.0, 100.0, 100.0, enabled, "%.0f", onDrag) {
         onChange(lookLatest.copy(palette = it))
     }
+}
+
+/** Frosted glass's grain: one small tile made once and repeated, not dots drawn every frame. */
+private val FrostBrush: androidx.compose.ui.graphics.ShaderBrush by lazy {
+    val n = 96
+    val px = IntArray(n * n) { k ->
+        val h = ((k * 2654435761L) ushr 7).toInt() and 0xFF
+        when {
+            h < 14 -> android.graphics.Color.argb(13, 255, 255, 255)
+            h < 28 -> android.graphics.Color.argb(15, 0, 0, 0)
+            else -> 0
+        }
+    }
+    val tile = android.graphics.Bitmap.createBitmap(px, n, n, android.graphics.Bitmap.Config.ARGB_8888)
+    androidx.compose.ui.graphics.ShaderBrush(androidx.compose.ui.graphics.ImageShader(tile.asImageBitmap(),
+        androidx.compose.ui.graphics.TileMode.Repeated, androidx.compose.ui.graphics.TileMode.Repeated))
 }
