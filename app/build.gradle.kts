@@ -125,14 +125,14 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2026.01.00")
+    val composeBom = platform("androidx.compose:compose-bom:2026.11.01")
     implementation(composeBom)
     implementation("androidx.core:core-ktx:1.17.0")
     // Android 12+ system splash with a compat path back to API 29 (ui-motion_splash.md 2).
     implementation("androidx.core:core-splashscreen:1.2.0")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     // HEIF · 全尺寸 (HeifExport.kt): MediaCodec HEVC through the stable 1.1 line.
-    implementation("androidx.heifwriter:heifwriter:1.1.0")
+    implementation("androidx.heifwriter:heifwriter:1.2.0")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
@@ -144,7 +144,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.moshi:moshi:1.15.2")
     // Installs src/main/baseline-prof.txt on sideloaded installs (no Play to deliver it); see that file.
-    implementation("androidx.profileinstaller:profileinstaller:1.4.0")
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     // Execute the real sidecar/style JSON contract on the release JVM test path.
@@ -152,9 +152,9 @@ dependencies {
     // Screenshots (app/src/testDebug, docs/SCREENSHOTS.md): debug unit tests only, so the
     // release build and its unit tests never see them.
     testDebugImplementation(composeBom)
-    testDebugImplementation("org.robolectric:robolectric:4.17")
-    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi:1.77.0")
-    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.77.0")
+    testDebugImplementation("org.robolectric:robolectric:4.18.1")
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi:1.79.0")
+    testDebugImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.79.0")
     testDebugImplementation("androidx.compose.ui:ui-test-junit4")
     testDebugImplementation("androidx.test:core:1.7.0")
     testDebugImplementation("androidx.test.ext:junit:1.3.0")
