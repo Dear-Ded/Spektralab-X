@@ -77,5 +77,6 @@ words them by the button the user pressed (没有明确的光向 / 预览还不�
 | | |
 |---|---|
 | UI | done: panel, settings sheets, light, entry gate, 15 Compose tests on a fake session, screenshots 80–87 |
-| Backend connected | **not yet**: needs the `AssistantPort` / `AssistantSettingsPort` implementation above |
-| Real-model effect verified | **not yet** |
+| Backend connected | Internal builds: both ports are bound to the session, settings and local preference store. The Release entry remains disabled. |
+| Real-model effect verified | An installed internal build generated a directional draft through Gemini and exported its local render on a synthetic fixture. This covers that provider and example only. See the [candidate ledger](DARKROOM_ASSISTANT_ENGINEERING_ROUTE.md#d5-work-ledger). |
+| Remember a specific adjustment | Open: `learn`, `useRules`, `clearPreferences` and `apply` do not confirm a rule. Before wiring this feature, the UI owner must provide a distinct user confirmation carrying the reviewed parameter, mode, value or offset and scope. Dismissing the review must leave rules unchanged. |
