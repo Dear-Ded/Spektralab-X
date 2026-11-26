@@ -42,7 +42,7 @@ Treat commercial products as behavior references only. Do not download or reuse 
 
 ## D5. Work ledger
 
-For save and history fixes, name the failing user action and add a regression for it. Keep one owner for each write. Do not introduce speculative retries, parallel save paths or silent recovery for unrelated errors.
+Do not add speculative defensive code. Every new guard or fallback must correspond to an explicit contract or a reachable failure; do not repeat a check already owned by another layer. For save and history fixes, name the failing user action and add a regression for it. Keep one owner for each write. Do not introduce speculative retries, parallel save paths or silent recovery for unrelated errors.
 
 | ID | Status | Evidence required to close |
 | --- | --- | --- |
@@ -58,7 +58,8 @@ For save and history fixes, name the failing user action and add a regression fo
 | P4.2 | Closed (installed Android emulator, synthetic input) | The ARM64 candidate exercised the native preview, apply/undo, export queue and final MediaStore writes on Android. The unapplied and undone JPEGs were byte-identical to baseline. The applied JPEG changed and the 16-bit TIFF decoded. An installed live directional draft produced opposite changes across one axis and cleared both masks on undo. Physical-device behavior remains open. |
 | P4.3 | Closed (internal application-root binding) | `e4bdcae` supplies both real ports at the root in Debug; the existing sheet opens through the session port. Both gate states and the setup path passed on Android JVM. No product UI layout or release gate change. |
 | P4.4 | Partial: saved adoption verified; confirmed rules open | On installed `55faad6`, undo deactivated an opted-in adoption; redo reactivated the same record after the photo saved. On `a6f10ce`, 86 cloud tests passed for the editor, session, both photo writers and preference store, including interrupted writes and clearing preferences during redo. The settings port has no event for confirming a particular rule. |
-| P4.5 | Partial: internal builds only | `4374580` passed installed Gemini direction, statistics consent, output and undo checks. `55faad6` passed 603 Debug and 387 Release tests, 52 screenshot-workflow tests, lint and both assemblies; the installed app passed Gemini, saved history and cold restart. The `a6f10ce` follow-up has separate test receipts. Physical-device results, hosted Actions and official signing are unverified. No publication. |
+| P4.5 | Internal candidate verified; external checks separate | `8b59a74`: both assemblies, 608 Debug tests, 52 screenshot-workflow tests and Release lint passed. Release tests: 390 on identical production and test sources. Installed offline Brighten preserved the formal edit until apply; undo, redo and restart returned the expected exposures. Installed live Gemini/directional/export and adoption checks remain tied to `4374580` and `55faad6`, not this APK. No physical-device result, hosted Actions, official signing or publication. |
+| D3.4 | Emulator sampler and host render measured | Fixed 1600 x 1200 fixture, process-first/repeated sampler medians: sRGB 58.80/15.55 ms, Display P3 85.36/39.02 ms. In five fresh host JNI processes the same neutral 213 x 320 RAF preview took 14.85/8.38 ms after opening the source (30 byte-identical outputs). Row reads include platform color conversion. These are not physical-device budgets or model roundtrip timings. |
 
 Branch aligned with `origin/main` at `3294552c2304daf87da19e6c969dff41c101b6f2`
 via `8998a1f`; the three upstream commits did not change the Android/engine
