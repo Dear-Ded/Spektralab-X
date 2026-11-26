@@ -64,6 +64,12 @@ Branch aligned with `origin/main` at `3294552c2304daf87da19e6c969dff41c101b6f2`
 via `8998a1f`; the three upstream commits did not change the Android/engine
 code or the two candidate CI workflows used for these tests.
 
+`f8757fe` adds only a regression for the restart writer: after a failed exact
+write, flushing the same queued snapshot persists the original photo, edit
+and white balance. The two writer suites passed all 24 tests; the complete
+Release unit suite passed all 390 tests in 51 suites, with no skips. This
+does not extend the installed-device or live-provider receipts to `f8757fe`.
+
 The focused P4 cloud test baseline at `abf3ff1` is 26 suites, 181 tests, no
 failures or skips; Release Kotlin compilation also passed. These are focused
 checks, not a complete Android workflow or candidate APK.
