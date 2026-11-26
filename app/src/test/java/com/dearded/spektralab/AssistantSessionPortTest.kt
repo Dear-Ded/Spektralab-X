@@ -99,14 +99,20 @@ class AssistantSessionPortTest {
         assertTrue(received.isEmpty())
         port.generate("Keep the color restrained.")
         val initialScope = scopePrompt()
+        assertEquals(AssistantScope(controller.state.value.scopePrompt!!.id, "Keep the color restrained."), initialScope)
+        assertNull(port.view.value.question)
+        port.answer("Whole photo #${initialScope.id}")
         assertTrue(received.isEmpty())
-        port.answer(initialScope.options.first())
+        port.confirmScope(initialScope.id, wholePhoto = true)
         assertEquals(AssistantQuestion("How strong?", listOf("Subtle", "Strong")), shown { it.question?.prompt == "How strong?" }.question)
         port.answer("Subtle")
         val answerScope = scopePrompt(except = initialScope)
-        port.answer(initialScope.options.first())
+        assertEquals("Subtle", answerScope.goal)
+        assertEquals("How strong?", port.view.value.question?.prompt)
+        port.confirmScope(initialScope.id, wholePhoto = true)
+        assertEquals(answerScope.id, controller.state.value.scopePrompt?.id)
         assertEquals(1, received.size)
-        port.answer(answerScope.options.first())
+        port.confirmScope(answerScope.id, wholePhoto = true)
         val draft = shown { it.phase == AssistantPhase.Previewing }
         assertFalse(draft.local)
         assertEquals(mapOf(AssistantParam.EXPOSURE to .4, AssistantParam.SATURATION to 12.0),
@@ -144,9 +150,9 @@ class AssistantSessionPortTest {
         port.statistics(true)
         port.generate("Darken only the water, leaving the rocks unchanged.")
         val water = scopePrompt()
-        port.answer(water.options.last())
+        port.confirmScope(water.id, wholePhoto = false)
         shown { it.notice == AssistantNotice.Unsupported }
-        port.answer(water.options.first())
+        port.confirmScope(water.id, wholePhoto = true)
         assertTrue(received.isEmpty())
         assertEquals(0, editor.samples)
         assertEquals(0, editor.renders)
@@ -154,10 +160,10 @@ class AssistantSessionPortTest {
 
         port.generate("Bring up the exposure of the whole photo.")
         val whole = scopePrompt(except = water)
-        port.answer(water.options.first())
+        port.confirmScope(water.id, wholePhoto = true)
         assertTrue(received.isEmpty())
-        port.answer(whole.options.first())
-        port.answer(whole.options.first())
+        port.confirmScope(whole.id, wholePhoto = true)
+        port.confirmScope(whole.id, wholePhoto = true)
         shown { it.canApply }
         assertEquals(listOf("Bring up the exposure of the whole photo."), received.map { it.goal })
         assertEquals(1, editor.samples)
@@ -165,7 +171,7 @@ class AssistantSessionPortTest {
 
         port.generate("Lift only the water next.")
         val followUp = scopePrompt(except = whole)
-        port.answer(followUp.options.last())
+        port.confirmScope(followUp.id, wholePhoto = false)
         shown { it.notice == AssistantNotice.Unsupported }
         assertEquals(1, received.size)
         assertEquals(1, editor.samples)
@@ -183,11 +189,11 @@ class AssistantSessionPortTest {
         }
         port.open()
         port.generate("Bring up the exposure.")
-        port.answer(scopePrompt().options.first())
+        port.confirmScope(scopePrompt().id, wholePhoto = true)
         shown { it.question?.prompt == "Which area?" }
         port.answer("The water only; leave the rocks alone.")
         val answerScope = scopePrompt()
-        port.answer(answerScope.options.last())
+        port.confirmScope(answerScope.id, wholePhoto = false)
         shown { it.notice == AssistantNotice.Unsupported }
         assertEquals(listOf<TaskClarification?>(null), received)
         assertEquals(0, editor.samples)
@@ -203,20 +209,20 @@ class AssistantSessionPortTest {
         val oldSource = scopePrompt()
         editor.source = 2
         ui.value = ui.value.copy(previewSource = 2)
-        port.answer(oldSource.options.first())
+        port.confirmScope(oldSource.id, wholePhoto = true)
         assertEquals(DraftPhase.IDLE, controller.state.value.phase)
         port.open()
         port.generate(goal)
         val oldStatistics = scopePrompt(except = oldSource)
         port.statistics(true)
-        port.answer(oldStatistics.options.first())
+        port.confirmScope(oldStatistics.id, wholePhoto = true)
         port.generate(goal)
         val fresh = scopePrompt(except = oldStatistics)
-        port.answer(oldSource.options.first())
-        port.answer(oldStatistics.options.first())
+        port.confirmScope(oldSource.id, wholePhoto = true)
+        port.confirmScope(oldStatistics.id, wholePhoto = true)
         assertTrue(received.isEmpty())
         assertEquals(0, editor.samples)
-        port.answer(fresh.options.first())
+        port.confirmScope(fresh.id, wholePhoto = true)
         shown { it.notice == AssistantNotice.NoChange }
         assertEquals(1, received.size)
         assertEquals(1, editor.samples)
@@ -231,7 +237,7 @@ class AssistantSessionPortTest {
         port.open()
         port.generate("Raise the exposure.")
         val first = scopePrompt()
-        port.answer(first.options.first())
+        port.confirmScope(first.id, wholePhoto = true)
         shown { it.canApply }
         port.generate("Make the whole photo a little warmer.")
         val followUp = scopePrompt(except = first)
@@ -239,8 +245,8 @@ class AssistantSessionPortTest {
         val ready = CompletableDeferred<Unit>()
         controller.prepareExport { ready.complete(Unit) }
         ready.await()
-        port.answer(followUp.options.first())
-        shown { it.question == null && it.showingCurrent && it.canApply }
+        port.confirmScope(followUp.id, wholePhoto = true)
+        shown { it.scope == null && it.question == null && it.showingCurrent && it.canApply }
         assertEquals(1, received.size)
         assertEquals(0, editor.commits)
         assertEquals(editor.formal, editor.displayed)
@@ -312,7 +318,7 @@ class AssistantSessionPortTest {
         editor.displayed = restored
 
         port.generate("Lift the midtones.")
-        port.answer(scopePrompt().options.first())
+        port.confirmScope(scopePrompt().id, wholePhoto = true)
         shown { it.notice == AssistantNotice.NoChange }
         assertEquals(.25, received.single().stored.getValue(AdviceParameter.EXPOSURE.id), 0.0)
 
@@ -360,9 +366,9 @@ class AssistantSessionPortTest {
         val port = AssistantSessionPort(scope, controller, runtime, ui, { canBegin }, { ui.value.ready },
             { undos++; onUndo() }, { settings++ })
         suspend fun shown(predicate: (AssistantView) -> Boolean) = port.view.first(predicate)
-        suspend fun scopePrompt(except: AssistantQuestion? = null) = checkNotNull(shown {
-            it.question?.let { q -> q != except && q.options.size == 2 && q.options.all { o -> '#' in o } } == true
-        }.question)
+        suspend fun scopePrompt(except: AssistantScope? = null) = checkNotNull(shown {
+            it.scope != null && it.scope.id != except?.id
+        }.scope)
 
         fun connect(reply: (AdviceRequest, TaskClarification?) -> AdviceResult) {
             val endpoint = EndpointConfig("test", 1, "Test Service", "https://example.test/v1".toHttpUrl(),

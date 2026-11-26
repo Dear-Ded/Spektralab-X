@@ -144,7 +144,13 @@ internal class AssistantPreferenceStore(context: Context, scope: CoroutineScope)
             val saved = persisted
             tokens = saved?.tokens ?: Tokens()
             captureAllowed = saved?.learn == true && !privacyWriteFailed
-            state.value = AssistantPreferences(saved?.learn == true, saved?.useRules == true, controlsPending != 0, error)
+            state.value = AssistantPreferences(
+                learn = saved?.learn == true,
+                useRules = saved?.useRules == true,
+                rulesActive = false,
+                busy = controlsPending != 0,
+                error = error,
+            )
         }
 
         synchronized(gate) { publish() }

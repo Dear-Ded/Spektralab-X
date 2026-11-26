@@ -7,7 +7,6 @@ import com.dearded.spektralab.advisor.domain.BrightSide
 import com.dearded.spektralab.advisor.domain.ParameterChange
 import com.dearded.spektralab.advisor.domain.effectiveValueChanged
 import com.dearded.spektralab.advisor.session.AdviceNotice
-import com.dearded.spektralab.advisor.session.AdviceScopePrompt
 import com.dearded.spektralab.advisor.session.AdviceSessionController
 import com.dearded.spektralab.advisor.session.AdvisorRuntimeState
 import com.dearded.spektralab.advisor.session.DraftPhase
@@ -73,13 +72,9 @@ internal class AssistantSessionPort(
     override fun discard() = controller.discardDraft()
     override fun undo() = undoEdit()
     override fun retrySave() = controller.retrySave()
-    override fun answer(text: String) {
-        val prompt = controller.state.value.scopePrompt
-        if (prompt == null) controller.requestAnswerScope(text)
-        else {
-            val choice = prompt.scopeView().options.indexOf(text)
-            if (choice >= 0) controller.resolveScope(prompt.id, wholePhoto = choice == 0)
-        }
+    override fun answer(text: String) = controller.requestAnswerScope(text)
+    override fun confirmScope(id: Long, wholePhoto: Boolean) {
+        if (controller.state.value.scopePrompt?.id == id) controller.resolveScope(id, wholePhoto)
     }
     override fun tryPreset(preset: AssistantPreset) = withCurrentEdit {
         controller.tryLocalPreset(when (preset) {
@@ -93,17 +88,6 @@ internal class AssistantSessionPort(
         // Editor history can invalidate the snapshot without dismissing the assistant.
         if (controller.state.value.phase == DraftPhase.IDLE && canBegin()) controller.begin()
         action()
-    }
-}
-
-// The existing panel returns only visible labels. Include the request ID so an old button
-// cannot confirm a later request, even if both ask for the same edit to different photos.
-private fun AdviceScopePrompt.scopeView(): AssistantQuestion {
-    val summary = text.take(72) + if (text.length > 72) "..." else ""
-    return if (AppLocale.language == UiLanguage.ENGLISH) {
-        AssistantQuestion("Adjustment scope: $summary", listOf("Whole photo #$id", "Only this area #$id"))
-    } else {
-        AssistantQuestion("调整范围：$summary", listOf("整张照片 #$id", "仅指定区域 #$id"))
     }
 }
 
@@ -139,7 +123,8 @@ private fun DraftState.toAssistantView(runtime: AdvisorRuntimeState, canAnalyzeP
         changes = changes,
         statistics = includeStatistics,
         cinematicReady = includeStatistics && canAnalyzePreview(),
-        question = scopePrompt?.scopeView() ?: question?.let { AssistantQuestion(it.prompt, it.options.map { option -> option.label }) },
+        question = question?.let { AssistantQuestion(it.prompt, it.options.map { option -> option.label }) },
+        scope = scopePrompt?.let { AssistantScope(it.id, it.text) },
         notice = when (notice) {
             null -> null
             AdviceNotice.NO_CHANGE -> AssistantNotice.NoChange
