@@ -93,6 +93,22 @@ class EditorStateAutosaveTest {
         }
     }
 
+    @Test fun failedExactWriteLeavesTheMatchingRestartSnapshotForNormalFlush() = runBlocking {
+        scenario { scope ->
+            val written = mutableListOf<EditorStateSave>()
+            var failing = true
+            val saves = EditorStateAutosave(scope) { snapshot ->
+                if (failing) throw IOException("synthetic storage full")
+                written.add(snapshot)
+            }
+            saves.changed(first)
+            assertTrue(runCatching { saves.saveNow(first).await() }.exceptionOrNull() is IOException)
+            failing = false
+            saves.flush()
+            assertEquals(listOf(first), written)
+        }
+    }
+
     @Test fun disposalFlushesPendingStateAndStopsItsWorker() = runBlocking {
         scenario { scope ->
             val written = mutableListOf<EditorStateSave>()
