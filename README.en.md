@@ -64,7 +64,9 @@ CineStill 800T has no anti-halation layer. Bright light reflects off the back of
 
 You can pick a style, set its strength, add a border and save; or keep going with curves, colour wheels and masks. Both work on the same edit. The interface is available in Chinese and English (Settings).
 
-The editor was redone in alpha v0.3: on the Adjust page you swipe to pick a control and fine-tune it on a large dial; the Film page goes through cassette, paper, exposure and effects in darkroom order; Save queues the job at once and the queue then shows the format, size and file size actually written. Cold start and saving have a developing animation, and the shutter, film advance and other actions use sounds recorded from real film cameras. They follow the media volume and can be turned off in Settings.
+The editor was redone in alpha v0.3: on the Adjust page you swipe to pick a control and fine-tune it on a large dial; the Film page goes through cassette, paper, exposure and effects in darkroom order; Save queues the job at once and the queue then shows the format, size and file size actually written. The shutter, film advance and other actions use sounds recorded from real film cameras, following the media volume.
+
+Since alpha v0.3.03, a new style or film develops out of the old one as in the tray (Android 13+), and at cold start and on saving the photo develops from its colour negative. The dial, keys, switches, curve, histogram and cassettes are drawn like real camera and darkroom parts. Vibration and camera sounds can each be turned off in Settings.
 
 ## Features
 
@@ -93,6 +95,7 @@ The editor was redone in alpha v0.3: on the Adjust page you swipe to pick a cont
 
 **Light table**
 - Import a roll at a time; grid of 2, 3, 4 or 6 columns; long-press and drag to select; star, pick, reject.
+- The strip sits on a light box, light coming through the perforations and the edge print. Turn the box off for a black ground at night.
 - Rolls are grouped by film and date automatically, or loaded by hand. Copy one photo's adjustments, paste chosen groups onto others and export in batch; export a whole roll as a contact sheet.
 
 **Export**
