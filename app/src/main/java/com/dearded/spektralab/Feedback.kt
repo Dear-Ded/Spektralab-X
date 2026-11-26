@@ -28,6 +28,10 @@ import androidx.compose.ui.platform.LocalView
  *    closing) are composed from vibration primitives on API 30+ where the motor
  *    supports them, so they have the rhythm of the real thing; elsewhere they fall
  *    back to one system effect. They also follow the system touch-feedback switch.
+ *  - The small, frequent ones are also composed on API 31+ when the motor has the primitives:
+ *    a light PRIMITIVE_TICK (0.2-0.5) is finer than the system's tick on a good X-axis motor.
+ *  - 振动反馈 in settings ([VIBRATION], default on) turns every vibration off; sounds keep
+ *    their own switch.
  *  - Sounds (res/raw/snd_*.ogg, recordings cut by tools/sound/cut_sounds.py) play only for
  *    those moments, never for a dial or a tab. They follow media volume and
  *    only play while 相机声音 is on in settings.
@@ -77,6 +81,8 @@ enum class Cue {
 
 /** Settings key of 相机声音 in "settings", default on. */
 internal const val CAMERA_SOUND = "camera_sound"
+/** Settings key of 振动反馈 in "settings", default on. */
+internal const val VIBRATION = "vibration"
 
 object Feedback {
     private const val TAG = "Feedback"
@@ -127,10 +133,16 @@ object Feedback {
             lastDetent = now
         }
         record(cue)
-        val composed = Build.VERSION.SDK_INT >= 31 && playComposed(view.context, cue)
-        if (!composed) systemConstant(cue, fast)?.let { view.performHapticFeedback(it) }
+        if (vibrationOn(view.context)) {
+            val composed = Build.VERSION.SDK_INT >= 31 && playComposed(view.context, cue, fast)
+            if (!composed) systemConstant(cue, fast)?.let { view.performHapticFeedback(it) }
+        }
         sound(view.context, cue)
     }
+
+    /** False when 振动反馈 is off in settings; every vibration in the app asks this. */
+    fun vibrationOn(context: Context): Boolean =
+        context.getSharedPreferences("settings", 0).getBoolean(VIBRATION, true)
 
     private fun record(cue: Cue) {
         android.util.Log.d(TAG, cue.name)
@@ -185,14 +197,14 @@ object Feedback {
 
     /** Plays [cue]'s composed rhythm; false when it has none or this phone cannot play it. */
     @RequiresApi(31)
-    private fun playComposed(context: Context, cue: Cue): Boolean {
-        val steps = composition(cue) ?: return false
+    private fun playComposed(context: Context, cue: Cue, fast: Boolean): Boolean {
+        val steps = composition(cue, fast) ?: return false
         return vibrate(context, steps)
     }
 
     /** The rhythm of a mechanical moment, or null for cues that use the system effect. API 31 for LOW_TICK and THUD. */
     @RequiresApi(31)
-    private fun composition(cue: Cue): List<Step>? {
+    private fun composition(cue: Cue, fast: Boolean): List<Step>? {
         val click = VibrationEffect.Composition.PRIMITIVE_CLICK
         val tick = VibrationEffect.Composition.PRIMITIVE_TICK
         val low = VibrationEffect.Composition.PRIMITIVE_LOW_TICK
@@ -214,6 +226,15 @@ object Feedback {
             Cue.Load -> listOf(Step(thud, 0.9f, 0), Step(click, 0.45f, 32))
             Cue.Zero -> listOf(Step(low, 0.4f, 0), Step(click, 0.8f, 18))
             Cue.Limit -> listOf(Step(thud, 0.7f, 0))
+            // The fine ones: a detent is a grain under the thumb, a spin lighter still.
+            Cue.Detent -> listOf(Step(tick, if (fast) 0.18f else 0.3f, 0))
+            Cue.DetentMajor -> listOf(Step(tick, if (fast) 0.3f else 0.55f, 0))
+            Cue.Tab, Cue.Segment -> listOf(Step(tick, 0.45f, 0))
+            Cue.Pick -> listOf(Step(click, 0.35f, 0))
+            Cue.Hold -> listOf(Step(low, 0.35f, 0))
+            Cue.Release -> listOf(Step(tick, 0.25f, 0))
+            Cue.ToggleOn -> listOf(Step(low, 0.3f, 0), Step(click, 0.5f, 24))
+            Cue.ToggleOff -> listOf(Step(click, 0.35f, 0))
             else -> null
         }
     }

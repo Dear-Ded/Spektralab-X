@@ -187,6 +187,11 @@ fun SettingsScreen(ui: UiState, vm: EditorViewModel, onClose: () -> Unit) {
                     var sound by remember { mutableStateOf(prefs.getBoolean(CAMERA_SOUND, true)) }
                     SettingRow(tr("相机声音"), sound, true) { sound = it; prefs.edit().putBoolean(CAMERA_SOUND, it).apply() }
                 }
+                // Every vibration in the app (Feedback.vibrationOn); the system switch still applies too.
+                add {
+                    var vibrate by remember { mutableStateOf(prefs.getBoolean(VIBRATION, true)) }
+                    SettingRow(tr("振动反馈"), vibrate, true) { vibrate = it; prefs.edit().putBoolean(VIBRATION, it).apply() }
+                }
             })
 
             // 画质与导出: size, colour, what goes into the file.

@@ -1,5 +1,7 @@
 package com.dearded.spektralab
 
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.heightIn
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -641,9 +643,8 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             "custom" -> {
                 var text by remember(f.brandText) { mutableStateOf(f.brandText) }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = text, onValueChange = { text = it.take(24) }, singleLine = true, enabled = enabled,
-                        label = { Text(tr("文字")) }, modifier = Modifier.weight(1f),
+                    OutlinedTextField(colors = windowFieldColors(), value = text, onValueChange = { text = it.take(24) }, singleLine = true, enabled = enabled,
+                        label = { Text(tr("文字")) }, modifier = Modifier.weight(1f).windowField(),
                     )
                     TextButton(onClick = { set(f.copy(brandText = text.trim())) }, enabled = enabled && text.trim() != f.brandText) {
                         Text(tr("应用"))
@@ -673,9 +674,11 @@ fun BrandPanel(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            .toggleable(value = checked, enabled = enabled, role = androidx.compose.ui.semantics.Role.Switch, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
+        GrooveSwitch(checked, enabled)
     }
 }
 

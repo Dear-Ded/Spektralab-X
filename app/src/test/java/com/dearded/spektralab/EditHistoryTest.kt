@@ -8,6 +8,24 @@ class EditHistoryTest {
     private val neutral = Edit.NONE
     private val standard = neutral.copy(rawDevelopment = RawDevelopmentMode.STANDARD_V1)
 
+    @Test fun appliedDraftIsOneUndoStepBetweenGroupedAdjustments() {
+        val history = EditHistory()
+        val manual = neutral.copy(look = neutral.look.copy(exposure = .1))
+        val applied = manual.copy(look = manual.look.copy(exposure = .4))
+        val firstDrag = applied.copy(look = applied.look.copy(exposure = .5))
+        val lastDrag = applied.copy(look = applied.look.copy(exposure = .6))
+        history.record(neutral, manual, 10)
+        history.recordSeparate(manual, applied)
+        history.record(applied, firstDrag, 20)
+        history.record(firstDrag, lastDrag, 30)
+        assertEquals(applied, history.undo(lastDrag))
+        assertEquals(manual, history.undo(applied))
+        assertEquals(neutral, history.undo(manual))
+        assertEquals(manual, history.redo(neutral))
+        assertEquals(applied, history.redo(manual))
+        assertEquals(lastDrag, history.redo(applied))
+    }
+
     @Test fun inspectingPendingUndoAndRedoLeavesBothStacksIntact() {
         val history = EditHistory()
         history.record(neutral, standard, 1000)

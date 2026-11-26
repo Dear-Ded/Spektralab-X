@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
@@ -63,8 +64,7 @@ fun CategoryBar(
         verticalAlignment = Alignment.CenterVertically) {
         Row(
             Modifier.weight(1f).height(64.dp)
-                .background(Palette.Panel, Corners.full)
-                .border(1.dp, Palette.OutlineSoft, Corners.full)
+                .drawBehind { drawGroove(size.height / 2) }
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -79,11 +79,10 @@ fun CategoryBar(
                     },
                     Motion.defaultEffects(), label = "tint",
                 )
-                val fill by animateColorAsState(
-                    if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f), Motion.defaultEffects(), label = "fill")
+                val key by androidx.compose.animation.core.animateFloatAsState(if (on) 1f else 0f, Motion.defaultEffects(), label = "tool-key")
                 Column(
                     Modifier.weight(1f).fillMaxHeight()
-                        .background(fill, Corners.full)
+                        .drawBehind { if (key > 0.01f) drawKey(size.height / 2, 1f, 0f, alpha = key) }
                         .selectable(
                             selected = on, role = Role.Tab,
                             interactionSource = remember { MutableInteractionSource() }, indication = null,

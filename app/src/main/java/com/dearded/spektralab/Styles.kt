@@ -428,7 +428,7 @@ private fun StyleStripContent(
                 subtitle = if (car.edit.noFilm) tr("原图") else ui.catalog.film(car.edit.film)?.label ?: tr("原图"),
                 enabled = enabled && ui.source != null, placeholder = f.name,
             ) {
-                view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK)
+                Feedback.play(view, Cue.Pick)
                 candidate?.let(onEdit)
             }
         }

@@ -67,4 +67,18 @@ class PreviewPublicationTest {
         assertFalse(gate.publish(frame))
         assertTrue(gate.publish(frame, allowStaleLive = true))
     }
+
+    @Test fun ownershipChangeBlocksLateLiveEvenWhenTheEditIsUnchanged() {
+        val gate = PreviewPublication("a")
+        gate.replaceSource(4)
+        val ordinary = gate.frame(4, gate.intent(), "live", "sRGB")
+        val advisor = gate.frame(4, gate.changeOwner("a"), "preview", "sRGB")
+        assertFalse(gate.publish(ordinary, allowStaleLive = true))
+        assertTrue(gate.publish(advisor))
+        assertEquals(advisor, gate.shownFrame())
+        val lateDraft = gate.frame(4, gate.request("draft"), "live", "sRGB")
+        gate.changeOwner("a")
+        assertFalse(gate.publish(lateDraft, allowStaleLive = true))
+        assertFalse(gate.current(advisor))
+    }
 }

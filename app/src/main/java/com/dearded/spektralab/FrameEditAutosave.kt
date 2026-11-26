@@ -1,8 +1,10 @@
 package com.dearded.spektralab
 
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -18,14 +20,16 @@ internal data class FrameEditSave(val id: String, val edit: Edit, val wbK: Doubl
 internal class FrameEditAutosave(
     scope: CoroutineScope,
     private val onFailure: (Exception) -> Unit = {},
-    private val write: (FrameEditSave) -> Unit,
+    private val write: (FrameEditSave) -> Boolean,
 ) {
     private sealed interface Request {
+        val done: CompletableDeferred<Unit>? get() = null
         data class Save(val value: FrameEditSave) : Request
-        data class Flush(val done: CompletableDeferred<Unit>? = null) : Request
+        data class SaveNow(val value: FrameEditSave, override val done: CompletableDeferred<Unit>) : Request
+        data class Flush(override val done: CompletableDeferred<Unit>? = null) : Request
     }
 
-    private val requests = Channel<Request>(Channel.UNLIMITED)
+    private val requests = Channel<Request>(Channel.UNLIMITED, onUndeliveredElement = { it.done?.cancel() })
     // The editor calls opened/changed on Main, in the same transaction as its accepted edit.
     private var accepted: FrameEditSave? = null
     val frameId: String? get() = accepted?.id
@@ -49,17 +53,25 @@ internal class FrameEditAutosave(
             try {
                 when (request) {
                     is Request.Save -> pending[request.value.id] = request.value
+                    is Request.SaveNow -> {
+                        if (pending[request.value.id] != request.value) pending.remove(request.value.id)
+                        if (!write(request.value)) throw IOException("Frame not found: ${request.value.id}")
+                        pending.remove(request.value.id)
+                        reportedFailure = false
+                        request.done.complete(Unit)
+                    }
                     is Request.Flush -> { persist(); request.done?.complete(Unit) }
                     null -> persist()
                 }
             } catch (e: CancellationException) {
+                request?.done?.cancel(e)
                 throw e
             } catch (e: Exception) {
                 if (!reportedFailure) { reportedFailure = true; onFailure(e) }
-                (request as? Request.Flush)?.done?.completeExceptionally(e)
+                request?.done?.completeExceptionally(e)
             }
         }
-    }
+    }.also { it.invokeOnCompletion { requests.cancel() } }
 
     /** A new photo starts its baseline immediately; a successful re-decode saves WB/development changes. */
     fun opened(id: String?, edit: Edit, wbK: Double, wbTint: Double, reopening: Boolean) {
@@ -77,6 +89,13 @@ internal class FrameEditAutosave(
         requests.trySend(Request.Save(next))
     }
 
+    /** Writes this snapshot without changing the opened frame or its edit baseline. */
+    fun saveNow(snapshot: FrameEditSave): Deferred<Unit> {
+        val done = CompletableDeferred<Unit>()
+        if (requests.trySend(Request.SaveNow(snapshot, done)).isFailure) done.cancel()
+        return done
+    }
+
     fun requestFlush() { requests.trySend(Request.Flush()) }
 
     /** A read of the same sidecar must wait for every previously accepted write. */
@@ -88,6 +107,6 @@ internal class FrameEditAutosave(
 
     suspend fun close() {
         try { flush() }
-        finally { worker.cancelAndJoin(); requests.close() }
+        finally { worker.cancelAndJoin() }
     }
 }

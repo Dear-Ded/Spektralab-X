@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.animation.togetherWith
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -197,10 +198,18 @@ fun EditorScreen(vm: EditorViewModel, preview: suspend (Edit) -> android.graphic
     // UI2.md 2.1: 保存 sits at the right end of the bottom toolbar, under the thumb.
     val saveButton: @Composable () -> Unit = {
                     Box {
+                        val savePress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                        val saveDown by savePress.collectIsPressedAsState()
+                        val saveSink by androidx.compose.animation.core.animateFloatAsState(if (saveDown) 1f else 0f, Motion.fastEffects(), label = "save-press")
+                        val saveOn = ui.hasImage && !ui.exporting
                         androidx.compose.material3.Button(
-                            onClick = { exportMenu = true }, enabled = ui.hasImage && !ui.exporting,
+                            onClick = { exportMenu = true }, enabled = saveOn,
+                            interactionSource = savePress,
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Transparent,
+                                contentColor = Palette.OnAccent, disabledContainerColor = Color.Transparent, disabledContentColor = Palette.OnAccent.copy(alpha = 0.5f)),
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
-                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() },
+                            modifier = Modifier.height(48.dp).onGloballyPositioned { saveBounds = it.boundsInWindow() }
+                                .drawBehind { drawKey(size.height / 2, 1f, saveSink, alpha = if (saveOn) 1f else 0.5f) },
                         ) {
                             SaveMark(jobs, savedAt)
                             Spacer(Modifier.width(6.dp))
@@ -551,7 +560,7 @@ private fun Preview(
                             onDoubleTap = { scale = 1f; offset = Offset.Zero },
                             onLongPress = {
                                 holding = true
-                                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                                Feedback.play(view, Cue.LongPress)
                             },
                             onPress = {
                                 tryAwaitRelease()
@@ -590,6 +599,7 @@ private fun Preview(
             var back by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
             var front by remember { mutableStateOf(bitmap) }
             val fade = remember { androidx.compose.animation.core.Animatable(1f) }
+            var swapSeed by remember { mutableFloatStateOf(0.37f) }
             LaunchedEffect(bitmap) {
                 if (bitmap === front) return@LaunchedEffect
                 // A new look (a style, a film, a paper, a reset, an undo) crosses over from the old print;
@@ -597,16 +607,23 @@ private fun Preview(
                 val cross = ui.edit != shownEdit && !holding && back == null && !sliderDragging()
                 shownEdit = ui.edit
                 if (!cross) { front = bitmap; fade.snapTo(1f); return@LaunchedEffect }
-                back = front; front = bitmap; fade.snapTo(0f)
-                // UI2.md 3.7 / ui2_reactbits.md 8.2: alpha only, about 110 ms (fastEffects), so the old print
-                // is gone before the eye settles on the new one; with animations off it is a cut.
-                try { fade.animateTo(1f, Motion.fastEffects()) } finally { back = null }
+                back = front; front = bitmap; fade.snapTo(0f); swapSeed = (swapSeed + 0.618f) % 10f
+                // The new look comes up through the old as the site's opening print does (FilmDevelop.swapEffect),
+                // about 0.55 s; below API 33 a 110 ms cross-fade. With animations off it is a cut either way.
+                val developing = android.os.Build.VERSION.SDK_INT >= 33
+                try {
+                    if (developing) fade.animateTo(1f, androidx.compose.animation.core.tween(560, easing = androidx.compose.animation.core.LinearOutSlowInEasing))
+                    else fade.animateTo(1f, Motion.fastEffects())
+                } finally { back = null }
             }
             Box(gestures) {
                 val under = back
                 if (under != null) {
                     FramedImage(under, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
-                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer { alpha = fade.value })
+                    FramedImage(front, frame, caption, showFrameDecoration, Modifier.fillMaxSize().graphicsLayer {
+                        val effect = FilmDevelop.swapEffect(size, fade.value, swapSeed)
+                        if (effect != null) renderEffect = effect else alpha = fade.value
+                    })
                 } else {
                     FramedImage(bitmap, frame, caption, showFrameDecoration, Modifier.fillMaxSize())
                 }
@@ -689,7 +706,10 @@ private fun MonoHistogram(h: Histogram, modifier: Modifier) {
             }
             lineTo(size.width, size.height); close()
         }
-        drawPath(path, Color.White.copy(alpha = 0.72f))
+        // Backlit grey under smoked glass: a soft glow, then the counts.
+        drawPath(path, Color.White.copy(alpha = 0.1f), style = androidx.compose.ui.graphics.drawscope.Stroke(4.dp.toPx()))
+        drawPath(path, Color(0xFFF0ECE4).copy(alpha = 0.72f))
+        drawWindowGlass(8.dp.toPx())
         fun tick(x: Float, share: Float) {
             if (share <= 0.001f) return
             val hgt = size.height * minOf(1f, share * 10)
@@ -1030,9 +1050,8 @@ private fun Controls(
                                 }
                             }
                             SwitchRow(tr("片基字"), perf.edgeText, enabled) { setPerf(perf.copy(edgeText = it)) }
-                            androidx.compose.material3.OutlinedTextField(
-                                value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
-                                singleLine = true, enabled = enabled && perf.edgeText, modifier = Modifier.fillMaxWidth(),
+                            androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), value = perf.text, onValueChange = { setPerf(perf.copy(text = it.take(32))) },
+                                singleLine = true, enabled = enabled && perf.edgeText, modifier = Modifier.fillMaxWidth().windowField(),
                                 label = { Text(tr("片基文字（留空用胶片名）")) },
                             )
                             SwitchRow(tr("帧号"), perf.numbers, enabled && perf.edgeText,
@@ -1121,10 +1140,9 @@ private fun Controls(
                             SwitchRow(tr("参数文字"), e.frame.caption, enabled) { vm.update(e.copy(frame = e.frame.copy(caption = it))) }
                             BrandPanel(ui, vm, enabled)
                             if (e.frame.sign) {
-                                androidx.compose.material3.OutlinedTextField(
-                                    value = e.frame.signText,
+                                androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), value = e.frame.signText,
                                     onValueChange = { vm.update(e.copy(frame = e.frame.copy(signText = it.take(40)))) },
-                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true, enabled = enabled, modifier = Modifier.fillMaxWidth().windowField(),
                                     label = { Text(tr("签名")) },
                                 )
                             }
@@ -1518,10 +1536,8 @@ private fun PresetRow(ui: UiState, vm: EditorViewModel, enabled: Boolean) {
             title = { Text(tr("存为预设")) },
             text = {
                 Column {
-                    androidx.compose.material3.OutlinedTextField(
-                        value = name, onValueChange = { name = it.take(40) }, singleLine = true,
-                        label = { Text(tr("名称")) },
-                    )
+                    androidx.compose.material3.OutlinedTextField(colors = windowFieldColors(), modifier = Modifier.windowField(), value = name, onValueChange = { name = it.take(40) }, singleLine = true,
+                        label = { Text(tr("名称")) },)
                     Text(
                         tr("保存胶片、相纸、放大和效果参数；曝光、裁剪和白平衡属于单张照片，不保存。同名会覆盖。"),
                         style = MaterialTheme.typography.bodySmall,

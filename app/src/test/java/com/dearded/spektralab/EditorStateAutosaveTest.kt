@@ -51,6 +51,64 @@ class EditorStateAutosaveTest {
         }
     }
 
+    @Test fun exactReceiptWaitsForItsWriteAndSupersedesThePendingRestartState() = runBlocking {
+        scenario { scope ->
+            val entered = CompletableDeferred<EditorStateSave>()
+            val release = CountDownLatch(1)
+            val written = mutableListOf<EditorStateSave>()
+            val saves = EditorStateAutosave(scope) {
+                entered.complete(it)
+                check(release.await(4, TimeUnit.SECONDS))
+                written.add(it)
+            }
+            saves.changed(first)
+            val receipt = saves.saveNow(second)
+            try {
+                assertEquals(second, entered.await())
+                assertFalse(receipt.isCompleted)
+            } finally { release.countDown() }
+            receipt.await()
+            saves.close()
+            assertEquals(listOf(second), written)
+        }
+    }
+
+    @Test fun failedExactReceiptRequiresAnExplicitRetryAndDoesNotRestoreAnOlderSnapshot() = runBlocking {
+        scenario { scope ->
+            var failing = true
+            val error = IOException("synthetic storage full")
+            val written = mutableListOf<EditorStateSave>()
+            val saves = EditorStateAutosave(scope) {
+                if (failing) throw error
+                written.add(it)
+            }
+            saves.changed(first)
+            val failure = runCatching { saves.saveNow(second).await() }.exceptionOrNull()
+            assertEquals(error.message, (failure as? IOException)?.message)
+            failing = false
+            saves.flush()
+            assertTrue(written.isEmpty())
+            saves.saveNow(second).await()
+            assertEquals(listOf(second), written)
+        }
+    }
+
+    @Test fun failedExactWriteLeavesTheMatchingRestartSnapshotForNormalFlush() = runBlocking {
+        scenario { scope ->
+            val written = mutableListOf<EditorStateSave>()
+            var failing = true
+            val saves = EditorStateAutosave(scope) { snapshot ->
+                if (failing) throw IOException("synthetic storage full")
+                written.add(snapshot)
+            }
+            saves.changed(first)
+            assertTrue(runCatching { saves.saveNow(first).await() }.exceptionOrNull() is IOException)
+            failing = false
+            saves.flush()
+            assertEquals(listOf(first), written)
+        }
+    }
+
     @Test fun disposalFlushesPendingStateAndStopsItsWorker() = runBlocking {
         scenario { scope ->
             val written = mutableListOf<EditorStateSave>()

@@ -113,16 +113,20 @@ fun SelectPill(
     // ui_corners.md: selected is told by the fill and the weight, not by a shape change.
     val style = rememberSelectionStyle(selected, enabled, restCorner = 12.dp, selectedCorner = 12.dp)
     val ink = style.ink
+    // A key (Skeuo.kt): ivory when chosen; it sinks under the finger.
+    val ivory by animateFloatAsState(if (selected) 1f else 0f, Motion.defaultEffects(), label = "pill-key")
+    val down by press.collectIsPressedAsState()
+    val sink by animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "pill-press")
     Box(
         Modifier
             .minimumInteractiveComponentSize()
             .height(40.dp)
             .graphicsLayer { alpha = if (enabled || selected) 1f else 0.5f }
-            .pressScale(press).clip(Corners.m).drawBehind { drawRect(style.fill) }
-            .then(if (selected) Modifier else Modifier.border(1.dp, Palette.OutlineSoft, Corners.m))
+            .drawBehind { drawKey(12.dp.toPx(), ivory, sink) }
+            .clip(Corners.m)
             .selectable(
                 selected = selected, enabled = enabled, role = Role.Tab,
-                interactionSource = press, indication = ripple(), onClick = onClick,
+                interactionSource = press, indication = null, onClick = onClick,
             )
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
@@ -260,21 +264,21 @@ internal fun Segmented(
 ) {
     Row(
         modifier.fillMaxWidth().height(48.dp)
-            .background(Palette.Panel, Corners.m)
-            .border(1.dp, Palette.OutlineSoft, Corners.m)
+            .drawBehind { drawGroove(12.dp.toPx()) }
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         options.forEachIndexed { i, label ->
             val on = i == selected
             val can = enabled && optionEnabled(i)
-            val fill by animateColorAsState(if (on) Palette.Accent else Palette.Panel.copy(alpha = 0f),
-                Motion.defaultEffects(), label = "seg-fill")
+            val key by animateFloatAsState(if (on) 1f else 0f, Motion.defaultEffects(), label = "seg-key")
             val ink by animateColorAsState(
                 when { on -> Palette.OnAccent; can -> Palette.OnSurface; else -> Palette.OnSurfaceSoft.copy(alpha = 0.45f) },
                 Motion.defaultEffects(), label = "seg-ink")
             Box(
-                Modifier.weight(1f).fillMaxSize().clip(Corners.s).background(fill)
+                Modifier.weight(1f).fillMaxSize()
+                    .drawBehind { if (key > 0.01f) drawKey(8.dp.toPx(), 1f, 0f, alpha = key) }
+                    .clip(Corners.s)
                     .selectable(selected = on, enabled = can, role = Role.Tab) { if (!on) onSelect(i) },
                 contentAlignment = Alignment.Center,
             ) {
@@ -330,22 +334,7 @@ internal fun SettingRow(
             if (line.isNotBlank()) Hint(line)
         }
         Spacer(Modifier.width(12.dp))
-        Switch(
-            checked = checked, onCheckedChange = null, enabled = enabled,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Palette.OnAccent,
-                checkedTrackColor = Palette.Accent,
-                checkedBorderColor = Palette.Accent,
-                uncheckedThumbColor = Palette.OnSurfaceSoft,
-                uncheckedTrackColor = Palette.PanelHigh,
-                uncheckedBorderColor = Palette.Outline,
-                disabledCheckedThumbColor = Palette.PanelHigh,
-                disabledCheckedTrackColor = Palette.OnSurfaceSoft.copy(alpha = 0.4f),
-                disabledUncheckedThumbColor = Palette.Outline,
-                disabledUncheckedTrackColor = Palette.Panel,
-                disabledUncheckedBorderColor = Palette.OutlineSoft,
-            ),
-        )
+        GrooveSwitch(checked, enabled)
     }
 }
 
@@ -549,12 +538,14 @@ private fun Check(color: Color) {
 internal fun TonalButton(text: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     val shape = Corners.m
+    val down by press.collectIsPressedAsState()
+    val sink by animateFloatAsState(if (down) 1f else 0f, Motion.fastEffects(), label = "tonal-press")
     Box(
         modifier.heightIn(min = 48.dp)
-            .pressScale(press).graphicsLayer { alpha = if (enabled) 1f else 0.5f }
-            .clip(shape).background(Palette.PanelHigh)
-            .border(1.dp, Palette.OutlineSoft, shape)
-            .clickable(enabled = enabled, interactionSource = press, indication = ripple(), role = Role.Button, onClick = onClick)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.5f }
+            .drawBehind { drawKey(12.dp.toPx(), 0f, sink) }
+            .clip(shape)
+            .clickable(enabled = enabled, interactionSource = press, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 18.dp),
         contentAlignment = Alignment.Center,
     ) {

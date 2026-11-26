@@ -257,13 +257,14 @@ class FrameStore private constructor(private val context: Context) {
     private fun readSidecar(id: String): Sidecar? =
         runCatching { Sidecar.fromJson(JSONObject(File(dir, "$id.json").readText())) }.getOrNull()
 
-    /** Writes [id]'s sidecar and marks the frame edited. */
-    fun saveEdit(id: String, edit: Edit, wbK: Double, wbTint: Double): Unit = synchronized(lock) {
-        val frame = byId(id) ?: return
+    /** Writes [id]'s sidecar and marks the frame edited, or returns false if [id] is absent. */
+    fun saveEdit(id: String, edit: Edit, wbK: Double, wbTint: Double): Boolean = synchronized(lock) {
+        val frame = byId(id) ?: return@synchronized false
         val now = System.currentTimeMillis()
         val updated = frame.copy(edited = true, film = if (edit.noFilm) "" else edit.film, editedAt = now)
         writeAtomicText(File(dir, "$id.json"), Sidecar(edit, wbK, wbTint, now).toJson(updated).toString())
         commitIndex(_frames.value.map { if (it.id == id) updated else it })
+        true
     }
 
     /** Picks, rejects or stars [ids]; null leaves that field alone. */

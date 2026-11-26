@@ -56,11 +56,11 @@ CineStill 800T has no anti-halation layer. Bright light reflects off the back of
 <td width="25%" align="center"><img src="docs/site/img/ui-style.webp" width="200" alt="Styles page: style thumbnails under the photo"><br><sub>Styles</sub></td>
 <td width="25%" align="center"><img src="docs/site/img/ui-film.webp" width="200" alt="Film page: cassette artwork and the develop steps"><br><sub>Film</sub></td>
 <td width="25%" align="center"><img src="docs/site/img/ui-adjust.webp" width="200" alt="Adjust page: swipe to pick a control, fine-tune on a large dial"><br><sub>Adjust</sub></td>
-<td width="25%" align="center"><img src="docs/site/img/ui-table.webp" width="200" alt="Light table: grid of one roll"><br><sub>Light table</sub></td>
+<td width="25%" align="center"><img src="docs/site/img/ui-table.webp" width="200" alt="Light table: a roll on the light box"><br><sub>Light table</sub></td>
 </tr>
 </table>
 
-<sub>Captured by the alpha v0.3.02 [CI screenshot job](https://github.com/Dear-Ded/Spektralab-X/actions/runs/45393154860) with test data, not photographed from a phone. Method: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).</sub>
+<sub>Captured by the [CI screenshot job](https://github.com/Dear-Ded/Spektralab-X/actions/runs/45614486085) with test data, not photographed from a phone. Method: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).</sub>
 
 You can pick a style, set its strength, add a border and save; or keep going with curves, colour wheels and masks. Both work on the same edit. The interface is available in Chinese and English (Settings).
 

@@ -1,5 +1,6 @@
 package com.dearded.spektralab
 
+import androidx.compose.ui.draw.drawBehind
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,8 +70,7 @@ internal fun FloatingBar(
     ) {
         Row(
             Modifier.weight(1f).height(64.dp)
-                .background(Palette.Panel, Corners.full)
-                .border(1.dp, Palette.OutlineSoft, Corners.full)
+                .drawBehind { drawGroove(size.height / 2) }
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .then(if (scroll) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -100,12 +100,14 @@ internal fun TableBar(rolls: Boolean, onGrid: () -> Unit, onRolls: () -> Unit, a
 internal fun AddButton(add: AddPhotos) {
     Box {
         var menu by remember { mutableStateOf(false) }
+        val addPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
         IconButton(
             onClick = { menu = true },
-            modifier = Modifier.size(64.dp),
-            colors = IconButtonDefaults.iconButtonColors(containerColor = Palette.Accent, contentColor = Palette.OnAccent),
+            modifier = Modifier.size(64.dp).key(1f, addPress),
+            interactionSource = addPress,
+            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent, contentColor = Palette.OnAccent),
         ) {
-            Box(Modifier.size(64.dp).background(Palette.Accent, Corners.full), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Add, contentDescription = tr("添加照片"), tint = Palette.OnAccent)
             }
         }

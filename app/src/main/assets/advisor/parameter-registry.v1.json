@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "registry_version": "layer2.scalars.1",
+  "as_of": "2026-11-16",
+  "purpose": "implementation_contract_not_runtime_code",
+  "source_snapshot": "spektralab-color-code-20261111",
+  "source_type": "Look",
+  "target_semantics": "absolute_stored_value",
+  "omitted_parameter_semantics": "unchanged",
+  "unknown_parameter_policy": "reject_entire_result",
+  "out_of_range_policy": "reject_entire_result",
+  "duplicate_parameter_policy": "reject_entire_result",
+  "numeric_type": "finite_double_from_json_number_only",
+  "display_precision_is_quantization": false,
+  "effective_value_evaluator": "Look.resolved",
+  "native_positional_array_is_persistence_contract": false,
+  "comparison_epsilon": 0.000001,
+  "effective_difference_required": true,
+  "max_changes": 8,
+  "all_other_edit_fields": "read_only_for_model",
+  "required_resolution_dependencies": [
+    "palette", "tone", "colour", "toneHome", "colourHome"
+  ],
+  "parameters": [
+    {
+      "id": "layer2.temperature", "storage_field": "look.temperature",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "layer2_blue_amber_offset", "display_step_hint": 0.1,
+      "description": "Blue to amber Layer 2 offset, not Kelvin or source white balance."
+    },
+    {
+      "id": "layer2.tint", "storage_field": "look.tint",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "layer2_green_magenta_offset", "display_step_hint": 0.1,
+      "description": "Green to magenta Layer 2 offset, not source white balance tint."
+    },
+    {
+      "id": "layer2.exposure", "storage_field": "look.exposure",
+      "minimum": -3, "maximum": 3, "neutral": 0,
+      "unit": "EV", "display_step_hint": 0.01,
+      "description": "Layer 2 exposure, distinct from engine input exposureEv."
+    },
+    {
+      "id": "layer2.contrast", "storage_field": "look.contrast",
+      "minimum": -50, "maximum": 50, "neutral": 0,
+      "unit": "engine_parameter", "display_step_hint": 0.1,
+      "description": "Engine-specific Layer 2 contrast."
+    },
+    {
+      "id": "layer2.saturation", "storage_field": "look.saturation",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "engine_parameter", "display_step_hint": 0.1,
+      "description": "Engine-specific Layer 2 saturation."
+    },
+    {
+      "id": "layer2.vibrance", "storage_field": "look.vibrance",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "engine_parameter", "display_step_hint": 0.1,
+      "description": "Engine-specific Layer 2 vibrance."
+    },
+    {
+      "id": "layer2.highlights", "storage_field": "look.highlights",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "engine_parameter", "display_step_hint": 0.1,
+      "description": "Engine-specific Layer 2 highlights adjustment."
+    },
+    {
+      "id": "layer2.shadows", "storage_field": "look.shadows",
+      "minimum": -100, "maximum": 100, "neutral": 0,
+      "unit": "engine_parameter", "display_step_hint": 0.1,
+      "description": "Engine-specific Layer 2 shadows adjustment."
+    }
+  ],
+  "question_policy": {
+    "max_prompt_codepoints": 160,
+    "min_choice_options": 2,
+    "max_choice_options": 3,
+    "option_id_pattern": "^[A-Za-z0-9_]{1,24}$",
+    "min_option_label_codepoints": 1,
+    "max_option_label_codepoints": 40,
+    "whitespace_only_prompt_or_label": "reject",
+    "max_consecutive_clarifications": 2,
+    "may_write_profile": false
+  },
+  "validation_limits": {
+    "max_business_json_bytes": 16384,
+    "max_json_depth": 16,
+    "max_http_decoded_response_bytes": 2097152,
+    "duplicate_json_keys": "reject",
+    "trailing_content": "reject",
+    "markdown_code_fences": "reject",
+    "json_comments": "reject"
+  }
+}

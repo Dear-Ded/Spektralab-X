@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:spektralab:advisor:advice-result:2",
+  "title": "Spektralab Advice Result v2",
+  "description": "Portable shape contract. Local semantic validation is mandatory for status combinations, bounds, duplicate keys and parameters, locks, length limits, effective changes and request freshness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "changes", "question"],
+  "properties": {
+    "schema_version": {"type": "integer", "enum": [2]},
+    "status": {
+      "type": "string",
+      "enum": ["proposal", "needs_input", "no_change", "unsupported"]
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["parameter", "target"],
+        "properties": {
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "layer2.temperature",
+              "layer2.tint",
+              "layer2.exposure",
+              "layer2.contrast",
+              "layer2.saturation",
+              "layer2.vibrance",
+              "layer2.highlights",
+              "layer2.shadows"
+            ]
+          },
+          "target": {"type": "number"}
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "prompt", "options"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["none", "choice", "text"]},
+        "prompt": {"type": "string"},
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": {"type": "string"},
+              "label": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
